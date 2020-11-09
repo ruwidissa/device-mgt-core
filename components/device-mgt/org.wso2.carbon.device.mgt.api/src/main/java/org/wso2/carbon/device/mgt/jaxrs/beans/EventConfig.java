@@ -23,14 +23,22 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 public class EventConfig {
+
+    @ApiModelProperty(
+            name = "id",
+            value = "id of the event entry")
+    private int id;
+
     @ApiModelProperty(
             name = "eventLogic",
-            value = "Logic of the event should be handled at the device level")
+            value = "Logic of the event should be handled at the device level",
+            required = true)
     private String eventLogic;
 
     @ApiModelProperty(
             name = "actions",
-            value = "List of actions to be triggered according to the logic")
+            value = "List of actions to be triggered according to the logic",
+            required = true)
     private List<EventAction> actions;
 
     public String getEventLogic() {
@@ -47,5 +55,13 @@ public class EventConfig {
 
     public void setActions(List<EventAction> actions) {
         this.actions = actions;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

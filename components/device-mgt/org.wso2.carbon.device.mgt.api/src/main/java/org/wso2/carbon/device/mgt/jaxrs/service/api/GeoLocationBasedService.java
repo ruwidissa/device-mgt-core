@@ -51,6 +51,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 
 @SwaggerDefinition(
         info = @Info(
@@ -1069,11 +1070,13 @@ public interface GeoLocationBasedService {
                     response = Response.class)
     })
     Response updateGeofence(
-            @ApiParam(name = "fence", value = "Geo fence data")GeofenceWrapper geofenceWrapper,
+            @ApiParam(name = "fence", value = "Geo fence data")
+                    GeofenceWrapper geofenceWrapper,
             @ApiParam(
                     name = "fenceId",
                     value = "Id of the fence",
                     required = true)
-            @PathParam("fenceId") int fenceId);
+            @PathParam("fenceId") int fenceId,
+            @ApiParam(name = "eventIds", value = "Event id list to be removed") @QueryParam("eventIds") int[] eventIds);
 }
 

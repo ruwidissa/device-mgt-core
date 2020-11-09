@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.device.mgt.common.event.config;
 
-import java.util.List;
-
 public class EventConfig {
     private int eventId;
     private String eventSource;
@@ -56,5 +54,15 @@ public class EventConfig {
 
     public void setEventSource(String eventSource) {
         this.eventSource = eventSource;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof EventConfig) {
+            EventConfig eventConfig = (EventConfig) obj;
+            return this.eventSource.equalsIgnoreCase(eventConfig.getEventSource()) &&
+                    this.eventLogic.equalsIgnoreCase(eventConfig.getEventLogic());
+        }
+        return false;
     }
 }

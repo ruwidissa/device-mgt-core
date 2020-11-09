@@ -29,6 +29,7 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventConfigurationProviderServiceImpl implements EventConfigurationProviderService {
@@ -40,14 +41,24 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
     }
 
     @Override
-    public boolean createEventOfDeviceGroup(List<EventConfig> eventConfigList, List<Integer> groupIds, int tenantId)
+    public List<Integer> createEventsOfDeviceGroup(List<EventConfig> eventConfigList, List<Integer> groupIds, int tenantId)
             throws EventConfigurationException {
         try {
             DeviceManagementDAOFactory.beginTransaction();
-            int[] generatedEventIds = eventConfigDAO.storeEventRecords(eventConfigList, tenantId);
-            boolean isRecordsCreated = eventConfigDAO.addEventGroupMappingRecords(generatedEventIds, groupIds);
+            if (log.isDebugEnabled()) {
+                log.debug("Creating event records of tenant " + tenantId);
+            }
+            List<Integer> generatedEventIds = eventConfigDAO.storeEventRecords(eventConfigList, tenantId);
+            if (log.isDebugEnabled()) {
+                log.debug("Created events with event ids : " + generatedEventIds.toString());
+                log.debug("Creating event group mapping for created events with group ids : " + groupIds.toString());
+            }
+            eventConfigDAO.addEventGroupMappingRecords(generatedEventIds, groupIds);
             DeviceManagementDAOFactory.commitTransaction();
-            return isRecordsCreated;
+            if (log.isDebugEnabled()) {
+                log.debug("Event configuration added successfully for the tenant " + tenantId);
+            }
+            return generatedEventIds;
         } catch (TransactionManagementException e) {
             String msg = "Failed to start/open transaction to store device event configurations";
             throw new EventConfigurationException(msg, e);
@@ -59,5 +70,85 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
+    }
+
+    @Override
+    public List<Integer> updateEventsOfDeviceGroup(List<EventConfig> newEventList,
+                                                   List<Integer> removedEventIdList,
+                                                   List<Integer> groupIds, int tenantId) throws EventConfigurationException {
+        //todo when concerning about other event types, all of this steps might not necessary.
+        // so divide them into separate service methods
+        if (log.isDebugEnabled()) {
+            log.debug("Updating event configurations of tenant " + tenantId);
+        }
+        List<EventConfig> eventsToAdd;
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            eventsToAdd = new ArrayList<>();
+            List<EventConfig> eventsToUpdate = new ArrayList<>();
+            List<Integer> updateEventIdList = new ArrayList<>();
+            for (EventConfig newEvent : newEventList) {
+                if (newEvent.getEventId() == -1) {
+                    eventsToAdd.add(newEvent);
+                    continue;
+                }
+                eventsToUpdate.add(newEvent);
+                updateEventIdList.add(newEvent.getEventId());
+            }
+            List<Integer> savedGroups = eventConfigDAO.getGroupsOfEvents(updateEventIdList);
+            List<Integer> groupIdsToAdd = new ArrayList<>();
+            List<Integer> groupIdsToDelete = new ArrayList<>();
+            for (Integer savedGroup : savedGroups) {
+                if (!groupIds.contains(savedGroup)) {
+                    groupIdsToDelete.add(savedGroup);
+                }
+            }
+
+            for (Integer newGroupId : groupIds) {
+                if (!savedGroups.contains(newGroupId)) {
+                    groupIdsToAdd.add(newGroupId);
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Updating event records ");
+            }
+            eventConfigDAO.updateEventRecords(eventsToUpdate, tenantId);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting event group mapping records of groups");
+            }
+            eventConfigDAO.deleteEventGroupMappingRecordsByGroupIds(groupIdsToDelete);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Creating event group mapping records for updated events");
+            }
+            eventConfigDAO.addEventGroupMappingRecords(updateEventIdList, groupIdsToAdd);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting event group mapping records of removing events");
+            }
+            eventConfigDAO.deleteEventGroupMappingRecordsByEventIds(removedEventIdList);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting removed event records");
+            }
+            eventConfigDAO.deleteEventRecords(removedEventIdList, tenantId);
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Failed to start/open transaction to store device event configurations";
+            throw new EventConfigurationException(msg, e);
+        } catch (EventManagementDAOException e) {
+            String msg = "Error occurred while saving event records";
+            log.error(msg, e);
+            DeviceManagementDAOFactory.rollbackTransaction();
+            throw new EventConfigurationException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Adding new events while updating event");
+        }
+        return createEventsOfDeviceGroup(eventsToAdd, groupIds, tenantId);
     }
 }

@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import jdk.nashorn.internal.parser.JSONParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPIUtil;
 import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse;
@@ -55,6 +56,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.EventAction;
 import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.GeoLocationBasedService;
+import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
@@ -597,17 +599,9 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
     @Produces("application/json")
     public Response createGeofence(GeofenceWrapper geofenceWrapper) {
         RequestValidationUtil.validateGeofenceData(geofenceWrapper);
+        RequestValidationUtil.validateEventConfigurationData(geofenceWrapper.getEventConfig());
         try {
-            GeofenceData geofenceData = new GeofenceData();
-            geofenceData.setFenceName(geofenceWrapper.getFenceName());
-            geofenceData.setDescription(geofenceWrapper.getDescription());
-            geofenceData.setLatitude(geofenceWrapper.getLatitude());
-            geofenceData.setLongitude(geofenceWrapper.getLongitude());
-            geofenceData.setRadius(geofenceWrapper.getRadius());
-            geofenceData.setGeoJson(geofenceWrapper.getGeoJson());
-            geofenceData.setFenceShape(geofenceWrapper.getFenceShape());
-            geofenceData.setGroupIds(geofenceWrapper.getGroupIds());
-            geofenceData.setEventConfig(mapRequestEvent(geofenceWrapper.getEventConfig()));
+            GeofenceData geofenceData = mapRequestGeofenceData(geofenceWrapper);
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
             if (!geoService.createGeofence(geofenceData)) {
                 String msg = "Failed to create geofence";
@@ -633,6 +627,11 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         List<EventConfig> savingEventList = new ArrayList<>();
         for (org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig event : eventConfig) {
             EventConfig savingConfig = new EventConfig();
+            if (event.getId() > 0) {
+                savingConfig.setEventId(event.getId());
+            } else {
+                savingConfig.setEventId(-1);
+            }
             savingConfig.setEventLogic(event.getEventLogic());
             String eventJson = new Gson().toJson(event.getActions());
             savingConfig.setActions(eventJson);
@@ -740,28 +739,55 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
     @PUT
     @Consumes("application/json")
     @Produces("application/json")
-    public Response updateGeofence(GeofenceWrapper geofenceWrapper, @PathParam("fenceId") int fenceId) {
+    public Response updateGeofence(GeofenceWrapper geofenceWrapper,
+                                   @PathParam("fenceId") int fenceId,
+                                   @QueryParam("eventIds") int[] eventIds) {
         RequestValidationUtil.validateGeofenceData(geofenceWrapper);
+        RequestValidationUtil.validateEventConfigurationData(geofenceWrapper.getEventConfig());
         try {
-            GeofenceData geofenceData = new GeofenceData();
-            geofenceData.setFenceName(geofenceWrapper.getFenceName());
-            geofenceData.setDescription(geofenceWrapper.getDescription());
-            geofenceData.setLatitude(geofenceWrapper.getLatitude());
-            geofenceData.setLongitude(geofenceWrapper.getLongitude());
-            geofenceData.setRadius(geofenceWrapper.getRadius());
-            geofenceData.setFenceShape(geofenceWrapper.getFenceShape());
-            geofenceData.setGeoJson(geofenceWrapper.getGeoJson());
+            GeofenceData geofenceData = mapRequestGeofenceData(geofenceWrapper);
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
             if (!geoService.updateGeofence(geofenceData, fenceId)) {
                 String msg = "No valid Geofence found for ID " + fenceId;
                 log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
-            return Response.status(Response.Status.CREATED).build();
+            List<Integer> eventsToRemove = new ArrayList<>();
+            for (int eventId : eventIds) {
+                eventsToRemove.add(eventId);
+            }
+            geoService.updateGeoEventConfigurations(geofenceData.getEventConfig(), eventsToRemove,
+                    geofenceData.getGroupIds(), fenceId);
+            return Response.status(Response.Status.CREATED).entity("Geo Fence update successfully").build();
         } catch (GeoLocationBasedServiceException e) {
-            String msg = "Failed to create geofence";
+            String msg = "Failed to update geofence";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (EventConfigurationException e) {
+            String msg = "Failed to update geofence events";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
+    }
+
+    private GeofenceData mapRequestGeofenceData(GeofenceWrapper geofenceWrapper) {
+        GeofenceData geofenceData = new GeofenceData();
+        geofenceData.setFenceName(geofenceWrapper.getFenceName());
+        geofenceData.setDescription(geofenceWrapper.getDescription());
+        geofenceData.setLatitude(geofenceWrapper.getLatitude());
+        geofenceData.setLongitude(geofenceWrapper.getLongitude());
+        geofenceData.setRadius(geofenceWrapper.getRadius());
+        geofenceData.setFenceShape(geofenceWrapper.getFenceShape());
+        geofenceData.setGeoJson(geofenceWrapper.getGeoJson());
+        if (geofenceWrapper.getGroupIds() == null || geofenceWrapper.getGroupIds().isEmpty()) {
+            String msg = "Group ID / IDs are mandatory, since cannot be null or empty";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST)
+                            .setMessage(msg).build());
+        }
+        geofenceData.setGroupIds(geofenceWrapper.getGroupIds());
+        geofenceData.setEventConfig(mapRequestEvent(geofenceWrapper.getEventConfig()));
+        return geofenceData;
     }
 }

@@ -32,6 +32,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class EventConfigDAOImpl implements EventConfigDAO {
     private static final Log log = LogFactory.getLog(EventConfigDAOImpl.class);
 
     @Override
-    public int[] storeEventRecords(List<EventConfig> eventConfigList, int tenantId) throws EventManagementDAOException {
+    public List<Integer> storeEventRecords(List<EventConfig> eventConfigList, int tenantId) throws EventManagementDAOException {
         try {
             Connection conn = this.getConnection();
             String sql = "INSERT INTO DM_DEVICE_EVENT(" +
@@ -49,8 +51,6 @@ public class EventConfigDAOImpl implements EventConfigDAO {
                     "CREATED_TIMESTAMP, " +
                     "TENANT_ID) " +
                     "VALUES (?, ?, ?, ?, ?)";
-
-
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 for (EventConfig eventConfig : eventConfigList) {
                     stmt.setString(1, eventConfig.getEventSource());
@@ -61,11 +61,11 @@ public class EventConfigDAOImpl implements EventConfigDAO {
                     stmt.addBatch();
                 }
                 int[] createdRowCount = stmt.executeBatch();
-                int[] generatedIds = new int[createdRowCount.length];
+                List<Integer> generatedIds = new ArrayList<>();
                 ResultSet generatedKeys = stmt.getGeneratedKeys();
                 for (int i = 0; i < createdRowCount.length; i++) {
                     if (generatedKeys.next()) {
-                        generatedIds[i] = generatedKeys.getInt(1);
+                        generatedIds.add(generatedKeys.getInt(1));
                     }
                 }
                 return generatedIds;
@@ -78,7 +78,7 @@ public class EventConfigDAOImpl implements EventConfigDAO {
     }
 
     @Override
-    public boolean addEventGroupMappingRecords(int[] generatedEventIds, List<Integer> groupIds) throws EventManagementDAOException {
+    public boolean addEventGroupMappingRecords(List<Integer> eventIds, List<Integer> groupIds) throws EventManagementDAOException {
         try {
             Connection conn = this.getConnection();
             String sql = "INSERT INTO DM_DEVICE_EVENT_GROUP_MAPPING(" +
@@ -87,8 +87,8 @@ public class EventConfigDAOImpl implements EventConfigDAO {
                     "VALUES (?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 for (Integer groupId : groupIds) {
-                    for (int i = 0; i < generatedEventIds.length; i++) {
-                        stmt.setInt(1, generatedEventIds[i]);
+                    for (Integer eventId : eventIds) {
+                        stmt.setInt(1, eventId);
                         stmt.setInt(2, groupId);
                         stmt.addBatch();
                     }
@@ -100,6 +100,198 @@ public class EventConfigDAOImpl implements EventConfigDAO {
             log.error(msg, e);
             throw new EventManagementDAOException(msg, e);
         }
+    }
+
+    @Override
+    public List<EventConfig> getEventsOfGroups(List<Integer> groupIds, int tenantId) throws EventManagementDAOException {
+        try {
+            List<EventConfig> eventList = new ArrayList<>();
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "E.ID AS EVENT_ID, " +
+                    "EVENT_SOURCE, " +
+                    "EVENT_LOGIC, " +
+                    "ACTIONS " +
+                    "FROM DM_DEVICE_EVENT E, DM_DEVICE_EVENT_GROUP_MAPPING G " +
+                    "WHERE G.EVENT_ID = E.ID " +
+                    "AND G.GROUP_ID IN (%s) " +
+                    "AND E.TENANT_ID = ? " +
+                    "GROUP BY E.ID";
+            String inClause = String.join(", ", Collections.nCopies(groupIds.size(), "?"));
+            sql = String.format(sql, inClause);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int index = 1;
+                for (Integer groupId : groupIds) {
+                    stmt.setInt(index++, groupId);
+                }
+                return getEventConfigs(tenantId, eventList, stmt, index);
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while creating event group mapping records";
+            log.error(msg, e);
+            throw new EventManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteEventGroupMappingRecordsByEventIds(List<Integer> eventsIdsToDelete) throws EventManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "DELETE FROM DM_DEVICE_EVENT_GROUP_MAPPING WHERE EVENT_ID IN (%s)";
+            String inClause = String.join(", ", Collections.nCopies(eventsIdsToDelete.size(), "?"));
+            sql = String.format(sql, inClause);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int index = 1;
+                for (Integer eventId : eventsIdsToDelete) {
+                    stmt.setInt(index++, eventId);
+                    stmt.addBatch();
+                }
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting event group mapping records";
+            log.error(msg, e);
+            throw new EventManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteEventGroupMappingRecordsByGroupIds(List<Integer> groupIdsToDelete) throws EventManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "DELETE FROM DM_DEVICE_EVENT_GROUP_MAPPING WHERE GROUP_ID IN (%s)";
+            String inClause = String.join(", ", Collections.nCopies(groupIdsToDelete.size(), "?"));
+            sql = String.format(sql, inClause);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int index = 1;
+                for (Integer groupId : groupIdsToDelete) {
+                    stmt.setInt(index++, groupId);
+                    stmt.addBatch();
+                }
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting event group mapping records";
+            log.error(msg, e);
+            throw new EventManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void updateEventRecords(List<EventConfig> eventsToUpdate, int tenantId) throws EventManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "UPDATE DM_DEVICE_EVENT SET " +
+                    "ACTIONS = ? " +
+                    "WHERE ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (EventConfig updatingEvent : eventsToUpdate) {
+                    stmt.setString(1, updatingEvent.getActions());
+                    stmt.setInt(2, updatingEvent.getEventId());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while updating event records of tenant " + tenantId;
+            log.error(msg, e);
+            throw new EventManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteEventRecords(List<Integer> eventsIdsToDelete, int tenantId) throws EventManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "DELETE FROM DM_DEVICE_EVENT WHERE ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (Integer eventId : eventsIdsToDelete) {
+                    stmt.setInt(1, eventId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting event records of tenant " + tenantId;
+            log.error(msg, e);
+            throw new EventManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<EventConfig> getEventsById(List<Integer> eventIdList, int tenantId) throws EventManagementDAOException {
+        try {
+            List<EventConfig> eventList = new ArrayList<>();
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "ID AS EVENT_ID, " +
+                    "EVENT_SOURCE, " +
+                    "EVENT_LOGIC, " +
+                    "ACTIONS " +
+                    "FROM DM_DEVICE_EVENT " +
+                    "WHERE ID IN (%s) ";
+            String inClause = String.join(", ", Collections.nCopies(eventIdList.size(), "?"));
+            sql = String.format(sql, inClause);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int index = 1;
+                for (Integer eventId : eventIdList) {
+                    if (eventId != -1) {
+                        stmt.setInt(index++, eventId);
+                    }
+                }
+                return getEventConfigs(tenantId, eventList, stmt, index);
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while creating event group mapping records";
+            log.error(msg, e);
+            throw new EventManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<Integer> getGroupsOfEvents(List<Integer> eventIdList) throws EventManagementDAOException {
+        try {
+            List<Integer> groupIdList = new ArrayList<>();
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "GROUP_ID " +
+                    "FROM DM_DEVICE_EVENT_GROUP_MAPPING " +
+                    "WHERE EVENT_ID IN (%s) " +
+                    "GROUP BY GROUP_ID";
+            String inClause = String.join(", ", Collections.nCopies(eventIdList.size(), "?"));
+            sql = String.format(sql, inClause);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int index = 1;
+                for (Integer eventId : eventIdList) {
+                    if (eventId != -1) {
+                        stmt.setInt(index++, eventId);
+                    }
+                }
+                ResultSet resultSet = stmt.executeQuery();
+                while (resultSet.next()) {
+                    groupIdList.add(resultSet.getInt("GROUP_ID"));
+                }
+                return groupIdList;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while creating event group mapping records";
+            log.error(msg, e);
+            throw new EventManagementDAOException(msg, e);
+        }
+    }
+
+    private List<EventConfig> getEventConfigs(int tenantId, List<EventConfig> eventList, PreparedStatement stmt, int index) throws SQLException {
+        stmt.setInt(index, tenantId);
+        ResultSet rst = stmt.executeQuery();
+        while (rst.next()) {
+            EventConfig event = new EventConfig();
+            event.setEventId(rst.getInt("EVENT_ID"));
+            event.setEventSource(rst.getString("EVENT_SOURCE"));
+            event.setEventLogic(rst.getString("EVENT_LOGIC"));
+            event.setActions(rst.getString("ACTIONS"));
+            eventList.add(event);
+        }
+        return eventList;
     }
 
     private Connection getConnection() throws SQLException {

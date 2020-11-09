@@ -21,8 +21,10 @@ package org.wso2.carbon.device.mgt.common.geo.service;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -78,6 +80,7 @@ public interface GeoLocationProviderService {
      * @param geofenceData fence data
      * @return true if the fence creation success
      * @throws GeoLocationBasedServiceException error occurs while creating a geofence
+     * @throws EventConfigurationException  for errors occur while creating event configuration for the geofence
      */
     boolean createGeofence(GeofenceData geofenceData) throws GeoLocationBasedServiceException, EventConfigurationException;
 
@@ -126,6 +129,20 @@ public interface GeoLocationProviderService {
      * @param fenceId Id of the fence which should be updated
      * @return true if update success. false if not a record found for the used Id
      * @throws GeoLocationBasedServiceException  for errors occur while updating geo fences
+     * @throws EventConfigurationException  for errors occur while updating event records of the geofence
      */
-    boolean updateGeofence(GeofenceData geofenceData, int fenceId) throws GeoLocationBasedServiceException;
+    boolean updateGeofence(GeofenceData geofenceData, int fenceId)
+            throws GeoLocationBasedServiceException, EventConfigurationException;
+
+    /**
+     * Update geofence event configuration
+     * @param eventConfig updated event configurations list
+     * @param removedEventIdList removed event ids
+     * @param groupIds newly added group ids to be mapped with event records
+     * @param fenceId updating fence id
+     * @return true for successful update of geofence event data
+     * @throws GeoLocationBasedServiceException any errors occurred while updating event records of the fence
+     */
+    boolean updateGeoEventConfigurations(List<EventConfig> eventConfig, List<Integer> removedEventIdList,
+                                         List<Integer> groupIds, int fenceId) throws GeoLocationBasedServiceException;
 }

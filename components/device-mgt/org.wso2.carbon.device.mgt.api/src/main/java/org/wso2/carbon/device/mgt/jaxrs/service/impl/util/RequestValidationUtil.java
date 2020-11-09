@@ -35,6 +35,7 @@ import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig;
 import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.PolicyWrapper;
@@ -717,6 +718,31 @@ public class RequestValidationUtil {
             log.error(msg);
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+    }
+
+    public static void validateEventConfigurationData(List<EventConfig> eventConfig) {
+        if (eventConfig == null ||eventConfig.isEmpty()) {
+            String msg = "Event configuration is mandatory, since should not be null or empty";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+
+        for (EventConfig config : eventConfig) {
+            if (config.getActions() == null || config.getActions().isEmpty()) {
+                String msg = "Event actions are mandatory, since should not be null or empty";
+                log.error(msg);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+            }
+
+            if (config.getEventLogic() == null || config.getEventLogic().trim().isEmpty()) {
+                String msg = "Event logic is mandatory, since should not be null or empty";
+                log.error(msg);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+            }
         }
     }
 }

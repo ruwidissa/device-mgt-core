@@ -24,12 +24,14 @@ public class EventAction {
 
     @ApiModelProperty(
             name = "actionType",
-            value = "Type of the event action to be triggered in the device level")
+            value = "Type of the event action to be triggered in the device level",
+            required = true)
     private String actionType;
 
     @ApiModelProperty(
             name = "payload",
-            value = "Payload of the event action")
+            value = "Payload of the event action",
+            required = true)
     private Object payload;
 
     public String getActionType() {

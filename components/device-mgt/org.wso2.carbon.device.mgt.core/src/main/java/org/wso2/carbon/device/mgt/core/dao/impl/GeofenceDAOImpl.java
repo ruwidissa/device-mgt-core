@@ -322,4 +322,90 @@ public class GeofenceDAOImpl implements GeofenceDAO {
         }
         return geofenceDataList;
     }
+
+    @Override
+    public List<Integer> getGroupIdsOfGeoFence(int fenceId) throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "GROUP_ID " +
+                    "FROM DM_GEOFENCE_GROUP_MAPPING " +
+                    "WHERE FENCE_ID = ? ";
+            List<Integer> groupIds = new ArrayList<>();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, fenceId);
+                try (ResultSet rst = stmt.executeQuery()) {
+                    while (rst.next()) {
+                        groupIds.add(rst.getInt(1));
+                    }
+                }
+            }
+            return groupIds;
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching group IDs of the fence " + fenceId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteGeofenceGroupMapping(List<Integer> groupIdsToDelete) throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "DELETE FROM DM_GEOFENCE_GROUP_MAPPING WHERE GROUP_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (Integer groupId : groupIdsToDelete) {
+                    stmt.setInt(1, groupId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting Geofence group mapping records";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void createGeofenceEventMapping(int fenceId, List<Integer> eventIds) throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "INSERT INTO DM_GEOFENCE_EVENT_MAPPING(" +
+                    "FENCE_ID, "+
+                    "EVENT_ID) " +
+                    "VALUES (?, ?)";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (Integer createdEventId : eventIds) {
+                    stmt.setInt(1, fenceId);
+                    stmt.setInt(2, createdEventId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while creating geofence event group mapping records";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteGeofenceEventMapping(List<Integer> removedEventIdList) throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "DELETE FROM DM_GEOFENCE_EVENT_MAPPING WHERE EVENT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (Integer eventId : removedEventIdList) {
+                    stmt.setInt(1, eventId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting Geofence event mapping records";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
 }

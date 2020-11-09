@@ -21,6 +21,27 @@ package org.wso2.carbon.device.mgt.common.event.config;
 import java.util.List;
 
 public interface EventConfigurationProviderService {
-    boolean createEventOfDeviceGroup(List<EventConfig> eventConfigList, List<Integer> groupIds, int tenantId)
+    /**
+     * Create event configuration records
+     * @param eventConfigList event list to be added
+     * @param groupIds group ids of the events are mapped
+     * @param tenantId events owning tenant id
+     * @return generated event ids
+     * @throws EventConfigurationException errors thrown while creating event configuration
+     */
+    List<Integer> createEventsOfDeviceGroup(List<EventConfig> eventConfigList, List<Integer> groupIds, int tenantId)
             throws EventConfigurationException;
+
+    /**
+     * Update event configuration records
+     * @param eventConfig updated event configuration list. event ids should be present for
+     *                    the updating events and event ids should be -1 for the newly creating events
+     * @param removedEventIdList event ids of removed while updating the event configuration
+     * @param groupIds group ids to be mapped with updated events
+     * @param tenantId
+     * @return
+     * @throws EventConfigurationException
+     */
+    List<Integer> updateEventsOfDeviceGroup(List<EventConfig> eventConfig, List<Integer> removedEventIdList,
+                                            List<Integer> groupIds, int tenantId) throws EventConfigurationException;
 }

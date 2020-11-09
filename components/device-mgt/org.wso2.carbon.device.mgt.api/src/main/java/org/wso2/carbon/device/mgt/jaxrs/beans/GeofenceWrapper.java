@@ -37,8 +37,7 @@ public class GeofenceWrapper {
 
     @ApiModelProperty(
             name = "description",
-            value = "Description of the geo fence",
-            required = true)
+            value = "Description of the geo fence")
     private String description;
 
     @ApiModelProperty(
@@ -63,14 +62,20 @@ public class GeofenceWrapper {
 
     @ApiModelProperty(
             name = "fenceShape",
-            value = "Shape of the fence")
+            value = "Shape of the fence",
+            required = true)
     private String fenceShape;
 
     @ApiModelProperty(
             name = "eventConfig",
-            value = "Event configuration of the geofence")
+            value = "Event configuration of the geofence",
+            required = true)
     private List<EventConfig> eventConfig;
 
+    @ApiModelProperty(
+            name = "groupIds",
+            value = "Group ids to add geo fences",
+            required = true)
     private List<Integer> groupIds;
 
     public int getId() {
