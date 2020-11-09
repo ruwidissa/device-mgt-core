@@ -145,4 +145,6 @@ public interface GeoLocationProviderService {
      */
     boolean updateGeoEventConfigurations(List<EventConfig> eventConfig, List<Integer> removedEventIdList,
                                          List<Integer> groupIds, int fenceId) throws GeoLocationBasedServiceException;
+
+    List<GeofenceData> getGeoFenceEvents(List<GeofenceData> geoFences) throws GeoLocationBasedServiceException;
 }

@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
@@ -35,8 +36,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GeofenceDAOImpl implements GeofenceDAO {
     private static final Log log = LogFactory.getLog(GeofenceDAOImpl.class);
@@ -407,5 +411,126 @@ public class GeofenceDAOImpl implements GeofenceDAO {
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
+    }
+
+    @Override
+    public Map<Integer, List<EventConfig>> getEventsOfGeoFences(List<Integer> geofenceIds) throws DeviceManagementDAOException {
+        try {
+            Map<Integer, List<EventConfig>> geoFenceEventMap = new HashMap<>();
+            List<EventConfig> eventList = new ArrayList<>();
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "E.ID AS EVENT_ID, " +
+                    "M.FENCE_ID AS FENCE_ID, " +
+                    "EVENT_SOURCE, " +
+                    "EVENT_LOGIC, " +
+                    "ACTIONS " +
+                    "FROM DM_DEVICE_EVENT E, DM_GEOFENCE_EVENT_MAPPING M " +
+                    "WHERE E.ID = M.EVENT_ID " +
+                    "AND M.FENCE_ID IN (%s)";
+            String inClause = String.join(", ", Collections.nCopies(geofenceIds.size(), "?"));
+            sql = String.format(sql, inClause);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int index = 1;
+                for (Integer geofenceId : geofenceIds) {
+                    stmt.setInt(index++, geofenceId);
+                }
+                ResultSet resultSet = stmt.executeQuery();
+                while (resultSet.next()) {
+                    int fenceId = resultSet.getInt("FENCE_ID");
+                    List<EventConfig> eventConfigList = geoFenceEventMap.get(fenceId);
+                    if (eventConfigList == null) {
+                        eventConfigList = new ArrayList<>();
+                    }
+                    EventConfig event = new EventConfig();
+                    event.setEventId(resultSet.getInt("EVENT_ID"));
+                    event.setEventSource(resultSet.getString("EVENT_SOURCE"));
+                    event.setEventLogic(resultSet.getString("EVENT_LOGIC"));
+                    event.setActions(resultSet.getString("ACTIONS"));
+                    eventConfigList.add(event);
+                    geoFenceEventMap.put(fenceId, eventConfigList);
+                }
+                return geoFenceEventMap;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while updating Geofence record with id ";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<EventConfig> getEventsOfGeoFence(int geofenceId) throws DeviceManagementDAOException {
+        try {
+            List<EventConfig> eventList = new ArrayList<>();
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "ID AS EVENT_ID, " +
+                    "EVENT_SOURCE, " +
+                    "EVENT_LOGIC, " +
+                    "ACTIONS " +
+                    "FROM DM_DEVICE_EVENT " +
+                    "WHERE ID IN (" +
+                    "SELECT EVENT_ID FROM DM_GEOFENCE_EVENT_MAPPING " +
+                    "WHERE FENCE_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, geofenceId);
+                return getEventConfigs(eventList, stmt);
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while updating Geofence record with id ";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public Map<Integer, List<Integer>> getGroupIdsOfGeoFences(List<Integer> fenceIds) throws DeviceManagementDAOException {
+        try {
+            Map<Integer, List<Integer>> fenceGroupMap = new HashMap<>();
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "FENCE_ID, " +
+                    "GROUP_ID " +
+                    "FROM DM_GEOFENCE_GROUP_MAPPING " +
+                    "WHERE FENCE_ID IN (%s) ";
+            String inClause = String.join(", ", Collections.nCopies(fenceIds.size(), "?"));
+            sql = String.format(sql, inClause);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int index = 1;
+                for (Integer fenceId : fenceIds) {
+                    stmt.setInt(index++, fenceId);
+                }
+                ResultSet rst = stmt.executeQuery();
+                while (rst.next()) {
+                    int fenceId = rst.getInt("FENCE_ID");
+                    List<Integer> groupIdList = fenceGroupMap.get(fenceId);
+                    if (groupIdList == null) {
+                        groupIdList = new ArrayList<>();
+                    }
+                    groupIdList.add(rst.getInt("GROUP_ID"));
+                    fenceGroupMap.put(fenceId, groupIdList);
+                }
+            }
+            return fenceGroupMap;
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching group IDs of the fences";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    private List<EventConfig> getEventConfigs(List<EventConfig> eventList, PreparedStatement stmt) throws SQLException {
+        ResultSet resultSet = stmt.executeQuery();
+        EventConfig event;
+        while (resultSet.next()) {
+            event = new EventConfig();
+            event.setEventId(resultSet.getInt("EVENT_ID"));
+            event.setEventSource(resultSet.getString("EVENT_SOURCE"));
+            event.setEventLogic(resultSet.getString("EVENT_LOGIC"));
+            event.setActions(resultSet.getString("ACTIONS"));
+            eventList.add(event);
+        }
+        return eventList;
     }
 }

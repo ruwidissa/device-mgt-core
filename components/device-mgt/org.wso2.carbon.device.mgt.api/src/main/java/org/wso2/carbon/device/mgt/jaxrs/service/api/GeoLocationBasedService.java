@@ -979,7 +979,11 @@ public interface GeoLocationBasedService {
             @ApiParam(
                     name = "name",
                     value = "Geo Fence name")
-            @QueryParam("name") String name);
+            @QueryParam("name") String name,
+            @ApiParam(
+                    name = "requireEventData",
+                    value = "Require geofence event data")
+            @QueryParam("requireEventData") boolean requireEventData);
 
 
     @DELETE

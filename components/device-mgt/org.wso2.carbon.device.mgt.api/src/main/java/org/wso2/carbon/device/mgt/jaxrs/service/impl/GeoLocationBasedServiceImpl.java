@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.Gson;
 import jdk.nashorn.internal.parser.JSONParser;
 import org.apache.commons.logging.Log;
@@ -66,6 +68,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -674,7 +677,33 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         geofenceWrapper.setRadius(geofenceData.getRadius());
         geofenceWrapper.setGeoJson(geofenceData.getGeoJson());
         geofenceWrapper.setFenceShape(geofenceData.getFenceShape());
+        geofenceWrapper.setGroupIds(geofenceData.getGroupIds());
+        if (geofenceData.getEventConfig() != null) {
+            geofenceWrapper.setEventConfig(getEventConfigBean(geofenceData.getEventConfig()));
+        }
         return geofenceWrapper;
+    }
+
+    private List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> getEventConfigBean(List<EventConfig> eventConfig) {
+        List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> eventList = new ArrayList<>();
+        org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig eventData;
+        for (EventConfig event : eventConfig) {
+            eventData = new org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig();
+            eventData.setId(event.getEventId());
+            eventData.setEventLogic(event.getEventLogic());
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            try {
+                List<EventAction> eventActions = mapper.readValue(event.getActions(), mapper.getTypeFactory().
+                        constructCollectionType(List.class, EventAction.class));
+                eventData.setActions(eventActions);
+            } catch (IOException e) {
+                log.error("Error occurred while parsing event actions of the event with ID " + event.getEventId());
+            }
+            eventList.add(eventData);
+        }
+        return eventList;
     }
 
     @Path("/geo-fence")
@@ -683,7 +712,8 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
     @Produces("application/json")
     public Response getGeofence(@QueryParam("offset") int offset,
                                 @QueryParam("limit") int limit,
-                                @QueryParam("name") String name) {
+                                @QueryParam("name") String name,
+                                @QueryParam("requireEventData") boolean requireEventData) {
         try {
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
             if (offset >= 0 && limit != 0) {
@@ -691,10 +721,18 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                 if (name != null && !name.isEmpty()) {
                     request.setProperty(DeviceManagementConstants.GeoServices.FENCE_NAME, name);
                 }
-                return getResponse(geoService.getGeoFences(request));
+                List<GeofenceData> geoFences = geoService.getGeoFences(request);
+                if (requireEventData) {
+                    geoFences = geoService.getGeoFenceEvents(geoFences);
+                }
+                return getResponse(geoFences);
             }
             if (name != null && !name.isEmpty()) {
-                return getResponse(geoService.getGeoFences(name));
+                List<GeofenceData> geoFences = geoService.getGeoFences(name);
+                if (requireEventData) {
+                    geoFences = geoService.getGeoFenceEvents(geoFences);
+                }
+                return getResponse(geoFences);
             }
             return getResponse(geoService.getGeoFences());
         } catch (GeoLocationBasedServiceException e) {

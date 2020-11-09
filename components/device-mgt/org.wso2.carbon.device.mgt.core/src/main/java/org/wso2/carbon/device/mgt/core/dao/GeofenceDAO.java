@@ -19,9 +19,11 @@
 package org.wso2.carbon.device.mgt.core.dao;
 
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Use to manage geofence data in DB
@@ -128,4 +130,10 @@ public interface GeofenceDAO {
      * @throws DeviceManagementDAOException error occurred deleting geofence event mapping
      */
     void deleteGeofenceEventMapping(List<Integer> removedEventIdList) throws DeviceManagementDAOException;
+
+    Map<Integer, List<EventConfig>> getEventsOfGeoFences(List<Integer> geofenceIds) throws DeviceManagementDAOException;
+
+    List<EventConfig> getEventsOfGeoFence(int geofenceId) throws DeviceManagementDAOException;
+
+    Map<Integer, List<Integer>> getGroupIdsOfGeoFences(List<Integer> fenceIds) throws DeviceManagementDAOException;
 }

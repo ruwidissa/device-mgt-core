@@ -1613,4 +1613,32 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         }
         return true;
     }
+
+    @Override
+    public List<GeofenceData> getGeoFenceEvents(List<GeofenceData> geoFences) throws GeoLocationBasedServiceException {
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            List<Integer> fenceIds = new ArrayList<>();
+            for (GeofenceData geoFence : geoFences) {
+                fenceIds.add(geoFence.getId());
+            }
+            Map<Integer, List<EventConfig>> eventsOfGeoFences = geofenceDAO.getEventsOfGeoFences(fenceIds);
+            Map<Integer, List<Integer>> groupIdsOfGeoFences = geofenceDAO.getGroupIdsOfGeoFences(fenceIds);
+            for (GeofenceData geoFence : geoFences) {
+                geoFence.setEventConfig(eventsOfGeoFences.get(geoFence.getId()));
+                geoFence.setGroupIds(groupIdsOfGeoFences.get(geoFence.getId()));
+            }
+            return geoFences;
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving geo fence events/groups data";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Failed open DB connection while getting geo fence event data";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
 }
