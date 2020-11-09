@@ -173,14 +173,14 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         if (deviceTypeId != -1) {
             sql += "AND AP_APP.DEVICE_TYPE_ID = ? ";
         }
-        sql += "GROUP BY AP_APP.ID ";
+        sql += "GROUP BY AP_APP.ID ORDER BY AP_APP.ID ";
         if (StringUtils.isNotEmpty(filter.getSortBy())) {
-            sql += "ORDER BY ID " + filter.getSortBy() +" ";
+            sql += filter.getSortBy() +" ";
         }
         if (filter.getLimit() != -1) {
             sql += "LIMIT ? OFFSET ? ";
         }
-        sql += ") AS app_data ON app_data.ID = AP_APP.ID WHERE AP_APP.TENANT_ID = ?";
+        sql += ") AS app_data ON app_data.ID = AP_APP.ID WHERE AP_APP.TENANT_ID = ? ORDER BY AP_APP.ID";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
