@@ -53,16 +53,25 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.Utils;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
-import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
+import org.wso2.carbon.device.mgt.common.MonitoringOperation;
+import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshotWrapper;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
+import org.wso2.carbon.device.mgt.common.exceptions.UnAuthorizedException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
+import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementService;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
@@ -82,6 +91,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
+import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceStub;
 import org.wso2.carbon.event.receiver.stub.EventReceiverAdminServiceStub;
@@ -123,7 +133,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * MDMAPIUtils class provides utility function used by CDM REST-API classes.
@@ -940,4 +952,149 @@ public class DeviceMgtAPIUtils {
         claimPropertyDTO.setPropertyValue(propertyValue);
         return claimPropertyDTO;
     }
+
+    /**
+     * Getting Device History Snapshots for given Device Type and Identifier.
+     *
+     * @param deviceType Device type of the device
+     * @param identifier Device identifier of the device
+     * @param authorizedUser user who initiates the request
+     * @param from time to start getting DeviceLocationHistorySnapshotWrapper in milliseconds
+     * @param to time to end getting DeviceLocationHistorySnapshotWrapper in milliseconds
+     * @param type output type should be for DeviceLocationHistorySnapshotWrapper
+     * @param dms DeviceManagementService instance
+     *
+     * @return DeviceLocationHistorySnapshotWrapper instance
+     * @throws DeviceManagementException if device information cannot be fetched
+     * @throws DeviceAccessAuthorizationException  if device authorization get failed
+     */
+    public static DeviceLocationHistorySnapshotWrapper getDeviceHistorySnapshots(String deviceType,
+                                                                                 String identifier,
+                                                                                 String authorizedUser,
+                                                                                 long from,
+                                                                                 long to,
+                                                                                 String type,
+                                                                                 DeviceManagementProviderService dms)
+            throws DeviceManagementException, DeviceAccessAuthorizationException {
+            RequestValidationUtil.validateDeviceIdentifier(deviceType, identifier);
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier(identifier, deviceType);
+
+            if (!getDeviceAccessAuthorizationService().isUserAuthorized(deviceIdentifier, authorizedUser)) {
+                String msg = "User '" + authorizedUser + "' is not authorized to retrieve the given device id '" +
+                        identifier + "'";
+                log.error(msg);
+                throw new UnAuthorizedException(msg);
+            }
+
+            // Get the location history snapshots for the given period
+            List<DeviceLocationHistorySnapshot> deviceLocationHistorySnapshots = dms.getDeviceLocationInfo(deviceIdentifier, from, to);
+
+            OperationMonitoringTaskConfig operationMonitoringTaskConfig = dms.getDeviceMonitoringConfig(deviceType);
+            int taskFrequency = operationMonitoringTaskConfig.getFrequency();
+            int operationRecurrentTimes = 0;
+
+            List<MonitoringOperation> monitoringOperations = operationMonitoringTaskConfig.getMonitoringOperation();
+            for (MonitoringOperation monitoringOperation : monitoringOperations) {
+                if (monitoringOperation.getTaskName().equals("DEVICE_LOCATION")) {
+                    operationRecurrentTimes = monitoringOperation.getRecurrentTimes();
+                    break;
+                }
+            }
+
+            // Device Location operation frequency in milliseconds. Adding 100000 ms as an error
+            long operationFrequency = taskFrequency * operationRecurrentTimes + 100000;
+            Queue<DeviceLocationHistorySnapshot> deviceLocationHistorySnapshotsQueue = new LinkedList<>(
+                    deviceLocationHistorySnapshots);
+            List<List<DeviceLocationHistorySnapshot>> locationHistorySnapshotList = new ArrayList<>();
+
+            List<Object> pathsArray = new ArrayList<>();
+            DeviceLocationHistorySnapshotWrapper snapshotWrapper = new DeviceLocationHistorySnapshotWrapper();
+            while (!deviceLocationHistorySnapshotsQueue.isEmpty()) {
+                List<DeviceLocationHistorySnapshot> snapshots = new ArrayList<>();
+                // Make a copy of remaining snapshots
+                List<DeviceLocationHistorySnapshot> cachedSnapshots = new ArrayList<>(
+                        deviceLocationHistorySnapshotsQueue);
+
+                List<Object> locationPoint = new ArrayList<>();
+                for (int i = 0; i < cachedSnapshots.size(); i++) {
+                    DeviceLocationHistorySnapshot currentSnapshot = deviceLocationHistorySnapshotsQueue.poll();
+                    snapshots.add(currentSnapshot);
+                    if (currentSnapshot != null) {
+                        locationPoint.add(currentSnapshot.getLatitude());
+                        locationPoint.add(currentSnapshot.getLongitude());
+                        locationPoint.add(currentSnapshot.getUpdatedTime());
+                        pathsArray.add(new ArrayList<>(locationPoint));
+                        locationPoint.clear();
+                    }
+                    if (!deviceLocationHistorySnapshotsQueue.isEmpty()) {
+                        DeviceLocationHistorySnapshot nextSnapshot = deviceLocationHistorySnapshotsQueue.peek();
+                        locationPoint.add(nextSnapshot.getLatitude());
+                        locationPoint.add(nextSnapshot.getLongitude());
+                        locationPoint.add(nextSnapshot.getUpdatedTime());
+                        pathsArray.add(new ArrayList<>(locationPoint));
+                        locationPoint.clear();
+                        if (nextSnapshot.getUpdatedTime().getTime() - currentSnapshot.getUpdatedTime().getTime()
+                                > operationFrequency) {
+                            break;
+                        }
+                    }
+                }
+                locationHistorySnapshotList.add(snapshots);
+            }
+            DeviceLocationHistory deviceLocationHistory = new DeviceLocationHistory();
+            deviceLocationHistory.setLocationHistorySnapshots(locationHistorySnapshotList);
+            if (type != null) {
+                if (type.equals("path")) {
+                    snapshotWrapper.setPathSnapshot(pathsArray);
+                } else if (type.equals("full")) {
+                    snapshotWrapper.setFullSnapshot(deviceLocationHistory);
+                } else {
+                    String msg = "Invalid type, use either 'path' or 'full'";
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
+            } else {
+                snapshotWrapper.setFullSnapshot(deviceLocationHistory);
+            }
+            return snapshotWrapper;
+    }
+
+    /**
+     * Check user who initiates the request has permission to list devices from given group Id.
+     *
+     * @param groupId Group ID of the group
+     * @param authorizedUser user who initiates the request
+     *
+     * @return boolean instance
+     * @throws UserStoreException if roles list of authorizedUser cannot be fetched
+     * @throws DeviceAccessAuthorizationException if device authorization get failed.
+     * @throws GroupManagementException if group or roles cannot be fetched using groupId
+     */
+    public static boolean checkPermission(int groupId, String authorizedUser) throws UserStoreException, DeviceAccessAuthorizationException, GroupManagementException  {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        UserStoreManager userStoreManager = DeviceMgtAPIUtils.getRealmService()
+                .getTenantUserRealm(tenantId).getUserStoreManager();
+        String[] userRoles = userStoreManager.getRoleListOfUser(authorizedUser);
+        boolean isPermitted = false;
+        if (getDeviceAccessAuthorizationService().isDeviceAdminUser()) {
+            isPermitted = true;
+        } else {
+            List<String> roles = DeviceMgtAPIUtils.getGroupManagementProviderService().getRoles(groupId);
+            for (String userRole : userRoles) {
+                if (roles.contains(userRole)) {
+                    isPermitted = true;
+                    break;
+                }
+            }
+            if (!isPermitted) {
+                DeviceGroup deviceGroup = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                        .getGroup(groupId, false);
+                if (deviceGroup != null && authorizedUser.equals(deviceGroup.getOwner())) {
+                    isPermitted = true;
+                }
+            }
+        }
+        return isPermitted;
+    }
+
 }
