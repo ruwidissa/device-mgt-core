@@ -127,7 +127,10 @@ class AddNewReleaseFormComponent extends React.Component {
             description: 'New release was added successfully',
           });
           const uuid = res.data.data.uuid;
-          this.props.history.push('/publisher/apps/releases/' + uuid);
+          this.props.history.push({
+            pathname: '/publisher/apps/releases/' + uuid,
+            state: { fullAppDetails: this.props.location.state.fullAppDetails },
+          });
         } else {
           this.setState({
             loading: false,

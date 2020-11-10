@@ -27,6 +27,7 @@ import {
   Steps,
   Alert,
   Tabs,
+  Tooltip,
 } from 'antd';
 import axios from 'axios';
 import ReactQuill from 'react-quill';
@@ -198,6 +199,35 @@ class LifeCycle extends React.Component {
     this.setState({ current });
   };
 
+  /*
+ Function to check if the same app releases are in published
+ state or not and assigned a boolean value to disable
+ the publish button if an app release is already published
+*/
+  checkReleaseLifeCycleStatus = (proceedingStates, lifecycleState) => {
+    if (typeof this.props.appReleases !== 'undefined') {
+      const currentAppUUID = this.props.uuid;
+      let appReleases = this.props.appReleases.fullAppDetails;
+      let appRelease;
+      let isPublished;
+      for (let i = 0; i < appReleases.length; i++) {
+        appRelease = appReleases[i];
+        if (
+          currentAppUUID !== appRelease.uuid &&
+          appRelease.currentStatus === 'PUBLISHED' &&
+          proceedingStates.includes('PUBLISHED') &&
+          lifecycleState === 'PUBLISHED'
+        ) {
+          isPublished = true;
+          return isPublished;
+        }
+      }
+      isPublished = false;
+      return isPublished;
+    }
+    return false;
+  };
+
   render() {
     const {
       currentStatus,
@@ -207,6 +237,7 @@ class LifeCycle extends React.Component {
       lifeCycleStates,
     } = this.state;
     const { lifecycle } = this.props;
+    const text = <span>Already an app is in publish state</span>;
     let proceedingStates = [];
     if (
       lifecycle !== null &&
@@ -247,17 +278,33 @@ class LifeCycle extends React.Component {
                             <p>{step.text}</p>
                             {proceedingStates.map(lifecycleState => {
                               return (
-                                <Button
-                                  size={'small'}
-                                  style={{ marginRight: 3 }}
-                                  onClick={() =>
-                                    this.showReasonModal(lifecycleState)
+                                // eslint-disable-next-line react/jsx-key
+                                <Tooltip
+                                  title={
+                                    this.checkReleaseLifeCycleStatus(
+                                      proceedingStates,
+                                      lifecycleState,
+                                    ) === true
+                                      ? text
+                                      : ''
                                   }
-                                  key={lifecycleState}
-                                  type={'primary'}
                                 >
-                                  {lifecycleState}
-                                </Button>
+                                  <Button
+                                    size={'small'}
+                                    style={{ marginRight: 3 }}
+                                    disabled={this.checkReleaseLifeCycleStatus(
+                                      proceedingStates,
+                                      lifecycleState,
+                                    )}
+                                    onClick={() =>
+                                      this.showReasonModal(lifecycleState)
+                                    }
+                                    key={lifecycleState}
+                                    type={'primary'}
+                                  >
+                                    {lifecycleState}
+                                  </Button>
+                                </Tooltip>
                               );
                             })}
                           </div>
