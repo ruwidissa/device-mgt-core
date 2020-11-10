@@ -48,15 +48,12 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
-import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
-import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.policy.mgt.CorrectiveAction;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
 import org.wso2.carbon.device.mgt.core.config.tenant.PlatformConfigurationManagementServiceImpl;
-import org.wso2.carbon.device.mgt.core.geo.service.GeoLocationProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.operation.mgt.PolicyOperation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
@@ -161,75 +158,12 @@ public class PolicyManagerUtil {
             }
             if (payloadVersion >= 2.0f) {
                 setMultipleCorrectiveActions(effectiveFeatures, policyOperation, policy);
-                transformGeoFencePolicy(effectiveFeatures, policyOperation, policy);
             } else {
                 setSingleCorrectiveAction(policy, effectiveFeatures);
             }
         }
         policyOperation.setPayLoad(policyOperation.getProfileOperations());
         return policyOperation;
-    }
-
-    /**
-     * Transform geofence policy payload
-     * @param effectiveFeatures feature list of the policy
-     * @param policyOperation operation object
-     * @param policy related policy object
-     * @throws PolicyTransformException if any error occurs while transforming geo fence policy
-     */
-    private static void transformGeoFencePolicy(List<ProfileFeature> effectiveFeatures,
-                                                  PolicyOperation policyOperation, Policy policy) throws PolicyTransformException {
-        String payload = null;
-        int fenceId = -1;
-        for (ProfileFeature effectiveFeature : effectiveFeatures) {
-            if (effectiveFeature.getFeatureCode().equals(PolicyManagementConstants.GEOFENCE_POLICY)) {
-                payload = effectiveFeature.getContent().toString();
-                break;
-            }
-        }
-        if (payload != null) {
-            for (ProfileOperation profileOperation : policyOperation.getProfileOperations()) {
-                try {
-                    if (profileOperation.getCode().equals(PolicyManagementConstants.GEOFENCE_POLICY)) {
-                        JsonParser jsonParser = new JsonParser();
-                        JsonElement parsedPayload = jsonParser.parse(payload);
-                        JsonObject jsonPayload = parsedPayload.getAsJsonObject();
-                        GeoLocationProviderServiceImpl geoLocationProviderService = new GeoLocationProviderServiceImpl();
-                        if (jsonPayload.get("fenceId") == null) {
-                            String msg = "No valid fence Id found in saved policy payload";
-                            log.error(msg);
-                            throw new PolicyTransformException(msg);
-                        }
-                        fenceId = jsonPayload.get("fenceId").getAsInt();
-                        if (log.isDebugEnabled()) {
-                            log.debug("Retrieving geofence with ID " + fenceId);
-                        }
-                        GeofenceData geofence = geoLocationProviderService.getGeoFences(fenceId);
-                        if (geofence != null) {
-                            JsonObject operationPayload = new JsonObject();
-                            operationPayload.addProperty("fenceId", geofence.getId());
-                            operationPayload.addProperty("latitude", geofence.getLatitude());
-                            operationPayload.addProperty("longitude", geofence.getLongitude());
-                            operationPayload.addProperty("radius", geofence.getRadius());
-                            operationPayload.addProperty("name", geofence.getFenceName());
-                            operationPayload.addProperty("fenceShape", geofence.getFenceShape());
-                            operationPayload.addProperty("geoJson", geofence.getGeoJson());
-                            profileOperation.setPayLoad(operationPayload.toString());
-                        }
-                    }
-                } catch (GeoLocationBasedServiceException e) {
-                    String msg = "Error occurred while retrieving geofence with fence Id " + fenceId
-                            + " for the policy with Id "+policy.getId();
-                    log.error(msg);
-                    throw new PolicyTransformException(msg);
-                }
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                String msg = "No Geofence feature attached with the policy " + policy.getId();
-                log.debug(msg);
-            }
-        }
     }
 
     /**
