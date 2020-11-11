@@ -241,9 +241,9 @@ public class PolicyManagerImpl implements PolicyManager {
             policy.getProfile().setUpdatedDate(currentTimestamp);
             policy.setPriorityId(previousPolicy.getPriorityId());
             policy.setPolicyPayloadVersion(previousPolicy.getPolicyPayloadVersion());
-            Policy updatedPolicy = policyDAO.updatePolicy(policy);
-            profileDAO.updateProfile(policy.getProfile());
 
+            policyDAO.updatePolicy(policy);
+            profileDAO.updateProfile(policy.getProfile());
             featureDAO.updateProfileFeatures(existingFeaturesList, profileId);
             if (!newFeaturesList.isEmpty()) {
                 featureDAO.addProfileFeatures(newFeaturesList, profileId);
@@ -646,8 +646,8 @@ public class PolicyManagerImpl implements PolicyManager {
 
     @Override
     public void inactivatePolicy(int policyId) throws PolicyManagementException {
+        Policy policy = this.getPolicy(policyId);
         try {
-            Policy policy = this.getPolicy(policyId);
             PolicyManagementDAOFactory.beginTransaction();
             policyDAO.inactivatePolicy(policyId);
             policyDAO.recordUpdatedPolicy(policy);

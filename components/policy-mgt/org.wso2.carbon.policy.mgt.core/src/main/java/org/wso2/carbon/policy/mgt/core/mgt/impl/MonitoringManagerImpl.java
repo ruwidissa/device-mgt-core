@@ -32,7 +32,6 @@ import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceData;
-import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
