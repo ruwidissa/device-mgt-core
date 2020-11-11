@@ -166,7 +166,35 @@ public class GeofenceDAOImpl implements GeofenceDAO {
     @Override
     public List<GeofenceData> getGeoFencesOfTenant(String fenceName, int tenantId)
             throws DeviceManagementDAOException {
-        return null;
+        try {
+            List<GeofenceData> geofenceData;
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "ID, " +
+                    "FENCE_NAME, " +
+                    "DESCRIPTION, " +
+                    "LATITUDE, " +
+                    "LONGITUDE, " +
+                    "RADIUS, " +
+                    "GEO_JSON, " +
+                    "FENCE_SHAPE, " +
+                    "OWNER, " +
+                    "TENANT_ID " +
+                    "FROM DM_GEOFENCE " +
+                    "WHERE FENCE_NAME LIKE ? AND TENANT_ID = ? ";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, fenceName + "%");
+                stmt.setInt(2, tenantId);
+                try (ResultSet rst = stmt.executeQuery()) {
+                    geofenceData = extractGeofenceData(rst);
+                }
+            }
+            return geofenceData;
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving Geofence of the tenant " + tenantId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
     }
 
     @Override
