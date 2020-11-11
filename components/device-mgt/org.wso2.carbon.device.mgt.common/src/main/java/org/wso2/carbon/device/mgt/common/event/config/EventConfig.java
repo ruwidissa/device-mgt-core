@@ -65,4 +65,13 @@ public class EventConfig {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "{eventId=" + eventId +
+                ", eventSource='" + eventSource + '\'' +
+                ", eventLogic='" + eventLogic + '\'' +
+                ", actions='" + actions + '\'' +
+                '}';
+    }
 }

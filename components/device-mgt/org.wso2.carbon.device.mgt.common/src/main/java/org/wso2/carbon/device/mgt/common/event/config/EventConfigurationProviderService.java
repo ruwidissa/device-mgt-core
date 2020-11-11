@@ -44,4 +44,10 @@ public interface EventConfigurationProviderService {
      */
     List<Integer> updateEventsOfDeviceGroup(List<EventConfig> eventConfig, List<Integer> removedEventIdList,
                                             List<Integer> groupIds, int tenantId) throws EventConfigurationException;
+
+    List<EventConfig> getEvents(List<Integer> createdEventIds) throws EventConfigurationException;
+
+    List<EventConfig> getEventsOfGroup(int groupId, int tenantId) throws EventConfigurationException;
+
+    List<String> getEventsSourcesOfGroup(int groupId, int tenantId) throws EventConfigurationException;
 }

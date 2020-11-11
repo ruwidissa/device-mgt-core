@@ -124,10 +124,57 @@ public class EventConfigDAOImpl implements EventConfigDAO {
                 for (Integer groupId : groupIds) {
                     stmt.setInt(index++, groupId);
                 }
-                return getEventConfigs(tenantId, eventList, stmt, index);
+                stmt.setInt(index, tenantId);
+                ResultSet rst = stmt.executeQuery();
+                while (rst.next()) {
+                    EventConfig event = new EventConfig();
+                    event.setEventId(rst.getInt("EVENT_ID"));
+                    event.setEventSource(rst.getString("EVENT_SOURCE"));
+                    event.setEventLogic(rst.getString("EVENT_LOGIC"));
+                    event.setActions(rst.getString("ACTIONS"));
+                    eventList.add(event);
+                }
+                return eventList;
             }
         } catch (SQLException e) {
             String msg = "Error occurred while creating event group mapping records";
+            log.error(msg, e);
+            throw new EventManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<EventConfig> getEventsOfGroups(int groupId, int tenantId) throws EventManagementDAOException {
+        try {
+            List<EventConfig> eventList = new ArrayList<>();
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "E.ID AS EVENT_ID, " +
+                    "EVENT_SOURCE, " +
+                    "EVENT_LOGIC, " +
+                    "ACTIONS " +
+                    "FROM DM_DEVICE_EVENT E, DM_DEVICE_EVENT_GROUP_MAPPING G " +
+                    "WHERE G.EVENT_ID = E.ID " +
+                    "AND G.GROUP_ID = ? " +
+                    "AND E.TENANT_ID = ? " +
+                    "GROUP BY E.ID";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, groupId);
+                stmt.setInt(2, tenantId);
+                ResultSet rst = stmt.executeQuery();
+                while (rst.next()) {
+                    EventConfig event = new EventConfig();
+                    event.setEventId(rst.getInt("EVENT_ID"));
+                    event.setEventSource(rst.getString("EVENT_SOURCE"));
+                    event.setEventLogic(rst.getString("EVENT_LOGIC"));
+                    event.setActions(rst.getString("ACTIONS"));
+                    eventList.add(event);
+                }
+                return eventList;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving event records of group " + groupId
+                    + " and tenant " + tenantId;
             log.error(msg, e);
             throw new EventManagementDAOException(msg, e);
         }
@@ -219,7 +266,7 @@ public class EventConfigDAOImpl implements EventConfigDAO {
     }
 
     @Override
-    public List<EventConfig> getEventsById(List<Integer> eventIdList, int tenantId) throws EventManagementDAOException {
+    public List<EventConfig> getEventsById(List<Integer> eventIdList) throws EventManagementDAOException {
         try {
             List<EventConfig> eventList = new ArrayList<>();
             Connection conn = this.getConnection();
@@ -239,7 +286,16 @@ public class EventConfigDAOImpl implements EventConfigDAO {
                         stmt.setInt(index++, eventId);
                     }
                 }
-                return getEventConfigs(tenantId, eventList, stmt, index);
+                ResultSet rst = stmt.executeQuery();
+                while (rst.next()) {
+                    EventConfig event = new EventConfig();
+                    event.setEventId(rst.getInt("EVENT_ID"));
+                    event.setEventSource(rst.getString("EVENT_SOURCE"));
+                    event.setEventLogic(rst.getString("EVENT_LOGIC"));
+                    event.setActions(rst.getString("ACTIONS"));
+                    eventList.add(event);
+                }
+                return eventList;
             }
         } catch (SQLException e) {
             String msg = "Error occurred while creating event group mapping records";
@@ -280,18 +336,33 @@ public class EventConfigDAOImpl implements EventConfigDAO {
         }
     }
 
-    private List<EventConfig> getEventConfigs(int tenantId, List<EventConfig> eventList, PreparedStatement stmt, int index) throws SQLException {
-        stmt.setInt(index, tenantId);
-        ResultSet rst = stmt.executeQuery();
-        while (rst.next()) {
-            EventConfig event = new EventConfig();
-            event.setEventId(rst.getInt("EVENT_ID"));
-            event.setEventSource(rst.getString("EVENT_SOURCE"));
-            event.setEventLogic(rst.getString("EVENT_LOGIC"));
-            event.setActions(rst.getString("ACTIONS"));
-            eventList.add(event);
+    @Override
+    public List<String> getEventSourcesOfGroups(int groupId, int tenantId) throws EventManagementDAOException {
+        try {
+            List<String> eventSourceList = new ArrayList<>();
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "EVENT_SOURCE " +
+                    "FROM DM_DEVICE_EVENT E, DM_DEVICE_EVENT_GROUP_MAPPING G " +
+                    "WHERE G.EVENT_ID = E.ID " +
+                    "AND G.GROUP_ID = ?" +
+                    "AND E.TENANT_ID = ?" +
+                    "GROUP BY EVENT_SOURCE";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, groupId);
+                stmt.setInt(2, tenantId);
+                ResultSet rst = stmt.executeQuery();
+                while (rst.next()) {
+                    eventSourceList.add(rst.getString("EVENT_SOURCE"));
+                }
+                return eventSourceList;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving event records of group " + groupId
+                    + " and tenant " + tenantId;
+            log.error(msg, e);
+            throw new EventManagementDAOException(msg, e);
         }
-        return eventList;
     }
 
     private Connection getConnection() throws SQLException {

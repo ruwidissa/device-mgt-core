@@ -147,4 +147,8 @@ public interface GeoLocationProviderService {
                                          List<Integer> groupIds, int fenceId) throws GeoLocationBasedServiceException;
 
     List<GeofenceData> getGeoFenceEvents(List<GeofenceData> geoFences) throws GeoLocationBasedServiceException;
+
+    List<GeofenceData> getGeoFencesOfGroup(int groupId, int tenantId, boolean requireEventData) throws GeoLocationBasedServiceException;
+
+    List<EventConfig> getEventsOfGeoFence(int geoFenceId) throws GeoLocationBasedServiceException;
 }

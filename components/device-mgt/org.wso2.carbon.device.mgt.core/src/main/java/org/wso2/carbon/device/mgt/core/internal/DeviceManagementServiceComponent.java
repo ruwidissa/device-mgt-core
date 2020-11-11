@@ -330,6 +330,7 @@ public class DeviceManagementServiceComponent {
 
         /* Registering Geo Service */
         GeoLocationProviderService geoService = new GeoLocationProviderServiceImpl();
+        DeviceManagementDataHolder.getInstance().setGeoLocationProviderService(geoService);
         bundleContext.registerService(GeoLocationProviderService.class.getName(), geoService, null);
 
         /* Registering Metadata Service */
@@ -338,6 +339,7 @@ public class DeviceManagementServiceComponent {
 
         /* Registering Event Configuration Service */
         EventConfigurationProviderService eventConfigurationService = new EventConfigurationProviderServiceImpl();
+        DeviceManagementDataHolder.getInstance().setEventConfigurationProviderService(eventConfigurationService);
         bundleContext.registerService(EventConfigurationProviderService.class.getName(), eventConfigurationService, null);
 
         OTPManagementService otpManagementService = new OTPManagementServiceImpl();

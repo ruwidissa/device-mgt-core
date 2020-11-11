@@ -41,6 +41,7 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupDAO;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.user.api.UserRealm;
@@ -52,6 +53,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GroupManagementProviderServiceImpl implements GroupManagementProviderService {
 
@@ -795,6 +799,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 }
             }
             GroupManagementDAOFactory.commitTransaction();
+            createEventTask(groupId, deviceIdentifiers, tenantId);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving device.";
             log.error(msg, e);
@@ -1045,5 +1050,12 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             deviceGroup.setGroupProperties(this.groupDAO.getAllGroupProperties(deviceGroup.getGroupId(),
                     tenantId));
         }
+    }
+
+    private void createEventTask(int groupId, List<DeviceIdentifier> deviceIdentifiers, int tenantId) {
+        GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager();
+        ScheduledExecutorService eventOperationExecutor = Executors.newSingleThreadScheduledExecutor();
+        eventOperationExecutor.schedule(eventManager
+                .getDeviceEventOperationExecutor(groupId, deviceIdentifiers, tenantId), 10, TimeUnit.SECONDS);
     }
 }

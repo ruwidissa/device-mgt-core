@@ -136,4 +136,7 @@ public interface GeofenceDAO {
     List<EventConfig> getEventsOfGeoFence(int geofenceId) throws DeviceManagementDAOException;
 
     Map<Integer, List<Integer>> getGroupIdsOfGeoFences(List<Integer> fenceIds) throws DeviceManagementDAOException;
+
+    List<GeofenceData> getGeoFences(int groupId, int tenantId) throws DeviceManagementDAOException;
+
 }

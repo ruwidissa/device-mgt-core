@@ -50,6 +50,8 @@ public interface EventConfigDAO {
      */
     List<EventConfig> getEventsOfGroups(List<Integer> groupIds, int tenantId) throws EventManagementDAOException;
 
+    List<EventConfig> getEventsOfGroups(int groupId, int tenantId) throws EventManagementDAOException;
+
     /**
      * Delete event group mapping records using the group ids
      * @param groupIdsToDelete id of groups
@@ -76,13 +78,14 @@ public interface EventConfigDAO {
     /**
      * Get event records by event ids
      * @param eventIds filtering event ids
-     * @param tenantId tenant id of the events
      * @return filtered event configuration list
      * @throws EventManagementDAOException error occurred while reading events
      */
-    List<EventConfig> getEventsById(List<Integer> eventIds, int tenantId) throws EventManagementDAOException;
+    List<EventConfig> getEventsById(List<Integer> eventIds) throws EventManagementDAOException;
 
     List<Integer> getGroupsOfEvents(List<Integer> updateEventIdList) throws EventManagementDAOException;
 
     void deleteEventGroupMappingRecordsByEventIds(List<Integer> removedEventIdList) throws EventManagementDAOException;
+
+    List<String> getEventSourcesOfGroups(int groupId, int tenantId) throws EventManagementDAOException;
 }

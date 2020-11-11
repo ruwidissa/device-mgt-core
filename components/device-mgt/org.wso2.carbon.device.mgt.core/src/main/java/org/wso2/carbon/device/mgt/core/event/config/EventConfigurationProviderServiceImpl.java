@@ -28,9 +28,16 @@ import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementExcepti
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
+import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class EventConfigurationProviderServiceImpl implements EventConfigurationProviderService {
     private static final Log log = LogFactory.getLog(EventConfigurationProviderServiceImpl.class);
@@ -150,5 +157,59 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
             log.debug("Adding new events while updating event");
         }
         return createEventsOfDeviceGroup(eventsToAdd, groupIds, tenantId);
+    }
+
+    @Override
+    public List<EventConfig> getEvents(List<Integer> createdEventIds) throws EventConfigurationException {
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return eventConfigDAO.getEventsById(createdEventIds);
+        } catch (EventManagementDAOException e) {
+            String msg = "Error occurred while retrieving event by IDs : " + Arrays.toString(createdEventIds.toArray());
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Failed to open connection while retrieving event by IDs";
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public List<EventConfig> getEventsOfGroup(int groupId, int tenantId) throws EventConfigurationException {
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return eventConfigDAO.getEventsOfGroups(groupId, tenantId);
+        } catch (EventManagementDAOException e) {
+            String msg = "Error occurred while retrieving events of group " + groupId + " and tenant " + tenantId;
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Failed to open connection while retrieving event by IDs";
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public List<String> getEventsSourcesOfGroup(int groupId, int tenantId) throws EventConfigurationException {
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return eventConfigDAO.getEventSourcesOfGroups(groupId, tenantId);
+        } catch (EventManagementDAOException e) {
+            String msg = "Error occurred while retrieving events of group " + groupId + " and tenant " + tenantId;
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Failed to open connection while retrieving event by IDs";
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
     }
 }
