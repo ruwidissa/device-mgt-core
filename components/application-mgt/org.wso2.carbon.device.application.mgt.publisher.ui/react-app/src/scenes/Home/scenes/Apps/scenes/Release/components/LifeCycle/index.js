@@ -77,6 +77,7 @@ class LifeCycle extends React.Component {
       current: 0,
       lifecycleSteps: [],
       lifeCycleStates: [],
+      isPublished: false,
     };
   }
 
@@ -91,6 +92,10 @@ class LifeCycle extends React.Component {
       lifecycleSteps,
     });
     this.getLifeCycleHistory();
+
+    this.setState({
+      isPublished: this.checkReleaseLifeCycleStatus(),
+    });
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -204,26 +209,18 @@ class LifeCycle extends React.Component {
  state or not and assigned a boolean value to disable
  the publish button if an app release is already published
 */
-  checkReleaseLifeCycleStatus = (proceedingStates, lifecycleState) => {
+  checkReleaseLifeCycleStatus = () => {
     if (typeof this.props.appReleases !== 'undefined') {
-      const currentAppUUID = this.props.uuid;
       let appReleases = this.props.appReleases.fullAppDetails;
-      let appRelease;
-      let isPublished;
       for (let i = 0; i < appReleases.length; i++) {
-        appRelease = appReleases[i];
         if (
-          currentAppUUID !== appRelease.uuid &&
-          appRelease.currentStatus === 'PUBLISHED' &&
-          proceedingStates.includes('PUBLISHED') &&
-          lifecycleState === 'PUBLISHED'
+          this.props.uuid !== appReleases[i].uuid &&
+          appReleases[i].currentStatus === 'PUBLISHED'
         ) {
-          isPublished = true;
-          return isPublished;
+          return true;
         }
       }
-      isPublished = false;
-      return isPublished;
+      return false;
     }
     return false;
   };
@@ -278,13 +275,11 @@ class LifeCycle extends React.Component {
                             <p>{step.text}</p>
                             {proceedingStates.map(lifecycleState => {
                               return (
-                                // eslint-disable-next-line react/jsx-key
                                 <Tooltip
+                                  key={lifecycleState}
                                   title={
-                                    this.checkReleaseLifeCycleStatus(
-                                      proceedingStates,
-                                      lifecycleState,
-                                    ) === true
+                                    lifecycleState === 'PUBLISHED' &&
+                                    this.state.isPublished
                                       ? text
                                       : ''
                                   }
@@ -292,10 +287,10 @@ class LifeCycle extends React.Component {
                                   <Button
                                     size={'small'}
                                     style={{ marginRight: 3 }}
-                                    disabled={this.checkReleaseLifeCycleStatus(
-                                      proceedingStates,
-                                      lifecycleState,
-                                    )}
+                                    disabled={
+                                      lifecycleState === 'PUBLISHED' &&
+                                      this.state.isPublished
+                                    }
                                     onClick={() =>
                                       this.showReasonModal(lifecycleState)
                                     }
