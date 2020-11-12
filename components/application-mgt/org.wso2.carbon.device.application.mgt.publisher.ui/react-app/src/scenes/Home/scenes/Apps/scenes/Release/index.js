@@ -232,6 +232,7 @@ class Release extends React.Component {
                             this.changeCurrentLifecycleStatus
                           }
                           lifecycle={lifecycle}
+                          appReleases={this.props.location.state}
                         />
                       )}
                     </Skeleton>
