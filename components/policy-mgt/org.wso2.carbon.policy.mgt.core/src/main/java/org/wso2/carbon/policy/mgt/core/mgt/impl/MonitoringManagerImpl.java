@@ -267,14 +267,20 @@ public class MonitoringManagerImpl implements MonitoringManager {
             int enrollmentId;
             for (Device device : devices) {
                 enrollmentId = device.getEnrolmentInfo().getId();
-                if (persistedComplianceData.containsKey(enrollmentId)) {
-                    notifiableDeviceEnrollments.put(enrollmentId, device);
-                } else if (appliedPolicyIds.containsKey(enrollmentId)){
-                    PolicyDeviceWrapper policyDeviceWrapper = new PolicyDeviceWrapper();
-                    policyDeviceWrapper.setDeviceId(device.getId());
-                    policyDeviceWrapper.setEnrolmentId(device.getEnrolmentInfo().getId());
-                    policyDeviceWrapper.setPolicyId(appliedPolicyIds.get(enrollmentId));
-                    firstTimeComplianceData.add(policyDeviceWrapper);
+                /*
+               When a policy has applied to the device, and the first monitoring operation runs on the policy, then it
+               is considered as a compliance policy and adds monitoring operation on the applied policy.
+               If the device has identified the applied policy as either compliance or non-compliance policy then
+               adds monitoring operation on the applied policy.
+                .*/
+                if (appliedPolicyIds.containsKey(enrollmentId)) {
+                    if (!persistedComplianceData.containsKey(enrollmentId)) {
+                        PolicyDeviceWrapper policyDeviceWrapper = new PolicyDeviceWrapper();
+                        policyDeviceWrapper.setDeviceId(device.getId());
+                        policyDeviceWrapper.setEnrolmentId(device.getEnrolmentInfo().getId());
+                        policyDeviceWrapper.setPolicyId(appliedPolicyIds.get(enrollmentId));
+                        firstTimeComplianceData.add(policyDeviceWrapper);
+                    }
                     notifiableDeviceEnrollments.put(enrollmentId, device);
                 }
             }
