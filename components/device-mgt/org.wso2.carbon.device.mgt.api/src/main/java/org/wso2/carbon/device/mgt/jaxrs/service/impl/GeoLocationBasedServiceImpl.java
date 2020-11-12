@@ -647,13 +647,18 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
     @GET
     @Consumes("application/json")
     @Produces("application/json")
-    public Response getGeofence(@PathParam("fenceId") int fenceId) {
+    public Response getGeofence(@PathParam("fenceId") int fenceId,
+                                @QueryParam("requireEventData") boolean requireEventData) {
         try {
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
             GeofenceData geofenceData = geoService.getGeoFences(fenceId);
             if (geofenceData == null) {
                 String msg = "No valid Geofence found for ID " + fenceId;
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+            if (requireEventData) {
+                List<EventConfig> eventsOfGeoFence = geoService.getEventsOfGeoFence(geofenceData.getId());
+                geofenceData.setEventConfig(eventsOfGeoFence);
             }
             return Response.status(Response.Status.OK).entity(getMappedResponseBean(geofenceData)).build();
         } catch (GeoLocationBasedServiceException e) {

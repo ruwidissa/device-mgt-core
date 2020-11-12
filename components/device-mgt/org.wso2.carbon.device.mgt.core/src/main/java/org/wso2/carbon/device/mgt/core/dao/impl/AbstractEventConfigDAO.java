@@ -21,7 +21,6 @@ package org.wso2.carbon.device.mgt.core.dao.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
@@ -30,52 +29,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
-public class EventConfigDAOImpl implements EventConfigDAO {
-    private static final Log log = LogFactory.getLog(EventConfigDAOImpl.class);
-
-    @Override
-    public List<Integer> storeEventRecords(List<EventConfig> eventConfigList, int tenantId) throws EventManagementDAOException {
-        try {
-            Connection conn = this.getConnection();
-            String sql = "INSERT INTO DM_DEVICE_EVENT(" +
-                    "EVENT_SOURCE, " +
-                    "EVENT_LOGIC, " +
-                    "ACTIONS, "+
-                    "CREATED_TIMESTAMP, " +
-                    "TENANT_ID) " +
-                    "VALUES (?, ?, ?, ?, ?)";
-            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                for (EventConfig eventConfig : eventConfigList) {
-                    stmt.setString(1, eventConfig.getEventSource());
-                    stmt.setString(2, eventConfig.getEventLogic());
-                    stmt.setString(3, eventConfig.getActions());
-                    stmt.setTimestamp(4, new Timestamp(new Date().getTime()));
-                    stmt.setInt(5, tenantId);
-                    stmt.addBatch();
-                }
-                int[] createdRowCount = stmt.executeBatch();
-                List<Integer> generatedIds = new ArrayList<>();
-                ResultSet generatedKeys = stmt.getGeneratedKeys();
-                for (int i = 0; i < createdRowCount.length; i++) {
-                    if (generatedKeys.next()) {
-                        generatedIds.add(generatedKeys.getInt(1));
-                    }
-                }
-                return generatedIds;
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while creating event configurations for the tenant id " + tenantId;
-            log.error(msg, e);
-            throw new EventManagementDAOException(msg, e);
-        }
-    }
+public abstract class AbstractEventConfigDAO implements EventConfigDAO {
+    private static final Log log = LogFactory.getLog(AbstractEventConfigDAO.class);
 
     @Override
     public boolean addEventGroupMappingRecords(List<Integer> eventIds, List<Integer> groupIds) throws EventManagementDAOException {

@@ -930,7 +930,11 @@ public interface GeoLocationBasedService {
                 name = "fenceId",
                 value = "Id of the fence",
                 required = true)
-            @PathParam("fenceId") int fenceId);
+            @PathParam("fenceId") int fenceId,
+            @ApiParam(
+                    name = "requireEventData",
+                    value = "Require geofence event data")
+            @QueryParam("requireEventData") boolean requireEventData);
 
 
     @GET
