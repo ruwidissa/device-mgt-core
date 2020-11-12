@@ -87,15 +87,13 @@ class LifeCycle extends React.Component {
     const lifecycleSteps = Object.keys(lifeCycleConfig).map(config => {
       return lifeCycleConfig[config];
     });
+    let isPublished = this.checkReleaseLifeCycleStatus();
     this.setState({
       current: lifeCycleConfig[this.props.currentStatus].step,
       lifecycleSteps,
+      isPublished,
     });
     this.getLifeCycleHistory();
-
-    this.setState({
-      isPublished: this.checkReleaseLifeCycleStatus(),
-    });
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
