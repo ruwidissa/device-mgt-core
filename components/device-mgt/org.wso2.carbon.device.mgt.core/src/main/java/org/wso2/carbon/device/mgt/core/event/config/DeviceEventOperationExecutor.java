@@ -65,6 +65,9 @@ public class DeviceEventOperationExecutor implements Runnable {
         EventConfigurationProviderService eventConfigurationService = DeviceManagementDataHolder.getInstance().getEventConfigurationService();
         try {
             List<String> eventSources = eventConfigurationService.getEventsSourcesOfGroup(groupId, tenantId);
+            if (eventSources == null || eventSources.isEmpty()) {
+                log.info("No events applied for queried group with ID " + groupId);
+            }
             for (String eventSource : eventSources) {
                 if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
                     setGeoFenceOperationContent(operation);

@@ -464,14 +464,13 @@ public class GeofenceDAOImpl implements GeofenceDAO {
             List<EventConfig> eventList = new ArrayList<>();
             Connection conn = this.getConnection();
             String sql = "SELECT " +
-                    "ID AS EVENT_ID, " +
+                    "E.ID AS EVENT_ID, " +
                     "EVENT_SOURCE, " +
                     "EVENT_LOGIC, " +
                     "ACTIONS " +
-                    "FROM DM_DEVICE_EVENT " +
-                    "WHERE ID IN (" +
-                    "SELECT EVENT_ID FROM DM_GEOFENCE_EVENT_MAPPING " +
-                    "WHERE FENCE_ID = ?";
+                    "FROM DM_DEVICE_EVENT E, DM_GEOFENCE_EVENT_MAPPING G " +
+                    "WHERE E.ID = G.EVENT_ID " +
+                    "AND G.FENCE_ID = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, geofenceId);
                 return getEventConfigs(eventList, stmt);

@@ -304,8 +304,8 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
                     "EVENT_SOURCE " +
                     "FROM DM_DEVICE_EVENT E, DM_DEVICE_EVENT_GROUP_MAPPING G " +
                     "WHERE G.EVENT_ID = E.ID " +
-                    "AND G.GROUP_ID = ?" +
-                    "AND E.TENANT_ID = ?" +
+                    "AND G.GROUP_ID = ? " +
+                    "AND E.TENANT_ID = ? " +
                     "GROUP BY EVENT_SOURCE";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, groupId);

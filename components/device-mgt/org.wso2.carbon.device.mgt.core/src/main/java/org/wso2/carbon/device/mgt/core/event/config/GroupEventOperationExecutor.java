@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.event.config;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -68,16 +69,6 @@ public class GroupEventOperationExecutor implements Runnable {
         if (log.isDebugEnabled()) {
             log.debug("Event creation operation started for groups with IDs " + Arrays.toString(groupIds.toArray()));
         }
-        ProfileOperation operation = new ProfileOperation();
-        operation.setCode(OperationMgtConstants.OperationCodes.EVENT_CONFIG);
-        operation.setType(Operation.Type.PROFILE);
-        if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
-            createGeoFenceOperation(operation);
-        } //extend with another cases to handle other types of events
-
-        if (log.isDebugEnabled()) {
-            log.debug("Starting tenant flow for tenant id " + tenantId);
-        }
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
         GroupManagementProviderService groupManagementService = DeviceManagementDataHolder
@@ -104,6 +95,17 @@ public class GroupEventOperationExecutor implements Runnable {
                 log.error("Failed to retrieve devices of group with ID " + groupId + " and name " + group.getName(), e);
             }
         }
+        ProfileOperation operation = new ProfileOperation();
+        operation.setCode(OperationMgtConstants.OperationCodes.EVENT_CONFIG);
+        operation.setType(Operation.Type.PROFILE);
+        if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
+            createGeoFenceOperation(operation);
+        } //extend with another cases to handle other types of events
+
+        if (log.isDebugEnabled()) {
+            log.debug("Starting tenant flow for tenant id " + tenantId);
+        }
+
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
         for (Device device : devices) {
             if (device.getType().equalsIgnoreCase("android")) { //TODO introduce a proper mechanism for event handling for each device types
@@ -127,7 +129,7 @@ public class GroupEventOperationExecutor implements Runnable {
             log.error("Creating event operation failed.\n" +
                     "Could not found device/devices for the defined device identifiers.", e);
         }
-        log.info("Event operation creation succeeded");
+        log.info("Event operation creation task completed");
     }
 
     private void createGeoFenceOperation(ProfileOperation operation) {
@@ -140,11 +142,13 @@ public class GroupEventOperationExecutor implements Runnable {
                 log.debug("Retrieved event records of Geo Fence " + geoFenceMeta.getId() +
                         ". events " + Arrays.toString(eventConfigList.toArray()));
             }
+            List<EventOperation> eventOperations = new ArrayList<>();
             EventOperation eventOperation = new EventOperation();
             eventOperation.setEventDefinition(eventMetaData);
             eventOperation.setEventSource(eventSource);
             eventOperation.setEventTriggers(eventConfigList);
-            operation.setPayLoad(eventOperation.toJSON());
+            eventOperations.add(eventOperation);
+            operation.setPayLoad(new Gson().toJson(eventOperations));
         } catch (GeoLocationBasedServiceException e) {
             log.error("Failed to retrieve event data of Geo fence " + geoFenceMeta.getId()
                     + " : " + geoFenceMeta.getFenceName(), e);
