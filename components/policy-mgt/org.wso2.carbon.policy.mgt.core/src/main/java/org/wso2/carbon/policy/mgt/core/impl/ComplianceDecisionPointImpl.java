@@ -153,7 +153,7 @@ public class ComplianceDecisionPointImpl implements ComplianceDecisionPoint {
                     PolicyOperation policyOperation = new PolicyOperation();
                     policyOperation.setEnabled(true);
                     policyOperation.setType(Operation.Type.POLICY);
-                    policyOperation.setCode(PolicyOperation.POLICY_OPERATION_CODE);
+                    policyOperation.setCode(PolicyManagementConstants.MONITOR_POLICY_BUNDLE);
 
                     if (complianceData.isCompletePolicy()) {
                         List<ProfileFeature> effectiveFeatures = policy.getProfile().getProfileFeaturesList();
