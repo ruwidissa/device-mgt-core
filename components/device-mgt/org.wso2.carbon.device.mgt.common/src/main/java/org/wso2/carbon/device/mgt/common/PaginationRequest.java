@@ -42,12 +42,17 @@ public class PaginationRequest {
     private String filter;
     private Map<String, Object> property = new HashMap<>();
     private List<String> statusList = new ArrayList<>();
-
+    private OperationLogFilters operationLogFilters = new OperationLogFilters();
+    public OperationLogFilters getOperationLogFilters() {
+        return operationLogFilters;
+    }
+    public void setOperationLogFilters(OperationLogFilters operationLogFilters) {
+        this.operationLogFilters = operationLogFilters;
+    }
     public PaginationRequest(int start, int rowCount) {
         this.startIndex = start;
         this.rowCount = rowCount;
     }
-
     public int getStartIndex() {
         return startIndex;
     }

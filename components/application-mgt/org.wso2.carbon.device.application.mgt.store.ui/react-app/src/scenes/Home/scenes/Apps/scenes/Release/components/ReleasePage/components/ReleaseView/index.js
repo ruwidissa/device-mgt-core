@@ -153,7 +153,7 @@ class ReleaseView extends React.Component {
       metaData = JSON.parse(release.metaData);
       // eslint-disable-next-line no-empty
     } catch (e) {}
-    if (app.hasOwnProperty('packageName')) {
+    if (app.type !== 'WEB_CLIP' && app.hasOwnProperty('packageName')) {
       metaData.push({
         key: 'Package Name',
         value: app.packageName,
