@@ -1493,8 +1493,38 @@ public interface DeviceManagementService {
             @ApiParam(
                     name = "ownership",
                     value = "Provides the ownership of the required device.")
-            @QueryParam("owner")
-                    String ownership);
+            @QueryParam("ownership")
+                    String ownership,
+            @ApiParam(
+                    name = "createdFrom",
+                    value = "Since when user wants to filter operation logs using the created data and time")
+            @QueryParam("createdFrom")
+                    Long createdFrom,
+            @ApiParam(
+                    name = "createdTo",
+                    value = "Till when user wants to filter operation logs using the created data and time")
+            @QueryParam("createdTo")
+                    Long createdTo,
+            @ApiParam(
+                    name = "updatedFrom",
+                    value = "Since when user wants to filter operation logs using the received date and time")
+            @QueryParam("updatedFrom")
+                    Long updatedFrom,
+            @ApiParam(
+                    name = "updatedTo",
+                    value = "Till when user wants to filter operation logs using the received date and time")
+            @QueryParam("updatedTo")
+                    Long updatedTo,
+            @ApiParam(
+                    name = "operationCode",
+                    value = "Provides the operation codes to filter the operation logs via operation codes")
+            @QueryParam("operationCode")
+                    List<String> operationCode,
+            @ApiParam(
+                    name = "operationStatus",
+                    value = "Provides the status codes to filter operation logs via status")
+            @QueryParam("operationStatus")
+                    List<String> status);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
