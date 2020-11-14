@@ -36,8 +36,7 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.text.DateFormat;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
@@ -45,16 +44,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceFilters;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.OperationLogFilters;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.DeviceFilters;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
@@ -81,6 +81,7 @@ import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import org.wso2.carbon.device.mgt.common.search.PropertyMap;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
+
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
@@ -92,14 +93,16 @@ import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceCompliance;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ComplianceDeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ComplianceDeviceList;
+
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -128,9 +131,13 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Calendar;
 
 @Path("/devices")
 public class DeviceManagementServiceImpl implements DeviceManagementService {
@@ -871,21 +878,30 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("offset") int offset,
             @QueryParam("limit") int limit,
             @QueryParam("owner") String owner,
-            @QueryParam("ownership") String ownership) {
+            @QueryParam("ownership") String ownership,
+            @QueryParam("createdFrom") Long createdFrom,
+            @QueryParam("createdTo") Long createdTo,
+            @QueryParam("updatedFrom") Long updatedFrom,
+            @QueryParam("updatedTo") Long updatedTo,
+            @QueryParam("operationCode") List<String> operationCode,
+            @QueryParam("operationStatus") List<String> status) {
         OperationList operationsList = new OperationList();
+        RequestValidationUtil requestValidationUtil = new RequestValidationUtil();
         RequestValidationUtil.validateOwnerParameter(owner);
         RequestValidationUtil.validatePaginationParameters(offset, limit);
         PaginationRequest request = new PaginationRequest(offset, limit);
         request.setOwner(owner);
-        PaginationResult result;
-        DeviceManagementProviderService dms;
         try {
+            //validating the operation log filters
+            OperationLogFilters olf = requestValidationUtil.validateOperationLogFilters(operationCode, createdFrom,
+                    createdTo, updatedFrom, updatedTo, status, type);
+            request.setOperationLogFilters(olf);
             RequestValidationUtil.validateDeviceIdentifier(type, id);
-            dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
             if (!StringUtils.isBlank(ownership)) {
                 request.setOwnership(ownership);
             }
-            result = dms.getOperations(new DeviceIdentifier(id, type), request);
+            PaginationResult result = dms.getOperations(new DeviceIdentifier(id, type), request);
             operationsList.setList((List<? extends Operation>) result.getData());
             operationsList.setCount(result.getRecordsTotal());
             return Response.status(Response.Status.OK).entity(operationsList).build();
@@ -895,6 +911,20 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (InputValidationException e) {
+            String msg = "Error occurred while fetching the operations for the '" + type + "' device, which " +
+                    "carries the id '" + id + "'";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retrieving the list of [" + type + "] features with params " +
+                    "{featureType: operation, hidden: true}";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (DeviceTypeNotFoundException e) {
+            String msg = "No device type found with name '" + type + "'";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
     }
 

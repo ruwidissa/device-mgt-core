@@ -23,11 +23,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.Feature;
+import org.wso2.carbon.device.mgt.common.FeatureManager;
+import org.wso2.carbon.device.mgt.common.OperationLogFilters;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
 import org.wso2.carbon.device.mgt.common.notification.mgt.Notification;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
@@ -35,20 +40,24 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.PolicyWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ProfileFeature;
 import org.wso2.carbon.device.mgt.jaxrs.beans.RoleInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
+import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceTypeManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.policy.mgt.common.PolicyPayloadValidator;
 
+import javax.ws.rs.core.Response;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Arrays;
 
 public class RequestValidationUtil {
 
     private static final Log log = LogFactory.getLog(RequestValidationUtil.class);
-
     /**
      * Checks if multiple criteria are specified in a conditional request.
      *
@@ -473,6 +482,155 @@ public class RequestValidationUtil {
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request parameter owner should" +
                             " be non empty.").build());
+        }
+    }
+
+    /**
+     * Checks if operation log filters are valid
+     *
+     * @param type          Device type upon which the selection is done
+     * @param createdFrom   Since when created date and time upon to filter operation logs
+     * @param createdTo     Till when created date and time upon to filter operation logs
+     * @param updatedFrom   Since when received date and time upon to filter operation logs
+     * @param updatedTo     Till when received date and time upon to filter operation logs
+     * @param status        List of operation status codes upon to filter operation logs
+     */
+    public OperationLogFilters validateOperationLogFilters(List<String> operationCode,
+                                                           Long createdFrom, Long createdTo, Long updatedFrom,
+                                                           Long updatedTo, List<String> status, String type)
+            throws DeviceTypeNotFoundException, DeviceManagementException {
+        OperationLogFilters operationLogFilters = new OperationLogFilters();
+        Calendar date = Calendar.getInstance();
+        long timeMilli = date.getTimeInMillis();
+
+        if (updatedFrom != null || updatedTo != null) {
+            validateDates(updatedFrom, updatedTo);
+            //if user only sends the fromDate toDate sets as current date
+            if (updatedFrom != null && updatedTo == null) {
+                timeMilli = timeMilli / 1000;
+                operationLogFilters.setUpdatedDayTo(timeMilli);
+                operationLogFilters.setUpdatedDayFrom(updatedFrom);
+            } else {
+                operationLogFilters.setUpdatedDayFrom(updatedFrom);
+                operationLogFilters.setUpdatedDayTo(updatedTo);
+            }
+        }
+        if (createdTo != null || createdFrom != null) {
+            validateDates(createdFrom, createdTo);
+            createdFrom = createdFrom * 1000;
+            //if user only sends the fromDate toDate sets as current date
+            if (createdFrom != null && createdTo == null) {
+                operationLogFilters.setCreatedDayFrom(createdFrom);
+                operationLogFilters.setCreatedDayTo(timeMilli);
+            } else {
+                createdTo = createdTo * 1000;
+                operationLogFilters.setCreatedDayFrom(createdFrom);
+                operationLogFilters.setCreatedDayTo(createdTo);
+            }
+        }
+        if (status != null && !status.isEmpty()) {
+            validateStatusFiltering(status);
+            operationLogFilters.setStatus(status);
+        }
+
+        if (operationCode != null && !operationCode.isEmpty()) {
+            validateOperationCodeFiltering(operationCode, type);
+            operationLogFilters.setOperationCode(operationCode);
+        }
+        return operationLogFilters;
+    }
+
+    /**
+     * Checks if date ranges requested by user are valid
+     *
+     * @param toDate   Till when created/updated dates upon to validate dates
+     * @param fromDate Since when created/updated dates upon to validate dates
+     */
+    public static void validateDates(Long fromDate, Long toDate) {
+        Calendar date = Calendar.getInstance();
+        long timeMilli = date.getTimeInMillis();
+        timeMilli = timeMilli / 1000;
+        //if user only sends toDate
+        if (fromDate == null && toDate != null) {
+            String msg = "Request parameter must sent with the from date parameter";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        //if user sends future dates
+        if (fromDate != null && toDate != null) {
+            if (timeMilli < fromDate || timeMilli < toDate) {
+                String msg = "Bad Request cannot apply future dates";
+                log.error(msg);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder()
+                                .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+            }
+        }
+        //if user send future dates - only when from date sends
+        if (fromDate != null && toDate == null) {
+            if (fromDate > timeMilli) {
+                String msg = "Bad Request cannot apply future dates";
+                log.error(msg);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder()
+                                .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+            }
+        }
+    }
+
+    /**
+     * Checks if user requested operation status codes are valid.
+     *
+     * @param status    status codes upon to filter operation logs using status
+     */
+    public static void validateStatusFiltering(List<String> status) {
+        for (int i = 0; i < status.size(); i++) {
+            if (Constants.OperationStatus.COMPLETED.toUpperCase().equals(status.get(i))
+                    || Constants.OperationStatus.ERROR.toUpperCase().equals(status.get(i))
+                    || Constants.OperationStatus.NOTNOW.toUpperCase().equals(status.get(i))
+                    || Constants.OperationStatus.REPEATED.toUpperCase().equals(status.get(i))
+                    || Constants.OperationStatus.PENDING.toUpperCase().equals(status.get(i))
+                    || Constants.OperationStatus.IN_PROGRESS.toUpperCase().equals(status.get(i))) {
+            } else {
+                String msg = "Invalid status type: " + status + ". \nValid status types are COMPLETED | ERROR | " +
+                        "IN_PROGRESS | NOTNOW | PENDING | REPEATED";
+                log.error(msg);
+                throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
+                        .setCode(HttpStatus.SC_BAD_REQUEST)
+                        .setMessage(msg).build());
+            }
+        }
+    }
+
+    /**
+     * Checks if user requested operation codes are valid.
+     *
+     * @param operationCode    operation codes upon to filter operation logs using operation codes
+     * @param type             status codes upon to filter operation logs using status
+     */
+    public static void validateOperationCodeFiltering(List<String> operationCode, String type)
+            throws DeviceTypeNotFoundException, DeviceManagementException {
+        int count = 0;
+        List<Feature> features;
+        DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+        FeatureManager fm = dms.getFeatureManager(type);
+        features = fm.getFeatures("operation");
+        for (String oc : operationCode) {
+            for (Feature f : features) {
+                if (f.getCode().equals(oc)) {
+                    count++;
+                    break;
+                }
+            }
+        }
+        if (!(count == operationCode.size())) {
+            String msg = "Requested Operation code invalid";
+            log.error(msg);
+            throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
+                    .setCode(HttpStatus.SC_BAD_REQUEST)
+                    .setMessage(msg).build());
         }
     }
 
