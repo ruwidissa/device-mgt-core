@@ -45,6 +45,7 @@
         <module>components/webapp-authenticator-framework</module>
         <module>components/email-sender</module>
         <module>components/ui-request-interceptor</module>
+        <module>components/task-allocation</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
