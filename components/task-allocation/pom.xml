@@ -33,7 +33,6 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>io.entgra.dynamic.task.allocation.framework</module>
         <module>io.entgra.server.bootup.heartbeat.beacon</module>
     </modules>
 

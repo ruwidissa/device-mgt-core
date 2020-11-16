@@ -107,6 +107,17 @@ public interface DeviceManagementProviderService {
      */
     List<Device> getAllDevices(String deviceType, boolean requireDeviceInfo) throws DeviceManagementException;
 
+
+    /**
+     * Method returns a list of devices allocated to a specific node of the server, given the serverIndex and active server count
+     * @param deviceType
+     * @param activeServerCount
+     * @param serverIndex
+     * @return
+     * @throws DeviceManagementException
+     */
+    List<Device> getAllocatedDevices(String deviceType, int activeServerCount, int serverIndex) throws DeviceManagementException;
+
     /**
      * Method to retrieve all the devices registered in the system.
      *

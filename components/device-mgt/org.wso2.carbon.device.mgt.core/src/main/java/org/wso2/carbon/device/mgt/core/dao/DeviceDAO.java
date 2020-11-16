@@ -325,6 +325,18 @@ public interface DeviceDAO {
      */
     List<Device> getDevices(String type, int tenantId) throws DeviceManagementDAOException;
 
+    /**
+     * This method is used to retrieve the list of devices attributed to a specific node
+     * when using dynamic partitioning to allocate tasks given the tenant and device type
+     * along with activeServerCount and serverIndex
+     *
+     * @param type device type.
+     * @param tenantId tenant id.
+     * @return returns list of devices of provided type.
+     * @throws DeviceManagementDAOException
+     */
+    List<Device> getDevices(String type, int tenantId, int activeServerCount, int serverIndex) throws DeviceManagementDAOException;
+
     List<Device> getDevices(long timestamp, int tenantId) throws DeviceManagementDAOException;
 
     /**

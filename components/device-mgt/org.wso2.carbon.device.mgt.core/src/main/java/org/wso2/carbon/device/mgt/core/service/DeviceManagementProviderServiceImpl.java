@@ -766,6 +766,46 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public List<Device> getAllocatedDevices(String deviceType, int activeServerCount, int serverIndex) throws DeviceManagementException {
+        if (deviceType == null) {
+            String msg = "Device type is empty for method getAllDevices";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Getting allocated Devices for Server with index "+ serverIndex + " and" +
+                      " type '" + deviceType);
+        }
+        List<Device> allocatedDevices;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            allocatedDevices = deviceDAO.getDevices(deviceType, this.getTenantId(), activeServerCount, serverIndex);
+            if (allocatedDevices == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No device is found upon the type '" + deviceType + "'");
+                }
+                return null;
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving all devices of type '" +
+                         deviceType + "' that are being managed within the scope of current tenant";
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred while getting all devices of device type '" + deviceType + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return allocatedDevices;
+    }
+
+    @Override
     public List<Device> getAllDevices() throws DeviceManagementException {
         return this.getAllDevices(true);
     }

@@ -145,11 +145,11 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
         try {
             Connection conn = HeartBeatBeaconDAOFactory.getConnection();
             String sql = "SELECT (@row_number:=@row_number + 1) AS IDX, UUID, HOST_NAME, MAC from " +
-                         "SERVER_HEART_BEAT_EVENTS WHERE LAST_UPDATED_TIMESTAMP >  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? SECOND) " +
+                         "SERVER_HEART_BEAT_EVENTS, (SELECT @row_number:=-1) AS TEMP " +
+                         "WHERE LAST_UPDATED_TIMESTAMP >  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? SECOND) " +
                          "ORDER BY UUID";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, elapsedTimeInSeconds);
-            stmt.execute("SET @row_number = 0");
             resultSet = stmt.executeQuery();
             while (resultSet.next()) {
                 ctxList.add(HeartBeatBeaconDAOUtil.populateContext(resultSet));
