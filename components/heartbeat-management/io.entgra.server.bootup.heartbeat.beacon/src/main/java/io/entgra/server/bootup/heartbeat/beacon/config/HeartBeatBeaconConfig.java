@@ -16,8 +16,10 @@
  * under the License.
  */
 
-package io.entgra.server.bootup.heartbeat.beacon;
+package io.entgra.server.bootup.heartbeat.beacon.config;
 
+import io.entgra.server.bootup.heartbeat.beacon.HeartBeatBeaconConfigurationException;
+import io.entgra.server.bootup.heartbeat.beacon.HeartBeatBeaconUtils;
 import io.entgra.server.bootup.heartbeat.beacon.config.datasource.DataSourceConfig;
 import io.entgra.server.bootup.heartbeat.beacon.exception.InvalidConfigurationStateException;
 import org.w3c.dom.Document;
@@ -55,7 +57,7 @@ public class HeartBeatBeaconConfig {
         return config;
     }
 
-    @XmlElement(name = "NotifierInitialDelay", required = true)
+    @XmlElement(name = "NotifierInitialDelayInSeconds", required = true)
     public int getNotifierDelay() {
         return notifierDelay;
     }
@@ -64,7 +66,7 @@ public class HeartBeatBeaconConfig {
         this.notifierDelay = notifierDelay;
     }
 
-    @XmlElement(name = "NotifierFrequency", required = true)
+    @XmlElement(name = "NotifierFrequencyInSeconds", required = true)
     public int getNotifierFrequency() {
         return notifierFrequency;
     }
@@ -73,7 +75,7 @@ public class HeartBeatBeaconConfig {
         this.notifierFrequency = notifierFrequency;
     }
 
-    @XmlElement(name = "timeSkew", required = true)
+    @XmlElement(name = "TimeSkewInSeconds", required = true)
     public int getTimeSkew() {
         return timeSkew;
     }

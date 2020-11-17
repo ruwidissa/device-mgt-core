@@ -54,6 +54,7 @@
         <module>features/certificate-mgt</module>
         <module>features/oauth-extensions</module>
         <module>features/email-sender</module>
+        <module>features/heartbeat-management</module>
         <module>features/ui-request-interceptor</module>
         <module>features/jwt-client</module>
 	    <module>features/device-mgt-extensions</module>

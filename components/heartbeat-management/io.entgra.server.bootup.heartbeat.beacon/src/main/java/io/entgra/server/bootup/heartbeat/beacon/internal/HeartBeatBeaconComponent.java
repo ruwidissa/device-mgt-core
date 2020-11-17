@@ -18,7 +18,7 @@
 
 package io.entgra.server.bootup.heartbeat.beacon.internal;
 
-import io.entgra.server.bootup.heartbeat.beacon.HeartBeatBeaconConfig;
+import io.entgra.server.bootup.heartbeat.beacon.config.HeartBeatBeaconConfig;
 import io.entgra.server.bootup.heartbeat.beacon.HeartBeatBeaconUtils;
 import io.entgra.server.bootup.heartbeat.beacon.config.datasource.DataSourceConfig;
 import io.entgra.server.bootup.heartbeat.beacon.dao.HeartBeatBeaconDAOFactory;
