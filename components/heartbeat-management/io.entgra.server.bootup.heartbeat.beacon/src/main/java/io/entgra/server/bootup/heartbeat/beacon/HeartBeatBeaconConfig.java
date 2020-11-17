@@ -18,6 +18,7 @@
 
 package io.entgra.server.bootup.heartbeat.beacon;
 
+import io.entgra.server.bootup.heartbeat.beacon.config.datasource.DataSourceConfig;
 import io.entgra.server.bootup.heartbeat.beacon.exception.InvalidConfigurationStateException;
 import org.w3c.dom.Document;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -36,6 +37,7 @@ public class HeartBeatBeaconConfig {
     private int notifierDelay;
     private int serverTimeOutIntervalInSeconds;
     private int timeSkew;
+    private DataSourceConfig dataSourceConfig;
 
     private static HeartBeatBeaconConfig config;
 
@@ -87,6 +89,15 @@ public class HeartBeatBeaconConfig {
 
     public void setServerTimeOutIntervalInSeconds(int serverTimeOutIntervalInSeconds) {
         this.serverTimeOutIntervalInSeconds = serverTimeOutIntervalInSeconds;
+    }
+
+    @XmlElement(name = "DataSourceConfiguration", required = true)
+    public DataSourceConfig getDataSourceConfig() {
+        return dataSourceConfig;
+    }
+
+    public void setDataSourceConfig(DataSourceConfig dataSourceConfig) {
+        this.dataSourceConfig = dataSourceConfig;
     }
 
     public static void init() throws HeartBeatBeaconConfigurationException {

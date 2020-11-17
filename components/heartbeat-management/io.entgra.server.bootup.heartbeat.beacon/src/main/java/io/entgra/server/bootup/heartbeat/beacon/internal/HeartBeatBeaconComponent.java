@@ -20,6 +20,8 @@ package io.entgra.server.bootup.heartbeat.beacon.internal;
 
 import io.entgra.server.bootup.heartbeat.beacon.HeartBeatBeaconConfig;
 import io.entgra.server.bootup.heartbeat.beacon.HeartBeatBeaconUtils;
+import io.entgra.server.bootup.heartbeat.beacon.config.datasource.DataSourceConfig;
+import io.entgra.server.bootup.heartbeat.beacon.dao.HeartBeatBeaconDAOFactory;
 import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementServiceImpl;
 import org.apache.commons.logging.Log;
@@ -42,6 +44,8 @@ public class HeartBeatBeaconComponent {
             }
             //heart beat notifier configuration */
             HeartBeatBeaconConfig.init();
+            DataSourceConfig dsConfig = HeartBeatBeaconConfig.getInstance().getDataSourceConfig();
+            HeartBeatBeaconDAOFactory.init(dsConfig);
 
             this.registerHeartBeatServices(componentContext);
 
