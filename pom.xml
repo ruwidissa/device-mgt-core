@@ -35,7 +35,7 @@
     </parent>
 
     <modules>
-        <module>components/task-allocation</module>
+        <module>components/heartbeat-management</module>
         <module>components/device-mgt</module>
         <module>components/device-mgt-extensions</module>
 	    <module>components/identity-extensions</module>
