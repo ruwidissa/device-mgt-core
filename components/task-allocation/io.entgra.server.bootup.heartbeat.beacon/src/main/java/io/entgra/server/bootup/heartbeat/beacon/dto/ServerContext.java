@@ -22,7 +22,7 @@ public class ServerContext {
 
     private String hostName;
     private String macAddress;
-    private String serverHash;
+    private int carbonServerPort;
     private String uuid;
     private int index;
 
@@ -42,14 +42,6 @@ public class ServerContext {
         this.macAddress = macAddress;
     }
 
-    public String getServerHash() {
-        return serverHash;
-    }
-
-    public void setServerHash(String serverHash) {
-        this.serverHash = serverHash;
-    }
-
     public String getUuid() {
         return uuid;
     }
@@ -64,5 +56,13 @@ public class ServerContext {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public int getCarbonServerPort() {
+        return carbonServerPort;
+    }
+
+    public void setCarbonServerPort(int carbonServerPort) {
+        this.carbonServerPort = carbonServerPort;
     }
 }

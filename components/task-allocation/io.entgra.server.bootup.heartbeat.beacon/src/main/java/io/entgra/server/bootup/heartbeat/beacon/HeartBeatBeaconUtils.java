@@ -83,10 +83,12 @@ public class HeartBeatBeaconUtils {
             hexadecimal[i] = String.format("%02X", hardwareAddress[i]);
         }
         String macAddress = String.join("-", hexadecimal);
+        int iotsCorePort = Integer.parseInt(System.getProperty("iot.core.https.port"));
 
         ServerContext ctx = new ServerContext();
         ctx.setHostName(localHost.getHostName());
         ctx.setMacAddress(macAddress);
+        ctx.setCarbonServerPort(iotsCorePort);
 
         return ctx;
     }

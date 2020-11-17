@@ -26,65 +26,43 @@ import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 import io.entgra.server.bootup.heartbeat.beacon.internal.HeartBeatBeaconDataHolder;
+import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
 
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Map;
 
 public class HeartBeatManagementServiceImpl implements HeartBeatManagementService {
 
     @Override
-    public int getActiveServerCount() throws HeartBeatManagementException {
-        HeartBeatDAO heartBeatDAO;
-        int activeServerCount = -1;
-        try {
-            HeartBeatBeaconDAOFactory.openConnection();
-            heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
-
-            int timeOutIntervalInSeconds = HeartBeatBeaconConfig.getInstance().getServerTimeOutIntervalInSeconds();
-            activeServerCount = heartBeatDAO.getActiveServerCount(timeOutIntervalInSeconds);
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the underlying data source";
-            throw new HeartBeatManagementException(msg, e);
-        } catch (HeartBeatDAOException e) {
-            String msg = "Error Occured while retrieving active server count.";
-            throw new HeartBeatManagementException(msg, e);
-        } finally {
-            HeartBeatBeaconDAOFactory.closeConnection();
-        }
-        return activeServerCount;
-    }
-
-    @Override
-    public int getServerLocalHashIndex() throws HeartBeatManagementException {
+    public ServerCtxInfo getServerCtxInfo() throws HeartBeatManagementException {
         HeartBeatDAO heartBeatDAO;
         int hashIndex = -1;
         ServerContext localServerCtx = null;
+        ServerCtxInfo serverCtxInfo = null;
         try {
             HeartBeatBeaconDAOFactory.openConnection();
             heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
 
             int timeOutIntervalInSeconds = HeartBeatBeaconConfig.getInstance().getServerTimeOutIntervalInSeconds();
             String localServerUUID = HeartBeatBeaconDataHolder.getInstance().getLocalServerUUID();
-            List<ServerContext> serverCtxList = heartBeatDAO.getActiveServerDetails(timeOutIntervalInSeconds);
-            for(ServerContext ctx : serverCtxList){
-                if(ctx.getUuid() == localServerUUID){
-                    localServerCtx = ctx;
-                    break;
+            Map<String, ServerContext> serverCtxMap = heartBeatDAO.getActiveServerDetails(timeOutIntervalInSeconds);
+            if(!serverCtxMap.isEmpty()) {
+                localServerCtx = serverCtxMap.get(localServerUUID);
+                if (localServerCtx != null) {
+                    hashIndex = localServerCtx.getIndex();
+                    serverCtxInfo = new ServerCtxInfo(serverCtxMap.size(), hashIndex);
                 }
-            }
-            if(localServerCtx != null){
-                hashIndex = localServerCtx.getIndex();
             }
         } catch (SQLException e) {
             String msg = "Error occurred while opening a connection to the underlying data source";
             throw new HeartBeatManagementException(msg, e);
         } catch (HeartBeatDAOException e) {
-            String msg = "Error Occured while retrieving active server count.";
+            String msg = "Error occurred while retrieving active server count.";
             throw new HeartBeatManagementException(msg, e);
         } finally {
             HeartBeatBeaconDAOFactory.closeConnection();
         }
-        return hashIndex;
+        return serverCtxInfo;
     }
 
     @Override

@@ -23,6 +23,7 @@ import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This interface represents the key operations associated with persisting group related information.
@@ -35,8 +36,6 @@ public interface HeartBeatDAO {
 
     String retrieveExistingServerCtx(ServerContext ctx) throws HeartBeatDAOException;
 
-    int getActiveServerCount(int elapsedTimeInSeconds) throws HeartBeatDAOException;
-
-    List<ServerContext> getActiveServerDetails(int elapsedTimeInSeconds) throws HeartBeatDAOException;
+    Map<String, ServerContext> getActiveServerDetails(int elapsedTimeInSeconds) throws HeartBeatDAOException;
 
 }

@@ -35,6 +35,7 @@
     </parent>
 
     <modules>
+        <module>components/task-allocation</module>
         <module>components/device-mgt</module>
         <module>components/device-mgt-extensions</module>
 	    <module>components/identity-extensions</module>
@@ -45,7 +46,6 @@
         <module>components/webapp-authenticator-framework</module>
         <module>components/email-sender</module>
         <module>components/ui-request-interceptor</module>
-        <module>components/task-allocation</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -375,6 +375,11 @@
                 <groupId>org.wso2.carbon.devicemgt</groupId>
                 <artifactId>org.wso2.carbon.device.application.mgt.feature</artifactId>
                 <type>zip</type>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <!-- Device Management dependencies -->

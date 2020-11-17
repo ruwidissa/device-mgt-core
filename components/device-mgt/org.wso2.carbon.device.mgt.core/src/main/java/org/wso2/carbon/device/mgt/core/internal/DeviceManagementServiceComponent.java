@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.core.internal;
 
+import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -134,6 +135,12 @@ import java.util.concurrent.TimeUnit;
  * policy="dynamic"
  * bind="setDeviceTypeGeneratorService"
  * unbind="unsetDeviceTypeGeneratorService"
+ * @scr.reference name="entgra.heart.beat.service"
+ * interface="io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
+ * cardinality="0..1"
+ * policy="dynamic"
+ * bind="setHeartBeatService"
+ * unbind="unsetHeartBeatService"
  */
 public class DeviceManagementServiceComponent {
 
@@ -477,6 +484,28 @@ public class DeviceManagementServiceComponent {
             log.debug("Un setting Registry Service");
         }
         DeviceManagementDataHolder.getInstance().setRegistryService(null);
+    }
+
+    /**
+     * Sets HeartBeatManagementService Service.
+     *
+     * @param heartBeatService An instance of HeartBeatManagementService
+     */
+    protected void setHeartBeatService(HeartBeatManagementService heartBeatService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting Heart Beat Service");
+        }
+        DeviceManagementDataHolder.getInstance().setHeartBeatService(heartBeatService);
+    }
+
+    /**
+     * Unsets Registry Service.
+     */
+    protected void unsetHeartBeatService(HeartBeatManagementService heartBeatService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Un setting Heart Beat Service");
+        }
+        DeviceManagementDataHolder.getInstance().setHeartBeatService(null);
     }
 
     protected void setDataSourceService(DataSourceService dataSourceService) {

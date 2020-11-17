@@ -20,12 +20,11 @@ package io.entgra.server.bootup.heartbeat.beacon.service;
 import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
+import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
 
 public interface HeartBeatManagementService {
 
-    int getActiveServerCount() throws HeartBeatManagementException;
-
-    int getServerLocalHashIndex() throws HeartBeatManagementException;
+    ServerCtxInfo getServerCtxInfo() throws HeartBeatManagementException;
 
     String updateServerContext(ServerContext ctx) throws HeartBeatManagementException;
 

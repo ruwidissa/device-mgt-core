@@ -834,7 +834,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                          "            AND d.TENANT_ID = ?) d1" +
                          "WHERE d1.ID = e.DEVICE_ID" +
                          "        AND TENANT_ID = ?" +
-                         "        AND MOD(d1.ID, 3) = 2" +
+                         "        AND MOD(d1.ID, ?) = ?" +
                          "ORDER BY e.DATE_OF_LAST_UPDATE DESC";
 
             stmt = conn.prepareStatement(sql);

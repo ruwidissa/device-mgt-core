@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.internal;
 
+import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
@@ -56,6 +57,7 @@ public class DeviceManagementDataHolder {
     private DeviceInformationManager deviceInformationManager;
     private LicenseManager licenseManager;
     private RegistryService registryService;
+    private HeartBeatManagementService heartBeatService;
     private LicenseConfig licenseConfig;
     private ApplicationManager appManager;
     private AppManagementConfig appManagerConfig;
@@ -285,5 +287,14 @@ public class DeviceManagementDataHolder {
 
     public void setDeviceInformationManager(DeviceInformationManager deviceInformationManager) {
         this.deviceInformationManager = deviceInformationManager;
+    }
+
+    public HeartBeatManagementService getHeartBeatService() {
+        return heartBeatService;
+    }
+
+    public void setHeartBeatService(
+            HeartBeatManagementService heartBeatService) {
+        this.heartBeatService = heartBeatService;
     }
 }

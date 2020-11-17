@@ -30,7 +30,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -46,11 +48,12 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
             Connection conn = HeartBeatBeaconDAOFactory.getConnection();
 
             String sql;
-            sql = "INSERT INTO SERVER_HEART_BEAT_EVENTS(HOST_NAME, MAC, UUID) VALUES (?, ?, ?)";
+            sql = "INSERT INTO SERVER_HEART_BEAT_EVENTS(HOST_NAME, MAC, UUID, SERVER_PORT) VALUES (?, ?, ?, ?)";
             stmt = conn.prepareStatement(sql, new String[]{"UUID"});
             stmt.setString(1, ctx.getHostName());
             stmt.setString(2, ctx.getMacAddress());
             stmt.setString(3, UUID.randomUUID().toString());
+            stmt.setInt(4, ctx.getCarbonServerPort());
 
             stmt.executeUpdate();
             ResultSet result = stmt.getGeneratedKeys();
@@ -94,10 +97,11 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
         String uuid = null;
         try {
             Connection conn = HeartBeatBeaconDAOFactory.getConnection();
-            String sql = "SELECT UUID FROM SERVER_HEART_BEAT_EVENTS WHERE HOST_NAME = ? AND MAC = ?";
+            String sql = "SELECT UUID FROM SERVER_HEART_BEAT_EVENTS WHERE HOST_NAME = ? AND MAC = ? AND SERVER_PORT = ?";
             stmt = conn.prepareStatement(sql, new String[]{"UUID"});
             stmt.setString(1, ctx.getHostName());
             stmt.setString(2, ctx.getMacAddress());
+            stmt.setInt(3, ctx.getCarbonServerPort());
 
             resultSet = stmt.executeQuery();
             if (resultSet.next()){
@@ -114,37 +118,13 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
     }
 
     @Override
-    public int getActiveServerCount(int elapsedTimeInSeconds) throws HeartBeatDAOException {
+    public Map<String, ServerContext> getActiveServerDetails(int elapsedTimeInSeconds) throws HeartBeatDAOException {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
-        int count = -1;
+        Map<String, ServerContext> ctxList = new HashMap<>();
         try {
             Connection conn = HeartBeatBeaconDAOFactory.getConnection();
-            String sql = "SELECT COUNT(ID) AS COUNT from SERVER_HEART_BEAT_EVENTS WHERE " +
-                         "LAST_UPDATED_TIMESTAMP > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? SECOND)";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, elapsedTimeInSeconds);
-            resultSet = stmt.executeQuery();
-            if (resultSet.next()) {
-                count = resultSet.getInt("COUNT");
-            }
-        } catch (SQLException e) {
-            throw new HeartBeatDAOException("Error occurred while retrieving acting server count with " +
-                                            "heartbeat updates within " + elapsedTimeInSeconds + " seconds.", e);
-        } finally {
-            HeartBeatBeaconDAOUtil.cleanupResources(stmt, resultSet);
-        }
-        return count;
-    }
-
-    @Override
-    public List<ServerContext> getActiveServerDetails(int elapsedTimeInSeconds) throws HeartBeatDAOException {
-        PreparedStatement stmt = null;
-        ResultSet resultSet = null;
-        List<ServerContext> ctxList = new ArrayList<>();
-        try {
-            Connection conn = HeartBeatBeaconDAOFactory.getConnection();
-            String sql = "SELECT (@row_number:=@row_number + 1) AS IDX, UUID, HOST_NAME, MAC from " +
+            String sql = "SELECT (@row_number:=@row_number + 1) AS IDX, UUID, HOST_NAME, MAC, SERVER_PORT from " +
                          "SERVER_HEART_BEAT_EVENTS, (SELECT @row_number:=-1) AS TEMP " +
                          "WHERE LAST_UPDATED_TIMESTAMP >  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? SECOND) " +
                          "ORDER BY UUID";
@@ -152,7 +132,7 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
             stmt.setInt(1, elapsedTimeInSeconds);
             resultSet = stmt.executeQuery();
             while (resultSet.next()) {
-                ctxList.add(HeartBeatBeaconDAOUtil.populateContext(resultSet));
+                ctxList.put(resultSet.getString("UUID"), HeartBeatBeaconDAOUtil.populateContext(resultSet));
             }
         } catch (SQLException e) {
             throw new HeartBeatDAOException("Error occurred while retrieving acting server count with " +
