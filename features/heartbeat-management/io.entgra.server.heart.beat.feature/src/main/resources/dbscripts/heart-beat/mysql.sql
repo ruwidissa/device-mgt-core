@@ -1,5 +1,5 @@
 -- -----------------------------------------------------
--- Table `POWER_METER_DEVICE`
+-- Table `SERVER_HEART_BEAT_EVENTS`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS SERVER_HEART_BEAT_EVENTS (
     ID INTEGER AUTO_INCREMENT NOT NULL,
