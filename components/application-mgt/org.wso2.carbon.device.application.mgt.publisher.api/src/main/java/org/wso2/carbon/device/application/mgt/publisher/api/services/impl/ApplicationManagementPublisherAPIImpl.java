@@ -373,6 +373,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error("ApplicationDTO Creation Failed");
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
+        } catch (BadRequestException e) {
+            String msg = "Found incompatible payload with enterprise app release creating request.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the application";
             log.error(msg, e);

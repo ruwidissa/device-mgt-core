@@ -31,6 +31,10 @@ public class Application {
             required = true)
     private String name;
 
+    @ApiModelProperty(name = "installerName",
+            value = "Application Installer Name")
+    private String installerName;
+
     @ApiModelProperty(name = "description",
             value = "Description of the application",
             required = true)
@@ -173,4 +177,8 @@ public class Application {
     public boolean isAndroidEnterpriseApp() { return isAndroidEnterpriseApp; }
 
     public void setAndroidEnterpriseApp(boolean androidEnterpriseApp) { isAndroidEnterpriseApp = androidEnterpriseApp; }
+
+    public String getInstallerName() { return installerName; }
+
+    public void setInstallerName(String installerName) { this.installerName = installerName; }
 }
