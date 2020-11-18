@@ -65,6 +65,10 @@ public class Constants {
     public  static final String SUBSCRIBED = "SUBSCRIBED";
     public  static final String UNSUBSCRIBED = "UNSUBSCRIBED";
 
+    //App type constants related to window device type
+    public static final String MSI = "MSI";
+    public static final String APPX = "APPX";
+
     private static final Map<String, String> AGENT_DATA = new HashMap<>();
     static {
         AGENT_DATA.put("android", "android-agent.apk");

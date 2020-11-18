@@ -82,6 +82,7 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.MDMAndroidOperationUtil;
 import org.wso2.carbon.device.mgt.core.util.MDMIOSOperationUtil;
+import org.wso2.carbon.device.mgt.core.util.MDMWindowsOperationUtil;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
@@ -1017,6 +1018,18 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         app.setIdentifier(application.getPackageName());
                         app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
                         return MDMIOSOperationUtil.createAppUninstallOperation(app);
+                    } else {
+                        String msg = "Invalid Action is found. Action: " + action;
+                        log.error(msg);
+                        throw new ApplicationManagementException(msg);
+                    }
+                } else if (DeviceTypes.WINDOWS.toString().equalsIgnoreCase(deviceType)) {
+                    app.setType(mobileAppType);
+                    app.setIdentifier(application.getPackageName());
+                    app.setMetaData(application.getApplicationReleases().get(0).getMetaData());
+                    app.setName(application.getInstallerName());
+                    if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+                        return MDMWindowsOperationUtil.createInstallAppOperation(app);
                     } else {
                         String msg = "Invalid Action is found. Action: " + action;
                         log.error(msg);

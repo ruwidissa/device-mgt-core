@@ -33,6 +33,7 @@ import {
 } from 'antd';
 import '@babel/polyfill';
 import Authorized from '../../../../../../../../components/Authorized/Authorized';
+import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 
 const { Text } = Typography;
 
@@ -59,6 +60,12 @@ function getBase64(file) {
   });
 }
 
+// function for access the full name of the binary file using the installation path
+function extractBinaryFileName(installationPath) {
+  let UploadedBinaryName = installationPath.split('/');
+  return UploadedBinaryName[UploadedBinaryName.length - 1];
+}
+
 class NewAppUploadForm extends React.Component {
   constructor(props) {
     super(props);
@@ -77,6 +84,7 @@ class NewAppUploadForm extends React.Component {
       osVersionsHelperText: '',
       osVersionsValidateStatus: 'validating',
       metaData: [],
+      appType: null,
     };
     this.lowerOsVersion = null;
     this.upperOsVersion = null;
@@ -93,6 +101,8 @@ class NewAppUploadForm extends React.Component {
     e.preventDefault();
     const { formConfig } = this.props;
     const { specificElements } = formConfig;
+    let windowsAppTypeMetaArray = [];
+    let metaValue = [];
 
     this.props.form.validateFields((err, values) => {
       if (!err) {
@@ -107,6 +117,19 @@ class NewAppUploadForm extends React.Component {
           releaseType,
         } = values;
 
+        /**
+         * To save the metaData value that receive from
+         * metaData UI In an windows app type creation
+         */
+        if (
+          ((this.props.formConfig.installationType === 'ENTERPRISE' &&
+            this.props.selectedValue === 'windows') ||
+            this.props.deviceType === 'windows') &&
+          this.state.metaData.length !== 0
+        ) {
+          metaValue = [...this.state.metaData];
+        }
+
         // add release data
         const release = {
           description: releaseDescription,
@@ -115,6 +138,90 @@ class NewAppUploadForm extends React.Component {
           metaData: JSON.stringify(this.state.metaData),
           releaseType: releaseType,
         };
+
+        const data = new FormData();
+        const config = this.props.context;
+        // Accessing the Meta Key value for windows device type from the config.json file
+        const metaKeyValues =
+          config.windowsAppxMsiKeyValueForMetaData.metaKeyArray;
+
+        /*
+          Setting up the app type specific values to the
+          metaData state field and Setting up the version
+          and the packageName for windows type
+        */
+        if (
+          (this.props.formConfig.installationType === 'ENTERPRISE' &&
+            this.props.selectedValue === 'windows') ||
+          this.props.deviceType === 'windows'
+        ) {
+          // Setting up the version and packageName
+          release.version = values.version;
+          release.packageName = values.packageName;
+          // setting the metaData value for appx type
+          if (
+            this.props.selectedAppType === 'appx' ||
+            this.state.appType === 'appx'
+          ) {
+            windowsAppTypeMetaArray = [
+              {
+                key: metaKeyValues[0],
+                value: values.packageUrl,
+              },
+              {
+                key: metaKeyValues[1],
+                value: values.dependencyPackageUrl,
+              },
+              {
+                key: metaKeyValues[2],
+                value: values.certificateHash,
+              },
+              {
+                key: metaKeyValues[3],
+                value: values.encodedCertContent,
+              },
+              {
+                key: metaKeyValues[4],
+                value: values.packageName,
+              },
+            ];
+            windowsAppTypeMetaArray = [
+              ...windowsAppTypeMetaArray,
+              ...metaValue,
+            ];
+          } else if (
+            this.props.selectedAppType === 'msi' ||
+            this.state.appType === 'msi'
+          ) {
+            windowsAppTypeMetaArray = [
+              {
+                key: metaKeyValues[5],
+                value: values.productId,
+              },
+              {
+                key: metaKeyValues[6],
+                value: values.contentUri,
+              },
+              {
+                key: metaKeyValues[7],
+                value: values.fileHash,
+              },
+            ];
+            windowsAppTypeMetaArray = [
+              ...windowsAppTypeMetaArray,
+              ...metaValue,
+            ];
+          }
+          this.setState(
+            {
+              metaData: windowsAppTypeMetaArray,
+            },
+            () => {
+              release.metaData = JSON.stringify(this.state.metaData);
+              this.props.onSuccessReleaseData({ data, release });
+            },
+          );
+        }
 
         if (specificElements.hasOwnProperty('version')) {
           release.version = values.version;
@@ -126,7 +233,6 @@ class NewAppUploadForm extends React.Component {
           release.packageName = values.packageName;
         }
 
-        const data = new FormData();
         let isFormValid = true; // flag to check if this form is valid
 
         if (
@@ -187,7 +293,16 @@ class NewAppUploadForm extends React.Component {
           if (specificElements.hasOwnProperty('binaryFile')) {
             data.append('binaryFile', binaryFile[0].originFileObj);
           }
-          this.props.onSuccessReleaseData({ data, release });
+          // Condition to check is it not an Enterprise windows app creation or release
+          if (
+            !(
+              this.props.selectedValue === 'windows' &&
+              this.props.formConfig.installationType === 'ENTERPRISE'
+            ) &&
+            this.props.deviceType !== 'windows'
+          ) {
+            this.props.onSuccessReleaseData({ data, release });
+          }
         }
       }
     });
@@ -203,13 +318,44 @@ class NewAppUploadForm extends React.Component {
       icons: fileList,
     });
   };
+
   handleBinaryFileChange = ({ fileList }) => {
+    let validity = true;
+    // To set the app type of windows by using the binary file in an new app release
+    if (this.props.formConfig.isNewRelease && fileList.length !== 0) {
+      let firstUploadedBinaryFileName = extractBinaryFileName(
+        this.props.uploadedInstalltionAppType,
+      );
+      let FirstFileExtension = firstUploadedBinaryFileName.substr(
+        firstUploadedBinaryFileName.lastIndexOf('.') + 1,
+      );
+      let LastFileExtension = fileList[0].name.substr(
+        fileList[0].name.lastIndexOf('.') + 1,
+      );
+      if (FirstFileExtension !== LastFileExtension) {
+        validity = false;
+      } else if (LastFileExtension === 'msi' || LastFileExtension === 'appx') {
+        this.setState({
+          appType: LastFileExtension,
+        });
+      }
+    }
+
     if (fileList.length === 1) {
       this.setState({
         binaryFileHelperText: '',
       });
     }
-    this.setState({ binaryFiles: fileList });
+
+    if (validity) {
+      this.setState({
+        binaryFiles: fileList,
+      });
+    } else {
+      this.setState({
+        binaryFileHelperText: 'Upload Correct Binary File extension',
+      });
+    }
   };
 
   handleScreenshotChange = ({ fileList }) => {
@@ -266,6 +412,7 @@ class NewAppUploadForm extends React.Component {
   render() {
     const { formConfig, supportedOsVersions } = this.props;
     const { getFieldDecorator } = this.props.form;
+    const config = this.props.context;
     const {
       icons,
       screenshots,
@@ -399,7 +546,12 @@ class NewAppUploadForm extends React.Component {
                   </Text>
                 </Col>
               </Row>
-              {formConfig.specificElements.hasOwnProperty('packageName') && (
+
+              {/* Package Name field for windows device type and other specific scene using it */}
+              {(formConfig.specificElements.hasOwnProperty('packageName') ||
+                (this.props.formConfig.installationType === 'ENTERPRISE' &&
+                  this.props.selectedValue === 'windows') ||
+                this.props.deviceType === 'windows') && (
                 <Form.Item {...formItemLayout} label="Package Name">
                   {getFieldDecorator('packageName', {
                     rules: [
@@ -425,7 +577,11 @@ class NewAppUploadForm extends React.Component {
                 </Form.Item>
               )}
 
-              {formConfig.specificElements.hasOwnProperty('version') && (
+              {/* Version field for windows device type and other specific scene using it */}
+              {(formConfig.specificElements.hasOwnProperty('version') ||
+                (this.props.formConfig.installationType === 'ENTERPRISE' &&
+                  this.props.selectedValue === 'windows') ||
+                this.props.deviceType === 'windows') && (
                 <Form.Item {...formItemLayout} label="Version">
                   {getFieldDecorator('version', {
                     rules: [
@@ -435,6 +591,127 @@ class NewAppUploadForm extends React.Component {
                       },
                     ],
                   })(<Input placeholder="Version" />)}
+                </Form.Item>
+              )}
+
+              {/* Windows Appx App Type Fields */}
+              {/* For Windows appx app type only -> Package Url */}
+              {((this.props.formConfig.installationType === 'ENTERPRISE' &&
+                this.props.selectedValue === 'windows' &&
+                this.props.selectedAppType === 'appx') ||
+                this.state.appType === 'appx') && (
+                <Form.Item {...formItemLayout} label="Package Url">
+                  {getFieldDecorator('packageUrl', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input the package url',
+                      },
+                    ],
+                  })(<Input placeholder="Package Url" />)}
+                </Form.Item>
+              )}
+
+              {/* For Windows appx app type only -> Dependency Package Url */}
+              {((this.props.formConfig.installationType === 'ENTERPRISE' &&
+                this.props.selectedValue === 'windows' &&
+                this.props.selectedAppType === 'appx') ||
+                this.state.appType === 'appx') && (
+                <Form.Item {...formItemLayout} label="Dependency Package Url">
+                  {getFieldDecorator('dependencyPackageUrl', {})(
+                    <Input placeholder="Dependency Package Url" />,
+                  )}
+                </Form.Item>
+              )}
+
+              {/* For Windows appx app type only -> Certificate Hash */}
+              {((this.props.formConfig.installationType === 'ENTERPRISE' &&
+                this.props.selectedValue === 'windows' &&
+                this.props.selectedAppType === 'appx') ||
+                this.state.appType === 'appx') && (
+                <Form.Item {...formItemLayout} label="Certificate Hash">
+                  {getFieldDecorator('certificateHash', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input the certificate hash',
+                      },
+                    ],
+                  })(<Input placeholder="Certificate Hash" />)}
+                </Form.Item>
+              )}
+
+              {/* For Windows appx app type only -> Encoded Certificate Content */}
+              {((this.props.formConfig.installationType === 'ENTERPRISE' &&
+                this.props.selectedValue === 'windows' &&
+                this.props.selectedAppType === 'appx') ||
+                this.state.appType === 'appx') && (
+                <Form.Item {...formItemLayout} label="Encoded Cert Content">
+                  {getFieldDecorator('encodedCertContent', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Give the encoded cert content',
+                      },
+                    ],
+                  })(
+                    <TextArea
+                      placeholder="Enter a encoded certificate content"
+                      rows={5}
+                    />,
+                  )}
+                </Form.Item>
+              )}
+
+              {/* Windows MSI App Type Fields */}
+              {/* For Windows msi app type only -> Product Id */}
+              {((this.props.formConfig.installationType === 'ENTERPRISE' &&
+                this.props.selectedValue === 'windows' &&
+                this.props.selectedAppType === 'msi') ||
+                this.state.appType === 'msi') && (
+                <Form.Item {...formItemLayout} label="Product Id">
+                  {getFieldDecorator('productId', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input the product id',
+                      },
+                    ],
+                  })(<Input placeholder="Product Id" />)}
+                </Form.Item>
+              )}
+
+              {/* For Windows msi app type only -> Content URI */}
+              {((this.props.formConfig.installationType === 'ENTERPRISE' &&
+                this.props.selectedValue === 'windows' &&
+                this.props.selectedAppType === 'msi') ||
+                this.state.appType === 'msi') && (
+                <Form.Item {...formItemLayout} label="Content URI">
+                  {getFieldDecorator('contentUri', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input the content uri',
+                      },
+                    ],
+                  })(<Input placeholder="Content Uri" />)}
+                </Form.Item>
+              )}
+
+              {/* For Windows msi app type only -> File Hash */}
+              {((this.props.formConfig.installationType === 'ENTERPRISE' &&
+                this.props.selectedValue === 'windows' &&
+                this.props.selectedAppType === 'msi') ||
+                this.state.appType === 'msi') && (
+                <Form.Item {...formItemLayout} label="File Hash">
+                  {getFieldDecorator('fileHash', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Please input the file hash',
+                      },
+                    ],
+                  })(<Input placeholder="File Hash" />)}
                 </Form.Item>
               )}
 
@@ -547,49 +824,60 @@ class NewAppUploadForm extends React.Component {
                 {getFieldDecorator('meta', {})(
                   <div>
                     {metaData.map((data, index) => {
-                      return (
-                        <InputGroup key={index}>
-                          <Row gutter={8}>
-                            <Col span={5}>
-                              <Input
-                                placeholder="key"
-                                value={data.key}
-                                onChange={e => {
-                                  metaData[index].key = e.currentTarget.value;
-                                  this.setState({
-                                    metaData,
-                                  });
-                                }}
-                              />
-                            </Col>
-                            <Col span={8}>
-                              <Input
-                                placeholder="value"
-                                value={data.value}
-                                onChange={e => {
-                                  metaData[index].value = e.currentTarget.value;
-                                  this.setState({
-                                    metaData,
-                                  });
-                                }}
-                              />
-                            </Col>
-                            <Col span={3}>
-                              <Button
-                                type="dashed"
-                                shape="circle"
-                                icon={<MinusOutlined />}
-                                onClick={() => {
-                                  metaData.splice(index, 1);
-                                  this.setState({
-                                    metaData,
-                                  });
-                                }}
-                              />
-                            </Col>
-                          </Row>
-                        </InputGroup>
-                      );
+                      /*
+                         Exclude showing the values related to
+                         windows app type variables in meta Data UI
+                       */
+                      if (
+                        !config.windowsAppxMsiKeyValueForMetaData.metaKeyArray.includes(
+                          data.key,
+                        )
+                      ) {
+                        return (
+                          <InputGroup key={index}>
+                            <Row gutter={8}>
+                              <Col span={5}>
+                                <Input
+                                  placeholder="key"
+                                  value={data.key}
+                                  onChange={e => {
+                                    metaData[index].key = e.currentTarget.value;
+                                    this.setState({
+                                      metaData,
+                                    });
+                                  }}
+                                />
+                              </Col>
+                              <Col span={8}>
+                                <Input
+                                  placeholder="value"
+                                  value={data.value}
+                                  onChange={e => {
+                                    metaData[index].value =
+                                      e.currentTarget.value;
+                                    this.setState({
+                                      metaData,
+                                    });
+                                  }}
+                                />
+                              </Col>
+                              <Col span={3}>
+                                <Button
+                                  type="dashed"
+                                  shape="circle"
+                                  icon={<MinusOutlined />}
+                                  onClick={() => {
+                                    metaData.splice(index, 1);
+                                    this.setState({
+                                      metaData,
+                                    });
+                                  }}
+                                />
+                              </Col>
+                            </Row>
+                          </InputGroup>
+                        );
+                      }
                     })}
                     <Button
                       type="dashed"
@@ -633,4 +921,6 @@ class NewAppUploadForm extends React.Component {
   }
 }
 
-export default Form.create({ name: 'app-upload-form' })(NewAppUploadForm);
+export default withConfigContext(
+  Form.create({ name: 'app-upload-form' })(NewAppUploadForm),
+);

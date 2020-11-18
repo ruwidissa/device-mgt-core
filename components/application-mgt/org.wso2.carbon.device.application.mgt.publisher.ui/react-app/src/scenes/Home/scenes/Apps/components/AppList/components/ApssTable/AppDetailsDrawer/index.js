@@ -783,6 +783,7 @@ class AppDetailsDrawer extends React.Component {
                       to={{
                         pathname: `/publisher/apps/${app.deviceType}/${app.id}/add-release`,
                         state: {
+                          appDetails: app.applicationReleases[0],
                           fullAppDetails: app.applicationReleases,
                         },
                       }}
