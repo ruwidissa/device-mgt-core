@@ -131,13 +131,45 @@ public interface GeofenceDAO {
      */
     void deleteGeofenceEventMapping(List<Integer> removedEventIdList) throws DeviceManagementDAOException;
 
+    /**
+     * Get events of the geofence using fence ids
+     * @param geofenceIds ids of geo fences to be queried
+     * @return Event config list mapped with fence id
+     * @throws DeviceManagementDAOException error occurred while retrieving geo fence event map
+     */
     Map<Integer, List<EventConfig>> getEventsOfGeoFences(List<Integer> geofenceIds) throws DeviceManagementDAOException;
 
+    /**
+     * Get events of a particular geofence
+     * @param geofenceId id of the fence to be queried
+     * @return EventConfig list of the particular geofence
+     * @throws DeviceManagementDAOException thrown errors while getting events of geofence
+     */
     List<EventConfig> getEventsOfGeoFence(int geofenceId) throws DeviceManagementDAOException;
 
+    /**
+     * Get group Ids mapped with fence ids
+     * @param fenceIds fence id list to be queried
+     * @return GroupIds mapped with geofence id
+     * @throws DeviceManagementDAOException thrown errors while retrieving group Ids of geo fence
+     */
     Map<Integer, List<Integer>> getGroupIdsOfGeoFences(List<Integer> fenceIds) throws DeviceManagementDAOException;
 
+    /**
+     * Get geo fences of the specific group and tenant
+     * @param groupId id of the group
+     * @param tenantId tenant id of the geo fences
+     * @return List of geofence data mapped with specific group and tenant
+     * @throws DeviceManagementDAOException
+     */
     List<GeofenceData> getGeoFences(int groupId, int tenantId) throws DeviceManagementDAOException;
 
+    /**
+     * Get geofence using fence id and attached group Ids
+     * @param fenceId id of the fence
+     * @param requireGroupData true if mapped group data needed
+     * @return Geofence data
+     * @throws DeviceManagementDAOException
+     */
     GeofenceData getGeofence(int fenceId, boolean requireGroupData) throws DeviceManagementDAOException;
 }

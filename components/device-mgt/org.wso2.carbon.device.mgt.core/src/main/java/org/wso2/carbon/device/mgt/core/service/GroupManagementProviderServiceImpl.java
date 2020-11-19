@@ -1054,10 +1054,17 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         }
     }
 
+    /**
+     * Create event config/revoke operation at the time of device removing from a group/assigning into group
+     * @param eventOperationCode code of the event operation(config/revoke)
+     * @param groupId Id of the device removing/assigning group
+     * @param deviceIdentifiers devices assigning to/removing from group
+     * @param tenantId tenant of the group
+     */
     private void createEventTask(String eventOperationCode, int groupId, List<DeviceIdentifier> deviceIdentifiers, int tenantId) {
         GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager(eventOperationCode, tenantId, null);
         ScheduledExecutorService eventOperationExecutor = Executors.newSingleThreadScheduledExecutor();
         eventOperationExecutor.schedule(eventManager
-                .getDeviceEventOperationExecutor(groupId, deviceIdentifiers), 10, TimeUnit.SECONDS);
+                .getEventOperationExecutor(groupId, deviceIdentifiers), 10, TimeUnit.SECONDS);
     }
 }

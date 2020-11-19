@@ -21,7 +21,6 @@ package org.wso2.carbon.device.mgt.core.event.config;
 import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.event.config.EventAction;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
@@ -31,18 +30,13 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
-import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class EventConfigurationProviderServiceImpl implements EventConfigurationProviderService {
     private static final Log log = LogFactory.getLog(EventConfigurationProviderServiceImpl.class);
@@ -53,8 +47,17 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
     }
 
     @Override
-    public List<Integer> createEventsOfDeviceGroup(List<EventConfig> eventConfigList, List<Integer> groupIds, int tenantId)
+    public List<Integer> createEventsOfDeviceGroup(List<EventConfig> eventConfigList, List<Integer> groupIds)
             throws EventConfigurationException {
+        int tenantId;
+        try {
+            tenantId = DeviceManagementDAOUtil.getTenantId();
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving tenant Id";
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
+        }
+
         try {
             DeviceManagementDAOFactory.beginTransaction();
             if (log.isDebugEnabled()) {
@@ -85,13 +88,12 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
     }
 
     @Override
-    public List<Integer> updateEventsOfDeviceGroup(List<EventConfig> newEventList,
-                                                   List<Integer> removedEventIdList,
-                                                   List<Integer> groupIds, int tenantId) throws EventConfigurationException {
+    public List<Integer> updateEventsOfDeviceGroup(List<EventConfig> newEventList, List<Integer> removedEventIdList,
+                                                   List<Integer> groupIds) throws EventConfigurationException {
         //todo when concerning about other event types, all of this steps might not necessary.
         // so divide them into separate service methods
         if (log.isDebugEnabled()) {
-            log.debug("Updating event configurations of tenant " + tenantId);
+            log.debug("Updating event configurations of tenant");
         }
         List<EventConfig> eventsToAdd;
         try {
@@ -126,7 +128,7 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
                 if (log.isDebugEnabled()) {
                     log.debug("Updating event records ");
                 }
-                eventConfigDAO.updateEventRecords(eventsToUpdate, tenantId);
+                eventConfigDAO.updateEventRecords(eventsToUpdate);
             }
 
 
@@ -153,7 +155,7 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
                 if (log.isDebugEnabled()) {
                     log.debug("Deleting removed event records");
                 }
-                eventConfigDAO.deleteEventRecords(removedEventIdList, tenantId);
+                eventConfigDAO.deleteEventRecords(removedEventIdList);
             }
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
@@ -171,7 +173,7 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
         if (log.isDebugEnabled()) {
             log.debug("Adding new events while updating event");
         }
-        return createEventsOfDeviceGroup(eventsToAdd, groupIds, tenantId);
+        return createEventsOfDeviceGroup(eventsToAdd, groupIds);
     }
 
     @Override
@@ -181,24 +183,6 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
             return eventConfigDAO.getEventsById(createdEventIds);
         } catch (EventManagementDAOException e) {
             String msg = "Error occurred while retrieving event by IDs : " + Arrays.toString(createdEventIds.toArray());
-            log.error(msg, e);
-            throw new EventConfigurationException(msg, e);
-        } catch (SQLException e) {
-            String msg = "Failed to open connection while retrieving event by IDs";
-            log.error(msg, e);
-            throw new EventConfigurationException(msg, e);
-        } finally {
-            DeviceManagementDAOFactory.closeConnection();
-        }
-    }
-
-    @Override
-    public List<EventConfig> getEventsOfGroup(int groupId, int tenantId) throws EventConfigurationException {
-        try {
-            DeviceManagementDAOFactory.openConnection();
-            return eventConfigDAO.getEventsOfGroups(groupId, tenantId);
-        } catch (EventManagementDAOException e) {
-            String msg = "Error occurred while retrieving events of group " + groupId + " and tenant " + tenantId;
             log.error(msg, e);
             throw new EventConfigurationException(msg, e);
         } catch (SQLException e) {
@@ -229,24 +213,16 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
     }
 
     @Override
-    public void deleteEvents(List<EventConfig> eventsOfGeoFence) throws EventConfigurationException {
-        int tenantId;
-        try {
-            tenantId = DeviceManagementDAOUtil.getTenantId();
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while retrieving tenant Id";
-            log.error(msg, e);
-            throw new EventConfigurationException(msg, e);
-        }
+    public void deleteEvents(List<EventConfig> events) throws EventConfigurationException {
         try {
             DeviceManagementDAOFactory.beginTransaction();
             Set<Integer> eventIdSet = new HashSet<>();
-            for (EventConfig eventConfig : eventsOfGeoFence) {
+            for (EventConfig eventConfig : events) {
                 eventIdSet.add(eventConfig.getEventId());
             }
             if (!eventIdSet.isEmpty()) {
                 eventConfigDAO.deleteEventGroupMappingRecordsByEventIds(Lists.newArrayList(eventIdSet));
-                eventConfigDAO.deleteEventRecords(Lists.newArrayList(eventIdSet), tenantId);
+                eventConfigDAO.deleteEventRecords(Lists.newArrayList(eventIdSet));
             }
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {

@@ -183,7 +183,7 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
     }
 
     @Override
-    public void updateEventRecords(List<EventConfig> eventsToUpdate, int tenantId) throws EventManagementDAOException {
+    public void updateEventRecords(List<EventConfig> eventsToUpdate) throws EventManagementDAOException {
         try {
             Connection conn = this.getConnection();
             String sql = "UPDATE DM_DEVICE_EVENT SET " +
@@ -198,14 +198,14 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
                 stmt.executeBatch();
             }
         } catch (SQLException e) {
-            String msg = "Error occurred while updating event records of tenant " + tenantId;
+            String msg = "Error occurred while updating event records";
             log.error(msg, e);
             throw new EventManagementDAOException(msg, e);
         }
     }
 
     @Override
-    public void deleteEventRecords(List<Integer> eventsIdsToDelete, int tenantId) throws EventManagementDAOException {
+    public void deleteEventRecords(List<Integer> eventsIdsToDelete) throws EventManagementDAOException {
         try {
             Connection conn = this.getConnection();
             String sql = "DELETE FROM DM_DEVICE_EVENT WHERE ID = ?";
@@ -217,7 +217,7 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
                 stmt.executeBatch();
             }
         } catch (SQLException e) {
-            String msg = "Error occurred while deleting event records of tenant " + tenantId;
+            String msg = "Error occurred while deleting event records of tenant";
             log.error(msg, e);
             throw new EventManagementDAOException(msg, e);
         }

@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.gson.Gson;
-import jdk.nashorn.internal.parser.JSONParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -43,7 +42,6 @@ import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
-import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.common.geo.service.*;
@@ -728,14 +726,14 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                 }
                 List<GeofenceData> geoFences = geoService.getGeoFences(request);
                 if (requireEventData) {
-                    geoFences = geoService.getGeoFenceEvents(geoFences);
+                    geoFences = geoService.attachEventObjects(geoFences);
                 }
                 return getResponse(geoFences);
             }
             if (name != null && !name.isEmpty()) {
                 List<GeofenceData> geoFences = geoService.getGeoFences(name);
                 if (requireEventData) {
-                    geoFences = geoService.getGeoFenceEvents(geoFences);
+                    geoFences = geoService.attachEventObjects(geoFences);
                 }
                 return getResponse(geoFences);
             }

@@ -61,19 +61,19 @@ public interface EventConfigDAO {
 
     /**
      * Update event records of the tenant
+     *
      * @param eventsToUpdate updating event records
-     * @param tenantId event owning tenant id
      * @throws EventManagementDAOException error occurred while updating events
      */
-    void updateEventRecords(List<EventConfig> eventsToUpdate, int tenantId) throws EventManagementDAOException;
+    void updateEventRecords(List<EventConfig> eventsToUpdate) throws EventManagementDAOException;
 
     /**
      * Delete events using event ids
+     *
      * @param eventsIdsToDelete ids of the events which should be deleted
-     * @param tenantId event owning tenant id
      * @throws EventManagementDAOException error occurred while deleting event records
      */
-    void deleteEventRecords(List<Integer> eventsIdsToDelete, int tenantId) throws EventManagementDAOException;
+    void deleteEventRecords(List<Integer> eventsIdsToDelete) throws EventManagementDAOException;
 
     /**
      * Get event records by event ids
@@ -83,9 +83,27 @@ public interface EventConfigDAO {
      */
     List<EventConfig> getEventsById(List<Integer> eventIds) throws EventManagementDAOException;
 
-    List<Integer> getGroupsOfEvents(List<Integer> updateEventIdList) throws EventManagementDAOException;
+    /**
+     * Get group ids belong to events using event ids
+     * @param eventIds Ids of the events mapped with group
+     * @return Group Id list
+     * @throws EventManagementDAOException thrown errors while retrieving group Ids of events
+     */
+    List<Integer> getGroupsOfEvents(List<Integer> eventIds) throws EventManagementDAOException;
 
-    void deleteEventGroupMappingRecordsByEventIds(List<Integer> removedEventIdList) throws EventManagementDAOException;
+    /**
+     * Delete event group mapping records using event Ids
+     * @param eventIds Ids of the events
+     * @throws EventManagementDAOException thrown errors while deleting event group mappings
+     */
+    void deleteEventGroupMappingRecordsByEventIds(List<Integer> eventIds) throws EventManagementDAOException;
 
+    /**
+     * Retrieve event sources mapped with specific groups and tenant
+     * @param groupId Id of the group
+     * @param tenantId Id of the tenant
+     * @return Event source list belong to
+     * @throws EventManagementDAOException thrown errors while retrieving event sources
+     */
     List<String> getEventSourcesOfGroups(int groupId, int tenantId) throws EventManagementDAOException;
 }

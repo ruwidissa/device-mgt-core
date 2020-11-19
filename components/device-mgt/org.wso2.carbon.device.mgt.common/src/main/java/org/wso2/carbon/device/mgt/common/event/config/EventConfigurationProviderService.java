@@ -23,34 +23,53 @@ import java.util.List;
 public interface EventConfigurationProviderService {
     /**
      * Create event configuration records
+     *
      * @param eventConfigList event list to be added
-     * @param groupIds group ids of the events are mapped
-     * @param tenantId events owning tenant id
+     * @param groupIds        group ids of the events are mapped
      * @return generated event ids
      * @throws EventConfigurationException errors thrown while creating event configuration
      */
-    List<Integer> createEventsOfDeviceGroup(List<EventConfig> eventConfigList, List<Integer> groupIds, int tenantId)
+    List<Integer> createEventsOfDeviceGroup(List<EventConfig> eventConfigList, List<Integer> groupIds)
             throws EventConfigurationException;
 
     /**
      * Update event configuration records
-     * @param eventConfig updated event configuration list. event ids should be present for
-     *                    the updating events and event ids should be -1 for the newly creating events
+     *
+     * @param eventConfig        updated event configuration list. event ids should be present for
+     *                           the updating events and event ids should be -1 for the newly creating events
      * @param removedEventIdList event ids of removed while updating the event configuration
-     * @param groupIds group ids to be mapped with updated events
-     * @param tenantId
-     * @return
+     * @param groupIds           group ids to be mapped with updated events
+     * @return Newly created event Ids
      * @throws EventConfigurationException
      */
     List<Integer> updateEventsOfDeviceGroup(List<EventConfig> eventConfig, List<Integer> removedEventIdList,
-                                            List<Integer> groupIds, int tenantId) throws EventConfigurationException;
+                                            List<Integer> groupIds) throws EventConfigurationException;
 
+    /**
+     * Retrieve event list using event IDs
+     *
+     * @param createdEventIds event ids
+     * @return {@link EventConfig} List of events of defined IDs
+     * @throws EventConfigurationException
+     */
     List<EventConfig> getEvents(List<Integer> createdEventIds) throws EventConfigurationException;
 
-    List<EventConfig> getEventsOfGroup(int groupId, int tenantId) throws EventConfigurationException;
-
+    /**
+     * Get event sources attached to a specific group
+     *
+     * @param groupId  mapped group id of events
+     * @param tenantId event owning tenant
+     * @return Event sources of the group
+     * @throws EventConfigurationException error thrown while retrieving event sources
+     */
     List<String> getEventsSourcesOfGroup(int groupId, int tenantId) throws EventConfigurationException;
 
+    /**
+     * Delete events by event Ids
+     *
+     * @param eventList event list to be deleted
+     * @throws EventConfigurationException error thrown while deleting event records
+     */
     void deleteEvents(List<EventConfig> eventList) throws EventConfigurationException;
 
 }
