@@ -139,4 +139,5 @@ public interface GeofenceDAO {
 
     List<GeofenceData> getGeoFences(int groupId, int tenantId) throws DeviceManagementDAOException;
 
+    GeofenceData getGeofence(int fenceId, boolean requireGroupData) throws DeviceManagementDAOException;
 }

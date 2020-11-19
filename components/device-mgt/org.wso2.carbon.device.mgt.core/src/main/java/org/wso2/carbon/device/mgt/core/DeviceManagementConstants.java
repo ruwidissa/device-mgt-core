@@ -98,6 +98,8 @@ public final class DeviceManagementConstants {
         public static final String MONITOR_OPERATION_CODE = "MONITOR";
         public static final String POLICY_OPERATION_CODE = PolicyOperation.POLICY_OPERATION_CODE;
         public static final String POLICY_REVOKE_OPERATION_CODE = OperationMgtConstants.OperationCodes.POLICY_REVOKE;
+        public static final String EVENT_CONFIG_OPERATION_CODE = OperationMgtConstants.OperationCodes.EVENT_CONFIG;
+        public static final String EVENT_REVOKE_OPERATION_CODE = OperationMgtConstants.OperationCodes.EVENT_REVOKE;
     }
 
     public static final class CorrectiveActions {

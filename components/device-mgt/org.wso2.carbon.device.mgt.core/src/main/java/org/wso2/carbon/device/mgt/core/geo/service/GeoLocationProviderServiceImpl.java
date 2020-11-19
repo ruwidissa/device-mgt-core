@@ -54,8 +54,10 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GeofenceDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import org.wso2.carbon.device.mgt.core.geo.task.EventCreateCallback;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
+import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
 import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
@@ -1289,9 +1291,9 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         }
         List<Integer> createdEventIds;
         try {
-            EventConfigurationProviderService eventConfigService = DeviceManagementDataHolder.getInstance()
-                    .getEventConfigurationService();
             setEventSource(geofenceData.getEventConfig());
+            EventConfigurationProviderService eventConfigService =  DeviceManagementDataHolder
+                    .getInstance().getEventConfigurationService();
             createdEventIds = eventConfigService.createEventsOfDeviceGroup(geofenceData.getEventConfig(), geofenceData.getGroupIds(), tenantId);
             DeviceManagementDAOFactory.beginTransaction();
             geofenceDAO.createGeofenceEventMapping(geofenceData.getId(), createdEventIds);
@@ -1317,15 +1319,23 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
-        createEventTask(geofenceData, tenantId);
+        createEventTask(OperationMgtConstants.OperationCodes.EVENT_CONFIG, geofenceData, tenantId);
         return true;
     }
 
-    private void createEventTask(GeofenceData geofenceData, int tenantId) {
-        GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager();
+    private void createEventRevokeTask(GeofenceData geofenceData, int tenantId) {
+        GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager(OperationMgtConstants.OperationCodes.EVENT_REVOKE,
+                tenantId, values -> createEventTask(OperationMgtConstants.OperationCodes.EVENT_CONFIG, geofenceData, tenantId));
         ScheduledExecutorService eventOperationExecutor = Executors.newSingleThreadScheduledExecutor();
         eventOperationExecutor.schedule(eventManager
-                .getGroupEventOperationExecutor(geofenceData, tenantId), 10, TimeUnit.SECONDS);
+                .getGroupEventOperationExecutor(geofenceData), 10, TimeUnit.SECONDS);
+    }
+
+    private void createEventTask(String operationCode, GeofenceData geofenceData, int tenantId) {
+        GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager(operationCode, tenantId, null);
+        ScheduledExecutorService eventOperationExecutor = Executors.newSingleThreadScheduledExecutor();
+        eventOperationExecutor.schedule(eventManager
+                .getGroupEventOperationExecutor(geofenceData), 10, TimeUnit.SECONDS);
     }
 
     private void setEventSource(List<EventConfig> eventConfig) {
@@ -1470,6 +1480,8 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
     @Override
     public boolean deleteGeofenceData(int fenceId) throws GeoLocationBasedServiceException {
         int tenantId;
+        GeofenceData geofence;
+        List<EventConfig> eventsOfGeoFence;
         try {
             tenantId = DeviceManagementDAOUtil.getTenantId();
         } catch (DeviceManagementDAOException e) {
@@ -1480,12 +1492,25 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
 
         try {
             DeviceManagementDAOFactory.beginTransaction();
-            if (geofenceDAO.deleteGeofenceById(fenceId) > 0) {
-                DeviceManagementDAOFactory.commitTransaction();
-                GeoCacheManagerImpl.getInstance().removeFenceFromCache(fenceId, tenantId);
-                return true;
+            geofence = geofenceDAO.getGeofence(fenceId, true);
+            if (geofence == null) {
+                return false;
             }
-            return false;
+            eventsOfGeoFence = geofenceDAO.getEventsOfGeoFence(fenceId);
+            List<Integer> eventIds = new ArrayList<>();
+            for (EventConfig config : eventsOfGeoFence) {
+                eventIds.add(config.getEventId());
+            }
+            if (!eventIds.isEmpty()) {
+                geofenceDAO.deleteGeofenceEventMapping(eventIds);
+            }
+            List<Integer> groupIdsOfGeoFence = geofenceDAO.getGroupIdsOfGeoFence(fenceId);
+            if (!groupIdsOfGeoFence.isEmpty()) {
+                geofenceDAO.deleteGeofenceGroupMapping(groupIdsOfGeoFence);
+            }
+            geofenceDAO.deleteGeofenceById(fenceId);
+            DeviceManagementDAOFactory.commitTransaction();
+            GeoCacheManagerImpl.getInstance().removeFenceFromCache(fenceId, tenantId);
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while deleting geofence";
@@ -1498,6 +1523,8 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
+        this.deleteGeoFenceEvents(geofence, eventsOfGeoFence);
+        return true;
     }
 
     @Override
@@ -1552,7 +1579,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
     }
 
     @Override
-    public boolean updateGeoEventConfigurations(List<EventConfig> eventConfig,
+    public boolean updateGeoEventConfigurations(GeofenceData geofenceData,
                                                 List<Integer> removedEventIdList, List<Integer> groupIds, int fenceId)
             throws GeoLocationBasedServiceException {
         if (log.isDebugEnabled()) {
@@ -1579,17 +1606,18 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         }
 
         List<Integer> createdEventIds;
+        int tenantId;
         try {
-            int tenantId = DeviceManagementDAOUtil.getTenantId();
-            setEventSource(eventConfig);
-            EventConfigurationProviderService eventConfigService = DeviceManagementDataHolder.getInstance()
-                    .getEventConfigurationService();
+            tenantId = DeviceManagementDAOUtil.getTenantId();
+            setEventSource(geofenceData.getEventConfig());
+            EventConfigurationProviderService eventConfigService =  DeviceManagementDataHolder
+                    .getInstance().getEventConfigurationService();
             if (eventConfigService == null) {
                 String msg = "Failed to load EventConfigurationProviderService osgi service of tenant " + tenantId;
                 log.error(msg);
                 throw new GeoLocationBasedServiceException(msg);
             }
-            createdEventIds = eventConfigService.updateEventsOfDeviceGroup(eventConfig, removedEventIdList, groupIds, tenantId);
+            createdEventIds = eventConfigService.updateEventsOfDeviceGroup(geofenceData.getEventConfig(), removedEventIdList, groupIds, tenantId);
         } catch (EventConfigurationException e) {
             String msg = "Error occurred while updating event configuration data";
             log.error(msg, e);
@@ -1623,6 +1651,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         if (log.isDebugEnabled()) {
             log.debug("Update geofence event completed.");
         }
+        createEventRevokeTask(geofenceData, tenantId);
         return true;
     }
 
@@ -1692,6 +1721,32 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             throw new GeoLocationBasedServiceException(msg, e);
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred while retrieving event data of geo fence " + geoFenceId;
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public void deleteGeoFenceEvents(GeofenceData geofenceData, List<EventConfig> eventList) throws GeoLocationBasedServiceException {
+        int tenantId;
+        try {
+            tenantId = DeviceManagementDAOUtil.getTenantId();
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving tenant id while get geofence data";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        }
+
+        try {
+            EventConfigurationProviderService eventConfigService =  DeviceManagementDataHolder
+                    .getInstance().getEventConfigurationService();
+            eventConfigService.deleteEvents(eventList);
+            createEventTask(OperationMgtConstants.OperationCodes.EVENT_REVOKE, geofenceData, tenantId);
+        } catch (EventConfigurationException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Failed to delete Geofence event configurations";
             log.error(msg, e);
             throw new GeoLocationBasedServiceException(msg, e);
         } finally {

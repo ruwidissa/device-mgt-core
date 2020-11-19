@@ -50,4 +50,7 @@ public interface EventConfigurationProviderService {
     List<EventConfig> getEventsOfGroup(int groupId, int tenantId) throws EventConfigurationException;
 
     List<String> getEventsSourcesOfGroup(int groupId, int tenantId) throws EventConfigurationException;
+
+    void deleteEvents(List<EventConfig> eventList) throws EventConfigurationException;
+
 }

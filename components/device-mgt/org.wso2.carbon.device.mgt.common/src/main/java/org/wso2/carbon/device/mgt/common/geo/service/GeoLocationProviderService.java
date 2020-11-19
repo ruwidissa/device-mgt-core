@@ -136,14 +136,14 @@ public interface GeoLocationProviderService {
 
     /**
      * Update geofence event configuration
-     * @param eventConfig updated event configurations list
+     * @param geofenceData updated GeoFenceData object
      * @param removedEventIdList removed event ids
      * @param groupIds newly added group ids to be mapped with event records
      * @param fenceId updating fence id
      * @return true for successful update of geofence event data
      * @throws GeoLocationBasedServiceException any errors occurred while updating event records of the fence
      */
-    boolean updateGeoEventConfigurations(List<EventConfig> eventConfig, List<Integer> removedEventIdList,
+    boolean updateGeoEventConfigurations(GeofenceData geofenceData, List<Integer> removedEventIdList,
                                          List<Integer> groupIds, int fenceId) throws GeoLocationBasedServiceException;
 
     List<GeofenceData> getGeoFenceEvents(List<GeofenceData> geoFences) throws GeoLocationBasedServiceException;
@@ -151,4 +151,6 @@ public interface GeoLocationProviderService {
     List<GeofenceData> getGeoFencesOfGroup(int groupId, int tenantId, boolean requireEventData) throws GeoLocationBasedServiceException;
 
     List<EventConfig> getEventsOfGeoFence(int geoFenceId) throws GeoLocationBasedServiceException;
+
+    void deleteGeoFenceEvents(GeofenceData geofenceData, List<EventConfig> eventConfigList) throws GeoLocationBasedServiceException;
 }

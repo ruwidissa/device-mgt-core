@@ -28,14 +28,26 @@ import org.wso2.carbon.device.mgt.core.event.config.GroupEventOperationExecutor;
 import java.util.List;
 
 public class GeoFenceEventOperationManager {
-    public GroupEventOperationExecutor getGroupEventOperationExecutor(GeofenceData geofenceData, int tenantId) {
-        GeoFenceEventMeta geoFenceEventMeta = new GeoFenceEventMeta(geofenceData);
-        return new GroupEventOperationExecutor(geoFenceEventMeta, geofenceData.getGroupIds(),
-                tenantId, DeviceManagementConstants.EventServices.GEOFENCE);
+    private final int tenantId;
+    private final String eventOperationCode;
+    private final EventCreateCallback callback;
+    public GeoFenceEventOperationManager(String eventOperationCode, int tenantId, EventCreateCallback callback) {
+        this.eventOperationCode = eventOperationCode;
+        this.tenantId = tenantId;
+        this.callback = callback;
     }
 
-    public DeviceEventOperationExecutor getDeviceEventOperationExecutor(int groupId, List<DeviceIdentifier> deviceIdentifiers,
-                                                                        int tenantId) {
-        return new DeviceEventOperationExecutor(groupId, deviceIdentifiers, tenantId);
+    public GroupEventOperationExecutor getGroupEventOperationExecutor(GeofenceData geofenceData) {
+        GeoFenceEventMeta geoFenceEventMeta = new GeoFenceEventMeta(geofenceData);
+        GroupEventOperationExecutor executor = new GroupEventOperationExecutor(geoFenceEventMeta, geofenceData.getGroupIds(),
+                tenantId, DeviceManagementConstants.EventServices.GEOFENCE, eventOperationCode);
+        executor.setCallback(callback);
+        return executor;
+    }
+
+    public DeviceEventOperationExecutor getDeviceEventOperationExecutor(int groupId, List<DeviceIdentifier> deviceIdentifiers) {
+        DeviceEventOperationExecutor executor = new DeviceEventOperationExecutor(groupId, deviceIdentifiers, tenantId, eventOperationCode);
+        executor.setCallback(callback);
+        return executor;
     }
 }

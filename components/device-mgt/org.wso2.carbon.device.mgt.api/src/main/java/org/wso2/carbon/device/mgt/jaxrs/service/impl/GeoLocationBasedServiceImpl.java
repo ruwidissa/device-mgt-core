@@ -799,7 +799,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             for (int eventId : eventIds) {
                 eventsToRemove.add(eventId);
             }
-            geoService.updateGeoEventConfigurations(geofenceData.getEventConfig(), eventsToRemove,
+            geoService.updateGeoEventConfigurations(geofenceData, eventsToRemove,
                     geofenceData.getGroupIds(), fenceId);
             return Response.status(Response.Status.CREATED).entity("Geo Fence update successfully").build();
         } catch (GeoLocationBasedServiceException e) {

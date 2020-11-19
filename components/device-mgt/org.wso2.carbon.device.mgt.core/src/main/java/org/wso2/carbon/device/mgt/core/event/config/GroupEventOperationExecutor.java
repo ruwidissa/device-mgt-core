@@ -26,8 +26,10 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 import org.wso2.carbon.device.mgt.common.event.config.EventMetaData;
 import org.wso2.carbon.device.mgt.common.event.config.EventOperation;
+import org.wso2.carbon.device.mgt.common.event.config.EventRevokeOperation;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoFenceEventMeta;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
@@ -36,6 +38,7 @@ import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.core.geo.task.EventCreateCallback;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
@@ -55,24 +58,47 @@ public class GroupEventOperationExecutor implements Runnable {
     private final String eventSource;
     private final EventMetaData eventMetaData;
     private final int tenantId;
+    private final String operationCode;
+    private final GroupManagementProviderService groupManagementService;
+    private EventCreateCallback callback;
 
-    public GroupEventOperationExecutor(EventMetaData eventMetaData, List<Integer> groupIds, int tenantId, String eventSource) {
+    public GroupEventOperationExecutor(EventMetaData eventMetaData, List<Integer> groupIds, int tenantId,
+                                       String eventSource, String operationCode) {
         this.eventMetaData = eventMetaData;
         this.groupIds = groupIds;
         this.tenantId = tenantId;
         this.eventSource = eventSource;
+        this.operationCode = operationCode;
+        this.groupManagementService = DeviceManagementDataHolder.getInstance().getGroupManagementProviderService();
     }
 
     @Override
     public void run() {
-        log.info("Starting event operation creation task for event " + eventSource + " tenant " + tenantId);
+        log.info("Starting event operation creation task");
+        if (operationCode == null) {
+            log.error("Failed to start event operation task. Operation code is null");
+            return;
+        }
         if (log.isDebugEnabled()) {
-            log.debug("Event creation operation started for groups with IDs " + Arrays.toString(groupIds.toArray()));
+            log.info("Starting " + operationCode + " operation creation task for event " + eventSource
+                    + " tenant " + tenantId + " group Ids "+ Arrays.toString(groupIds.toArray()));
         }
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
-        GroupManagementProviderService groupManagementService = DeviceManagementDataHolder
-                .getInstance().getGroupManagementProviderService();
+        ProfileOperation operation = new ProfileOperation();
+        operation.setType(Operation.Type.PROFILE);
+        try {
+            if (operationCode.equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_CONFIG)) {
+                operation.setCode(OperationMgtConstants.OperationCodes.EVENT_CONFIG);
+                buildEventConfigOperation(operation);
+            } else if (operationCode.equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_REVOKE)){
+                operation.setCode(OperationMgtConstants.OperationCodes.EVENT_REVOKE);
+                buildEventRevokeOperation(operation);
+            }
+        } catch (EventConfigurationException e) {
+            log.error("Event creation failed with message : " + e.getMessage(), e);
+            return;
+        }
         Set<Device> devices = new HashSet<>();
         for (Integer groupId : groupIds) {
             DeviceGroup group;
@@ -86,7 +112,7 @@ public class GroupEventOperationExecutor implements Runnable {
                 if (group != null) {
                     List<Device> allDevicesOfGroup = groupManagementService.getAllDevicesOfGroup(group.getName(), false);
                     if (allDevicesOfGroup == null || allDevicesOfGroup.isEmpty()) {
-                        log.info("No devices found in group " + group.getName());
+                        log.warn("No devices found in group " + group.getName());
                     } else {
                         devices.addAll(allDevicesOfGroup);
                     }
@@ -95,44 +121,61 @@ public class GroupEventOperationExecutor implements Runnable {
                 log.error("Failed to retrieve devices of group with ID " + groupId + " and name " + group.getName(), e);
             }
         }
-        ProfileOperation operation = new ProfileOperation();
-        operation.setCode(OperationMgtConstants.OperationCodes.EVENT_CONFIG);
-        operation.setType(Operation.Type.PROFILE);
-        if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
-            createGeoFenceOperation(operation);
-        } //extend with another cases to handle other types of events
 
-        if (log.isDebugEnabled()) {
-            log.debug("Starting tenant flow for tenant id " + tenantId);
+        if (devices.isEmpty()) {
+            log.warn("No devices found for the specified groups " + Arrays.toString(groupIds.toArray()));
+            return;
         }
-
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
         for (Device device : devices) {
-            if (device.getType().equalsIgnoreCase("android")) { //TODO introduce a proper mechanism for event handling for each device types
+            if (device.getType().equalsIgnoreCase("android")) {
+                //TODO introduce a proper mechanism for event handling for each device types
                 deviceIdentifiers.add(new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()));
             }
         }
         DeviceManagementProviderService deviceManagementProvider = DeviceManagementDataHolder
                 .getInstance().getDeviceManagementProvider();
         try {
-            if (!deviceIdentifiers.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Creating event operations stared for devices" + Arrays.toString(deviceIdentifiers.toArray()));
-                }
-                deviceManagementProvider.addOperation("android", operation, deviceIdentifiers); //TODO introduce a proper mechanism
-            } else {
-                log.info("Device identifiers are empty, Hence ignoring adding event operation");
+            if (log.isDebugEnabled()) {
+                log.debug("Creating event operations stared for devices" + Arrays.toString(deviceIdentifiers.toArray()));
             }
+            deviceManagementProvider.addOperation("android", operation, deviceIdentifiers);
+            //TODO introduce a proper mechanism
         } catch (OperationManagementException e) {
             log.error("Creating event operation failed with error ", e);
+            return;
         } catch (InvalidDeviceException e) {
             log.error("Creating event operation failed.\n" +
                     "Could not found device/devices for the defined device identifiers.", e);
+            return;
         }
         log.info("Event operation creation task completed");
+        if (callback != null) {
+            callback.onCompleteEventOperation(null);
+        }
     }
 
-    private void createGeoFenceOperation(ProfileOperation operation) {
+    private void buildEventRevokeOperation(ProfileOperation operation) {
+        if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
+            createGeoFenceRevokeOperation(operation);
+        } //extend with another cases to handle other types of events
+    }
+
+    private void createGeoFenceRevokeOperation(ProfileOperation operation) {
+        GeoFenceEventMeta geoFenceMeta = (GeoFenceEventMeta) eventMetaData;
+        EventRevokeOperation eventRevokeOperation = new EventRevokeOperation();
+        eventRevokeOperation.setEventSource(eventSource);
+        eventRevokeOperation.setId(geoFenceMeta.getId());
+        operation.setPayLoad(new Gson().toJson(eventRevokeOperation));
+    }
+
+    private void buildEventConfigOperation(ProfileOperation operation) throws EventConfigurationException {
+        if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
+            createGeoFenceConfigOperation(operation);
+        } //extend with another cases to handle other types of events
+    }
+
+    private void createGeoFenceConfigOperation(ProfileOperation operation) throws EventConfigurationException {
         GeoFenceEventMeta geoFenceMeta = (GeoFenceEventMeta) eventMetaData;
         try {
             GeoLocationProviderService geoLocationProviderService = DeviceManagementDataHolder
@@ -149,9 +192,13 @@ public class GroupEventOperationExecutor implements Runnable {
             eventOperation.setEventTriggers(eventConfigList);
             eventOperations.add(eventOperation);
             operation.setPayLoad(new Gson().toJson(eventOperations));
-        } catch (GeoLocationBasedServiceException e) {
-            log.error("Failed to retrieve event data of Geo fence " + geoFenceMeta.getId()
+        }catch (GeoLocationBasedServiceException e) {
+            throw new EventConfigurationException("Failed to retrieve event data of Geo fence " + geoFenceMeta.getId()
                     + " : " + geoFenceMeta.getFenceName(), e);
         }
+    }
+
+    public void setCallback(EventCreateCallback callback) {
+        this.callback = callback;
     }
 }

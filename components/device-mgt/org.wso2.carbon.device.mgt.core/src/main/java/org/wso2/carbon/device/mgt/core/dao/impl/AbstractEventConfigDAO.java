@@ -150,7 +150,6 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
                 int index = 1;
                 for (Integer eventId : eventsIdsToDelete) {
                     stmt.setInt(index++, eventId);
-                    stmt.addBatch();
                 }
                 stmt.executeUpdate();
             }

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.event.config;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.event.config.EventAction;
@@ -25,16 +26,20 @@ import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
+import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
+import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -116,30 +121,40 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
                     groupIdsToAdd.add(newGroupId);
                 }
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Updating event records ");
-            }
-            eventConfigDAO.updateEventRecords(eventsToUpdate, tenantId);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Deleting event group mapping records of groups");
+            if (!eventsToUpdate.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Updating event records ");
+                }
+                eventConfigDAO.updateEventRecords(eventsToUpdate, tenantId);
             }
-            eventConfigDAO.deleteEventGroupMappingRecordsByGroupIds(groupIdsToDelete);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Creating event group mapping records for updated events");
-            }
-            eventConfigDAO.addEventGroupMappingRecords(updateEventIdList, groupIdsToAdd);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Deleting event group mapping records of removing events");
+            if (!groupIdsToDelete.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleting event group mapping records of groups");
+                }
+                eventConfigDAO.deleteEventGroupMappingRecordsByGroupIds(groupIdsToDelete);
             }
-            eventConfigDAO.deleteEventGroupMappingRecordsByEventIds(removedEventIdList);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Deleting removed event records");
+            if (!groupIdsToAdd.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Creating event group mapping records for updated events");
+                }
+                eventConfigDAO.addEventGroupMappingRecords(updateEventIdList, groupIdsToAdd);
             }
-            eventConfigDAO.deleteEventRecords(removedEventIdList, tenantId);
+
+            if (!removedEventIdList.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleting event group mapping records of removing events");
+                }
+                eventConfigDAO.deleteEventGroupMappingRecordsByEventIds(removedEventIdList);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleting removed event records");
+                }
+                eventConfigDAO.deleteEventRecords(removedEventIdList, tenantId);
+            }
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
             String msg = "Failed to start/open transaction to store device event configurations";
@@ -210,6 +225,38 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
             throw new EventConfigurationException(msg, e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public void deleteEvents(List<EventConfig> eventsOfGeoFence) throws EventConfigurationException {
+        int tenantId;
+        try {
+            tenantId = DeviceManagementDAOUtil.getTenantId();
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving tenant Id";
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
+        }
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            Set<Integer> eventIdSet = new HashSet<>();
+            for (EventConfig eventConfig : eventsOfGeoFence) {
+                eventIdSet.add(eventConfig.getEventId());
+            }
+            if (!eventIdSet.isEmpty()) {
+                eventConfigDAO.deleteEventGroupMappingRecordsByEventIds(Lists.newArrayList(eventIdSet));
+                eventConfigDAO.deleteEventRecords(Lists.newArrayList(eventIdSet), tenantId);
+            }
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Failed to start/open transaction to delete device event configurations";
+            throw new EventConfigurationException(msg, e);
+        } catch (EventManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while deleting event records";
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
         }
     }
 }

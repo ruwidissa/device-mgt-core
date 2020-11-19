@@ -43,6 +43,7 @@ import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
+import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -799,7 +800,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 }
             }
             GroupManagementDAOFactory.commitTransaction();
-            createEventTask(groupId, deviceIdentifiers, tenantId);
+            createEventTask(OperationMgtConstants.OperationCodes.EVENT_CONFIG, groupId, deviceIdentifiers, tenantId);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving device.";
             log.error(msg, e);
@@ -844,6 +845,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 this.groupDAO.removeDevice(groupId, device.getId(), tenantId);
             }
             GroupManagementDAOFactory.commitTransaction();
+            createEventTask(OperationMgtConstants.OperationCodes.EVENT_REVOKE, groupId, deviceIdentifiers, tenantId);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving device.";
             log.error(msg, e);
@@ -1052,10 +1054,10 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         }
     }
 
-    private void createEventTask(int groupId, List<DeviceIdentifier> deviceIdentifiers, int tenantId) {
-        GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager();
+    private void createEventTask(String eventOperationCode, int groupId, List<DeviceIdentifier> deviceIdentifiers, int tenantId) {
+        GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager(eventOperationCode, tenantId, null);
         ScheduledExecutorService eventOperationExecutor = Executors.newSingleThreadScheduledExecutor();
         eventOperationExecutor.schedule(eventManager
-                .getDeviceEventOperationExecutor(groupId, deviceIdentifiers, tenantId), 10, TimeUnit.SECONDS);
+                .getDeviceEventOperationExecutor(groupId, deviceIdentifiers), 10, TimeUnit.SECONDS);
     }
 }
