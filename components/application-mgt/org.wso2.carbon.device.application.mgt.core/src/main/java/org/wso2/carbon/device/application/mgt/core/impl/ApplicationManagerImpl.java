@@ -339,13 +339,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
             applicationReleaseDTO.setInstallerName(applicationArtifact.getInstallerName());
             try (ByteArrayInputStream binary = new ByteArrayInputStream(content)) {
-                ApplicationInstaller applicationInstaller = null;
-                String packagename;
                 if (!DeviceTypes.WINDOWS.toString().equalsIgnoreCase(deviceType)) {
-                    applicationInstaller = applicationStorageManager.getAppInstallerData(binary, deviceType);
-                    packagename = applicationInstaller.getPackageName();
+                    ApplicationInstaller applicationInstaller = applicationStorageManager
+                            .getAppInstallerData(binary, deviceType);
                     applicationReleaseDTO.setVersion(applicationInstaller.getVersion());
-                    applicationReleaseDTO.setPackageName(packagename);
+                    applicationReleaseDTO.setPackageName(applicationInstaller.getPackageName());
                 } else {
                     String windowsInstallerName = applicationArtifact.getInstallerName();
                     String extension = windowsInstallerName.substring(windowsInstallerName.lastIndexOf(".") + 1);
@@ -356,16 +354,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         log.error(msg);
                         throw new BadRequestException(msg);
                     }
-                    packagename = applicationReleaseDTO.getPackageName();
                 }
 
+                String packageName = applicationReleaseDTO.getPackageName();
                 try {
                     ConnectionManagerUtil.openDBConnection();
                     if (!isNewRelease && applicationReleaseDAO
-                            .isActiveReleaseExisitForPackageName(packagename, tenantId,
+                            .isActiveReleaseExisitForPackageName(packageName, tenantId,
                                     lifecycleStateManager.getEndState())) {
-                        String msg = "Application release is already exist for the package name: " + packagename
-                                + ". Either you can delete all application releases for package " + packagename + " or "
+                        String msg = "Application release is already exist for the package name: " + packageName
+                                + ". Either you can delete all application releases for package " + packageName + " or "
                                 + "you can add this app release as an new application release, under the existing "
                                 + "application.";
                         log.error(msg);
@@ -1925,13 +1923,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
             int deviceTypeId;
             if (!deviceTypeName.equals(Constants.ALL)) {
                 DeviceType deviceType = deviceManagementProviderService.getDeviceType(deviceTypeName);
-                deviceTypeId = deviceType.getId();
                 if (deviceType == null) {
                     String msg = "Device type doesn't exist. Hence check the application name existence with valid "
                             + "device type name.";
                     log.error(msg);
                     throw new BadRequestException(msg);
                 }
+                deviceTypeId = deviceType.getId();
             } else {
                 //For web-clips device type = 'ALL'
                 deviceTypeId = 0;
@@ -2678,6 +2676,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
+            DeviceType deviceTypeObj = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
             AtomicReference<ApplicationReleaseDTO> applicationReleaseDTO = new AtomicReference<>(
                     applicationDTO.getApplicationReleaseDTOs().get(0));
             validateAppReleaseUpdating(entAppReleaseWrapper, applicationDTO, applicationArtifact,
@@ -2696,15 +2695,19 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (!StringUtils.isEmpty(entAppReleaseWrapper.getMetaData())) {
                 applicationReleaseDTO.get().setMetaData(entAppReleaseWrapper.getMetaData());
             }
-            if (!StringUtils.isEmpty(entAppReleaseWrapper.getVersion())) { // Updating version
-                applicationReleaseDTO.get().setVersion(entAppReleaseWrapper.getVersion());
+
+            //If the application device type is WINDOWS, it is allowed to modify version number and package name.
+            if (DeviceTypes.WINDOWS.toString().equalsIgnoreCase(deviceTypeObj.getName())) {
+                if (!StringUtils.isEmpty(entAppReleaseWrapper.getVersion())) {
+                    applicationReleaseDTO.get().setVersion(entAppReleaseWrapper.getVersion());
+                }
+                if (!StringUtils.isEmpty(entAppReleaseWrapper.getPackageName())) {
+                    applicationReleaseDTO.get().setPackageName(entAppReleaseWrapper.getPackageName());
+                }
             }
-            if (!StringUtils.isEmpty(entAppReleaseWrapper.getPackageName())) { // Updating packageName
-                applicationReleaseDTO.get().setPackageName(entAppReleaseWrapper.getPackageName());
-            }
+
             if (!StringUtils.isEmpty(applicationArtifact.getInstallerName())
                     && applicationArtifact.getInstallerStream() != null) {
-                DeviceType deviceTypeObj = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
                 applicationReleaseDTO
                         .set(updateEntAppReleaseArtifact(deviceTypeObj.getName(), applicationReleaseDTO.get(),
                                 applicationArtifact));
@@ -3135,17 +3138,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new BadRequestException(msg);
             }
             unrestrictedRoles = applicationWrapper.getUnrestrictedRoles();
-
-            //Validating the version number and the packageName of the Windows applications
-            if (DeviceTypes.WINDOWS.toString().equalsIgnoreCase(applicationWrapper.getDeviceType())) {
-                if (applicationWrapper.getEntAppReleaseWrappers().get(0).getVersion() == null ||
-                        applicationWrapper.getEntAppReleaseWrappers().get(0).getPackageName() == null) {
-                    String msg = "Application Version number or/and PackageName both are required only when the app type is " +
-                            applicationWrapper.getDeviceType() + " platform type";
-                    log.error(msg);
-                    throw new BadRequestException(msg);
-                }
-            }
         } else if (param instanceof WebAppWrapper) {
             WebAppWrapper webAppWrapper = (WebAppWrapper) param;
             appName = webAppWrapper.getName();
@@ -3461,7 +3453,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.openDBConnection();
             List<Integer> deviceSubIds = subscriptionDAO.getDeviceSubIdsForOperation(operationId, deviceId, tenantId);
-            if (deviceSubIds.isEmpty() || deviceSubIds == null) {
+            if (deviceSubIds.isEmpty()) {
                 return false;
             }
         } catch (ApplicationManagementDAOException e) {
