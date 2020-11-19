@@ -21,7 +21,6 @@ package io.entgra.server.bootup.heartbeat.beacon.dto;
 public class ServerContext {
 
     private String hostName;
-    private String macAddress;
     private int carbonServerPort;
     private String uuid;
     private int index;
@@ -32,14 +31,6 @@ public class ServerContext {
 
     public void setHostName(String hostName) {
         this.hostName = hostName;
-    }
-
-    public String getMacAddress() {
-        return macAddress;
-    }
-
-    public void setMacAddress(String macAddress) {
-        this.macAddress = macAddress;
     }
 
     public String getUuid() {

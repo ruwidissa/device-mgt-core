@@ -167,7 +167,6 @@ public class HeartBeatBeaconDAOFactory {
         currentConnection.remove();
     }
 
-
     /**
      * Resolve data source from the data source definition
      *
@@ -190,7 +189,7 @@ public class HeartBeatBeaconDAOFactory {
             List<JNDILookupDefinition.JNDIProperty> jndiPropertyList =
                     jndiConfig.getJndiProperties();
             if (jndiPropertyList != null) {
-                Hashtable<Object, Object> jndiProperties = new Hashtable<>();
+                Hashtable<Object, Object> jndiProperties = new Hashtable<Object, Object>();
                 for (JNDILookupDefinition.JNDIProperty prop : jndiPropertyList) {
                     jndiProperties.put(prop.getName(), prop.getValue());
                 }

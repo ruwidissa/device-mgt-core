@@ -20,6 +20,7 @@ package io.entgra.server.bootup.heartbeat.beacon.internal;
 
 import io.entgra.server.bootup.heartbeat.beacon.config.HeartBeatBeaconConfig;
 import io.entgra.server.bootup.heartbeat.beacon.HeartBeatBeaconConfigurationException;
+import io.entgra.server.bootup.heartbeat.beacon.dao.HeartBeatBeaconDAOFactory;
 import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
@@ -66,7 +67,7 @@ public class HeartBeatInternalUtils {
                                          CONFIG.getNotifierFrequency() != 0 ? CONFIG.getNotifierFrequency() : DEFAULT__NOTIFIER_INTERVAL,
                                          TimeUnit.SECONDS);
         } catch (HeartBeatManagementException e) {
-            throw new HeartBeatBeaconConfigurationException("Error occured while updating initial server context.");
+            throw new HeartBeatBeaconConfigurationException("Error occured while updating initial server context.", e);
         }
     }
 

@@ -27,10 +27,17 @@ import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementServi
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.ndatasource.core.DataSourceService;
 
 /**
  * @scr.component name="io.entgra.server.bootup.heartbeat.beacon.heartbeatBeaconComponent"
  * immediate="true"
+ * @scr.reference name="org.wso2.carbon.ndatasource"
+ * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setDataSourceService"
+ * unbind="unsetDataSourceService"
  */
 public class HeartBeatBeaconComponent {
 
@@ -42,21 +49,24 @@ public class HeartBeatBeaconComponent {
             if (log.isDebugEnabled()) {
                 log.debug("Initializing email sender core bundle");
             }
-            //heart beat notifier configuration */
-            HeartBeatBeaconConfig.init();
-            DataSourceConfig dsConfig = HeartBeatBeaconConfig.getInstance().getDataSourceConfig();
-            HeartBeatBeaconDAOFactory.init(dsConfig);
-
             this.registerHeartBeatServices(componentContext);
 
-            //Setting up executors to notify heart beat status */
-            HeartBeatInternalUtils.setUpNotifiers(HeartBeatBeaconUtils.getServerDetails());
+            //heart beat notifier configuration */
+            HeartBeatBeaconConfig.init();
+
+            if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
+                DataSourceConfig dsConfig = HeartBeatBeaconConfig.getInstance().getDataSourceConfig();
+                HeartBeatBeaconDAOFactory.init(dsConfig);
+
+                //Setting up executors to notify heart beat status */
+                HeartBeatInternalUtils.setUpNotifiers(HeartBeatBeaconUtils.getServerDetails());
+            }
 
             if (log.isDebugEnabled()) {
-                log.debug("Email sender core bundle has been successfully initialized");
+                log.debug("Heart Beat Notifier bundle has been successfully initialized");
             }
         } catch (Throwable e) {
-            log.error("Error occurred while initializing email sender core bundle", e);
+            log.error("Error occurred while initializing Heart Beat Notifier bundle", e);
         }
     }
 
@@ -72,6 +82,18 @@ public class HeartBeatBeaconComponent {
         HeartBeatManagementService heartBeatServiceProvider = new HeartBeatManagementServiceImpl();
         HeartBeatBeaconDataHolder.getInstance().setHeartBeatManagementService(heartBeatServiceProvider);
         componentContext.getBundleContext().registerService(HeartBeatManagementService.class, heartBeatServiceProvider, null);
+    }
+
+    protected void setDataSourceService(DataSourceService dataSourceService) {
+        /* This is to avoid mobile device management component getting initialized before the underlying datasources
+        are registered */
+        if (log.isDebugEnabled()) {
+            log.debug("Data source service set to mobile service component");
+        }
+    }
+
+    protected void unsetDataSourceService(DataSourceService dataSourceService) {
+        //do nothing
     }
 
 }

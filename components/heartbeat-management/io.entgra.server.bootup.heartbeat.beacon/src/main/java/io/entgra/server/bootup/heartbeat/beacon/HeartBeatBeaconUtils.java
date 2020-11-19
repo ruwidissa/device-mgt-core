@@ -30,7 +30,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
@@ -68,7 +67,7 @@ public class HeartBeatBeaconUtils {
                 return (DataSource) InitialContext.doLookup(dataSourceName);
             }
             final InitialContext context = new InitialContext(jndiProperties);
-            return (DataSource) context.lookup(dataSourceName);
+            return (DataSource) context.doLookup(dataSourceName);
         } catch (Exception e) {
             throw new RuntimeException("Error in looking up data source: " + e.getMessage(), e);
         }
@@ -77,20 +76,10 @@ public class HeartBeatBeaconUtils {
 
     public static ServerContext getServerDetails() throws UnknownHostException, SocketException {
         InetAddress localHost = InetAddress.getLocalHost();
-        NetworkInterface ni = NetworkInterface.getByInetAddress(localHost);
-        byte[] hardwareAddress = ni.getHardwareAddress();
-        String[] hexadecimal = new String[hardwareAddress.length];
-        for (int i = 0; i < hardwareAddress.length; i++) {
-            hexadecimal[i] = String.format("%02X", hardwareAddress[i]);
-        }
-        String macAddress = String.join("-", hexadecimal);
         int iotsCorePort = Integer.parseInt(System.getProperty("iot.core.https.port"));
-
         ServerContext ctx = new ServerContext();
         ctx.setHostName(localHost.getHostName());
-        ctx.setMacAddress(macAddress);
         ctx.setCarbonServerPort(iotsCorePort);
-
         return ctx;
     }
 

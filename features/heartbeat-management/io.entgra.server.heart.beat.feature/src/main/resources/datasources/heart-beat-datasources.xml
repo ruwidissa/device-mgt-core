@@ -16,25 +16,23 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-
-<datasources-configuration>
+<datasources-configuration xmlns:svns="http://org.wso2.securevault/configuration">
 	<providers>
 		<provider>org.wso2.carbon.ndatasource.rdbms.RDBMSDataSourceReader</provider>
 	</providers>
-
 	<datasources>
 		<datasource>
-			<name>jdbc/ServerHeartBeat_DS</name>
-			<description>The datasource used for recording server Heart Beats</description>
+			<name>HeartBeat_DS</name>
+			<description>The datasource Server Heart Beat</description>
 			<jndiConfig>
-				<name>jdbc/ServerHeartBeat_DS</name>
+				<name>jdbc/HeartBeat_DS</name>
 			</jndiConfig>
 			<definition type="RDBMS">
 				<configuration>
-					<url>jdbc:h2:repository/database/HeartBeat_DB;DB_CLOSE_ON_EXIT=FALSE</url>
-					<username>wso2carbon</username>
-					<password>wso2carbon</password>
-					<driverClassName>org.h2.Driver</driverClassName>
+					<url>jdbc:mysql://localhost:3306/heart_beat</url>
+					<username>root</username>
+					<password>root</password>
+					<driverClassName>com.mysql.jdbc.Driver</driverClassName>
 					<maxActive>50</maxActive>
 					<maxWait>60000</maxWait>
 					<testOnBorrow>true</testOnBorrow>

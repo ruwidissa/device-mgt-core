@@ -85,7 +85,6 @@ public final class HeartBeatBeaconDAOUtil {
         ctx.setIndex(resultSet.getInt("IDX"));
         ctx.setUuid(resultSet.getString("UUID"));
         ctx.setHostName(resultSet.getString("HOST_NAME"));
-        ctx.setMacAddress(resultSet.getString("MAC"));
         ctx.setCarbonServerPort(resultSet.getInt("SERVER_PORT"));
         return ctx;
     }

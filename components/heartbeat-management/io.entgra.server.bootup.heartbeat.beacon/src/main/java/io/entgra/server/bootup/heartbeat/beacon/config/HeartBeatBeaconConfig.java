@@ -35,6 +35,7 @@ import java.io.File;
 @XmlRootElement(name = "HeartBeatBeaconConfig")
 public class HeartBeatBeaconConfig {
 
+    private boolean enabled;
     private int notifierFrequency;
     private int notifierDelay;
     private int serverTimeOutIntervalInSeconds;
@@ -44,7 +45,7 @@ public class HeartBeatBeaconConfig {
     private static HeartBeatBeaconConfig config;
 
     private static final String HEART_BEAT_NOTIFIER_CONFIG_PATH =
-            CarbonUtils.getEtcCarbonConfigDirPath() + File.separator + "heart-beat-config.xml";
+            CarbonUtils.getCarbonConfigDirPath() + File.separator + "heart-beat-config.xml";
 
     private HeartBeatBeaconConfig() {
     }
@@ -100,6 +101,15 @@ public class HeartBeatBeaconConfig {
 
     public void setDataSourceConfig(DataSourceConfig dataSourceConfig) {
         this.dataSourceConfig = dataSourceConfig;
+    }
+
+    @XmlElement(name = "Enable", required = true)
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public static void init() throws HeartBeatBeaconConfigurationException {

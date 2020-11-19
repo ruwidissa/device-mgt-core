@@ -27,6 +27,7 @@ import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementExc
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 import io.entgra.server.bootup.heartbeat.beacon.internal.HeartBeatBeaconDataHolder;
 import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
+import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 
 import java.sql.SQLException;
 import java.util.Map;
@@ -39,30 +40,35 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
         int hashIndex = -1;
         ServerContext localServerCtx = null;
         ServerCtxInfo serverCtxInfo = null;
-        try {
-            HeartBeatBeaconDAOFactory.openConnection();
-            heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
+        if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
+            try {
+                HeartBeatBeaconDAOFactory.openConnection();
+                heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
 
-            int timeOutIntervalInSeconds = HeartBeatBeaconConfig.getInstance().getServerTimeOutIntervalInSeconds();
-            int timeSkew = HeartBeatBeaconConfig.getInstance().getTimeSkew();
-            int cumilativeTimeOut = timeOutIntervalInSeconds + timeSkew;
-            String localServerUUID = HeartBeatBeaconDataHolder.getInstance().getLocalServerUUID();
-            Map<String, ServerContext> serverCtxMap = heartBeatDAO.getActiveServerDetails(cumilativeTimeOut);
-            if(!serverCtxMap.isEmpty()) {
-                localServerCtx = serverCtxMap.get(localServerUUID);
-                if (localServerCtx != null) {
-                    hashIndex = localServerCtx.getIndex();
-                    serverCtxInfo = new ServerCtxInfo(serverCtxMap.size(), hashIndex);
+                int timeOutIntervalInSeconds = HeartBeatBeaconConfig.getInstance().getServerTimeOutIntervalInSeconds();
+                int timeSkew = HeartBeatBeaconConfig.getInstance().getTimeSkew();
+                int cumilativeTimeOut = timeOutIntervalInSeconds + timeSkew;
+                String localServerUUID = HeartBeatBeaconDataHolder.getInstance().getLocalServerUUID();
+                Map<String, ServerContext> serverCtxMap = heartBeatDAO.getActiveServerDetails(cumilativeTimeOut);
+                if (!serverCtxMap.isEmpty()) {
+                    localServerCtx = serverCtxMap.get(localServerUUID);
+                    if (localServerCtx != null) {
+                        hashIndex = localServerCtx.getIndex();
+                        serverCtxInfo = new ServerCtxInfo(serverCtxMap.size(), hashIndex);
+                    }
                 }
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection to the underlying data source";
+                throw new HeartBeatManagementException(msg, e);
+            } catch (HeartBeatDAOException e) {
+                String msg = "Error occurred while retrieving active server count.";
+                throw new HeartBeatManagementException(msg, e);
+            } finally {
+                HeartBeatBeaconDAOFactory.closeConnection();
             }
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the underlying data source";
-            throw new HeartBeatManagementException(msg, e);
-        } catch (HeartBeatDAOException e) {
-            String msg = "Error occurred while retrieving active server count.";
-            throw new HeartBeatManagementException(msg, e);
-        } finally {
-            HeartBeatBeaconDAOFactory.closeConnection();
+        } else {
+            String msg = "Heart Beat Configuration Disabled. Server Context Information Not available.";
+            throw new HeartBeatManagementException(msg);
         }
         return serverCtxInfo;
     }
@@ -71,22 +77,29 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
     public String updateServerContext(ServerContext ctx) throws HeartBeatManagementException {
         HeartBeatDAO heartBeatDAO;
         String uuid = null;
-        try {
-            HeartBeatBeaconDAOFactory.openConnection();
-            heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
+        if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
+            try {
+                HeartBeatBeaconDAOFactory.beginTransaction();
+                heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
 
-            uuid = heartBeatDAO.retrieveExistingServerCtx(ctx);
-            if(uuid == null){
-                uuid = heartBeatDAO.recordServerCtx(ctx);
+                uuid = heartBeatDAO.retrieveExistingServerCtx(ctx);
+                if (uuid == null) {
+                    uuid = heartBeatDAO.recordServerCtx(ctx);
+                    HeartBeatBeaconDAOFactory.commitTransaction();
+                }
+            } catch (HeartBeatDAOException e) {
+                String msg = "Error Occured while retrieving server context.";
+                throw new HeartBeatManagementException(msg, e);
+            } catch (TransactionManagementException e) {
+                HeartBeatBeaconDAOFactory.rollbackTransaction();
+                String msg = "Error occurred while updating server context. Issue in opening a connection to the underlying data source";
+                throw new HeartBeatManagementException(msg, e);
+            } finally {
+                HeartBeatBeaconDAOFactory.closeConnection();
             }
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the underlying data source";
-            throw new HeartBeatManagementException(msg, e);
-        } catch (HeartBeatDAOException e) {
-            String msg = "Error Occured while retrieving active server count.";
-            throw new HeartBeatManagementException(msg, e);
-        } finally {
-            HeartBeatBeaconDAOFactory.closeConnection();
+        } else {
+            String msg = "Heart Beat Configuration Disabled. Updating Server Context Failed.";
+            throw new HeartBeatManagementException(msg);
         }
         return uuid;
     }
@@ -96,18 +109,26 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
     public boolean recordHeartBeat(HeartBeatEvent event) throws HeartBeatManagementException {
         HeartBeatDAO heartBeatDAO;
         boolean operationSuccess = false;
-        try {
-            HeartBeatBeaconDAOFactory.openConnection();
-            heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
-            operationSuccess = heartBeatDAO.recordHeatBeat(event);
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the underlying data source";
-            throw new HeartBeatManagementException(msg, e);
-        } catch (HeartBeatDAOException e) {
-            String msg = "Error Occured while retrieving active server count.";
-            throw new HeartBeatManagementException(msg, e);
-        } finally {
-            HeartBeatBeaconDAOFactory.closeConnection();
+        if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
+            try {
+                HeartBeatBeaconDAOFactory.beginTransaction();
+                heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
+                operationSuccess = heartBeatDAO.recordHeatBeat(event);
+                HeartBeatBeaconDAOFactory.commitTransaction();
+            } catch (HeartBeatDAOException e) {
+                String msg = "Error occurred while recording heart beat.";
+                throw new HeartBeatManagementException(msg, e);
+            } catch (TransactionManagementException e) {
+                HeartBeatBeaconDAOFactory.rollbackTransaction();
+                String msg = "Error occurred performing heart beat record transaction. " +
+                             "Transaction rolled back.";
+                throw new HeartBeatManagementException(msg, e);
+            } finally {
+                HeartBeatBeaconDAOFactory.closeConnection();
+            }
+        } else {
+            String msg = "Heart Beat Configuration Disabled. Recording Heart Beat Failed.";
+            throw new HeartBeatManagementException(msg);
         }
         return operationSuccess;
     }

@@ -19,9 +19,10 @@
   -->
 
 <HeartBeatBeaconConfig>
-    <DataSourceConfiguration type="heart-beat">
+    <Enable>true</Enable>
+    <DataSourceConfiguration>
         <JndiLookupDefinition>
-            <Name>jdbc/ServerHeartBeat_DS</Name>
+            <Name>jdbc/HeartBeat_DS</Name>
         </JndiLookupDefinition>
     </DataSourceConfiguration>
     <NotifierInitialDelayInSeconds>30</NotifierInitialDelayInSeconds>

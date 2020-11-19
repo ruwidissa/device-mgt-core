@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,23 +47,21 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
         String uuid = null;
         try {
             Connection conn = HeartBeatBeaconDAOFactory.getConnection();
+            String serverUUID = UUID.randomUUID().toString();
 
             String sql;
-            sql = "INSERT INTO SERVER_HEART_BEAT_EVENTS(HOST_NAME, MAC, UUID, SERVER_PORT) VALUES (?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql, new String[]{"UUID"});
+            sql = "INSERT INTO SERVER_HEART_BEAT_EVENTS(HOST_NAME, UUID, SERVER_PORT) VALUES (?, ?, ?)";
+            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, ctx.getHostName());
-            stmt.setString(2, ctx.getMacAddress());
-            stmt.setString(3, UUID.randomUUID().toString());
-            stmt.setInt(4, ctx.getCarbonServerPort());
+            stmt.setString(2, serverUUID);
+            stmt.setInt(3, ctx.getCarbonServerPort());
 
-            stmt.executeUpdate();
-            ResultSet result = stmt.getGeneratedKeys();
-            if (result.next()){
-                uuid = result.getString("UUID");
+            if(stmt.executeUpdate() > 0){
+                uuid = serverUUID;
             }
         } catch (SQLException e) {
             throw new HeartBeatDAOException("Error occurred while persisting server context for : '" +
-                                            "mac '" + ctx.getMacAddress() + "' " +
+                                            "port '" + ctx.getCarbonServerPort() + "' " +
                                             "hostname : '" + ctx.getHostName() + "' ", e);
         } finally {
             HeartBeatBeaconDAOUtil.cleanupResources(stmt, null);
@@ -97,11 +96,10 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
         String uuid = null;
         try {
             Connection conn = HeartBeatBeaconDAOFactory.getConnection();
-            String sql = "SELECT UUID FROM SERVER_HEART_BEAT_EVENTS WHERE HOST_NAME = ? AND MAC = ? AND SERVER_PORT = ?";
+            String sql = "SELECT UUID FROM SERVER_HEART_BEAT_EVENTS WHERE HOST_NAME = ? AND SERVER_PORT = ?";
             stmt = conn.prepareStatement(sql, new String[]{"UUID"});
             stmt.setString(1, ctx.getHostName());
-            stmt.setString(2, ctx.getMacAddress());
-            stmt.setInt(3, ctx.getCarbonServerPort());
+            stmt.setInt(2, ctx.getCarbonServerPort());
 
             resultSet = stmt.executeQuery();
             if (resultSet.next()){
@@ -109,7 +107,7 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
             }
         } catch (SQLException e) {
             throw new HeartBeatDAOException("Error occurred while retrieving meta information for heart beat event from " +
-                                            "mac '" + ctx.getMacAddress() + "' " +
+                                            "port '" + ctx.getCarbonServerPort() + "' " +
                                             "hostname : '" + ctx.getHostName() + "' ", e);
         } finally {
             HeartBeatBeaconDAOUtil.cleanupResources(stmt, resultSet);
@@ -124,7 +122,7 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
         Map<String, ServerContext> ctxList = new HashMap<>();
         try {
             Connection conn = HeartBeatBeaconDAOFactory.getConnection();
-            String sql = "SELECT (@row_number:=@row_number + 1) AS IDX, UUID, HOST_NAME, MAC, SERVER_PORT from " +
+            String sql = "SELECT (@row_number:=@row_number + 1) AS IDX, UUID, HOST_NAME, SERVER_PORT from " +
                          "SERVER_HEART_BEAT_EVENTS, (SELECT @row_number:=-1) AS TEMP " +
                          "WHERE LAST_UPDATED_TIMESTAMP >  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? SECOND) " +
                          "ORDER BY UUID";
