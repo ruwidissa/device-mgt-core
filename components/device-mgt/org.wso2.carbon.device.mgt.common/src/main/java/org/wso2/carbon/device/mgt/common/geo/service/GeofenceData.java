@@ -22,6 +22,7 @@ import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.event.config.EventMetaData;
 
 import java.util.List;
+import java.util.Map;
 
 public class GeofenceData {
     private int id;
@@ -36,6 +37,7 @@ public class GeofenceData {
     private String fenceShape;
     private List<EventConfig> eventConfig;
     private List<Integer> groupIds;
+    private Map<Integer, String> groupData;
 
     public int getId() {
         return id;
@@ -131,5 +133,13 @@ public class GeofenceData {
 
     public void setGroupIds(List<Integer> groupIds) {
         this.groupIds = groupIds;
+    }
+
+    public Map<Integer, String> getGroupData() {
+        return groupData;
+    }
+
+    public void setGroupData(Map<Integer, String> groupData) {
+        this.groupData = groupData;
     }
 }

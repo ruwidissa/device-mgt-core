@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.jaxrs.beans;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
+import java.util.Map;
 
 public class GeofenceWrapper {
 
@@ -77,6 +78,8 @@ public class GeofenceWrapper {
             value = "Group ids to add geo fences",
             required = true)
     private List<Integer> groupIds;
+
+    private Map<Integer, String> groupNames;
 
     public int getId() {
         return id;
@@ -156,5 +159,13 @@ public class GeofenceWrapper {
 
     public void setGroupIds(List<Integer> groupIds) {
         this.groupIds = groupIds;
+    }
+
+    public Map<Integer, String> getGroupNames() {
+        return groupNames;
+    }
+
+    public void setGroupNames(Map<Integer, String> groupNames) {
+        this.groupNames = groupNames;
     }
 }

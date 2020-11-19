@@ -54,6 +54,7 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GeofenceDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import org.wso2.carbon.device.mgt.core.dto.event.config.GeoFenceGroupMap;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
@@ -89,6 +90,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -1376,7 +1378,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
 
         try {
             DeviceManagementDAOFactory.openConnection();
-            GeofenceData geofence = geofenceDAO.getGeofence(fenceId);
+            GeofenceData geofence = geofenceDAO.getGeofence(fenceId, true);
             if (geofence != null) {
                 GeoCacheManagerImpl.getInstance().addFenceToCache(geofence, fenceId, tenantId);
             }
@@ -1677,11 +1679,22 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             for (GeofenceData geoFence : geoFences) {
                 fenceIds.add(geoFence.getId());
             }
-            Map<Integer, List<EventConfig>> eventsOfGeoFences = geofenceDAO.getEventsOfGeoFences(fenceIds);
-            Map<Integer, List<Integer>> groupIdsOfGeoFences = geofenceDAO.getGroupIdsOfGeoFences(fenceIds);
-            for (GeofenceData geoFence : geoFences) {
-                geoFence.setEventConfig(eventsOfGeoFences.get(geoFence.getId()));
-                geoFence.setGroupIds(groupIdsOfGeoFences.get(geoFence.getId()));
+            if (!fenceIds.isEmpty()) {
+                Map<Integer, List<EventConfig>> eventsOfGeoFences = geofenceDAO.getEventsOfGeoFences(fenceIds);
+                Set<GeoFenceGroupMap> groupIdsOfGeoFences = geofenceDAO.getGroupIdsOfGeoFences(fenceIds);
+                for (GeofenceData geoFence : geoFences) {
+                    geoFence.setEventConfig(eventsOfGeoFences.get(geoFence.getId()));
+                    for (GeoFenceGroupMap geoFenceGroupMap : groupIdsOfGeoFences) {
+                        if (geoFenceGroupMap.getFenceId() == geoFence.getId()) {
+                            Map<Integer, String> groupData = geoFence.getGroupData();
+                            if (groupData == null) {
+                                groupData = new HashMap<>();
+                            }
+                            groupData.put(geoFenceGroupMap.getGroupId(), geoFenceGroupMap.getGroupName());
+                            geoFence.setGroupData(groupData);
+                        }
+                    }
+                }
             }
             return geoFences;
         } catch (DeviceManagementDAOException e) {

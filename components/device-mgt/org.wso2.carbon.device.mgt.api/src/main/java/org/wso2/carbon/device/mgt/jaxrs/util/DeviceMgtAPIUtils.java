@@ -568,15 +568,6 @@ public class DeviceMgtAPIUtils {
         return geoService;
     }
 
-    public static EventConfigurationProviderService getEventConfigService() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        EventConfigurationProviderService eventService = (EventConfigurationProviderService) ctx.getOSGiService(EventConfigurationProviderService.class, null);
-        if (eventService == null) {
-            throw new IllegalStateException("Event configuration service has not been initialized.");
-        }
-        return eventService;
-    }
-
     public static AnalyticsDataAPI getAnalyticsDataAPI() {
         PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         AnalyticsDataAPI analyticsDataAPI =

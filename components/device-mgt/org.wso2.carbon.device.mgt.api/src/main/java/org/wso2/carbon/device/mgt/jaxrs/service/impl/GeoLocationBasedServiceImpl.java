@@ -680,7 +680,12 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         geofenceWrapper.setRadius(geofenceData.getRadius());
         geofenceWrapper.setGeoJson(geofenceData.getGeoJson());
         geofenceWrapper.setFenceShape(geofenceData.getFenceShape());
-        geofenceWrapper.setGroupIds(geofenceData.getGroupIds());
+        if (geofenceData.getGroupIds() != null && !geofenceData.getGroupIds().isEmpty()) {
+            geofenceWrapper.setGroupIds(geofenceData.getGroupIds());
+        }
+        if (geofenceData.getGroupData() != null && !geofenceData.getGroupData().isEmpty()) {
+            geofenceWrapper.setGroupNames(geofenceData.getGroupData());
+        }
         if (geofenceData.getEventConfig() != null) {
             geofenceWrapper.setEventConfig(getEventConfigBean(geofenceData.getEventConfig()));
         }
@@ -725,7 +730,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                     request.setProperty(DeviceManagementConstants.GeoServices.FENCE_NAME, name);
                 }
                 List<GeofenceData> geoFences = geoService.getGeoFences(request);
-                if (requireEventData) {
+                if (!geoFences.isEmpty() && requireEventData) {
                     geoFences = geoService.attachEventObjects(geoFences);
                 }
                 return getResponse(geoFences);

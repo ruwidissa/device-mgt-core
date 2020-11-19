@@ -23,6 +23,7 @@ import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import java.util.List;
 
 public interface EventConfigDAO {
+
     /**
      * Create event configuration entries of the db for a selected tenant
      * @param eventConfigList event list to be created
@@ -50,6 +51,13 @@ public interface EventConfigDAO {
      */
     List<EventConfig> getEventsOfGroups(List<Integer> groupIds, int tenantId) throws EventManagementDAOException;
 
+    /**
+     * Get events of groups using group Id
+     * @param groupId  id of the group
+     * @param tenantId id of the tenant
+     * @return EventConfig list of specific group
+     * @throws EventManagementDAOException errors occur while retrieving events of groups
+     */
     List<EventConfig> getEventsOfGroups(int groupId, int tenantId) throws EventManagementDAOException;
 
     /**
@@ -61,7 +69,6 @@ public interface EventConfigDAO {
 
     /**
      * Update event records of the tenant
-     *
      * @param eventsToUpdate updating event records
      * @throws EventManagementDAOException error occurred while updating events
      */
@@ -69,7 +76,6 @@ public interface EventConfigDAO {
 
     /**
      * Delete events using event ids
-     *
      * @param eventsIdsToDelete ids of the events which should be deleted
      * @throws EventManagementDAOException error occurred while deleting event records
      */

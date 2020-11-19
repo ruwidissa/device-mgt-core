@@ -27,6 +27,7 @@ import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GeofenceDAO;
+import org.wso2.carbon.device.mgt.core.dto.event.config.GeoFenceGroupMap;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,8 +39,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GeofenceDAOImpl implements GeofenceDAO {
     private static final Log log = LogFactory.getLog(GeofenceDAOImpl.class);
@@ -170,8 +173,8 @@ public class GeofenceDAOImpl implements GeofenceDAO {
     public List<GeofenceData> getGeoFencesOfTenant(String fenceName, int tenantId)
             throws DeviceManagementDAOException {
         try {
-            List<GeofenceData> geofenceData;
             Connection conn = this.getConnection();
+            List<GeofenceData> geofenceData;
             String sql = "SELECT " +
                     "ID, " +
                     "FENCE_NAME, " +
@@ -184,7 +187,8 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                     "OWNER, " +
                     "TENANT_ID " +
                     "FROM DM_GEOFENCE " +
-                    "WHERE FENCE_NAME LIKE ? AND TENANT_ID = ? ";
+                    "WHERE FENCE_NAME LIKE ?" +
+                    "AND TENANT_ID = ? ";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, fenceName + "%");
                 stmt.setInt(2, tenantId);
@@ -482,15 +486,17 @@ public class GeofenceDAOImpl implements GeofenceDAO {
     }
 
     @Override
-    public Map<Integer, List<Integer>> getGroupIdsOfGeoFences(List<Integer> fenceIds) throws DeviceManagementDAOException {
+    public Set<GeoFenceGroupMap> getGroupIdsOfGeoFences(List<Integer> fenceIds) throws DeviceManagementDAOException {
         try {
-            Map<Integer, List<Integer>> fenceGroupMap = new HashMap<>();
+            Set<GeoFenceGroupMap> geoFenceGroupSet = new HashSet<>();
             Connection conn = this.getConnection();
             String sql = "SELECT " +
                     "FENCE_ID, " +
-                    "GROUP_ID " +
-                    "FROM DM_GEOFENCE_GROUP_MAPPING " +
-                    "WHERE FENCE_ID IN (%s) ";
+                    "M.GROUP_ID, " +
+                    "G.GROUP_NAME " +
+                    "FROM DM_GEOFENCE_GROUP_MAPPING M, DM_GROUP G " +
+                    "WHERE M.GROUP_ID = G.ID " +
+                    "AND FENCE_ID IN (%s)";
             String inClause = String.join(", ", Collections.nCopies(fenceIds.size(), "?"));
             sql = String.format(sql, inClause);
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -500,16 +506,14 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                 }
                 ResultSet rst = stmt.executeQuery();
                 while (rst.next()) {
-                    int fenceId = rst.getInt("FENCE_ID");
-                    List<Integer> groupIdList = fenceGroupMap.get(fenceId);
-                    if (groupIdList == null) {
-                        groupIdList = new ArrayList<>();
-                    }
-                    groupIdList.add(rst.getInt("GROUP_ID"));
-                    fenceGroupMap.put(fenceId, groupIdList);
+                    GeoFenceGroupMap geoFenceGroupMap = new GeoFenceGroupMap();
+                    geoFenceGroupMap.setFenceId(rst.getInt("FENCE_ID"));
+                    geoFenceGroupMap.setGroupId(rst.getInt("GROUP_ID"));
+                    geoFenceGroupMap.setGroupName(rst.getString("GROUP_NAME"));
+                    geoFenceGroupSet.add(geoFenceGroupMap);
                 }
             }
-            return fenceGroupMap;
+            return geoFenceGroupSet;
         } catch (SQLException e) {
             String msg = "Error occurred while fetching group IDs of the fences";
             log.error(msg, e);
@@ -601,10 +605,10 @@ public class GeofenceDAOImpl implements GeofenceDAO {
             try (PreparedStatement stmt = con.prepareStatement(sql)){
                 stmt.setInt(1, fenceId);
                 ResultSet rst = stmt.executeQuery();
-                List<Integer> groupIdList = new ArrayList<>();
+                Map<Integer, String> groupMap = new HashMap<>();
                 GeofenceData geofenceData = null;
                 while (rst.next()) {
-                    groupIdList.add(rst.getInt("GROUP_ID"));
+                    groupMap.put(rst.getInt("GROUP_ID"), rst.getString("GROUP_NAME"));
                     if (rst.isLast()) {
                         geofenceData = new GeofenceData();
                         geofenceData.setId(rst.getInt("FENCE_ID"));
@@ -615,7 +619,7 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                         geofenceData.setRadius(rst.getFloat("RADIUS"));
                         geofenceData.setGeoJson(rst.getString("GEO_JSON"));
                         geofenceData.setFenceShape(rst.getString("FENCE_SHAPE"));
-                        geofenceData.setGroupIds(groupIdList);
+                        geofenceData.setGroupData(groupMap);
                     }
                 }
                 return geofenceData;

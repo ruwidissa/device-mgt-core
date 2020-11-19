@@ -21,9 +21,11 @@ package org.wso2.carbon.device.mgt.core.dao;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
+import org.wso2.carbon.device.mgt.core.dto.event.config.GeoFenceGroupMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Use to manage geofence data in DB
@@ -153,7 +155,7 @@ public interface GeofenceDAO {
      * @return GroupIds mapped with geofence id
      * @throws DeviceManagementDAOException thrown errors while retrieving group Ids of geo fence
      */
-    Map<Integer, List<Integer>> getGroupIdsOfGeoFences(List<Integer> fenceIds) throws DeviceManagementDAOException;
+    Set<GeoFenceGroupMap> getGroupIdsOfGeoFences(List<Integer> fenceIds) throws DeviceManagementDAOException;
 
     /**
      * Get geo fences of the specific group and tenant
