@@ -52,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * This class holds the generic implementation of OperationDAO which can be used to support ANSI db syntax.
@@ -1479,27 +1481,109 @@ public class GenericOperationDAOImpl implements OperationDAO {
     }
 
     @Override
-    public int getOperationCountForDevice(int enrolmentId) throws OperationManagementDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        int operationCount = 0;
+    public int getOperationCountForDevice(int enrolmentId, PaginationRequest request)
+            throws OperationManagementDAOException {
+        String createdTo = null;
+        String createdFrom = null;
+        DateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        if (request.getOperationLogFilters().getCreatedDayFrom() != null) {
+            createdFrom = simple.format(request.getOperationLogFilters().getCreatedDayFrom());
+        }
+        if (request.getOperationLogFilters().getCreatedDayTo() != null) {
+            createdTo = simple.format(request.getOperationLogFilters().getCreatedDayTo());
+        }
+
+        Long updatedFrom = request.getOperationLogFilters().getUpdatedDayFrom();
+        Long updatedTo = request.getOperationLogFilters().getUpdatedDayTo();
+        List<String> operationCodes = request.getOperationLogFilters().getOperationCode();
+        List<String> status = request.getOperationLogFilters().getStatus();
+        boolean isCreatedDayProvided = false;
+        boolean isUpdatedDayProvided = false;
+        boolean isOperationCodeProvided = false;
+        boolean isStatusProvided = false;
+
+        String sql = "SELECT "
+                + "COUNT(o.ID) AS OPERATION_COUNT "
+                + "FROM "
+                + "DM_OPERATION o "
+                + "INNER JOIN "
+                + "(SELECT dm.OPERATION_ID, "
+                + "dm.ID, "
+                + "dm.STATUS, "
+                + "dm.UPDATED_TIMESTAMP "
+                + "FROM "
+                + "DM_ENROLMENT_OP_MAPPING dm "
+                + "WHERE "
+                + "dm.ENROLMENT_ID = ?";
+
+        if (updatedFrom != null && updatedFrom != 0 && updatedTo != null && updatedTo != 0) {
+            sql += " AND dm.UPDATED_TIMESTAMP BETWEEN ? AND ?";
+            isUpdatedDayProvided = true;
+        }
+        sql += ") om ON o.ID = om.OPERATION_ID ";
+        if (createdFrom != null && !createdFrom.isEmpty() && createdTo != null && !createdTo.isEmpty()) {
+            sql += " WHERE o.CREATED_TIMESTAMP BETWEEN ? AND ?";
+            isCreatedDayProvided = true;
+        }
+        if (status != null && !status.isEmpty()) {
+            if (isCreatedDayProvided) {
+                sql += " AND (om.STATUS = ? ";
+            } else {
+                sql += " WHERE (om.STATUS = ? ";
+            }
+            sql = IntStream.range(0, status.size() - 1).mapToObj(i -> " OR om.STATUS = ?")
+                    .collect(Collectors.joining("", sql, ""));
+            sql += ")";
+            isStatusProvided = true;
+        }
+        if (operationCodes != null && !operationCodes.isEmpty()) {
+            if (isCreatedDayProvided || isStatusProvided) {
+                sql += " AND (o.OPERATION_CODE = ? ";
+            } else {
+                sql += " WHERE (o.OPERATION_CODE = ? ";
+            }
+            sql = IntStream.range(0, operationCodes.size() - 1).mapToObj(i -> " OR o.OPERATION_CODE = ?")
+                    .collect(Collectors.joining("", sql, ""));
+            sql += ")";
+            isOperationCodeProvided = true;
+        }
         try {
-            conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT COUNT(ID) AS OPERATION_COUNT FROM DM_ENROLMENT_OP_MAPPING WHERE ENROLMENT_ID = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, enrolmentId);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                operationCount = rs.getInt("OPERATION_COUNT");
+            Connection conn = OperationManagementDAOFactory.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, enrolmentId);
+                if (isUpdatedDayProvided) {
+                    stmt.setLong(paramIndex++, updatedFrom);
+                    stmt.setLong(paramIndex++, updatedTo);
+                }
+                if (isCreatedDayProvided) {
+                    stmt.setString(paramIndex++, createdFrom);
+                    stmt.setString(paramIndex++, createdTo);
+                }
+                if (isStatusProvided) {
+                    for (String s : status) {
+                        stmt.setString(paramIndex++, s);
+                    }
+                }
+                if (isOperationCodeProvided) {
+                    for (String s : operationCodes) {
+                        stmt.setString(paramIndex++, s);
+                    }
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("OPERATION_COUNT");
+                    }
+                }
             }
         } catch (SQLException e) {
-            throw new OperationManagementDAOException("Error occurred while getting the operations count for enrolment: "
-                    + enrolmentId, e);
-        } finally {
-            OperationManagementDAOUtil.cleanupResources(stmt, rs);
+            String msg = "SQL error occurred while retrieving the operation count of the device" + enrolmentId
+                    + " for search query";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
         }
-        return operationCount;
+        return 0;
     }
 
     @Override
