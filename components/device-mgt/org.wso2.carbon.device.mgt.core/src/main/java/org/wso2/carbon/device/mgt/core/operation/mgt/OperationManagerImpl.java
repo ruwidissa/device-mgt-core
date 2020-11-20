@@ -24,6 +24,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
@@ -300,7 +301,7 @@ public class OperationManagerImpl implements OperationManager {
     }
 
     @Override
-    public void addTaskOperation(String deviceType, Operation operation) throws OperationManagementException {
+    public void addTaskOperation(String deviceType, Operation operation, DynamicTaskContext dynamicTaskContext) throws OperationManagementException {
         List<String> validStatuses = Arrays.asList(EnrolmentInfo.Status.ACTIVE.toString(),
                 EnrolmentInfo.Status.INACTIVE.toString(),
                 EnrolmentInfo.Status.UNREACHABLE.toString());
@@ -316,7 +317,16 @@ public class OperationManagerImpl implements OperationManager {
                 paginationRequest = new PaginationRequest(start, batchSize);
                 paginationRequest.setStatusList(validStatuses);
                 paginationRequest.setDeviceType(deviceType);
-                List<Device> devices = deviceDAO.getDevices(paginationRequest, tenantId);
+                List<Device> devices;
+
+                if(dynamicTaskContext != null && dynamicTaskContext.isPartitioningEnabled()) {
+                    devices = deviceDAO.getAllocatedDevices(paginationRequest, tenantId,
+                                                                         dynamicTaskContext.getActiveServerCount(),
+                                                            dynamicTaskContext.getServerHashIndex());
+                } else {
+                    devices = deviceDAO.getDevices(paginationRequest, tenantId);
+                }
+
                 if (devices.size() == batchSize) {
                     hasRecords = true;
                     start += batchSize;

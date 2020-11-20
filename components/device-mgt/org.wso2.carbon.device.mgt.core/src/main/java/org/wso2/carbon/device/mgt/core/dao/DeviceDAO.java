@@ -296,6 +296,18 @@ public interface DeviceDAO {
     List<Device> getDevices(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
 
     /**
+     * This method is used to retrieve the devices of a given tenant as a paginated result, along the lines of
+     * activeServerCount and serverIndex
+     *
+     * @param request
+     * @param tenantId
+     * @param activeServerCount
+     * @param serverIndex
+     * @return
+     */
+    List<Device> getAllocatedDevices(PaginationRequest request, int tenantId, int activeServerCount, int serverIndex) throws DeviceManagementDAOException;
+
+    /**
      * This method is used to search for devices within a specific group.
      *
      * @param request  PaginationRequest object holding the data for pagination
@@ -335,7 +347,7 @@ public interface DeviceDAO {
      * @return returns list of devices of provided type.
      * @throws DeviceManagementDAOException
      */
-    List<Device> getDevices(String type, int tenantId, int activeServerCount, int serverIndex) throws DeviceManagementDAOException;
+    List<Device> getAllocatedDevices(String type, int tenantId, int activeServerCount, int serverIndex) throws DeviceManagementDAOException;
 
     List<Device> getDevices(long timestamp, int tenantId) throws DeviceManagementDAOException;
 

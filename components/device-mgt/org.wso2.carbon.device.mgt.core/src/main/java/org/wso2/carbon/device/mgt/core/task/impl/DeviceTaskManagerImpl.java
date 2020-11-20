@@ -44,6 +44,7 @@ import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
@@ -115,7 +116,7 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
 
 
     @Override
-    public void addOperations() throws DeviceMgtTaskException {
+    public void addOperations(DynamicTaskContext dynamicTaskContext) throws DeviceMgtTaskException {
         DeviceManagementProviderService deviceManagementProviderService = DeviceManagementDataHolder.getInstance().
                 getDeviceManagementProvider();
         //list operations for device type
@@ -133,7 +134,7 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
             operation.setType(Operation.Type.COMMAND);
             operation.setCode(str);
             try {
-                deviceManagementProviderService.addTaskOperation(deviceType, operation);
+                deviceManagementProviderService.addTaskOperation(deviceType, operation, dynamicTaskContext);
             } catch (OperationManagementException e) {
                 throw new DeviceMgtTaskException("Error occurred while adding task operations to devices", e);
             }

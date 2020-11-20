@@ -37,6 +37,7 @@ package org.wso2.carbon.device.mgt.core.service;
 
 import org.apache.commons.collections.map.SingletonMap;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
@@ -664,7 +665,7 @@ public interface DeviceManagementProviderService {
     Activity addOperation(String type, Operation operation,
                           List<DeviceIdentifier> devices) throws OperationManagementException, InvalidDeviceException;
 
-    void addTaskOperation(String deviceType, Operation operation) throws OperationManagementException;
+    void addTaskOperation(String deviceType, Operation operation, DynamicTaskContext taskContext) throws OperationManagementException;
 
     void addTaskOperation(String type, List<Device> devices, Operation operation)
             throws OperationManagementException;

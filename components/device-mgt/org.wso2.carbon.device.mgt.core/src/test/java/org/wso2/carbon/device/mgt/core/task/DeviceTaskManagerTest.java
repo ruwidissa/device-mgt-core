@@ -117,7 +117,7 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
     @Test(groups = "Device Task Manager Test Group", description = "Testing adding operations to devices.")
     public void testAddOperation() throws DeviceMgtTaskException, OperationManagementException {
         log.info("Attempting to add operations for devices.");
-        this.deviceTaskManager.addOperations();
+        this.deviceTaskManager.addOperations(null);
         for (DeviceIdentifier deviceId : deviceIds) {
             List<? extends Operation> operationList = this.operationManager.getOperations(deviceId);
             Assert.assertNotNull(operationList);
@@ -133,7 +133,7 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
                 new TestDeviceManagementService(NEW_DEVICE_TYPE, TestDataHolder.SUPER_TENANT_DOMAIN));
         DeviceTaskManager taskManager = new DeviceTaskManagerImpl(NEW_DEVICE_TYPE,
                 TestDataHolder.generateMonitoringTaskConfig(true, 50000, 3));
-        taskManager.addOperations();
+        taskManager.addOperations(null);
     }
 
     @Test(groups = "Device Task Manager Test Group", dependsOnMethods = "testAddOperationsWithoutDevices",
@@ -141,7 +141,7 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
     public void testAddOperationsWithoutOperations() throws DeviceMgtTaskException {
         DeviceTaskManager taskManager = new DeviceTaskManagerImpl(NEW_DEVICE_TYPE,
                 TestDataHolder.generateMonitoringTaskConfig(true, 50000, 3));
-        taskManager.addOperations();
+        taskManager.addOperations(null);
     }
 
     @Test(groups = "Device Task Manager Test Group", description = "Testing device detail retriever task execution")

@@ -802,7 +802,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
 
     @Override
-    public List<Device> getDevices(String type, int tenantId, int activeServerCount, int serverIndex) throws DeviceManagementDAOException {
+    public List<Device> getAllocatedDevices(String type, int tenantId, int activeServerCount, int serverIndex) throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;

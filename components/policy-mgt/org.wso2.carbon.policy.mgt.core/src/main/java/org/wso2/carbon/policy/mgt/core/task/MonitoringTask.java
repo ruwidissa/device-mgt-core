@@ -28,7 +28,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.ntask.core.Task;
+import org.wso2.carbon.device.mgt.core.task.impl.DynamicPartitionedScheduleTask;
 import org.wso2.carbon.policy.mgt.core.internal.PolicyManagementDataHolder;
 import org.wso2.carbon.policy.mgt.core.mgt.MonitoringManager;
 
@@ -36,16 +36,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MonitoringTask implements Task {
+public class MonitoringTask extends DynamicPartitionedScheduleTask {
 
     private static final Log log = LogFactory.getLog(MonitoringTask.class);
 
     @Override
     public void setProperties(Map<String, String> map) {
-    }
-
-    @Override
-    public void init() {
     }
 
     @Override
@@ -125,7 +121,14 @@ public class MonitoringTask implements Task {
                     PolicyMonitoringManager monitoringService =
                             PolicyManagementDataHolder.getInstance().getDeviceManagementService()
                                     .getPolicyMonitoringManager(deviceType);
-                    List<Device> devices = deviceManagementProviderService.getAllDevices(deviceType, false);
+                    List<Device> devices;
+                    if(super.getTaskContext()!= null && super.getTaskContext().isPartitioningEnabled()){
+                        devices = deviceManagementProviderService.getAllocatedDevices(deviceType,
+                                                                                      super.getTaskContext().getActiveServerCount(),
+                                                                                      super.getTaskContext().getServerHashIndex());
+                    } else {
+                        devices = deviceManagementProviderService.getAllDevices(deviceType, false);
+                    }
                     if (monitoringService != null && !devices.isEmpty()) {
                         List<Device> notifiableDevices = new ArrayList<>();
                         if (log.isDebugEnabled()) {
@@ -163,4 +166,8 @@ public class MonitoringTask implements Task {
         }
     }
 
+    @Override
+    protected void setup() {
+
+    }
 }

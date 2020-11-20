@@ -56,6 +56,7 @@ import org.wso2.carbon.device.mgt.common.DeviceManager;
 import org.wso2.carbon.device.mgt.common.DeviceNotification;
 import org.wso2.carbon.device.mgt.common.DevicePropertyNotification;
 import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
@@ -779,7 +780,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         List<Device> allocatedDevices;
         try {
             DeviceManagementDAOFactory.openConnection();
-            allocatedDevices = deviceDAO.getDevices(deviceType, this.getTenantId(), activeServerCount, serverIndex);
+            allocatedDevices = deviceDAO.getAllocatedDevices(deviceType, this.getTenantId(), activeServerCount, serverIndex);
             if (allocatedDevices == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("No device is found upon the type '" + deviceType + "'");
@@ -1874,8 +1875,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public void addTaskOperation(String type, Operation operation) throws OperationManagementException {
-        pluginRepository.getOperationManager(type, this.getTenantId()).addTaskOperation(type, operation);
+    public void addTaskOperation(String type, Operation operation, DynamicTaskContext taskContext) throws OperationManagementException {
+        pluginRepository.getOperationManager(type, this.getTenantId()).addTaskOperation(type, operation, taskContext);
     }
 
     @Override
