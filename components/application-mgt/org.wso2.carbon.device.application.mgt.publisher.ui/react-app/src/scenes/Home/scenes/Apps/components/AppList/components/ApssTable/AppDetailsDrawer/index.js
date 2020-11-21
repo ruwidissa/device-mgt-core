@@ -702,7 +702,14 @@ class AppDetailsDrawer extends React.Component {
                         title="Click to view full details"
                         placement="topRight"
                       >
-                        <Link to={'apps/releases/' + release.uuid}>
+                        <Link
+                          to={{
+                            pathname: `apps/releases/${release.uuid}`,
+                            state: {
+                              fullAppDetails: app.applicationReleases,
+                            },
+                          }}
+                        >
                           <Card className="release-card">
                             <Meta
                               avatar={
@@ -773,7 +780,13 @@ class AppDetailsDrawer extends React.Component {
                       <Text>Add new release for the application</Text>
                     </div>
                     <Link
-                      to={`/publisher/apps/${app.deviceType}/${app.id}/add-release`}
+                      to={{
+                        pathname: `/publisher/apps/${app.deviceType}/${app.id}/add-release`,
+                        state: {
+                          appDetails: app.applicationReleases[0],
+                          fullAppDetails: app.applicationReleases,
+                        },
+                      }}
                     >
                       <Button htmlType="button" type="primary" size="small">
                         Add

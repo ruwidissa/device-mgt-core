@@ -27,6 +27,7 @@ import { handleApiError } from '../../../../../../services/utils/errorHandler';
 import NewAppUploadForm from '../../../AddNewApp/components/AddNewAppForm/components/NewAppUploadForm';
 
 const formConfig = {
+  isNewRelease: true,
   specificElements: {
     binaryFile: {
       required: true,
@@ -127,7 +128,10 @@ class AddNewReleaseFormComponent extends React.Component {
             description: 'New release was added successfully',
           });
           const uuid = res.data.data.uuid;
-          this.props.history.push('/publisher/apps/releases/' + uuid);
+          this.props.history.push({
+            pathname: '/publisher/apps/releases/' + uuid,
+            state: { fullAppDetails: this.props.location.state.fullAppDetails },
+          });
         } else {
           this.setState({
             loading: false,
@@ -160,6 +164,11 @@ class AddNewReleaseFormComponent extends React.Component {
                 <NewAppUploadForm
                   forbiddenErrors={forbiddenErrors}
                   formConfig={formConfig}
+                  deviceType={this.props.deviceType}
+                  // Takes the first upload app type installation path
+                  uploadedInstalltionAppType={
+                    this.props.location.state.appDetails.installerPath
+                  }
                   supportedOsVersions={supportedOsVersions}
                   onSuccessReleaseData={this.onSuccessReleaseData}
                   onClickBackButton={this.onClickBackButton}

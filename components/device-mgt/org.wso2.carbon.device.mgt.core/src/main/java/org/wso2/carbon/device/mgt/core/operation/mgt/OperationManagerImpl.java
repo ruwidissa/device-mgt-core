@@ -627,7 +627,7 @@ public class OperationManagerImpl implements OperationManager {
                 operations.add(operation);
             }
             paginationResult = new PaginationResult();
-            int count = operationDAO.getOperationCountForDevice(enrolmentId);
+            int count = operationDAO.getOperationCountForDevice(enrolmentId, request);
             paginationResult.setData(operations);
             paginationResult.setRecordsTotal(count);
             paginationResult.setRecordsFiltered(count);

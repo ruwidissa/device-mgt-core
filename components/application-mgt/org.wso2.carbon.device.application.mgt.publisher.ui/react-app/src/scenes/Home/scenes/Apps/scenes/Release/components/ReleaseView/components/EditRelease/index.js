@@ -65,6 +65,12 @@ function getBase64(file) {
     reader.onerror = error => reject(error);
   });
 }
+// function for access the name of the binary file using the installation path
+function extractBinaryFileName(installationPath) {
+  let UploadedBinaryName = installationPath.split('/');
+  let binaryFileName = UploadedBinaryName[UploadedBinaryName.length - 1];
+  return binaryFileName.substr(binaryFileName.lastIndexOf('.') + 1);
+}
 
 class EditReleaseModal extends React.Component {
   // To add subscription type & tenancy sharing, refer https://gitlab.com/entgra/carbon-device-mgt/merge_requests/331
@@ -156,7 +162,6 @@ class EditReleaseModal extends React.Component {
     const { formConfig } = this.state;
     const { specificElements } = formConfig;
     let metaData = [];
-
     try {
       metaData = JSON.parse(release.metaData);
     } catch (e) {
@@ -185,7 +190,23 @@ class EditReleaseModal extends React.Component {
         },
       });
     }
-    if (specificElements.hasOwnProperty('version')) {
+    // Showing the packageName value in the edit form UI
+    if (
+      formConfig.specificElements.hasOwnProperty('packageName') ||
+      (this.props.type === 'ENTERPRISE' && this.props.deviceType === 'windows')
+    ) {
+      this.props.form.setFields({
+        packageName: {
+          value: release.packageName,
+        },
+      });
+    }
+
+    // Showing the version value in the edit form UI
+    if (
+      formConfig.specificElements.hasOwnProperty('version') ||
+      (this.props.type === 'ENTERPRISE' && this.props.deviceType === 'windows')
+    ) {
       this.props.form.setFields({
         version: {
           value: release.version,
@@ -197,14 +218,6 @@ class EditReleaseModal extends React.Component {
       this.props.form.setFields({
         url: {
           value: release.url,
-        },
-      });
-    }
-
-    if (specificElements.hasOwnProperty('packageName')) {
-      this.props.form.setFields({
-        packageName: {
-          value: release.packageName,
         },
       });
     }
@@ -248,6 +261,10 @@ class EditReleaseModal extends React.Component {
 
     const { formConfig } = this.state;
     const { specificElements } = formConfig;
+    // Accessing the extension type of the current uploaded binary file
+    const appTypeExtension = extractBinaryFileName(
+      this.props.release.installerPath,
+    );
 
     this.props.form.validateFields((err, values) => {
       if (!err) {
@@ -280,8 +297,36 @@ class EditReleaseModal extends React.Component {
           data.append('binaryFile', binaryFiles[0].originFileObj);
         }
 
-        if (specificElements.hasOwnProperty('version')) {
+        if (
+          specificElements.hasOwnProperty('version') ||
+          (this.props.type === 'ENTERPRISE' &&
+            this.props.deviceType === 'windows')
+        ) {
           release.version = values.version;
+        }
+
+        // Accessing the Meta Key value for windows device type from the config.json file
+        const metaKeyValues =
+          config.windowsAppxMsiKeyValueForMetaData.metaKeyArray;
+
+        if (
+          specificElements.hasOwnProperty('packageName') ||
+          (this.props.type === 'ENTERPRISE' &&
+            this.props.deviceType === 'windows')
+        ) {
+          release.packageName = values.packageName;
+          // Setting up the packageName to the package_Family_Name key in an appx app type instance
+          if (appTypeExtension === config.windowsDeviceType.appType[1]) {
+            let metaDataArray = this.state.metaData;
+            let filterMetaArray = metaDataArray.filter(
+              obj => obj.key !== metaKeyValues[4],
+            );
+            filterMetaArray.push({
+              key: metaKeyValues[4],
+              value: values.packageName,
+            });
+            release.metaData = JSON.stringify(filterMetaArray);
+          }
         }
 
         if (specificElements.hasOwnProperty('url')) {
@@ -335,7 +380,6 @@ class EditReleaseModal extends React.Component {
                 message: 'Done!',
                 description: 'Saved!',
               });
-              // console.log(updatedRelease);
               this.props.updateRelease(updatedRelease);
             }
           })
@@ -463,7 +507,6 @@ class EditReleaseModal extends React.Component {
                     )}
                   </Form.Item>
                 )}
-
                 {formConfig.specificElements.hasOwnProperty('url') && (
                   <Form.Item {...formItemLayout} label="URL">
                     {getFieldDecorator('url', {
@@ -474,19 +517,6 @@ class EditReleaseModal extends React.Component {
                         },
                       ],
                     })(<Input placeholder="url" />)}
-                  </Form.Item>
-                )}
-
-                {formConfig.specificElements.hasOwnProperty('version') && (
-                  <Form.Item {...formItemLayout} label="Version">
-                    {getFieldDecorator('version', {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Please input the version',
-                        },
-                      ],
-                    })(<Input placeholder="Version" />)}
                   </Form.Item>
                 )}
 
@@ -527,6 +557,38 @@ class EditReleaseModal extends React.Component {
                     </Upload>,
                   )}
                 </Form.Item>
+
+                {/* Package Name field for windows device type and other specific scene using it */}
+                {(formConfig.specificElements.hasOwnProperty('packageName') ||
+                  (this.props.type === 'ENTERPRISE' &&
+                    this.props.deviceType === 'windows')) && (
+                  <Form.Item {...formItemLayout} label="Package Name">
+                    {getFieldDecorator('packageName', {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please input the package name',
+                        },
+                      ],
+                    })(<Input placeholder="Package Name" />)}
+                  </Form.Item>
+                )}
+
+                {/* Version field for windows device type and other specific scene using it */}
+                {(formConfig.specificElements.hasOwnProperty('version') ||
+                  (this.props.type === 'ENTERPRISE' &&
+                    this.props.deviceType === 'windows')) && (
+                  <Form.Item {...formItemLayout} label="Version">
+                    {getFieldDecorator('version', {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please input the version',
+                        },
+                      ],
+                    })(<Input placeholder="Version" />)}
+                  </Form.Item>
+                )}
 
                 <Form.Item {...formItemLayout} label="Release Type">
                   {getFieldDecorator('releaseType', {
@@ -650,50 +712,59 @@ class EditReleaseModal extends React.Component {
                   })(
                     <div>
                       {metaData.map((data, index) => {
-                        return (
-                          <InputGroup key={index}>
-                            <Row gutter={8}>
-                              <Col span={10}>
-                                <Input
-                                  placeholder="key"
-                                  value={data.key}
-                                  onChange={e => {
-                                    metaData[index].key = e.currentTarget.value;
-                                    this.setState({
-                                      metaData,
-                                    });
-                                  }}
-                                />
-                              </Col>
-                              <Col span={10}>
-                                <Input
-                                  placeholder="value"
-                                  value={data.value}
-                                  onChange={e => {
-                                    metaData[index].value =
-                                      e.currentTarget.value;
-                                    this.setState({
-                                      metaData,
-                                    });
-                                  }}
-                                />
-                              </Col>
-                              <Col span={3}>
-                                <Button
-                                  type="dashed"
-                                  shape="circle"
-                                  icon={<MinusOutlined />}
-                                  onClick={() => {
-                                    metaData.splice(index, 1);
-                                    this.setState({
-                                      metaData,
-                                    });
-                                  }}
-                                />
-                              </Col>
-                            </Row>
-                          </InputGroup>
-                        );
+                        if (
+                          !(
+                            data.key ===
+                            config.windowsAppxMsiKeyValueForMetaData
+                              .metaKeyArray[4]
+                          )
+                        ) {
+                          return (
+                            <InputGroup key={index}>
+                              <Row gutter={8}>
+                                <Col span={10}>
+                                  <Input
+                                    placeholder="key"
+                                    value={data.key}
+                                    onChange={e => {
+                                      metaData[index].key =
+                                        e.currentTarget.value;
+                                      this.setState({
+                                        metaData,
+                                      });
+                                    }}
+                                  />
+                                </Col>
+                                <Col span={10}>
+                                  <Input
+                                    placeholder="value"
+                                    value={data.value}
+                                    onChange={e => {
+                                      metaData[index].value =
+                                        e.currentTarget.value;
+                                      this.setState({
+                                        metaData,
+                                      });
+                                    }}
+                                  />
+                                </Col>
+                                <Col span={3}>
+                                  <Button
+                                    type="dashed"
+                                    shape="circle"
+                                    icon={<MinusOutlined />}
+                                    onClick={() => {
+                                      metaData.splice(index, 1);
+                                      this.setState({
+                                        metaData,
+                                      });
+                                    }}
+                                  />
+                                </Col>
+                              </Row>
+                            </InputGroup>
+                          );
+                        }
                       })}
                       <Button
                         type="dashed"

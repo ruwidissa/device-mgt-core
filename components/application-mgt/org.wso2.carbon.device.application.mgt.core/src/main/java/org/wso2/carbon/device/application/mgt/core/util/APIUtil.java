@@ -304,6 +304,10 @@ public class APIUtil {
             applicationReleaseDTO.setIsSharedWithAllTenants(entAppReleaseWrapper.getIsSharedWithAllTenants());
             applicationReleaseDTO.setMetaData(entAppReleaseWrapper.getMetaData());
             applicationReleaseDTO.setSupportedOsVersions(entAppReleaseWrapper.getSupportedOsVersions());
+            //Setting version number value specifically for windows type and in an instance of android and ios it will be null
+            applicationReleaseDTO.setVersion(entAppReleaseWrapper.getVersion());
+            //Setting package name value specifically for windows type and in an instance of android and ios it will be null
+            applicationReleaseDTO.setPackageName(entAppReleaseWrapper.getPackageName());
         } else if (param instanceof WebAppReleaseWrapper){
             WebAppReleaseWrapper webAppReleaseWrapper = (WebAppReleaseWrapper) param;
             applicationReleaseDTO.setDescription(webAppReleaseWrapper.getDescription());
@@ -358,6 +362,7 @@ public class APIUtil {
         application.setTags(applicationDTO.getTags());
         application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
         application.setRating(applicationDTO.getAppRating());
+        application.setInstallerName(applicationDTO.getApplicationReleaseDTOs().get(0).getInstallerName());
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         if (ApplicationType.PUBLIC.toString().equals(applicationDTO.getType()) && application.getCategories()
                 .contains("GooglePlaySyncedApp")) {
@@ -384,6 +389,7 @@ public class APIUtil {
 
         applicationRelease.setDescription(applicationReleaseDTO.getDescription());
         applicationRelease.setVersion(applicationReleaseDTO.getVersion());
+        applicationRelease.setPackageName(applicationReleaseDTO.getPackageName());
         applicationRelease.setUuid(applicationReleaseDTO.getUuid());
         applicationRelease.setReleaseType(applicationReleaseDTO.getReleaseType());
         applicationRelease.setPrice(applicationReleaseDTO.getPrice());

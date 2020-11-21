@@ -41,7 +41,8 @@ import java.util.Map;
 public class DelegationTask implements Task {
 
     private static final Log log = LogFactory.getLog(DelegationTask.class);
-    private PolicyConfiguration policyConfiguration = DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getPolicyConfiguration();
+    private PolicyConfiguration policyConfiguration = DeviceConfigurationManager.getInstance()
+            .getDeviceManagementConfig().getPolicyConfiguration();
 
     @Override
     public void setProperties(Map<String, String> map) {
@@ -73,21 +74,17 @@ public class DelegationTask implements Task {
                 List<Device> toBeNotified;
                 for (String deviceType : deviceTypes) {
                     try {
-                        devices = new ArrayList<>();
                         toBeNotified = new ArrayList<>();
-                        devices.addAll(service.getAllDevices(deviceType, false));
-                        //HashMap<Integer, Integer> deviceIdPolicy = policyManager.getAppliedPolicyIdsDeviceIds();
+                        devices = new ArrayList<>(service.getAllDevices(deviceType, false));
                         for (Device device : devices) {
-                            // if (deviceIdPolicy.containsKey(device.getId())) {
                             if (device != null && device.getEnrolmentInfo() != null
-                                && device.getEnrolmentInfo().getStatus() != EnrolmentInfo.Status.REMOVED) {
+                                    && device.getEnrolmentInfo().getStatus() != EnrolmentInfo.Status.REMOVED) {
                                 toBeNotified.add(device);
                             }
-                            // }
                         }
                         if (!toBeNotified.isEmpty()) {
-                            PolicyEnforcementDelegator enforcementDelegator = new PolicyEnforcementDelegatorImpl
-                                    (toBeNotified, updatedPolicyDeviceList.getUpdatedPolicyIds());
+                            PolicyEnforcementDelegator enforcementDelegator = new PolicyEnforcementDelegatorImpl(
+                                    toBeNotified, updatedPolicyDeviceList.getUpdatedPolicyIds());
                             enforcementDelegator.delegate();
                         }
                     } catch (DeviceManagementException e) {

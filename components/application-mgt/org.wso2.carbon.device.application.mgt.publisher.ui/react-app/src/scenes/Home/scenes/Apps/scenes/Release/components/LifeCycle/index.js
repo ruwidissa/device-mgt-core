@@ -27,6 +27,7 @@ import {
   Steps,
   Alert,
   Tabs,
+  Tooltip,
 } from 'antd';
 import axios from 'axios';
 import ReactQuill from 'react-quill';
@@ -76,6 +77,7 @@ class LifeCycle extends React.Component {
       current: 0,
       lifecycleSteps: [],
       lifeCycleStates: [],
+      isPublished: false,
     };
   }
 
@@ -85,9 +87,11 @@ class LifeCycle extends React.Component {
     const lifecycleSteps = Object.keys(lifeCycleConfig).map(config => {
       return lifeCycleConfig[config];
     });
+    let isPublished = this.checkReleaseLifeCycleStatus();
     this.setState({
       current: lifeCycleConfig[this.props.currentStatus].step,
       lifecycleSteps,
+      isPublished,
     });
     this.getLifeCycleHistory();
   }
@@ -198,6 +202,27 @@ class LifeCycle extends React.Component {
     this.setState({ current });
   };
 
+  /*
+ Function to check if the same app releases are in published
+ state or not and assigned a boolean value to disable
+ the publish button if an app release is already published
+*/
+  checkReleaseLifeCycleStatus = () => {
+    if (typeof this.props.appReleases !== 'undefined') {
+      let appReleases = this.props.appReleases.fullAppDetails;
+      for (let i = 0; i < appReleases.length; i++) {
+        if (
+          this.props.uuid !== appReleases[i].uuid &&
+          appReleases[i].currentStatus === 'PUBLISHED'
+        ) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return false;
+  };
+
   render() {
     const {
       currentStatus,
@@ -207,6 +232,7 @@ class LifeCycle extends React.Component {
       lifeCycleStates,
     } = this.state;
     const { lifecycle } = this.props;
+    const text = <span>Already an app is in publish state</span>;
     let proceedingStates = [];
     if (
       lifecycle !== null &&
@@ -247,17 +273,31 @@ class LifeCycle extends React.Component {
                             <p>{step.text}</p>
                             {proceedingStates.map(lifecycleState => {
                               return (
-                                <Button
-                                  size={'small'}
-                                  style={{ marginRight: 3 }}
-                                  onClick={() =>
-                                    this.showReasonModal(lifecycleState)
-                                  }
+                                <Tooltip
                                   key={lifecycleState}
-                                  type={'primary'}
+                                  title={
+                                    lifecycleState === 'PUBLISHED' &&
+                                    this.state.isPublished
+                                      ? text
+                                      : ''
+                                  }
                                 >
-                                  {lifecycleState}
-                                </Button>
+                                  <Button
+                                    size={'small'}
+                                    style={{ marginRight: 3 }}
+                                    disabled={
+                                      lifecycleState === 'PUBLISHED' &&
+                                      this.state.isPublished
+                                    }
+                                    onClick={() =>
+                                      this.showReasonModal(lifecycleState)
+                                    }
+                                    key={lifecycleState}
+                                    type={'primary'}
+                                  >
+                                    {lifecycleState}
+                                  </Button>
+                                </Tooltip>
                               );
                             })}
                           </div>

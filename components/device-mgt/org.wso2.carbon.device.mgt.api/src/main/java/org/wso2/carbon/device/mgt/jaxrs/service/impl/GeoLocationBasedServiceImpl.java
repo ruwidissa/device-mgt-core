@@ -659,7 +659,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                                 @QueryParam("name") String name) {
         try {
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
-            if (offset != 0 && limit != 0) {
+            if (offset >= 0 && limit != 0) {
                 PaginationRequest request = new PaginationRequest(offset, limit);
                 if (name != null && !name.isEmpty()) {
                     request.setProperty(DeviceManagementConstants.GeoServices.FENCE_NAME, name);

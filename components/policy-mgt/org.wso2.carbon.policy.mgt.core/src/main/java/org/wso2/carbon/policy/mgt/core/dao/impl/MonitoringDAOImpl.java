@@ -188,14 +188,6 @@ public class MonitoringDAOImpl implements MonitoringDAO {
             stmt.setInt(4, tenantId);
             stmt.setInt(5, enrolmentId);
             stmt.executeUpdate();
-
-//            generatedKeys = stmt.getGeneratedKeys();
-//            if (generatedKeys.next()) {
-//                return generatedKeys.getInt(1);
-//            } else {
-//                return 0;
-//            }
-
         } catch (SQLException e) {
             throw new MonitoringDAOException("Error occurred while deleting the none compliance to the database.", e);
         } finally {
@@ -442,7 +434,7 @@ public class MonitoringDAOImpl implements MonitoringDAO {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
-        List<ComplianceFeature> complianceFeatures = new ArrayList<ComplianceFeature>();
+        List<ComplianceFeature> complianceFeatures = new ArrayList<>();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         try {
@@ -488,8 +480,7 @@ public class MonitoringDAOImpl implements MonitoringDAO {
 
     }
 
-    private Connection getConnection() throws MonitoringDAOException {
+    private Connection getConnection() {
         return PolicyManagementDAOFactory.getConnection();
     }
-
 }

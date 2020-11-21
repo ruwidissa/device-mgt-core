@@ -25,7 +25,6 @@ import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +34,10 @@ import java.util.List;
  */
 public class DefaultPolicyMonitoringManager implements PolicyMonitoringManager {
 
-    private static Log log = LogFactory.getLog(DefaultPolicyMonitoringManager.class);
+    private static final Log log = LogFactory.getLog(DefaultPolicyMonitoringManager.class);
+
     @Override
-    public NonComplianceData checkPolicyCompliance(DeviceIdentifier deviceIdentifier, Policy policy, Object response)
-            throws PolicyComplianceException {
+    public NonComplianceData checkPolicyCompliance(DeviceIdentifier deviceIdentifier, Policy policy, Object response) {
         if (log.isDebugEnabled()) {
             log.debug("Checking policy compliance status of device '" + deviceIdentifier.getId() + "'");
         }

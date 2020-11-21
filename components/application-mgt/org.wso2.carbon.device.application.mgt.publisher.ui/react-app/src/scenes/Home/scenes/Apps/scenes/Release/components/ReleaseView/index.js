@@ -41,6 +41,8 @@ class ReleaseView extends React.Component {
     const { app, release } = this.props;
     const config = this.props.context;
     const { lifecycle, currentLifecycleStatus } = this.props;
+    let isKeyInclude = false;
+    let metaArrayWithOutWindowsKey = [];
     if (release == null) {
       return null;
     }
@@ -169,21 +171,31 @@ class ReleaseView extends React.Component {
           <Text>META DATA</Text>
           <Row>
             {metaData.map((data, index) => {
-              return (
-                <Col
-                  key={index}
-                  lg={8}
-                  md={6}
-                  xs={24}
-                  style={{ marginTop: 15 }}
-                >
-                  <Text>{data.key}</Text>
-                  <br />
-                  <Text type="secondary">{data.value}</Text>
-                </Col>
-              );
+              // Exclude showing the values related to windows app type variables in the metaData UI
+              if (
+                !config.windowsAppxMsiKeyValueForMetaData.metaKeyArray.includes(
+                  data.key,
+                )
+              ) {
+                isKeyInclude = false;
+                metaArrayWithOutWindowsKey.push(data);
+                return (
+                  <Col
+                    key={index}
+                    lg={8}
+                    md={6}
+                    xs={24}
+                    style={{ marginTop: 15 }}
+                  >
+                    <Text>{data.key}</Text>
+                    <br />
+                    <Text type="secondary">{data.value}</Text>
+                  </Col>
+                );
+              }
             })}
-            {metaData.length === 0 && (
+            {(metaData.length === 0 ||
+              (!isKeyInclude && metaArrayWithOutWindowsKey.length === 0)) && (
               <Text type="secondary">No meta data available.</Text>
             )}
           </Row>

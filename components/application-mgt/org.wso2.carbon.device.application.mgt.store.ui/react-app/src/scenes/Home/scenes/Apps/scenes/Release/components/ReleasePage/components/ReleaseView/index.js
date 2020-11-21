@@ -148,12 +148,14 @@ class ReleaseView extends React.Component {
     const config = this.props.context;
     const release = app.applicationReleases[0];
 
+    let isKeyInclude = false;
+    let metaArrayWithOutWindowsKey = [];
     let metaData = [];
     try {
       metaData = JSON.parse(release.metaData);
       // eslint-disable-next-line no-empty
     } catch (e) {}
-    if (app.hasOwnProperty('packageName')) {
+    if (app.type !== 'WEB_CLIP' && app.hasOwnProperty('packageName')) {
       metaData.push({
         key: 'Package Name',
         value: app.packageName,
@@ -270,24 +272,33 @@ class ReleaseView extends React.Component {
               </div>
               <Divider />
               <Text>META DATA</Text>
-
               <Row>
                 {metaData.map((data, index) => {
-                  return (
-                    <Col
-                      key={index}
-                      lg={8}
-                      md={6}
-                      xs={24}
-                      style={{ marginTop: 15 }}
-                    >
-                      <Text>{data.key}</Text>
-                      <br />
-                      <Text type="secondary">{data.value}</Text>
-                    </Col>
-                  );
+                  if (
+                    !config.windowsAppxMsiKeyValueForMetaData.metaKeyArray.includes(
+                      data.key,
+                    )
+                  ) {
+                    isKeyInclude = false;
+                    metaArrayWithOutWindowsKey.push(data);
+                    return (
+                      <Col
+                        key={index}
+                        lg={8}
+                        md={6}
+                        xs={24}
+                        style={{ marginTop: 15 }}
+                      >
+                        <Text>{data.key}</Text>
+                        <br />
+                        <Text type="secondary">{data.value}</Text>
+                      </Col>
+                    );
+                  }
                 })}
-                {metaData.length === 0 && (
+                {(metaData.length === 0 ||
+                  (!isKeyInclude &&
+                    metaArrayWithOutWindowsKey.length === 0)) && (
                   <Text type="secondary">No meta data available.</Text>
                 )}
               </Row>

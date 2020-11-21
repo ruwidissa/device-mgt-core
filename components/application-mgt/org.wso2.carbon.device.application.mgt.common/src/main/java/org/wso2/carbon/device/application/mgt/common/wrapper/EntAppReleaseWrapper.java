@@ -60,6 +60,14 @@ public class EntAppReleaseWrapper {
     @NotNull
     private String supportedOsVersions;
 
+    @ApiModelProperty(name = "version",
+            value = "Version number of the applications installer specifically for windows")
+    private String version;
+
+    @ApiModelProperty(name = "packageName",
+            value = "PackageName of the application installer specifically for windows")
+    private String packageName;
+
     public String getReleaseType() {
         return releaseType;
     }
@@ -99,4 +107,20 @@ public class EntAppReleaseWrapper {
     public String getSupportedOsVersions() { return supportedOsVersions; }
 
     public void setSupportedOsVersions(String supportedOsVersions) { this.supportedOsVersions = supportedOsVersions; }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
 }
