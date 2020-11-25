@@ -41,7 +41,9 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupDAO;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
+import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -52,6 +54,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GroupManagementProviderServiceImpl implements GroupManagementProviderService {
 
@@ -795,6 +800,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 }
             }
             GroupManagementDAOFactory.commitTransaction();
+            createEventTask(OperationMgtConstants.OperationCodes.EVENT_CONFIG, groupId, deviceIdentifiers, tenantId);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving device.";
             log.error(msg, e);
@@ -839,6 +845,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 this.groupDAO.removeDevice(groupId, device.getId(), tenantId);
             }
             GroupManagementDAOFactory.commitTransaction();
+            createEventTask(OperationMgtConstants.OperationCodes.EVENT_REVOKE, groupId, deviceIdentifiers, tenantId);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving device.";
             log.error(msg, e);
@@ -1045,5 +1052,19 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             deviceGroup.setGroupProperties(this.groupDAO.getAllGroupProperties(deviceGroup.getGroupId(),
                     tenantId));
         }
+    }
+
+    /**
+     * Create event config/revoke operation at the time of device removing from a group/assigning into group
+     * @param eventOperationCode code of the event operation(config/revoke)
+     * @param groupId Id of the device removing/assigning group
+     * @param deviceIdentifiers devices assigning to/removing from group
+     * @param tenantId tenant of the group
+     */
+    private void createEventTask(String eventOperationCode, int groupId, List<DeviceIdentifier> deviceIdentifiers, int tenantId) {
+        GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager(eventOperationCode, tenantId, null);
+        ScheduledExecutorService eventOperationExecutor = Executors.newSingleThreadScheduledExecutor();
+        eventOperationExecutor.schedule(eventManager
+                .getEventOperationExecutor(groupId, deviceIdentifiers), 10, TimeUnit.SECONDS);
     }
 }

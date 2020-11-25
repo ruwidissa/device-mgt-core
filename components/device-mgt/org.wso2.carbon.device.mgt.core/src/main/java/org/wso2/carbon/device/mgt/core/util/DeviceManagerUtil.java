@@ -64,6 +64,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManageme
 import org.wso2.carbon.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
@@ -604,6 +605,18 @@ public final class DeviceManagerUtil {
             throw new IllegalStateException(msg);
         }
         return eventsPublisherService;
+    }
+
+    public static EventConfigurationProviderService getEventConfigService() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        EventConfigurationProviderService eventConfigService =
+                (EventConfigurationProviderService) ctx.getOSGiService(EventConfigurationProviderService.class, null);
+        if (eventConfigService == null) {
+            String msg = "Event configuration service has not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return eventConfigService;
     }
 
     public static void initializeDeviceCache() {

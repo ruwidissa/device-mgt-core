@@ -20,6 +20,9 @@ package org.wso2.carbon.device.mgt.jaxrs.beans;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
+import java.util.Map;
+
 public class GeofenceWrapper {
 
     @ApiModelProperty(
@@ -35,8 +38,7 @@ public class GeofenceWrapper {
 
     @ApiModelProperty(
             name = "description",
-            value = "Description of the geo fence",
-            required = true)
+            value = "Description of the geo fence")
     private String description;
 
     @ApiModelProperty(
@@ -61,8 +63,23 @@ public class GeofenceWrapper {
 
     @ApiModelProperty(
             name = "fenceShape",
-            value = "Shape of the fence")
+            value = "Shape of the fence",
+            required = true)
     private String fenceShape;
+
+    @ApiModelProperty(
+            name = "eventConfig",
+            value = "Event configuration of the geofence",
+            required = true)
+    private List<EventConfig> eventConfig;
+
+    @ApiModelProperty(
+            name = "groupIds",
+            value = "Group ids to add geo fences",
+            required = true)
+    private List<Integer> groupIds;
+
+    private Map<Integer, String> groupNames;
 
     public int getId() {
         return id;
@@ -126,5 +143,29 @@ public class GeofenceWrapper {
 
     public void setFenceShape(String fenceShape) {
         this.fenceShape = fenceShape;
+    }
+
+    public List<EventConfig> getEventConfig() {
+        return eventConfig;
+    }
+
+    public void setEventConfig(List<EventConfig> eventConfig) {
+        this.eventConfig = eventConfig;
+    }
+
+    public List<Integer> getGroupIds() {
+        return groupIds;
+    }
+
+    public void setGroupIds(List<Integer> groupIds) {
+        this.groupIds = groupIds;
+    }
+
+    public Map<Integer, String> getGroupNames() {
+        return groupNames;
+    }
+
+    public void setGroupNames(Map<Integer, String> groupNames) {
+        this.groupNames = groupNames;
     }
 }

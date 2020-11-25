@@ -21,7 +21,10 @@ package org.wso2.carbon.device.mgt.common.geo.service;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -77,13 +80,14 @@ public interface GeoLocationProviderService {
      * @param geofenceData fence data
      * @return true if the fence creation success
      * @throws GeoLocationBasedServiceException error occurs while creating a geofence
+     * @throws EventConfigurationException  for errors occur while creating event configuration for the geofence
      */
-    boolean createGeofence(GeofenceData geofenceData) throws GeoLocationBasedServiceException;
+    boolean createGeofence(GeofenceData geofenceData) throws GeoLocationBasedServiceException, EventConfigurationException;
 
     /**
      * Get geofence by ID
      * @param fenceId id of the fence which should be retrieved
-     * @return Extracted geofence data
+     * @return {@link GeofenceData} Extracted geofence data
      * @throws GeoLocationBasedServiceException error occurs while retrieving a geofence
      */
     GeofenceData getGeoFences(int fenceId) throws GeoLocationBasedServiceException;
@@ -91,7 +95,7 @@ public interface GeoLocationProviderService {
     /**
      * Get paginated geofence list
      * @param request Pagination Request
-     * @return List of Geofences retrieved
+     * @return {@link GeofenceData} List of Geofences retrieved
      * @throws GeoLocationBasedServiceException error occurs while retrieving geofences
      */
     List<GeofenceData> getGeoFences(PaginationRequest request) throws GeoLocationBasedServiceException;
@@ -99,14 +103,14 @@ public interface GeoLocationProviderService {
     /**
      * Search geo fences using the fence name
      * @param name searching name of the fence
-     * @return list of fences found for the specific name
+     * @return {@link GeofenceData} list of fences found for the specific name
      * @throws GeoLocationBasedServiceException  for errors occur while querying geo fences
      */
     List<GeofenceData> getGeoFences(String name) throws GeoLocationBasedServiceException;
 
     /**
      * Get all geo fences of the tenant
-     * @return list of the all geo fences of the tenant
+     * @return {@link GeofenceData} list of the all geo fences of the tenant
      * @throws GeoLocationBasedServiceException for errors occur while querying geo fences
      */
     List<GeofenceData> getGeoFences() throws GeoLocationBasedServiceException;
@@ -125,6 +129,46 @@ public interface GeoLocationProviderService {
      * @param fenceId Id of the fence which should be updated
      * @return true if update success. false if not a record found for the used Id
      * @throws GeoLocationBasedServiceException  for errors occur while updating geo fences
+     * @throws EventConfigurationException  for errors occur while updating event records of the geofence
      */
-    boolean updateGeofence(GeofenceData geofenceData, int fenceId) throws GeoLocationBasedServiceException;
+    boolean updateGeofence(GeofenceData geofenceData, int fenceId)
+            throws GeoLocationBasedServiceException, EventConfigurationException;
+
+    /**
+     * Update geofence event configuration
+     * @param geofenceData updated GeoFenceData object
+     * @param removedEventIdList removed event ids
+     * @param groupIds newly added group ids to be mapped with event records
+     * @param fenceId updating fence id
+     * @return true for successful update of geofence event data
+     * @throws GeoLocationBasedServiceException any errors occurred while updating event records of the fence
+     */
+    boolean updateGeoEventConfigurations(GeofenceData geofenceData, List<Integer> removedEventIdList,
+                                         List<Integer> groupIds, int fenceId) throws GeoLocationBasedServiceException;
+
+    /**
+     * Attach event data into geofence objects
+     * @param geoFences list of GeofenceData to attach corresponding event data
+     * @return {@link GeofenceData} events attached geofence object list
+     * @throws GeoLocationBasedServiceException any errors occurred while attaching event records to geofences
+     */
+    List<GeofenceData> attachEventObjects(List<GeofenceData> geoFences) throws GeoLocationBasedServiceException;
+
+    /**
+     * Get Geofence records of groups. Attaching with corresponding event data of fences
+     * @param groupId Id of the group geo which fences attached
+     * @param tenantId Id of the tenant which geo fences attached
+     * @param requireEventData use true for attach event records with the geo fence data
+     * @return {@link GeofenceData} Queried geo fence data using group Id
+     * @throws GeoLocationBasedServiceException any errors occurred while getting geofences of group
+     */
+    List<GeofenceData> getGeoFencesOfGroup(int groupId, int tenantId, boolean requireEventData) throws GeoLocationBasedServiceException;
+
+    /**
+     * Get event records mapped with specific geo fence
+     * @param geoFenceId Id of the Geofence to retrieve mapped events
+     * @return {@link EventConfig} Event records of the geofence
+     * @throws GeoLocationBasedServiceException any errors occurred while reading event records to geofence
+     */
+    List<EventConfig> getEventsOfGeoFence(int geoFenceId) throws GeoLocationBasedServiceException;
 }

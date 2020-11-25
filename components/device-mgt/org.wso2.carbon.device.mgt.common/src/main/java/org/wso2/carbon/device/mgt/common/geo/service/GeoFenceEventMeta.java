@@ -18,26 +18,31 @@
 
 package org.wso2.carbon.device.mgt.common.geo.service;
 
-import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.event.config.EventMetaData;
 
-import java.util.List;
-import java.util.Map;
-
-public class GeofenceData {
+public class GeoFenceEventMeta implements EventMetaData {
     private int id;
     private String fenceName;
     private String description;
     private double latitude;
     private double longitude;
     private float radius;
-    private int tenantId;
-    private String owner;
     private String geoJson;
     private String fenceShape;
-    private List<EventConfig> eventConfig;
-    private List<Integer> groupIds;
-    private Map<Integer, String> groupData;
+
+    public GeoFenceEventMeta() {
+    }
+
+    public GeoFenceEventMeta(GeofenceData geofenceData) {
+        this.id = geofenceData.getId();
+        this.fenceName = geofenceData.getFenceName();
+        this.description = geofenceData.getDescription();
+        this.latitude = geofenceData.getLatitude();
+        this.longitude = geofenceData.getLongitude();
+        this.radius = geofenceData.getRadius();
+        this.geoJson = geofenceData.getGeoJson();
+        this.fenceShape = geofenceData.getFenceShape();
+    }
 
     public int getId() {
         return id;
@@ -87,22 +92,6 @@ public class GeofenceData {
         this.radius = radius;
     }
 
-    public int getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(int tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
     public String getGeoJson() {
         return geoJson;
     }
@@ -117,29 +106,5 @@ public class GeofenceData {
 
     public void setFenceShape(String fenceShape) {
         this.fenceShape = fenceShape;
-    }
-
-    public List<EventConfig> getEventConfig() {
-        return eventConfig;
-    }
-
-    public void setEventConfig(List<EventConfig> eventConfig) {
-        this.eventConfig = eventConfig;
-    }
-
-    public List<Integer> getGroupIds() {
-        return groupIds;
-    }
-
-    public void setGroupIds(List<Integer> groupIds) {
-        this.groupIds = groupIds;
-    }
-
-    public Map<Integer, String> getGroupData() {
-        return groupData;
-    }
-
-    public void setGroupData(Map<Integer, String> groupData) {
-        this.groupData = groupData;
     }
 }

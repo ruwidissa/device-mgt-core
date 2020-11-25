@@ -33,6 +33,7 @@ import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.common.geo.service.Alert;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
@@ -50,6 +51,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 
 @SwaggerDefinition(
         info = @Info(
@@ -872,14 +874,15 @@ public interface GeoLocationBasedService {
             @ApiResponse(
                     code = 400,
                     message = "Bad Request. \n Invalid Geofence data found.",
-                    response = Response.class),
+                    response = ErrorResponse.class),
             @ApiResponse(
                     code = 401,
-                    message = "Unauthorized. \n Unauthorized request."),
+                    message = "Unauthorized. \n Unauthorized request.",
+                    response = ErrorResponse.class),
             @ApiResponse(
                     code = 500,
                     message = "Internal Server Error. \n Error on retrieving stats",
-                    response = Response.class)
+                    response = ErrorResponse.class)
     })
     Response createGeofence(@ApiParam(name = "fence", value = "Geo fence data")GeofenceWrapper geofenceWrapper);
 
@@ -927,7 +930,11 @@ public interface GeoLocationBasedService {
                 name = "fenceId",
                 value = "Id of the fence",
                 required = true)
-            @PathParam("fenceId") int fenceId);
+            @PathParam("fenceId") int fenceId,
+            @ApiParam(
+                    name = "requireEventData",
+                    value = "Require geofence event data")
+            @QueryParam("requireEventData") boolean requireEventData);
 
 
     @GET
@@ -976,7 +983,11 @@ public interface GeoLocationBasedService {
             @ApiParam(
                     name = "name",
                     value = "Geo Fence name")
-            @QueryParam("name") String name);
+            @QueryParam("name") String name,
+            @ApiParam(
+                    name = "requireEventData",
+                    value = "Require geofence event data")
+            @QueryParam("requireEventData") boolean requireEventData);
 
 
     @DELETE
@@ -1067,11 +1078,13 @@ public interface GeoLocationBasedService {
                     response = Response.class)
     })
     Response updateGeofence(
-            @ApiParam(name = "fence", value = "Geo fence data")GeofenceWrapper geofenceWrapper,
+            @ApiParam(name = "fence", value = "Geo fence data")
+                    GeofenceWrapper geofenceWrapper,
             @ApiParam(
                     name = "fenceId",
                     value = "Id of the fence",
                     required = true)
-            @PathParam("fenceId") int fenceId);
+            @PathParam("fenceId") int fenceId,
+            @ApiParam(name = "eventIds", value = "Event id list to be removed") @QueryParam("eventIds") int[] eventIds);
 }
 

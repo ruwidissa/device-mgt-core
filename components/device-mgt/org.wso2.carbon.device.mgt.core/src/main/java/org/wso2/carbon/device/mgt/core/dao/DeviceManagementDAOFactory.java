@@ -29,11 +29,13 @@ import org.wso2.carbon.device.mgt.core.config.datasource.JNDILookupDefinition;
 import org.wso2.carbon.device.mgt.core.dao.impl.ApplicationDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.DeviceTypeDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.EnrollmentDAOImpl;
+import org.wso2.carbon.device.mgt.core.dao.impl.event.GenericEventConfigDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.GeofenceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.GenericDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.OracleDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.PostgreSQLDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.SQLServerDeviceDAOImpl;
+import org.wso2.carbon.device.mgt.core.dao.impl.event.H2EventConfigDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.impl.DeviceDetailsDAOImpl;
@@ -152,6 +154,23 @@ public class DeviceManagementDAOFactory {
 
     public static GeofenceDAO getGeofenceDAO() {
         return new GeofenceDAOImpl();
+    }
+
+    public static EventConfigDAO getEventConfigDAO() {
+        if (databaseEngine != null) {
+            switch (databaseEngine) {
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_ORACLE:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MSSQL:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MYSQL:
+                    return new GenericEventConfigDAOImpl();
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2:
+                    return new H2EventConfigDAOImpl();
+                default:
+                    throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
+            }
+        }
+        throw new IllegalStateException("Database engine has not initialized properly.");
     }
 
     public static void init(DataSourceConfig config) {
