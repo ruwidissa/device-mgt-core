@@ -831,10 +831,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                          "    WHERE DEVICE_TYPE_ID = t.ID" +
                          "            AND t.NAME = ?" +
                          "            AND t.ID = d.DEVICE_TYPE_ID" +
-                         "            AND d.TENANT_ID = ?) d1" +
+                         "            AND d.TENANT_ID = ?) d1 " +
                          "WHERE d1.ID = e.DEVICE_ID" +
                          "        AND TENANT_ID = ?" +
-                         "        AND MOD(d1.ID, ?) = ?" +
+                         "        AND MOD(d1.ID, ?) = ? " +
                          "ORDER BY e.DATE_OF_LAST_UPDATE DESC";
 
             stmt = conn.prepareStatement(sql);

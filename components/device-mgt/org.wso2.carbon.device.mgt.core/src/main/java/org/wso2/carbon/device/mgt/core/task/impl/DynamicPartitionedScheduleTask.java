@@ -39,8 +39,7 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
             ServerCtxInfo ctxInfo = DeviceManagementDataHolder.getInstance().getHeartBeatService().getServerCtxInfo();
             if(ctxInfo!=null){
                 taskContext = new DynamicTaskContext();
-                taskContext.setActiveServerCount(ctxInfo.getActiveServerCount());
-                taskContext.setServerHashIndex(ctxInfo.getLocalServerHashIdx());
+                updateContext(ctxInfo);
 
                 if(ctxInfo.getActiveServerCount() > 0){
                     taskContext.setPartitioningEnabled(true);
@@ -58,6 +57,25 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
             log.error("Error Instantiating Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function." , e);
         }
         setup();
+    }
+
+    public DynamicTaskContext refreshContext(){
+        try {
+            ServerCtxInfo ctxInfo = DeviceManagementDataHolder.getInstance().getHeartBeatService().getServerCtxInfo();
+            if(ctxInfo != null) {
+                updateContext(ctxInfo);
+            } else {
+                log.info("Dynamic Task Context not present. Tasks will run on regular worker/manager mode.");
+            }
+        } catch (HeartBeatManagementException e) {
+            log.error("Error refreshing Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function.", e);
+        }
+        return taskContext;
+    }
+
+    private void updateContext(ServerCtxInfo ctxInfo) {
+        taskContext.setActiveServerCount(ctxInfo.getActiveServerCount());
+        taskContext.setServerHashIndex(ctxInfo.getLocalServerHashIdx());
     }
 
     protected abstract void setup();

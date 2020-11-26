@@ -18,6 +18,7 @@
 
 package io.entgra.server.bootup.heartbeat.beacon;
 
+import io.entgra.server.bootup.heartbeat.beacon.config.HeartBeatBeaconConfig;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,10 +30,16 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
+import java.util.Properties;
 
 public class HeartBeatBeaconUtils {
 
@@ -81,6 +88,33 @@ public class HeartBeatBeaconUtils {
         ctx.setHostName(localHost.getHostName());
         ctx.setCarbonServerPort(iotsCorePort);
         return ctx;
+    }
+
+    public static void saveUUID(String text) throws IOException {
+        File serverDetails = new File(HeartBeatBeaconConfig.getInstance().getServerUUIDFileLocation());
+        serverDetails.createNewFile(); // if file already exists will do nothing
+        FileOutputStream fos = new FileOutputStream(serverDetails, false);
+        Properties prop = new Properties();
+        prop.setProperty("server.uuid", text);
+        prop.store(fos, null);
+        fos.close();
+    }
+
+    public static String readUUID() {
+        InputStream input = null;
+        String uuid = null;
+        try {
+            input = new FileInputStream(HeartBeatBeaconConfig.getInstance().getServerUUIDFileLocation());
+            Properties props = new Properties();
+            props.load(input);
+            uuid = props.getProperty("server.uuid");
+            input.close();
+        } catch (FileNotFoundException e) {
+            log.info("File : server-credentials.properties does not exist, new UUID will be generated for server.");
+        } catch (IOException e) {
+            log.error("Error accessing server-credentials.properties to locate server.uuid.", e);
+        }
+        return uuid;
     }
 
 

@@ -342,6 +342,9 @@ public class OperationManagerImpl implements OperationManager {
                 Map<Integer, Device> enrolments = new HashMap<>();
                 for (Device device : devices) {
                     enrolments.put(device.getEnrolmentInfo().getId(), device);
+                    if(log.isDebugEnabled()){
+                        log.info("Adding operation for device Id : " + device.getDeviceIdentifier());
+                    }
                 }
                 if (operationDto.getControl() ==
                         org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {

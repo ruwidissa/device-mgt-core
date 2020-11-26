@@ -30,11 +30,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
+import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class represents implementation of HeartBeatDAO
@@ -90,6 +90,30 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
     }
 
     @Override
+    public boolean checkUUIDValidity(String uuid) throws HeartBeatDAOException {
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        boolean result = false;
+        try {
+            Connection conn = HeartBeatBeaconDAOFactory.getConnection();
+            String sql = "SELECT ID FROM SERVER_HEART_BEAT_EVENTS WHERE UUID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, uuid);
+
+            resultSet = stmt.executeQuery();
+            if(resultSet.next()){
+                result = true;
+            }
+        } catch (SQLException e) {
+            throw new HeartBeatDAOException("Error occurred checking existense of UUID" + uuid +
+                                            " amongst heartbeat meta info ", e);
+        } finally {
+            HeartBeatBeaconDAOUtil.cleanupResources(stmt, resultSet);
+        }
+        return result;
+    }
+
+    @Override
     public String retrieveExistingServerCtx(ServerContext ctx) throws HeartBeatDAOException {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
@@ -116,7 +140,8 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
     }
 
     @Override
-    public Map<String, ServerContext> getActiveServerDetails(int elapsedTimeInSeconds) throws HeartBeatDAOException {
+    public Map<String, ServerContext> getActiveServerDetails(int elapsedTimeInSeconds)
+            throws HeartBeatDAOException {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         Map<String, ServerContext> ctxList = new HashMap<>();
@@ -124,10 +149,11 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
             Connection conn = HeartBeatBeaconDAOFactory.getConnection();
             String sql = "SELECT (@row_number:=@row_number + 1) AS IDX, UUID, HOST_NAME, SERVER_PORT from " +
                          "SERVER_HEART_BEAT_EVENTS, (SELECT @row_number:=-1) AS TEMP " +
-                         "WHERE LAST_UPDATED_TIMESTAMP >  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL ? SECOND) " +
+                         "WHERE LAST_UPDATED_TIMESTAMP > ? " +
                          "ORDER BY UUID";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, elapsedTimeInSeconds);
+            stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(elapsedTimeInSeconds)));
             resultSet = stmt.executeQuery();
             while (resultSet.next()) {
                 ctxList.put(resultSet.getString("UUID"), HeartBeatBeaconDAOUtil.populateContext(resultSet));

@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.core.task;
 
+import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.powermock.api.mockito.PowerMockito;
@@ -32,6 +33,7 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementExcept
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.core.TestDeviceManagementService;
+import org.wso2.carbon.device.mgt.core.TestHeartBeatManagementService;
 import org.wso2.carbon.device.mgt.core.TestUtils;
 import org.wso2.carbon.device.mgt.core.authorization.DeviceAccessAuthorizationServiceImpl;
 import org.wso2.carbon.device.mgt.core.common.BaseDeviceManagementTest;
@@ -83,6 +85,9 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
         DeviceManagementDataHolder.getInstance().setDeviceTaskManagerService(null);
         DeviceManagementService deviceManagementService = new TestDeviceManagementService(
                 TestDataHolder.TEST_DEVICE_TYPE, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        HeartBeatManagementService heartBeatManagementService = new TestHeartBeatManagementService();
+        DeviceManagementDataHolder.getInstance()
+                .setHeartBeatService(heartBeatManagementService);
         this.operationManager = PowerMockito.spy(
                 new OperationManagerImpl(TestDataHolder.TEST_DEVICE_TYPE, deviceManagementService));
         try {

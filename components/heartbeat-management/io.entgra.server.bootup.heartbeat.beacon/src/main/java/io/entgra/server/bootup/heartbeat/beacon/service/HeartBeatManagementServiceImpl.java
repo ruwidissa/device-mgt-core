@@ -23,8 +23,8 @@ import io.entgra.server.bootup.heartbeat.beacon.dao.HeartBeatBeaconDAOFactory;
 import io.entgra.server.bootup.heartbeat.beacon.dao.HeartBeatDAO;
 import io.entgra.server.bootup.heartbeat.beacon.dao.exception.HeartBeatDAOException;
 import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
-import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
+import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import io.entgra.server.bootup.heartbeat.beacon.internal.HeartBeatBeaconDataHolder;
 import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
@@ -34,17 +34,21 @@ import java.util.Map;
 
 public class HeartBeatManagementServiceImpl implements HeartBeatManagementService {
 
+    private final HeartBeatDAO heartBeatDAO;
+
+    public HeartBeatManagementServiceImpl(){
+        this.heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
+    }
+
+
     @Override
     public ServerCtxInfo getServerCtxInfo() throws HeartBeatManagementException {
-        HeartBeatDAO heartBeatDAO;
         int hashIndex = -1;
         ServerContext localServerCtx = null;
         ServerCtxInfo serverCtxInfo = null;
         if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
             try {
                 HeartBeatBeaconDAOFactory.openConnection();
-                heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
-
                 int timeOutIntervalInSeconds = HeartBeatBeaconConfig.getInstance().getServerTimeOutIntervalInSeconds();
                 int timeSkew = HeartBeatBeaconConfig.getInstance().getTimeSkew();
                 int cumilativeTimeOut = timeOutIntervalInSeconds + timeSkew;
@@ -75,13 +79,10 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
 
     @Override
     public String updateServerContext(ServerContext ctx) throws HeartBeatManagementException {
-        HeartBeatDAO heartBeatDAO;
         String uuid = null;
         if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
             try {
                 HeartBeatBeaconDAOFactory.beginTransaction();
-                heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
-
                 uuid = heartBeatDAO.retrieveExistingServerCtx(ctx);
                 if (uuid == null) {
                     uuid = heartBeatDAO.recordServerCtx(ctx);
@@ -107,14 +108,17 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
 
     @Override
     public boolean recordHeartBeat(HeartBeatEvent event) throws HeartBeatManagementException {
-        HeartBeatDAO heartBeatDAO;
         boolean operationSuccess = false;
         if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
             try {
                 HeartBeatBeaconDAOFactory.beginTransaction();
-                heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
-                operationSuccess = heartBeatDAO.recordHeatBeat(event);
-                HeartBeatBeaconDAOFactory.commitTransaction();
+                if(heartBeatDAO.checkUUIDValidity(event.getServerUUID())){
+                    operationSuccess = heartBeatDAO.recordHeatBeat(event);
+                    HeartBeatBeaconDAOFactory.commitTransaction();
+                } else {
+                    String msg = "Server UUID Does not exist, heartbeat not recorded.";
+                    throw new HeartBeatManagementException(msg);
+                }
             } catch (HeartBeatDAOException e) {
                 String msg = "Error occurred while recording heart beat.";
                 throw new HeartBeatManagementException(msg, e);

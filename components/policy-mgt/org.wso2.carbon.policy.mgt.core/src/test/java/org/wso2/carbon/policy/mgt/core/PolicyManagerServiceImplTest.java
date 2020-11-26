@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.policy.mgt.core;
 
+import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
@@ -51,6 +52,7 @@ import org.wso2.carbon.policy.mgt.core.enforcement.DelegationTask;
 import org.wso2.carbon.policy.mgt.core.internal.PolicyManagementDataHolder;
 import org.wso2.carbon.policy.mgt.core.mgt.MonitoringManager;
 import org.wso2.carbon.policy.mgt.core.mgt.impl.MonitoringManagerImpl;
+import org.wso2.carbon.policy.mgt.core.mock.TestHeartBeatManagementService;
 import org.wso2.carbon.policy.mgt.core.mock.TypeXDeviceManagementService;
 import org.wso2.carbon.policy.mgt.core.task.MonitoringTask;
 import org.wso2.carbon.policy.mgt.core.task.TaskScheduleService;
@@ -93,6 +95,8 @@ public class  PolicyManagerServiceImplTest extends BasePolicyManagementDAOTest {
         DeviceManagementService deviceManagementService = new TypeXDeviceManagementService(DEVICE_TYPE_A);
         deviceMgtService.registerDeviceType(deviceManagementService);
         operationManager = new OperationManagerImpl(DEVICE_TYPE_A, deviceManagementService);
+        HeartBeatManagementService heartBeatManagementService = new TestHeartBeatManagementService();
+        DeviceManagementDataHolder.getInstance().setHeartBeatService(heartBeatManagementService);
         enrollDevice(DEVICE1, DEVICE_TYPE_A);
         createDeviceGroup(GROUP1);
         DeviceGroup group1 = groupMgtService.getGroup(GROUP1, false);

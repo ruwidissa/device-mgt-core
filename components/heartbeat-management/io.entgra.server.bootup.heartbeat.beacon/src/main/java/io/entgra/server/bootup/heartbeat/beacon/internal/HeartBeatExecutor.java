@@ -18,22 +18,23 @@
 
 package io.entgra.server.bootup.heartbeat.beacon.internal;
 
-import io.entgra.server.bootup.heartbeat.beacon.config.HeartBeatBeaconConfig;
 import io.entgra.server.bootup.heartbeat.beacon.HeartBeatBeaconConfigurationException;
-import io.entgra.server.bootup.heartbeat.beacon.dao.HeartBeatBeaconDAOFactory;
+import io.entgra.server.bootup.heartbeat.beacon.HeartBeatBeaconUtils;
+import io.entgra.server.bootup.heartbeat.beacon.config.HeartBeatBeaconConfig;
 import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class HeartBeatInternalUtils {
+public class HeartBeatExecutor {
 
-    private static Log log = LogFactory.getLog(HeartBeatInternalUtils.class);
+    private static Log log = LogFactory.getLog(HeartBeatExecutor.class);
     private static final int DEFAULT__NOTIFIER_INTERVAL = 5;
     private static final int DEFAULT_NOTIFIER_DELAY = 5;
     private static HeartBeatBeaconConfig CONFIG;
@@ -51,12 +52,17 @@ public class HeartBeatInternalUtils {
         }
 
         try {
-            String uuid = HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().updateServerContext(ctx);
-            HeartBeatBeaconDataHolder.getInstance().setLocalServerUUID(uuid);
+            String uuid = HeartBeatBeaconUtils.readUUID();
+            if(uuid == null){
+                uuid = HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().updateServerContext(ctx);
+                HeartBeatBeaconUtils.saveUUID(uuid);
+            }
+            final String designatedUUID = uuid;
+            HeartBeatBeaconDataHolder.getInstance().setLocalServerUUID(designatedUUID);
             Runnable periodicTask = new Runnable() {
                 public void run() {
                     try {
-                        recordHeartBeat(uuid);
+                        recordHeartBeat(designatedUUID);
                     } catch (HeartBeatManagementException e) {
                         log.error("Error while executing record heart beat task. This will result in schedule operation malfunction.", e);
                     }
@@ -68,6 +74,8 @@ public class HeartBeatInternalUtils {
                                          TimeUnit.SECONDS);
         } catch (HeartBeatManagementException e) {
             throw new HeartBeatBeaconConfigurationException("Error occured while updating initial server context.", e);
+        } catch (IOException e) {
+            throw new HeartBeatBeaconConfigurationException("Error while persisting UUID of server.", e);
         }
     }
 

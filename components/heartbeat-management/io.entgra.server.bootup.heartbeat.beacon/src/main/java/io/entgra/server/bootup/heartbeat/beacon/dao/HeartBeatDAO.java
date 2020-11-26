@@ -22,7 +22,6 @@ import io.entgra.server.bootup.heartbeat.beacon.dao.exception.HeartBeatDAOExcept
 import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,6 +32,8 @@ public interface HeartBeatDAO {
     String recordServerCtx(ServerContext ctx) throws HeartBeatDAOException;
 
     boolean recordHeatBeat(HeartBeatEvent event) throws HeartBeatDAOException;
+
+    boolean checkUUIDValidity(String uuid) throws HeartBeatDAOException;
 
     String retrieveExistingServerCtx(ServerContext ctx) throws HeartBeatDAOException;
 

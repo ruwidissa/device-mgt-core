@@ -47,6 +47,9 @@ public class HeartBeatBeaconConfig {
     private static final String HEART_BEAT_NOTIFIER_CONFIG_PATH =
             CarbonUtils.getCarbonConfigDirPath() + File.separator + "heart-beat-config.xml";
 
+    private static final String SERVER_UUID_FILE_LOCATION =
+            CarbonUtils.getCarbonConfigDirPath() + File.separator + "server-credentials.properties";
+
     private HeartBeatBeaconConfig() {
     }
 
@@ -110,6 +113,10 @@ public class HeartBeatBeaconConfig {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public String getServerUUIDFileLocation(){
+        return SERVER_UUID_FILE_LOCATION;
     }
 
     public static void init() throws HeartBeatBeaconConfigurationException {

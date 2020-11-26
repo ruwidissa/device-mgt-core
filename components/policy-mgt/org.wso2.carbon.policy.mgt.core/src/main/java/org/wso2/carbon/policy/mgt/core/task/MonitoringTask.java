@@ -96,7 +96,7 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
     }
 
     private void executeTask() {
-
+        super.refreshContext();
         MonitoringManager monitoringManager = PolicyManagementDataHolder.getInstance().getMonitoringManager();
         List<String> deviceTypes = new ArrayList<>();
         List<String> configDeviceTypes = new ArrayList<>();
@@ -141,6 +141,9 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
                                     status.equals(EnrolmentInfo.Status.INACTIVE) ||
                                     status.equals(EnrolmentInfo.Status.UNREACHABLE)) {
                                 notifiableDevices.add(device);
+                            }
+                            if(log.isDebugEnabled()){
+                                log.debug("Adding monitoring operation to device : " + device.getDeviceIdentifier());
                             }
                         }
                         if (log.isDebugEnabled()) {
