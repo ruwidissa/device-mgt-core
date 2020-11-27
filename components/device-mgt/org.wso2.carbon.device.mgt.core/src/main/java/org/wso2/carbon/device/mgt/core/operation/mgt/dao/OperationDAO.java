@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.mgt.core.operation.mgt.dao;
 
+import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationResponse;
@@ -90,13 +91,20 @@ public interface OperationDAO {
 
     /**
      * This method provides operation mappings for given status
-     * @param opStatus Operation status
+     *
+     * @param opStatus               Operation status
      * @param pushNotificationStatus Push notification Status
-     * @param limit Limit for no devices
+     * @param limit                  Limit for no devices
      * @return Tenant based operation mappings list
      * @throws OperationManagementDAOException
      */
     Map<Integer, List<OperationMapping>> getOperationMappingsByStatus(Operation.Status opStatus, Operation.PushNotificationStatus pushNotificationStatus,
-                                                                     int limit) throws OperationManagementDAOException;
+                                                                      int limit) throws OperationManagementDAOException;
+
+    List<Activity> getActivities(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementDAOException;
+
+    int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementDAOException;
 
 }

@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.core.operation.mgt.dao.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
@@ -46,12 +47,12 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Date;
 
 /**
  * This class holds the generic implementation of OperationDAO which can be used to support ANSI db syntax.
@@ -952,33 +953,33 @@ public class GenericOperationDAOImpl implements OperationDAO {
             Connection conn = OperationManagementDAOFactory.getConnection();
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             String sql = "SELECT " +
-                         "    eom.ENROLMENT_ID," +
-                         "    eom.CREATED_TIMESTAMP," +
-                         "    eom.UPDATED_TIMESTAMP," +
-                         "    eom.OPERATION_ID," +
-                         "    eom.OPERATION_CODE," +
-                         "    eom.INITIATED_BY," +
-                         "    eom.TYPE," +
-                         "    eom.STATUS," +
-                         "    eom.DEVICE_ID," +
-                         "    eom.DEVICE_IDENTIFICATION," +
-                         "    eom.DEVICE_TYPE," +
-                         "    opr.ID AS OP_RES_ID," +
-                         "    opr.RECEIVED_TIMESTAMP," +
-                         "    opr.OPERATION_RESPONSE," +
-                         "    opr.IS_LARGE_RESPONSE " +
-                         "FROM " +
-                         "    DM_ENROLMENT_OP_MAPPING eom " +
-                         "LEFT JOIN " +
-                         "    DM_DEVICE_OPERATION_RESPONSE opr ON opr.EN_OP_MAP_ID = eom.ID " +
-                         "INNER JOIN " +
-                         "    (SELECT DISTINCT OPERATION_ID FROM DM_ENROLMENT_OP_MAPPING ORDER BY OPERATION_ID ASC limit ? , ? ) eom_ordered " +
-                         "       ON eom_ordered.OPERATION_ID = eom.OPERATION_ID " +
-                         "WHERE " +
-                         "    eom.UPDATED_TIMESTAMP > ? " +
-                         "        AND eom.TENANT_ID = ? " +
-                         "        AND eom.INITIATED_BY = ? " +
-                         "ORDER BY eom.OPERATION_ID, eom.UPDATED_TIMESTAMP";
+                    "    eom.ENROLMENT_ID," +
+                    "    eom.CREATED_TIMESTAMP," +
+                    "    eom.UPDATED_TIMESTAMP," +
+                    "    eom.OPERATION_ID," +
+                    "    eom.OPERATION_CODE," +
+                    "    eom.INITIATED_BY," +
+                    "    eom.TYPE," +
+                    "    eom.STATUS," +
+                    "    eom.DEVICE_ID," +
+                    "    eom.DEVICE_IDENTIFICATION," +
+                    "    eom.DEVICE_TYPE," +
+                    "    opr.ID AS OP_RES_ID," +
+                    "    opr.RECEIVED_TIMESTAMP," +
+                    "    opr.OPERATION_RESPONSE," +
+                    "    opr.IS_LARGE_RESPONSE " +
+                    "FROM " +
+                    "    DM_ENROLMENT_OP_MAPPING eom " +
+                    "LEFT JOIN " +
+                    "    DM_DEVICE_OPERATION_RESPONSE opr ON opr.EN_OP_MAP_ID = eom.ID " +
+                    "INNER JOIN " +
+                    "    (SELECT DISTINCT OPERATION_ID FROM DM_ENROLMENT_OP_MAPPING ORDER BY OPERATION_ID ASC limit ? , ? ) eom_ordered " +
+                    "       ON eom_ordered.OPERATION_ID = eom.OPERATION_ID " +
+                    "WHERE " +
+                    "    eom.UPDATED_TIMESTAMP > ? " +
+                    "        AND eom.TENANT_ID = ? " +
+                    "        AND eom.INITIATED_BY = ? " +
+                    "ORDER BY eom.OPERATION_ID, eom.UPDATED_TIMESTAMP";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, offset);
@@ -1012,32 +1013,32 @@ public class GenericOperationDAOImpl implements OperationDAO {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
             String sql = "SELECT " +
-                         "    eom.ENROLMENT_ID," +
-                         "    eom.CREATED_TIMESTAMP," +
-                         "    eom.UPDATED_TIMESTAMP," +
-                         "    eom.OPERATION_ID," +
-                         "    eom.OPERATION_CODE," +
-                         "    eom.INITIATED_BY," +
-                         "    eom.TYPE," +
-                         "    eom.STATUS," +
-                         "    eom.DEVICE_ID," +
-                         "    eom.DEVICE_IDENTIFICATION," +
-                         "    eom.DEVICE_TYPE," +
-                         "    ops.ID AS OP_RES_ID," +
-                         "    ops.RECEIVED_TIMESTAMP," +
-                         "    ops.OPERATION_RESPONSE," +
-                         "    ops.IS_LARGE_RESPONSE " +
-                         "FROM " +
-                         "    DM_ENROLMENT_OP_MAPPING AS eom " +
-                         "INNER JOIN " +
-                         "  (SELECT DISTINCT OPERATION_ID FROM DM_ENROLMENT_OP_MAPPING ORDER BY OPERATION_ID ASC limit ? , ? ) AS eom_ordered " +
-                         "         ON eom_ordered.OPERATION_ID = eom.OPERATION_ID " +
-                         "LEFT JOIN " +
-                         "    DM_DEVICE_OPERATION_RESPONSE AS ops ON ops.EN_OP_MAP_ID = eom.ID " +
-                         "WHERE " +
-                         "    eom.UPDATED_TIMESTAMP > ? " +
-                         "        AND eom.TENANT_ID = ? " +
-                         "ORDER BY eom.OPERATION_ID, eom.UPDATED_TIMESTAMP";
+                    "    eom.ENROLMENT_ID," +
+                    "    eom.CREATED_TIMESTAMP," +
+                    "    eom.UPDATED_TIMESTAMP," +
+                    "    eom.OPERATION_ID," +
+                    "    eom.OPERATION_CODE," +
+                    "    eom.INITIATED_BY," +
+                    "    eom.TYPE," +
+                    "    eom.STATUS," +
+                    "    eom.DEVICE_ID," +
+                    "    eom.DEVICE_IDENTIFICATION," +
+                    "    eom.DEVICE_TYPE," +
+                    "    ops.ID AS OP_RES_ID," +
+                    "    ops.RECEIVED_TIMESTAMP," +
+                    "    ops.OPERATION_RESPONSE," +
+                    "    ops.IS_LARGE_RESPONSE " +
+                    "FROM " +
+                    "    DM_ENROLMENT_OP_MAPPING AS eom " +
+                    "INNER JOIN " +
+                    "  (SELECT DISTINCT OPERATION_ID FROM DM_ENROLMENT_OP_MAPPING ORDER BY OPERATION_ID ASC limit ? , ? ) AS eom_ordered " +
+                    "         ON eom_ordered.OPERATION_ID = eom.OPERATION_ID " +
+                    "LEFT JOIN " +
+                    "    DM_DEVICE_OPERATION_RESPONSE AS ops ON ops.EN_OP_MAP_ID = eom.ID " +
+                    "WHERE " +
+                    "    eom.UPDATED_TIMESTAMP > ? " +
+                    "        AND eom.TENANT_ID = ? " +
+                    "ORDER BY eom.OPERATION_ID, eom.UPDATED_TIMESTAMP";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, offset);
@@ -1056,7 +1057,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
             }
         } catch (SQLException e) {
             String msg = "Error occurred while getting the operation details from the database.";
-            log.error(msg,e);
+            log.error(msg, e);
             throw new OperationManagementDAOException(msg, e);
         }
     }
@@ -1619,4 +1620,221 @@ public class GenericOperationDAOImpl implements OperationDAO {
         }
         return operationMappingsTenantMap;
     }
+
+    @Override
+    public List<Activity> getActivities(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementDAOException {
+        try {
+            Connection conn = OperationManagementDAOFactory.getConnection();
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            String sql = "SELECT " +
+                    "    eom.ENROLMENT_ID," +
+                    "    eom.CREATED_TIMESTAMP," +
+                    "    eom.UPDATED_TIMESTAMP," +
+                    "    eom.OPERATION_ID," +
+                    "    eom.OPERATION_CODE," +
+                    "    eom.INITIATED_BY," +
+                    "    eom.TYPE," +
+                    "    eom.STATUS," +
+                    "    eom.DEVICE_ID," +
+                    "    eom.DEVICE_IDENTIFICATION," +
+                    "    eom.DEVICE_TYPE," +
+                    "    opr.ID AS OP_RES_ID," +
+                    "    opr.RECEIVED_TIMESTAMP," +
+                    "    opr.OPERATION_RESPONSE," +
+                    "    opr.IS_LARGE_RESPONSE " +
+                    "FROM " +
+                    "    DM_ENROLMENT_OP_MAPPING eom " +
+                    "LEFT JOIN " +
+                    "    DM_DEVICE_OPERATION_RESPONSE opr ON opr.EN_OP_MAP_ID = eom.ID " +
+                    "INNER JOIN " +
+                    "    (SELECT DISTINCT OPERATION_ID FROM DM_ENROLMENT_OP_MAPPING WHERE TENANT_ID = ? ";
+
+            if (activityPaginationRequest.getDeviceType() != null) {
+                sql += "AND DEVICE_TYPE = ? ";
+            }
+            if (activityPaginationRequest.getDeviceId() != null) {
+                sql += "AND DEVICE_IDENTIFICATION = ? ";
+            }
+            if (activityPaginationRequest.getOperationCode() != null) {
+                sql += "AND OPERATION_CODE = ? ";
+            }
+            if (activityPaginationRequest.getInitiatedBy() != null) {
+                sql += "AND INITIATED_BY = ? ";
+            }
+            if (activityPaginationRequest.getSince() != 0) {
+                sql += "AND UPDATED_TIMESTAMP > ? ";
+            }
+            if (activityPaginationRequest.getType() != null) {
+                sql += "AND TYPE = ? ";
+            }
+            if (activityPaginationRequest.getStatus() != null) {
+                sql += "AND STATUS = ? ";
+            }
+
+            sql += "ORDER BY OPERATION_ID ASC limit ? , ? ) eom_ordered " +
+                    "ON eom_ordered.OPERATION_ID = eom.OPERATION_ID WHERE eom.TENANT_ID = ? ";
+
+            if (activityPaginationRequest.getDeviceType() != null) {
+                sql += "AND eom.DEVICE_TYPE = ? ";
+            }
+            if (activityPaginationRequest.getDeviceId() != null) {
+                sql += "AND eom.DEVICE_IDENTIFICATION = ? ";
+            }
+            if (activityPaginationRequest.getOperationCode() != null) {
+                sql += "AND eom.OPERATION_CODE = ? ";
+            }
+            if (activityPaginationRequest.getInitiatedBy() != null) {
+                sql += "AND eom.INITIATED_BY = ? ";
+            }
+            if (activityPaginationRequest.getSince() != 0) {
+                sql += "AND eom.UPDATED_TIMESTAMP > ? ";
+            }
+            if (activityPaginationRequest.getType() != null) {
+                sql += "AND eom.TYPE = ? ";
+            }
+            if (activityPaginationRequest.getStatus() != null) {
+                sql += "AND eom.STATUS = ? ";
+            }
+
+            sql += "ORDER BY eom.OPERATION_ID, eom.UPDATED_TIMESTAMP";
+
+            int index = 1;
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(index++, tenantId);
+                if (activityPaginationRequest.getDeviceType() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getDeviceType());
+                }
+                if (activityPaginationRequest.getDeviceId() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getDeviceId());
+                }
+                if (activityPaginationRequest.getOperationCode() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getOperationCode());
+                }
+                if (activityPaginationRequest.getInitiatedBy() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getInitiatedBy());
+                }
+                if (activityPaginationRequest.getSince() != 0) {
+                    stmt.setLong(index++, activityPaginationRequest.getSince());
+                }
+                if (activityPaginationRequest.getType() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getType().name());
+                }
+                if (activityPaginationRequest.getStatus() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getStatus().name());
+                }
+
+                stmt.setInt(index++, activityPaginationRequest.getOffset());
+                stmt.setInt(index++, activityPaginationRequest.getLimit());
+                stmt.setInt(index++, tenantId);
+
+                if (activityPaginationRequest.getDeviceType() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getDeviceType());
+                }
+                if (activityPaginationRequest.getDeviceId() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getDeviceId());
+                }
+                if (activityPaginationRequest.getOperationCode() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getOperationCode());
+                }
+                if (activityPaginationRequest.getInitiatedBy() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getInitiatedBy());
+                }
+                if (activityPaginationRequest.getSince() != 0) {
+                    stmt.setLong(index++, activityPaginationRequest.getSince());
+                }
+                if (activityPaginationRequest.getType() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getType().name());
+                }
+                if (activityPaginationRequest.getStatus() != null) {
+                    stmt.setString(index, activityPaginationRequest.getStatus().name());
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    ActivityHolder activityHolder = OperationDAOUtil.getActivityHolder(rs);
+                    List<Integer> largeResponseIDs = activityHolder.getLargeResponseIDs();
+                    List<Activity> activities = activityHolder.getActivityList();
+                    if (!largeResponseIDs.isEmpty()) {
+                        populateLargeOperationResponses(activities, largeResponseIDs);
+                    }
+                    return activities;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting the operation details from the database.";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementDAOException {
+        try {
+            Connection conn = OperationManagementDAOFactory.getConnection();
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            String sql = "SELECT count(DISTINCT OPERATION_ID) AS ACTIVITY_COUNT FROM DM_ENROLMENT_OP_MAPPING " +
+                    "WHERE TENANT_ID = ? ";
+
+            if (activityPaginationRequest.getDeviceType() != null) {
+                sql += "AND DEVICE_TYPE = ? ";
+            }
+            if (activityPaginationRequest.getDeviceId() != null) {
+                sql += "AND DEVICE_IDENTIFICATION = ? ";
+            }
+            if (activityPaginationRequest.getOperationCode() != null) {
+                sql += "AND OPERATION_CODE = ? ";
+            }
+            if (activityPaginationRequest.getInitiatedBy() != null) {
+                sql += "AND INITIATED_BY = ? ";
+            }
+            if (activityPaginationRequest.getSince() != 0) {
+                sql += "AND UPDATED_TIMESTAMP > ? ";
+            }
+            if (activityPaginationRequest.getType() != null) {
+                sql += "AND TYPE = ? ";
+            }
+            if (activityPaginationRequest.getStatus() != null) {
+                sql += "AND STATUS = ? ";
+            }
+
+            int index = 1;
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(index++, tenantId);
+                if (activityPaginationRequest.getDeviceType() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getDeviceType());
+                }
+                if (activityPaginationRequest.getDeviceId() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getDeviceId());
+                }
+                if (activityPaginationRequest.getOperationCode() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getOperationCode());
+                }
+                if (activityPaginationRequest.getInitiatedBy() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getInitiatedBy());
+                }
+                if (activityPaginationRequest.getSince() != 0) {
+                    stmt.setLong(index++, activityPaginationRequest.getSince());
+                }
+                if (activityPaginationRequest.getType() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getType().name());
+                }
+                if (activityPaginationRequest.getStatus() != null) {
+                    stmt.setString(index, activityPaginationRequest.getStatus().name());
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("ACTIVITY_COUNT");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting the operation details from the database.";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
+        }
+        return 0;
+    }
+
 }

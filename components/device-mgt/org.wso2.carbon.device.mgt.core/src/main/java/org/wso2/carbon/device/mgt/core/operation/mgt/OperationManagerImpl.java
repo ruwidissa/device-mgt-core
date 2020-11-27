@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -151,9 +152,7 @@ public class OperationManagerImpl implements OperationManager {
                     return null;
                 }
                 notificationStrategies.put(tenantId, provider.getNotificationStrategy(pushNoteConfig));
-            } else if (notificationStrategies.containsKey(tenantId)) {
-                notificationStrategies.remove(tenantId);
-            }
+            } else notificationStrategies.remove(tenantId);
             lastUpdatedTimeStamps.put(tenantId, Calendar.getInstance().getTimeInMillis());
         }
         return notificationStrategies.get(tenantId);
@@ -1224,6 +1223,35 @@ public class OperationManagerImpl implements OperationManager {
         }
     }
 
+    @Override
+    public List<Activity> getActivities(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException {
+        try {
+            OperationManagementDAOFactory.openConnection();
+            return operationDAO.getActivities(activityPaginationRequest);
+        } catch (SQLException e) {
+            throw new OperationManagementException("Error occurred while opening a connection to the data source.", e);
+        } catch (OperationManagementDAOException e) {
+            throw new OperationManagementException("Error occurred while getting the activity list.", e);
+        } finally {
+            OperationManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException {
+        try {
+            OperationManagementDAOFactory.openConnection();
+            return operationDAO.getActivitiesCount(activityPaginationRequest);
+        } catch (SQLException e) {
+            throw new OperationManagementException("Error occurred while opening a connection to the data source.", e);
+        } catch (OperationManagementDAOException e) {
+            throw new OperationManagementException("Error occurred while getting the activity count.", e);
+        } finally {
+            OperationManagementDAOFactory.closeConnection();
+        }
+    }
 
     @Override
     public List<Activity> getFilteredActivities(String operationCode, int limit, int offset) throws OperationManagementException {
@@ -1525,11 +1553,7 @@ public class OperationManagerImpl implements OperationManager {
             org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation deviceSpecificOperation = operationDAO.
                     getOperationByDeviceAndId(enrolmentInfo.getId(),
                             operationId);
-            if (deviceSpecificOperation == null) {
-                return false;
-            } else {
-                return true;
-            }
+            return deviceSpecificOperation != null;
         } catch (OperationManagementDAOException e) {
             String msg = "Error occurred while checking if operation with operation id "
                     + operationId +" exist for " + deviceId.getType() + "' device '" + deviceId.getId() + "'";

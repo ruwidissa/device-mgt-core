@@ -49,6 +49,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
+import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceEnrollmentInfoNotification;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
@@ -2052,6 +2053,19 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     @Override
     public int getActivityCountUpdatedAfterByUser(long timestamp, String user) throws OperationManagementException {
         return DeviceManagementDataHolder.getInstance().getOperationManager().getActivityCountUpdatedAfterByUser(timestamp, user);
+    }
+
+    @Override
+    public List<Activity> getActivities(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException {
+        return DeviceManagementDataHolder.getInstance().getOperationManager().getActivities(activityPaginationRequest);
+    }
+
+    @Override
+    public int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException {
+        return DeviceManagementDataHolder.getInstance().getOperationManager()
+                .getActivitiesCount(activityPaginationRequest);
     }
 
     @Override

@@ -39,6 +39,7 @@ import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -423,36 +424,59 @@ public interface ActivityInfoProviderService {
     })
     Response getActivities(
             @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    defaultValue = "0")
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many activity details you require from the starting pagination index/offset.",
+                    defaultValue = "5")
+            @DefaultValue("20") @QueryParam("limit") int limit,
+            @ApiParam(
                     name = "since",
                     value = "Checks if the requested variant was created since the specified date-time.\n" +
                             "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
-                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
-                    required = false)
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200"
+            )
             @QueryParam("since") String since,
             @ApiParam(
                     name = "initiatedBy",
                     value = "The user, who initiated the operation. If is done by the task, the SYSTEM will be returned." +
-                            " And if a user adds the operation, username is returned",
-                    required = false)
+                            " And if a user adds the operation, username is returned"
+            )
             @QueryParam("initiatedBy") String initiatedBy,
             @ApiParam(
-                    name = "offset",
-                    value = "The starting pagination index for the complete list of qualified items.",
-                    required = false,
-                    defaultValue = "0")
-            @QueryParam("offset") int offset,
+                    name = "operationCode",
+                    value = "Operation Code to filter"
+            )
+            @QueryParam("operationCode") String operationCode,
             @ApiParam(
-                    name = "limit",
-                    value = "Provide how many activity details you require from the starting pagination index/offset.",
-                    required = false,
-                    defaultValue = "5")
-            @QueryParam("limit") int limit,
+                    name = "deviceType",
+                    value = "Device Type to filter"
+            )
+            @QueryParam("deviceType") String deviceType,
+            @ApiParam(
+                    name = "deviceId",
+                    value = "Device Id to filter"
+            )
+            @QueryParam("deviceId") String deviceId,
+            @ApiParam(
+                    name = "type",
+                    value = "Operation type to filter"
+            )
+            @QueryParam("type") String type,
+            @ApiParam(
+                    name = "status",
+                    value = "Operation response status to filter"
+            )
+            @QueryParam("status") String status,
             @ApiParam(
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time\n." +
                             "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z\n." +
-                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
-                    required = false)
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200"
+            )
             @HeaderParam("If-Modified-Since") String ifModifiedSince);
 
 }

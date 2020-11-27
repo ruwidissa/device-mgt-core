@@ -36,17 +36,23 @@
 package org.wso2.carbon.device.mgt.core.service;
 
 import org.apache.commons.collections.map.SingletonMap;
+import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.FeatureManager;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
-import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
@@ -54,11 +60,6 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
@@ -931,5 +932,10 @@ public interface DeviceManagementProviderService {
      */
     List<Device> getDevicesByIdentifiersAndStatuses(List<String> deviceIdentifiers, List<EnrolmentInfo.Status> statuses)
             throws DeviceManagementException;
+
+    List<Activity> getActivities(ActivityPaginationRequest activityPaginationRequest) throws OperationManagementException;
+
+    int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException;
 
 }
