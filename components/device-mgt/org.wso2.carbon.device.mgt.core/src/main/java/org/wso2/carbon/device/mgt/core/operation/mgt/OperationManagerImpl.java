@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.operation.mgt;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
@@ -186,15 +187,12 @@ public class OperationManagerImpl implements OperationManager {
                 boolean isScheduledOperation = this.isTaskScheduledOperation(operation);
                 String initiatedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
                 if (initiatedBy == null && isScheduledOperation) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("initiatedBy : " + SYSTEM);
-                    }
                     operation.setInitiatedBy(SYSTEM);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("initiatedBy : " + initiatedBy);
-                    }
+                } else if (StringUtils.isEmpty(operation.getInitiatedBy())) {
                     operation.setInitiatedBy(initiatedBy);
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("initiatedBy : " + operation.getInitiatedBy());
                 }
 
                 org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation operationDto =
