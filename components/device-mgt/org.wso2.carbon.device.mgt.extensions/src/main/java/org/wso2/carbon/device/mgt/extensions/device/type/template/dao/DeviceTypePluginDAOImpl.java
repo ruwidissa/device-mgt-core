@@ -39,7 +39,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypeMgtPluginException;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypeUtils;
 
@@ -58,8 +57,8 @@ import java.util.List;
 public class DeviceTypePluginDAOImpl implements PluginDAO {
 
     private static final Log log = LogFactory.getLog(DeviceTypePluginDAOImpl.class);
-    private DeviceTypeDAOHandler deviceTypeDAOHandler;
-    private DeviceDAODefinition deviceDAODefinition;
+    private final DeviceTypeDAOHandler deviceTypeDAOHandler;
+    private final DeviceDAODefinition deviceDAODefinition;
     private String selectDBQueryForGetDevice;
     private String createDBqueryForAddDevice;
     private String updateDBQueryForUpdateDevice;
@@ -108,7 +107,6 @@ public class DeviceTypePluginDAOImpl implements PluginDAO {
             throw new DeviceTypeMgtPluginException(msg, e);
         } finally {
             DeviceTypeUtils.cleanupResources(stmt, resultSet);
-            deviceTypeDAOHandler.closeConnection();
         }
 
         return device;
