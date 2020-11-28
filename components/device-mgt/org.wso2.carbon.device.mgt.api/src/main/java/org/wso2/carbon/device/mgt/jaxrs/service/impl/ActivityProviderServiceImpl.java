@@ -305,16 +305,18 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                     log.debug("Activity request: " + new Gson().toJson(activityPaginationRequest));
                 }
                 int count = dmService.getActivitiesCount(activityPaginationRequest);
-                if (count > 0) {
-                    activityList.setList(dmService.getActivities(activityPaginationRequest));
-                }
-                activityList.setCount(count);
                 if (log.isDebugEnabled()) {
                     log.debug("Filtered Activity count: " + count);
-                    if (count > 0) {
+                }
+                if (count > 0) {
+                    activityList.setList(dmService.getActivities(activityPaginationRequest));
+                    if (log.isDebugEnabled()) {
                         log.debug("Fetched Activity count: " + activityList.getList().size());
                     }
+                } else if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
+                    return Response.notModified().build();
                 }
+                activityList.setCount(count);
                 return Response.ok().entity(activityList).build();
             } catch (OperationManagementException e) {
                 String msg
