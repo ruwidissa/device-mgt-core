@@ -143,10 +143,10 @@ public class PolicyManagerUtil {
     }
 
     /**
-     * Attach policy specific data which has been not retrieved
-     * @param policy
-     * @return
-     * @throws PolicyTransformException
+     * Transform policy into a Operation
+     * @param policy policy to be transformed
+     * @return policy operation object
+     * @throws PolicyTransformException for errors occurred while transforming a policy
      */
     public static Operation transformPolicy(Policy policy) throws PolicyTransformException {
         List<ProfileFeature> effectiveFeatures = policy.getProfile().getProfileFeaturesList();
