@@ -52,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Date;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * This class holds the generic implementation of OperationDAO which can be used to support ANSI db syntax.
@@ -650,22 +652,31 @@ public class GenericOperationDAOImpl implements OperationDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         Activity activity = null;
-        int responseId = 0;
         List<ActivityStatus> activityStatusList = new ArrayList<>();
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT eom.ENROLMENT_ID, eom.OPERATION_ID, eom.ID AS EOM_MAPPING_ID, dor.ID AS OP_RES_ID,\n" +
-                    "de.DEVICE_ID, d.DEVICE_IDENTIFICATION, \n" +
-                    "d.DEVICE_TYPE_ID, dt.NAME AS DEVICE_TYPE_NAME, eom.STATUS, eom.CREATED_TIMESTAMP, \n" +
-                    "eom.UPDATED_TIMESTAMP, op.OPERATION_CODE, op.TYPE AS OPERATION_TYPE, dor.OPERATION_RESPONSE, \n" +
-                    "dor.RECEIVED_TIMESTAMP, dor.IS_LARGE_RESPONSE, op.INITIATED_BY FROM DM_ENROLMENT_OP_MAPPING AS eom \n" +
-                    "INNER JOIN DM_OPERATION AS op ON op.ID=eom.OPERATION_ID\n" +
-                    "INNER JOIN DM_ENROLMENT AS de ON de.ID=eom.ENROLMENT_ID\n" +
-                    "INNER JOIN DM_DEVICE AS d ON d.ID=de.DEVICE_ID \n" +
-                    "INNER JOIN DM_DEVICE_TYPE AS dt ON dt.ID=d.DEVICE_TYPE_ID\n" +
-                    "LEFT JOIN DM_DEVICE_OPERATION_RESPONSE AS dor ON dor.ENROLMENT_ID=de.id \n" +
-                    "AND dor.OPERATION_ID = eom.OPERATION_ID\n" +
-                    "WHERE eom.OPERATION_ID = ? AND de.device_id = ? AND de.TENANT_ID = ?";
+            String sql = "SELECT "
+                    + "eom.ENROLMENT_ID, "
+                    + "eom.OPERATION_ID, eom.ID AS EOM_MAPPING_ID, "
+                    + "dor.ID AS OP_RES_ID, "
+                    + "de.DEVICE_ID, "
+                    + "d.DEVICE_IDENTIFICATION, "
+                    + "d.DEVICE_TYPE_ID, dt.NAME AS DEVICE_TYPE_NAME, "
+                    + "eom.STATUS, eom.CREATED_TIMESTAMP, "
+                    + "eom.UPDATED_TIMESTAMP, "
+                    + "op.OPERATION_CODE, "
+                    + "op.TYPE AS OPERATION_TYPE, "
+                    + "dor.OPERATION_RESPONSE, "
+                    + "dor.RECEIVED_TIMESTAMP, "
+                    + "dor.IS_LARGE_RESPONSE, "
+                    + "op.INITIATED_BY FROM DM_ENROLMENT_OP_MAPPING AS eom "
+                    + "INNER JOIN DM_OPERATION AS op ON op.ID=eom.OPERATION_ID "
+                    + "INNER JOIN DM_ENROLMENT AS de ON de.ID=eom.ENROLMENT_ID "
+                    + "INNER JOIN DM_DEVICE AS d ON d.ID=de.DEVICE_ID "
+                    + "INNER JOIN DM_DEVICE_TYPE AS dt ON dt.ID=d.DEVICE_TYPE_ID "
+                    + "LEFT JOIN DM_DEVICE_OPERATION_RESPONSE AS dor ON dor.ENROLMENT_ID=de.id "
+                    + "AND dor.OPERATION_ID = eom.OPERATION_ID "
+                    + "WHERE eom.OPERATION_ID = ? AND de.device_id = ? AND de.TENANT_ID = ?";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, operationId);
@@ -682,37 +693,40 @@ public class GenericOperationDAOImpl implements OperationDAO {
                     activity = new Activity();
                     activity.setActivityId(DeviceManagementConstants.OperationAttributes.ACTIVITY + operationId);
                     activity.setType(Activity.Type.valueOf(rs.getString("OPERATION_TYPE")));
-                    activity.setCreatedTimeStamp(new java.util.Date(rs.getLong(("CREATED_TIMESTAMP")) * 1000).toString());
+                    activity.setCreatedTimeStamp(
+                            new java.util.Date(rs.getLong(("CREATED_TIMESTAMP")) * 1000).toString());
                     activity.setCode(rs.getString("OPERATION_CODE"));
                     activity.setInitiatedBy(rs.getString("INITIATED_BY"));
                 }
                 if (enrolmentId != rs.getInt("ENROLMENT_ID")) {
                     activityStatus = new ActivityStatus();
-
-                    DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
-                    deviceIdentifier.setId(rs.getString("DEVICE_IDENTIFICATION"));
-                    deviceIdentifier.setType(rs.getString("DEVICE_TYPE_NAME"));
+                    DeviceIdentifier deviceIdentifier = new DeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"),
+                            rs.getString("DEVICE_TYPE_NAME"));
                     activityStatus.setDeviceIdentifier(deviceIdentifier);
-
                     activityStatus.setStatus(ActivityStatus.Status.valueOf(rs.getString("STATUS")));
 
                     List<OperationResponse> operationResponses = new ArrayList<>();
                     if (rs.getInt("UPDATED_TIMESTAMP") != 0) {
-                        activityStatus.setUpdatedTimestamp(new java.util.Date(rs.getLong(("UPDATED_TIMESTAMP")) * 1000).toString());
-                        operationResponses.add(OperationDAOUtil.getOperationResponse(rs));
+                        activityStatus.setUpdatedTimestamp(
+                                new java.util.Date(rs.getLong(("UPDATED_TIMESTAMP")) * 1000).toString());
+                        if (rs.getBoolean("IS_LARGE_RESPONSE")) {
+                            largeResponseIDs.add(rs.getInt("OP_RES_ID"));
+                        } else {
+                            operationResponses.add(OperationDAOUtil.getOperationResponse(rs));
+                        }
                     }
                     activityStatus.setResponses(operationResponses);
-
                     activityStatusList.add(activityStatus);
-
                     enrolmentId = rs.getInt("ENROLMENT_ID");
                     activity.setActivityStatus(activityStatusList);
                 } else {
                     if (rs.getInt("UPDATED_TIMESTAMP") != 0) {
-                        responseId = rs.getInt("OP_RES_ID");
                         if (rs.getBoolean("IS_LARGE_RESPONSE")) {
-                            largeResponseIDs.add(responseId);
+                            largeResponseIDs.add(rs.getInt("OP_RES_ID"));
                         } else {
+                            if (activityStatus == null) {
+                                activityStatus = new ActivityStatus();
+                            }
                             activityStatus.getResponses().add(OperationDAOUtil.getOperationResponse(rs));
                         }
                     }
@@ -1467,27 +1481,109 @@ public class GenericOperationDAOImpl implements OperationDAO {
     }
 
     @Override
-    public int getOperationCountForDevice(int enrolmentId) throws OperationManagementDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        int operationCount = 0;
+    public int getOperationCountForDevice(int enrolmentId, PaginationRequest request)
+            throws OperationManagementDAOException {
+        String createdTo = null;
+        String createdFrom = null;
+        DateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        if (request.getOperationLogFilters().getCreatedDayFrom() != null) {
+            createdFrom = simple.format(request.getOperationLogFilters().getCreatedDayFrom());
+        }
+        if (request.getOperationLogFilters().getCreatedDayTo() != null) {
+            createdTo = simple.format(request.getOperationLogFilters().getCreatedDayTo());
+        }
+
+        Long updatedFrom = request.getOperationLogFilters().getUpdatedDayFrom();
+        Long updatedTo = request.getOperationLogFilters().getUpdatedDayTo();
+        List<String> operationCodes = request.getOperationLogFilters().getOperationCode();
+        List<String> status = request.getOperationLogFilters().getStatus();
+        boolean isCreatedDayProvided = false;
+        boolean isUpdatedDayProvided = false;
+        boolean isOperationCodeProvided = false;
+        boolean isStatusProvided = false;
+
+        String sql = "SELECT "
+                + "COUNT(o.ID) AS OPERATION_COUNT "
+                + "FROM "
+                + "DM_OPERATION o "
+                + "INNER JOIN "
+                + "(SELECT dm.OPERATION_ID, "
+                + "dm.ID, "
+                + "dm.STATUS, "
+                + "dm.UPDATED_TIMESTAMP "
+                + "FROM "
+                + "DM_ENROLMENT_OP_MAPPING dm "
+                + "WHERE "
+                + "dm.ENROLMENT_ID = ?";
+
+        if (updatedFrom != null && updatedFrom != 0 && updatedTo != null && updatedTo != 0) {
+            sql += " AND dm.UPDATED_TIMESTAMP BETWEEN ? AND ?";
+            isUpdatedDayProvided = true;
+        }
+        sql += ") om ON o.ID = om.OPERATION_ID ";
+        if (createdFrom != null && !createdFrom.isEmpty() && createdTo != null && !createdTo.isEmpty()) {
+            sql += " WHERE o.CREATED_TIMESTAMP BETWEEN ? AND ?";
+            isCreatedDayProvided = true;
+        }
+        if (status != null && !status.isEmpty()) {
+            if (isCreatedDayProvided) {
+                sql += " AND (om.STATUS = ? ";
+            } else {
+                sql += " WHERE (om.STATUS = ? ";
+            }
+            sql = IntStream.range(0, status.size() - 1).mapToObj(i -> " OR om.STATUS = ?")
+                    .collect(Collectors.joining("", sql, ""));
+            sql += ")";
+            isStatusProvided = true;
+        }
+        if (operationCodes != null && !operationCodes.isEmpty()) {
+            if (isCreatedDayProvided || isStatusProvided) {
+                sql += " AND (o.OPERATION_CODE = ? ";
+            } else {
+                sql += " WHERE (o.OPERATION_CODE = ? ";
+            }
+            sql = IntStream.range(0, operationCodes.size() - 1).mapToObj(i -> " OR o.OPERATION_CODE = ?")
+                    .collect(Collectors.joining("", sql, ""));
+            sql += ")";
+            isOperationCodeProvided = true;
+        }
         try {
-            conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT COUNT(ID) AS OPERATION_COUNT FROM DM_ENROLMENT_OP_MAPPING WHERE ENROLMENT_ID = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, enrolmentId);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                operationCount = rs.getInt("OPERATION_COUNT");
+            Connection conn = OperationManagementDAOFactory.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, enrolmentId);
+                if (isUpdatedDayProvided) {
+                    stmt.setLong(paramIndex++, updatedFrom);
+                    stmt.setLong(paramIndex++, updatedTo);
+                }
+                if (isCreatedDayProvided) {
+                    stmt.setString(paramIndex++, createdFrom);
+                    stmt.setString(paramIndex++, createdTo);
+                }
+                if (isStatusProvided) {
+                    for (String s : status) {
+                        stmt.setString(paramIndex++, s);
+                    }
+                }
+                if (isOperationCodeProvided) {
+                    for (String s : operationCodes) {
+                        stmt.setString(paramIndex++, s);
+                    }
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("OPERATION_COUNT");
+                    }
+                }
             }
         } catch (SQLException e) {
-            throw new OperationManagementDAOException("Error occurred while getting the operations count for enrolment: "
-                    + enrolmentId, e);
-        } finally {
-            OperationManagementDAOUtil.cleanupResources(stmt, rs);
+            String msg = "SQL error occurred while retrieving the operation count of the device" + enrolmentId
+                    + " for search query";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
         }
-        return operationCount;
+        return 0;
     }
 
     @Override

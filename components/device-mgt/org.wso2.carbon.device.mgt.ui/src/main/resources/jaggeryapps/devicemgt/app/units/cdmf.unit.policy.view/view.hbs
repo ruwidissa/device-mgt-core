@@ -1,8 +1,7 @@
 {{#zone "content"}}
     {{#if isAuthorized}}
         <span id="logged-in-user" class="hidden" data-username="{{@user.username}}" data-domain="{{@user.domain}}"
-              data-tenant-id="{{@user.tenantId}}" data-iscloud="{{isCloud}}"
-                data-corrective-policies="{{correctivePolicies}}"></span>
+              data-tenant-id="{{@user.tenantId}}" data-iscloud="{{isCloud}}"></span>
         {{#defineZone "policy-profile-top"}}
             <div class="row wr-device-board">
                 <div class="col-lg-12 wr-secondary-bar">
@@ -47,42 +46,9 @@
                                 <td class="sorting_1" style="padding:10px 15px;">Assigned Roles</td>
                                 <td id="policy-roles" style="padding:10px 15px;"></td>
                             </tr>
-                            <tr role="row" id="roles-row" class="even">
-                                <td class="sorting_1" style="padding:10px 15px;">Policy Type</td>
-                                <td id="policy-type" style="padding:10px 15px;"></td>
-                            </tr>
                             </tbody>
                         </table>
                     {{/defineZone}}
-                    <div id="policy-corrective-actions-list" class="hidden">
-                        <div style="background: #008cc4; color: #fff; padding: 10px; margin-bottom: 5px">
-                            Corrective Actions
-                        </div>
-                        <div class="add-margin-top-4x">
-                            <div id="policy-corrective-actions">
-                                <table class="table table-responsive table-striped">
-                                    <tbody>
-                                        <tr role="row">
-                                            <td class="sorting_1" style="padding:10px 15px; width: 14%;">Action Type</td>
-                                            <td style="padding:10px 15px;">POLICY</td>
-                                            <td class="sorting_1" style="padding:10px 15px; width: 14%;">Policy ID</td>
-                                            <td id="corrective-action-type-policy-id" style="padding:10px 15px;"></td>
-                                        </tr>
-                                        <tr id="corrective-action-policy-id-missing-msg">
-                                            <td class="alert alert-danger" colspan="4" style="padding:10px 15px;">
-                                                <strong>
-                                                    <i class="icon fw fw-error"></i>
-                                                    Corrective policy having the above Policy ID has been updated to
-                                                    a GENERAL policy or it has been deleted. Hence this policy will
-                                                    not be applied till modified correctly.
-                                                </strong>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
                     <div style="background: #008cc4; color: #fff; padding: 10px; margin-bottom: 5px">Description
                     </div>
                     <div class="add-margin-top-4x">

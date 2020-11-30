@@ -33,12 +33,15 @@ import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.common.geo.service.Alert;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -46,7 +49,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 
 @SwaggerDefinition(
         info = @Info(
@@ -76,6 +81,12 @@ import javax.ws.rs.core.Response;
                         description = "",
                         key = "perm:geo-service:alerts-manage",
                         permissions = {"/device-mgt/devices/owning-device/manage-alerts"}
+                ),
+                @Scope(
+                        name = "Manage Geo Fences",
+                        description = "",
+                        key = "perm:geo-service:geo-fence",
+                        permissions = {"/device-mgt/devices/owning-device/manage-geo-fence"}
                 )
         }
 )
@@ -833,5 +844,247 @@ public interface GeoLocationBasedService {
                     value = "The query name.",
                     required = true)
             @QueryParam("queryName") String queryName);
+
+    @POST
+    @Path("/geo-fence")
+    @ApiOperation(
+            consumes = "application/json",
+            produces = "application/json",
+            httpMethod = "POST",
+            value = "Create Geo fence",
+            notes = "Create a new geo fence",
+            response = Response.class,
+            tags = "Geo Service Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 201,
+                    message = "Created.",
+                    response = Response.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 400,
+                    message = "Bad Request. \n Invalid Geofence data found.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized. \n Unauthorized request.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Error on retrieving stats",
+                    response = ErrorResponse.class)
+    })
+    Response createGeofence(@ApiParam(name = "fence", value = "Geo fence data")GeofenceWrapper geofenceWrapper);
+
+
+    @GET
+    @Path("/geo-fence/{fenceId}")
+    @ApiOperation(
+            consumes = "application/json",
+            produces = "application/json",
+            httpMethod = "GET",
+            value = "Get Geo fence",
+            notes = "Get existing geo fence",
+            response = Response.class,
+            tags = "Geo Service Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK.",
+                    response = Response.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not found. \n No Geofence found for the Id",
+                    response = Response.class),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized. \n Unauthorized request."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Error on retrieving stats",
+                    response = Response.class)
+    })
+    Response getGeofence(
+            @ApiParam(
+                name = "fenceId",
+                value = "Id of the fence",
+                required = true)
+            @PathParam("fenceId") int fenceId,
+            @ApiParam(
+                    name = "requireEventData",
+                    value = "Require geofence event data")
+            @QueryParam("requireEventData") boolean requireEventData);
+
+
+    @GET
+    @Path("/geo-fence")
+    @ApiOperation(
+            consumes = "application/json",
+            produces = "application/json",
+            httpMethod = "GET",
+            value = "Get Geo fences",
+            notes = "Get all geo fence",
+            response = Response.class,
+            tags = "Geo Service Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK.",
+                    response = Response.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized. \n Unauthorized request."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Error on retrieving stats",
+                    response = Response.class)
+    })
+    Response getGeofence(
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.")
+            @QueryParam("offset") int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many device details you require from the starting pagination index/offset.")
+            @QueryParam("limit") int limit,
+            @ApiParam(
+                    name = "name",
+                    value = "Geo Fence name")
+            @QueryParam("name") String name,
+            @ApiParam(
+                    name = "requireEventData",
+                    value = "Require geofence event data")
+            @QueryParam("requireEventData") boolean requireEventData);
+
+
+    @DELETE
+    @Path("/geo-fence/{fenceId}")
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            httpMethod = "DELETE",
+            value = "Delete Geo fence",
+            notes = "Delete an existing geo fence",
+            response = Response.class,
+            tags = "Geo Service Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK.",
+                    response = Response.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not found. \n No geofences found for the Id",
+                    response = Response.class),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized. \n Unauthorized request."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Error on retrieving stats",
+                    response = Response.class)
+    })
+    Response deleteGeofence(
+            @ApiParam(
+                    name = "fenceId",
+                    value = "Id of the fence",
+                    required = true)
+            @PathParam("fenceId") int fenceId);
+
+
+    @PUT
+    @Path("/geo-fence/{fenceId}")
+    @ApiOperation(
+            consumes = "application/json",
+            produces = "application/json",
+            httpMethod = "PUT",
+            value = "Update Geo fence",
+            notes = "Update an existing geo fence",
+            response = Response.class,
+            tags = "Geo Service Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK.",
+                    response = Response.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 400,
+                    message = "Bad Request. \n Invalid Geofence data found.",
+                    response = Response.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not found. \n No Geofence found for the Id",
+                    response = Response.class),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized. \n Unauthorized request."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Error on retrieving stats",
+                    response = Response.class)
+    })
+    Response updateGeofence(
+            @ApiParam(name = "fence", value = "Geo fence data")
+                    GeofenceWrapper geofenceWrapper,
+            @ApiParam(
+                    name = "fenceId",
+                    value = "Id of the fence",
+                    required = true)
+            @PathParam("fenceId") int fenceId,
+            @ApiParam(name = "eventIds", value = "Event id list to be removed") @QueryParam("eventIds") int[] eventIds);
 }
 

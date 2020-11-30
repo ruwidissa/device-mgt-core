@@ -28,6 +28,10 @@ public class Select {
     private String valueType;
     private List<Option> options;
     private String mode;
+    private String apiUrl;
+    private String defineValueKey;
+    private String displayValueKey;
+    private String arrayPath;
 
     @XmlElement(name = "ValueType", required = true)
     public String getValueType() {
@@ -55,5 +59,41 @@ public class Select {
 
     public void setMode(String mode) {
         this.mode = mode;
+    }
+
+    @XmlElement(name = "Url")
+    public String getUrl() {
+        return apiUrl;
+    }
+
+    public void setUrl(String url) {
+        this.apiUrl = url;
+    }
+
+    @XmlElement(name = "DefineValueKey")
+    public String getDefineValueKey() {
+        return defineValueKey;
+    }
+
+    public void setDefineValueKey(String defineValueKey) {
+        this.defineValueKey = defineValueKey;
+    }
+
+    @XmlElement(name = "DisplayValueKey")
+    public String getDisplayValueKey() {
+        return displayValueKey;
+    }
+
+    public void setDisplayValueKey(String displayValueKey) {
+        this.displayValueKey = displayValueKey;
+    }
+
+    @XmlElement(name = "ArrayPath")
+    public String getArrayPath() {
+        return arrayPath;
+    }
+
+    public void setArrayPath(String arrayPath) {
+        this.arrayPath = arrayPath;
     }
 }

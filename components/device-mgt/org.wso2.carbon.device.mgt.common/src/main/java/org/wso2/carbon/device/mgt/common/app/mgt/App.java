@@ -62,6 +62,10 @@ public class App {
     private String location;
     @ApiModelProperty(name = "properties", value = "List of meta data.", required = true)
     private Properties properties;
+    @ApiModelProperty(name = "metaData",
+            value = "Meta data of the application release",
+            required = true)
+    private String metaData;
 
     public MobileAppTypes getType() {
         return type;
@@ -142,4 +146,8 @@ public class App {
     public void setProperties(Properties properties) {
         this.properties = properties;
     }
+
+    public String getMetaData() { return metaData; }
+
+    public void setMetaData(String metaData) { this.metaData = metaData; }
 }

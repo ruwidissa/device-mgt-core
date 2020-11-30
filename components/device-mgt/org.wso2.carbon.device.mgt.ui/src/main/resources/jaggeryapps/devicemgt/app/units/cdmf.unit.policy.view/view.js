@@ -44,8 +44,6 @@ function onRequest(context) {
 
     var devicemgtProps = require("/app/modules/conf-reader/main.js")["conf"];
     page["isCloud"] = devicemgtProps.isCloud;
-
-    page["correctivePolicies"] = JSON.stringify(policyModule.getAllPoliciesByType("CORRECTIVE")["content"]);
     
     return page;
 }

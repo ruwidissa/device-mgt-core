@@ -45,6 +45,7 @@ public class Item {
     private InputList inputList;
     private String nullableValue;
     private String divider;
+    private boolean isHidden;
 
     @XmlElement(name = "Label")
     public String getLabel() {
@@ -206,5 +207,14 @@ public class Item {
 
     public void setDivider(String divider) {
         this.divider = divider;
+    }
+
+    @XmlElement(name = "Hidden")
+    public boolean isHidden() {
+        return isHidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        isHidden = hidden;
     }
 }

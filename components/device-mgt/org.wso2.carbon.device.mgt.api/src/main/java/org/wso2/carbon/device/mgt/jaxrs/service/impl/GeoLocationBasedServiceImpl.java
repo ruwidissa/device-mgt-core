@@ -18,8 +18,13 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPIUtil;
 import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse;
@@ -31,10 +36,21 @@ import org.wso2.carbon.analytics.datasource.commons.exception.AnalyticsException
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
-import org.wso2.carbon.device.mgt.common.geo.service.*;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.geo.service.Alert;
+import org.wso2.carbon.device.mgt.common.geo.service.AlertAlreadyExistException;
+import org.wso2.carbon.device.mgt.common.geo.service.Event;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoFence;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
+import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
@@ -42,15 +58,29 @@ import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.GeoHashLength
 import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.ZoomGeoHashLengthStrategy;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.beans.EventAction;
+import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.GeoLocationBasedService;
+import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
+import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -576,5 +606,272 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         eventBean.setTimestamp(record.getTimestamp());
         eventBean.setValues(record.getValues());
         return eventBean;
+    }
+
+    @Path("/geo-fence")
+    @POST
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response createGeofence(GeofenceWrapper geofenceWrapper) {
+        RequestValidationUtil.validateGeofenceData(geofenceWrapper);
+        RequestValidationUtil.validateEventConfigurationData(geofenceWrapper.getEventConfig());
+        try {
+            GeofenceData geofenceData = mapRequestGeofenceData(geofenceWrapper);
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            if (!geoService.createGeofence(geofenceData)) {
+                String msg = "Failed to create geofence";
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+            return Response.status(Response.Status.CREATED).entity("Geo Fence record created successfully").build();
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Failed to create geofence";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (EventConfigurationException e) {
+            String msg = "Failed to create event configuration for Geo Fence";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    /**
+     * Extract request event data from the payload and attach it to the DTO
+     * @param eventConfig request event payload
+     * @return generated event beans list according to the payload data
+     */
+    private List<EventConfig> mapRequestEvent(List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> eventConfig) {
+        List<EventConfig> savingEventList = new ArrayList<>();
+        for (org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig event : eventConfig) {
+            EventConfig savingConfig = new EventConfig();
+            if (event.getId() > 0) {
+                savingConfig.setEventId(event.getId());
+            } else {
+                savingConfig.setEventId(-1);
+            }
+            savingConfig.setEventLogic(event.getEventLogic());
+            String eventJson = new Gson().toJson(event.getActions());
+            savingConfig.setActions(eventJson);
+            savingEventList.add(savingConfig);
+        }
+        return savingEventList;
+    }
+
+    @Path("/geo-fence/{fenceId}")
+    @GET
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response getGeofence(@PathParam("fenceId") int fenceId,
+                                @QueryParam("requireEventData") boolean requireEventData) {
+        try {
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            GeofenceData geofenceData = geoService.getGeoFences(fenceId);
+            if (geofenceData == null) {
+                String msg = "No valid Geofence found for ID " + fenceId;
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+            if (requireEventData) {
+                List<EventConfig> eventsOfGeoFence = geoService.getEventsOfGeoFence(geofenceData.getId());
+                geofenceData.setEventConfig(eventsOfGeoFence);
+            }
+            return Response.status(Response.Status.OK).entity(getMappedResponseBean(geofenceData)).build();
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Server error occurred while retrieving Geofence for Id " + fenceId;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    /**
+     * Wrap geofence data retrieved from DB into Response Bean
+     * @param geofenceData retrieved data fromDB
+     * @return Response bean with geofence data
+     */
+    private GeofenceWrapper getMappedResponseBean(GeofenceData geofenceData) {
+        GeofenceWrapper geofenceWrapper = new GeofenceWrapper();
+        geofenceWrapper.setId(geofenceData.getId());
+        geofenceWrapper.setFenceName(geofenceData.getFenceName());
+        geofenceWrapper.setDescription(geofenceData.getDescription());
+        geofenceWrapper.setLatitude(geofenceData.getLatitude());
+        geofenceWrapper.setLongitude(geofenceData.getLongitude());
+        geofenceWrapper.setRadius(geofenceData.getRadius());
+        geofenceWrapper.setGeoJson(geofenceData.getGeoJson());
+        geofenceWrapper.setFenceShape(geofenceData.getFenceShape());
+        if (geofenceData.getGroupIds() != null && !geofenceData.getGroupIds().isEmpty()) {
+            geofenceWrapper.setGroupIds(geofenceData.getGroupIds());
+        }
+        if (geofenceData.getGroupData() != null && !geofenceData.getGroupData().isEmpty()) {
+            geofenceWrapper.setGroupNames(geofenceData.getGroupData());
+        }
+        if (geofenceData.getEventConfig() != null) {
+            geofenceWrapper.setEventConfig(getEventConfigBean(geofenceData.getEventConfig()));
+        }
+        return geofenceWrapper;
+    }
+
+    /**
+     * Get event list to send with the response
+     * @param eventConfig event list retrieved
+     * @return list of response event beans
+     */
+    private List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> getEventConfigBean(List<EventConfig> eventConfig) {
+        List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> eventList = new ArrayList<>();
+        org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig eventData;
+        for (EventConfig event : eventConfig) {
+            eventData = new org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig();
+            eventData.setId(event.getEventId());
+            eventData.setEventLogic(event.getEventLogic());
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            try {
+                List<EventAction> eventActions = mapper.readValue(event.getActions(), mapper.getTypeFactory().
+                        constructCollectionType(List.class, EventAction.class));
+                eventData.setActions(eventActions);
+            } catch (IOException e) {
+                if (log.isDebugEnabled()) {
+                    log.warn("Error occurred while parsing event actions of the event with ID " + event.getEventId());
+                }
+                continue;
+            }
+            eventList.add(eventData);
+        }
+        return eventList;
+    }
+
+    @Path("/geo-fence")
+    @GET
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response getGeofence(@QueryParam("offset") int offset,
+                                @QueryParam("limit") int limit,
+                                @QueryParam("name") String name,
+                                @QueryParam("requireEventData") boolean requireEventData) {
+        try {
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            if (offset >= 0 && limit != 0) {
+                PaginationRequest request = new PaginationRequest(offset, limit);
+                if (name != null && !name.isEmpty()) {
+                    request.setProperty(DeviceManagementConstants.GeoServices.FENCE_NAME, name);
+                }
+                List<GeofenceData> geoFences = geoService.getGeoFences(request);
+                if (!geoFences.isEmpty() && requireEventData) {
+                    geoFences = geoService.attachEventObjects(geoFences);
+                }
+                return buildResponse(geoFences);
+            }
+            if (name != null && !name.isEmpty()) {
+                List<GeofenceData> geoFences = geoService.getGeoFences(name);
+                if (requireEventData) {
+                    geoFences = geoService.attachEventObjects(geoFences);
+                }
+                return buildResponse(geoFences);
+            }
+            return buildResponse(geoService.getGeoFences());
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Failed to retrieve geofence data";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    /**
+     * Build the response payload from the data retrieved from the database
+     * @param fencesList retrieved geofence data to send in response
+     * @return HttpResponse object
+     */
+    private Response buildResponse(List<GeofenceData> fencesList) {
+        List<GeofenceWrapper> geofenceList = new ArrayList<>();
+        for (GeofenceData geofenceData : fencesList) {
+            geofenceList.add(getMappedResponseBean(geofenceData));
+        }
+        PaginationResult paginationResult = new PaginationResult();
+        paginationResult.setData(geofenceList);
+        paginationResult.setRecordsTotal(geofenceList.size());
+        return Response.status(Response.Status.OK).entity(paginationResult).build();
+    }
+
+    @DELETE
+    @Override
+    @Path("/geo-fence/{fenceId}")
+    public Response deleteGeofence(@PathParam("fenceId") int fenceId) {
+        try {
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            if (!geoService.deleteGeofenceData(fenceId)) {
+                String msg = "No valid Geofence found for ID " + fenceId;
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+            return Response.status(Response.Status.OK).build();
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Failed to delete geofence data";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @Path("/geo-fence/{fenceId}")
+    @PUT
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response updateGeofence(GeofenceWrapper geofenceWrapper,
+                                   @PathParam("fenceId") int fenceId,
+                                   @QueryParam("eventIds") int[] eventIds) {
+        RequestValidationUtil.validateGeofenceData(geofenceWrapper);
+        RequestValidationUtil.validateEventConfigurationData(geofenceWrapper.getEventConfig());
+        try {
+            GeofenceData geofenceData = mapRequestGeofenceData(geofenceWrapper);
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            if (!geoService.updateGeofence(geofenceData, fenceId)) {
+                String msg = "No valid Geofence found for ID " + fenceId;
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+            List<Integer> eventsToRemove = new ArrayList<>();
+            for (int eventId : eventIds) {
+                eventsToRemove.add(eventId);
+            }
+            geoService.updateGeoEventConfigurations(geofenceData, eventsToRemove,
+                    geofenceData.getGroupIds(), fenceId);
+            return Response.status(Response.Status.CREATED).entity("Geo Fence update successfully").build();
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Failed to update geofence";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (EventConfigurationException e) {
+            String msg = "Failed to update geofence events";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    /**
+     * Parse geofence data from the request payload to the GeofenceData DTO
+     * @param geofenceWrapper request payload data
+     * @return GeofenceData object built from the request data
+     */
+    private GeofenceData mapRequestGeofenceData(GeofenceWrapper geofenceWrapper) {
+        GeofenceData geofenceData = new GeofenceData();
+        geofenceData.setFenceName(geofenceWrapper.getFenceName());
+        geofenceData.setDescription(geofenceWrapper.getDescription());
+        geofenceData.setLatitude(geofenceWrapper.getLatitude());
+        geofenceData.setLongitude(geofenceWrapper.getLongitude());
+        geofenceData.setRadius(geofenceWrapper.getRadius());
+        geofenceData.setFenceShape(geofenceWrapper.getFenceShape());
+        geofenceData.setGeoJson(geofenceWrapper.getGeoJson());
+        if (geofenceWrapper.getGroupIds() == null || geofenceWrapper.getGroupIds().isEmpty()) {
+            String msg = "Group ID / IDs are mandatory, since cannot be null or empty";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST)
+                            .setMessage(msg).build());
+        }
+        geofenceData.setGroupIds(geofenceWrapper.getGroupIds());
+        geofenceData.setEventConfig(mapRequestEvent(geofenceWrapper.getEventConfig()));
+        return geofenceData;
     }
 }

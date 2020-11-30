@@ -122,7 +122,6 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
                 return null;
             }
             return policy;
-            //return PolicyManagementDataHolder.getInstance().getPolicyEvaluationPoint().getEffectivePolicy(identifier);
         } catch (PolicyEvaluationException | PolicyManagementException e) {
             String msg = "Error occurred while retrieving the effective policy for devices.";
             log.error(msg, e);
@@ -135,7 +134,7 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
             PolicyDelegationException {
         try {
             String type = null;
-            if (deviceIdentifiers.size() > 0) {
+            if (!deviceIdentifiers.isEmpty()) {
                 type = deviceIdentifiers.get(0).getType();
             }
             PolicyManagementDataHolder.getInstance().getDeviceManagementService().addOperation(type,
@@ -161,7 +160,7 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
     public void addPolicyRevokeOperation(List<DeviceIdentifier> deviceIdentifiers) throws PolicyDelegationException {
         try {
             String type = null;
-            if (deviceIdentifiers.size() > 0) {
+            if (!deviceIdentifiers.isEmpty()) {
                 type = deviceIdentifiers.get(0).getType();
             }
             PolicyManagementDataHolder.getInstance().getDeviceManagementService().addOperation(type,

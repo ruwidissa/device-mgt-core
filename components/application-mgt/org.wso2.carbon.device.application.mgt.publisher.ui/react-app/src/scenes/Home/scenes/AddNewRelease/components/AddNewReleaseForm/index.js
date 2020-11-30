@@ -27,6 +27,7 @@ import { handleApiError } from '../../../../../../services/utils/errorHandler';
 import NewAppUploadForm from '../../../AddNewApp/components/AddNewAppForm/components/NewAppUploadForm';
 
 const formConfig = {
+  isNewRelease: true,
   specificElements: {
     binaryFile: {
       required: true,
@@ -163,6 +164,11 @@ class AddNewReleaseFormComponent extends React.Component {
                 <NewAppUploadForm
                   forbiddenErrors={forbiddenErrors}
                   formConfig={formConfig}
+                  deviceType={this.props.deviceType}
+                  // Takes the first upload app type installation path
+                  uploadedInstalltionAppType={
+                    this.props.location.state.appDetails.installerPath
+                  }
                   supportedOsVersions={supportedOsVersions}
                   onSuccessReleaseData={this.onSuccessReleaseData}
                   onClickBackButton={this.onClickBackButton}

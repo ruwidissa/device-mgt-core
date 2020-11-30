@@ -281,6 +281,16 @@ public interface ApplicationManager {
 
     String getInstallableLifecycleState() throws ApplicationManagementException;
 
+    /**
+     * Check if there are subscription devices for operations
+     *
+     * @param operationId Id of the operation
+     * @param deviceId  deviceId of the relevant device
+     * @return boolean value either true or false according to the situation
+     * @throws ApplicationManagementException
+     */
+    boolean checkSubDeviceIdsForOperations(int operationId, int deviceId) throws ApplicationManagementException;
+
     void updateSubsStatus (int deviceId, int operationId, String status) throws ApplicationManagementException;
 
 

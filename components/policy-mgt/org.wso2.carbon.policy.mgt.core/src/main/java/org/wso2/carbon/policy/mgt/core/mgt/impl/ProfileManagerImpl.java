@@ -22,8 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Profile;
 import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
 import org.wso2.carbon.policy.mgt.common.ProfileManagementException;
 import org.wso2.carbon.policy.mgt.core.dao.FeatureDAO;
 import org.wso2.carbon.policy.mgt.core.dao.FeatureManagerDAOException;
@@ -41,17 +39,13 @@ import java.util.List;
 
 public class ProfileManagerImpl implements ProfileManager {
 
-    private static Log log = LogFactory.getLog(ProfileManagerImpl.class);
+    private static final Log log = LogFactory.getLog(ProfileManagerImpl.class);
     private ProfileDAO profileDAO;
     private FeatureDAO featureDAO;
-//    private DeviceDAO deviceDAO;
-    private DeviceTypeDAO deviceTypeDAO;
 
     public ProfileManagerImpl() {
         profileDAO = PolicyManagementDAOFactory.getProfileDAO();
         featureDAO = PolicyManagementDAOFactory.getFeatureDAO();
-//        deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
-        deviceTypeDAO = DeviceManagementDAOFactory.getDeviceTypeDAO();
     }
 
     @Override
@@ -68,19 +62,21 @@ public class ProfileManagerImpl implements ProfileManager {
             PolicyManagementDAOFactory.commitTransaction();
         } catch (ProfileManagerDAOException e) {
             PolicyManagementDAOFactory.rollbackTransaction();
-            throw new ProfileManagementException("Error occurred while adding the profile (" +
-                    profile.getProfileName() + ")", e);
+            String msg = "Error occurred while adding the profile (" + profile.getProfileName() + ")";
+            log.error(msg, e);
+            throw new ProfileManagementException(msg, e);
         } catch (FeatureManagerDAOException e) {
             PolicyManagementDAOFactory.rollbackTransaction();
-            throw new ProfileManagementException("Error occurred while adding the profile features (" +
-                    profile.getProfileName() + ")", e);
+            String msg = "Error occurred while adding the profile features (" + profile.getProfileName() + ")";
+            log.error(msg, e);
+            throw new ProfileManagementException(msg, e);
         } catch (PolicyManagerDAOException e) {
-            throw new ProfileManagementException("Error occurred while adding the profile (" +
-                    profile.getProfileName() + ") to the database", e);
+            String msg = "Error occurred while adding the profile (" + profile.getProfileName() + ") to the database";
+            log.error(msg, e);
+            throw new ProfileManagementException(msg, e);
         } finally {
             PolicyManagementDAOFactory.closeConnection();
         }
-
         return profile;
     }
 
@@ -115,7 +111,7 @@ public class ProfileManagerImpl implements ProfileManager {
 
     @Override
     public boolean deleteProfile(Profile profile) throws ProfileManagementException {
-        boolean bool = true;
+        boolean bool;
         try {
             PolicyManagementDAOFactory.beginTransaction();
             featureDAO.deleteFeaturesOfProfile(profile);
@@ -173,7 +169,7 @@ public class ProfileManagerImpl implements ProfileManager {
 
             for (Profile profile : profileList) {
 
-                List<ProfileFeature> list = new ArrayList<ProfileFeature>();
+                List<ProfileFeature> list = new ArrayList<>();
                 for (ProfileFeature profileFeature : featureList) {
                     if (profile.getProfileId() == profileFeature.getProfileId()) {
                         list.add(profileFeature);
@@ -204,7 +200,7 @@ public class ProfileManagerImpl implements ProfileManager {
             featureList = featureDAO.getAllProfileFeatures();
 
             for (Profile profile : profileList) {
-                List<ProfileFeature> profileFeatureList = new ArrayList<ProfileFeature>();
+                List<ProfileFeature> profileFeatureList = new ArrayList<>();
                 for (ProfileFeature profileFeature : featureList) {
                     if (profile.getProfileId() == profileFeature.getProfileId()) {
                         profileFeatureList.add(profileFeature);
@@ -224,5 +220,4 @@ public class ProfileManagerImpl implements ProfileManager {
         }
         return profileList;
     }
-
 }

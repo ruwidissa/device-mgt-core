@@ -35,6 +35,8 @@ import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig;
+import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.PolicyWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ProfileFeature;
@@ -682,4 +684,73 @@ public class RequestValidationUtil {
                 && StringUtils.isEmpty(emailAddress);
     }
 
+    /**
+     * Check the request payload attributes are correct for create a geofence
+     * @param geofenceWrapper request payload data
+     */
+    public static void validateGeofenceData(GeofenceWrapper geofenceWrapper) {
+        boolean isGeoJsonExists = false;
+        if (geofenceWrapper.getFenceName() == null || geofenceWrapper.getFenceName().trim().isEmpty()) {
+            String msg = "Geofence name should not be null or empty";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (geofenceWrapper.getGeoJson() != null && !geofenceWrapper.getGeoJson().trim().isEmpty()) {
+            isGeoJsonExists = true;
+        }
+        if ((geofenceWrapper.getLatitude() < -90 || geofenceWrapper.getLatitude() > 90) && !isGeoJsonExists) {
+            String msg = "Latitude should be a value between -90 and 90";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if ((geofenceWrapper.getLongitude() < -180 || geofenceWrapper.getLongitude() > 180) && !isGeoJsonExists) {
+            String msg = "Longitude should be a value between -180 and 180";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (geofenceWrapper.getRadius() < 1 && !isGeoJsonExists) {
+            String msg = "Minimum radius of the fence should be 1m";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (geofenceWrapper.getFenceShape().trim().isEmpty()) {
+            String msg = "Fence shape should not be empty";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+    }
+
+    /**
+     * Check the request payload attributes are correct for create an event record
+     * @param eventConfig request payload data
+     */
+    public static void validateEventConfigurationData(List<EventConfig> eventConfig) {
+        if (eventConfig == null ||eventConfig.isEmpty()) {
+            String msg = "Event configuration is mandatory, since should not be null or empty";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+
+        for (EventConfig config : eventConfig) {
+            if (config.getActions() == null || config.getActions().isEmpty()) {
+                String msg = "Event actions are mandatory, since should not be null or empty";
+                log.error(msg);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+            }
+
+            if (config.getEventLogic() == null || config.getEventLogic().trim().isEmpty()) {
+                String msg = "Event logic is mandatory, since should not be null or empty";
+                log.error(msg);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+            }
+        }
+    }
 }

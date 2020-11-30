@@ -129,26 +129,4 @@ public interface DeviceDetailsDAO {
     void updateDeviceInformation(int deviceId, int enrollmentId, DeviceInfo newDeviceInfo) throws DeviceDetailsMgtDAOException;
 
     void updateDeviceLocation(DeviceLocation deviceLocation, int enrollmentId) throws DeviceDetailsMgtDAOException;
-
-//    /**
-//     * This method will add device application to database.
-//     * @param deviceApplication - Device application
-//     * @throws DeviceDetailsMgtDAOException
-//     */
-//    void addDeviceApplications(DeviceApplication deviceApplication) throws DeviceDetailsMgtDAOException;
-//
-//    /**
-//     * This method will return the device application list once device id is provided.
-//     * @param deviceId
-//     * @return
-//     * @throws DeviceDetailsMgtDAOException
-//     */
-//    DeviceApplication getDeviceApplications(int deviceId) throws DeviceDetailsMgtDAOException;
-//
-//    /**
-//     * This method will delete the application list from the database.
-//     * @param deviceId - Integer
-//     * @throws DeviceDetailsMgtDAOException
-//     */
-//    void deleteDeviceApplications(int deviceId) throws DeviceDetailsMgtDAOException;
 }
