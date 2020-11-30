@@ -1330,8 +1330,9 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
      * @param tenantId id of the fence owning tenant
      */
     private void createEventRevokeTask(GeofenceData geofenceData, int tenantId) {
-        GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager(OperationMgtConstants.OperationCodes.EVENT_REVOKE,
-                tenantId, values -> createEventTask(OperationMgtConstants.OperationCodes.EVENT_CONFIG, geofenceData, tenantId));
+        GeoFenceEventOperationManager eventManager =
+                new GeoFenceEventOperationManager(OperationMgtConstants.OperationCodes.EVENT_REVOKE, tenantId,
+                        values -> createEventTask(OperationMgtConstants.OperationCodes.EVENT_CONFIG, geofenceData, tenantId));
         ScheduledExecutorService eventOperationExecutor = Executors.newSingleThreadScheduledExecutor();
         eventOperationExecutor.schedule(eventManager
                 .getEventOperationExecutor(geofenceData), 10, TimeUnit.SECONDS);

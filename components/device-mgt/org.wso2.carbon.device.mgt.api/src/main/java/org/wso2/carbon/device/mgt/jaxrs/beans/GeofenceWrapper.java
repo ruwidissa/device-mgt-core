@@ -75,7 +75,7 @@ public class GeofenceWrapper {
 
     @ApiModelProperty(
             name = "groupIds",
-            value = "Group ids to add geo fences",
+            value = "Group ids mapped with geo fences",
             required = true)
     private List<Integer> groupIds;
 

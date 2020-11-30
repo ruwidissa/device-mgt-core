@@ -40,11 +40,17 @@ import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
-import org.wso2.carbon.device.mgt.common.geo.service.*;
+import org.wso2.carbon.device.mgt.common.geo.service.Alert;
+import org.wso2.carbon.device.mgt.common.geo.service.AlertAlreadyExistException;
+import org.wso2.carbon.device.mgt.common.geo.service.Event;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoFence;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
+import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
@@ -64,7 +70,15 @@ import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -624,6 +638,11 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         }
     }
 
+    /**
+     * Extract request event data from the payload and attach it to the DTO
+     * @param eventConfig request event payload
+     * @return generated event beans list according to the payload data
+     */
     private List<EventConfig> mapRequestEvent(List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> eventConfig) {
         List<EventConfig> savingEventList = new ArrayList<>();
         for (org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig event : eventConfig) {
@@ -652,6 +671,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             GeofenceData geofenceData = geoService.getGeoFences(fenceId);
             if (geofenceData == null) {
                 String msg = "No valid Geofence found for ID " + fenceId;
+                log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
             if (requireEventData) {
@@ -661,6 +681,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             return Response.status(Response.Status.OK).entity(getMappedResponseBean(geofenceData)).build();
         } catch (GeoLocationBasedServiceException e) {
             String msg = "Server error occurred while retrieving Geofence for Id " + fenceId;
+            log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
@@ -692,6 +713,11 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         return geofenceWrapper;
     }
 
+    /**
+     * Get event list to send with the response
+     * @param eventConfig event list retrieved
+     * @return list of response event beans
+     */
     private List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> getEventConfigBean(List<EventConfig> eventConfig) {
         List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> eventList = new ArrayList<>();
         org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig eventData;
@@ -733,16 +759,16 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                 if (!geoFences.isEmpty() && requireEventData) {
                     geoFences = geoService.attachEventObjects(geoFences);
                 }
-                return getResponse(geoFences);
+                return buildResponse(geoFences);
             }
             if (name != null && !name.isEmpty()) {
                 List<GeofenceData> geoFences = geoService.getGeoFences(name);
                 if (requireEventData) {
                     geoFences = geoService.attachEventObjects(geoFences);
                 }
-                return getResponse(geoFences);
+                return buildResponse(geoFences);
             }
-            return getResponse(geoService.getGeoFences());
+            return buildResponse(geoService.getGeoFences());
         } catch (GeoLocationBasedServiceException e) {
             String msg = "Failed to retrieve geofence data";
             log.error(msg, e);
@@ -750,7 +776,12 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         }
     }
 
-    private Response getResponse(List<GeofenceData> fencesList) {
+    /**
+     * Build the response payload from the data retrieved from the database
+     * @param fencesList retrieved geofence data to send in response
+     * @return HttpResponse object
+     */
+    private Response buildResponse(List<GeofenceData> fencesList) {
         List<GeofenceWrapper> geofenceList = new ArrayList<>();
         for (GeofenceData geofenceData : fencesList) {
             geofenceList.add(getMappedResponseBean(geofenceData));
@@ -760,7 +791,6 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         paginationResult.setRecordsTotal(geofenceList.size());
         return Response.status(Response.Status.OK).entity(paginationResult).build();
     }
-
 
     @DELETE
     @Override
@@ -816,6 +846,11 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         }
     }
 
+    /**
+     * Parse geofence data from the request payload to the GeofenceData DTO
+     * @param geofenceWrapper request payload data
+     * @return GeofenceData object built from the request data
+     */
     private GeofenceData mapRequestGeofenceData(GeofenceWrapper geofenceWrapper) {
         GeofenceData geofenceData = new GeofenceData();
         geofenceData.setFenceName(geofenceWrapper.getFenceName());

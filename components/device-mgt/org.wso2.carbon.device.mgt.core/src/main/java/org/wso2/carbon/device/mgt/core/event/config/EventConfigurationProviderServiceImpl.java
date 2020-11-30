@@ -131,7 +131,6 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
                 eventConfigDAO.updateEventRecords(eventsToUpdate);
             }
 
-
             if (!groupIdsToDelete.isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Deleting event group mapping records of groups");
@@ -160,6 +159,7 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
             String msg = "Failed to start/open transaction to store device event configurations";
+            log.error(msg, e);
             throw new EventConfigurationException(msg, e);
         } catch (EventManagementDAOException e) {
             String msg = "Error occurred while saving event records";
@@ -227,6 +227,7 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
             String msg = "Failed to start/open transaction to delete device event configurations";
+            log.error(msg, e);
             throw new EventConfigurationException(msg, e);
         } catch (EventManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
