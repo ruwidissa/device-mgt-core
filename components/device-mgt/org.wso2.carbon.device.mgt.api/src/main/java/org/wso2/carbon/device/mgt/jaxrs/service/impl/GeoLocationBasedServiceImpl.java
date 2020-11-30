@@ -733,7 +733,10 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                         constructCollectionType(List.class, EventAction.class));
                 eventData.setActions(eventActions);
             } catch (IOException e) {
-                log.error("Error occurred while parsing event actions of the event with ID " + event.getEventId());
+                if (log.isDebugEnabled()) {
+                    log.warn("Error occurred while parsing event actions of the event with ID " + event.getEventId());
+                }
+                continue;
             }
             eventList.add(eventData);
         }

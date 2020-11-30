@@ -250,9 +250,13 @@ public class OperationManagerImpl implements OperationManager {
                 return activity;
             } catch (OperationManagementDAOException e) {
                 OperationManagementDAOFactory.rollbackTransaction();
-                throw new OperationManagementException("Error occurred while adding operation", e);
+                String msg = "Error occurred while adding operation";
+                log.error(msg, e);
+                throw new OperationManagementException(msg, e);
             } catch (TransactionManagementException e) {
-                throw new OperationManagementException("Error occurred while initiating the transaction", e);
+                String msg = "Error occurred while initiating the transaction";
+                log.error(msg, e);
+                throw new OperationManagementException(msg, e);
             } finally {
                 OperationManagementDAOFactory.closeConnection();
             }
