@@ -1451,6 +1451,12 @@ public class PolicyManagerImpl implements PolicyManager {
         Collections.sort(policyList);
     }
 
+    /**
+     * Get the corrective action list of a specific policy
+     * @param allCorrectiveActions stored corrective actions of all policies
+     * @param policyId Id of the policy to get corrective action
+     * @return
+     */
     private List<CorrectiveAction> getSingleCorrectiveAction
             (List<CorrectiveAction> allCorrectiveActions, int policyId) {
         List<CorrectiveAction> correctiveActionsOfPolicy = new ArrayList<>();
@@ -1464,6 +1470,13 @@ public class PolicyManagerImpl implements PolicyManager {
         return correctiveActionsOfPolicy;
     }
 
+    /**
+     * Set the corrective actions of a specific policy against with the policy profile.
+     * This method is using with the new implementation of corrective policies which is able to apply multiple corrective
+     * policies based on a feature code of a policy
+     * @param allCorrectiveActions corrective action list retrieved from the DB
+     * @param profile profile of the selected policy
+     */
     private void setMultipleCorrectiveActions(List<CorrectiveAction> allCorrectiveActions,
                                               Profile profile) {
         for (ProfileFeature profileFeature : profile.getProfileFeaturesList()) {

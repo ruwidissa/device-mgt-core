@@ -607,6 +607,10 @@ public final class DeviceManagerUtil {
         return eventsPublisherService;
     }
 
+    /**
+     * Retrieve EventConfigurationProviderService osgi service component
+     * @return {@link EventConfigurationProviderService} service component
+     */
     public static EventConfigurationProviderService getEventConfigService() {
         PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         EventConfigurationProviderService eventConfigService =
@@ -657,6 +661,9 @@ public final class DeviceManagerUtil {
         }
     }
 
+    /**
+     * Enable Geofence caching according to the configurations proviced by cdm-config.xml
+     */
     public static void initializeGeofenceCache() {
         DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
         int geoCacheExpiry = config.getGeoFenceCacheConfiguration().getExpiryTime();
@@ -713,6 +720,10 @@ public final class DeviceManagerUtil {
         return deviceCache;
     }
 
+    /**
+     * Get geofence cache object
+     * @return {@link Cache<GeoCacheKey, GeofenceData>}
+     */
     public static Cache<GeoCacheKey, GeofenceData> getGeoCache() {
         DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
         CacheManager manager = getCacheManager();

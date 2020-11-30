@@ -476,7 +476,7 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                     "AND G.FENCE_ID = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, geofenceId);
-                return getEventConfigs(eventList, stmt);
+                return getEventConfigs(stmt);
             }
         } catch (SQLException e) {
             String msg = "Error occurred while updating Geofence record with id ";
@@ -521,7 +521,14 @@ public class GeofenceDAOImpl implements GeofenceDAO {
         }
     }
 
-    private List<EventConfig> getEventConfigs(List<EventConfig> eventList, PreparedStatement stmt) throws SQLException {
+    /**
+     * Retrieve the geofence event extracted from the DB
+     * @param stmt prepared statement to retrieve data from the DB
+     * @return Retrieved Event list from the DB
+     * @throws SQLException for the errors occur while accessing the DB
+     */
+    private List<EventConfig> getEventConfigs(PreparedStatement stmt) throws SQLException {
+        List<EventConfig> eventList = new ArrayList<>();
         ResultSet resultSet = stmt.executeQuery();
         EventConfig event;
         while (resultSet.next()) {

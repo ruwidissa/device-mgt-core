@@ -684,6 +684,10 @@ public class RequestValidationUtil {
                 && StringUtils.isEmpty(emailAddress);
     }
 
+    /**
+     * Check the request payload attributes are correct for create a geofence
+     * @param geofenceWrapper request payload data
+     */
     public static void validateGeofenceData(GeofenceWrapper geofenceWrapper) {
         boolean isGeoJsonExists = false;
         if (geofenceWrapper.getFenceName() == null || geofenceWrapper.getFenceName().trim().isEmpty()) {
@@ -721,6 +725,10 @@ public class RequestValidationUtil {
         }
     }
 
+    /**
+     * Check the request payload attributes are correct for create an event record
+     * @param eventConfig request payload data
+     */
     public static void validateEventConfigurationData(List<EventConfig> eventConfig) {
         if (eventConfig == null ||eventConfig.isEmpty()) {
             String msg = "Event configuration is mandatory, since should not be null or empty";
