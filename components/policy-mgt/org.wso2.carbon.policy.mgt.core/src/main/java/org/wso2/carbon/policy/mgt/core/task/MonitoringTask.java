@@ -45,12 +45,10 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
     }
 
     @Override
-    public void execute() {
-
+    public void executeDynamicTask() {
         if (log.isDebugEnabled()) {
             log.debug("Monitoring task started to run.");
         }
-
         this.executeforAllTenants();
     }
 
@@ -96,7 +94,6 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
     }
 
     private void executeTask() {
-        super.refreshContext();
         MonitoringManager monitoringManager = PolicyManagementDataHolder.getInstance().getMonitoringManager();
         List<String> deviceTypes = new ArrayList<>();
         List<String> configDeviceTypes = new ArrayList<>();
@@ -122,7 +119,7 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
                             PolicyManagementDataHolder.getInstance().getDeviceManagementService()
                                     .getPolicyMonitoringManager(deviceType);
                     List<Device> devices;
-                    if(super.getTaskContext()!= null && super.getTaskContext().isPartitioningEnabled()){
+                    if(super.isDynamicTaskEligible()){
                         devices = deviceManagementProviderService.getAllocatedDevices(deviceType,
                                                                                       super.getTaskContext().getActiveServerCount(),
                                                                                       super.getTaskContext().getServerHashIndex());

@@ -18,6 +18,7 @@
 
 package io.entgra.server.bootup.heartbeat.beacon.dao.util;
 
+import io.entgra.server.bootup.heartbeat.beacon.dto.ElectedCandidate;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +28,8 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 /**
@@ -43,6 +46,29 @@ public final class HeartBeatBeaconDAOUtil {
      * @param rs   Obtained results set
      */
     public static void cleanupResources(PreparedStatement stmt, ResultSet rs) {
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException e) {
+                log.warn("Error occurred while closing result set", e);
+            }
+        }
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException e) {
+                log.warn("Error occurred while closing prepared statement", e);
+            }
+        }
+    }
+
+    /**
+     * Cleanup resources used to transaction
+     *
+     * @param stmt Statement used
+     * @param rs   Obtained results set
+     */
+    public static void cleanupResources(Statement stmt, ResultSet rs) {
         if (rs != null) {
             try {
                 rs.close();
@@ -87,5 +113,16 @@ public final class HeartBeatBeaconDAOUtil {
         ctx.setHostName(resultSet.getString("HOST_NAME"));
         ctx.setCarbonServerPort(resultSet.getInt("SERVER_PORT"));
         return ctx;
+    }
+
+    public static ElectedCandidate populateCandidate(ResultSet resultSet) throws SQLException {
+        ElectedCandidate candidate = new ElectedCandidate();
+        candidate.setServerUUID(resultSet.getString("UUID"));
+        candidate.setTimeOfElection(resultSet.getTimestamp("ELECTED_TIME"));
+        String tasksList = resultSet.getString("ACKNOWLEDGED_TASK_LIST");
+        if(tasksList != null && !tasksList.isEmpty()){
+            candidate.setAcknowledgedTaskList(Arrays.asList(tasksList.split(",")));
+        }
+        return candidate;
     }
 }

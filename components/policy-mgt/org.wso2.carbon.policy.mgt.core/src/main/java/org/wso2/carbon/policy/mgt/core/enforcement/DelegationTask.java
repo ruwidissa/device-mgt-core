@@ -49,8 +49,7 @@ public class DelegationTask extends DynamicPartitionedScheduleTask {
     }
 
     @Override
-    public void execute() {
-        super.refreshContext();
+    public void executeDynamicTask() {
         try {
             PolicyManager policyManager = new PolicyManagerImpl();
             UpdatedPolicyDeviceListBean updatedPolicyDeviceList = policyManager.applyChangesMadeToPolicies();
@@ -70,7 +69,7 @@ public class DelegationTask extends DynamicPartitionedScheduleTask {
                     try {
                         devices = new ArrayList<>();
                         toBeNotified = new ArrayList<>();
-                        if(super.getTaskContext() != null && super.getTaskContext().isPartitioningEnabled()) {
+                        if(super.isDynamicTaskEligible()) {
                             devices.addAll(service.getAllocatedDevices(deviceType,
                                                                        super.getTaskContext().getActiveServerCount(),
                                                                        super.getTaskContext().getServerHashIndex()));

@@ -23,13 +23,14 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.exception.SubscriptionManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.impl.SubscriptionManagerImpl;
-import org.wso2.carbon.ntask.core.Task;
+import org.wso2.carbon.device.mgt.core.task.impl.RandomlyAssignedScheduleTask;
 
 import java.util.Map;
 
-public class ScheduledAppSubscriptionCleanupTask implements Task {
+public class ScheduledAppSubscriptionCleanupTask extends RandomlyAssignedScheduleTask {
     private static Log log = LogFactory.getLog(ScheduledAppSubscriptionCleanupTask.class);
     private SubscriptionManager subscriptionManager;
+    private static final String TASK_NAME = "SCHEDULE_APP_SUBSCRIPTION_CLEANUP";
 
     @Override
     public void setProperties(Map<String, String> properties) {
@@ -37,18 +38,25 @@ public class ScheduledAppSubscriptionCleanupTask implements Task {
     }
 
     @Override
-    public void init() {
+    public void executeRandomlyAssignedTask() {
+        try {
+            if(super.isQualifiedToExecuteTask()) {
+                subscriptionManager.cleanScheduledSubscriptions();
+            }
+        } catch (SubscriptionManagementException e) {
+            log.error("Error occurred while cleaning up tasks.");
+        }
+    }
+
+    @Override
+    protected void setup() {
         if (this.subscriptionManager == null) {
             this.subscriptionManager = new SubscriptionManagerImpl();
         }
     }
 
     @Override
-    public void execute() {
-        try {
-            subscriptionManager.cleanScheduledSubscriptions();
-        } catch (SubscriptionManagementException e) {
-            log.error("Error occurred while cleaning up tasks.");
-        }
+    public String getTaskName() {
+        return TASK_NAME;
     }
 }

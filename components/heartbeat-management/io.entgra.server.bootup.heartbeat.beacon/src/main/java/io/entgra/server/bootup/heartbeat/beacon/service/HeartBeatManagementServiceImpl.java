@@ -22,17 +22,28 @@ import io.entgra.server.bootup.heartbeat.beacon.config.HeartBeatBeaconConfig;
 import io.entgra.server.bootup.heartbeat.beacon.dao.HeartBeatBeaconDAOFactory;
 import io.entgra.server.bootup.heartbeat.beacon.dao.HeartBeatDAO;
 import io.entgra.server.bootup.heartbeat.beacon.dao.exception.HeartBeatDAOException;
+import io.entgra.server.bootup.heartbeat.beacon.dto.ElectedCandidate;
 import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import io.entgra.server.bootup.heartbeat.beacon.internal.HeartBeatBeaconDataHolder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class HeartBeatManagementServiceImpl implements HeartBeatManagementService {
+
+    private static final Log log = LogFactory.getLog(HeartBeatManagementServiceImpl.class);
 
     private final HeartBeatDAO heartBeatDAO;
 
@@ -78,6 +89,19 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
     }
 
     @Override
+    public boolean isTaskPartitioningEnabled() throws HeartBeatManagementException {
+        boolean enabled = false;
+        if(HeartBeatBeaconConfig.getInstance() != null){
+            enabled = HeartBeatBeaconConfig.getInstance().isEnabled();
+        } else {
+            String msg = "Issue instantiating heart beat config.";
+            throw new HeartBeatManagementException(msg);
+        }
+        return enabled;
+    }
+
+
+    @Override
     public String updateServerContext(ServerContext ctx) throws HeartBeatManagementException {
         String uuid = null;
         if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
@@ -103,6 +127,124 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
             throw new HeartBeatManagementException(msg);
         }
         return uuid;
+    }
+
+    @Override
+    public boolean isQualifiedToExecuteTask() throws HeartBeatManagementException {
+        boolean isQualified = false;
+        if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
+            try {
+                String localServerUUID = HeartBeatBeaconDataHolder.getInstance().getLocalServerUUID();
+                HeartBeatBeaconDAOFactory.openConnection();
+                ElectedCandidate candidate = heartBeatDAO.retrieveCandidate();
+                if(candidate != null && candidate.getServerUUID().equalsIgnoreCase(localServerUUID)){
+                    isQualified = true;
+                    if(log.isDebugEnabled()){
+                        log.debug("Node : " + localServerUUID + " Qualified to execute randomly assigned task.");
+                    }
+                }
+            } catch (HeartBeatDAOException e) {
+                String msg = "Error occurred while checking if server is qualified to execute randomly designated task.";
+                throw new HeartBeatManagementException(msg, e);
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection to the underlying data source";
+                throw new HeartBeatManagementException(msg, e);
+            } finally {
+                HeartBeatBeaconDAOFactory.closeConnection();
+            }
+        } else {
+            String msg = "Heart Beat Configuration Disabled. Error occurred while checking if server is qualified to execute randomly designated task.";
+            throw new HeartBeatManagementException(msg);
+        }
+        return isQualified;
+    }
+
+    @Override
+    public boolean updateTaskExecutionAcknowledgement(String newTask) throws HeartBeatManagementException {
+        boolean result = false;
+        if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
+            try {
+                String serverUUID = HeartBeatBeaconDataHolder.getInstance().getLocalServerUUID();
+                HeartBeatBeaconDAOFactory.beginTransaction();
+                ElectedCandidate candidate = heartBeatDAO.retrieveCandidate();
+                if(candidate != null && candidate.getServerUUID().equals(serverUUID)){
+                    List<String> taskList = candidate.getAcknowledgedTaskList();
+                    boolean taskExecuted = false;
+                    for(String task : taskList){
+                        if(task.equalsIgnoreCase(newTask)){
+                            taskExecuted = true;
+                            break;
+                        }
+                    }
+                    if(!taskExecuted) {
+                        taskList.add(newTask);
+                        result = heartBeatDAO.acknowledgeTask(serverUUID, taskList);
+                        HeartBeatBeaconDAOFactory.commitTransaction();
+                    }
+                }
+            } catch (HeartBeatDAOException e) {
+                String msg = "Error occurred while updating acknowledged task.";
+                throw new HeartBeatManagementException(msg, e);
+            } catch (TransactionManagementException e) {
+                HeartBeatBeaconDAOFactory.rollbackTransaction();
+                String msg = "Error occurred while updating acknowledged task.. Issue in opening a connection to the underlying data source";
+                throw new HeartBeatManagementException(msg, e);
+            } finally {
+                HeartBeatBeaconDAOFactory.closeConnection();
+            }
+        } else {
+            String msg = "Heart Beat Configuration Disabled. Updating acknowledged task list failed.";
+            throw new HeartBeatManagementException(msg);
+        }
+        return result;
+    }
+
+
+    @Override
+    public void electCandidate(int elapsedTimeInSeconds) throws HeartBeatManagementException {
+        if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
+            try {
+                HeartBeatBeaconDAOFactory.beginTransaction();
+                Map<String, ServerContext> servers = heartBeatDAO.getActiveServerDetails(elapsedTimeInSeconds);
+                if (servers != null && !servers.isEmpty()) {
+                    ElectedCandidate presentCandidate = heartBeatDAO.retrieveCandidate();
+                    if (presentCandidate != null &&
+                        presentCandidate.getTimeOfElection().before(new Timestamp(System.currentTimeMillis()
+                                                                                  - TimeUnit.SECONDS.toMillis(elapsedTimeInSeconds)))) {
+                        heartBeatDAO.purgeCandidates();
+                        electCandidate(servers);
+                    } else {
+                        electCandidate(servers);
+                    }
+                    HeartBeatBeaconDAOFactory.commitTransaction();
+                }
+            } catch (HeartBeatDAOException e) {
+                String msg = "Error occurred while electing candidate for dynamic task execution.";
+                throw new HeartBeatManagementException(msg, e);
+            } catch (TransactionManagementException e) {
+                HeartBeatBeaconDAOFactory.rollbackTransaction();
+                String msg = "Error occurred while electing candidate for dynamic task execution. Issue in opening a connection to the underlying data source";
+                throw new HeartBeatManagementException(msg, e);
+            } finally {
+                HeartBeatBeaconDAOFactory.closeConnection();
+            }
+        } else {
+            String msg = "Heart Beat Configuration Disabled. Error electing candidate for dynamic task execution.";
+            throw new HeartBeatManagementException(msg);
+        }
+    }
+
+    private void electCandidate(Map<String, ServerContext> servers) throws HeartBeatDAOException {
+        String electedCandidate = getRandomElement(servers.keySet());
+        heartBeatDAO.recordElectedCandidate(electedCandidate);
+    }
+
+
+    private String getRandomElement(Set<String> valueSet)
+    {
+        Random rand = new Random();
+        List<String> items = new ArrayList<>(valueSet);
+        return items.get(rand.nextInt(items.size()));
     }
 
 

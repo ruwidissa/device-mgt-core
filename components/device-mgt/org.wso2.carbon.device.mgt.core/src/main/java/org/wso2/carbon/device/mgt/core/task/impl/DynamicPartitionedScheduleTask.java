@@ -36,22 +36,12 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
     @Override
     public final void init() {
         try {
-            ServerCtxInfo ctxInfo = DeviceManagementDataHolder.getInstance().getHeartBeatService().getServerCtxInfo();
-            if(ctxInfo!=null){
+            boolean dynamicTaskEnabled = DeviceManagementDataHolder.getInstance().getHeartBeatService().isTaskPartitioningEnabled();
+            if(dynamicTaskEnabled){
                 taskContext = new DynamicTaskContext();
-                updateContext(ctxInfo);
-
-                if(ctxInfo.getActiveServerCount() > 0){
-                    taskContext.setPartitioningEnabled(true);
-                }
-
-                if(log.isDebugEnabled()){
-                    log.debug("Initiating execution of dynamic task for server : " + taskContext.getServerHashIndex() +
-                              " where active server count is : " + taskContext.getActiveServerCount() +
-                              " partitioning task enabled : " + taskContext.isPartitioningEnabled());
-                }
+                taskContext.setPartitioningEnabled(true);
             } else {
-                log.error("Error Instantiating Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function.");
+                log.info("Error Instantiating Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function.");
             }
         } catch (HeartBeatManagementException e) {
             log.error("Error Instantiating Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function." , e);
@@ -59,29 +49,56 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
         setup();
     }
 
-    public DynamicTaskContext refreshContext(){
-        try {
-            ServerCtxInfo ctxInfo = DeviceManagementDataHolder.getInstance().getHeartBeatService().getServerCtxInfo();
-            if(ctxInfo != null) {
-                updateContext(ctxInfo);
-            } else {
-                log.info("Dynamic Task Context not present. Tasks will run on regular worker/manager mode.");
-            }
-        } catch (HeartBeatManagementException e) {
-            log.error("Error refreshing Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function.", e);
-        }
-        return taskContext;
+    @Override
+    public final void execute() {
+        refreshContext();
+        executeDynamicTask();
     }
 
-    private void updateContext(ServerCtxInfo ctxInfo) {
+    public void refreshContext(){
+        if(taskContext != null && taskContext.isPartitioningEnabled()) {
+            try {
+                updateContext();
+            } catch (HeartBeatManagementException e) {
+                log.error("Error refreshing Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function.", e);
+            }
+        }
+    }
+
+    private void updateContext() throws HeartBeatManagementException {
+        ServerCtxInfo ctxInfo = DeviceManagementDataHolder.getInstance().getHeartBeatService().getServerCtxInfo();
+        if(ctxInfo != null) {
+            populateContext(ctxInfo);
+        } else {
+            log.info("Dynamic Task Context not present. Tasks will run on regular worker/manager mode.");
+        }
+    }
+
+    private void populateContext(ServerCtxInfo ctxInfo) {
         taskContext.setActiveServerCount(ctxInfo.getActiveServerCount());
         taskContext.setServerHashIndex(ctxInfo.getLocalServerHashIdx());
+
+        if(log.isDebugEnabled()){
+            log.debug("Initiating execution of dynamic task for server : " + taskContext.getServerHashIndex() +
+                      " where active server count is : " + taskContext.getActiveServerCount() +
+                      " partitioning task enabled : " + taskContext.isPartitioningEnabled());
+        }
     }
 
     protected abstract void setup();
 
+    protected abstract void executeDynamicTask();
+
     public static DynamicTaskContext getTaskContext() {
         return taskContext;
+    }
+
+    public static boolean isDynamicTaskEligible(){
+        if(taskContext != null && taskContext.isPartitioningEnabled()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

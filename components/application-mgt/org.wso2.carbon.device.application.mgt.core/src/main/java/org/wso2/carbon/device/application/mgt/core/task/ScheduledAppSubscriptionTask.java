@@ -33,15 +33,17 @@ import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManage
 import org.wso2.carbon.device.application.mgt.core.impl.SubscriptionManagerImpl;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.ntask.core.Task;
+import org.wso2.carbon.device.mgt.core.task.impl.RandomlyAssignedScheduleTask;
 
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class ScheduledAppSubscriptionTask implements Task {
+public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
     private static Log log = LogFactory.getLog(ScheduledAppSubscriptionTask.class);
+    private static final String TASK_NAME = "SCHEDULE_APP_SUBSCRIPTION";
+
     private SubscriptionManager subscriptionManager;
     private String subscribers;
     private String subscriptionType;
@@ -65,68 +67,75 @@ public class ScheduledAppSubscriptionTask implements Task {
     }
 
     @Override
-    public void init() {
+    public void executeRandomlyAssignedTask() {
+        if(super.isQualifiedToExecuteTask()) {
+            try {
+                ScheduledSubscriptionDTO subscriptionDTO = subscriptionManager.getPendingScheduledSubscription(
+                        this.taskName);
+                if (subscriptionDTO == null) {
+                    log.error("Unable to execute the task. Task entry for [" + this.taskName + "] cannot be retrieved " +
+                              "from the database.");
+                    return;
+                }
+                if (StringUtils.isNotEmpty(this.subscribers)) {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    carbonContext.setTenantDomain(this.tenantDomain);
+                    carbonContext.setTenantId(this.tenantId);
+                    carbonContext.setUsername(this.subscriber);
+
+                    if (this.subscriptionType.equals(SubscriptionType.DEVICE.toString())) {
+                        List<DeviceIdentifier> deviceIdentifiers = new Gson().fromJson(this.subscribers,
+                                                                                       new TypeToken<List<DeviceIdentifier>>() {
+                                                                                       }.getType());
+                        try {
+                            subscriptionManager.performBulkAppOperation(this.application, deviceIdentifiers,
+                                                                        this.subscriptionType, this.action);
+                            subscriptionDTO.setStatus(ExecutionStatus.EXECUTED);
+                        } catch (ApplicationManagementException e) {
+                            log.error(
+                                    "Error occurred while " + this.action + "ing application " + this.application
+                                    + "to/from the following devices: " + this.subscribers, e);
+                            subscriptionDTO.setStatus(ExecutionStatus.FAILED);
+                        }
+                    } else {
+                        List<String> subscriberList = Pattern.compile(",").splitAsStream(this.subscribers).collect(
+                                Collectors.toList());
+                        try {
+                            subscriptionManager.performBulkAppOperation(this.application, subscriberList,
+                                                                        this.subscriptionType, this.action);
+                            subscriptionDTO.setStatus(ExecutionStatus.EXECUTED);
+                        } catch (ApplicationManagementException e) {
+                            log.error(
+                                    "Error occurred while " + this.action + "ing application " + this.application
+                                    + "to/from the following " + this.subscriptionType + "s: " + this.subscribers, e);
+                            subscriptionDTO.setStatus(ExecutionStatus.FAILED);
+                        }
+                    }
+                } else {
+                    log.warn(
+                            "Subscriber list is empty. Therefore skipping scheduled task to " + this.action + "application "
+                            + this.application);
+                    subscriptionDTO.setStatus(ExecutionStatus.FAILED);
+                }
+                subscriptionManager.updateScheduledSubscriptionStatus(subscriptionDTO.getId(), subscriptionDTO.getStatus());
+            } catch (SubscriptionManagementException e) {
+                log.error("Error occurred while executing the task: " + this.taskName, e);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    @Override
+    protected void setup() {
         if (this.subscriptionManager == null) {
             this.subscriptionManager = new SubscriptionManagerImpl();
         }
     }
 
     @Override
-    public void execute() {
-        try {
-            ScheduledSubscriptionDTO subscriptionDTO = subscriptionManager.getPendingScheduledSubscription(
-                    this.taskName);
-            if (subscriptionDTO == null) {
-                log.error("Unable to execute the task. Task entry for [" + this.taskName +  "] cannot be retrieved " +
-                          "from the database.");
-                return;
-            }
-            if (StringUtils.isNotEmpty(this.subscribers)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                carbonContext.setTenantDomain(this.tenantDomain);
-                carbonContext.setTenantId(this.tenantId);
-                carbonContext.setUsername(this.subscriber);
-
-                if (this.subscriptionType.equals(SubscriptionType.DEVICE.toString())) {
-                    List<DeviceIdentifier> deviceIdentifiers = new Gson().fromJson(this.subscribers,
-                            new TypeToken<List<DeviceIdentifier>>() {
-                            }.getType());
-                    try {
-                        subscriptionManager.performBulkAppOperation(this.application, deviceIdentifiers,
-                                this.subscriptionType, this.action);
-                        subscriptionDTO.setStatus(ExecutionStatus.EXECUTED);
-                    } catch (ApplicationManagementException e) {
-                        log.error(
-                                "Error occurred while " + this.action + "ing application " + this.application
-                                + "to/from the following devices: " + this.subscribers, e);
-                        subscriptionDTO.setStatus(ExecutionStatus.FAILED);
-                    }
-                } else {
-                    List<String> subscriberList = Pattern.compile(",").splitAsStream(this.subscribers).collect(
-                            Collectors.toList());
-                    try {
-                        subscriptionManager.performBulkAppOperation(this.application, subscriberList,
-                                this.subscriptionType, this.action);
-                        subscriptionDTO.setStatus(ExecutionStatus.EXECUTED);
-                    } catch (ApplicationManagementException e) {
-                        log.error(
-                                "Error occurred while " + this.action + "ing application " + this.application
-                                + "to/from the following " + this.subscriptionType + "s: " + this.subscribers, e);
-                        subscriptionDTO.setStatus(ExecutionStatus.FAILED);
-                    }
-                }
-            } else {
-                log.warn(
-                        "Subscriber list is empty. Therefore skipping scheduled task to " + this.action + "application "
-                        + this.application);
-                subscriptionDTO.setStatus(ExecutionStatus.FAILED);
-            }
-            subscriptionManager.updateScheduledSubscriptionStatus(subscriptionDTO.getId(), subscriptionDTO.getStatus());
-        } catch (SubscriptionManagementException e) {
-            log.error("Error occurred while executing the task: " + this.taskName, e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+    public String getTaskName() {
+        return TASK_NAME;
     }
 }

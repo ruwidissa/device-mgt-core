@@ -8,6 +8,11 @@ import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
 
 public class TestHeartBeatManagementService implements HeartBeatManagementService {
     @Override
+    public boolean isTaskPartitioningEnabled() throws HeartBeatManagementException {
+        return false;
+    }
+
+    @Override
     public ServerCtxInfo getServerCtxInfo() throws HeartBeatManagementException {
         return null;
     }
@@ -19,6 +24,22 @@ public class TestHeartBeatManagementService implements HeartBeatManagementServic
 
     @Override
     public boolean recordHeartBeat(HeartBeatEvent event) throws HeartBeatManagementException {
+        return false;
+    }
+
+    @Override
+    public void electCandidate(int elapsedTimeInSeconds) throws HeartBeatManagementException {
+
+    }
+
+    @Override
+    public boolean updateTaskExecutionAcknowledgement(String newTask)
+            throws HeartBeatManagementException {
+        return false;
+    }
+
+    @Override
+    public boolean isQualifiedToExecuteTask() throws HeartBeatManagementException {
         return false;
     }
 }

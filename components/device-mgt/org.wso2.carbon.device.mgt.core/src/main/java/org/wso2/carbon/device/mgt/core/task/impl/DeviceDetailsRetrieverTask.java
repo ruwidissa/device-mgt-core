@@ -65,8 +65,7 @@ public class DeviceDetailsRetrieverTask extends DynamicPartitionedScheduleTask {
     }
 
     @Override
-    public void execute() {
-        super.refreshContext();
+    public void executeDynamicTask() {
         deviceManagementProviderService = DeviceManagementDataHolder.getInstance()
                 .getDeviceManagementProvider();
         OperationMonitoringTaskConfig operationMonitoringTaskConfig = deviceManagementProviderService

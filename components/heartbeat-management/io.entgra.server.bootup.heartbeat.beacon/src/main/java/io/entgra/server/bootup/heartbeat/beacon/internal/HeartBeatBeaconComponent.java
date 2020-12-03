@@ -47,7 +47,7 @@ public class HeartBeatBeaconComponent {
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Initializing email sender core bundle");
+                log.debug("Initializing heart beat management bundle");
             }
             this.registerHeartBeatServices(componentContext);
 
@@ -88,7 +88,7 @@ public class HeartBeatBeaconComponent {
         /* This is to avoid mobile device management component getting initialized before the underlying datasources
         are registered */
         if (log.isDebugEnabled()) {
-            log.debug("Data source service set to mobile service component");
+            log.debug("Data source service set to heart beat management component");
         }
     }
 

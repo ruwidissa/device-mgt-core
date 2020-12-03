@@ -19,7 +19,7 @@
   -->
 
 <HeartBeatBeaconConfig>
-    <Enable>true</Enable>
+    <Enable>false</Enable>
     <DataSourceConfiguration>
         <JndiLookupDefinition>
             <Name>jdbc/HeartBeat_DS</Name>

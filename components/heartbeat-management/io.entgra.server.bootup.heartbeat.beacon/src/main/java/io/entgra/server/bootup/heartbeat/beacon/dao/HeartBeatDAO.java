@@ -19,9 +19,11 @@
 package io.entgra.server.bootup.heartbeat.beacon.dao;
 
 import io.entgra.server.bootup.heartbeat.beacon.dao.exception.HeartBeatDAOException;
+import io.entgra.server.bootup.heartbeat.beacon.dto.ElectedCandidate;
 import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,5 +40,13 @@ public interface HeartBeatDAO {
     String retrieveExistingServerCtx(ServerContext ctx) throws HeartBeatDAOException;
 
     Map<String, ServerContext> getActiveServerDetails(int elapsedTimeInSeconds) throws HeartBeatDAOException;
+
+    boolean recordElectedCandidate(String serverUUID) throws HeartBeatDAOException;
+
+    void purgeCandidates() throws HeartBeatDAOException;
+
+    ElectedCandidate retrieveCandidate() throws HeartBeatDAOException;
+
+    boolean acknowledgeTask(String uuid, List<String> taskList) throws HeartBeatDAOException;
 
 }

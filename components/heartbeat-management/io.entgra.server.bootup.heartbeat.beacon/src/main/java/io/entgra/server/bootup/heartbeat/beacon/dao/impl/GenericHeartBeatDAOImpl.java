@@ -22,8 +22,11 @@ import io.entgra.server.bootup.heartbeat.beacon.dao.HeartBeatBeaconDAOFactory;
 import io.entgra.server.bootup.heartbeat.beacon.dao.HeartBeatDAO;
 import io.entgra.server.bootup.heartbeat.beacon.dao.exception.HeartBeatDAOException;
 import io.entgra.server.bootup.heartbeat.beacon.dao.util.HeartBeatBeaconDAOUtil;
+import io.entgra.server.bootup.heartbeat.beacon.dto.ElectedCandidate;
 import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,6 +35,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +44,8 @@ import java.util.concurrent.TimeUnit;
  * This class represents implementation of HeartBeatDAO
  */
 public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
+
+    private static final Log log = LogFactory.getLog(GenericHeartBeatDAOImpl.class);
 
     @Override
     public String recordServerCtx(ServerContext ctx) throws HeartBeatDAOException {
@@ -67,6 +73,83 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
             HeartBeatBeaconDAOUtil.cleanupResources(stmt, null);
         }
         return uuid;
+    }
+
+    @Override
+    public boolean recordElectedCandidate(String serverUUID) throws HeartBeatDAOException {
+        PreparedStatement stmt = null;
+        try {
+            Connection conn = HeartBeatBeaconDAOFactory.getConnection();
+            String sql;
+            sql = "INSERT INTO ELECTED_LEADER_META_INFO(UUID) VALUES (?)";
+            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, serverUUID);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new HeartBeatDAOException("Error occurred while persisting UUID of chosen " +
+                                            "elected dynamic task execution candidate : " + serverUUID , e);
+        } finally {
+            HeartBeatBeaconDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public void purgeCandidates() throws HeartBeatDAOException {
+        Statement stmt = null;
+        try {
+            Connection conn = HeartBeatBeaconDAOFactory.getConnection();
+            conn.setAutoCommit(false);
+            String sql = "TRUNCATE TABLE ELECTED_LEADER_META_INFO";
+            stmt = conn.createStatement();
+            stmt.execute(sql);
+            conn.commit();
+        } catch (SQLException e) {
+            throw new HeartBeatDAOException("Error occurred while truncating ELECTED_LEADER_META_INFO table.", e);
+        } finally {
+            HeartBeatBeaconDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public ElectedCandidate retrieveCandidate() throws HeartBeatDAOException {
+        Statement stmt = null;
+        ResultSet resultSet = null;
+        ElectedCandidate candidate = null;
+        try {
+            Connection conn = HeartBeatBeaconDAOFactory.getConnection();
+            String sql = "SELECT * from ELECTED_LEADER_META_INFO";
+            stmt = conn.createStatement();
+            resultSet = stmt.executeQuery(sql);
+            while (resultSet.next()){
+                candidate = HeartBeatBeaconDAOUtil.populateCandidate(resultSet);
+            }
+        } catch (SQLException e) {
+            throw new HeartBeatDAOException("Error occurred while retrieving meta information of elected candidate", e);
+        } finally {
+            HeartBeatBeaconDAOUtil.cleanupResources(stmt, resultSet);
+        }
+        return candidate;
+    }
+
+    @Override
+    public boolean acknowledgeTask(String uuid, List<String> taskList) throws HeartBeatDAOException {
+        PreparedStatement stmt = null;
+        try {
+            Connection conn = HeartBeatBeaconDAOFactory.getConnection();
+            String sql;
+            sql = "UPDATE ELECTED_LEADER_META_INFO SET ACKNOWLEDGED_TASK_LIST = ? WHERE UUID = ?";
+            stmt = conn.prepareStatement(sql, new String[]{"UUID"});
+            stmt.setString(1, String.join(",", taskList));
+            stmt.setString(2, uuid);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new HeartBeatDAOException("Error occurred while updating task list of elected server : '" +
+                                            uuid + "'  and task list " + taskList, e);
+        } finally {
+            HeartBeatBeaconDAOUtil.cleanupResources(stmt, null);
+        }
     }
 
     @Override
@@ -152,8 +235,7 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
                          "WHERE LAST_UPDATED_TIMESTAMP > ? " +
                          "ORDER BY UUID";
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, elapsedTimeInSeconds);
-            stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(elapsedTimeInSeconds)));
+            stmt.setTimestamp(1, new Timestamp(System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(elapsedTimeInSeconds)));
             resultSet = stmt.executeQuery();
             while (resultSet.next()) {
                 ctxList.put(resultSet.getString("UUID"), HeartBeatBeaconDAOUtil.populateContext(resultSet));

@@ -57,13 +57,17 @@ public class HeartBeatExecutor {
                 uuid = HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().updateServerContext(ctx);
                 HeartBeatBeaconUtils.saveUUID(uuid);
             }
+            int timeOutIntervalInSeconds = CONFIG.getServerTimeOutIntervalInSeconds();
+            int timeSkew = CONFIG.getTimeSkew();
+            int cumilativeTimeOut = timeOutIntervalInSeconds + timeSkew;
             final String designatedUUID = uuid;
             HeartBeatBeaconDataHolder.getInstance().setLocalServerUUID(designatedUUID);
             Runnable periodicTask = new Runnable() {
                 public void run() {
                     try {
                         recordHeartBeat(designatedUUID);
-                    } catch (HeartBeatManagementException e) {
+                        electDynamicTaskExecutionCandidate(cumilativeTimeOut);
+                    } catch (Exception e) {
                         log.error("Error while executing record heart beat task. This will result in schedule operation malfunction.", e);
                     }
                 }
@@ -82,5 +86,10 @@ public class HeartBeatExecutor {
     static void recordHeartBeat(String uuid) throws HeartBeatManagementException {
         HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().recordHeartBeat(new HeartBeatEvent(uuid));
     }
+
+    static void electDynamicTaskExecutionCandidate(int cumilativeTimeOut) throws HeartBeatManagementException {
+        HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().electCandidate(cumilativeTimeOut);
+    }
+
 
 }

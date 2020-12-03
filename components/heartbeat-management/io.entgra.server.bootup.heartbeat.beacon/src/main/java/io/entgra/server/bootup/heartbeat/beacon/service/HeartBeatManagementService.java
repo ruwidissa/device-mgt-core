@@ -18,6 +18,7 @@
 
 package io.entgra.server.bootup.heartbeat.beacon.service;
 
+import io.entgra.server.bootup.heartbeat.beacon.dto.ElectedCandidate;
 import io.entgra.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
@@ -25,10 +26,18 @@ import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
 
 public interface HeartBeatManagementService {
 
+    boolean isTaskPartitioningEnabled() throws HeartBeatManagementException;
+
     ServerCtxInfo getServerCtxInfo() throws HeartBeatManagementException;
 
     String updateServerContext(ServerContext ctx) throws HeartBeatManagementException;
 
     boolean recordHeartBeat(HeartBeatEvent event) throws HeartBeatManagementException;
+
+    void electCandidate(int elapsedTimeInSeconds) throws HeartBeatManagementException;
+
+    boolean updateTaskExecutionAcknowledgement(String newTask) throws HeartBeatManagementException;
+
+    boolean isQualifiedToExecuteTask() throws HeartBeatManagementException;
 
 }

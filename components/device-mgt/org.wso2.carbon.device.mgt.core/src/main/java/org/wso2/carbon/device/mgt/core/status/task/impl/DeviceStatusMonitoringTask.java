@@ -68,14 +68,13 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
     }
 
     @Override
-    public void execute() {
+    public void executeDynamicTask() {
         List<OperationEnrolmentMapping> operationEnrolmentMappings;
         List<EnrolmentInfo> enrolmentInfoTobeUpdated = new ArrayList<>();
         Map<Integer, Long> lastActivities = null;
         EnrolmentInfo enrolmentInfo;
         DeviceIdentifier deviceIdentifier;
         Device device;
-        super.refreshContext();
         try {
             operationEnrolmentMappings = this.getOperationEnrolmentMappings(super.getTaskContext());
             if (operationEnrolmentMappings.size() > 0) {
