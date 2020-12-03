@@ -212,10 +212,8 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                         presentCandidate.getTimeOfElection().before(new Timestamp(System.currentTimeMillis()
                                                                                   - TimeUnit.SECONDS.toMillis(elapsedTimeInSeconds)))) {
                         heartBeatDAO.purgeCandidates();
-                        electCandidate(servers);
-                    } else {
-                        electCandidate(servers);
                     }
+                    electCandidate(servers);
                     HeartBeatBeaconDAOFactory.commitTransaction();
                 }
             } catch (HeartBeatDAOException e) {
