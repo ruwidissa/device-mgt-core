@@ -18,8 +18,6 @@
 package org.wso2.carbon.policy.mgt.core.mgt.bean;
 
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
-
 
 import java.util.List;
 

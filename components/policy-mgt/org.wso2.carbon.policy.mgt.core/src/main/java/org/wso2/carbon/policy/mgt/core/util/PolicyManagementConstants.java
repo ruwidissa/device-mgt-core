@@ -40,6 +40,7 @@ public final class PolicyManagementConstants {
     public static final String DEVICE_CONFIG_XML_NAME = "cdm-config.xml";
     public static final String ANY = "ANY";
     public static final String POLICY_BUNDLE = "POLICY_BUNDLE";
+    public static final String MONITOR_POLICY_BUNDLE = "MONITOR_POLICY_BUNDLE";
 
     public static final String TENANT_ID = "TENANT_ID";
 
@@ -65,7 +66,12 @@ public final class PolicyManagementConstants {
     public static final String GENERAL_POLICY_TYPE = "GENERAL";
     public static final String CORRECTIVE_POLICY_TYPE = "CORRECTIVE";
     public static final String POLICY_CORRECTIVE_ACTION_TYPE = "POLICY";
+    public static final String POLICY_FEATURE_CODE = "POLICY_ACTION";
+    public static final String POLICY_ACTIONS = "POLICY_ACTIONS";
     public static final String CORRECTIVE_POLICY_FEATURE_CODE = "CORRECTIVE_POLICY";
+    public static final String EMAIL_CORRECTIVE_ACTION_TYPE = "MAIL";
+    public static final String EMAIL_FEATURE_CODE = "EMAIL_ACTION";
+    public static final Integer EMAIL_ACTION_ID = 450;
 
     /**
      Caller would reference the constants using PolicyManagementConstants.DEVICE_CONFIG_XML_NAME,

@@ -41,7 +41,8 @@ import java.util.Map;
 public class DelegationTask extends DynamicPartitionedScheduleTask {
 
     private static final Log log = LogFactory.getLog(DelegationTask.class);
-    private PolicyConfiguration policyConfiguration = DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getPolicyConfiguration();
+    private PolicyConfiguration policyConfiguration = DeviceConfigurationManager.getInstance()
+            .getDeviceManagementConfig().getPolicyConfiguration();
 
     @Override
     public void setProperties(Map<String, String> map) {
@@ -76,11 +77,9 @@ public class DelegationTask extends DynamicPartitionedScheduleTask {
                         } else {
                             devices.addAll(service.getAllDevices(deviceType, false));
                         }
-                        //HashMap<Integer, Integer> deviceIdPolicy = policyManager.getAppliedPolicyIdsDeviceIds();
                         for (Device device : devices) {
-                            // if (deviceIdPolicy.containsKey(device.getId())) {
                             if (device != null && device.getEnrolmentInfo() != null
-                                && device.getEnrolmentInfo().getStatus() != EnrolmentInfo.Status.REMOVED) {
+                                    && device.getEnrolmentInfo().getStatus() != EnrolmentInfo.Status.REMOVED) {
                                 toBeNotified.add(device);
                             }
                             // }
@@ -89,8 +88,8 @@ public class DelegationTask extends DynamicPartitionedScheduleTask {
                             }
                         }
                         if (!toBeNotified.isEmpty()) {
-                            PolicyEnforcementDelegator enforcementDelegator = new PolicyEnforcementDelegatorImpl
-                                    (toBeNotified, updatedPolicyDeviceList.getUpdatedPolicyIds());
+                            PolicyEnforcementDelegator enforcementDelegator = new PolicyEnforcementDelegatorImpl(
+                                    toBeNotified, updatedPolicyDeviceList.getUpdatedPolicyIds());
                             enforcementDelegator.delegate();
                         }
                     } catch (DeviceManagementException e) {

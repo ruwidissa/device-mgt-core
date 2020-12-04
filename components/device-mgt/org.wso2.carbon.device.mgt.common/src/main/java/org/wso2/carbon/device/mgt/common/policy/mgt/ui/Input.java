@@ -28,6 +28,9 @@ public class Input {
     private String type;
     private String placeholderValue;
     private List<Rule> rules;
+    private String apiUrl;
+    private String arrayPath;
+    private String dataKey;
 
     @XmlElement(name = "Type")
     public String getType() {
@@ -52,4 +55,31 @@ public class Input {
     public List<Rule> getRules() { return rules; }
 
     public void setRules(List<Rule> rules) { this.rules = rules; }
+
+    @XmlElement(name = "Url")
+    public String getUrl() {
+        return apiUrl;
+    }
+
+    public void setUrl(String url) {
+        this.apiUrl = url;
+    }
+
+    @XmlElement(name = "ArrayPath")
+    public String getArrayPath() {
+        return arrayPath;
+    }
+
+    public void setArrayPath(String arrayPath) {
+        this.arrayPath = arrayPath;
+    }
+
+    @XmlElement(name = "DataKey")
+    public String getDataKey() {
+        return dataKey;
+    }
+
+    public void setDataKey(String dataKey) {
+        this.dataKey = dataKey;
+    }
 }

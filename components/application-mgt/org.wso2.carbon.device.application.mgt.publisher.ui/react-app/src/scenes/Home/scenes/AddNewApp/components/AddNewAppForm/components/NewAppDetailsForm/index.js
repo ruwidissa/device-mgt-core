@@ -46,6 +46,7 @@ class NewAppDetailsForm extends React.Component {
       categories: [],
       tags: [],
       deviceTypes: [],
+      selectedValue: null,
       fetching: false,
       roleSearchValue: [],
       unrestrictedRoles: [],
@@ -312,12 +313,33 @@ class NewAppDetailsForm extends React.Component {
     });
   };
 
+  // Event handler for selecting the device type
+  handleSelect = event => {
+    this.setState({
+      selectedValue: event,
+    });
+    if (this.props.selectedValueHandler) {
+      this.props.selectedValueHandler(event);
+    }
+  };
+
+  // Event handler for selecting the windows app type
+  handleSelectForAppType = event => {
+    if (this.props.selectedAppTypeHandler) {
+      this.props.selectedAppTypeHandler(event);
+    }
+  };
+
   render() {
+    const config = this.props.context;
+    // Windows installation app types
+    const appTypes = config.windowsDeviceType.appType;
     const { formConfig } = this.props;
     const {
       categories,
       tags,
       deviceTypes,
+      selectedValue,
       fetching,
       unrestrictedRoles,
     } = this.state;
@@ -358,6 +380,7 @@ class NewAppDetailsForm extends React.Component {
                       <Select
                         style={{ width: '100%' }}
                         placeholder="select device type"
+                        onSelect={this.handleSelect.bind(this)}
                       >
                         {deviceTypes.map(deviceType => {
                           return (
@@ -395,6 +418,31 @@ class NewAppDetailsForm extends React.Component {
                   ],
                 })(<Input placeholder="ex: Lorem App" />)}
               </Form.Item>
+
+              {/* App Type only shown for windows device types for enterprise apps */}
+              {selectedValue === 'windows' &&
+                this.props.formConfig.installationType === 'ENTERPRISE' && (
+                  <Form.Item {...formItemLayout} label="App Type">
+                    {getFieldDecorator('appType', {
+                      rules: [
+                        {
+                          required: true,
+                          message: 'Please select app type',
+                        },
+                      ],
+                    })(
+                      <Select
+                        style={{ width: '100%' }}
+                        placeholder="select application type"
+                        onSelect={this.handleSelectForAppType}
+                      >
+                        {appTypes.map(appType => {
+                          return <Option key={appType}>{appType}</Option>;
+                        })}
+                      </Select>,
+                    )}
+                  </Form.Item>
+                )}
 
               {/* description*/}
               <Form.Item {...formItemLayout} label="Description">

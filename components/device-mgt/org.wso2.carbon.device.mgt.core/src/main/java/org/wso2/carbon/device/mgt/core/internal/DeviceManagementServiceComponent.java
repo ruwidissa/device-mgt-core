@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
@@ -51,6 +52,7 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
+import org.wso2.carbon.device.mgt.core.event.config.EventConfigurationProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.geo.service.GeoLocationProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
@@ -335,11 +337,17 @@ public class DeviceManagementServiceComponent {
 
         /* Registering Geo Service */
         GeoLocationProviderService geoService = new GeoLocationProviderServiceImpl();
+        DeviceManagementDataHolder.getInstance().setGeoLocationProviderService(geoService);
         bundleContext.registerService(GeoLocationProviderService.class.getName(), geoService, null);
 
         /* Registering Metadata Service */
         MetadataManagementService metadataManagementService = new MetadataManagementServiceImpl();
         bundleContext.registerService(MetadataManagementService.class.getName(), metadataManagementService, null);
+
+        /* Registering Event Configuration Service */
+        EventConfigurationProviderService eventConfigurationService = new EventConfigurationProviderServiceImpl();
+        DeviceManagementDataHolder.getInstance().setEventConfigurationProviderService(eventConfigurationService);
+        bundleContext.registerService(EventConfigurationProviderService.class.getName(), eventConfigurationService, null);
 
         OTPManagementService otpManagementService = new OTPManagementServiceImpl();
         bundleContext.registerService(OTPManagementService.class.getName(), otpManagementService, null);

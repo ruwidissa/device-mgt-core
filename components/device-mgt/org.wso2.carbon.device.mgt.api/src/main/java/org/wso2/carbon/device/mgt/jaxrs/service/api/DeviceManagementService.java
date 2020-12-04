@@ -395,6 +395,96 @@ public interface DeviceManagementService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{groupId}/location-history")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting the Location Details of Devices in the group",
+            notes = "Get the location details of devices  in the group during a define time period.",
+            response = Response.class,
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the details of the device.",
+                            response = Device.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 304,
+                            message = "Not Modified. Empty body because the client already has the latest version" +
+                                    " of the requested resource.\n"),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n Location history details for the devices with the specified group id was not found.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred while retrieving the devices location history details.",
+                            response = ErrorResponse.class)
+            })
+    Response getDevicesGroupLocationInfo(
+            @ApiParam(
+                    name = "groupId",
+                    value = "The group ID.",
+                    required = true)
+            @PathParam("groupId") int groupId,
+            @ApiParam(
+                    name = "from",
+                    value = "Define the time to start getting the geo location history of the device in " +
+                            "milliseconds.",
+                    required = true)
+            @QueryParam("from") long from,
+            @ApiParam(
+                    name = "to",
+                    value = "Define the time to finish getting the geo location history of the device in " +
+                            "milliseconds.",
+                    required = true)
+            @QueryParam("to") long to,
+            @ApiParam(
+                    name = "type",
+                    value = "Defines how the output should be.",
+                    required = true)
+            @QueryParam("type") String type,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    required = false,
+                    defaultValue = "0")
+            @QueryParam("offset") int offset,
+             @ApiParam(
+                     name = "limit",
+                     value = "Provide how many device details you require from the starting pagination index/offset.",
+                     required = false,
+                     defaultValue = "100")
+             @QueryParam("limit") int limit
+    );
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -551,7 +641,12 @@ public interface DeviceManagementService {
                     value = "Define the time to finish getting the geo location history of the device in " +
                             "milliseconds.",
                     required = true)
-            @QueryParam("to") long to);
+            @QueryParam("to") long to,
+            @ApiParam(
+                    name = "type",
+                    value = "Defines how the output should be.",
+                    required = true)
+            @QueryParam("type") String type);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -1493,8 +1588,38 @@ public interface DeviceManagementService {
             @ApiParam(
                     name = "ownership",
                     value = "Provides the ownership of the required device.")
-            @QueryParam("owner")
-                    String ownership);
+            @QueryParam("ownership")
+                    String ownership,
+            @ApiParam(
+                    name = "createdFrom",
+                    value = "Since when user wants to filter operation logs using the created data and time")
+            @QueryParam("createdFrom")
+                    Long createdFrom,
+            @ApiParam(
+                    name = "createdTo",
+                    value = "Till when user wants to filter operation logs using the created data and time")
+            @QueryParam("createdTo")
+                    Long createdTo,
+            @ApiParam(
+                    name = "updatedFrom",
+                    value = "Since when user wants to filter operation logs using the received date and time")
+            @QueryParam("updatedFrom")
+                    Long updatedFrom,
+            @ApiParam(
+                    name = "updatedTo",
+                    value = "Till when user wants to filter operation logs using the received date and time")
+            @QueryParam("updatedTo")
+                    Long updatedTo,
+            @ApiParam(
+                    name = "operationCode",
+                    value = "Provides the operation codes to filter the operation logs via operation codes")
+            @QueryParam("operationCode")
+                    List<String> operationCode,
+            @ApiParam(
+                    name = "operationStatus",
+                    value = "Provides the status codes to filter operation logs via status")
+            @QueryParam("operationStatus")
+                    List<String> status);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

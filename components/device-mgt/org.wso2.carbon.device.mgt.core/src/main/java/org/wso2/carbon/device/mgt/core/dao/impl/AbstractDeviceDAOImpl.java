@@ -118,7 +118,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "UPDATE DM_DEVICE SET NAME = ?, DESCRIPTION = ?, LAST_UPDATED_TIMESTAMP = ? " +
-                    "WHERE DEVICE_TYPE_ID = (SELECT ID FROM DM_DEVICE_TYPE WHERE NAME = ? AND (PROVIDER_TENANT_ID = ? OR SHARED_WITH_ALL_TENANTS = ?)) " +
+                    "WHERE DEVICE_TYPE_ID = (SELECT ID FROM DM_DEVICE_TYPE " +
+                    "WHERE NAME = ? AND (PROVIDER_TENANT_ID = ? OR SHARED_WITH_ALL_TENANTS = ?)) " +
                     "AND DEVICE_IDENTIFICATION = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql, new String[]{"id"});
             stmt.setString(1, device.getName());
@@ -164,20 +165,14 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     + "d.NAME, "
                     + "t.NAME AS DEVICE_TYPE, "
                     + "d.DEVICE_IDENTIFICATION "
-                    + "FROM DM_DEVICE d, DM_DEVICE_TYPE t";
-
-            if (deviceData.getLastModifiedDate() != null) {
-                sql += ", DM_DEVICE_DETAIL dt";
-            }
-
-            sql += " WHERE "
+                    + "FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE "
                     + "t.NAME = ? AND "
                     + "t.ID = d.DEVICE_TYPE_ID AND "
                     + "d.DEVICE_IDENTIFICATION = ? AND "
                     + "d.TENANT_ID = ?";
 
             if (deviceData.getLastModifiedDate() != null) {
-                sql += " AND dt.DEVICE_ID = d.ID AND dt.UPDATE_TIMESTAMP > ?";
+                sql += " AND d.LAST_UPDATED_TIMESTAMP > ?";
             }
 
             sql += ") d1 WHERE d1.ID = e.DEVICE_ID AND ";
@@ -197,7 +192,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 stmt.setString(paramIndx++, deviceData.getDeviceIdentifier().getId());
                 stmt.setInt(paramIndx++, tenantId);
                 if (deviceData.getLastModifiedDate() != null) {
-                    stmt.setLong(paramIndx++, deviceData.getLastModifiedDate().getTime());
+                    stmt.setTimestamp(paramIndx++, new Timestamp(deviceData.getLastModifiedDate().getTime()));
                 }
                 if (!StringUtils.isBlank(deviceData.getDeviceOwner())) {
                     stmt.setString(paramIndx++, deviceData.getDeviceOwner());
@@ -354,15 +349,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             String sql = "SELECT d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, " +
                     "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.IS_TRANSFERRED, e.DATE_OF_LAST_UPDATE, " +
                     "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
-                    "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_DETAIL dt " +
-                    "WHERE t.NAME = ? AND  t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ? AND dt.DEVICE_ID = d.ID " +
-                    "AND dt.UPDATE_TIMESTAMP > ?) d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ? ORDER BY e.DATE_OF_LAST_UPDATE DESC";
+                    "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t " +
+                    "WHERE t.NAME = ? AND  t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ? " +
+                    "AND d.LAST_UPDATED_TIMESTAMP > ?) d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ? ORDER BY e.DATE_OF_LAST_UPDATE DESC";
             stmt = conn.prepareStatement(sql);
             int paramIdx = 1;
             stmt.setString(paramIdx++, deviceIdentifier.getType());
             stmt.setString(paramIdx++, deviceIdentifier.getId());
             stmt.setInt(paramIdx++, tenantId);
-            stmt.setLong(paramIdx++, since.getTime());
+            stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
             stmt.setInt(paramIdx, tenantId);
             rs = stmt.executeQuery();
             if (rs.next()) {
@@ -549,11 +544,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     "(SELECT d.ID, d.DESCRIPTION, d.NAME, " +
                     "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION " +
                     "FROM" +
-                    " DM_DEVICE d, DM_DEVICE_TYPE t," +
-                    " DM_DEVICE_DETAIL dt " +
+                    " DM_DEVICE d, DM_DEVICE_TYPE t " +
                     "WHERE " +
                     "t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ? AND" +
-                    " dt.DEVICE_ID = d.ID AND dt.UPDATE_TIMESTAMP > ?) d1 " +
+                    " d.LAST_UPDATED_TIMESTAMP > ?) d1 " +
                     "WHERE" +
                     " d1.ID = e.DEVICE_ID AND TENANT_ID = ? " +
                     "ORDER BY " +
@@ -562,7 +556,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             int paramIdx = 1;
             stmt.setString(paramIdx++, deviceIdentifier);
             stmt.setInt(paramIdx++, tenantId);
-            stmt.setLong(paramIdx++, since.getTime());
+            stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
             stmt.setInt(paramIdx, tenantId);
             rs = stmt.executeQuery();
             if (rs.next()) {
@@ -589,14 +583,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             String sql = "SELECT d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, " +
                     "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.IS_TRANSFERRED, e.DATE_OF_LAST_UPDATE, " +
                     "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
-                    "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_DETAIL dt " +
-                    "WHERE t.NAME = ? AND t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ? AND dt.DEVICE_ID = d.ID " +
-                    "AND dt.UPDATE_TIMESTAMP > ?) d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ? AND e.OWNER = ? ORDER BY e.DATE_OF_LAST_UPDATE DESC";
+                    "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t " +
+                    "WHERE t.NAME = ? AND t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ? " +
+                    "AND d.LAST_UPDATED_TIMESTAMP > ?) d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ? AND e.OWNER = ? " +
+                    "ORDER BY e.DATE_OF_LAST_UPDATE DESC";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, deviceIdentifier.getType());
             stmt.setString(2, deviceIdentifier.getId());
             stmt.setInt(3, tenantId);
-            stmt.setLong(4, since.getTime());
+            stmt.setTimestamp(4, new Timestamp(since.getTime()));
             stmt.setInt(5, tenantId);
             stmt.setString(6, owner);
             rs = stmt.executeQuery();
@@ -971,15 +966,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 sql = sql + " AND d.NAME LIKE ?";
                 isDeviceNameProvided = true;
             }
-            sql = sql + ") gd, DM_DEVICE_TYPE t";
-            if (since != null) {
-                sql = sql + ", DM_DEVICE_DETAIL dt";
-                isSinceProvided = true;
-            }
-            sql = sql + " WHERE gd.DEVICE_TYPE_ID = t.ID";
+            sql = sql + ") gd, DM_DEVICE_TYPE t WHERE gd.DEVICE_TYPE_ID = t.ID";
             //Add query for last updated timestamp
-            if (isSinceProvided) {
-                sql = sql + " AND dt.DEVICE_ID = gd.DEVICE_ID AND dt.UPDATE_TIMESTAMP > ?";
+            if (since != null) {
+                sql = sql + " AND d.LAST_UPDATED_TIMESTAMP > ?";
+                isSinceProvided = true;
             }
             //Add the query for device-type
             if (deviceType != null && !deviceType.isEmpty()) {
@@ -1013,7 +1004,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     stmt.setString(paramIdx++, deviceName + "%");
                 }
                 if (isSinceProvided) {
-                    stmt.setLong(paramIdx++, since.getTime());
+                    stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
                 }
                 if (isDeviceTypeProvided) {
                     stmt.setString(paramIdx++, deviceType);
@@ -1241,16 +1232,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     "t.NAME AS DEVICE_TYPE " +
                     "FROM " +
                     "DM_DEVICE d, " +
-                    "DM_DEVICE_TYPE t";
+                    "DM_DEVICE_TYPE t WHERE DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?";
             //Add query for last updated timestamp
             if (since != null) {
-                sql = sql + " , DM_DEVICE_DETAIL dt";
+                sql = sql + " AND d.LAST_UPDATED_TIMESTAMP > ?";
                 isSinceProvided = true;
-            }
-            sql = sql + " WHERE DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?";
-            //Add query for last updated timestamp
-            if (isSinceProvided) {
-                sql = sql + " AND dt.DEVICE_ID = d.ID AND dt.UPDATE_TIMESTAMP > ?";
             }
             if (deviceType != null && !deviceType.isEmpty()) {
                 sql = sql + " AND t.NAME = ?";
@@ -1282,7 +1268,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 int paramIdx = 1;
                 stmt.setInt(paramIdx++, tenantId);
                 if (isSinceProvided) {
-                    stmt.setLong(paramIdx++, since.getTime());
+                    stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
                 }
                 if (isDeviceTypeProvided) {
                     stmt.setString(paramIdx++, request.getDeviceType());
@@ -1947,41 +1933,46 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
     }
 
-    @Override
-    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
-            throws DeviceManagementDAOException {
-
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from,
+            long to) throws DeviceManagementDAOException {
         List<DeviceLocationHistorySnapshot> deviceLocationHistories = new ArrayList<>();
+        String sql = "SELECT "
+                + "DEVICE_ID, "
+                + "TENANT_ID, "
+                + "DEVICE_ID_NAME, "
+                + "DEVICE_TYPE_NAME, "
+                + "LATITUDE, "
+                + "LONGITUDE, "
+                + "SPEED, "
+                + "HEADING, "
+                + "TIMESTAMP, "
+                + "GEO_HASH, "
+                + "DEVICE_OWNER, "
+                + "DEVICE_ALTITUDE, "
+                + "DISTANCE "
+                + "FROM DM_DEVICE_HISTORY_LAST_SEVEN_DAYS "
+                + "WHERE "
+                + "DEVICE_ID_NAME = ? AND "
+                + "DEVICE_TYPE_NAME = ? AND "
+                + "TIMESTAMP BETWEEN ? AND ? "
+                + "ORDER BY timestamp";
         try {
-            conn = this.getConnection();
-
-            String sql =
-                    "SELECT DEVICE_ID, TENANT_ID, DEVICE_ID_NAME, DEVICE_TYPE_NAME, LATITUDE, LONGITUDE, SPEED, " +
-                            "HEADING, TIMESTAMP, GEO_HASH, DEVICE_OWNER, DEVICE_ALTITUDE, DISTANCE " +
-                            "FROM DM_DEVICE_HISTORY_LAST_SEVEN_DAYS " +
-                            "WHERE DEVICE_ID_NAME = ? " +
-                            "AND DEVICE_TYPE_NAME = ? " +
-                            "AND TIMESTAMP >= ? " +
-                            "AND TIMESTAMP <= ?";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, deviceIdentifier.getId());
-            stmt.setString(2, deviceIdentifier.getType());
-            stmt.setLong(3, from);
-            stmt.setLong(4, to);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                deviceLocationHistories.add(DeviceManagementDAOUtil.loadDeviceLocation(rs));
+            Connection conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, deviceIdentifier.getId());
+                stmt.setString(2, deviceIdentifier.getType());
+                stmt.setLong(3, from);
+                stmt.setLong(4, to);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        deviceLocationHistories.add(DeviceManagementDAOUtil.loadDeviceLocation(rs));
+                    }
+                }
             }
         } catch (SQLException e) {
-            String errMessage = "Error occurred while obtaining the DB connection to get device location information";
-            log.error(errMessage, e);
-            throw new DeviceManagementDAOException(errMessage, e);
-        } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            String msg = "Error occurred while obtaining the DB connection to get device location information";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         }
         return deviceLocationHistories;
     }

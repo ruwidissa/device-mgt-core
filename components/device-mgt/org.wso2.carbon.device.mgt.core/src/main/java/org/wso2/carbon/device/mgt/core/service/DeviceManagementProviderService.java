@@ -48,6 +48,7 @@ import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
@@ -934,6 +935,19 @@ public interface DeviceManagementProviderService {
     DeviceEnrollmentInvitationDetails getDeviceEnrollmentInvitationDetails(String deviceType);
 
     /**
+     * This method is called by device when triggered a corrective action
+     *
+     * @param deviceIdentifier Device Identifier
+     * @param featureCode Feature Code
+     * @param actions Actions
+     * @param configList Configuration List
+     * @throws DeviceManagementException if error occurred while triggering corrective action
+     * @throws DeviceNotFoundException if server doesn't have a device for given device identifier
+     */
+    void triggerCorrectiveActions(String deviceIdentifier, String featureCode, List<String> actions,
+            List<ConfigurationEntry> configList) throws DeviceManagementException, DeviceNotFoundException;
+
+    /**
      * This method is used to retrieve devices with specified device identifiers filtered with statuses.
      *
      * @param deviceIdentifiers A list of device identifiers
@@ -943,5 +957,4 @@ public interface DeviceManagementProviderService {
      */
     List<Device> getDevicesByIdentifiersAndStatuses(List<String> deviceIdentifiers, List<EnrolmentInfo.Status> statuses)
             throws DeviceManagementException;
-
 }

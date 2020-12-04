@@ -82,6 +82,7 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.MDMAndroidOperationUtil;
 import org.wso2.carbon.device.mgt.core.util.MDMIOSOperationUtil;
+import org.wso2.carbon.device.mgt.core.util.MDMWindowsOperationUtil;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
@@ -108,7 +109,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     private LifecycleStateManager lifecycleStateManager;
 
     public SubscriptionManagerImpl() {
-        lifecycleStateManager = DataHolder.getInstance().getLifecycleStateManager();
+        this.lifecycleStateManager = DataHolder.getInstance().getLifecycleStateManager();
         this.subscriptionDAO = ApplicationManagementDAOFactory.getSubscriptionDAO();
         this.applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
     }
@@ -549,7 +550,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         boolean isValidSubType = Arrays.stream(SubscriptionType.values())
                 .anyMatch(sub -> sub.name().equalsIgnoreCase(subType));
         if (!isValidSubType) {
-            String msg = "Found invalid subscription type " + subType+  " to install application release" ;
+            String msg = "Found invalid subscription type " + subType+  " to subscribe application release" ;
             log.error(msg);
             throw new BadRequestException(msg);
         }
@@ -579,8 +580,10 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ApplicationDTO applicationDTO, String subType, List<String> subscribers, String action)
             throws ApplicationManagementException {
 
+        //Get app subscribing info of each device
         SubscribingDeviceIdHolder subscribingDeviceIdHolder = getSubscribingDeviceIdHolder(devices,
                 applicationDTO.getApplicationReleaseDTOs().get(0).getId());
+
         List<Activity> activityList = new ArrayList<>();
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
         List<DeviceIdentifier> ignoredDeviceIdentifiers = new ArrayList<>();
@@ -1015,6 +1018,18 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         app.setIdentifier(application.getPackageName());
                         app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
                         return MDMIOSOperationUtil.createAppUninstallOperation(app);
+                    } else {
+                        String msg = "Invalid Action is found. Action: " + action;
+                        log.error(msg);
+                        throw new ApplicationManagementException(msg);
+                    }
+                } else if (DeviceTypes.WINDOWS.toString().equalsIgnoreCase(deviceType)) {
+                    app.setType(mobileAppType);
+                    app.setIdentifier(application.getPackageName());
+                    app.setMetaData(application.getApplicationReleases().get(0).getMetaData());
+                    app.setName(application.getInstallerName());
+                    if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+                        return MDMWindowsOperationUtil.createInstallAppOperation(app);
                     } else {
                         String msg = "Invalid Action is found. Action: " + action;
                         log.error(msg);

@@ -56,12 +56,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
+import java.util.ArrayList;
+import java.util.LinkedList;
 /**
  * This class holds the implementation of OperationDAO which can be used to support SQLServer db syntax.
  */
@@ -72,44 +73,142 @@ public class SQLServerOperationDAOImpl extends GenericOperationDAOImpl {
     @Override
     public List<? extends Operation> getOperationsForDevice(int enrolmentId, PaginationRequest request)
             throws OperationManagementDAOException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         Operation operation;
         List<Operation> operations = new ArrayList<Operation>();
+        String createdTo = null;
+        String createdFrom = null;
+        DateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        boolean isCreatedDayProvided = false;
+        boolean isUpdatedDayProvided = false;  //updated day = received day
+        boolean isOperationCodeProvided = false;
+        boolean isStatusProvided = false;
+        if (request.getOperationLogFilters().getCreatedDayFrom() != null) {
+            createdFrom = simple.format(request.getOperationLogFilters().getCreatedDayFrom());
+        }
+        if (request.getOperationLogFilters().getCreatedDayTo() != null) {
+            createdTo = simple.format(request.getOperationLogFilters().getCreatedDayTo());
+        }
+        Long updatedFrom = request.getOperationLogFilters().getUpdatedDayFrom();
+        Long updatedTo = request.getOperationLogFilters().getUpdatedDayTo();
+        List<String> operationCode = request.getOperationLogFilters().getOperationCode();
+        List<String> status = request.getOperationLogFilters().getStatus();
+        String sql = "SELECT " +
+                        "o.ID, " +
+                        "TYPE, " +
+                        "o.CREATED_TIMESTAMP, " +
+                        "o.RECEIVED_TIMESTAMP, " +
+                        "o.OPERATION_CODE, " +
+                        "om.STATUS, " +
+                        "om.ID AS OM_MAPPING_ID, " +
+                        "om.UPDATED_TIMESTAMP " +
+                    "FROM " +
+                        "DM_OPERATION o " +
+                    "INNER JOIN " +
+                    "(SELECT " +
+                        "dm.OPERATION_ID, " +
+                        "dm.ID, " +
+                        "dm.STATUS, " +
+                        "dm.UPDATED_TIMESTAMP " +
+                    "FROM " +
+                        "DM_ENROLMENT_OP_MAPPING dm " +
+                    "WHERE " +
+                        "dm.ENROLMENT_ID = ?";
+
+        if (updatedFrom != null && updatedFrom != 0 && updatedTo != null && updatedTo != 0) {
+            sql = sql + " AND dm.UPDATED_TIMESTAMP BETWEEN ? AND ?";
+            isUpdatedDayProvided = true;
+        }
+        sql = sql + ") om ON o.ID = om.OPERATION_ID ";
+        if (createdFrom != null && !createdFrom.isEmpty() && createdTo != null && !createdTo.isEmpty()) {
+            sql = sql + " WHERE o.CREATED_TIMESTAMP BETWEEN ? AND ?";
+            isCreatedDayProvided = true;
+        }
+        if ((isCreatedDayProvided) && (status != null && !status.isEmpty())) {
+            int size = status.size();
+            sql = sql + " AND (om.STATUS = ? ";
+            for (int i = 0; i < size - 1; i++) {
+                sql = sql + " OR om.STATUS = ?";
+            }
+            sql = sql + ")";
+            isStatusProvided = true;
+        } else if ((!isCreatedDayProvided) && (status != null && !status.isEmpty())) {
+            int size = status.size();
+            sql = sql + " WHERE (om.STATUS = ? ";
+            for (int i = 0; i < size - 1; i++) {
+                sql = sql + " OR om.STATUS = ?";
+            }
+            sql = sql + ")";
+            isStatusProvided = true;
+        }
+        if ((isCreatedDayProvided || isStatusProvided) && (operationCode != null && !operationCode.isEmpty())) {
+            // sql = sql + " AND o.OPERATION_CODE = ? ";
+            int size = operationCode.size();
+            sql = sql + " AND (o.OPERATION_CODE = ? ";
+            for (int i = 0; i < size - 1; i++) {
+                sql = sql + " OR o.OPERATION_CODE = ?";
+            }
+            sql = sql + ")";
+            isOperationCodeProvided = true;
+        } else if ((!isCreatedDayProvided && !isStatusProvided) && (operationCode != null && !operationCode.isEmpty())) {
+            //sql = sql + " WHERE o.OPERATION_CODE = ? ";
+            int size = operationCode.size();
+            sql = sql + " WHERE (o.OPERATION_CODE = ? ";
+            for (int i = 0; i < size - 1; i++) {
+                sql = sql + " OR o.OPERATION_CODE = ?";
+            }
+            sql = sql + ")";
+            isOperationCodeProvided = true;
+        }
+        sql = sql + " ORDER BY o.CREATED_TIMESTAMP DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        int paramIndex = 1;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT o.ID, TYPE, o.CREATED_TIMESTAMP, o.RECEIVED_TIMESTAMP, " +
-                         "o.OPERATION_CODE, om.STATUS, om.ID AS OM_MAPPING_ID, om.UPDATED_TIMESTAMP FROM DM_OPERATION o " +
-                         "INNER JOIN (SELECT dm.OPERATION_ID, dm.ID, dm.STATUS, dm.UPDATED_TIMESTAMP FROM DM_ENROLMENT_OP_MAPPING dm " +
-                         "WHERE dm.ENROLMENT_ID = ?) om ON o.ID = om.OPERATION_ID ORDER BY o.CREATED_TIMESTAMP DESC " +
-                         "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, enrolmentId);
-            stmt.setInt(2, request.getStartIndex());
-            stmt.setInt(3, request.getRowCount());
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                operation = new Operation();
-                operation.setId(rs.getInt("ID"));
-                operation.setType(Operation.Type.valueOf(rs.getString("TYPE")));
-                operation.setCreatedTimeStamp(rs.getTimestamp("CREATED_TIMESTAMP").toString());
-                if (rs.getLong("UPDATED_TIMESTAMP") == 0) {
-                    operation.setReceivedTimeStamp("");
-                } else {
-                    operation.setReceivedTimeStamp(
-                            new java.sql.Timestamp((rs.getLong("UPDATED_TIMESTAMP") * 1000)).toString());
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(paramIndex++, enrolmentId);
+                if (isUpdatedDayProvided) {
+                    stmt.setLong(paramIndex++, updatedFrom);
+                    stmt.setLong(paramIndex++, updatedTo);
                 }
-                operation.setCode(rs.getString("OPERATION_CODE"));
-                operation.setStatus(Operation.Status.valueOf(rs.getString("STATUS")));
-                OperationDAOUtil.setActivityId(operation, rs.getInt("ID"));
-                operations.add(operation);
+                if (isCreatedDayProvided) {
+                    stmt.setString(paramIndex++, createdFrom);
+                    stmt.setString(paramIndex++, createdTo);
+                }
+                if (isStatusProvided) {
+                    int size = status.size();
+                    for (int i = 0; i < size; i++) {
+                        stmt.setString(paramIndex++, status.get(i));
+                    }
+                }
+                if (isOperationCodeProvided) {
+                    int size = operationCode.size();
+                    for (int i = 0; i < size; i++) {
+                        stmt.setString(paramIndex++, operationCode.get(i));
+                    }
+                }
+                stmt.setInt(paramIndex++, request.getStartIndex());
+                stmt.setInt(paramIndex, request.getRowCount());
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        operation = new Operation();
+                        operation.setId(rs.getInt("ID"));
+                        operation.setType(Operation.Type.valueOf(rs.getString("TYPE")));
+                        operation.setCreatedTimeStamp(rs.getTimestamp("CREATED_TIMESTAMP").toString());
+                        if (rs.getLong("UPDATED_TIMESTAMP") == 0) {
+                            operation.setReceivedTimeStamp("");
+                        } else {
+                            operation.setReceivedTimeStamp(
+                                    new java.sql.Timestamp((rs.getLong("UPDATED_TIMESTAMP") * 1000)).toString());
+                        }
+                        operation.setCode(rs.getString("OPERATION_CODE"));
+                        operation.setStatus(Operation.Status.valueOf(rs.getString("STATUS")));
+                        OperationDAOUtil.setActivityId(operation, rs.getInt("ID"));
+                        operations.add(operation);
+                    }
+                }
             }
         } catch (SQLException e) {
             throw new OperationManagementDAOException("SQL error occurred while retrieving the operations " +
-                                                      "available for the device '" + enrolmentId + "'", e);
-        } finally {
-            OperationManagementDAOUtil.cleanupResources(stmt, rs);
+                    "available for the device '" + enrolmentId + "'", e);
         }
         return operations;
     }

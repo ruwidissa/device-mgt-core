@@ -40,5 +40,8 @@
       "color": "#008cc4",
       "theme": "filled"
     }
+  },
+  "windowsAppxMsiKeyValueForMetaData": {
+    "metaKeyArray": ["Package_Url", "Dependency_Package_Url", "Certificate_Hash", "Encoded_Cert_Content", "Package_Family_Name", "Product_Id", "Content_Uri", "File_Hash"]
   }
 }

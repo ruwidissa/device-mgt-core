@@ -54,6 +54,12 @@ public class Policy implements Comparable<Policy>, Serializable {
     private static final long serialVersionUID = 19981017L;
 
     @ApiModelProperty(
+            name = "payloadVersion",
+            value = "Payload version of the Policy",
+            example = "1")
+    private String policyPayloadVersion;
+
+    @ApiModelProperty(
             name = "id",
             value = "The policy ID",
             required = true,
@@ -201,12 +207,18 @@ public class Policy implements Comparable<Policy>, Serializable {
             example = "GENERAL")
     private String policyType;
 
-    @ApiModelProperty(
-            name = "correctiveActions",
-            value = "List of corrective actions to be applied when the policy is violated",
-            example = "[{'actionType': 'POLICY', 'policyId': 1}]"
-    )
+    @ApiModelProperty(name = "correctiveActions",
+            value = "List of corrective actions to be applied when the policy is violated")
     private List<CorrectiveAction> correctiveActions;
+
+    @XmlElement
+    public String getPolicyPayloadVersion() {
+        return policyPayloadVersion;
+    }
+
+    public void setPolicyPayloadVersion(String policyPayloadVersion) {
+        this.policyPayloadVersion = policyPayloadVersion;
+    }
 
     @XmlElement
     public int getId() {
@@ -379,13 +391,11 @@ public class Policy implements Comparable<Policy>, Serializable {
         this.policyType = policyType;
     }
 
-    @XmlElement
     public List<CorrectiveAction> getCorrectiveActions() {
         return correctiveActions;
     }
 
-    public void setCorrectiveActions(
-            List<CorrectiveAction> correctiveActions) {
+    public void setCorrectiveActions(List<CorrectiveAction> correctiveActions) {
         this.correctiveActions = correctiveActions;
     }
 

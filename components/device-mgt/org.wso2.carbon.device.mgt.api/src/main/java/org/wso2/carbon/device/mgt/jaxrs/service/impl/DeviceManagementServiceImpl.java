@@ -36,25 +36,21 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceFilters;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.Feature;
-import org.wso2.carbon.device.mgt.common.FeatureManager;
-import org.wso2.carbon.device.mgt.common.MonitoringOperation;
-import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.Feature;
+import org.wso2.carbon.device.mgt.common.FeatureManager;
+import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.OperationLogFilters;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.DeviceFilters;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
@@ -62,14 +58,13 @@ import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorization
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshotWrapper;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
-import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
+import org.wso2.carbon.device.mgt.common.exceptions.UnAuthorizedException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
@@ -91,15 +86,16 @@ import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceCompliance;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ComplianceDeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ComplianceDeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -111,7 +107,6 @@ import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerSer
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
@@ -128,9 +123,9 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 @Path("/devices")
 public class DeviceManagementServiceImpl implements DeviceManagementService {
@@ -218,29 +213,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
             if (groupId != 0) {
                 try {
-                    int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-                    UserStoreManager userStoreManager = DeviceMgtAPIUtils.getRealmService()
-                            .getTenantUserRealm(tenantId).getUserStoreManager();
-                    String[] userRoles = userStoreManager.getRoleListOfUser(authorizedUser);
-                    boolean isPermitted = false;
-                    if (deviceAccessAuthorizationService.isDeviceAdminUser()) {
-                        isPermitted = true;
-                    } else {
-                        List<String> roles = DeviceMgtAPIUtils.getGroupManagementProviderService().getRoles(groupId);
-                        for (String userRole : userRoles) {
-                            if (roles.contains(userRole)) {
-                                isPermitted = true;
-                                break;
-                            }
-                        }
-                        if (!isPermitted) {
-                            DeviceGroup deviceGroup = DeviceMgtAPIUtils.getGroupManagementProviderService()
-                                    .getGroup(groupId, false);
-                            if (deviceGroup != null && authorizedUser.equals(deviceGroup.getOwner())) {
-                                isPermitted = true;
-                            }
-                        }
-                    }
+                    boolean isPermitted = DeviceMgtAPIUtils.checkPermission(groupId, authorizedUser);
                     if (isPermitted) {
                         request.setGroupId(groupId);
                     } else {
@@ -383,6 +356,103 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         }
     }
 
+    /**
+     * Validate group Id and group Id greater than 0 and exist.
+     *
+     * @param groupId Group ID of the group
+     * @param from time to start getting DeviceLocationHistorySnapshotWrapper in milliseconds
+     * @param to time to end getting DeviceLocationHistorySnapshotWrapper in milliseconds
+     */
+    private static void validateGroupId(int groupId, long from, long to) throws GroupManagementException, BadRequestException {
+        if (from == 0 || to == 0) {
+            String msg = "Invalid values for from/to";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        if (groupId <= 0) {
+            String msg = "Invalid group ID '" + groupId + "'";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        GroupManagementProviderService service = DeviceMgtAPIUtils.getGroupManagementProviderService();
+        if (service.getGroup(groupId, false) == null) {
+            String msg = "Invalid group ID '" + groupId + "'";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+    }
+
+    @GET
+    @Override
+    @Path("/{groupId}/location-history")
+    public Response getDevicesGroupLocationInfo(@PathParam("groupId") int groupId,
+                                                @QueryParam("from") long from,
+                                                @QueryParam("to") long to,
+                                                @QueryParam("type") String type,
+                                                @DefaultValue("0") @QueryParam("offset") int offset,
+                                                @DefaultValue("100") @QueryParam("limit") int limit){
+        try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            PaginationRequest request = new PaginationRequest(offset, limit);
+            DeviceList devices = new DeviceList();
+
+            // this is the user who initiates the request
+            String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+                try {
+                    validateGroupId(groupId, from, to);
+                    boolean isPermitted = DeviceMgtAPIUtils.checkPermission(groupId, authorizedUser);
+                    if (isPermitted) {
+                        request.setGroupId(groupId);
+                    } else {
+                        String msg = "Current user '" + authorizedUser
+                                + "' doesn't have enough privileges to list devices of group '"
+                                + groupId + "'";
+                        log.error(msg);
+                        return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+                    }
+                } catch (GroupManagementException e) {
+                    String msg = "Error occurred while getting the data using '" + groupId + "'";
+                    log.error(msg);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+                } catch (UserStoreException e){
+                    String msg = "Error occurred while retrieving role list of user '" + authorizedUser + "'";
+                    log.error(msg);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+                }
+
+            PaginationResult result = dms.getAllDevices(request, false);
+
+            if(!result.getData().isEmpty()){
+                devices.setList((List<Device>) result.getData());
+
+                for (Device device : devices.getList()) {
+                    DeviceLocationHistorySnapshotWrapper snapshotWrapper = DeviceMgtAPIUtils.getDeviceHistorySnapshots(
+                            device.getType(), device.getDeviceIdentifier(), authorizedUser, from, to, type,
+                            dms);
+                    device.setHistorySnapshot(snapshotWrapper);
+                }
+            }
+            return Response.status(Response.Status.OK).entity(devices).build();
+        } catch (BadRequestException e) {
+            String msg = "Invalid type, use either 'path' or 'full'";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (UnAuthorizedException e) {
+            String msg = "Current user doesn't have enough privileges to list devices of group '" + groupId + "'";
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while fetching the device information.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (DeviceAccessAuthorizationException e) {
+            String msg = "Error occurred while checking device access authorization";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
     @DELETE
     @Override
     @Path("/type/{deviceType}/id/{deviceId}")
@@ -504,97 +574,43 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         return Response.status(Response.Status.OK).entity(device).build();
     }
 
-    @Path("/{deviceType}/{deviceId}/location-history")
     @GET
-    public Response getDeviceLocationInfo(@PathParam("deviceType") String deviceType,
-                                          @PathParam("deviceId") String deviceId,
-                                          @QueryParam("from") long from, @QueryParam("to") long to) {
-
-        String errorMessage;
-        DeviceLocationHistory deviceLocationHistory = new DeviceLocationHistory();
-
+    @Path("/{deviceType}/{deviceId}/location-history")
+    public Response getDeviceLocationInfo(
+            @PathParam("deviceType") String deviceType,
+            @PathParam("deviceId") String deviceId,
+            @QueryParam("from") long from,
+            @QueryParam("to") long to,
+            @QueryParam("type") String type) {
         try {
-            RequestValidationUtil.validateDeviceIdentifier(deviceType, deviceId);
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
-            DeviceAccessAuthorizationService deviceAccessAuthorizationService =
-                    DeviceMgtAPIUtils.getDeviceAccessAuthorizationService();
             String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            DeviceIdentifier deviceIdentifier = new DeviceIdentifier(deviceId, deviceType);
-            deviceIdentifier.setId(deviceId);
-            deviceIdentifier.setType(deviceType);
-
-            if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, authorizedUser)) {
-                String msg = "User '" + authorizedUser + "' is not authorized to retrieve the given device id '" +
-                        deviceId + "'";
-                log.error(msg);
-                return Response.status(Response.Status.UNAUTHORIZED).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(401l).setMessage(msg).build()).build();
-            }
-            if (from == 0 || to == 0) {
-                errorMessage = "Invalid values for from/to";
-                log.error(errorMessage);
-                return Response.status(Response.Status.BAD_REQUEST).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(errorMessage)).build();
-            }
-
-            List<List<DeviceLocationHistorySnapshot>> locationHistorySnapshotList = new ArrayList<>();
-            // Get the location history snapshots for the given period
-            List<DeviceLocationHistorySnapshot> deviceLocationHistorySnapshots = dms.getDeviceLocationInfo(deviceIdentifier, from, to);
-
-            OperationMonitoringTaskConfig operationMonitoringTaskConfig = dms.getDeviceMonitoringConfig(deviceType);
-            int taskFrequency = operationMonitoringTaskConfig.getFrequency();
-            int operationRecurrentTimes = 0;
-
-            List<MonitoringOperation> monitoringOperations = operationMonitoringTaskConfig.getMonitoringOperation();
-            for (MonitoringOperation monitoringOperation :
-                    monitoringOperations) {
-                if (monitoringOperation.getTaskName().equals("DEVICE_LOCATION")) {
-                    operationRecurrentTimes = monitoringOperation.getRecurrentTimes();
-                    break;
-                }
-            }
-            // Device Location operation frequency in milliseconds. Adding 100000 ms as an error
-            long operationFrequency = taskFrequency * operationRecurrentTimes + 100000;
-
-            Queue<DeviceLocationHistorySnapshot> deviceLocationHistorySnapshotsQueue = new LinkedList<>(deviceLocationHistorySnapshots);
-
-            while (deviceLocationHistorySnapshotsQueue.size() > 0) {
-                List<DeviceLocationHistorySnapshot> snapshots = new ArrayList<>();
-                // Make a copy of remaining snapshots
-                List<DeviceLocationHistorySnapshot> cachedSnapshots = new ArrayList<>(deviceLocationHistorySnapshotsQueue);
-
-                for (int i = 0; i < cachedSnapshots.size(); i++) {
-                    DeviceLocationHistorySnapshot currentSnapshot = deviceLocationHistorySnapshotsQueue.poll();
-                    snapshots.add(currentSnapshot);
-                    if (deviceLocationHistorySnapshotsQueue.size() > 0) {
-                        DeviceLocationHistorySnapshot nextSnapshot = deviceLocationHistorySnapshotsQueue.peek();
-                        if (nextSnapshot.getUpdatedTime().getTime() - currentSnapshot.getUpdatedTime().getTime() > operationFrequency) {
-                            break;
-                        }
-                    }
-                }
-                locationHistorySnapshotList.add(snapshots);
-            }
-            deviceLocationHistory.setLocationHistorySnapshots(locationHistorySnapshotList);
-
-
+            DeviceLocationHistorySnapshotWrapper snapshotWrapper = DeviceMgtAPIUtils.getDeviceHistorySnapshots(
+                    deviceType, deviceId, authorizedUser, from, to, type,
+                    dms);
+            return Response.status(Response.Status.OK).entity(snapshotWrapper).build();
+        } catch (BadRequestException e) {
+            String msg = "Invalid type, use either 'path' or 'full'";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (UnAuthorizedException e) {
+            String msg = "Current user doesn't have enough privileges to retrieve the given device id '"
+                    + deviceId + "'";
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (DeviceManagementException e) {
-            errorMessage = "Error occurred while fetching the device information.";
-            log.error(errorMessage, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(errorMessage).build()).build();
+            String msg = "Error occurred while fetching the device information.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (InputValidationException e) {
+            String msg = "Invalid device Id or device type";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (DeviceAccessAuthorizationException e) {
-            errorMessage = "Error occurred while checking the device authorization.";
-            log.error(errorMessage, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(errorMessage).build()).build();
-        } catch (InputValidationException e){
-            errorMessage = "Invalid device Id or device type";
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(errorMessage)).build();
+            String msg = "Error occurred while checking device access authorization";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
-        return Response.status(Response.Status.OK).entity(deviceLocationHistory).build();
     }
 
     @GET
@@ -871,21 +887,30 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("offset") int offset,
             @QueryParam("limit") int limit,
             @QueryParam("owner") String owner,
-            @QueryParam("ownership") String ownership) {
+            @QueryParam("ownership") String ownership,
+            @QueryParam("createdFrom") Long createdFrom,
+            @QueryParam("createdTo") Long createdTo,
+            @QueryParam("updatedFrom") Long updatedFrom,
+            @QueryParam("updatedTo") Long updatedTo,
+            @QueryParam("operationCode") List<String> operationCode,
+            @QueryParam("operationStatus") List<String> status) {
         OperationList operationsList = new OperationList();
+        RequestValidationUtil requestValidationUtil = new RequestValidationUtil();
         RequestValidationUtil.validateOwnerParameter(owner);
         RequestValidationUtil.validatePaginationParameters(offset, limit);
         PaginationRequest request = new PaginationRequest(offset, limit);
         request.setOwner(owner);
-        PaginationResult result;
-        DeviceManagementProviderService dms;
         try {
+            //validating the operation log filters
+            OperationLogFilters olf = requestValidationUtil.validateOperationLogFilters(operationCode, createdFrom,
+                    createdTo, updatedFrom, updatedTo, status, type);
+            request.setOperationLogFilters(olf);
             RequestValidationUtil.validateDeviceIdentifier(type, id);
-            dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
             if (!StringUtils.isBlank(ownership)) {
                 request.setOwnership(ownership);
             }
-            result = dms.getOperations(new DeviceIdentifier(id, type), request);
+            PaginationResult result = dms.getOperations(new DeviceIdentifier(id, type), request);
             operationsList.setList((List<? extends Operation>) result.getData());
             operationsList.setCount(result.getRecordsTotal());
             return Response.status(Response.Status.OK).entity(operationsList).build();
@@ -895,6 +920,20 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (InputValidationException e) {
+            String msg = "Error occurred while fetching the operations for the '" + type + "' device, which " +
+                    "carries the id '" + id + "'";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retrieving the list of [" + type + "] features with params " +
+                    "{featureType: operation, hidden: true}";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (DeviceTypeNotFoundException e) {
+            String msg = "No device type found with name '" + type + "'";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
     }
 

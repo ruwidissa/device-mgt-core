@@ -41,8 +41,15 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.MDMAppConstants;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
+import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -56,8 +63,10 @@ import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -190,4 +199,38 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
         }
     }
 
+    @POST
+    @Path("/{deviceId}/{featureCode}")
+    @Override
+    public Response triggerCorrectiveActions(
+            @PathParam("deviceId") String deviceIdentifier,
+            @PathParam("featureCode") String featureCode,
+            List<String> actions){
+        DeviceManagementProviderService deviceManagementService = DeviceMgtAPIUtils.getDeviceManagementService();
+        PlatformConfigurationManagementService platformConfigurationManagementService = DeviceMgtAPIUtils
+                .getPlatformConfigurationManagementService();
+        try {
+            PlatformConfiguration config = platformConfigurationManagementService
+                    .getConfiguration(MDMAppConstants.RegistryConstants.GENERAL_CONFIG_RESOURCE_PATH);
+            List<ConfigurationEntry> configList = config.getConfiguration();
+            deviceManagementService.triggerCorrectiveActions(deviceIdentifier, featureCode, actions, configList);
+        } catch (ConfigurationManagementException e) {
+            String msg = "Error occurred while processing platform configuration.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Bad request, can't proceed. Hence verify the request and re-try";
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while getting device data which has ID: " + deviceIdentifier;
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (DeviceNotFoundException e) {
+            String msg = "Couldn't find an device for device identifier: " + deviceIdentifier;
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        }
+        return Response.status(Response.Status.OK).entity("Triggered action successfully").build();
+    }
 }

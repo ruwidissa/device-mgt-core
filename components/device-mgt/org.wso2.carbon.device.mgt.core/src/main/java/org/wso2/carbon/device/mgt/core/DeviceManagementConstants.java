@@ -42,6 +42,7 @@ public final class DeviceManagementConstants {
 
     public static final String DM_CACHE_MANAGER = "DM_CACHE_MANAGER";
     public static final String DEVICE_CACHE = "DEVICE_CACHE";
+    public static final String GEOFENCE_CACHE = "GEOFENCE_CACHE";
     public static final String ENROLLMENT_NOTIFICATION_API_ENDPOINT = "/api/device-mgt/enrollment-notification";
     public static final String URL_SEPERATOR = "/";
 
@@ -97,6 +98,14 @@ public final class DeviceManagementConstants {
         public static final String MONITOR_OPERATION_CODE = "MONITOR";
         public static final String POLICY_OPERATION_CODE = PolicyOperation.POLICY_OPERATION_CODE;
         public static final String POLICY_REVOKE_OPERATION_CODE = OperationMgtConstants.OperationCodes.POLICY_REVOKE;
+        public static final String EVENT_CONFIG_OPERATION_CODE = OperationMgtConstants.OperationCodes.EVENT_CONFIG;
+        public static final String EVENT_REVOKE_OPERATION_CODE = OperationMgtConstants.OperationCodes.EVENT_REVOKE;
+    }
+
+    public static final class CorrectiveActions {
+        private CorrectiveActions() {throw new AssertionError();}
+
+        public static final String E_MAIL = "MAIL";
     }
 
     public static final class EmailAttributes {
@@ -117,6 +126,7 @@ public final class DeviceManagementConstants {
         public static final String USER_REGISTRATION_TEMPLATE = "user-registration";
         public static final String USER_ENROLLMENT_TEMPLATE = "user-enrollment";
         public static final String USER_VERIFY_TEMPLATE = "user-verify";
+        public static final String POLICY_VIOLATE_TEMPLATE = "policy-violating-notifier";
         public static final String USER_WELCOME_TEMPLATE = "user-welcome";
         public static final String DEFAULT_ENROLLMENT_TEMPLATE = "default-enrollment-invitation";
     }

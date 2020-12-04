@@ -23,6 +23,8 @@ import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManager;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
@@ -73,6 +75,9 @@ public class DeviceManagementDataHolder {
     private DeviceStatusTaskManagerService deviceStatusTaskManagerService;
     private DeviceTypeGeneratorService deviceTypeGeneratorService;
     private PrivacyComplianceProvider privacyComplianceProvider;
+    private EventConfigurationProviderService eventConfigurationService;
+    private GeoLocationProviderService geoLocationProviderService;
+
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
 
@@ -296,5 +301,21 @@ public class DeviceManagementDataHolder {
     public void setHeartBeatService(
             HeartBeatManagementService heartBeatService) {
         this.heartBeatService = heartBeatService;
+    }
+
+    public void setEventConfigurationProviderService(EventConfigurationProviderService eventConfigurationService) {
+        this.eventConfigurationService = eventConfigurationService;
+    }
+
+    public EventConfigurationProviderService getEventConfigurationService() {
+        return eventConfigurationService;
+    }
+
+    public GeoLocationProviderService getGeoLocationProviderService() {
+        return geoLocationProviderService;
+    }
+
+    public void setGeoLocationProviderService(GeoLocationProviderService geoLocationProviderService) {
+        this.geoLocationProviderService = geoLocationProviderService;
     }
 }

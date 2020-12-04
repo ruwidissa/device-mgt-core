@@ -37,6 +37,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -89,16 +90,11 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "d.NAME, " +
                     "d.DEVICE_IDENTIFICATION, " +
                     "t.NAME AS DEVICE_TYPE " +
-                    "FROM DM_DEVICE d, DM_DEVICE_TYPE t ";
-            //Add the query to filter active devices on timestamp
-            if (since != null) {
-                sql = sql + ", DM_DEVICE_DETAIL dt";
-                isSinceProvided = true;
-            }
-            sql = sql + " WHERE DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?";
+                    "FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?";
             //Add query for last updated timestamp
-            if (isSinceProvided) {
-                sql = sql + " AND dt.DEVICE_ID = d.ID AND dt.UPDATE_TIMESTAMP > ?";
+            if (since != null) {
+                sql = sql + " AND d.LAST_UPDATED_TIMESTAMP > ?";
+                isSinceProvided = true;
             }
             //Add the query for device-type
             if (deviceType != null && !deviceType.isEmpty()) {
@@ -134,7 +130,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 int paramIdx = 1;
                 stmt.setInt(paramIdx++, tenantId);
                 if (isSinceProvided) {
-                    stmt.setLong(paramIdx++, since.getTime());
+                    stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
                 }
                 if (isDeviceTypeProvided) {
                     stmt.setString(paramIdx++, deviceType);
@@ -371,15 +367,11 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 sql = sql + " AND d.NAME LIKE ?";
                 isDeviceNameProvided = true;
             }
-            sql = sql + ") gd, DM_DEVICE_TYPE t";
-            if (since != null) {
-                sql = sql + ", DM_DEVICE_DETAIL dt";
-                isSinceProvided = true;
-            }
-            sql = sql + " WHERE gd.DEVICE_TYPE_ID = t.ID";
+            sql = sql + ") gd, DM_DEVICE_TYPE t WHERE gd.DEVICE_TYPE_ID = t.ID";
             //Add query for last updated timestamp
-            if (isSinceProvided) {
-                sql = sql + " AND dt.DEVICE_ID = gd.DEVICE_ID AND dt.UPDATE_TIMESTAMP > ?";
+            if (since != null) {
+                sql = sql + " AND d.LAST_UPDATED_TIMESTAMP > ?";
+                isSinceProvided = true;
             }
             //Add the query for device-type
             if (deviceType != null && !deviceType.isEmpty()) {
@@ -414,7 +406,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     stmt.setString(paramIdx++, deviceName + "%");
                 }
                 if (isSinceProvided) {
-                    stmt.setLong(paramIdx++, since.getTime());
+                    stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
                 }
                 if (isDeviceTypeProvided) {
                     stmt.setString(paramIdx++, deviceType);
