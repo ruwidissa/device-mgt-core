@@ -29,7 +29,7 @@
                 </div>
 
             <div class="panel-body">
-                <form id="consentForm" method="POST" action="/commonauth">
+                <form id="consentForm" method="POST" action={{action}}>
                     <p>By selecting following attributes I agree to share them with the above service provider.</p>
                     {{#unless singleMandatoryClaim}}
                     <div class="wr-input-control">
@@ -60,9 +60,9 @@
                     </div>
                     <p class="small">Mandatory claims are marked with an asterisk ( * )</p>
                     <div class="wr-input-control wr-btn-grp">
-                        <input type="hidden" name="sessionDataKey" value="{{sessionDataKey}}"/>
+                        <input type="hidden" name="{{sessionDataKeyName}}" value="{{sessionDataKey}}"/>
                         <input type="hidden" name="consent" id="consent" value="deny"/>
-                        <button class="btn btn-primary" onclick="approved()">Approve</button>
+                        <button class="btn btn-primary" onclick="approved('{{ssoProtocol}}')">Approve</button>
                         <button class="btn btn-default" onclick="deny()">Deny</button>
                     </div>
                 </form>
