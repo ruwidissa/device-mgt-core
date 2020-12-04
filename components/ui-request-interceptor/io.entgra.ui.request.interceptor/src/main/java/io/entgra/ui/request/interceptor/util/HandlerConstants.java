@@ -24,7 +24,10 @@ public class HandlerConstants {
     public static final String UI_CONFIG_ENDPOINT = "/api/device-mgt-config/v1.0/configurations/ui-config";
     public static final String TOKEN_ENDPOINT = "/token";
     public static final String INTROSPECT_ENDPOINT = "/oauth2/introspect";
+    public static final String AUTHORIZATION_ENDPOINT = "/oauth2/authorize";
+    public static final String APIM_APPLICATIONS_ENDPOINT = "/api/am/store/v0.12/applications/";
     public static final String LOGIN_PAGE = "/login";
+    public static final String SSO_LOGIN_CALLBACK = "/ssoLoginCallback";
     public static final String BASIC = "Basic ";
     public static final String BEARER = "Bearer ";
     public static final String TAGS_KEY = "tags";
@@ -32,6 +35,10 @@ public class HandlerConstants {
     public static final String SESSION_AUTH_DATA_KEY = "authInfo";
     public static final String SESSION_DEFAULT_AUTH_DATA_KEY = "defaultAuthInfo";
     public static final String UI_CONFIG_KEY = "ui-config";
+    public static final String CALLBACK_URL_KEY = "callbackUrl";
+    public static final String IS_ALLOWED_TO_ALL_DOMAINS_KEY = "isAllowedToAllDomains";
+    public static final String JSESSIONID_KEY = "JSESSIONID";
+    public static final String COMMON_AUTH_ID_KEY = "commonAuthId";
     public static final String PLATFORM = "platform";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
@@ -40,6 +47,11 @@ public class HandlerConstants {
     public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
     public static final String REPORTS = "Reports";
     public static final String APP_NAME = "App-Name";
+    public static final String[] SSO_LOGOUT_COOKIE_PATHS = new String[]{"/", "/entgra-ui-request-handler",
+            "/store-ui-request-handler", "/publisher-ui-request-handler", "/mdm-reports-ui-request-handler", "/devicemgt"};
+    public static final String CODE_GRANT_TYPE = "authorization_code";
+    public static final String REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
+    public static final String PASSWORD_GRANT_TYPE = "password";
 
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";

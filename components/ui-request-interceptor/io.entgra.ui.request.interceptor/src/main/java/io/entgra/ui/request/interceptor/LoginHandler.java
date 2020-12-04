@@ -27,12 +27,10 @@ import io.entgra.ui.request.interceptor.beans.AuthData;
 import io.entgra.ui.request.interceptor.exceptions.LoginException;
 import io.entgra.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.ui.request.interceptor.util.HandlerUtil;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -71,66 +69,31 @@ public class LoginHandler extends HttpServlet {
             //setting session to expiry in 5 minutes
             httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
 
-            HttpGet uiConfigEndpoint = new HttpGet(uiConfigUrl);
-            ProxyResponse uiConfigResponse = HandlerUtil.execute(uiConfigEndpoint);
-            String executorResponse = uiConfigResponse.getExecutorResponse();
-            if (!StringUtils.isEmpty(executorResponse) && executorResponse
-                    .contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                log.error("Error occurred while getting UI configurations by invoking " + uiConfigUrl);
-                HandlerUtil.handleError(resp, uiConfigResponse);
-                return;
-            }
+            JsonObject uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
 
-            String uiConfig = uiConfigResponse.getData();
-            if (uiConfig == null){
-                log.error("UI config retrieval is failed, and didn't find UI configuration for App manager.");
-                HandlerUtil.handleError(resp, null);
-                return;
-            }
-            JsonParser jsonParser = new JsonParser();
-            JsonElement uiConfigJsonElement = jsonParser.parse(uiConfigResponse.getData());
-            JsonObject uiConfigJsonObject = null;
-            if (uiConfigJsonElement.isJsonObject()) {
-                uiConfigJsonObject = uiConfigJsonElement.getAsJsonObject();
-                httpSession.setAttribute(HandlerConstants.UI_CONFIG_KEY, uiConfigJsonObject);
-                httpSession.setAttribute(HandlerConstants.PLATFORM, gatewayUrl);
-            }
-            if (uiConfigJsonObject == null) {
-                log.error(
-                        "Either UI config json element is not an json object or converting rom json element to json object is failed.");
-                HandlerUtil.handleError(resp, null);
-                return;
-            }
-
-            boolean isSsoEnable = uiConfigJsonObject.get("isSsoEnable").getAsBoolean();
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
 
-            if (isSsoEnable) {
-                log.debug("SSO is enabled");
-            } else {
-                // default login
-                HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
-                apiRegEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
-                        .encodeToString((username + HandlerConstants.COLON + password).getBytes()));
-                apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
-                apiRegEndpoint.setEntity(constructAppRegPayload(tags));
+            HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
+            apiRegEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
+                    .encodeToString((username + HandlerConstants.COLON + password).getBytes()));
+            apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+            apiRegEndpoint.setEntity(HandlerUtil.constructAppRegPayload(tags, HandlerConstants.PUBLISHER_APPLICATION_NAME, username, password));
 
-                ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
+            ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
 
-                if (clientAppResponse.getCode() == HttpStatus.SC_UNAUTHORIZED){
-                    HandlerUtil.handleError(resp, clientAppResponse);
-                    return;
-                }
-                if (clientAppResponse.getCode() == HttpStatus.SC_CREATED && getTokenAndPersistInSession(req, resp,
-                        clientAppResponse.getData(), scopes)) {
-                    ProxyResponse proxyResponse = new ProxyResponse();
-                    proxyResponse.setCode(HttpStatus.SC_OK);
-                    HandlerUtil.handleSuccess(resp, proxyResponse);
-                    return;
-                }
-                HandlerUtil.handleError(resp, null);
+            if (clientAppResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
+                HandlerUtil.handleError(resp, clientAppResponse);
+                return;
             }
+            if (clientAppResponse.getCode() == HttpStatus.SC_CREATED && getTokenAndPersistInSession(req, resp,
+                    clientAppResponse.getData(), scopes)) {
+                ProxyResponse proxyResponse = new ProxyResponse();
+                proxyResponse.setCode(HttpStatus.SC_OK);
+                HandlerUtil.handleSuccess(resp, proxyResponse);
+                return;
+            }
+            HandlerUtil.handleError(resp, null);
         } catch (IOException e) {
             log.error("Error occurred while sending the response into the socket. ", e);
         } catch (JsonSyntaxException e) {
@@ -141,6 +104,7 @@ public class LoginHandler extends HttpServlet {
     }
 
     /***
+     * Generates token from token endpoint and persists them inside the session
      *
      * @param req - {@link HttpServletRequest}
      * @param clientAppResult - clientAppResult
@@ -148,7 +112,7 @@ public class LoginHandler extends HttpServlet {
      * @throws LoginException - login exception throws when getting token result
      */
     private boolean getTokenAndPersistInSession(HttpServletRequest req, HttpServletResponse resp,
-            String clientAppResult, JsonArray scopes) throws LoginException {
+                                                String clientAppResult, JsonArray scopes) throws LoginException {
         JsonParser jsonParser = new JsonParser();
         try {
             JsonElement jClientAppResult = jsonParser.parse(clientAppResult);
@@ -167,7 +131,7 @@ public class LoginHandler extends HttpServlet {
                     return false;
                 }
                 String tokenResult = tokenResultResponse.getData();
-                if (tokenResult == null){
+                if (tokenResult == null) {
                     log.error("Invalid token response is received.");
                     HandlerUtil.handleError(resp, tokenResultResponse);
                     return false;
@@ -199,24 +163,6 @@ public class LoginHandler extends HttpServlet {
 
     /***
      *
-     * @param scopes - scope Json Array and it is retrieved by reading UI config.
-     * @return string value of the defined scopes
-     */
-    private String getScopeString(JsonArray scopes) {
-        if (scopes != null && scopes.size() > 0) {
-            StringBuilder builder = new StringBuilder();
-            for (JsonElement scope : scopes) {
-                String tmpScope = scope.getAsString() + " ";
-                builder.append(tmpScope);
-            }
-            return builder.toString();
-        } else {
-            return null;
-        }
-    }
-
-    /***
-     *
      * @param req - {@link HttpServletRequest}
      * Define username and password static parameters.
      */
@@ -239,22 +185,7 @@ public class LoginHandler extends HttpServlet {
     }
 
     /***
-     *
-     * @param tags - tags which are retrieved by reading app manager configuration
-     * @return {@link StringEntity} of the payload to create the client application
-     */
-    private StringEntity constructAppRegPayload(JsonArray tags) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty(HandlerConstants.APP_NAME_KEY, HandlerConstants.PUBLISHER_APPLICATION_NAME);
-        jsonObject.addProperty(HandlerConstants.USERNAME, username);
-        jsonObject.addProperty(HandlerConstants.PASSWORD, password);
-        jsonObject.addProperty("isAllowedToAllDomains", "false");
-        jsonObject.add(HandlerConstants.TAGS_KEY, tags);
-        String payload = jsonObject.toString();
-        return new StringEntity(payload, ContentType.APPLICATION_JSON);
-    }
-
-    /***
+     * Generates tokens by invoking token endpoint
      *
      * @param encodedClientApp - Base64 encoded clientId:clientSecret.
      * @param scopes - Scopes which are retrieved by reading application-mgt configuration
@@ -265,7 +196,7 @@ public class LoginHandler extends HttpServlet {
         HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
-        String scopeString = getScopeString(scopes);
+        String scopeString = HandlerUtil.getScopeString(scopes);
 
         if (scopeString != null) {
             scopeString = scopeString.trim();
@@ -274,7 +205,8 @@ public class LoginHandler extends HttpServlet {
         }
 
         StringEntity tokenEPPayload = new StringEntity(
-                "grant_type=password&username=" + username + "&password=" + password + "&scope=" + scopeString,
+                "grant_type=" + HandlerConstants.PASSWORD_GRANT_TYPE + "&username=" + username + "&password=" +
+                        password + "&scope=" + scopeString,
                 ContentType.APPLICATION_FORM_URLENCODED);
         tokenEndpoint.setEntity(tokenEPPayload);
         return HandlerUtil.execute(tokenEndpoint);
