@@ -23,6 +23,7 @@ import { BrowserRouter as Router, Redirect, Switch } from 'react-router-dom';
 import axios from 'axios';
 import { Layout, Spin, Result } from 'antd';
 import ConfigContext from './components/ConfigContext';
+import { getUiConfig } from './services/utils/uiConfigHandler';
 
 const { Content } = Layout;
 const loadingView = (
@@ -161,12 +162,29 @@ class App extends React.Component {
       const redirectUrl = encodeURI(window.location.href);
       const pageURL = window.location.pathname;
       const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
-      if (lastURLSegment !== 'login') {
-        window.location.href =
-          window.location.origin + `/publisher/login?redirect=${redirectUrl}`;
-      } else {
-        this.getAndroidEnterpriseToken(config);
-      }
+      getUiConfig(config).then(uiConfig => {
+        if (uiConfig !== undefined) {
+          if (uiConfig.isSsoEnable) {
+            window.location =
+              window.location.origin +
+              config.serverConfig.ssoLoginUri +
+              '?redirect=' +
+              window.location.origin +
+              pageURL;
+          } else if (lastURLSegment !== 'login') {
+            window.location.href =
+              window.location.origin +
+              `/${config.appName}/login?redirect=${redirectUrl}`;
+          } else {
+            this.getAndroidEnterpriseToken(config);
+          }
+        } else {
+          this.setState({
+            loading: false,
+            error: true,
+          });
+        }
+      });
     } else {
       this.setState({
         loading: false,
