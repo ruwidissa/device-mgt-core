@@ -208,12 +208,17 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                 Map<String, ServerContext> servers = heartBeatDAO.getActiveServerDetails(elapsedTimeInSeconds);
                 if (servers != null && !servers.isEmpty()) {
                     ElectedCandidate presentCandidate = heartBeatDAO.retrieveCandidate();
-                    if (presentCandidate != null &&
-                        presentCandidate.getTimeOfElection().before(new Timestamp(System.currentTimeMillis()
-                                                                                  - TimeUnit.SECONDS.toMillis(elapsedTimeInSeconds)))) {
-                        heartBeatDAO.purgeCandidates();
+                    if (presentCandidate != null) {
+                        //if candidate is older than stipulated elapsed-time, purge and re-elect
+                        if (presentCandidate.getTimeOfElection().before(new Timestamp(System.currentTimeMillis()
+                                                                                      - TimeUnit.SECONDS.toMillis(elapsedTimeInSeconds)))) {
+                            heartBeatDAO.purgeCandidates();
+                            electCandidate(servers);
+                        }
+                    } else {
+                        //first time execution, elect if not present
+                        electCandidate(servers);
                     }
-                    electCandidate(servers);
                     HeartBeatBeaconDAOFactory.commitTransaction();
                 }
             } catch (HeartBeatDAOException e) {
