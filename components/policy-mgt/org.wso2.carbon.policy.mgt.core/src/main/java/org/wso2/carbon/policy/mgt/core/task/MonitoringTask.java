@@ -139,7 +139,7 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
                                     status.equals(EnrolmentInfo.Status.UNREACHABLE)) {
                                 notifiableDevices.add(device);
                             }
-                            if(log.isDebugEnabled()){
+                            if (log.isDebugEnabled()) {
                                 log.debug("Adding monitoring operation to device : " + device.getDeviceIdentifier());
                             }
                         }

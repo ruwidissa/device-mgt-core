@@ -47,7 +47,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
 
     private final HeartBeatDAO heartBeatDAO;
 
-    public HeartBeatManagementServiceImpl(){
+    public HeartBeatManagementServiceImpl() {
         this.heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
     }
 
@@ -57,7 +57,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
         int hashIndex = -1;
         ServerContext localServerCtx = null;
         ServerCtxInfo serverCtxInfo = null;
-        if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
+        if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
             try {
                 HeartBeatBeaconDAOFactory.openConnection();
                 int timeOutIntervalInSeconds = HeartBeatBeaconConfig.getInstance().getServerTimeOutIntervalInSeconds();
@@ -74,9 +74,11 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                 }
             } catch (SQLException e) {
                 String msg = "Error occurred while opening a connection to the underlying data source";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } catch (HeartBeatDAOException e) {
                 String msg = "Error occurred while retrieving active server count.";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } finally {
                 HeartBeatBeaconDAOFactory.closeConnection();
@@ -91,10 +93,11 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
     @Override
     public boolean isTaskPartitioningEnabled() throws HeartBeatManagementException {
         boolean enabled = false;
-        if(HeartBeatBeaconConfig.getInstance() != null){
+        if (HeartBeatBeaconConfig.getInstance() != null) {
             enabled = HeartBeatBeaconConfig.getInstance().isEnabled();
         } else {
             String msg = "Issue instantiating heart beat config.";
+            log.error(msg);
             throw new HeartBeatManagementException(msg);
         }
         return enabled;
@@ -104,7 +107,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
     @Override
     public String updateServerContext(ServerContext ctx) throws HeartBeatManagementException {
         String uuid = null;
-        if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
+        if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
             try {
                 HeartBeatBeaconDAOFactory.beginTransaction();
                 uuid = heartBeatDAO.retrieveExistingServerCtx(ctx);
@@ -114,10 +117,12 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                 }
             } catch (HeartBeatDAOException e) {
                 String msg = "Error Occured while retrieving server context.";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } catch (TransactionManagementException e) {
                 HeartBeatBeaconDAOFactory.rollbackTransaction();
                 String msg = "Error occurred while updating server context. Issue in opening a connection to the underlying data source";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } finally {
                 HeartBeatBeaconDAOFactory.closeConnection();
@@ -132,22 +137,24 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
     @Override
     public boolean isQualifiedToExecuteTask() throws HeartBeatManagementException {
         boolean isQualified = false;
-        if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
+        if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
             try {
                 String localServerUUID = HeartBeatBeaconDataHolder.getInstance().getLocalServerUUID();
                 HeartBeatBeaconDAOFactory.openConnection();
                 ElectedCandidate candidate = heartBeatDAO.retrieveCandidate();
-                if(candidate != null && candidate.getServerUUID().equalsIgnoreCase(localServerUUID)){
+                if (candidate != null && candidate.getServerUUID().equalsIgnoreCase(localServerUUID)) {
                     isQualified = true;
-                    if(log.isDebugEnabled()){
+                    if (log.isDebugEnabled()) {
                         log.debug("Node : " + localServerUUID + " Qualified to execute randomly assigned task.");
                     }
                 }
             } catch (HeartBeatDAOException e) {
                 String msg = "Error occurred while checking if server is qualified to execute randomly designated task.";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } catch (SQLException e) {
                 String msg = "Error occurred while opening a connection to the underlying data source";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } finally {
                 HeartBeatBeaconDAOFactory.closeConnection();
@@ -160,23 +167,24 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
     }
 
     @Override
-    public boolean updateTaskExecutionAcknowledgement(String newTask) throws HeartBeatManagementException {
+    public boolean updateTaskExecutionAcknowledgement(String newTask)
+            throws HeartBeatManagementException {
         boolean result = false;
-        if(HeartBeatBeaconConfig.getInstance().isEnabled()) {
+        if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
             try {
                 String serverUUID = HeartBeatBeaconDataHolder.getInstance().getLocalServerUUID();
                 HeartBeatBeaconDAOFactory.beginTransaction();
                 ElectedCandidate candidate = heartBeatDAO.retrieveCandidate();
-                if(candidate != null && candidate.getServerUUID().equals(serverUUID)){
+                if (candidate != null && candidate.getServerUUID().equals(serverUUID)) {
                     List<String> taskList = candidate.getAcknowledgedTaskList();
                     boolean taskExecuted = false;
-                    for(String task : taskList){
-                        if(task.equalsIgnoreCase(newTask)){
+                    for (String task : taskList) {
+                        if (task.equalsIgnoreCase(newTask)) {
                             taskExecuted = true;
                             break;
                         }
                     }
-                    if(!taskExecuted) {
+                    if (!taskExecuted) {
                         taskList.add(newTask);
                         result = heartBeatDAO.acknowledgeTask(serverUUID, taskList);
                         HeartBeatBeaconDAOFactory.commitTransaction();
@@ -184,10 +192,12 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                 }
             } catch (HeartBeatDAOException e) {
                 String msg = "Error occurred while updating acknowledged task.";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } catch (TransactionManagementException e) {
                 HeartBeatBeaconDAOFactory.rollbackTransaction();
                 String msg = "Error occurred while updating acknowledged task.. Issue in opening a connection to the underlying data source";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } finally {
                 HeartBeatBeaconDAOFactory.closeConnection();
@@ -223,10 +233,12 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                 }
             } catch (HeartBeatDAOException e) {
                 String msg = "Error occurred while electing candidate for dynamic task execution.";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } catch (TransactionManagementException e) {
                 HeartBeatBeaconDAOFactory.rollbackTransaction();
                 String msg = "Error occurred while electing candidate for dynamic task execution. Issue in opening a connection to the underlying data source";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } finally {
                 HeartBeatBeaconDAOFactory.closeConnection();
@@ -243,8 +255,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
     }
 
 
-    private String getRandomElement(Set<String> valueSet)
-    {
+    private String getRandomElement(Set<String> valueSet) {
         Random rand = new Random();
         List<String> items = new ArrayList<>(valueSet);
         return items.get(rand.nextInt(items.size()));
@@ -257,11 +268,12 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
         if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
             try {
                 HeartBeatBeaconDAOFactory.beginTransaction();
-                if(heartBeatDAO.checkUUIDValidity(event.getServerUUID())){
+                if (heartBeatDAO.checkUUIDValidity(event.getServerUUID())) {
                     operationSuccess = heartBeatDAO.recordHeatBeat(event);
                     HeartBeatBeaconDAOFactory.commitTransaction();
                 } else {
                     String msg = "Server UUID Does not exist, heartbeat not recorded.";
+                    log.error(msg);
                     throw new HeartBeatManagementException(msg);
                 }
             } catch (HeartBeatDAOException e) {
@@ -271,12 +283,14 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                 HeartBeatBeaconDAOFactory.rollbackTransaction();
                 String msg = "Error occurred performing heart beat record transaction. " +
                              "Transaction rolled back.";
+                log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
             } finally {
                 HeartBeatBeaconDAOFactory.closeConnection();
             }
         } else {
             String msg = "Heart Beat Configuration Disabled. Recording Heart Beat Failed.";
+            log.error(msg);
             throw new HeartBeatManagementException(msg);
         }
         return operationSuccess;

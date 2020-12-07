@@ -47,13 +47,15 @@ public class HeartBeatExecutor {
         ScheduledExecutorService executor =
                 Executors.newSingleThreadScheduledExecutor();
 
-        if(CONFIG == null){
-            throw new HeartBeatBeaconConfigurationException("Error while initiating schedule taks for recording heartbeats.");
+        if (CONFIG == null) {
+            String msg = "Error while initiating schedule taks for recording heartbeats.";
+            log.error(msg);
+            throw new HeartBeatBeaconConfigurationException(msg);
         }
 
         try {
             String uuid = HeartBeatBeaconUtils.readUUID();
-            if(uuid == null){
+            if (uuid == null) {
                 uuid = HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().updateServerContext(ctx);
                 HeartBeatBeaconUtils.saveUUID(uuid);
             }
@@ -77,9 +79,13 @@ public class HeartBeatExecutor {
                                          CONFIG.getNotifierFrequency() != 0 ? CONFIG.getNotifierFrequency() : DEFAULT__NOTIFIER_INTERVAL,
                                          TimeUnit.SECONDS);
         } catch (HeartBeatManagementException e) {
-            throw new HeartBeatBeaconConfigurationException("Error occured while updating initial server context.", e);
+            String msg = "Error occured while updating initial server context.";
+            log.error(msg);
+            throw new HeartBeatBeaconConfigurationException(msg, e);
         } catch (IOException e) {
-            throw new HeartBeatBeaconConfigurationException("Error while persisting UUID of server.", e);
+            String msg = "Error while persisting UUID of server.";
+            log.error(msg);
+            throw new HeartBeatBeaconConfigurationException(msg, e);
         }
     }
 
@@ -87,7 +93,8 @@ public class HeartBeatExecutor {
         HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().recordHeartBeat(new HeartBeatEvent(uuid));
     }
 
-    static void electDynamicTaskExecutionCandidate(int cumilativeTimeOut) throws HeartBeatManagementException {
+    static void electDynamicTaskExecutionCandidate(int cumilativeTimeOut)
+            throws HeartBeatManagementException {
         HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().electCandidate(cumilativeTimeOut);
     }
 

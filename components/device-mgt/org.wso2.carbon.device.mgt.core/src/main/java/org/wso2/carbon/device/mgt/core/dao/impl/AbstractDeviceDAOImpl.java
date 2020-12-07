@@ -797,13 +797,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
 
     @Override
-    public List<Device> getAllocatedDevices(String type, int tenantId, int activeServerCount, int serverIndex) throws DeviceManagementDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+    public List<Device> getAllocatedDevices(String type, int tenantId, int activeServerCount,
+                                            int serverIndex) throws DeviceManagementDAOException {
         List<Device> devices = null;
         try {
-            conn = this.getConnection();
+            Connection conn = this.getConnection();
             String sql = "SELECT d1.ID AS DEVICE_ID," +
                          "    d1.DESCRIPTION," +
                          "    d1.NAME AS DEVICE_NAME," +
@@ -832,24 +830,31 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                          "        AND MOD(d1.ID, ?) = ? " +
                          "ORDER BY e.DATE_OF_LAST_UPDATE DESC";
 
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, type);
-            stmt.setInt(2, tenantId);
-            stmt.setInt(3, tenantId);
-            stmt.setInt(4, activeServerCount);
-            stmt.setInt(5, serverIndex);
-            rs = stmt.executeQuery();
-            devices = new ArrayList<>();
-            while (rs.next()) {
-                Device device = DeviceManagementDAOUtil.loadActiveDevice(rs, false);
-                if (device != null) {
-                    devices.add(device);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, type);
+                stmt.setInt(2, tenantId);
+                stmt.setInt(3, tenantId);
+                stmt.setInt(4, activeServerCount);
+                stmt.setInt(5, serverIndex);
+                devices = new ArrayList<>();
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadActiveDevice(rs, false);
+                        if (device != null) {
+                            devices.add(device);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Error encountered while populating allocated active devices for server with index : " + serverIndex +
+                              " active-server-count " + activeServerCount + " device-type " + type + " tenant-id " + tenantId);
+                    throw new DeviceManagementDAOException("Error occurred while populating active devices '" + type + "'", e);
                 }
             }
         } catch (SQLException e) {
+            log.error("Error encountered while retrieving allocated devices for server with index : " + serverIndex +
+                      " active-server-count " + activeServerCount + " device-type " + type + " tenant-id " + tenantId);
             throw new DeviceManagementDAOException("Error occurred while listing devices for type '" + type + "'", e);
-        } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
         return devices;
     }

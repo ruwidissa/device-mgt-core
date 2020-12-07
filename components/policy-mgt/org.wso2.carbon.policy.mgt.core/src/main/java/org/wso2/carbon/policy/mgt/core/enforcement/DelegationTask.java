@@ -70,7 +70,7 @@ public class DelegationTask extends DynamicPartitionedScheduleTask {
                     try {
                         devices = new ArrayList<>();
                         toBeNotified = new ArrayList<>();
-                        if(super.isDynamicTaskEligible()) {
+                        if (super.isDynamicTaskEligible()) {
                             devices.addAll(service.getAllocatedDevices(deviceType,
                                                                        super.getTaskContext().getActiveServerCount(),
                                                                        super.getTaskContext().getServerHashIndex()));
@@ -79,11 +79,10 @@ public class DelegationTask extends DynamicPartitionedScheduleTask {
                         }
                         for (Device device : devices) {
                             if (device != null && device.getEnrolmentInfo() != null
-                                    && device.getEnrolmentInfo().getStatus() != EnrolmentInfo.Status.REMOVED) {
+                                && device.getEnrolmentInfo().getStatus() != EnrolmentInfo.Status.REMOVED) {
                                 toBeNotified.add(device);
                             }
-                            // }
-                            if(log.isDebugEnabled()){
+                            if (log.isDebugEnabled()) {
                                 log.debug("Adding policy operation to device : " + device.getDeviceIdentifier());
                             }
                         }

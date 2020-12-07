@@ -165,6 +165,7 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
         }
     }
 
+    @Override
     public List<Device> getAllocatedDevices(PaginationRequest request, int tenantId,
                                    int activeServerCount, int serverIndex)
             throws DeviceManagementDAOException {

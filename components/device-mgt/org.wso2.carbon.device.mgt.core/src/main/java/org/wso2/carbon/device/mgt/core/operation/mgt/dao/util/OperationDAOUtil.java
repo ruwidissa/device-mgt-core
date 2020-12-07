@@ -231,7 +231,7 @@ public class OperationDAOUtil {
                             if (rs.getBoolean("IS_LARGE_RESPONSE")) {
                                 largeResponseIDs.add(rs.getInt("OP_RES_ID"));
                             } else {
-                                if(activityStatus.getResponses() == null){
+                                if (activityStatus.getResponses() == null) {
                                     List<OperationResponse> operationResponses = new ArrayList<>();
                                     activityStatus.setResponses(operationResponses);
                                 }

@@ -55,8 +55,10 @@ public class HeartBeatBeaconUtils {
             DocumentBuilder docBuilder = factory.newDocumentBuilder();
             return docBuilder.parse(file);
         } catch (Exception e) {
-            throw new HeartBeatBeaconConfigurationException("Error occurred while parsing file, while converting " +
-                                                            "to a org.w3c.dom.Document", e);
+            String msg = "Error occurred while parsing file, while converting " +
+                         "to a org.w3c.dom.Document";
+            log.error(msg, e);
+            throw new HeartBeatBeaconConfigurationException(msg, e);
         }
     }
 
@@ -76,7 +78,9 @@ public class HeartBeatBeaconUtils {
             final InitialContext context = new InitialContext(jndiProperties);
             return (DataSource) context.doLookup(dataSourceName);
         } catch (Exception e) {
-            throw new RuntimeException("Error in looking up data source: " + e.getMessage(), e);
+            String msg = "Error in looking up data source: " + e.getMessage();
+            log.error(msg);
+            throw new RuntimeException(msg, e);
         }
     }
 
@@ -110,7 +114,11 @@ public class HeartBeatBeaconUtils {
             uuid = props.getProperty("server.uuid");
             input.close();
         } catch (FileNotFoundException e) {
-            log.info("File : server-credentials.properties does not exist, new UUID will be generated for server.");
+            String msg = "File : server-credentials.properties does not exist, new UUID will be generated for server.";
+            if(log.isDebugEnabled()){
+                log.debug(msg, e);
+            }
+            log.info(msg);
         } catch (IOException e) {
             log.error("Error accessing server-credentials.properties to locate server.uuid.", e);
         }

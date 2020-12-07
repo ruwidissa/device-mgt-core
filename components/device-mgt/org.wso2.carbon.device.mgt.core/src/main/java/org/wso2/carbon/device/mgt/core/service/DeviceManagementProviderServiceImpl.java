@@ -795,7 +795,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred while retrieving all devices of type '" +
                          deviceType + "' that are being managed within the scope of current tenant";
-            log.error(msg);
+            log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while opening a connection to the data source";
