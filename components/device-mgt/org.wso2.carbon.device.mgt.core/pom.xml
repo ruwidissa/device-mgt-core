@@ -114,7 +114,8 @@
 							org.scannotation.*,
                             org.wso2.carbon.event.processor.stub,
                             org.wso2.carbon.identity.jwt.client.extension.service,
-                            org.apache.commons.codec.binary
+                            org.apache.commons.codec.binary,
+                            io.entgra.server.bootup.heartbeat.beacon
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.device.mgt.core.internal,
@@ -363,6 +364,10 @@
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
         </dependency>
     </dependencies>
 

@@ -37,6 +37,7 @@ package org.wso2.carbon.device.mgt.core.service;
 
 import org.apache.commons.collections.map.SingletonMap;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
@@ -107,6 +108,17 @@ public interface DeviceManagementProviderService {
      *                                   devices.
      */
     List<Device> getAllDevices(String deviceType, boolean requireDeviceInfo) throws DeviceManagementException;
+
+
+    /**
+     * Method returns a list of devices allocated to a specific node of the server, given the serverIndex and active server count
+     * @param deviceType
+     * @param activeServerCount
+     * @param serverIndex
+     * @return
+     * @throws DeviceManagementException
+     */
+    List<Device> getAllocatedDevices(String deviceType, int activeServerCount, int serverIndex) throws DeviceManagementException;
 
     /**
      * Method to retrieve all the devices registered in the system.
@@ -654,7 +666,7 @@ public interface DeviceManagementProviderService {
     Activity addOperation(String type, Operation operation,
                           List<DeviceIdentifier> devices) throws OperationManagementException, InvalidDeviceException;
 
-    void addTaskOperation(String deviceType, Operation operation) throws OperationManagementException;
+    void addTaskOperation(String deviceType, Operation operation, DynamicTaskContext taskContext) throws OperationManagementException;
 
     void addTaskOperation(String type, List<Device> devices, Operation operation)
             throws OperationManagementException;

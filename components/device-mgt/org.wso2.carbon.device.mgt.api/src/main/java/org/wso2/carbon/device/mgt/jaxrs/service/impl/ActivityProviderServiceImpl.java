@@ -298,11 +298,7 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                 }
                 activityList.setList(activities);
                 activityList.setCount(count);
-                if (activities == null || activities.size() == 0) {
-                    if (isIfModifiedSinceSet) {
-                        return Response.notModified().build();
-                    }
-                }
+
                 return Response.ok().entity(activityList).build();
             } catch (OperationManagementException e) {
                 String msg

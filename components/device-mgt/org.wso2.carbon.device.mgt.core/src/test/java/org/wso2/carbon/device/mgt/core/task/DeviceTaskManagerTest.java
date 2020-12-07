@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.core.task;
 
+import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.powermock.api.mockito.PowerMockito;
@@ -32,6 +33,7 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementExcept
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.core.TestDeviceManagementService;
+import org.wso2.carbon.device.mgt.core.TestHeartBeatManagementService;
 import org.wso2.carbon.device.mgt.core.TestUtils;
 import org.wso2.carbon.device.mgt.core.authorization.DeviceAccessAuthorizationServiceImpl;
 import org.wso2.carbon.device.mgt.core.common.BaseDeviceManagementTest;
@@ -83,6 +85,9 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
         DeviceManagementDataHolder.getInstance().setDeviceTaskManagerService(null);
         DeviceManagementService deviceManagementService = new TestDeviceManagementService(
                 TestDataHolder.TEST_DEVICE_TYPE, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        HeartBeatManagementService heartBeatManagementService = new TestHeartBeatManagementService();
+        DeviceManagementDataHolder.getInstance()
+                .setHeartBeatService(heartBeatManagementService);
         this.operationManager = PowerMockito.spy(
                 new OperationManagerImpl(TestDataHolder.TEST_DEVICE_TYPE, deviceManagementService));
         try {
@@ -117,7 +122,7 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
     @Test(groups = "Device Task Manager Test Group", description = "Testing adding operations to devices.")
     public void testAddOperation() throws DeviceMgtTaskException, OperationManagementException {
         log.info("Attempting to add operations for devices.");
-        this.deviceTaskManager.addOperations();
+        this.deviceTaskManager.addOperations(null);
         for (DeviceIdentifier deviceId : deviceIds) {
             List<? extends Operation> operationList = this.operationManager.getOperations(deviceId);
             Assert.assertNotNull(operationList);
@@ -133,7 +138,7 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
                 new TestDeviceManagementService(NEW_DEVICE_TYPE, TestDataHolder.SUPER_TENANT_DOMAIN));
         DeviceTaskManager taskManager = new DeviceTaskManagerImpl(NEW_DEVICE_TYPE,
                 TestDataHolder.generateMonitoringTaskConfig(true, 50000, 3));
-        taskManager.addOperations();
+        taskManager.addOperations(null);
     }
 
     @Test(groups = "Device Task Manager Test Group", dependsOnMethods = "testAddOperationsWithoutDevices",
@@ -141,7 +146,7 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
     public void testAddOperationsWithoutOperations() throws DeviceMgtTaskException {
         DeviceTaskManager taskManager = new DeviceTaskManagerImpl(NEW_DEVICE_TYPE,
                 TestDataHolder.generateMonitoringTaskConfig(true, 50000, 3));
-        taskManager.addOperations();
+        taskManager.addOperations(null);
     }
 
     @Test(groups = "Device Task Manager Test Group", description = "Testing device detail retriever task execution")

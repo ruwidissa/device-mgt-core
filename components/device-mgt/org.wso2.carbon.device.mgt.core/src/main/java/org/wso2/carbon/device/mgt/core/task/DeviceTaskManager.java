@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.device.mgt.core.task;
 
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
+
 public interface DeviceTaskManager {
 
 //    /**
@@ -56,7 +58,7 @@ public interface DeviceTaskManager {
      * This method will add the operations to devices
      * @throws DeviceMgtTaskException
      */
-    void addOperations() throws DeviceMgtTaskException;
+    void addOperations(DynamicTaskContext dynamicTaskContext) throws DeviceMgtTaskException;
 
 
 //    /**

@@ -18,6 +18,8 @@
  */
 package org.wso2.carbon.device.mgt.core.operation.mgt.dao.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation;
@@ -38,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 
 public class OperationMappingDAOImpl implements OperationMappingDAO {
+
+    private static final Log log = LogFactory.getLog(OperationMappingDAOImpl.class);
 
     @Override
     public void addOperationMapping(Operation operation, Integer deviceId, boolean isScheduled, Device device, Integer tenantId) throws
@@ -228,6 +232,47 @@ public class OperationMappingDAOImpl implements OperationMappingDAO {
     }
 
     @Override
+    public List<OperationEnrolmentMapping> getFirstPendingOperationMappingsForActiveEnrolments(
+            long minDuration,
+            long maxDuration, int deviceTypeId,
+            int activeServerCount, int serverHashIndex) throws OperationManagementDAOException {
+        List<OperationEnrolmentMapping> enrolmentOperationMappingList;
+        try {
+            Connection conn = OperationManagementDAOFactory.getConnection();
+            //We are specifically looking for operation mappings in 'Pending' & 'Repeated' states. Further we want
+            //devices to be active at that moment. Hence filtering by 'ACTIVE' & 'UNREACHABLE' device states.
+            String sql = "SELECT ENROLMENT_ID, D.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFIER, MIN(CREATED_TIMESTAMP) " +
+                         "AS CREATED_TIMESTAMP, E.STATUS AS ENROLMENT_STATUS, E.TENANT_ID FROM " +
+                         "DM_ENROLMENT_OP_MAPPING OP INNER JOIN DM_ENROLMENT E ON OP.ENROLMENT_ID = E.ID INNER JOIN " +
+                         "DM_DEVICE D ON E.DEVICE_ID = D.ID WHERE " +
+                         "OP.STATUS IN ('" + Operation.Status.PENDING.name() + "','" + Operation.Status.REPEATED.name() + "') " +
+                         "AND OP.CREATED_TIMESTAMP BETWEEN ? AND ? AND E.STATUS IN ('" + EnrolmentInfo.Status.ACTIVE.name() +
+                         "','" + EnrolmentInfo.Status.UNREACHABLE.name() + "') AND D.DEVICE_TYPE_ID = ? AND MOD(D.ID, ?) = ? GROUP BY ENROLMENT_ID," +
+                         " D.DEVICE_IDENTIFICATION, E.STATUS, E.TENANT_ID";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setLong(1, maxDuration);
+                stmt.setLong(2, minDuration);
+                stmt.setInt(3, deviceTypeId);
+                stmt.setInt(4, activeServerCount);
+                stmt.setInt(5, serverHashIndex);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    enrolmentOperationMappingList = new ArrayList<>();
+                    while (rs.next()) {
+                        OperationEnrolmentMapping enrolmentOperationMapping = this.getEnrolmentOpMapping(rs);
+                        enrolmentOperationMappingList.add(enrolmentOperationMapping);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching pending operation mappings for " +
+                         "active devices of type '" + deviceTypeId + "'";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
+        }
+        return enrolmentOperationMappingList;
+    }
+
+    @Override
     public Map<Integer, Long> getLastConnectedTimeForActiveEnrolments(long timeStamp, int deviceTypeId) throws OperationManagementDAOException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -255,6 +300,44 @@ public class OperationMappingDAOImpl implements OperationMappingDAO {
                     "active devices of type '" + deviceTypeId + "'", e);
         } finally {
             OperationManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return lastConnectedTimeMap;
+    }
+
+    @Override
+    public Map<Integer, Long> getLastConnectedTimeForActiveEnrolments(long timeStamp,
+                                                                      int deviceTypeId,
+                                                                      int activeServerCount,
+                                                                      int serverHashIndex)
+            throws OperationManagementDAOException {
+        Map<Integer, Long> lastConnectedTimeMap = null;
+        try {
+            Connection conn = OperationManagementDAOFactory.getConnection();
+            //We are specifically looking for operation mappings in 'Pending' & 'Repeated' states. Further we want
+            //devices to be active at that moment. Hence filtering by 'ACTIVE' & 'UNREACHABLE' device states.
+            String sql = "SELECT OP.ENROLMENT_ID AS EID, MAX(OP.UPDATED_TIMESTAMP) AS LAST_CONNECTED_TIME FROM " +
+                         "DM_ENROLMENT_OP_MAPPING OP INNER JOIN DM_ENROLMENT E ON OP.ENROLMENT_ID = E.ID INNER JOIN " +
+                         "DM_DEVICE D ON E.DEVICE_ID = D.ID WHERE " +
+                         "OP.STATUS = '" + Operation.Status.COMPLETED.name() + "'" +
+                         "AND OP.UPDATED_TIMESTAMP >= ? AND E.STATUS IN ('" + EnrolmentInfo.Status.ACTIVE.name() +
+                         "','" + EnrolmentInfo.Status.UNREACHABLE.name() + "') AND D.DEVICE_TYPE_ID = ? AND MOD(D.ID, ?) = ? GROUP BY ENROLMENT_ID";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setLong(1, timeStamp);
+                stmt.setInt(2, deviceTypeId);
+                stmt.setInt(3, activeServerCount);
+                stmt.setInt(4, serverHashIndex);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    lastConnectedTimeMap = new HashMap<>();
+                    while (rs.next()) {
+                        lastConnectedTimeMap.put(rs.getInt("EID"), rs.getLong("LAST_CONNECTED_TIME"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching last connected time for " +
+                         "active devices of type '" + deviceTypeId + "'";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
         }
         return lastConnectedTimeMap;
     }

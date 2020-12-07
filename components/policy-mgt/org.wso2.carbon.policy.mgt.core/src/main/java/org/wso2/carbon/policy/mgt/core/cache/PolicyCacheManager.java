@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.policy.mgt.core.cache;
 
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 

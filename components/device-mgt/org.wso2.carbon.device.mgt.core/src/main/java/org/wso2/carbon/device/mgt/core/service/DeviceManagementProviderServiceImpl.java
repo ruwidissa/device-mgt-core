@@ -57,6 +57,7 @@ import org.wso2.carbon.device.mgt.common.DeviceManager;
 import org.wso2.carbon.device.mgt.common.DeviceNotification;
 import org.wso2.carbon.device.mgt.common.DevicePropertyNotification;
 import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
@@ -768,6 +769,46 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             return this.populateAllDeviceInfo(allDevices);
         }
         return allDevices;
+    }
+
+    @Override
+    public List<Device> getAllocatedDevices(String deviceType, int activeServerCount, int serverIndex) throws DeviceManagementException {
+        if (deviceType == null) {
+            String msg = "Device type is empty for method getAllDevices";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Getting allocated Devices for Server with index "+ serverIndex + " and" +
+                      " type '" + deviceType);
+        }
+        List<Device> allocatedDevices;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            allocatedDevices = deviceDAO.getAllocatedDevices(deviceType, this.getTenantId(), activeServerCount, serverIndex);
+            if (allocatedDevices == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No device is found upon the type '" + deviceType + "'");
+                }
+                return null;
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving all devices of type '" +
+                         deviceType + "' that are being managed within the scope of current tenant";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred while getting all devices of device type '" + deviceType + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return allocatedDevices;
     }
 
     @Override
@@ -1839,8 +1880,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public void addTaskOperation(String type, Operation operation) throws OperationManagementException {
-        pluginRepository.getOperationManager(type, this.getTenantId()).addTaskOperation(type, operation);
+    public void addTaskOperation(String type, Operation operation, DynamicTaskContext taskContext) throws OperationManagementException {
+        pluginRepository.getOperationManager(type, this.getTenantId()).addTaskOperation(type, operation, taskContext);
     }
 
     @Override

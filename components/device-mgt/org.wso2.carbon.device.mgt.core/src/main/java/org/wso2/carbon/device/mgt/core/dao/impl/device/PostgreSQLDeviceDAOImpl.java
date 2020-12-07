@@ -166,6 +166,133 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
     }
 
     @Override
+    public List<Device> getAllocatedDevices(PaginationRequest request, int tenantId,
+                                   int activeServerCount, int serverIndex)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        List<Device> devices = null;
+        String deviceType = request.getDeviceType();
+        boolean isDeviceTypeProvided = false;
+        String deviceName = request.getDeviceName();
+        boolean isDeviceNameProvided = false;
+        String owner = request.getOwner();
+        boolean isOwnerProvided = false;
+        String ownerPattern = request.getOwnerPattern();
+        boolean isOwnerPatternProvided = false;
+        String ownership = request.getOwnership();
+        boolean isOwnershipProvided = false;
+        List<String> statusList = request.getStatusList();
+        boolean isStatusProvided = false;
+        Date since = request.getSince();
+        boolean isSinceProvided = false;
+        boolean isPartitionedTask = false;
+
+        try {
+            conn = getConnection();
+            String sql = "SELECT d1.ID AS DEVICE_ID, " +
+                         "d1.DESCRIPTION, " +
+                         "d1.NAME AS DEVICE_NAME, " +
+                         "d1.DEVICE_TYPE, " +
+                         "d1.DEVICE_IDENTIFICATION, " +
+                         "e.OWNER, " +
+                         "e.OWNERSHIP, " +
+                         "e.STATUS, " +
+                         "e.IS_TRANSFERRED, " +
+                         "e.DATE_OF_LAST_UPDATE, " +
+                         "e.DATE_OF_ENROLMENT, " +
+                         "e.ID AS ENROLMENT_ID " +
+                         "FROM DM_ENROLMENT e, " +
+                         "(SELECT d.ID, " +
+                         "d.DESCRIPTION, " +
+                         "d.NAME, " +
+                         "d.DEVICE_IDENTIFICATION, " +
+                         "t.NAME AS DEVICE_TYPE " +
+                         "FROM DM_DEVICE d, " +
+                         "DM_DEVICE_TYPE t " +
+                         "WHERE DEVICE_TYPE_ID = t.ID " +
+                         "AND d.TENANT_ID = ?";
+            //Add the query for device-type
+            if (deviceType != null && !deviceType.isEmpty()) {
+                sql = sql + " AND t.NAME = ?";
+                isDeviceTypeProvided = true;
+            }
+            //Add the query for device-name
+            if (deviceName != null && !deviceName.isEmpty()) {
+                sql = sql + " AND d.NAME LIKE ?";
+                isDeviceNameProvided = true;
+            }
+            sql = sql + ") d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ?";
+            //Add the query for ownership
+            if (ownership != null && !ownership.isEmpty()) {
+                sql = sql + " AND e.OWNERSHIP = ?";
+                isOwnershipProvided = true;
+            }
+            //Add the query for owner
+            if (owner != null && !owner.isEmpty()) {
+                sql = sql + " AND e.OWNER = ?";
+                isOwnerProvided = true;
+            } else if (ownerPattern != null && !ownerPattern.isEmpty()) {
+                sql = sql + " AND e.OWNER LIKE ?";
+                isOwnerPatternProvided = true;
+            }
+            if (statusList != null && !statusList.isEmpty()) {
+                sql += buildStatusQuery(statusList);
+                isStatusProvided = true;
+            }
+            if (activeServerCount > 0){
+                sql = sql + " AND MOD(d1.ID, ?) = ?";
+                isPartitionedTask = true;
+            }
+            sql = sql + " LIMIT ? OFFSET ?";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIdx = 1;
+                stmt.setInt(paramIdx++, tenantId);
+                if (isDeviceTypeProvided) {
+                    stmt.setString(paramIdx++, deviceType);
+                }
+                if (isDeviceNameProvided) {
+                    stmt.setString(paramIdx++, deviceName + "%");
+                }
+                stmt.setInt(paramIdx++, tenantId);
+                if (isOwnershipProvided) {
+                    stmt.setString(paramIdx++, ownership);
+                }
+                if (isOwnerProvided) {
+                    stmt.setString(paramIdx++, owner);
+                } else if (isOwnerPatternProvided) {
+                    stmt.setString(paramIdx++, ownerPattern + "%");
+                }
+                if (isStatusProvided) {
+                    for (String status : statusList) {
+                        stmt.setString(paramIdx++, status);
+                    }
+                }
+                if (isPartitionedTask) {
+                    stmt.setInt(paramIdx++, activeServerCount);
+                    stmt.setInt(paramIdx++, serverIndex);
+                }
+                stmt.setInt(paramIdx++, request.getRowCount());
+                stmt.setInt(paramIdx, request.getStartIndex());
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    devices = new ArrayList<>();
+                    while (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        devices.add(device);
+                    }
+                    return devices;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of all " +
+                         "registered devices";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
     public List<Device> searchDevicesInGroup(PaginationRequest request, int tenantId)
             throws DeviceManagementDAOException {
         Connection conn;

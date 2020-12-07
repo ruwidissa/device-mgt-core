@@ -26,7 +26,7 @@ import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.ntask.core.Task;
+import org.wso2.carbon.device.mgt.core.task.impl.DynamicPartitionedScheduleTask;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.cache.impl.PolicyCacheManagerImpl;
 import org.wso2.carbon.policy.mgt.core.internal.PolicyManagementDataHolder;
@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class DelegationTask implements Task {
+public class DelegationTask extends DynamicPartitionedScheduleTask {
 
     private static final Log log = LogFactory.getLog(DelegationTask.class);
     private PolicyConfiguration policyConfiguration = DeviceConfigurationManager.getInstance()
@@ -50,13 +50,7 @@ public class DelegationTask implements Task {
     }
 
     @Override
-    public void init() {
-
-    }
-
-    @Override
-    public void execute() {
-
+    public void executeDynamicTask() {
         try {
             PolicyManager policyManager = new PolicyManagerImpl();
             UpdatedPolicyDeviceListBean updatedPolicyDeviceList = policyManager.applyChangesMadeToPolicies();
@@ -74,12 +68,22 @@ public class DelegationTask implements Task {
                 List<Device> toBeNotified;
                 for (String deviceType : deviceTypes) {
                     try {
+                        devices = new ArrayList<>();
                         toBeNotified = new ArrayList<>();
-                        devices = new ArrayList<>(service.getAllDevices(deviceType, false));
+                        if (super.isDynamicTaskEligible()) {
+                            devices.addAll(service.getAllocatedDevices(deviceType,
+                                                                       super.getTaskContext().getActiveServerCount(),
+                                                                       super.getTaskContext().getServerHashIndex()));
+                        } else {
+                            devices.addAll(service.getAllDevices(deviceType, false));
+                        }
                         for (Device device : devices) {
                             if (device != null && device.getEnrolmentInfo() != null
-                                    && device.getEnrolmentInfo().getStatus() != EnrolmentInfo.Status.REMOVED) {
+                                && device.getEnrolmentInfo().getStatus() != EnrolmentInfo.Status.REMOVED) {
                                 toBeNotified.add(device);
+                            }
+                            if (log.isDebugEnabled()) {
+                                log.debug("Adding policy operation to device : " + device.getDeviceIdentifier());
                             }
                         }
                         if (!toBeNotified.isEmpty()) {
@@ -98,5 +102,10 @@ public class DelegationTask implements Task {
         } catch (PolicyManagementException e) {
             log.error("Error occurred while getting the policies applied to devices.", e);
         }
+    }
+
+    @Override
+    protected void setup() {
+
     }
 }

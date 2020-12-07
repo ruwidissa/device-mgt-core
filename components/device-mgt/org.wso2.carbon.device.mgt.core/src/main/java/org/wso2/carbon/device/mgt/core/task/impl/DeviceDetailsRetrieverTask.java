@@ -39,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
@@ -52,7 +53,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import java.util.List;
 import java.util.Map;
 
-public class DeviceDetailsRetrieverTask implements Task {
+public class DeviceDetailsRetrieverTask extends DynamicPartitionedScheduleTask {
 
     private static Log log = LogFactory.getLog(DeviceDetailsRetrieverTask.class);
     private String deviceType;
@@ -64,11 +65,7 @@ public class DeviceDetailsRetrieverTask implements Task {
     }
 
     @Override
-    public void init() {
-    }
-
-    @Override
-    public void execute() {
+    public void executeDynamicTask() {
         deviceManagementProviderService = DeviceManagementDataHolder.getInstance()
                 .getDeviceManagementProvider();
         OperationMonitoringTaskConfig operationMonitoringTaskConfig = deviceManagementProviderService
@@ -125,7 +122,7 @@ public class DeviceDetailsRetrieverTask implements Task {
         //pass the configurations also from here, monitoring tasks
         try {
             if (deviceManagementProviderService.isDeviceMonitoringEnabled(deviceType)) {
-                deviceTaskManager.addOperations();
+                deviceTaskManager.addOperations(super.getTaskContext());
             }
         } catch (DeviceMgtTaskException e) {
             log.error("Error occurred while trying to add the operations to " +
@@ -133,4 +130,8 @@ public class DeviceDetailsRetrieverTask implements Task {
         }
     }
 
+    @Override
+    protected void setup() {
+
+    }
 }
