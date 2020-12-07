@@ -190,10 +190,6 @@ public interface MetadataService {
                                                     "Used by caches, or in conditional requests."),
                             }),
                     @ApiResponse(
-                            code = 404,
-                            message = "Not Found. \n The requested metadata entry is not found.",
-                            response = ErrorResponse.class),
-                    @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. " +
                                     "\n Server error occurred while fetching the metadata entry.",
