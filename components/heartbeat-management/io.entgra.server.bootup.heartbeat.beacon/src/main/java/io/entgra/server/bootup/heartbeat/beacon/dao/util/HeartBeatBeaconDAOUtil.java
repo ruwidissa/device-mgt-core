@@ -63,29 +63,6 @@ public final class HeartBeatBeaconDAOUtil {
     }
 
     /**
-     * Cleanup resources used to transaction
-     *
-     * @param stmt Statement used
-     * @param rs   Obtained results set
-     */
-    public static void cleanupResources(Statement stmt, ResultSet rs) {
-        if (rs != null) {
-            try {
-                rs.close();
-            } catch (SQLException e) {
-                log.warn("Error occurred while closing result set", e);
-            }
-        }
-        if (stmt != null) {
-            try {
-                stmt.close();
-            } catch (SQLException e) {
-                log.warn("Error occurred while closing prepared statement", e);
-            }
-        }
-    }
-
-    /**
      * Lookup datasource using name and jndi properties
      *
      * @param dataSourceName Name of datasource to lookup

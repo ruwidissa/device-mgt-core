@@ -85,6 +85,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
             }
         } else {
             String msg = "Heart Beat Configuration Disabled. Server Context Information Not available.";
+            log.error(msg);
             throw new HeartBeatManagementException(msg);
         }
         return serverCtxInfo;
@@ -129,6 +130,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
             }
         } else {
             String msg = "Heart Beat Configuration Disabled. Updating Server Context Failed.";
+            log.error(msg);
             throw new HeartBeatManagementException(msg);
         }
         return uuid;
@@ -161,6 +163,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
             }
         } else {
             String msg = "Heart Beat Configuration Disabled. Error occurred while checking if server is qualified to execute randomly designated task.";
+            log.error(msg);
             throw new HeartBeatManagementException(msg);
         }
         return isQualified;
@@ -204,6 +207,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
             }
         } else {
             String msg = "Heart Beat Configuration Disabled. Updating acknowledged task list failed.";
+            log.error(msg);
             throw new HeartBeatManagementException(msg);
         }
         return result;
@@ -245,6 +249,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
             }
         } else {
             String msg = "Heart Beat Configuration Disabled. Error electing candidate for dynamic task execution.";
+            log.error(msg);
             throw new HeartBeatManagementException(msg);
         }
     }

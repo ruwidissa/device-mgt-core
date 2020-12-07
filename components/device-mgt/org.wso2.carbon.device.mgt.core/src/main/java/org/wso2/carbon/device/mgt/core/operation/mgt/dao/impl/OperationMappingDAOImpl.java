@@ -264,8 +264,10 @@ public class OperationMappingDAOImpl implements OperationMappingDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new OperationManagementDAOException("Error occurred while fetching pending operation mappings for " +
-                                                      "active devices of type '" + deviceTypeId + "'", e);
+            String msg = "Error occurred while fetching pending operation mappings for " +
+                         "active devices of type '" + deviceTypeId + "'";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
         }
         return enrolmentOperationMappingList;
     }
