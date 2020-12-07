@@ -85,20 +85,14 @@ public class MetadataManagementServiceImpl implements MetadataManagementService 
     }
 
     @Override
-    public Metadata retrieveMetadata(String metaKey) throws MetadataManagementException, MetadataKeyNotFoundException {
+    public Metadata retrieveMetadata(String metaKey) throws MetadataManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Retrieving Metadata for metaKey:" + metaKey);
         }
         try {
             MetadataManagementDAOFactory.openConnection();
-            Metadata metadata = metadataDAO.getMetadata(
+            return metadataDAO.getMetadata(
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true), metaKey);
-            if (metadata == null) {
-                String msg = "Specified Metadata entry has not found. {metaKey:" + metaKey + "}";
-                log.error(msg);
-                throw new MetadataKeyNotFoundException(msg);
-            }
-            return metadata;
         } catch (MetadataManagementDAOException e) {
             String msg = "Error occurred while retrieving the metadata entry for metaKey:" + metaKey;
             log.error(msg, e);

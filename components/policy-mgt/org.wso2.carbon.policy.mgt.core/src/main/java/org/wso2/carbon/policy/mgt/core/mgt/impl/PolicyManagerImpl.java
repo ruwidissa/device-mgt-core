@@ -872,6 +872,7 @@ public class PolicyManagerImpl implements PolicyManager {
 
     @Override
     public List<Policy> getPolicies() throws PolicyManagementException {
+
         List<Policy> policyList;
         List<Profile> profileList;
         try {
