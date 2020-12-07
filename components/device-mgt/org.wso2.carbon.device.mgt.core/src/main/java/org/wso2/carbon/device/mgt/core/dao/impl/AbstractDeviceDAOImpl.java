@@ -788,7 +788,9 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while listing devices for type '" + type + "'", e);
+            String msg = "Error occurred while listing devices for type '" + type + "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -846,15 +848,17 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                         }
                     }
                 } catch (Exception e) {
-                    log.error("Error encountered while populating allocated active devices for server with index : " + serverIndex +
-                              " active-server-count " + activeServerCount + " device-type " + type + " tenant-id " + tenantId);
-                    throw new DeviceManagementDAOException("Error occurred while populating active devices '" + type + "'", e);
+                    String msg = "Error encountered while populating allocated active devices for server with index : " + serverIndex +
+                                 " active-server-count " + activeServerCount + " device-type " + type + " tenant-id " + tenantId;
+                    log.error(msg, e);
+                    throw new DeviceManagementDAOException(msg, e);
                 }
             }
         } catch (SQLException e) {
-            log.error("Error encountered while retrieving allocated devices for server with index : " + serverIndex +
-                      " active-server-count " + activeServerCount + " device-type " + type + " tenant-id " + tenantId);
-            throw new DeviceManagementDAOException("Error occurred while listing devices for type '" + type + "'", e);
+            String msg = "Error encountered while retrieving allocated devices for server with index : " + serverIndex +
+                         " active-server-count " + activeServerCount + " device-type " + type + " tenant-id " + tenantId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         }
         return devices;
     }

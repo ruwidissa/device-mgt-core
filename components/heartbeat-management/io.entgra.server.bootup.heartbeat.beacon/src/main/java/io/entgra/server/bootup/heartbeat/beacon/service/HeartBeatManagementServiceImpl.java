@@ -283,6 +283,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                 }
             } catch (HeartBeatDAOException e) {
                 String msg = "Error occurred while recording heart beat.";
+                log.error(msg);
                 throw new HeartBeatManagementException(msg, e);
             } catch (TransactionManagementException e) {
                 HeartBeatBeaconDAOFactory.rollbackTransaction();

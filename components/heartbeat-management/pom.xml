@@ -30,7 +30,7 @@
     <artifactId>heartbeat-management</artifactId>
     <packaging>pom</packaging>
     <name>Entgra - Task Allocation Framework</name>
-    <url>http://wso2.org</url>
+    <url>http://entgra.io</url>
 
     <modules>
         <module>io.entgra.server.bootup.heartbeat.beacon</module>
