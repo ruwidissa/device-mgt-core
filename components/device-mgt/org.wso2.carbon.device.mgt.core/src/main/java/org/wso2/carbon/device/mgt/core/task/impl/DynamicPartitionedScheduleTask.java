@@ -41,7 +41,10 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
                 taskContext = new DynamicTaskContext();
                 taskContext.setPartitioningEnabled(true);
             } else {
-                log.info("Error Instantiating Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function.");
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Error Instantiating Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function.");
+                }
             }
         } catch (HeartBeatManagementException e) {
             log.error("Error Instantiating Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function." , e);
