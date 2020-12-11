@@ -1973,16 +1973,17 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     @Override
     public void updateOperation(Device device, Operation operation) throws OperationManagementException {
-        EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
-        if (enrolmentInfo == null) {
-            throw new OperationManagementException(
-                    "Device not found for device id:" + device.getDeviceIdentifier() + " " + "type:" +
-                            device.getType());
-        }
         try {
-            pluginRepository.getOperationManager(device.getType(), this.getTenantId())
-                    .updateOperation(device.getEnrolmentInfo().getId(), operation,
-                            new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()));
+            EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
+            if (enrolmentInfo == null || device.getEnrolmentInfo().getId() <= 0) {
+                pluginRepository.getOperationManager(device.getType(), this.getTenantId())
+                        .updateOperation(new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()),
+                                operation);
+            } else {
+                pluginRepository.getOperationManager(device.getType(), this.getTenantId())
+                        .updateOperation(device.getEnrolmentInfo().getId(), operation,
+                                new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()));
+            }
             if (DeviceManagerUtil.isPublishOperationResponseEnabled()) {
                 List<String> permittedOperations = DeviceManagerUtil.getEnabledOperationsForResponsePublish();
                 if (permittedOperations.contains(operation.getCode())
