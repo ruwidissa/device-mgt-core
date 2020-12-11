@@ -47,9 +47,8 @@ public interface MetadataManagementService {
      * @param metaKey   a string to be search against the Metadata.metaKey
      * @return          the Metadata entry for specified Metadata.metaKey
      * @throws MetadataManagementException     If a data source related exception occurred
-     * @throws MetadataKeyNotFoundException    If the provided Metadata.metaKey not found
      */
-    Metadata retrieveMetadata(String metaKey) throws MetadataManagementException, MetadataKeyNotFoundException;
+    Metadata retrieveMetadata(String metaKey) throws MetadataManagementException;
 
     /**
      * Get all Metadata entries.

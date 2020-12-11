@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.common.operation.mgt;
 import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
@@ -48,7 +49,7 @@ public interface OperationManager {
 
     void addTaskOperation(List<Device> devices, Operation operation) throws OperationManagementException;
 
-    void addTaskOperation(String deviceType, Operation operation) throws OperationManagementException;
+    void addTaskOperation(String deviceType, Operation operation, DynamicTaskContext dynamicTaskContext) throws OperationManagementException;
 
     /**
      * Method to retrieve the list of all operations to a device.

@@ -1,9 +1,13 @@
-function approved() {
+function approved(ssoProtocol) {
     var mandatoryClaimCBs = $(".mandatory-claim");
     var checkedMandatoryClaimCBs = $(".mandatory-claim:checked");
 
     if (checkedMandatoryClaimCBs.length == mandatoryClaimCBs.length) {
-        document.getElementById('consent').value = "approve";
+        if(ssoProtocol === "saml") {
+            document.getElementById('consent').value = "approve";
+        } else if(ssoProtocol === "oidc") {
+            document.getElementById('consent').value = "approveAlways";
+        }
         document.getElementById("consentForm").submit();
     } else {
         $("#modal_claim_validation").modal();

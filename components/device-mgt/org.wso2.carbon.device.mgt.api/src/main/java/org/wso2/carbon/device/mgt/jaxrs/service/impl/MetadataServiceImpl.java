@@ -89,10 +89,6 @@ public class MetadataServiceImpl implements MetadataService {
         try {
             metadata = DeviceMgtAPIUtils.getMetadataManagementService().retrieveMetadata(metaKey);
             return Response.status(Response.Status.OK).entity(metadata).build();
-        } catch (MetadataKeyNotFoundException e) {
-            String msg = "Metadata entry metaKey:" + metaKey + " is not found.";
-            log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while getting the metadata entry for metaKey:" + metaKey;
             log.error(msg, e);

@@ -27,14 +27,12 @@ import io.swagger.annotations.ExtensionProperty;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
+import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 
-import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -64,7 +62,7 @@ import java.util.List;
 )
 @Scopes(
         scopes = {
-                @org.wso2.carbon.apimgt.annotations.api.Scope(
+                @Scope(
                         name = "View Application Subscriptions",
                         description = "View Application Subscriptions.",
                         key = "perm:admin:app:subscription:view",

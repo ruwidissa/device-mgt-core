@@ -63,7 +63,7 @@ public class PolicyFilterImpl implements PolicyFilter {
             }
         }
 
-        List<Policy> temp = new ArrayList<Policy>();
+        List<Policy> temp = new ArrayList<>();
         for (Policy policy : policies) {
             if (policy.isActive()) {
                 temp.add(policy);

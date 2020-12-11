@@ -21,6 +21,7 @@ import { LogoutOutlined } from '@ant-design/icons';
 import { notification, Menu } from 'antd';
 import axios from 'axios';
 import { withConfigContext } from '../../../../components/ConfigContext';
+import { getUiConfig } from '../../../../services/utils/uiConfigHandler';
 
 /*
 This class for call the logout api by sending request
@@ -44,27 +45,38 @@ class Logout extends React.Component {
       inValid: false,
     });
 
-    axios
-      .post(window.location.origin + config.serverConfig.logoutUri)
-      .then(res => {
-        // if the api call status is correct then user will logout and then it goes to login page
-        if (res.status === 200) {
-          window.location = window.location.origin + '/publisher/login';
-        }
-      })
-      .catch(function(error) {
-        if (error.hasOwnProperty('response') && error.response.status === 400) {
-          thisForm.setState({
-            inValid: true,
-          });
+    let logoutUri;
+    getUiConfig(config).then(uiConfig => {
+      if (uiConfig !== undefined) {
+        if (uiConfig.isSsoEnable) {
+          logoutUri = window.location.origin + config.serverConfig.ssoLogoutUri;
         } else {
-          notification.error({
-            message: 'There was a problem',
-            duration: 0,
-            description: 'Error occurred while trying to logout.',
-          });
+          logoutUri = window.location.origin + config.serverConfig.logoutUri;
         }
-      });
+        axios
+          .post(logoutUri)
+          .then(res => {
+            // if the api call status is correct then user
+            // will logout and then it goes to login page
+            if (res.status === 200) {
+              window.location =
+                window.location.origin + `/${config.appName}/login`;
+            }
+          })
+          .catch(function(error) {
+            notification.error({
+              message: 'There was a problem',
+              duration: 0,
+              description: 'Error occurred while trying to logout.',
+            });
+          });
+      } else {
+        this.setState({
+          loading: false,
+          error: true,
+        });
+      }
+    });
   };
 
   render() {

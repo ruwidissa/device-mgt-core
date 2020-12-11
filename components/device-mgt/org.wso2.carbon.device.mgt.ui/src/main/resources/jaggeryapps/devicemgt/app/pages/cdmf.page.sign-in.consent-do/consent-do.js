@@ -1,7 +1,21 @@
 function onRequest(context) {
     var Encode = Packages.org.owasp.encoder.Encode;
     var viewModel = {};
-    viewModel.appName = Encode.forHtml(request.getParameter("sp"));
+
+    // if sp is received, its a saml request or else its oidc
+    if(request.getParameter("sp") !== null) {
+        viewModel.appName = Encode.forHtml(request.getParameter("sp"));
+        viewModel.action = "/commonauth";
+        viewModel.sessionDataKey = Encode.forHtmlAttribute(request.getParameter("sessionDataKey"));
+        viewModel.sessionDataKeyName = "sessionDataKey";
+        viewModel.ssoProtocol = "saml";
+    } else {
+        viewModel.appName = Encode.forHtml(request.getParameter("application"));
+        viewModel.action = "../oauth2/authorize";
+        viewModel.sessionDataKey = Encode.forHtmlAttribute(request.getParameter("sessionDataKeyConsent"));
+        viewModel.sessionDataKeyName = "sessionDataKeyConsent";
+        viewModel.ssoProtocol = "oidc";
+    }
     var mandatoryClaims = [];
     var requestedClaims = [];
     var singleMandatoryClaim = false;
@@ -36,6 +50,5 @@ function onRequest(context) {
     viewModel.mandatoryClaims = mandatoryClaims;
     viewModel.requestedClaims = requestedClaims;
     viewModel.singleMandatoryClaim = singleMandatoryClaim;
-    viewModel.sessionDataKey = Encode.forHtmlAttribute(request.getParameter("sessionDataKey"));
     return viewModel;
 }

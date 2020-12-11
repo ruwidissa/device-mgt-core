@@ -37,12 +37,6 @@ import java.util.List;
 
 public interface PolicyManagerService {
 
-/*
-    Feature addFeature(Feature feature) throws FeatureManagementException;
-
-    Feature updateFeature(Feature feature) throws FeatureManagementException;
-*/
-
     Profile addProfile(Profile profile) throws PolicyManagementException;
 
     Profile updateProfile(Profile profile) throws PolicyManagementException;
@@ -97,9 +91,8 @@ public interface PolicyManagerService {
 
     boolean isCompliant(DeviceIdentifier deviceIdentifier) throws PolicyComplianceException;
 
-    PaginationResult getPolicyCompliance(
-            PaginationRequest paginationRequest, String policyId, boolean complianceStatus, boolean isPending, String fromDate, String toDate)
-            throws PolicyComplianceException;
+    PaginationResult getPolicyCompliance(PaginationRequest paginationRequest, String policyId, boolean complianceStatus,
+            boolean isPending, String fromDate, String toDate) throws PolicyComplianceException;
 
     List<ComplianceFeature> getNoneComplianceFeatures(int complianceStatusId) throws PolicyComplianceException;
 }

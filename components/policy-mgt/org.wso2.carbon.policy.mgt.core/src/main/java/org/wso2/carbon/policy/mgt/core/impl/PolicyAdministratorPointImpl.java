@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Profile;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
@@ -34,10 +35,8 @@ import org.wso2.carbon.policy.mgt.common.*;
 import org.wso2.carbon.policy.mgt.core.cache.PolicyCacheManager;
 import org.wso2.carbon.policy.mgt.core.cache.impl.PolicyCacheManagerImpl;
 import org.wso2.carbon.policy.mgt.core.internal.PolicyManagementDataHolder;
-import org.wso2.carbon.policy.mgt.core.mgt.FeatureManager;
 import org.wso2.carbon.policy.mgt.core.mgt.PolicyManager;
 import org.wso2.carbon.policy.mgt.core.mgt.ProfileManager;
-import org.wso2.carbon.policy.mgt.core.mgt.impl.FeatureManagerImpl;
 import org.wso2.carbon.policy.mgt.core.mgt.impl.PolicyManagerImpl;
 import org.wso2.carbon.policy.mgt.core.mgt.impl.ProfileManagerImpl;
 import org.wso2.carbon.policy.mgt.core.util.PolicyManagementConstants;
@@ -53,28 +52,18 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
 
     private PolicyManager policyManager;
     private ProfileManager profileManager;
-    private FeatureManager featureManager;
-    private PolicyCacheManager cacheManager;
     private PolicyConfiguration policyConfiguration;
-    // private PolicyEnforcementDelegator delegator;
 
     public PolicyAdministratorPointImpl() {
         this.policyManager = new PolicyManagerImpl();
         this.profileManager = new ProfileManagerImpl();
-        this.featureManager = new FeatureManagerImpl();
-        this.cacheManager = PolicyCacheManagerImpl.getInstance();
-        this.policyConfiguration = DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getPolicyConfiguration();
-        // this.delegator = new PolicyEnforcementDelegatorImpl();
+        this.policyConfiguration = DeviceConfigurationManager.getInstance().getDeviceManagementConfig()
+                .getPolicyConfiguration();
     }
 
     @Override
     public Policy addPolicy(Policy policy) throws PolicyManagementException {
         Policy resultantPolicy = policyManager.addPolicy(policy);
-//        try {
-//            delegator.delegate(resultantPolicy, resultantPolicy.getDevices());
-//        } catch (PolicyDelegationException e) {
-//            throw new PolicyManagementException("Error occurred while delegating policy operation to the devices", e);
-//        }
         if (policyConfiguration.getCacheEnable()) {
             PolicyCacheManagerImpl.getInstance().rePopulateCache();
         }
@@ -84,11 +73,6 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
     @Override
     public Policy updatePolicy(Policy policy) throws PolicyManagementException {
         Policy resultantPolicy = policyManager.updatePolicy(policy);
-//        try {
-//            delegator.delegate(resultantPolicy, resultantPolicy.getDevices());
-//        } catch (PolicyDelegationException e) {
-//            throw new PolicyManagementException("Error occurred while delegating policy operation to the devices", e);
-//        }
         if (policyConfiguration.getCacheEnable()) {
             PolicyCacheManagerImpl.getInstance().rePopulateCache();
         }
@@ -190,7 +174,6 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
                     }
                 }
             }
-
         } catch (TaskException e) {
             String msg = "Error occurred while creating the policy delegation task for tenant " +
                     PrivilegedCarbonContext.
@@ -198,42 +181,6 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
             log.error(msg, e);
             throw new PolicyManagementException(msg, e);
         }
-
-//        List<DeviceType> deviceTypes = policyManager.applyChangesMadeToPolicies();
-//
-//        if(log.isDebugEnabled()) {
-//            log.debug("Number of device types which policies are changed .......... : " + deviceTypes.size() );
-//        }
-//
-//        if (!deviceTypes.isEmpty()) {
-//
-//
-//            DeviceManagementProviderService service = PolicyManagementDataHolder.getInstance()
-//                    .getDeviceManagementService();
-//            List<Device> devices = new ArrayList<>();
-//            for (DeviceType deviceType : deviceTypes) {
-//                try {
-//                    devices.addAll(service.getAllDevices(deviceType.getName()));
-//                } catch (DeviceManagementException e) {
-//                    throw new PolicyManagementException("Error occurred while taking the devices", e);
-//                }
-//            }
-//            HashMap<Integer, Integer> deviceIdPolicy = policyManager.getAppliedPolicyIdsDeviceIds();
-//            List<Device> toBeNotified = new ArrayList<>();
-//
-//            for (Device device : devices) {
-//                if (deviceIdPolicy.containsKey(device.getId())) {
-//                    toBeNotified.add(device);
-//                }
-//            }
-//            if (!toBeNotified.isEmpty()) {
-//
-//              //  ExecutorService executorService = getExecutor();
-//              //  PolicyEnforcementDelegator enforcementDelegator = new PolicyEnforcementDelegatorImpl(toBeNotified);
-////                Thread thread = new Thread(new PolicyEnforcementDelegatorImpl(toBeNotified));
-////                thread.start();
-//            }
-//        }
     }
 
     @Override

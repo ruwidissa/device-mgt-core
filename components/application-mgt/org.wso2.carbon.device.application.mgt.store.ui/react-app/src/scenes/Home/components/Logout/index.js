@@ -22,6 +22,7 @@ import { Menu } from 'antd';
 import axios from 'axios';
 import { withConfigContext } from '../../../../components/context/ConfigContext';
 import { handleApiError } from '../../../../services/utils/errorHandler';
+import { getUiConfig } from '../../../../services/utils/uiConfigHandler';
 
 /*
 This class for call the logout api by sending request
@@ -45,20 +46,34 @@ class Logout extends React.Component {
       inValid: false,
     });
 
-    axios
-      .post(window.location.origin + config.serverConfig.logoutUri)
-      .then(res => {
-        // if the api call status is correct then user will logout and then it goes to login page
-        if (res.status === 200) {
-          window.location = window.location.origin + '/store/login';
+    let logoutUri;
+    getUiConfig(config).then(uiConfig => {
+      if (uiConfig !== undefined) {
+        if (uiConfig.isSsoEnable) {
+          logoutUri = window.location.origin + config.serverConfig.ssoLogoutUri;
+        } else {
+          logoutUri = window.location.origin + config.serverConfig.logoutUri;
         }
-      })
-      .catch(function(error) {
-        handleApiError(
-          error,
-          'Error occurred while trying to get your review.',
-        );
-      });
+        axios
+          .post(logoutUri)
+          .then(res => {
+            // if the api call status is correct then user
+            // will logout and then it goes to login page
+            if (res.status === 200) {
+              window.location =
+                window.location.origin + `/${config.appName}/login`;
+            }
+          })
+          .catch(function(error) {
+            handleApiError(error, 'Error occurred while trying to logout.');
+          });
+      } else {
+        this.setState({
+          loading: false,
+          error: true,
+        });
+      }
+    });
   };
 
   render() {

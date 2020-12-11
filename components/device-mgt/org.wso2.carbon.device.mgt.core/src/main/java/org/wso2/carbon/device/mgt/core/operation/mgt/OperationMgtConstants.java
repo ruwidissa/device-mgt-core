@@ -25,5 +25,7 @@ public class OperationMgtConstants {
         }
 
         public static final String POLICY_REVOKE = "POLICY_REVOKE";
+        public static final String EVENT_CONFIG = "EVENT_CONFIG";
+        public static final String EVENT_REVOKE = "EVENT_REVOKE";
     }
 }

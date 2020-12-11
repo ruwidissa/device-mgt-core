@@ -38,7 +38,7 @@ import java.util.Map;
 
 public class TaskScheduleServiceImpl implements TaskScheduleService {
 
-    private static Log log = LogFactory.getLog(TaskScheduleServiceImpl.class);
+    private static final Log log = LogFactory.getLog(TaskScheduleServiceImpl.class);
     private PolicyConfiguration policyConfiguration;
 
 

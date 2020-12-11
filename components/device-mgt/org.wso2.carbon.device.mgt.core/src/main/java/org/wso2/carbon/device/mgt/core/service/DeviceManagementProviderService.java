@@ -40,6 +40,7 @@ import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
@@ -53,6 +54,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManageme
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
@@ -107,6 +109,17 @@ public interface DeviceManagementProviderService {
      *                                   devices.
      */
     List<Device> getAllDevices(String deviceType, boolean requireDeviceInfo) throws DeviceManagementException;
+
+
+    /**
+     * Method returns a list of devices allocated to a specific node of the server, given the serverIndex and active server count
+     * @param deviceType
+     * @param activeServerCount
+     * @param serverIndex
+     * @return
+     * @throws DeviceManagementException
+     */
+    List<Device> getAllocatedDevices(String deviceType, int activeServerCount, int serverIndex) throws DeviceManagementException;
 
     /**
      * Method to retrieve all the devices registered in the system.
@@ -654,7 +667,7 @@ public interface DeviceManagementProviderService {
     Activity addOperation(String type, Operation operation,
                           List<DeviceIdentifier> devices) throws OperationManagementException, InvalidDeviceException;
 
-    void addTaskOperation(String deviceType, Operation operation) throws OperationManagementException;
+    void addTaskOperation(String deviceType, Operation operation, DynamicTaskContext taskContext) throws OperationManagementException;
 
     void addTaskOperation(String type, List<Device> devices, Operation operation)
             throws OperationManagementException;
@@ -921,6 +934,19 @@ public interface DeviceManagementProviderService {
      * @return enrollment steps of each enrollment types which are provided in the device type xml file
      */
     DeviceEnrollmentInvitationDetails getDeviceEnrollmentInvitationDetails(String deviceType);
+
+    /**
+     * This method is called by device when triggered a corrective action
+     *
+     * @param deviceIdentifier Device Identifier
+     * @param featureCode Feature Code
+     * @param actions Actions
+     * @param configList Configuration List
+     * @throws DeviceManagementException if error occurred while triggering corrective action
+     * @throws DeviceNotFoundException if server doesn't have a device for given device identifier
+     */
+    void triggerCorrectiveActions(String deviceIdentifier, String featureCode, List<String> actions,
+            List<ConfigurationEntry> configList) throws DeviceManagementException, DeviceNotFoundException;
 
     /**
      * This method is used to retrieve devices with specified device identifiers filtered with statuses.

@@ -77,7 +77,8 @@ public interface PolicyDAO {
      * @param policyId is used uniquely identify the policy to which corrective actions are to be added
      * @throws PolicyManagerDAOException is thrown when there is an error in adding corrective actions to database
      */
-    void addCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId)
+    void addCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId,
+                                      int featureId)
             throws PolicyManagerDAOException;
 
     /**
@@ -94,7 +95,8 @@ public interface PolicyDAO {
      * @param policyId is used uniquely identify the policy to which corrective actions are to be updated
      * @throws PolicyManagerDAOException is thrown when there is an error in updating corrective actions to database
      */
-    void updateCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId)
+    void updateCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId,
+                                         int featureId)
             throws PolicyManagerDAOException;
 
     /**
@@ -103,8 +105,15 @@ public interface PolicyDAO {
      * @param policyId is used uniquely identify the policy to which corrective actions are to be deleted
      * @throws PolicyManagerDAOException is thrown when there is an error in deleting corrective actions to database
      */
-    void deleteCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId)
+    void deleteCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId,
+                                         int featureId)
             throws PolicyManagerDAOException;
+
+    /**
+     * This method is used get all corrective actions from DB
+     * @throws PolicyManagerDAOException is thrown when there is an error in deleting corrective actions to database
+     */
+    List<CorrectiveAction> getAllCorrectiveActions() throws PolicyManagerDAOException;
 
     Policy updateUserOfPolicy(List<String> usersToAdd, Policy policy) throws PolicyManagerDAOException;
 

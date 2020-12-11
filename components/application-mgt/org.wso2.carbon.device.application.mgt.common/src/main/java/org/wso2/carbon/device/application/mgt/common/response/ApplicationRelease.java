@@ -87,6 +87,10 @@ public class ApplicationRelease {
             value = "Application Rating")
     private double rating;
 
+    @ApiModelProperty(name = "packageName",
+            value = "package name of the application")
+    private String packageName;
+
     public String getReleaseType() {
         return releaseType;
     }
@@ -162,4 +166,8 @@ public class ApplicationRelease {
     public List<String> getScreenshots() { return screenshots; }
 
     public void setScreenshots(List<String> screenshots) { this.screenshots = screenshots; }
+
+    public String getPackageName() { return packageName; }
+
+    public void setPackageName(String packageName) { this.packageName = packageName; }
 }

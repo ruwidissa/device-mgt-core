@@ -19,7 +19,7 @@
 package org.wso2.carbon.device.mgt.common;
 
 /**
- * This class holds all the constants used for IOS and Android.
+ * This class holds all the constants used for IOS, Android, Windows.
  */
 public class MDMAppConstants {
 
@@ -47,6 +47,29 @@ public class MDMAppConstants {
 		}
 		public static final String OPCODE_INSTALL_APPLICATION = "INSTALL_APPLICATION";
 		public static final String OPCODE_UNINSTALL_APPLICATION = "UNINSTALL_APPLICATION";
+	}
+
+	public class WindowsConstants {
+
+		private WindowsConstants() {
+			throw new AssertionError();
+		}
+		public static final String INSTALL_ENTERPRISE_APPLICATION = "INSTALL_ENTERPRISE_APPLICATION";
+		//App type constants related to window device type
+		public static final String MSI = "MSI";
+		public static final String APPX = "APPX";
+
+		//MSI Meta Key Constant
+		public static final String MSI_PRODUCT_ID = "Product_Id";
+		public static final String MSI_CONTENT_URI = "Content_Uri";
+		public static final String MSI_FILE_HASH = "File_Hash";
+
+		//APPX Meta Key Constant
+		public static final String APPX_PACKAGE_URI = "Package_Url";
+		public static final String APPX_DEPENDENCY_PACKAGE_URL = "Dependency_Package_Url";
+		public static final String APPX_CERTIFICATE_HASH = "Certificate_Hash";
+		public static final String APPX_ENCODED_CERT_CONTENT = "Encoded_Cert_Content";
+		public static final String APPX_PACKAGE_FAMILY_NAME = "Package_Family_Name";
 	}
 
 	public class RegistryConstants {

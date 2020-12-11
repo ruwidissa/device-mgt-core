@@ -55,6 +55,24 @@ public interface OperationMappingDAO {
                                                                                         long maxDuration, int deviceTypeId)
             throws OperationManagementDAOException;
 
+
+    /**
+     * This method returns first pending/repeated operation available for each active enrolment of given device-type
+     * in a task partitioned execution scenario
+     * where the operation was created after the given timestamp.
+     *
+     * @param minDuration
+     * @param maxDuration
+     * @param deviceTypeId
+     * @param activeServerCount
+     * @param serverHashIndex
+     * @return
+     */
+    List<OperationEnrolmentMapping> getFirstPendingOperationMappingsForActiveEnrolments(long minDuration,
+                                                                                        long maxDuration, int deviceTypeId,
+                                                                                        int activeServerCount, int serverHashIndex)
+            throws OperationManagementDAOException;
+
     /**
      * This method returns the timestamp of last completed Operation for each active enrolment of given device-type
      * where the operation was completed after the given timestamp.
@@ -65,6 +83,21 @@ public interface OperationMappingDAO {
      * @throws OperationManagementDAOException
      */
     Map<Integer, Long> getLastConnectedTimeForActiveEnrolments(long timeStamp, int deviceTypeId)
+            throws OperationManagementDAOException;
+
+
+    /**
+     * This method returns the timestamp of last completed Operation for each active enrolment of given device-type
+     * in a task partitioned execution scenario
+     * where the operation was completed after the given timestamp.
+     *
+     * @param timeStamp
+     * @param deviceTypeId
+     * @param activeServerCount
+     * @param serverHashIndex
+     * @return
+     */
+    Map<Integer, Long> getLastConnectedTimeForActiveEnrolments(long timeStamp, int deviceTypeId, int activeServerCount, int serverHashIndex)
             throws OperationManagementDAOException;
 
 }

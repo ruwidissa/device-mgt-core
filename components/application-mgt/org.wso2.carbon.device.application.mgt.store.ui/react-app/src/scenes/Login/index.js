@@ -96,10 +96,10 @@ class Login extends React.Component {
     const config = this.props.context;
     return (
       <div className="login">
-        <div className="background"></div>
+        <div className="background" />
         <div className="content">
           <Row>
-            <Col xs={3} sm={3} md={10}></Col>
+            <Col xs={3} sm={3} md={10} />
             <Col xs={18} sm={18} md={4}>
               <Row style={{ marginBottom: 20 }}>
                 <Col
@@ -174,7 +174,7 @@ class Login extends React.Component {
             </Col>
           </Row>
           <Row>
-            <Col span={4} offset={10}></Col>
+            <Col span={4} offset={10} />
           </Row>
         </div>
       </div>

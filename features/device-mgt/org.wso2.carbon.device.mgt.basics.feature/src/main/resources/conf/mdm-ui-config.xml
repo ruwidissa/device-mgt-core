@@ -19,7 +19,7 @@
 
 <UIConfiguration>
     <EnableOAuth>true</EnableOAuth>
-    <EnableSSO>false</EnableSSO>
+    <EnableSSO>true</EnableSSO>
     <AppRegistration>
         <Tags>
             <Tag>application_management</Tag>
@@ -148,6 +148,8 @@
         <Scope>perm:user:permission-view</Scope>
         <Scope>perm:ios:view-configuration</Scope>
         <Scope>perm:ios:manage-configuration</Scope>
+        <Scope>perm:ios:dep-view</Scope>
+        <Scope>perm:ios:dep-add</Scope>
         <Scope>perm:windows:view-configuration</Scope>
         <Scope>perm:windows:manage-configuration</Scope>
         <Scope>perm:android:lock-devices</Scope>
@@ -170,6 +172,10 @@
         <Scope>perm:android:change-lock-code</Scope>
         <Scope>perm:android:upgrade-firmware</Scope>
         <Scope>perm:android:send-notification</Scope>
+        <Scope>perm:geo-service:geo-fence</Scope>
+        <Scope>perm:metadata:view</Scope>
+        <Scope>perm:metadata:create</Scope>
+        <Scope>perm:metadata:update</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

@@ -1,4 +1,5 @@
 {
+  "appName": "store",
   "theme": {
     "type": "default",
     "value": "lightBaseTheme",
@@ -17,7 +18,10 @@
     },
     "loginUri": "/store-ui-request-handler/login",
     "logoutUri": "/store-ui-request-handler/logout",
-    "platform": "store"
+    "ssoLoginUri": "/store-ui-request-handler/ssoLogin",
+    "ssoLogoutUri": "/store-ui-request-handler/ssoLogout",
+    "platform": "store",
+    "appUiConfigUri": "/api/device-mgt-config/v1.0/configurations/ui-config"
   },
   "defaultPlatformIcons": {
     "default": {
@@ -40,5 +44,8 @@
       "color": "#008cc4",
       "theme": "filled"
     }
+  },
+  "windowsAppxMsiKeyValueForMetaData": {
+    "metaKeyArray": ["Package_Url", "Dependency_Package_Url", "Certificate_Hash", "Encoded_Cert_Content", "Package_Family_Name", "Product_Id", "Content_Uri", "File_Hash"]
   }
 }

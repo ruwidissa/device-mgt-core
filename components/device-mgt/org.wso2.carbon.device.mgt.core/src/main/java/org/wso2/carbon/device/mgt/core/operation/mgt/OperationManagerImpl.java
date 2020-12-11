@@ -26,6 +26,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
@@ -153,7 +154,9 @@ public class OperationManagerImpl implements OperationManager {
                     return null;
                 }
                 notificationStrategies.put(tenantId, provider.getNotificationStrategy(pushNoteConfig));
-            } else notificationStrategies.remove(tenantId);
+            } else {
+                notificationStrategies.remove(tenantId);
+            }
             lastUpdatedTimeStamps.put(tenantId, Calendar.getInstance().getTimeInMillis());
         }
         return notificationStrategies.get(tenantId);
@@ -165,49 +168,51 @@ public class OperationManagerImpl implements OperationManager {
         if (log.isDebugEnabled()) {
             log.debug("operation:[" + operation.toString() + "]");
             for (DeviceIdentifier deviceIdentifier : deviceIds) {
-                log.debug("device identifier id:[" + deviceIdentifier.getId() + "] type:[" +
-                        deviceIdentifier.getType() + "]");
+                log.debug("device identifier id:[" + deviceIdentifier.getId() + "] type:[" + deviceIdentifier.getType()
+                        + "]");
             }
         }
-        try {
-            DeviceIDHolder deviceValidationResult = DeviceManagerUtil.validateDeviceIdentifiers(deviceIds);
-            List<DeviceIdentifier> validDeviceIds = deviceValidationResult.getValidDeviceIDList();
-            if (validDeviceIds.size() > 0) {
-                DeviceIDHolder deviceAuthorizationResult = this.authorizeDevices(operation, validDeviceIds);
-                List<DeviceIdentifier> authorizedDeviceIds = deviceAuthorizationResult.getValidDeviceIDList();
-                if (authorizedDeviceIds.size() <= 0) {
-                    log.warn("User : " + getUser() + " is not authorized to perform operations on given device-list.");
-                    Activity activity = new Activity();
-                    //Send the operation statuses only for admin triggered operations
-                    activity.setActivityStatus(this.getActivityStatus(deviceValidationResult,
-                            deviceAuthorizationResult));
-                    return activity;
-                }
 
-                boolean isScheduledOperation = this.isTaskScheduledOperation(operation);
-                String initiatedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-                if (initiatedBy == null && isScheduledOperation) {
-                    operation.setInitiatedBy(SYSTEM);
-                } else if (StringUtils.isEmpty(operation.getInitiatedBy())) {
-                    operation.setInitiatedBy(initiatedBy);
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("initiatedBy : " + operation.getInitiatedBy());
-                }
+        DeviceIDHolder deviceValidationResult = DeviceManagerUtil.validateDeviceIdentifiers(deviceIds);
+        List<DeviceIdentifier> validDeviceIds = deviceValidationResult.getValidDeviceIDList();
+        if (!validDeviceIds.isEmpty()) {
+            DeviceIDHolder deviceAuthorizationResult = this.authorizeDevices(operation, validDeviceIds);
+            List<DeviceIdentifier> authorizedDeviceIds = deviceAuthorizationResult.getValidDeviceIDList();
+            if (authorizedDeviceIds.isEmpty()) {
+                log.warn("User : " + getUser() + " is not authorized to perform operations on given device-list.");
+                Activity activity = new Activity();
+                //Send the operation statuses only for admin triggered operations
+                activity.setActivityStatus(this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult));
+                return activity;
+            }
 
-                org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation operationDto =
-                        OperationDAOUtil.convertOperation(operation);
-                String operationCode = operationDto.getCode();
-                Map<Integer, Device> enrolments = new HashMap<>();
-                Device device;
-                for (DeviceIdentifier deviceId : authorizedDeviceIds) {
-                    device = getDevice(deviceId);
-                    enrolments.put(device.getEnrolmentInfo().getId(), device);
-                }
+            boolean isScheduledOperation = this.isTaskScheduledOperation(operation);
+            String initiatedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+            if (initiatedBy == null && (isScheduledOperation
+                    || operation.getCode().equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_CONFIG)
+                    || operation.getCode().equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_REVOKE))) {
+                operation.setInitiatedBy(SYSTEM);
+            } else if (StringUtils.isEmpty(operation.getInitiatedBy())) {
+                operation.setInitiatedBy(initiatedBy);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("initiatedBy : " + operation.getInitiatedBy());
+            }
 
+            org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation operationDto = OperationDAOUtil
+                    .convertOperation(operation);
+            String operationCode = operationDto.getCode();
+            Map<Integer, Device> enrolments = new HashMap<>();
+            Device device;
+            for (DeviceIdentifier deviceId : authorizedDeviceIds) {
+                device = getDevice(deviceId);
+                enrolments.put(device.getEnrolmentInfo().getId(), device);
+            }
+
+            try {
                 OperationManagementDAOFactory.beginTransaction();
-                if (operationDto.getControl() ==
-                        org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {
+                if (operationDto.getControl()
+                        == org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {
                     Map<Integer, Integer> pendingOperationIDs = operationDAO
                             .getExistingOperationIDs(enrolments.keySet().toArray(new Integer[0]), operationCode);
                     for (Integer enrolmentId : pendingOperationIDs.keySet()) {
@@ -224,8 +229,8 @@ public class OperationManagerImpl implements OperationManager {
                                     + operationCode);
                         }
                         Activity activity = new Activity();
-                        activity.setActivityStatus(this.getActivityStatus(deviceValidationResult,
-                                deviceAuthorizationResult));
+                        activity.setActivityStatus(
+                                this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult));
                         return activity;
                     }
                 }
@@ -239,20 +244,24 @@ public class OperationManagerImpl implements OperationManager {
                 activity.setType(Activity.Type.valueOf(operationDto.getType().toString()));
                 //For now set the operation statuses only for admin triggered operations
                 if (!isScheduledOperation) {
-                    activity.setActivityStatus(this.getActivityStatus(deviceValidationResult,
-                            deviceAuthorizationResult));
+                    activity.setActivityStatus(
+                            this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult));
                 }
                 return activity;
-            } else {
-                throw new InvalidDeviceException("Invalid device Identifiers found.");
+            } catch (OperationManagementDAOException e) {
+                OperationManagementDAOFactory.rollbackTransaction();
+                String msg = "Error occurred while adding operation";
+                log.error(msg, e);
+                throw new OperationManagementException(msg, e);
+            } catch (TransactionManagementException e) {
+                String msg = "Error occurred while initiating the transaction";
+                log.error(msg, e);
+                throw new OperationManagementException(msg, e);
+            } finally {
+                OperationManagementDAOFactory.closeConnection();
             }
-        } catch (OperationManagementDAOException e) {
-            OperationManagementDAOFactory.rollbackTransaction();
-            throw new OperationManagementException("Error occurred while adding operation", e);
-        } catch (TransactionManagementException e) {
-            throw new OperationManagementException("Error occurred while initiating the transaction", e);
-        } finally {
-            OperationManagementDAOFactory.closeConnection();
+        } else {
+            throw new InvalidDeviceException("Invalid device Identifiers found.");
         }
     }
 
@@ -297,7 +306,7 @@ public class OperationManagerImpl implements OperationManager {
     }
 
     @Override
-    public void addTaskOperation(String deviceType, Operation operation) throws OperationManagementException {
+    public void addTaskOperation(String deviceType, Operation operation, DynamicTaskContext dynamicTaskContext) throws OperationManagementException {
         List<String> validStatuses = Arrays.asList(EnrolmentInfo.Status.ACTIVE.toString(),
                 EnrolmentInfo.Status.INACTIVE.toString(),
                 EnrolmentInfo.Status.UNREACHABLE.toString());
@@ -313,7 +322,16 @@ public class OperationManagerImpl implements OperationManager {
                 paginationRequest = new PaginationRequest(start, batchSize);
                 paginationRequest.setStatusList(validStatuses);
                 paginationRequest.setDeviceType(deviceType);
-                List<Device> devices = deviceDAO.getDevices(paginationRequest, tenantId);
+                List<Device> devices;
+
+                if(dynamicTaskContext != null && dynamicTaskContext.isPartitioningEnabled()) {
+                    devices = deviceDAO.getAllocatedDevices(paginationRequest, tenantId,
+                                                                         dynamicTaskContext.getActiveServerCount(),
+                                                            dynamicTaskContext.getServerHashIndex());
+                } else {
+                    devices = deviceDAO.getDevices(paginationRequest, tenantId);
+                }
+
                 if (devices.size() == batchSize) {
                     hasRecords = true;
                     start += batchSize;
@@ -329,6 +347,9 @@ public class OperationManagerImpl implements OperationManager {
                 Map<Integer, Device> enrolments = new HashMap<>();
                 for (Device device : devices) {
                     enrolments.put(device.getEnrolmentInfo().getId(), device);
+                    if(log.isDebugEnabled()){
+                        log.info("Adding operation for device Id : " + device.getDeviceIdentifier());
+                    }
                 }
                 if (operationDto.getControl() ==
                         org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {
@@ -624,7 +645,7 @@ public class OperationManagerImpl implements OperationManager {
                 operations.add(operation);
             }
             paginationResult = new PaginationResult();
-            int count = operationDAO.getOperationCountForDevice(enrolmentId);
+            int count = operationDAO.getOperationCountForDevice(enrolmentId, request);
             paginationResult.setData(operations);
             paginationResult.setRecordsTotal(count);
             paginationResult.setRecordsFiltered(count);
@@ -1357,12 +1378,10 @@ public class OperationManagerImpl implements OperationManager {
         boolean status;
         switch (operation.getCode()) {
             case DeviceManagementConstants.AuthorizationSkippedOperationCodes.POLICY_OPERATION_CODE:
-                status = true;
-                break;
-            case DeviceManagementConstants.AuthorizationSkippedOperationCodes.MONITOR_OPERATION_CODE:
-                status = true;
-                break;
+            case DeviceManagementConstants.AuthorizationSkippedOperationCodes.EVENT_CONFIG_OPERATION_CODE:
+            case DeviceManagementConstants.AuthorizationSkippedOperationCodes.EVENT_REVOKE_OPERATION_CODE:
             case DeviceManagementConstants.AuthorizationSkippedOperationCodes.POLICY_REVOKE_OPERATION_CODE:
+            case DeviceManagementConstants.AuthorizationSkippedOperationCodes.MONITOR_OPERATION_CODE:
                 status = true;
                 break;
             default:

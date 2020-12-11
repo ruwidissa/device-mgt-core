@@ -63,7 +63,10 @@ policyModule = function () {
                 policyObjectToView["name"] = policyObjectFromRestEndpoint["policyName"];
                 policyObjectToView["platform"] = policyObjectFromRestEndpoint["profile"]["deviceType"];
                 policyObjectFromRestEndpoint["policyType"] = policyListFromRestEndpoint["policyType"];
-                policyObjectFromRestEndpoint["correctiveActions"] = policyListFromRestEndpoint["correctiveActions"];
+                var payloadVersion = policyObjectFromRestEndpoint["policyPayloadVersion"];
+                if (!parseFloat(payloadVersion) >= 2.0) {
+                    policyObjectFromRestEndpoint["correctiveActions"] = policyListFromRestEndpoint["correctiveActions"];
+                }
                 if (policyObjectToView["platform"] == "ios") {
                     policyObjectToView["deviceTypeIcon"] = "apple";
                 } else {

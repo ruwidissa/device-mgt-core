@@ -60,6 +60,7 @@ public class DeviceMgtUtil {
         profileFeature.setDeviceType(mdmProfileFeature.getDeviceTypeId());
         profileFeature.setFeatureCode(mdmProfileFeature.getFeatureCode());
         profileFeature.setId(mdmProfileFeature.getId());
+        profileFeature.setCorrectiveActions(mdmProfileFeature.getCorrectiveActions());
         return profileFeature;
 
     }

@@ -34,6 +34,7 @@
  */
 package org.wso2.carbon.device.mgt.core.service;
 
+import com.google.gson.Gson;
 import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -57,6 +58,7 @@ import org.wso2.carbon.device.mgt.common.DeviceManager;
 import org.wso2.carbon.device.mgt.common.DeviceNotification;
 import org.wso2.carbon.device.mgt.common.DevicePropertyNotification;
 import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
@@ -70,6 +72,7 @@ import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.CorrectiveActionConfig;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
@@ -81,6 +84,7 @@ import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySna
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotificationConfiguration;
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifier;
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifierException;
+import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
@@ -611,44 +615,46 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.closeConnection();
         }
 
-        try {
-            DeviceCacheKey deviceCacheKey;
-            for (Device device : existingDevices) {
-                if (!EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
-                    String msg = "Device " + device.getDeviceIdentifier() + " of type " + device.getType()
-                            + " is not dis-enrolled to permanently delete the device";
-                    log.error(msg);
-                    throw new InvalidDeviceException(msg);
-                }
-                deviceCacheKey = new DeviceCacheKey();
-                deviceCacheKey.setDeviceId(device.getDeviceIdentifier());
-                deviceCacheKey.setDeviceType(device.getType());
-                deviceCacheKey.setTenantId(tenantId);
-                deviceCacheKeyList.add(deviceCacheKey);
-                deviceIds.add(device.getId());
-                validDeviceIdentifiers.add(device.getDeviceIdentifier());
-                enrollmentIds.add(device.getEnrolmentInfo().getId());
-                if (deviceIdentifierMap.containsKey(device.getType())) {
-                    deviceIdentifierMap.get(device.getType()).add(device.getDeviceIdentifier());
-                } else {
-                    deviceIdentifierMap.put(device.getType(), Collections.singletonList(device.getDeviceIdentifier()));
-                    DeviceManager deviceManager = this.getDeviceManager(device.getType());
-                    if (deviceManager == null) {
-                        log.error("Device Manager associated with the device type '" + device.getType() +
-                                "' is null. Therefore, not attempting method 'deleteDevice'");
-                        return false;
-                    }
-                    deviceManagerMap.put(device.getType(), deviceManager);
-                }
-            }
-            if (deviceIds.isEmpty()) {
-                String msg = "No device IDs found for the device identifiers '" + deviceIdentifiers + "'";
+        DeviceCacheKey deviceCacheKey;
+        for (Device device : existingDevices) {
+            if (!EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
+                String msg = "Device " + device.getDeviceIdentifier() + " of type " + device.getType()
+                        + " is not dis-enrolled to permanently delete the device";
                 log.error(msg);
                 throw new InvalidDeviceException(msg);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Permanently deleting the details of devices : " + validDeviceIdentifiers);
+            deviceCacheKey = new DeviceCacheKey();
+            deviceCacheKey.setDeviceId(device.getDeviceIdentifier());
+            deviceCacheKey.setDeviceType(device.getType());
+            deviceCacheKey.setTenantId(tenantId);
+            deviceCacheKeyList.add(deviceCacheKey);
+            deviceIds.add(device.getId());
+            validDeviceIdentifiers.add(device.getDeviceIdentifier());
+            enrollmentIds.add(device.getEnrolmentInfo().getId());
+            if (deviceIdentifierMap.containsKey(device.getType())) {
+                deviceIdentifierMap.get(device.getType()).add(device.getDeviceIdentifier());
+            } else {
+                deviceIdentifierMap.put(device.getType(),
+                        new ArrayList<>(Collections.singletonList(device.getDeviceIdentifier())));
+                DeviceManager deviceManager = this.getDeviceManager(device.getType());
+                if (deviceManager == null) {
+                    log.error("Device Manager associated with the device type '" + device.getType()
+                            + "' is null. Therefore, not attempting method 'deleteDevice'");
+                    return false;
+                }
+                deviceManagerMap.put(device.getType(), deviceManager);
             }
+        }
+        if (deviceIds.isEmpty()) {
+            String msg = "No device IDs found for the device identifiers '" + deviceIdentifiers + "'";
+            log.error(msg);
+            throw new InvalidDeviceException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Permanently deleting the details of devices : " + validDeviceIdentifiers);
+        }
+
+        try {
             DeviceManagementDAOFactory.beginTransaction();
             //deleting device from the core
             deviceDAO.deleteDevices(validDeviceIdentifiers, new ArrayList<>(deviceIds), enrollmentIds);
@@ -764,6 +770,46 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             return this.populateAllDeviceInfo(allDevices);
         }
         return allDevices;
+    }
+
+    @Override
+    public List<Device> getAllocatedDevices(String deviceType, int activeServerCount, int serverIndex) throws DeviceManagementException {
+        if (deviceType == null) {
+            String msg = "Device type is empty for method getAllDevices";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Getting allocated Devices for Server with index "+ serverIndex + " and" +
+                      " type '" + deviceType);
+        }
+        List<Device> allocatedDevices;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            allocatedDevices = deviceDAO.getAllocatedDevices(deviceType, this.getTenantId(), activeServerCount, serverIndex);
+            if (allocatedDevices == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No device is found upon the type '" + deviceType + "'");
+                }
+                return null;
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving all devices of type '" +
+                         deviceType + "' that are being managed within the scope of current tenant";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred while getting all devices of device type '" + deviceType + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return allocatedDevices;
     }
 
     @Override
@@ -1835,8 +1881,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public void addTaskOperation(String type, Operation operation) throws OperationManagementException {
-        pluginRepository.getOperationManager(type, this.getTenantId()).addTaskOperation(type, operation);
+    public void addTaskOperation(String type, Operation operation, DynamicTaskContext taskContext) throws OperationManagementException {
+        pluginRepository.getOperationManager(type, this.getTenantId()).addTaskOperation(type, operation, taskContext);
     }
 
     @Override
@@ -3056,26 +3102,21 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
-            throws DeviceManagementException {
-
+    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from,
+            long to) throws DeviceManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Get device location information");
         }
-
         List<DeviceLocationHistorySnapshot> deviceLocationHistory;
-        String errMessage;
-
         try {
             DeviceManagementDAOFactory.openConnection();
             deviceLocationHistory = deviceDAO.getDeviceLocationInfo(deviceIdentifier, from, to);
-
         } catch (DeviceManagementDAOException e) {
-            errMessage = "Error occurred in getDeviceLocationInfo";
+            String errMessage = "Error occurred in getDeviceLocationInfo";
             log.error(errMessage, e);
             throw new DeviceManagementException(errMessage, e);
         } catch (SQLException e) {
-            errMessage = "Error occurred while opening a connection to the data source";
+            String errMessage = "Error occurred while opening a connection to the data source";
             log.error(errMessage, e);
             throw new DeviceManagementException(errMessage, e);
         } finally {
@@ -4224,6 +4265,67 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public void triggerCorrectiveActions(String deviceIdentifier, String featureCode, List<String> actions,
+            List<ConfigurationEntry> configList) throws DeviceManagementException, DeviceNotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("Triggering Corrective action. Device Identifier: " + deviceIdentifier);
+        }
+
+        if (StringUtils.isBlank(featureCode)){
+            String msg = "Found a Blan feature code: " + featureCode;
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        if (configList == null || configList.isEmpty()) {
+            String msg = "Platform config is not configured";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+
+        Device device = getDevice(deviceIdentifier, false);
+        if (device == null) {
+            String msg = "Couldn't find and device for device identifier " + deviceIdentifier;
+            log.error(msg);
+            throw new DeviceNotFoundException(msg);
+        }
+        EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
+
+        for (String action : actions) {
+            for (ConfigurationEntry config : configList) {
+                if (featureCode.equals(config.getName())) {
+                    CorrectiveActionConfig correctiveActionConfig = new Gson()
+                            .fromJson((String) config.getValue(), CorrectiveActionConfig.class);
+                    if (correctiveActionConfig.getActionTypes().contains(action)) {
+                        if (DeviceManagementConstants.CorrectiveActions.E_MAIL.equals(action)) {
+                            Properties props = new Properties();
+                            props.setProperty("mail-subject", correctiveActionConfig.getMailSubject());
+                            props.setProperty("feature-code", featureCode);
+                            props.setProperty("device-id", deviceIdentifier);
+                            props.setProperty("device-name", device.getName());
+                            props.setProperty("device-owner", enrolmentInfo.getOwner());
+                            props.setProperty("custom-mail-body", correctiveActionConfig.getMailBody());
+                            try {
+                                for (String mailAddress : correctiveActionConfig.getMailReceivers()) {
+                                    EmailMetaInfo metaInfo = new EmailMetaInfo(mailAddress, props);
+                                    sendEnrolmentInvitation(
+                                            DeviceManagementConstants.EmailAttributes.POLICY_VIOLATE_TEMPLATE,
+                                            metaInfo);
+                                }
+                            } catch (ConfigurationManagementException e) {
+                                String msg = "Error occurred while sending the mail.";
+                                log.error(msg);
+                                throw new DeviceManagementException(msg, e);
+                            }
+                        }
+                    } else {
+                        log.warn("Corrective action: " + action + " is not configured in the platform configuration "
+                                + "for policy " + featureCode);
+                    }
+                }
+            }
+        }
+    }
+
     public List<Device> getDevicesByIdentifiersAndStatuses(List<String> deviceIdentifiers,
                                                            List<EnrolmentInfo.Status> statuses)
             throws DeviceManagementException {
@@ -4243,5 +4345,4 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.closeConnection();
         }
     }
-
 }

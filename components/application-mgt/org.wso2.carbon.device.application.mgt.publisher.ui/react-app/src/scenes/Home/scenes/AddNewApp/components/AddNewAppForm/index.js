@@ -44,6 +44,8 @@ class AddNewAppFormComponent extends React.Component {
       release: null,
       isError: false,
       deviceType: null,
+      selectedValue: null,
+      selectedAppType: null,
       supportedOsVersions: [],
       errorText: '',
       forbiddenErrors: {
@@ -157,6 +159,20 @@ class AddNewAppFormComponent extends React.Component {
       });
   };
 
+  // For passing the device type as the prop for other component
+  selectedValueHandler = selectedValue => {
+    this.setState({
+      selectedValue,
+    });
+  };
+
+  // For passing the app type as the prop for other component
+  selectedAppTypeHandler = selectedAppType => {
+    this.setState({
+      selectedAppType,
+    });
+  };
+
   render() {
     const {
       loading,
@@ -164,6 +180,8 @@ class AddNewAppFormComponent extends React.Component {
       isError,
       supportedOsVersions,
       errorText,
+      selectedValue,
+      selectedAppType,
     } = this.state;
     const { formConfig } = this.props;
     return (
@@ -180,18 +198,21 @@ class AddNewAppFormComponent extends React.Component {
                 <div style={{ display: current === 0 ? 'unset' : 'none' }}>
                   <NewAppDetailsForm
                     formConfig={formConfig}
+                    selectedValueHandler={this.selectedValueHandler}
+                    selectedAppTypeHandler={this.selectedAppTypeHandler}
                     onSuccessApplicationData={this.onSuccessApplicationData}
                   />
                 </div>
                 <div style={{ display: current === 1 ? 'unset' : 'none' }}>
                   <NewAppUploadForm
                     formConfig={formConfig}
+                    selectedValue={selectedValue}
+                    selectedAppType={selectedAppType}
                     supportedOsVersions={supportedOsVersions}
                     onSuccessReleaseData={this.onSuccessReleaseData}
                     onClickBackButton={this.onClickBackButton}
                   />
                 </div>
-
                 <div style={{ display: current === 2 ? 'unset' : 'none' }}>
                   {!isError && (
                     <Result
