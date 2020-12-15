@@ -17,13 +17,14 @@
  */
 package org.wso2.carbon.device.mgt.common.operation.mgt;
 
+import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
 
 import java.util.List;
@@ -122,9 +123,14 @@ public interface OperationManager {
 
     List<Activity> getActivitiesUpdatedAfter(long timestamp, int limit, int offset) throws OperationManagementException;
 
+    List<Activity> getActivities(ActivityPaginationRequest activityPaginationRequest) throws OperationManagementException;
+
+    int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException;
+
     List<Activity> getFilteredActivities(String operationCode, int limit, int offset) throws OperationManagementException;
 
-    int getTotalCountOfFilteredActivities(String operationCode) throws  OperationManagementException;
+    int getTotalCountOfFilteredActivities(String operationCode) throws OperationManagementException;
 
     List<Activity> getActivitiesUpdatedAfterByUser(long timestamp, String user, int limit, int offset) throws OperationManagementException;
 

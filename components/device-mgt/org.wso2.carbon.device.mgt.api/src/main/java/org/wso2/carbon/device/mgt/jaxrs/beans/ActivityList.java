@@ -19,11 +19,11 @@
 package org.wso2.carbon.device.mgt.jaxrs.beans;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.Gson;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @ApiModel(value = "List of activities", description = "This contains a set of activities that matches a given"
@@ -45,13 +45,7 @@ public class ActivityList extends BasePaginatedResult {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\n");
-        sb.append("  count: ").append(getCount()).append(",\n");
-        sb.append("  devices: [").append(activities).append("\n");
-        sb.append("]}\n");
-        return sb.toString();
+        return new Gson().toJson(this);
     }
-
 
 }

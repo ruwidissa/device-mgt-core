@@ -307,10 +307,7 @@ public class DeviceTypeManager implements DeviceManager {
                 JAXBContext context = JAXBContext.newInstance(PlatformConfiguration.class);
                 Unmarshaller unmarshaller = context.createUnmarshaller();
                 return (PlatformConfiguration) unmarshaller.unmarshal(reader);
-            } else if (defaultPlatformConfiguration != null) {
-                return defaultPlatformConfiguration;
-            }
-            return null;
+            } else return defaultPlatformConfiguration;
         } catch (DeviceTypeMgtPluginException e) {
             throw new DeviceManagementException(
                     "Error occurred while retrieving the Registry instance : " + e.getMessage(), e);
@@ -379,10 +376,16 @@ public class DeviceTypeManager implements DeviceManager {
             boolean status;
             try {
                 if (log.isDebugEnabled()) {
-                    log.debug("Adding properties for new device : " + device.getDeviceIdentifier());
+                    log.debug("Modifying properties for enrolling device : " + device.getDeviceIdentifier());
                 }
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().beginTransaction();
-                status = deviceTypePluginDAOManager.getDeviceDAO().updateDevice(device);
+                Device existingDevice = deviceTypePluginDAOManager.getDeviceDAO()
+                        .getDevice(device.getDeviceIdentifier());
+                if (existingDevice == null) {
+                    status = deviceTypePluginDAOManager.getDeviceDAO().addDevice(device);
+                } else {
+                    status = deviceTypePluginDAOManager.getDeviceDAO().updateDevice(device);
+                }
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().commitTransaction();
             } catch (DeviceTypeMgtPluginException e) {
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
@@ -395,7 +398,7 @@ public class DeviceTypeManager implements DeviceManager {
             if (propertyBasedDeviceTypePluginDAOManager != null && status) {
                 try {
                     if (log.isDebugEnabled()) {
-                        log.debug("Updating properties for new device : " + device.getDeviceIdentifier());
+                        log.debug("Updating properties for enrolling device : " + device.getDeviceIdentifier());
                     }
                     propertyBasedDeviceTypePluginDAOManager.getDeviceTypeDAOHandler().beginTransaction();
                     status = propertyBasedDeviceTypePluginDAOManager.getDeviceDAO().updateDevice(device);

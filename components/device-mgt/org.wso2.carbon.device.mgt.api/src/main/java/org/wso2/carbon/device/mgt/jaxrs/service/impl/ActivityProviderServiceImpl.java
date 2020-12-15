@@ -18,10 +18,13 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
+import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ActivityList;
@@ -34,6 +37,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -213,17 +217,22 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
         }
     }
 
-
     @GET
     @Override
-    public Response getActivities(@QueryParam("since") String since,  @QueryParam("initiatedBy")String initiatedBy,
-                                  @QueryParam("offset") int offset, @QueryParam("limit") int limit,
+    public Response getActivities(@DefaultValue("0") @QueryParam("offset") int offset,
+                                  @DefaultValue("20") @QueryParam("limit") int limit,
+                                  @QueryParam("since") String since,
+                                  @QueryParam("initiatedBy") String initiatedBy,
+                                  @QueryParam("operationCode") String operationCode,
+                                  @QueryParam("deviceType") String deviceType,
+                                  @QueryParam("deviceId") String deviceId,
+                                  @QueryParam("type") String type,
+                                  @QueryParam("status") String status,
                                   @HeaderParam("If-Modified-Since") String ifModifiedSince) {
 
         long ifModifiedSinceTimestamp;
         long sinceTimestamp;
         long timestamp = 0;
-        boolean isIfModifiedSinceSet = false;
         if (log.isDebugEnabled()) {
             log.debug("getActivities since: " + since + " , offset: " + offset + " ,limit: " + limit + " ," +
                     "ifModifiedSince: " + ifModifiedSince);
@@ -240,7 +249,6 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                                 "Invalid date string is provided in 'If-Modified-Since' header").build()).build();
             }
             ifModifiedSinceTimestamp = ifSinceDate.getTime();
-            isIfModifiedSinceSet = true;
             timestamp = ifModifiedSinceTimestamp / 1000;
         } else if (since != null && !since.isEmpty()) {
             Date sinceDate;
@@ -266,39 +274,49 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
         }
         Response response = validateAdminUser();
         if (response == null) {
-            List<Activity> activities;
-            int count = 0;
             ActivityList activityList = new ActivityList();
             DeviceManagementProviderService dmService;
+            ActivityPaginationRequest activityPaginationRequest = new ActivityPaginationRequest(offset, limit);
             try {
                 if (log.isDebugEnabled()) {
                     log.debug("Calling database to get activities.");
                 }
                 dmService = DeviceMgtAPIUtils.getDeviceManagementService();
-                if (initiatedBy == null || initiatedBy.isEmpty()) {
-                    activities = dmService.getActivitiesUpdatedAfter(timestamp, limit, offset);
-
-                    if (log.isDebugEnabled()) {
-                        log.debug("Calling database to get activity count with timestamp.");
-                    }
-                    count = dmService.getActivityCountUpdatedAfter(timestamp);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Activity count: " + count);
-                    }
-                } else {
-                    activities = dmService.getActivitiesUpdatedAfterByUser(timestamp, initiatedBy, limit, offset);
-
-                    if (log.isDebugEnabled()) {
-                        log.debug("Calling database to get activity count with timestamp and user.");
-                    }
-                    count = dmService.getActivityCountUpdatedAfterByUser(timestamp, initiatedBy);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Activity count: " + count);
-                    }
+                if (initiatedBy != null && !initiatedBy.isEmpty()) {
+                    activityPaginationRequest.setInitiatedBy(initiatedBy);
                 }
-                activityList.setList(activities);
+                if (operationCode != null && !operationCode.isEmpty()) {
+                    activityPaginationRequest.setOperationCode(operationCode);
+                }
+                if (deviceType != null && !deviceType.isEmpty()) {
+                    activityPaginationRequest.setDeviceType(deviceType);
+                }
+                if (deviceId != null && !deviceId.isEmpty()) {
+                    activityPaginationRequest.setDeviceId(deviceId);
+                }
+                if (type != null && !type.isEmpty()) {
+                    activityPaginationRequest.setType(Operation.Type.valueOf(type.toUpperCase()));
+                }
+                if (status != null && !status.isEmpty()) {
+                    activityPaginationRequest.setStatus(Operation.Status.valueOf(status.toUpperCase()));
+                }
+                activityPaginationRequest.setSince(timestamp);
+                if (log.isDebugEnabled()) {
+                    log.debug("Activity request: " + new Gson().toJson(activityPaginationRequest));
+                }
+                int count = dmService.getActivitiesCount(activityPaginationRequest);
+                if (log.isDebugEnabled()) {
+                    log.debug("Filtered Activity count: " + count);
+                }
+                if (count > 0) {
+                    activityList.setList(dmService.getActivities(activityPaginationRequest));
+                    if (log.isDebugEnabled()) {
+                        log.debug("Fetched Activity count: " + activityList.getList().size());
+                    }
+                } else if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
+                    return Response.notModified().build();
+                }
                 activityList.setCount(count);
-
                 return Response.ok().entity(activityList).build();
             } catch (OperationManagementException e) {
                 String msg
