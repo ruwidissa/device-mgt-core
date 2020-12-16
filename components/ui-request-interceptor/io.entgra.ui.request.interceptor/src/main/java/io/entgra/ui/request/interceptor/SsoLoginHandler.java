@@ -228,8 +228,14 @@ public class SsoLoginHandler extends HttpServlet {
      */
     private StringEntity constructAppGrantTypeUpdatePayload() {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("supportedGrantTypes", new JSONArray(new Object[]{HandlerConstants.CODE_GRANT_TYPE,
-                HandlerConstants.REFRESH_TOKEN_GRANT_TYPE, HandlerConstants.PASSWORD_GRANT_TYPE}));
+        jsonObject.put("supportedGrantTypes",
+                new JSONArray(new Object[]{
+                        HandlerConstants.CODE_GRANT_TYPE,
+                        HandlerConstants.REFRESH_TOKEN_GRANT_TYPE,
+                        HandlerConstants.PASSWORD_GRANT_TYPE,
+                        HandlerConstants.JWT_BEARER_GRANT_TYPE
+                })
+        );
         jsonObject.put(HandlerConstants.CALLBACK_URL_KEY, iotsCoreUrl + baseContextPath + HandlerConstants.SSO_LOGIN_CALLBACK);
         String payload = jsonObject.toString();
         return new StringEntity(payload, ContentType.APPLICATION_JSON);
