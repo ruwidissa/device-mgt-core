@@ -50,7 +50,7 @@ public final class DeviceManagementConstants {
         private ConfigurationManagement(){
             throw new AssertionError();
         }
-        public static final String SCOPES_FOR_TOKEN = "perm:device:operations perm:device:publish-event";
+        public static final String SCOPES_FOR_TOKEN = "perm:device:operations perm:device:publish-event perm:windows:enroll";
         public static final String IOT_GATEWAY_HOST = "iot.gateway.host";
         public static final String IOT_GATEWAY_HTTPS_PORT = "iot.gateway.https.port";
         public static final String APPLICATION_REGISTRATION_API_ENDPOINT =
