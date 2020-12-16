@@ -52,6 +52,7 @@ public class HandlerConstants {
     public static final String CODE_GRANT_TYPE = "authorization_code";
     public static final String REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
     public static final String PASSWORD_GRANT_TYPE = "password";
+    public static final String JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
 
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";
