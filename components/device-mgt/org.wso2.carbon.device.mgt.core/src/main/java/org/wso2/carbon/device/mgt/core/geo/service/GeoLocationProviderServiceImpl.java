@@ -1779,6 +1779,13 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         }
     }
 
+    /**
+     * Build and retrieve the EventTaskEntry object
+     * @param operationCode operationCode of the requesting EventTask
+     * @param geoFenceId id of the geofence which the task creating
+     * @param tenantId id of the tenant owns the geofence
+     * @return built EventTaskEntry object
+     */
     private EventTaskEntry getEventOperationTask(String operationCode, int geoFenceId, int tenantId) {
         EventTaskEntry eventTaskEntry = new EventTaskEntry();
         eventTaskEntry.setEventSource(DeviceManagementConstants.EventServices.GEOFENCE);

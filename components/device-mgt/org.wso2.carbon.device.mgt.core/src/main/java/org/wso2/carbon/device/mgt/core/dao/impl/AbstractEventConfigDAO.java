@@ -360,7 +360,7 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
         } catch (SQLException e) {
             String msg = "Failed while creating event task entry for event operation " + eventTaskEntry.getOperationCode()
                     + " of the tenant " + eventTaskEntry.getTenantId();
-            log.error(msg);
+            log.error(msg, e);
             throw new EventManagementDAOException(msg, e);
         }
     }
@@ -404,7 +404,7 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
             }
         } catch (SQLException e) {
             String msg = "Failed while retrieving event task entries";
-            log.error(msg);
+            log.error(msg, e);
             throw new EventManagementDAOException(msg, e);
         }
     }
@@ -433,7 +433,7 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
             }
         } catch (SQLException e) {
             String msg = "Failed while retrieving event task entries";
-            log.error(msg);
+            log.error(msg, e);
             throw new EventManagementDAOException(msg, e);
         }
     }

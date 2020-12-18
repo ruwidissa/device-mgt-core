@@ -76,7 +76,9 @@ public class EventOperationTaskManagerImpl {
                 taskManager.deleteTask(TASK_NAME);
             }
         } catch (TaskException e) {
-            throw new EventOperationTaskException("Error occurred while stopping the group event operation task");
+            String msg = "Error occurred while stopping the group event operation task";
+            log.error(msg, e);
+            throw new EventOperationTaskException(msg, e);
         }
     }
 }

@@ -150,6 +150,10 @@ public class DeviceTaskManagerServiceComponent {
         }
     }
 
+    /**
+     * Start event operation creation task
+     * @param bundleContext OsgiBundle context
+     */
     private void startGroupEventCreationTask(BundleContext bundleContext) {
         DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
         EventOperationTaskConfiguration eventTaskConfig = deviceManagementConfig.getEventOperationTaskConfiguration();
@@ -165,6 +169,9 @@ public class DeviceTaskManagerServiceComponent {
         }
     }
 
+    /**
+     * Stop event operation creation task
+     */
     private void stopGroupEventCreationTask() {
         EventOperationTaskManagerImpl eventOperationTaskManager = DeviceManagementDataHolder.getInstance()
                 .getEventOperationTaskManager();
