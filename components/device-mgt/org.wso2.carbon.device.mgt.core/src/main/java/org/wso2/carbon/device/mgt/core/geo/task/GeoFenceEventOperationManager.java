@@ -23,7 +23,6 @@ import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoFenceEventMeta;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.core.event.config.GroupEventOperationExecutor;
-import org.wso2.carbon.device.mgt.core.event.config.EventOperationExecutor;
 
 import java.util.List;
 
@@ -40,20 +39,6 @@ public class GeoFenceEventOperationManager {
         this.eventOperationCode = eventOperationCode;
         this.tenantId = tenantId;
         this.callback = callback;
-    }
-
-    /**
-     * Get executor for create EVENT_CONFIG / EVENT_REVOKE operations at the time of a geofence
-     * created, updated or deleted
-     * @param geofenceData created geofence data object
-     * @return {@link EventOperationExecutor} Created executor to create operations
-     */
-    public EventOperationExecutor getEventOperationExecutor(GeofenceData geofenceData) {
-        GeoFenceEventMeta geoFenceEventMeta = new GeoFenceEventMeta(geofenceData);
-        EventOperationExecutor executor = new EventOperationExecutor(geoFenceEventMeta, geofenceData.getGroupIds(),
-                tenantId, DeviceManagementConstants.EventServices.GEOFENCE, eventOperationCode);
-        executor.setCallback(callback);
-        return executor;
     }
 
     /**

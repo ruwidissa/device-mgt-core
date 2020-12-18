@@ -30,6 +30,7 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import org.wso2.carbon.device.mgt.common.event.config.EventTaskEntry;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -234,6 +235,30 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
             String msg = "Error occurred while deleting event records";
             log.error(msg, e);
             throw new EventConfigurationException(msg, e);
+        }
+    }
+
+    @Override
+    public void createEventOperationTask(EventTaskEntry eventTaskEntry, List<Integer> groupIds)
+            throws EventConfigurationException {
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            eventConfigDAO.createEventTaskEntry(eventTaskEntry, groupIds);
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Failed to start transaction while creating event operation task entries of tenant "
+                    + eventTaskEntry.getTenantId();
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
+        } catch (EventManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while creating event task entries for event " + eventTaskEntry
+                    .getEventSource() + " with code " + eventTaskEntry.getOperationCode() + " of the tenant "
+                    + eventTaskEntry.getTenantId();
+            log.error(msg, e);
+            throw new EventConfigurationException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
         }
     }
 }

@@ -24,6 +24,7 @@ import org.wso2.carbon.device.mgt.core.config.archival.ArchivalConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.CertificateCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.DeviceCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.GeoFenceCacheConfiguration;
+import org.wso2.carbon.device.mgt.core.event.config.EventOperationTaskConfiguration;
 import org.wso2.carbon.device.mgt.core.config.geo.location.GeoLocationConfiguration;
 import org.wso2.carbon.device.mgt.core.config.identity.IdentityConfigurations;
 import org.wso2.carbon.device.mgt.core.config.keymanager.KeyManagerConfigurations;
@@ -56,6 +57,7 @@ public final class DeviceManagementConfig {
     private DeviceStatusTaskConfig deviceStatusTaskConfig;
     private DeviceCacheConfiguration deviceCacheConfiguration;
     private GeoFenceCacheConfiguration geoFenceCacheConfiguration;
+    private EventOperationTaskConfiguration eventOperationTaskConfiguration;
     private CertificateCacheConfiguration certificateCacheConfiguration;
     private OperationAnalyticsConfiguration operationAnalyticsConfiguration;
     private GeoLocationConfiguration geoLocationConfiguration;
@@ -163,6 +165,15 @@ public final class DeviceManagementConfig {
 
     public void setGeoFenceCacheConfiguration(GeoFenceCacheConfiguration geoFenceCacheConfiguration) {
         this.geoFenceCacheConfiguration = geoFenceCacheConfiguration;
+    }
+
+    @XmlElement(name = "EventOperationTaskConfiguration", required = true)
+    public EventOperationTaskConfiguration getEventOperationTaskConfiguration() {
+        return eventOperationTaskConfiguration;
+    }
+
+    public void setEventOperationTaskConfiguration(EventOperationTaskConfiguration eventOperationTaskConfiguration) {
+        this.eventOperationTaskConfiguration = eventOperationTaskConfiguration;
     }
 
     @XmlElement(name = "CertificateCacheConfiguration", required = true)

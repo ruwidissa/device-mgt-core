@@ -30,8 +30,7 @@ public class GeoFenceEventMeta implements EventMetaData {
     private String geoJson;
     private String fenceShape;
 
-    public GeoFenceEventMeta() {
-    }
+    public GeoFenceEventMeta() {}
 
     public GeoFenceEventMeta(GeofenceData geofenceData) {
         this.id = geofenceData.getId();

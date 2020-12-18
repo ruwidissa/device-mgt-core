@@ -72,4 +72,11 @@ public interface EventConfigurationProviderService {
      */
     void deleteEvents(List<EventConfig> eventList) throws EventConfigurationException;
 
+    /**
+     * Create task entry to be executed at the time of event operation task running
+     * @param eventTaskEntry event task entry
+     * @param groupIds group ids of the event task entry assigned
+     * @throws EventConfigurationException error thrown while creating task records
+     */
+    void createEventOperationTask(EventTaskEntry eventTaskEntry, List<Integer> groupIds) throws EventConfigurationException;
 }
