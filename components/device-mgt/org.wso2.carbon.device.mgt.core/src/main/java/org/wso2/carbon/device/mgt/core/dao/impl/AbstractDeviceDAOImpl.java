@@ -59,8 +59,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -1634,7 +1634,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     "DATE_OF_LAST_UPDATE, TENANT_ID FROM DM_ENROLMENT WHERE DEVICE_ID = (SELECT d.ID " +
                     "FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID " +
                     "AND d.DEVICE_IDENTIFICATION = ? AND t.NAME = ? AND d.TENANT_ID = ?) " +
-                    "AND TENANT_ID = ? AND STATUS in ('ACTIVE','UNREACHABLE','INACTIVE')";
+                    "AND TENANT_ID = ? AND STATUS != 'REMOVED'";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, deviceId.getId());
             stmt.setString(2, deviceId.getType());
