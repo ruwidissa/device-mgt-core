@@ -407,6 +407,10 @@
             <Name>Uninstall App</Name>
             <Description>Uninstall App</Description>
         </Feature>
+        <Feature type="operation" code="UNMANAGED_APP_UNINSTALL">
+            <Name>Uninstall App</Name>
+            <Description>Uninstall user installed App</Description>
+        </Feature>
         <Feature type="policy" code="BLACKLIST_APPLICATIONS">
             <Name>Blacklist app</Name>
             <Description>Blacklist applications</Description>

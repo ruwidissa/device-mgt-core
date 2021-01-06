@@ -21,6 +21,7 @@ import org.wso2.carbon.device.application.mgt.common.ExecutionStatus;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDTO;
+import org.wso2.carbon.device.application.mgt.common.exception.SubscriptionManagementException;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 
 import java.time.LocalDateTime;
@@ -153,6 +154,16 @@ public interface SubscriptionDAO {
      */
     List<ScheduledSubscriptionDTO> getScheduledSubscriptionByStatus(ExecutionStatus status, boolean deleted)
             throws ApplicationManagementDAOException;
+
+    /**
+     * Gets the UUID of an application if the app is subscribed in entgra store
+     *
+     * @param id          id of the device
+     * @param packageName package name of the application
+     * @throws SubscriptionManagementException if error
+     *                                         occurred while cleaning up subscriptions.
+     */
+    String getUUID(int id, String packageName) throws ApplicationManagementDAOException;
 
     /**
      * Retrieves a list of subscriptions that are not executed on the scheduled time.
