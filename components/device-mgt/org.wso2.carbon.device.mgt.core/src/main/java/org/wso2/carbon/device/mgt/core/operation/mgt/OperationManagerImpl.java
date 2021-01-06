@@ -229,6 +229,8 @@ public class OperationManagerImpl implements OperationManager {
                                     + operationCode);
                         }
                         Activity activity = new Activity();
+                        activity.setActivityId(DeviceManagementConstants.OperationAttributes.ACTIVITY +
+                                operation.getId());
                         activity.setActivityStatus(
                                 this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult));
                         return activity;
