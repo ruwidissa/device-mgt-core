@@ -52,6 +52,7 @@ import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.Utils;
+import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.Device;
@@ -174,6 +175,8 @@ public class DeviceMgtAPIUtils {
     private static MetadataManagementService metadataManagementService;
     private static OTPManagementService otpManagementService;
 
+    private static volatile SubscriptionManager subscriptionManager;
+
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
         String trustStorePassword = ServerConfiguration.getInstance().getFirstProperty(
@@ -215,6 +218,25 @@ public class DeviceMgtAPIUtils {
         }
         return 0;
     }
+
+    public static SubscriptionManager getSubscriptionManager() {
+        if (subscriptionManager == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (subscriptionManager == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    subscriptionManager =
+                            (SubscriptionManager) ctx.getOSGiService(SubscriptionManager.class, null);
+                    if (subscriptionManager == null) {
+                        String msg = "Subscription Manager service has not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+        return subscriptionManager;
+    }
+
 
     public static void scheduleTaskService(int notifierFrequency) {
         TaskScheduleService taskScheduleService;

@@ -66,6 +66,15 @@ public interface SubscriptionManager {
     List<ScheduledSubscriptionDTO> cleanScheduledSubscriptions() throws SubscriptionManagementException;
 
     /**
+     * Check app is subscribed in entgra store or not
+     *
+     * @param id          id of the device
+     * @param packageName package name of the application
+     * @throws SubscriptionManagementException if error occurred while cleaning up subscriptions.
+     */
+    String checkAppSubscription(int id, String packageName) throws SubscriptionManagementException;
+
+    /**
      * Retrieves the subscription entry which is pending by task name. At a given time, there should be only a single
      * entry in the status {@code PENDING} and not marked as deleted.
      *

@@ -1480,6 +1480,48 @@ public interface DeviceManagementService {
                     int limit);
 
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/{type}/{id}/uninstallation")
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Uninstall apps in device using apps tab",
+            notes = "Check app is subscribed in store or not and then do uninstallation accordingly",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:applications")
+                    })
+            })
+    @ApiResponses(
+            value = {
+
+            })
+    Response uninstallation(
+            @ApiParam(
+                    name = "type",
+                    value = "The device type name, such as ios, android, windows",
+                    required = true)
+            @PathParam("type")
+            @Size(max = 45)
+                    String type,
+            @ApiParam(
+                    name = "id",
+                    value = "The device identifier of the device.",
+                    required = true)
+            @PathParam("id")
+            @Size(max = 45)
+                    String id,
+            @ApiParam(
+                    name = "packageName",
+                    value = "The package name of the app user want to uninstall",
+                    required = true)
+            @QueryParam("packageName")
+                    String packageName);
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}/operations")
