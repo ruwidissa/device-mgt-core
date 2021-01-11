@@ -41,9 +41,9 @@ public class SsoLogoutHandler extends HttpServlet {
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         for (String path : HandlerConstants.SSO_LOGOUT_COOKIE_PATHS) {
-            removeCookie(HandlerConstants.JSESSIONID_KEY, System.getProperty("iot.core.host"), path, resp);
+            removeCookie(HandlerConstants.JSESSIONID_KEY, path, resp);
         }
-        removeCookie(HandlerConstants.COMMON_AUTH_ID_KEY, System.getProperty("iot.core.host"), "/", resp);
+        removeCookie(HandlerConstants.COMMON_AUTH_ID_KEY, "/", resp);
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(HttpStatus.SC_OK);
 
@@ -58,11 +58,9 @@ public class SsoLogoutHandler extends HttpServlet {
         }
     }
 
-    private static void removeCookie(String cookieName, String domain,
-                                     String path, HttpServletResponse response) {
+    private static void removeCookie(String cookieName,String path, HttpServletResponse response) {
         Cookie cookie = new Cookie(cookieName, "");
         cookie.setPath(path);
-        cookie.setDomain(domain);
         cookie.setValue(null);
         cookie.setMaxAge(0);
         response.addCookie(cookie);

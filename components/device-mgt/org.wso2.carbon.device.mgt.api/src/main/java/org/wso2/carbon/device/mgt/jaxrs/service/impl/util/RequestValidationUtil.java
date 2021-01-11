@@ -26,6 +26,7 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.OperationLogFilters;
+import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
@@ -42,16 +43,11 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.PolicyWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ProfileFeature;
 import org.wso2.carbon.device.mgt.jaxrs.beans.RoleInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceTypeManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.policy.mgt.common.PolicyPayloadValidator;
 
-import javax.ws.rs.core.Response;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -122,6 +118,26 @@ public class RequestValidationUtil {
         if (isErroneous) {
             throw new InputValidationException(error.setCode(400l).setMessage("Invalid device identifier").build());
 
+        }
+    }
+
+    /**
+     * validating the package name requested by user
+     *
+     * @param applications All the applications in the device
+     * @param packageName  Package name sen by the user
+     */
+    public static void validateApplicationIdentifier(String packageName, List<Application> applications) {
+        List<String> packageNames = new ArrayList<>();
+        for (Application application : applications) {
+            packageNames.add(application.getApplicationIdentifier());
+        }
+        if (!packageNames.contains(packageName)) {
+            String msg = "Invalid package name";
+            log.error(msg);
+            throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
+                    .setCode(HttpStatus.SC_BAD_REQUEST)
+                    .setMessage(msg).build());
         }
     }
 

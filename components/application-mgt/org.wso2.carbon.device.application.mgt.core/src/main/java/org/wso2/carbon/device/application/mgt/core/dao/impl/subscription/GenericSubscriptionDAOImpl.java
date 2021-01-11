@@ -931,6 +931,42 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
+    public String getUUID(int id, String packageName) throws ApplicationManagementDAOException {
+        try {
+            Connection conn = this.getDBConnection();
+            String sql = "SELECT " +
+                    "AP_APP_RELEASE.UUID " +
+                    "FROM  AP_DEVICE_SUBSCRIPTION " +
+                    "JOIN AP_APP_RELEASE " +
+                    "ON " +
+                    "AP_DEVICE_SUBSCRIPTION.AP_APP_RELEASE_ID = AP_APP_RELEASE.AP_APP_ID " +
+                    "WHERE PACKAGE_NAME = ? " +
+                    "AND DM_DEVICE_ID = ?" +
+                    "AND UNSUBSCRIBED = 'FALSE' " +
+                    "AND STATUS = 'COMPLETED';";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, packageName);
+                stmt.setInt(2, id);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("UUID");
+                    }
+                    return null;
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg =
+                    "Error occurred while obtaining the DB connection to check an application is subscribed ";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when processing SQL to check an application is subscribed";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
     public List<ScheduledSubscriptionDTO> getScheduledSubscriptionByStatus(ExecutionStatus status, boolean deleted)
             throws ApplicationManagementDAOException {
         String sql = "SELECT "

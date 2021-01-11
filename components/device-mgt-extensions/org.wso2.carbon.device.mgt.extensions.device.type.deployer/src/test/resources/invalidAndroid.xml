@@ -180,6 +180,10 @@
             <Name>Uninstall App</Name>
             <Description>Uninstall App</Description>
         </Feature>
+        <Feature code="UNMANAGED_APP_UNINSTALL">
+            <Name>Uninstall App</Name>
+            <Description>Uninstall user installed App</Description>
+        </Feature>
         <Feature code="BLACKLIST_APPLICATIONS">
             <Name>Blacklist app</Name>
             <Description>Blacklist applications</Description>

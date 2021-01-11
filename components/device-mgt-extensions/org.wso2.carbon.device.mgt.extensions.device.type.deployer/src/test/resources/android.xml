@@ -176,6 +176,10 @@
             <Name>Install App</Name>
             <Description>Install App</Description>
         </Feature>
+        <Feature code="UNMANAGED_APP_UNINSTALL">
+            <Name>Uninstall App</Name>
+            <Description>Uninstall user installed App</Description>
+        </Feature>
         <Feature code="UNINSTALL_APPLICATION">
             <Name>Uninstall App</Name>
             <Description>Uninstall App</Description>
