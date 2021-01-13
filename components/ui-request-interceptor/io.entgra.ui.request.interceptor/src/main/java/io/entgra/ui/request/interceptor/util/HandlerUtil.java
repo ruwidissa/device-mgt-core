@@ -23,6 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,17 +37,26 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
 import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
+import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class HandlerUtil {
 
@@ -361,5 +371,34 @@ public class HandlerUtil {
         } else {
             return null;
         }
+    }
+
+    /***
+     * Converts xml file into string.
+     *
+     * @param xmlFile - xmlFile which needs to be converted into string.
+     * @return string value of the xml file.
+     */
+    public static String xmlToString(File xmlFile) {
+        String stringOutput = null;
+
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(xmlFile);
+            OutputFormat format = new OutputFormat(doc);
+            StringWriter stringWriterOutput = new StringWriter();
+            XMLSerializer serial = new XMLSerializer(stringWriterOutput, format);
+            serial.serialize(doc);
+            stringOutput = stringWriterOutput.toString();
+        } catch (IOException e) {
+            log.error("Error occurred while sending the response into the socket. ", e);
+        } catch (ParserConfigurationException e) {
+            log.error("Error while creating the document builder.");
+        } catch ( SAXException e) {
+            log.error("Error while parsing xml file.", e);
+        }
+
+        return stringOutput;
     }
 }

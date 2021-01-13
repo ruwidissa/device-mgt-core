@@ -26,6 +26,7 @@ public class HandlerConstants {
     public static final String INTROSPECT_ENDPOINT = "/oauth2/introspect";
     public static final String AUTHORIZATION_ENDPOINT = "/oauth2/authorize";
     public static final String APIM_APPLICATIONS_ENDPOINT = "/api/am/store/v0.12/applications/";
+    public static final String IDENTITY_APP_MGT_ENDPOINT = "/services/IdentityApplicationManagementService.IdentityApplicationManagementServiceHttpsSoap11Endpoint";
     public static final String LOGIN_PAGE = "/login";
     public static final String SSO_LOGIN_CALLBACK = "/ssoLoginCallback";
     public static final String BASIC = "Basic ";
@@ -53,13 +54,19 @@ public class HandlerConstants {
     public static final String REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
     public static final String PASSWORD_GRANT_TYPE = "password";
     public static final String JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+    public static final String PRODUCTION_KEY = "PRODUCTION";
 
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";
     public static final String HTTP_PROTOCOL = "http";
+    public static final String UNDERSCORE = "_";
 
     public static final int INTERNAL_ERROR_CODE = 500;
     public static final long TIMEOUT = 1200;
 
     public static final String OTP_HEADER = "one-time-token";
+
+    public static final String AX_PREFIX = "ax2317:";
+    public static final String PAYLOADS_DIR = "repository/resources/payloads";
+    public static final String SOAP_ACTION_HEADER = "SOAPAction";
 }
