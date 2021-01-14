@@ -457,6 +457,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             if (device.getEnrolmentInfo().getId() == 0) {
                 device.getEnrolmentInfo().setId(currentDevice.getEnrolmentInfo().getId());
             }
+            if (device.getEnrolmentInfo().getStatus() == null) {
+                device.getEnrolmentInfo().setStatus(currentDevice.getEnrolmentInfo().getStatus());
+            }
             if (device.getName() == null) {
                 device.setName(currentDevice.getName());
             }
