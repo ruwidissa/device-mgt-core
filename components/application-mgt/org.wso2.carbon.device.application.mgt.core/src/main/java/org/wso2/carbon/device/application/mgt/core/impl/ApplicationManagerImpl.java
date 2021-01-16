@@ -3509,7 +3509,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new NotFoundException(msg);
             }
             ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
-            String artifactDownloadURL = APIUtil.getArtifactDownloadBaseURL() + applicationReleaseDTO.getUuid()
+
+            String artifactDownloadURL = APIUtil.getArtifactDownloadBaseURL()
+                    + tenantId + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid()
                     + Constants.FORWARD_SLASH + Constants.APP_ARTIFACT + Constants.FORWARD_SLASH +
                                          applicationReleaseDTO.getInstallerName();
             String plistContent = "&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTDPLIST1.0//EN&quot; &quot;" +
