@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements SubscriptionDAO {
-    private static Log log = LogFactory.getLog(GenericSubscriptionDAOImpl.class);
+    private static final Log log = LogFactory.getLog(GenericSubscriptionDAOImpl.class);
 
     @Override
     public void addDeviceSubscription(String subscribedBy, List<Integer> deviceIds,

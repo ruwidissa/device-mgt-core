@@ -19,6 +19,7 @@ package org.wso2.carbon.device.mgt.common.spi;
 
 import org.wso2.carbon.device.mgt.common.QREnrollmentPayload;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.general.QREnrollmentDetails;
 
 /**
  * This implementation populates device type plugin management service.
@@ -28,9 +29,10 @@ public interface DeviceTypeCommonService {
     /**
      * To get Enrollment QR code against Ownership type
      *
+     * @param qrEnrollmentDetails QR Enrollment Details
      * @return {@link QREnrollmentPayload} object with payload to generate QR, invalidPlatformConfigs
      * and optionalPlatformConfigs.
      * @throws DeviceManagementException if error occurred while generating the QR String for Ownership
      */
-    QREnrollmentPayload getEnrollmentQRCode(String ownershipType) throws DeviceManagementException;
+    QREnrollmentPayload getEnrollmentQRCode(QREnrollmentDetails qrEnrollmentDetails) throws DeviceManagementException;
 }
