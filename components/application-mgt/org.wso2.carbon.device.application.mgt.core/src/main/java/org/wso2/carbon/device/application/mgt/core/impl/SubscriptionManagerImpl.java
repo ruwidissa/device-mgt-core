@@ -371,10 +371,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = this.subscriptionDAO
                             .getDeviceSubscriptions(applicationDTO.getApplicationReleaseDTOs().get(0).getId(),
                                     tenantId);
+
                     AtomicBoolean isAppSubscribable = new AtomicBoolean(true);
                     for (DeviceSubscriptionDTO deviceSubscriptionDTO : deviceSubscriptionDTOS) {
-                        if (device.getId() == deviceSubscriptionDTO.getDeviceId() && !deviceSubscriptionDTO
-                                .isUnsubscribed()) {
+                        if (device.getId() == deviceSubscriptionDTO.getDeviceId() &&
+                                (Operation.Status.PENDING.toString().equals(deviceSubscriptionDTO.getStatus())
+                                || Operation.Status.IN_PROGRESS.toString().equals(deviceSubscriptionDTO.getStatus()))) {
                             isAppSubscribable.set(false);
                             break;
                         }
