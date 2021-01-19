@@ -67,6 +67,11 @@
             <groupId>org.wso2.carbon.registry</groupId>
             <artifactId>org.wso2.carbon.registry.indexing</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>org.wso2.carbon.identity.jwt.client.extension</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -110,6 +115,7 @@
 							org.wso2.carbon.apimgt.integration.client.*,
 							org.wso2.carbon.apimgt.integration.generated.client.store.api,
 							org.wso2.carbon.apimgt.integration.generated.client.store.model,
+                            org.wso2.carbon.identity.jwt.client.extension.*,
 							feign
                         </Import-Package>
                         <Export-Package>

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.application.extension;
 import feign.FeignException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.application.extension.bean.APIRegistrationProfile;
 import org.wso2.carbon.apimgt.application.extension.constants.ApiApplicationConstants;
 import org.wso2.carbon.apimgt.application.extension.dto.ApiApplicationKey;
 import org.wso2.carbon.apimgt.application.extension.exception.APIManagerException;
@@ -30,6 +31,11 @@ import org.wso2.carbon.apimgt.integration.client.OAuthRequestInterceptor;
 import org.wso2.carbon.apimgt.integration.client.store.StoreClient;
 import org.wso2.carbon.apimgt.integration.generated.client.store.model.*;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
+import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
+import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
+import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
@@ -229,5 +235,88 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             throws APIManagerException {
         return this.generateAndRetrieveApplicationKeys(applicationName, tags, keyType, username,
                 isAllowedAllDomains, validityTime, null);
+    }
+
+    @Override
+    public String getAccessToken(String scopes, String[] tags, String applicationName, String tokenType,
+            String validityPeriod) throws APIManagerException {
+        try {
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+            ApiApplicationKey clientCredentials = getClientCredentials(tenantDomain, tags, applicationName, tokenType,
+                    validityPeriod);
+
+            if (clientCredentials == null) {
+                String msg = "Oauth Application creation is failed.";
+                log.error(msg);
+                throw new APIManagerException(msg);
+            }
+
+            String user =
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + "@" + PrivilegedCarbonContext
+                            .getThreadLocalCarbonContext().getTenantDomain(true);
+
+            JWTClientManagerService jwtClientManagerService = APIApplicationManagerExtensionDataHolder.getInstance()
+                    .getJwtClientManagerService();
+            JWTClient jwtClient = jwtClientManagerService.getJWTClient();
+            AccessTokenInfo accessTokenForAdmin = jwtClient
+                    .getAccessToken(clientCredentials.getConsumerKey(), clientCredentials.getConsumerSecret(), user,
+                            scopes);
+
+            return accessTokenForAdmin.getAccessToken();
+        } catch (JWTClientException e) {
+            String msg = "JWT Error occurred while registering Application to get access token.";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
+        } catch (APIManagerException e) {
+            String msg = "Error occurred while getting access tokens.";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "User management exception when getting client credentials.";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
+        }
+    }
+
+    /**
+     * Get Client credentials
+     * @param tenantDomain Tenant Domain
+     * @param tags Tags
+     * @param applicationName Application Name
+     * @param tokenType Token Type
+     * @param validityPeriod Validity Period
+     * @return {@link ApiApplicationKey}
+     * @throws APIManagerException if error occurred while generating access token
+     * @throws UserStoreException if error ocurred while getting admin username.
+     */
+    private ApiApplicationKey getClientCredentials(String tenantDomain, String[] tags, String applicationName,
+            String tokenType, String validityPeriod) throws APIManagerException, UserStoreException {
+
+        APIRegistrationProfile registrationProfile = new APIRegistrationProfile();
+        registrationProfile.setAllowedToAllDomains(false);
+        registrationProfile.setMappingAnExistingOAuthApp(false);
+        registrationProfile.setTags(tags);
+        registrationProfile.setApplicationName(applicationName);
+
+        ApiApplicationKey info = null;
+        if (tenantDomain == null || tenantDomain.isEmpty()) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration()
+                            .getAdminUserName());
+
+            if (registrationProfile.getUsername() == null || registrationProfile.getUsername().isEmpty()) {
+                info = generateAndRetrieveApplicationKeys(registrationProfile.getApplicationName(),
+                        registrationProfile.getTags(), tokenType, registrationProfile.getApplicationName(),
+                        registrationProfile.isAllowedToAllDomains(), validityPeriod);
+            }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        return info;
     }
 }

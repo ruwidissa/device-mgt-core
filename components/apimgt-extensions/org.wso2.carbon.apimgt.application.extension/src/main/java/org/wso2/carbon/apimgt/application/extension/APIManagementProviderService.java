@@ -77,4 +77,18 @@ public interface APIManagementProviderService {
      */
     void removeAPIApplication(String applicationName, String username) throws APIManagerException;
 
+    /**
+     * To get access token for given scopes and for the given validity period
+     * @param scopes Scopes
+     * @param tags Tags
+     * @param applicationName Application Name
+     * @param tokenType Token Type
+     * @param validityPeriod Validity Period
+     * @return {@link String} Access Token
+     * @throws APIManagerException if error occurred while getting the access token for given scopes,
+     * validity period etc.
+     */
+    String getAccessToken(String scopes, String[] tags, String applicationName, String tokenType, String validityPeriod)
+            throws APIManagerException;
+
 }

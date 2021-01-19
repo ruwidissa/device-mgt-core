@@ -58,16 +58,20 @@ import org.wso2.carbon.user.core.service.RealmService;
  */
 public class APIApplicationManagerExtensionServiceComponent {
 
-    private static Log log = LogFactory.getLog(APIApplicationManagerExtensionServiceComponent.class);
+    private static final Log log = LogFactory.getLog(APIApplicationManagerExtensionServiceComponent.class);
 
     protected void activate(ComponentContext componentContext) {
-        if (log.isDebugEnabled()) {
-            log.debug("Initializing device extension bundle");
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Initializing device extension bundle");
+            }
+            APIManagementProviderService apiManagementProviderService = new APIManagementProviderServiceImpl();
+            APIApplicationManagerExtensionDataHolder.getInstance().setAPIManagementProviderService(apiManagementProviderService);
+            BundleContext bundleContext = componentContext.getBundleContext();
+            bundleContext.registerService(APIManagementProviderService.class.getName(), apiManagementProviderService, null);
+        }  catch (Throwable e) {
+            log.error("Error occurred while initializing API application management extension bundle", e);
         }
-        APIManagementProviderService apiManagementProviderService = new APIManagementProviderServiceImpl();
-        APIApplicationManagerExtensionDataHolder.getInstance().setAPIManagementProviderService(apiManagementProviderService);
-        BundleContext bundleContext = componentContext.getBundleContext();
-        bundleContext.registerService(APIManagementProviderService.class.getName(), apiManagementProviderService, null);
     }
 
     protected void deactivate(ComponentContext componentContext) {
