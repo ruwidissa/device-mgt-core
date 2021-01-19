@@ -19,10 +19,14 @@ package org.wso2.carbon.apimgt.application.extension.internal;
 
 import org.wso2.carbon.apimgt.application.extension.APIManagementProviderService;
 import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+
+import java.util.Hashtable;
 
 public class APIApplicationManagerExtensionDataHolder {
     private static APIApplicationManagerExtensionDataHolder thisInstance = new APIApplicationManagerExtensionDataHolder();
@@ -32,6 +36,7 @@ public class APIApplicationManagerExtensionDataHolder {
     private TenantRegistryLoader tenantRegistryLoader;
     private TenantIndexingLoader indexLoader;
     private IntegrationClientService integrationClientService;
+    private JWTClientManagerService jwtClientManagerService;
 
     private APIApplicationManagerExtensionDataHolder() {
     }
@@ -96,5 +101,17 @@ public class APIApplicationManagerExtensionDataHolder {
     public void setIntegrationClientService(
             IntegrationClientService integrationClientService) {
         this.integrationClientService = integrationClientService;
+    }
+
+    public JWTClientManagerService getJwtClientManagerService() {
+        if (jwtClientManagerService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            jwtClientManagerService = (JWTClientManagerService)ctx.getOSGiService(JWTClientManagerService.class, (Hashtable)null);
+        }
+        return jwtClientManagerService;
+    }
+
+    public void setJwtClientManagerService(JWTClientManagerService jwtClientManagerService) {
+        this.jwtClientManagerService = jwtClientManagerService;
     }
 }
