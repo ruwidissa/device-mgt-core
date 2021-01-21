@@ -53,7 +53,7 @@ public class GroupEventOperationExecutor implements Runnable {
     private static final Log log = LogFactory.getLog(GroupEventOperationExecutor.class);
 
     private final int groupId;
-    private final List<DeviceIdentifier> deviceIdentifiers;
+    private final List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
     private final int tenantId;
     private final String operationCode;
     private final GeoLocationProviderService geoLocationProviderService;
@@ -62,7 +62,11 @@ public class GroupEventOperationExecutor implements Runnable {
 
     public GroupEventOperationExecutor(int groupId, List<DeviceIdentifier> deviceIdentifiers, int tenantId, String operationCode) {
         this.groupId = groupId;
-        this.deviceIdentifiers = deviceIdentifiers;
+        for (DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
+            if (deviceIdentifier.getType().equalsIgnoreCase("android")) {
+                this.deviceIdentifiers.add(deviceIdentifier);
+            }
+        }
         this.tenantId = tenantId;
         this.operationCode = operationCode;
         this.geoLocationProviderService = DeviceManagementDataHolder.getInstance().getGeoLocationProviderService();
