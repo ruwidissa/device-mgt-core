@@ -31,7 +31,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
-import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
+import io.entgra.ui.request.interceptor.beans.ProxyResponse;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -131,7 +131,7 @@ public class DefaultTokenHandler extends HttpServlet {
 
         URIBuilder ub = new URIBuilder();
         ub.setScheme(HandlerConstants.WSS_PROTOCOL);
-        ub.setHost(System.getProperty(System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)));
+        ub.setHost(System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR));
         ub.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_CORE_PORT_ENV_VAR)));
         ub.setPath(HandlerConstants.REMOTE_SESSION_CONTEXT);
 
