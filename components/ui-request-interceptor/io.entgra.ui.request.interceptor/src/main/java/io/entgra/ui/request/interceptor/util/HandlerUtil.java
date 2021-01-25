@@ -23,7 +23,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,7 +41,7 @@ import org.apache.xml.serialize.XMLSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
-import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
+import io.entgra.ui.request.interceptor.beans.ProxyResponse;
 import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;

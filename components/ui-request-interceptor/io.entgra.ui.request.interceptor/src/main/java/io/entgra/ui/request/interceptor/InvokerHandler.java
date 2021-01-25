@@ -47,7 +47,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.InputStreamBody;
-import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
+import io.entgra.ui.request.interceptor.beans.ProxyResponse;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;

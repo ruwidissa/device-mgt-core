@@ -23,7 +23,7 @@ import io.entgra.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
-import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
+import io.entgra.ui.request.interceptor.beans.ProxyResponse;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
