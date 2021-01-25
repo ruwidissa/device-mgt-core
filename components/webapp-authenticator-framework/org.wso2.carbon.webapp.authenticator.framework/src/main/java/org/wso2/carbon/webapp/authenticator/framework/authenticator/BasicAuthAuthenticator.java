@@ -81,7 +81,17 @@ public class BasicAuthAuthenticator implements WebappAuthenticator {
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
         Credentials credentials = getCredentials(request);
         try {
+            if (credentials == null) {
+                authenticationInfo.setMessage("Found invalid payload to authenticate.");
+                authenticationInfo.setStatus(Status.FAILURE);
+                return authenticationInfo;
+            }
             int tenantId = Utils.getTenantIdOFUser(credentials.getUsername());
+            if (tenantId == -1) {
+                authenticationInfo.setMessage("Tenant Domain doesn't exists or tenant domain hasn't loaded properly.");
+                authenticationInfo.setStatus(Status.FAILURE);
+                return authenticationInfo;
+            }
             UserStoreManager userStore = AuthenticatorFrameworkDataHolder.getInstance().getRealmService().
                     getTenantUserRealm(tenantId).getUserStoreManager();
             String username = MultitenantUtils.getTenantAwareUsername(credentials.getUsername());

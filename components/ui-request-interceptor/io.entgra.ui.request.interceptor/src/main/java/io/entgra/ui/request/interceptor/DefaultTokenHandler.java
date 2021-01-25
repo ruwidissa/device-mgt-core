@@ -17,6 +17,7 @@
 
 package io.entgra.ui.request.interceptor;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -28,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
 
@@ -122,13 +124,27 @@ public class DefaultTokenHandler extends HttpServlet {
 
     /**
      * Get Success Proxy Response
-     * @param responseString Response String
+     * @param defaultAccessToken Access token which has default scope
      * @return {@link ProxyResponse}
      */
-    private ProxyResponse constructSuccessProxyResponse (String responseString) {
+    private ProxyResponse constructSuccessProxyResponse (String defaultAccessToken) {
+
+        URIBuilder ub = new URIBuilder();
+        ub.setScheme(HandlerConstants.WSS_PROTOCOL);
+        ub.setHost(System.getProperty(System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)));
+        ub.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_CORE_PORT_ENV_VAR)));
+        ub.setPath(HandlerConstants.REMOTE_SESSION_CONTEXT);
+
+        JsonObject responseJsonObj = new JsonObject();
+        responseJsonObj.addProperty("default-access-token", defaultAccessToken);
+        responseJsonObj.addProperty("remote-session-base-url", ub.toString());
+
+        Gson gson = new Gson();
+        String payload = gson.toJson(responseJsonObj);
+
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(HttpStatus.SC_OK);
-        proxyResponse.setData(responseString);
+        proxyResponse.setData(payload);
         return proxyResponse;
     }
 }

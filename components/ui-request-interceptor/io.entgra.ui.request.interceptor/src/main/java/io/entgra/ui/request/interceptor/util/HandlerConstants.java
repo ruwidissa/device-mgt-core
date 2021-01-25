@@ -69,4 +69,11 @@ public class HandlerConstants {
     public static final String AX_PREFIX = "ax2317:";
     public static final String PAYLOADS_DIR = "repository/resources/payloads";
     public static final String SOAP_ACTION_HEADER = "SOAPAction";
+
+    public static final String WSS_PROTOCOL = "wss";
+    public static final String REMOTE_SESSION_CONTEXT = "/remote/session/clients";
+
+    public static final String IOT_CORE_HOST_ENV_VAR = "iot.core.host";
+    public static final String IOT_CORE_PORT_ENV_VAR = "iot.core.https.port";
+
 }
