@@ -36,7 +36,7 @@ public class EnrolmentInfo implements Serializable {
     }
 
     public enum OwnerShip {
-        BYOD, COPE, WORK_PROFILE, GOOGLE_ENTERPRISE, COSU
+        BYOD, COPE, WORK_PROFILE, GOOGLE_ENTERPRISE, COSU, FULLY_MANAGED, DEDICATED_DEVICE
     }
 
     @ApiModelProperty(name = "id", value = "ID of the device in the WSO2 EMM device information database.",
