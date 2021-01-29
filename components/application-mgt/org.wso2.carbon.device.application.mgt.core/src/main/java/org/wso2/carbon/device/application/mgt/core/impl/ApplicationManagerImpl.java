@@ -1969,7 +1969,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationDTO applicationDTO = getApplication(applicationId);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            if (!StringUtils.isEmpty(applicationUpdateWrapper.getName())){
+            if (!StringUtils.isEmpty(applicationUpdateWrapper.getName()) && !applicationDTO.getName()
+                    .equals(applicationUpdateWrapper.getName())) {
                 if (applicationDAO
                         .isExistingAppName(applicationUpdateWrapper.getName().trim(), applicationDTO.getDeviceTypeId(),
                                 tenantId)) {
