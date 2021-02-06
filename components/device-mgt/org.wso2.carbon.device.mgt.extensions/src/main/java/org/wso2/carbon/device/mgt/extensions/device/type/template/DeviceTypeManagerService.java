@@ -49,6 +49,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.general.GeneralConfig;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
+import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
@@ -90,6 +91,7 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     private PolicyMonitoringManager policyMonitoringManager;
     private final InitialOperationConfig initialOperationConfig;
     private StartupOperationConfig startupOperationConfig;
+    private License licenseConfig;
     private PullNotificationSubscriber pullNotificationSubscriber;
     private final DeviceStatusTaskPluginConfig deviceStatusTaskPluginConfig;
     private DeviceTypePlatformDetails deviceTypePlatformDetails;
@@ -120,6 +122,8 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         this.setGeneralConfig(deviceTypeConfiguration);
         this.deviceEnrollmentInvitationDetails = new DeviceEnrollmentInvitationDetails();
         this.setDeviceEnrollmentInvitationDetails(deviceTypeConfiguration);
+        this.licenseConfig = new License();
+        this.setLicenseConfig(deviceTypeConfiguration);
     }
 
     @Override
@@ -268,6 +272,11 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         return deviceEnrollmentInvitationDetails;
     }
 
+    @Override
+    public License getLicenseConfig() {
+        return licenseConfig;
+    }
+
     private void setProvisioningConfig(String tenantDomain, DeviceTypeConfiguration deviceTypeConfiguration) {
         if (deviceTypeConfiguration.getProvisioningConfig() != null) {
             boolean sharedWithAllTenants = deviceTypeConfiguration.getProvisioningConfig().isSharedWithAllTenants();
@@ -370,6 +379,17 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         if (deviceEnrollmentInvitationDetailsFromConfig != null) {
             deviceEnrollmentInvitationDetails.setEnrollmentDetails(
                     deviceEnrollmentInvitationDetailsFromConfig.getEnrollmentDetails());
+        }
+    }
+
+    public void setLicenseConfig(DeviceTypeConfiguration deviceTypeConfiguration) {
+        org.wso2.carbon.device.mgt.extensions.device.type.template.config.License license = deviceTypeConfiguration
+                .getLicense();
+        if (license != null) {
+            licenseConfig.setName(deviceTypeConfiguration.getName());
+            licenseConfig.setLanguage(license.getLanguage());
+            licenseConfig.setVersion(license.getVersion());
+            licenseConfig.setText(license.getText());
         }
     }
 }

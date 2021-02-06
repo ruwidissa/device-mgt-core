@@ -964,4 +964,6 @@ public interface DeviceManagementProviderService {
     int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
             throws OperationManagementException;
 
+    License getLicenseConfig (String deviceTypeName) throws DeviceManagementException;
+
 }
