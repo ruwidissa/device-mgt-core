@@ -24,13 +24,15 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
+import org.wso2.carbon.device.mgt.common.event.config.EventMetaData;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
-import org.wso2.carbon.device.mgt.common.event.config.EventTaskEntry;
+import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,13 +40,19 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class EventConfigurationProviderServiceImpl implements EventConfigurationProviderService {
     private static final Log log = LogFactory.getLog(EventConfigurationProviderServiceImpl.class);
     private final EventConfigDAO eventConfigDAO;
+    private final ExecutorService executorService;
 
     public EventConfigurationProviderServiceImpl() {
         eventConfigDAO = DeviceManagementDAOFactory.getEventConfigDAO();
+        EventOperationTaskConfiguration eventConfig = DeviceConfigurationManager.getInstance()
+                .getDeviceManagementConfig().getEventOperationTaskConfiguration();
+        this.executorService = Executors.newFixedThreadPool(eventConfig.getPoolSize());
     }
 
     @Override
@@ -239,26 +247,10 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
     }
 
     @Override
-    public void createEventOperationTask(EventTaskEntry eventTaskEntry, List<Integer> groupIds)
-            throws EventConfigurationException {
-        try {
-            DeviceManagementDAOFactory.beginTransaction();
-            eventConfigDAO.createEventTaskEntry(eventTaskEntry, groupIds);
-            DeviceManagementDAOFactory.commitTransaction();
-        } catch (TransactionManagementException e) {
-            String msg = "Failed to start transaction while creating event operation task entries of tenant "
-                    + eventTaskEntry.getTenantId();
-            log.error(msg, e);
-            throw new EventConfigurationException(msg, e);
-        } catch (EventManagementDAOException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
-            String msg = "Error occurred while creating event task entries for event " + eventTaskEntry
-                    .getEventSource() + " with code " + eventTaskEntry.getOperationCode() + " of the tenant "
-                    + eventTaskEntry.getTenantId();
-            log.error(msg, e);
-            throw new EventConfigurationException(msg, e);
-        } finally {
-            DeviceManagementDAOFactory.closeConnection();
-        }
+    public void createEventOperationTask(String eventType, String eventCode, EventMetaData eventMeta, int tenantId,
+                                         List<Integer> groupIds) {
+        GeoFenceEventOperationManager geoFenceEventOperationManager = new GeoFenceEventOperationManager(eventType, tenantId, null);
+        EventOperationExecutor executor = geoFenceEventOperationManager.getEventOperationExecutor(groupIds, eventMeta);
+        this.executorService.submit(executor);
     }
 }

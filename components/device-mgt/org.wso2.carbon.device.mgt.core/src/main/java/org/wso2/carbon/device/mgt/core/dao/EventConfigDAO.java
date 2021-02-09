@@ -19,7 +19,6 @@
 package org.wso2.carbon.device.mgt.core.dao;
 
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
-import org.wso2.carbon.device.mgt.common.event.config.EventTaskEntry;
 
 import java.util.List;
 import java.util.Map;
@@ -114,33 +113,4 @@ public interface EventConfigDAO {
      * @throws EventManagementDAOException thrown errors while retrieving event sources
      */
     List<String> getEventSourcesOfGroups(int groupId, int tenantId) throws EventManagementDAOException;
-
-    /**
-     * Create record for event creation task which will be executed periodically
-     * @param eventTaskEntry event task object
-     * @param groupIds group ids of the event assigned
-     * @return true if record added successfully
-     * @throws EventManagementDAOException failed while creating the entry record
-     */
-    boolean createEventTaskEntry(EventTaskEntry eventTaskEntry, List<Integer> groupIds) throws EventManagementDAOException;
-
-    /**
-     * Retrieve task entries by status of the task
-     * @param status status of the task
-     * @return map of tenant id and event task entries
-     * @throws EventManagementDAOException if errors occurred while retrieving records
-     */
-    Map<Integer, List<EventTaskEntry>> getAvailableEventTaskEntries(String status) throws EventManagementDAOException;
-
-    /**
-     * Update event task records of group and set them as COMPLETED
-     * @param code operation code
-     * @param eventSource source of the event to be updated
-     * @param groupIds groupId list of the task entries
-     * @param tenantId tenant of the records
-     * @return true if the update done successfully
-     * @throws EventManagementDAOException if errors occurred while retrieving records
-     */
-    boolean setEventTaskComplete(String code, String eventSource, List<Integer> groupIds, int tenantId)
-            throws EventManagementDAOException;
 }

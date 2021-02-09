@@ -49,8 +49,8 @@ import java.util.List;
  * Event create/revoke operation creation task.
  * Use at the time of devices assign into group, remove from group.
  */
-public class GroupEventOperationExecutor implements Runnable {
-    private static final Log log = LogFactory.getLog(GroupEventOperationExecutor.class);
+public class GroupAssignmentEventOperationExecutor implements Runnable {
+    private static final Log log = LogFactory.getLog(GroupAssignmentEventOperationExecutor.class);
 
     private final int groupId;
     private final List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
@@ -59,8 +59,11 @@ public class GroupEventOperationExecutor implements Runnable {
     private final GeoLocationProviderService geoLocationProviderService;
     private final EventConfigurationProviderService eventConfigurationService;
     private EventCreateCallback callback;
+    private List<String> eventSources;
 
-    public GroupEventOperationExecutor(int groupId, List<DeviceIdentifier> deviceIdentifiers, int tenantId, String operationCode) {
+    private List<GeofenceData> geoFencesOfGroup;
+
+    public GroupAssignmentEventOperationExecutor(int groupId, List<DeviceIdentifier> deviceIdentifiers, int tenantId, String operationCode) {
         this.groupId = groupId;
         for (DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
             if (deviceIdentifier.getType().equalsIgnoreCase("android")) {
@@ -75,16 +78,32 @@ public class GroupEventOperationExecutor implements Runnable {
 
     @Override
     public void run() {
-        log.info("Starting event operation creation task for devices in group " + groupId + " tenant " + tenantId);
         if (log.isDebugEnabled()) {
             log.debug("Event creation operation started for devices with IDs " + Arrays.toString(deviceIdentifiers.toArray()));
             log.debug("Starting tenant flow for tenant with ID : " + tenantId);
         }
-        ProfileOperation operation = new ProfileOperation();
+
+        try {
+            this.eventSources = eventConfigurationService.getEventsSourcesOfGroup(groupId, tenantId);
+            if (this.eventSources == null || this.eventSources.isEmpty()) {
+                String msg = "No events applied for queried group with ID " + groupId;
+                if (log.isDebugEnabled()) {
+                    log.debug(msg);
+                }
+                return;
+            }
+        } catch (EventConfigurationException e) {
+            String msg = "Failed while retrieving event records of group " + groupId + "of the tenant " + tenantId;
+            log.error(msg, e);
+            return;
+        }
+
         if (operationCode != null) {
+            ProfileOperation operation = new ProfileOperation();
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
             try {
+                initEventMeta(); // Initialize all event based meta data of the group
                 operation.setCode(operationCode);
                 operation.setType(Operation.Type.PROFILE);
                 if (operationCode.equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_CONFIG)) {
@@ -92,7 +111,6 @@ public class GroupEventOperationExecutor implements Runnable {
                 } else if (operationCode.equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_REVOKE)) {
                     buildEventRevokeOperation(operation);
                 }
-
             } catch (EventConfigurationException e) {
                 log.error("Failed to retrieve event sources of group " + groupId + ". Event creation operation failed.", e);
                 return;
@@ -107,7 +125,9 @@ public class GroupEventOperationExecutor implements Runnable {
                     }
                     deviceManagementProvider.addOperation("android", operation, deviceIdentifiers); //TODO introduce a proper mechanism
                 } else {
-                    log.info("Device identifiers are empty, Hence ignoring adding event operation");
+                    if (log.isDebugEnabled()) {
+                        log.debug("Device identifiers are empty, Hence ignoring adding event operation");
+                    }
                 }
             } catch (OperationManagementException e) {
                 log.error("Creating event operation failed with error ", e);
@@ -115,7 +135,6 @@ public class GroupEventOperationExecutor implements Runnable {
                 log.error("Creating event operation failed.\n" +
                         "Could not found device/devices for the defined device identifiers.", e);
             }
-            log.info("Event operation creation succeeded");
             if (callback != null) {
                 callback.onCompleteEventOperation(null);
             }
@@ -124,21 +143,24 @@ public class GroupEventOperationExecutor implements Runnable {
     }
 
     /**
+     * This method is using for retrieve all types of events mapped with the specific group
+     * @throws EventConfigurationException when fails to retrieve event data of the group
+     */
+    private void initEventMeta() throws EventConfigurationException {
+        this.geoFencesOfGroup = getGeoFencesOfGroup();
+        //Need to be added other event sources which will be declared in future
+    }
+
+    /**
      * Build EVENT_REVOKE operation attaching event payload
      * @param operation operation object to build
      * @throws EventConfigurationException if not events found for the specific group
      */
     private void buildEventRevokeOperation(ProfileOperation operation) throws EventConfigurationException {
-        List<String> eventSources = eventConfigurationService.getEventsSourcesOfGroup(groupId, tenantId);
-        if (eventSources == null || eventSources.isEmpty()) {
-            String msg = "No events applied for queried group with ID " + groupId;
-            log.info(msg);
-            throw new EventConfigurationException(msg);
-        }
-        for (String eventSource : eventSources) {
+        for (String eventSource : this.eventSources) {
             if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
                 setGeoFenceRevokeOperationContent(operation);
-            } //extend with another cases to handle other types of events
+            } //add other cases to handle other types of events
         }
     }
 
@@ -148,29 +170,20 @@ public class GroupEventOperationExecutor implements Runnable {
      * @throws EventConfigurationException if not events found for the specific group
      */
     private void buildEventConfigOperationObject(ProfileOperation operation) throws EventConfigurationException {
-        List<String> eventSources = eventConfigurationService.getEventsSourcesOfGroup(groupId, tenantId);
-        if (eventSources == null || eventSources.isEmpty()) {
-            String msg = "No events applied for queried group with ID " + groupId;
-            log.info(msg);
-            throw new EventConfigurationException(msg);
-        }
-        for (String eventSource : eventSources) {
+        for (String eventSource : this.eventSources) {
             if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
                 setGeoFenceConfigOperationContent(operation);
-            } //extend with another cases to handle other types of events
+            } //add other cases to handle other types of events
         }
     }
 
     /**
      * Set operation payload GeoFence for EVENT_CONFIG operation
      * @param operation operation object to attach payload
-     * @throws EventConfigurationException failed while getting events of group
      */
-    private void setGeoFenceConfigOperationContent(ProfileOperation operation) throws EventConfigurationException {
-        log.info("Geo fence events found attached with group " + groupId + ", Started retrieving geo fences");
-        List<GeofenceData> geoFencesOfGroup = getGeoFencesOfGroup();
+    private void setGeoFenceConfigOperationContent(ProfileOperation operation) {
         List<EventOperation> eventOperationList = new ArrayList<>();
-        for (GeofenceData geofenceData : geoFencesOfGroup) {
+        for (GeofenceData geofenceData : this.geoFencesOfGroup) {
             GeoFenceEventMeta geoFenceEventMeta = new GeoFenceEventMeta(geofenceData);
             EventOperation eventOperation = new EventOperation();
             eventOperation.setEventDefinition(geoFenceEventMeta);
@@ -204,12 +217,10 @@ public class GroupEventOperationExecutor implements Runnable {
     /**
      * Set operation payload GeoFence for EVENT_REVOKE operation
      * @param operation operation object to attach payload
-     * @throws EventConfigurationException failed while getting events of group
      */
-    private void setGeoFenceRevokeOperationContent(ProfileOperation operation) throws EventConfigurationException {
-        List<GeofenceData> geoFencesOfGroup = getGeoFencesOfGroup();
+    private void setGeoFenceRevokeOperationContent(ProfileOperation operation){
         List<EventRevokeOperation> revokeOperationList = new ArrayList<>();
-        for (GeofenceData geofenceData : geoFencesOfGroup) {
+        for (GeofenceData geofenceData : this.geoFencesOfGroup) {
             EventRevokeOperation eventRevokeOperation = new EventRevokeOperation();
             eventRevokeOperation.setEventSource(DeviceManagementConstants.EventServices.GEOFENCE);
             eventRevokeOperation.setId(geofenceData.getId());

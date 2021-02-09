@@ -73,10 +73,13 @@ public interface EventConfigurationProviderService {
     void deleteEvents(List<EventConfig> eventList) throws EventConfigurationException;
 
     /**
-     * Create task entry to be executed at the time of event operation task running
-     * @param eventTaskEntry event task entry
-     * @param groupIds group ids of the event task entry assigned
-     * @throws EventConfigurationException error thrown while creating task records
+     * Create event operation and add them into the corresponding devices
+     * @param eventType EVENT_REVOKE / EVENT_CONFIG
+     * @param eventCode unique code of the event
+     * @param eventMeta event metadata
+     * @param tenantId tenant id
+     * @param groupIds group ids of the corresponding event
      */
-    void createEventOperationTask(EventTaskEntry eventTaskEntry, List<Integer> groupIds) throws EventConfigurationException;
+    void createEventOperationTask(String eventType, String eventCode, EventMetaData eventMeta, int tenantId,
+                                  List<Integer> groupIds) throws EventConfigurationException;
 }
