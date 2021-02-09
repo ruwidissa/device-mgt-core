@@ -31,9 +31,7 @@ import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManager;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypePluginConstants;
 import org.wso2.carbon.device.mgt.extensions.internal.DeviceTypeExtensionDataHolder;
 
@@ -52,17 +50,15 @@ public class MetaRepositoryBasedLicenseManager implements LicenseManager {
         try {
             Metadata metadata = metadataManagementService.retrieveMetadata(licenceKey);
             if (metadata == null) {
-                DeviceType deviceTypeData = DeviceManagerUtil
-                        .getDeviceType(deviceType, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
-
                 DeviceManagementProviderService deviceManagementProviderService = DeviceTypeExtensionDataHolder
                         .getInstance().getDeviceManagementProviderService();
 
-                License license = deviceManagementProviderService.getLicenseConfig(deviceTypeData.getName());
+                License license = deviceManagementProviderService.getLicenseConfig(deviceType);
 
-                if (!StringUtils.isBlank(license.getLanguage()) || !StringUtils.isBlank(license.getName())
-                        || !StringUtils.isBlank(license.getText()) || !StringUtils.isBlank(license.getVersion())) {
-                    addLicense(deviceTypeData.getName(), license);
+                if (license != null && !StringUtils.isBlank(license.getLanguage()) && !StringUtils
+                        .isBlank(license.getName()) && !StringUtils.isBlank(license.getText()) && !StringUtils
+                        .isBlank(license.getVersion())) {
+                    addLicense(deviceType, license);
                     return license;
                 } else {
                     license = new License();
@@ -70,7 +66,7 @@ public class MetaRepositoryBasedLicenseManager implements LicenseManager {
                     license.setVersion("1.0.0");
                     license.setLanguage("en_US");
                     license.setText("This is license text");
-                    addLicense(deviceTypeData.getName(), license);
+                    addLicense(deviceType, license);
                     return license;
                 }
             }
@@ -83,7 +79,8 @@ public class MetaRepositoryBasedLicenseManager implements LicenseManager {
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while getting device details.";
             log.error(msg, e);
-            throw new LicenseManagementException(msg, e);        }
+            throw new LicenseManagementException(msg, e);
+        }
     }
 
     @Override
@@ -105,7 +102,11 @@ public class MetaRepositoryBasedLicenseManager implements LicenseManager {
         MetadataManagementService metadataManagementService = DeviceTypeExtensionDataHolder.getInstance()
                 .getMetadataManagementService();
         try {
-            metadataManagementService.createMetadata(metadata);
+            if (metadataManagementService.retrieveMetadata(licenceKey) != null) {
+                metadataManagementService.updateMetadata(metadata);
+            } else {
+                metadataManagementService.createMetadata(metadata);
+            }
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while saving the licence value in meta data repository";
             log.error(msg, e);

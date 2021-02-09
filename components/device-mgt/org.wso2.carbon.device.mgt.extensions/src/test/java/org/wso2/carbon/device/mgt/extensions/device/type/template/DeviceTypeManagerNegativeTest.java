@@ -26,6 +26,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DataSource;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceDetails;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
@@ -72,7 +73,7 @@ public class DeviceTypeManagerNegativeTest {
     @BeforeClass
     public void setup()
             throws SAXException, JAXBException, ParserConfigurationException, DeviceTypeConfigurationException,
-            IOException, NoSuchFieldException, IllegalAccessException {
+            IOException, NoSuchFieldException, IllegalAccessException, LicenseManagementException {
         ClassLoader classLoader = getClass().getClassLoader();
         URL resourceUrl = classLoader.getResource(Utils.DEVICE_TYPE_FOLDER + "defective-devicetype.xml");
         File configurationFile = null;
@@ -291,7 +292,7 @@ public class DeviceTypeManagerNegativeTest {
      */
     private void createDefectiveDeviceTypeManager()
             throws NoSuchFieldException, SAXException, JAXBException, ParserConfigurationException,
-            DeviceTypeConfigurationException, IOException, IllegalAccessException {
+            DeviceTypeConfigurationException, IOException, IllegalAccessException, LicenseManagementException {
         Field datasourceField = DeviceTypeDAOHandler.class.getDeclaredField("dataSource");
         datasourceField.setAccessible(true);
         Field currentConnection = DeviceTypeDAOHandler.class.getDeclaredField("currentConnection");

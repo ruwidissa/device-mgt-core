@@ -20,7 +20,6 @@ package org.wso2.carbon.device.mgt.extensions.internal;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
-import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
