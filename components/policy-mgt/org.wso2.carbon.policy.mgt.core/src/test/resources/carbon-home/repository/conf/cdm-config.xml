@@ -121,6 +121,9 @@
     <GeoLocationConfiguration>
         <Enabled>false</Enabled>
     </GeoLocationConfiguration>
+    <EventOperationTaskConfiguration>
+        <Enable>true</Enable>
+    </EventOperationTaskConfiguration>
     <OperationAnalyticsConfiguration>
         <PublishLocationResponse>false</PublishLocationResponse>
         <PublishDeviceInfoResponse>false</PublishDeviceInfoResponse>

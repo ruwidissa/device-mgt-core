@@ -96,8 +96,6 @@
     </GeoFenceCacheConfiguration>
     <EventOperationTaskConfiguration>
         <Enable>true</Enable>
-        <!-- Event operation creation thread pool size -->
-        <PoolSize>50</PoolSize>
     </EventOperationTaskConfiguration>
     <CertificateCacheConfiguration>
         <Enable>true</Enable>

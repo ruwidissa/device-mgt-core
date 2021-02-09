@@ -32,13 +32,4 @@ public class EventOperationTaskConfiguration {
     public void setEnabled(boolean enabled) {
         this.isEnabled = enabled;
     }
-
-    @XmlElement(name = "PoolSize", required = true)
-    public int getPoolSize() {
-        return poolSize;
-    }
-
-    public void setPoolSize(int poolSize) {
-        this.poolSize = poolSize;
-    }
 }

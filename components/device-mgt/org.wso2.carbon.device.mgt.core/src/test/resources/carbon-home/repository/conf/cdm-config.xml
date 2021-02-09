@@ -97,6 +97,9 @@
         server environment-->
         <Capacity>10000</Capacity>
     </GeoFenceCacheConfiguration>
+    <EventOperationTaskConfiguration>
+        <Enable>true</Enable>
+    </EventOperationTaskConfiguration>
     <CertificateCacheConfiguration>
         <Enable>false</Enable>
         <ExpiryTime>86400</ExpiryTime>

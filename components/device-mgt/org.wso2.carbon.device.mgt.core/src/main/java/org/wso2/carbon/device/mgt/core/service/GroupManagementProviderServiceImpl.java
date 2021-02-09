@@ -66,7 +66,6 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
     private final GroupDAO groupDAO;
     private final DeviceDAO deviceDAO;
-    private final ExecutorService executorService;
 
     /**
      * Set groupDAO from GroupManagementDAOFactory when class instantiate.
@@ -74,9 +73,6 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
     public GroupManagementProviderServiceImpl() {
         this.groupDAO = GroupManagementDAOFactory.getGroupDAO();
         this.deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
-        EventOperationTaskConfiguration eventConfig = DeviceConfigurationManager.getInstance()
-                .getDeviceManagementConfig().getEventOperationTaskConfiguration();
-        this.executorService = Executors.newFixedThreadPool(eventConfig.getPoolSize());
     }
 
     /**
@@ -1072,6 +1068,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager(eventOperationCode, tenantId, null);
         GroupAssignmentEventOperationExecutor eventOperationExecutor = eventManager
                 .getGroupAssignmentEventExecutor(groupId, deviceIdentifiers);
+        ExecutorService executorService = Executors.newFixedThreadPool(50);
         if (eventOperationExecutor != null) {
             executorService.submit(eventOperationExecutor);
         } else {

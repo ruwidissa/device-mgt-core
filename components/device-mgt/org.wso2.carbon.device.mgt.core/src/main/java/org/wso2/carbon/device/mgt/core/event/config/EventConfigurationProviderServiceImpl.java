@@ -46,13 +46,11 @@ import java.util.concurrent.Executors;
 public class EventConfigurationProviderServiceImpl implements EventConfigurationProviderService {
     private static final Log log = LogFactory.getLog(EventConfigurationProviderServiceImpl.class);
     private final EventConfigDAO eventConfigDAO;
-    private final ExecutorService executorService;
 
     public EventConfigurationProviderServiceImpl() {
         eventConfigDAO = DeviceManagementDAOFactory.getEventConfigDAO();
         EventOperationTaskConfiguration eventConfig = DeviceConfigurationManager.getInstance()
                 .getDeviceManagementConfig().getEventOperationTaskConfiguration();
-        this.executorService = Executors.newFixedThreadPool(eventConfig.getPoolSize());
     }
 
     @Override
@@ -251,6 +249,7 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
                                          List<Integer> groupIds) {
         GeoFenceEventOperationManager geoFenceEventOperationManager = new GeoFenceEventOperationManager(eventType, tenantId, null);
         EventOperationExecutor executor = geoFenceEventOperationManager.getEventOperationExecutor(groupIds, eventMeta);
-        this.executorService.submit(executor);
+        ExecutorService executorService = Executors.newFixedThreadPool(50);
+        executorService.submit(executor);
     }
 }
