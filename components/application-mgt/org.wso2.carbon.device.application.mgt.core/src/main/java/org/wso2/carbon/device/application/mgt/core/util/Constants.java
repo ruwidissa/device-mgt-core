@@ -64,6 +64,7 @@ public class Constants {
     public static final String TASK_NAME = "TASK_NAME";
     public  static final String SUBSCRIBED = "SUBSCRIBED";
     public  static final String UNSUBSCRIBED = "UNSUBSCRIBED";
+    public static final String APPLE_LOOKUP_URL = "https://itunes.apple.com/us/lookup?id=";
 
     //App type constants related to window device type
     public static final String MSI = "MSI";
