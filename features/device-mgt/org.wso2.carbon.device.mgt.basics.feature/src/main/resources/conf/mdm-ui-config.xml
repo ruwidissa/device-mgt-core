@@ -124,6 +124,7 @@
         <Scope>perm:applications:uninstall</Scope>
         <Scope>perm:admin-groups:count</Scope>
         <Scope>perm:admin-groups:view</Scope>
+        <Scope>perm:admin-groups:add</Scope>
         <Scope>perm:notifications:mark-checked</Scope>
         <Scope>perm:notifications:view</Scope>
         <Scope>perm:admin:certificates:delete</Scope>
