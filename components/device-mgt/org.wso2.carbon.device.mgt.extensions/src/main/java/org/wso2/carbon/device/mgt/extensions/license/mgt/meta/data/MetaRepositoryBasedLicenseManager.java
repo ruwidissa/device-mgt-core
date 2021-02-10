@@ -117,6 +117,5 @@ public class MetaRepositoryBasedLicenseManager implements LicenseManager {
             log.error(msg, e);
             throw new LicenseManagementException(msg, e);
         }
-
     }
 }

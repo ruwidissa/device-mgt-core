@@ -123,9 +123,15 @@ public class DeviceTypeManager implements DeviceManager {
         //add license to registry.
         this.licenseManager = new MetaRepositoryBasedLicenseManager();
         try {
-            licenseManager.getLicense(deviceType, DeviceTypePluginConstants.LANGUAGE_CODE_ENGLISH_US);
+            if (deviceTypeConfiguration.getLicense() != null) {
+                License defaultLicense = new License();
+                defaultLicense.setLanguage(deviceTypeConfiguration.getLicense().getLanguage());
+                defaultLicense.setVersion(deviceTypeConfiguration.getLicense().getVersion());
+                defaultLicense.setText(deviceTypeConfiguration.getLicense().getText());
+                licenseManager.addLicense(deviceType, defaultLicense);
+            }
         } catch (LicenseManagementException e) {
-            String msg = "Error occurred while loading license of device type: " + deviceType;
+            String msg = "Error occurred while adding default license of device type: " + deviceType;
             throw new DeviceTypeDeployerPayloadException(msg, e);
         }
 
