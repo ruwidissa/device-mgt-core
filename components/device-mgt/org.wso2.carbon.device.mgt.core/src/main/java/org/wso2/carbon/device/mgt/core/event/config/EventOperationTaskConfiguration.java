@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 public class EventOperationTaskConfiguration {
     private boolean isEnabled;
-    private int frequency;
+    private int poolSize;
 
     @XmlElement(name = "Enable", required = true)
     public boolean isEnabled() {
@@ -30,15 +30,6 @@ public class EventOperationTaskConfiguration {
     }
 
     public void setEnabled(boolean enabled) {
-        isEnabled = enabled;
-    }
-
-    @XmlElement(name = "Frequency", required = true)
-    public int getFrequency() {
-        return frequency;
-    }
-
-    public void setFrequency(int frequency) {
-        this.frequency = frequency;
+        this.isEnabled = enabled;
     }
 }

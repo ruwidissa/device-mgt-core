@@ -24,7 +24,6 @@ import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
-import org.wso2.carbon.device.mgt.common.event.config.EventTaskEntry;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -322,117 +321,6 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
         } catch (SQLException e) {
             String msg = "Error occurred while retrieving event records of group " + groupId
                     + " and tenant " + tenantId;
-            log.error(msg, e);
-            throw new EventManagementDAOException(msg, e);
-        }
-    }
-
-
-    @Override
-    public boolean createEventTaskEntry(EventTaskEntry eventTaskEntry, List<Integer> groupIds)
-            throws EventManagementDAOException {
-        try {
-            Connection connection = this.getConnection();
-            String sql = "INSERT INTO DM_EVENT_OPERATION_ASSIGNMENT_TASK(" +
-                    "DEVICE_ID, " +
-                    "GROUP_ID, " +
-                    "OPERATION_CODE, " +
-                    "EVENT_SOURCE, " +
-                    "EVENT_META_ID, " +
-                    "STATUS, " +
-                    "TENANT_ID, " +
-                    "CREATED_TIMESTAMP) " +
-                    "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
-            try (PreparedStatement stm = connection.prepareStatement(sql)){
-                for (Integer groupId : groupIds) {
-                    stm.setInt(1, eventTaskEntry.getDeviceId());
-                    stm.setInt(2, groupId);
-                    stm.setString(3, eventTaskEntry.getOperationCode());
-                    stm.setString(4, eventTaskEntry.getEventSource());
-                    stm.setInt(5, eventTaskEntry.getEventMetaId());
-                    stm.setString(6, eventTaskEntry.getExecutionStatus().toString());
-                    stm.setInt(7, eventTaskEntry.getTenantId());
-                    stm.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
-                    stm.addBatch();
-                }
-                return stm.executeBatch().length > 0;
-            }
-        } catch (SQLException e) {
-            String msg = "Failed while creating event task entry for event operation " + eventTaskEntry.getOperationCode()
-                    + " of the tenant " + eventTaskEntry.getTenantId();
-            log.error(msg, e);
-            throw new EventManagementDAOException(msg, e);
-        }
-    }
-
-    @Override
-    public Map<Integer, List<EventTaskEntry>> getAvailableEventTaskEntries(String status) throws EventManagementDAOException {
-        Map<Integer, List<EventTaskEntry>> eventTaskEntries = new HashMap<>();
-        try {
-            Connection connection = this.getConnection();
-            String sql = "SELECT " +
-                    "ID, "+
-                    "DEVICE_ID, " +
-                    "GROUP_ID, " +
-                    "OPERATION_CODE, " +
-                    "EVENT_SOURCE, " +
-                    "EVENT_META_ID, " +
-                    "TENANT_ID " +
-                    "FROM DM_EVENT_OPERATION_ASSIGNMENT_TASK " +
-                    "WHERE STATUS = ?";
-            try (PreparedStatement stm = connection.prepareStatement(sql)){
-                stm.setString(1, status);
-                ResultSet resultSet = stm.executeQuery();
-                while (resultSet.next()) {
-                    int tenantId = resultSet.getInt("TENANT_ID");
-                    List<EventTaskEntry> eventsOfTenant = eventTaskEntries.get(tenantId);
-                    if (eventsOfTenant == null) {
-                        eventsOfTenant = new ArrayList<>();
-                    }
-                    EventTaskEntry eventTaskEntry = new EventTaskEntry();
-                    eventTaskEntry.setId(resultSet.getInt("ID"));
-                    eventTaskEntry.setOperationCode(resultSet.getString("OPERATION_CODE"));
-                    eventTaskEntry.setGroupId(resultSet.getInt("GROUP_ID"));
-                    eventTaskEntry.setEventMetaId(resultSet.getInt("EVENT_META_ID"));
-                    eventTaskEntry.setDeviceId(resultSet.getInt("DEVICE_ID"));
-                    eventTaskEntry.setTenantId(tenantId);
-                    eventTaskEntry.setEventSource(resultSet.getString("EVENT_SOURCE"));
-                    eventsOfTenant.add(eventTaskEntry);
-                    eventTaskEntries.put(tenantId, eventsOfTenant);
-                }
-                return eventTaskEntries;
-            }
-        } catch (SQLException e) {
-            String msg = "Failed while retrieving event task entries";
-            log.error(msg, e);
-            throw new EventManagementDAOException(msg, e);
-        }
-    }
-
-    @Override
-    public boolean setEventTaskComplete(String code, String eventSource, List<Integer> groupIds, int tenantId)
-            throws EventManagementDAOException {
-        try {
-            Connection connection = this.getConnection();
-            String sql = "UPDATE DM_EVENT_OPERATION_ASSIGNMENT_TASK " +
-                    "SET STATUS = ?, "+
-                    "COMPLETED_TIMESTAMP = ? " +
-                    "WHERE STATUS = ? AND OPERATION_CODE = ? AND EVENT_SOURCE = ? AND GROUP_ID = ? AND TENANT_ID = ?";
-            try (PreparedStatement stm = connection.prepareStatement(sql)){
-                for (Integer groupId : groupIds) {
-                    stm.setString(1, EventTaskEntry.ExecutionStatus.COMPLETED.toString());
-                    stm.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-                    stm.setString(3, EventTaskEntry.ExecutionStatus.CREATED.toString());
-                    stm.setString(4, code);
-                    stm.setString(5, eventSource);
-                    stm.setInt(6, groupId);
-                    stm.setInt(7, tenantId);
-                    stm.addBatch();
-                }
-                return stm.executeBatch().length > 0;
-            }
-        } catch (SQLException e) {
-            String msg = "Failed while retrieving event task entries";
             log.error(msg, e);
             throw new EventManagementDAOException(msg, e);
         }

@@ -36,11 +36,14 @@ import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupNotExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupDAO;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.event.config.EventOperationTaskConfiguration;
+import org.wso2.carbon.device.mgt.core.event.config.GroupAssignmentEventOperationExecutor;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
@@ -54,9 +57,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class GroupManagementProviderServiceImpl implements GroupManagementProviderService {
 
@@ -1061,10 +1063,20 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
      * @param deviceIdentifiers devices assigning to/removing from group
      * @param tenantId tenant of the group
      */
-    private void createEventTask(String eventOperationCode, int groupId, List<DeviceIdentifier> deviceIdentifiers, int tenantId) {
+    private void createEventTask(String eventOperationCode, int groupId, List<DeviceIdentifier> deviceIdentifiers,
+                                 int tenantId) {
         GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager(eventOperationCode, tenantId, null);
-        ScheduledExecutorService eventOperationExecutor = Executors.newSingleThreadScheduledExecutor();
-        eventOperationExecutor.schedule(eventManager
-                .getEventOperationExecutor(groupId, deviceIdentifiers), 10, TimeUnit.SECONDS);
+        GroupAssignmentEventOperationExecutor eventOperationExecutor = eventManager
+                .getGroupAssignmentEventExecutor(groupId, deviceIdentifiers);
+        if (eventOperationExecutor != null) {
+            ExecutorService eventConfigExecutors = DeviceManagementDataHolder.getInstance().getEventConfigExecutors();
+            if (eventConfigExecutors != null) {
+                eventConfigExecutors.submit(eventOperationExecutor);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring event creation since not enabled. Tenant id: " + tenantId + " Group Id: " + groupId);
+            }
+        }
     }
 }

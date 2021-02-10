@@ -92,14 +92,10 @@
     <GeoFenceCacheConfiguration>
         <Enable>true</Enable>
         <ExpiryTime>600</ExpiryTime>
-        <!--This configuration specifies the number of cache entries in device cache. default capacity is 10000 entries.
-        This can be configured to higher number if cache eviction happens due to large number of devices in the
-        server environment-->
         <Capacity>10000</Capacity>
     </GeoFenceCacheConfiguration>
     <EventOperationTaskConfiguration>
         <Enable>true</Enable>
-        <Frequency>60000</Frequency>
     </EventOperationTaskConfiguration>
     <CertificateCacheConfiguration>
         <Enable>true</Enable>

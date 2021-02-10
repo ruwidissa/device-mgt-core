@@ -26,10 +26,7 @@ import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
-import org.wso2.carbon.device.mgt.core.event.config.EventOperationTaskConfiguration;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
-import org.wso2.carbon.device.mgt.core.geo.task.EventOperationTaskException;
-import org.wso2.carbon.device.mgt.core.geo.task.EventOperationTaskManagerImpl;
 import org.wso2.carbon.device.mgt.core.status.task.DeviceStatusTaskException;
 import org.wso2.carbon.device.mgt.core.status.task.DeviceStatusTaskManagerService;
 import org.wso2.carbon.device.mgt.core.status.task.impl.DeviceStatusTaskManagerServiceImpl;
@@ -63,7 +60,6 @@ public class DeviceTaskManagerServiceComponent {
                 log.debug("Initializing device task manager bundle.");
             }
             startOperationMonitoringTask(componentContext.getBundleContext());
-            startGroupEventCreationTask(componentContext.getBundleContext());
             //Start the DeviceStatusMonitoringTask for registered DeviceTypes
             deviceManagementConfig = DeviceConfigurationManager.getInstance().
                     getDeviceManagementConfig();
@@ -112,9 +108,6 @@ public class DeviceTaskManagerServiceComponent {
             stopOperationMonitoringTask();
             if (deviceManagementConfig != null && deviceManagementConfig.getDeviceStatusTaskConfig().isEnabled()) {
                 stopDeviceStatusMonitoringTask();
-            } else if (deviceManagementConfig != null && deviceManagementConfig.getEventOperationTaskConfiguration()
-                    .isEnabled()) {
-                stopGroupEventCreationTask();
             }
         } catch (Throwable e) {
             log.error("Error occurred while shutting down device task manager service.", e);
@@ -147,38 +140,6 @@ public class DeviceTaskManagerServiceComponent {
                 log.error("Exception occurred while stopping the DeviceStatusMonitoring Task for deviceType '" +
                         deviceType + "'", e);
             }
-        }
-    }
-
-    /**
-     * Start event operation creation task
-     * @param bundleContext OsgiBundle context
-     */
-    private void startGroupEventCreationTask(BundleContext bundleContext) {
-        DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
-        EventOperationTaskConfiguration eventTaskConfig = deviceManagementConfig.getEventOperationTaskConfiguration();
-        if (eventTaskConfig.isEnabled()) {
-            EventOperationTaskManagerImpl eventOperationTaskManager = new EventOperationTaskManagerImpl();
-            DeviceManagementDataHolder.getInstance().setEventOperationTaskManager(eventOperationTaskManager);
-            bundleContext.registerService(EventOperationTaskManagerImpl.class, eventOperationTaskManager, null);
-            try {
-                eventOperationTaskManager.startGroupEventOperationTask(eventTaskConfig);
-            } catch (EventOperationTaskException e) {
-                log.error("Error occurred while creating group event creation task");
-            }
-        }
-    }
-
-    /**
-     * Stop event operation creation task
-     */
-    private void stopGroupEventCreationTask() {
-        EventOperationTaskManagerImpl eventOperationTaskManager = DeviceManagementDataHolder.getInstance()
-                .getEventOperationTaskManager();
-        try {
-            eventOperationTaskManager.stopGroupEventOperationTaskTask();
-        } catch (EventOperationTaskException e) {
-            log.error("Error occurred while stopping group event creation task");
         }
     }
 

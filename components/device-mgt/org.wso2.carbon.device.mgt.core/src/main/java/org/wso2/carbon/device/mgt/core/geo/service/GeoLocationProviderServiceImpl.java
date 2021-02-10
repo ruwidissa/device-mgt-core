@@ -42,10 +42,10 @@ import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
-import org.wso2.carbon.device.mgt.common.event.config.EventTaskEntry;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.Alert;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoFence;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoFenceEventMeta;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
 import org.wso2.carbon.device.mgt.common.geo.service.AlertAlreadyExistException;
@@ -56,7 +56,6 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GeofenceDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.event.config.GeoFenceGroupMap;
-import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
@@ -92,9 +91,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices.DAS_PORT;
 import static org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices.DEFAULT_HTTP_PROTOCOL;
@@ -1323,8 +1319,9 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         }
 
         try {
-            eventConfigService.createEventOperationTask(getEventOperationTask(OperationMgtConstants
-                    .OperationCodes.EVENT_CONFIG, geofenceData.getId(), tenantId), geofenceData.getGroupIds());
+            eventConfigService.createEventOperationTask(OperationMgtConstants.OperationCodes.EVENT_CONFIG,
+                    DeviceManagementConstants.EventServices.GEOFENCE, new GeoFenceEventMeta(geofenceData),
+                    tenantId, geofenceData.getGroupIds());
         } catch (EventConfigurationException e) {
             String msg = "Failed while creating EVENT_REVOKE operation creation task entry while updating geo fence "
                     + geofenceData.getFenceName() + " of the tenant " + tenantId;
@@ -1652,8 +1649,9 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             log.debug("Update geofence event completed.");
         }
         try {
-            eventConfigService.createEventOperationTask(getEventOperationTask(OperationMgtConstants
-                    .OperationCodes.EVENT_REVOKE, geofenceData.getId(), tenantId), geofenceData.getGroupIds());
+            eventConfigService.createEventOperationTask(OperationMgtConstants.OperationCodes.EVENT_REVOKE,
+                    DeviceManagementConstants.EventServices.GEOFENCE,
+                    new GeoFenceEventMeta(geofenceData), tenantId, geofenceData.getGroupIds());
         } catch (EventConfigurationException e) {
             String msg = "Failed while creating EVENT_REVOKE operation creation task entry while updating geo fence "
                     + geofenceData.getFenceName() + " of the tenant " + tenantId;
@@ -1767,8 +1765,9 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             EventConfigurationProviderService eventConfigService =  DeviceManagementDataHolder
                     .getInstance().getEventConfigurationService();
             eventConfigService.deleteEvents(eventList);
-            eventConfigService.createEventOperationTask(getEventOperationTask(OperationMgtConstants
-                    .OperationCodes.EVENT_REVOKE, geofenceData.getId(), tenantId), geofenceData.getGroupIds());
+            eventConfigService.createEventOperationTask(OperationMgtConstants.OperationCodes.EVENT_REVOKE,
+                    DeviceManagementConstants.EventServices.GEOFENCE, new GeoFenceEventMeta(geofenceData),
+                    tenantId, geofenceData.getGroupIds());
         } catch (EventConfigurationException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Failed to delete Geofence event configurations";
@@ -1777,22 +1776,5 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
-    }
-
-    /**
-     * Build and retrieve the EventTaskEntry object
-     * @param operationCode operationCode of the requesting EventTask
-     * @param geoFenceId id of the geofence which the task creating
-     * @param tenantId id of the tenant owns the geofence
-     * @return built EventTaskEntry object
-     */
-    private EventTaskEntry getEventOperationTask(String operationCode, int geoFenceId, int tenantId) {
-        EventTaskEntry eventTaskEntry = new EventTaskEntry();
-        eventTaskEntry.setEventSource(DeviceManagementConstants.EventServices.GEOFENCE);
-        eventTaskEntry.setExecutionStatus(EventTaskEntry.ExecutionStatus.CREATED);
-        eventTaskEntry.setOperationCode(operationCode);
-        eventTaskEntry.setEventMetaId(geoFenceId);
-        eventTaskEntry.setTenantId(tenantId);
-        return eventTaskEntry;
     }
 }
