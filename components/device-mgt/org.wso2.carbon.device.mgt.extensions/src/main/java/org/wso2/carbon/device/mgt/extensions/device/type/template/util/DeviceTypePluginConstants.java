@@ -24,4 +24,6 @@ package org.wso2.carbon.device.mgt.extensions.device.type.template.util;
 public class DeviceTypePluginConstants {
     public static final String MEDIA_TYPE_XML = "application/xml";
     public static final String LANGUAGE_CODE_ENGLISH_US = "en_US";
+    public static final String UNDERSCORE = "_";
+    public static final String LICENCE_META_KEY_SUFFIX = "_Licence_";
 }

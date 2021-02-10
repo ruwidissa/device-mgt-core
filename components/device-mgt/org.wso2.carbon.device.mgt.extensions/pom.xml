@@ -51,6 +51,10 @@
             <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.ws.commons.axiom.wso2</groupId>
             <artifactId>axiom</artifactId>
         </dependency>
@@ -180,6 +184,8 @@
 							org.wso2.carbon.registry.core.service,
 							org.wso2.carbon.utils.dbcreator,
 							org.wso2.carbon.utils.multitenancy,
+                            org.wso2.carbon.device.mgt.core.service,
+                            com.google.gson,
 							org.osgi.framework
                         </Import-Package>
 						<DynamicImport-Package>org.wso2.carbon.device.mgt.extensions.pull.notification,

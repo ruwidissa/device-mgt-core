@@ -4349,4 +4349,18 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.closeConnection();
         }
     }
+
+    @Override
+    public License getLicenseConfig (String deviceTypeName) throws DeviceManagementException {
+        DeviceManagementService deviceManagementService =
+                pluginRepository.getDeviceManagementService(deviceTypeName,
+                this.getTenantId());
+        if (deviceManagementService == null) {
+            String msg = "Device management service loading is failed for the device type: " + deviceTypeName;
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        return deviceManagementService.getLicenseConfig();
+    }
+
 }

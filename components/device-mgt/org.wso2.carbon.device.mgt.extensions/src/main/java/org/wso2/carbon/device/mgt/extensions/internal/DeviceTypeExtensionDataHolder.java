@@ -18,6 +18,9 @@
  */
 package org.wso2.carbon.device.mgt.extensions.internal;
 
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
 /**
@@ -26,6 +29,8 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 public class DeviceTypeExtensionDataHolder {
 
     private RegistryService registryService;
+    private MetadataManagementService metadataManagementService;
+    private DeviceManagementProviderService deviceManagementProviderService;
 
     private static DeviceTypeExtensionDataHolder thisInstance = new DeviceTypeExtensionDataHolder();
 
@@ -41,5 +46,31 @@ public class DeviceTypeExtensionDataHolder {
 
     public void setRegistryService(RegistryService registryService) {
         this.registryService = registryService;
+    }
+
+    public MetadataManagementService getMetadataManagementService() {
+        if (metadataManagementService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            metadataManagementService = (MetadataManagementService)
+                    ctx.getOSGiService(MetadataManagementService.class, null);
+        }
+        return metadataManagementService;
+    }
+
+    public void setMetadataManagementService(MetadataManagementService metadataManagementService) {
+        this.metadataManagementService = metadataManagementService;
+    }
+
+    public DeviceManagementProviderService getDeviceManagementProviderService() {
+        if (deviceManagementProviderService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            deviceManagementProviderService = (DeviceManagementProviderService)
+                    ctx.getOSGiService(DeviceManagementProviderService.class, null);
+        }
+        return deviceManagementProviderService;
+    }
+
+    public void setDeviceManagementProviderService(DeviceManagementProviderService deviceManagementProviderService) {
+        this.deviceManagementProviderService = deviceManagementProviderService;
     }
 }

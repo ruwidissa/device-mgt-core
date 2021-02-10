@@ -109,7 +109,8 @@ import java.util.stream.Stream;
 /**
  * Default Concrete implementation of Application Management related implementations.
  */
-public class ApplicationManagerImpl implements ApplicationManager {
+public class
+ApplicationManagerImpl implements ApplicationManager {
 
     private static final Log log = LogFactory.getLog(ApplicationManagerImpl.class);
     private VisibilityDAO visibilityDAO;

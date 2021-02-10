@@ -1,21 +1,5 @@
 /*
- * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * you may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *
- * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ * Copyright (c) 2021, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -27,15 +11,21 @@
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.core;
+package org.wso2.carbon.device.mgt.extensions.mock;
 
-import org.wso2.carbon.device.mgt.common.*;
-import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.DeviceManager;
+import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
+import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
+import org.wso2.carbon.device.mgt.common.MonitoringOperation;
+import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
+import org.wso2.carbon.device.mgt.common.ProvisioningConfig;
+import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
+import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
 import org.wso2.carbon.device.mgt.common.general.GeneralConfig;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
@@ -46,43 +36,13 @@ import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class TestDeviceManagementService implements DeviceManagementService {
+public class TypeXDeviceManagementService implements DeviceManagementService {
 
-    private String providerType;
-    private String tenantDomain;
-    private String operationCode;
+    private String deviceType;
 
-    public TestDeviceManagementService(String deviceType, String tenantDomain, String operationCode) {
-        providerType = deviceType;
-        this.tenantDomain = tenantDomain;
-        this.operationCode = operationCode;
-    }
-
-    public TestDeviceManagementService(String deviceType, String tenantDomain) {
-        providerType = deviceType;
-        this.tenantDomain = tenantDomain;
-        this.operationCode = "DEVICE_INFO";
-    }
-
-    @Override
-    public String getType() {
-        return providerType;
-    }
-
-    @Override
-    public OperationMonitoringTaskConfig getOperationMonitoringConfig() {
-        OperationMonitoringTaskConfig taskConfig = new OperationMonitoringTaskConfig();
-        taskConfig.setEnabled(true);
-        taskConfig.setFrequency(3000);
-        List<MonitoringOperation> monitoringOperations = new ArrayList<>();
-        MonitoringOperation monitoringOperation = new MonitoringOperation();
-        monitoringOperation.setTaskName(operationCode);
-        monitoringOperation.setRecurrentTimes(2);
-        monitoringOperations.add(monitoringOperation);
-        taskConfig.setMonitoringOperation(monitoringOperations);
-        return taskConfig;
+    public TypeXDeviceManagementService(String deviceType) {
+        this.deviceType = deviceType;
     }
 
     @Override
@@ -91,8 +51,20 @@ public class TestDeviceManagementService implements DeviceManagementService {
     }
 
     @Override
+    public String getType() {
+        return deviceType;
+    }
+
+    @Override
+    public OperationMonitoringTaskConfig getOperationMonitoringConfig() {
+        OperationMonitoringTaskConfig operationMonitoringTaskConfig = new OperationMonitoringTaskConfig();
+        operationMonitoringTaskConfig.setMonitoringOperation(new ArrayList<MonitoringOperation>());
+        return operationMonitoringTaskConfig;
+    }
+
+    @Override
     public DeviceManager getDeviceManager() {
-        return new TestDeviceManager();
+        return new TypeXDeviceManager();
     }
 
     @Override
@@ -102,7 +74,7 @@ public class TestDeviceManagementService implements DeviceManagementService {
 
     @Override
     public ProvisioningConfig getProvisioningConfig() {
-        return new ProvisioningConfig(tenantDomain, false);
+        return new ProvisioningConfig("carbon.super", true);
     }
 
     @Override
@@ -150,5 +122,6 @@ public class TestDeviceManagementService implements DeviceManagementService {
         return null;
     }
 
-    @Override public License getLicenseConfig() { return null; }
+    @Override
+    public License getLicenseConfig() { return null; }
 }

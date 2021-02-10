@@ -64,7 +64,7 @@ import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.Devi
 import org.wso2.carbon.device.mgt.extensions.device.type.template.feature.ConfigurationBasedFeatureManager;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypePluginConstants;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypeUtils;
-import org.wso2.carbon.device.mgt.extensions.license.mgt.registry.RegistryBasedLicenseManager;
+import org.wso2.carbon.device.mgt.extensions.license.mgt.meta.data.MetaRepositoryBasedLicenseManager;
 import org.wso2.carbon.device.mgt.extensions.spi.DeviceTypePluginExtensionService;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
@@ -121,20 +121,17 @@ public class DeviceTypeManager implements DeviceManager {
             requiredDeviceTypeAuthorization = true;
         }
         //add license to registry.
-        this.licenseManager = new RegistryBasedLicenseManager();
+        this.licenseManager = new MetaRepositoryBasedLicenseManager();
         try {
-            if (licenseManager.getLicense(deviceType, DeviceTypePluginConstants.LANGUAGE_CODE_ENGLISH_US) == null) {
-
-                if (deviceTypeConfiguration.getLicense() != null) {
-                    License defaultLicense = new License();
-                    defaultLicense.setLanguage(deviceTypeConfiguration.getLicense().getLanguage());
-                    defaultLicense.setVersion(deviceTypeConfiguration.getLicense().getVersion());
-                    defaultLicense.setText(deviceTypeConfiguration.getLicense().getText());
-                    licenseManager.addLicense(deviceType, defaultLicense);
-                }
+            if (deviceTypeConfiguration.getLicense() != null) {
+                License defaultLicense = new License();
+                defaultLicense.setLanguage(deviceTypeConfiguration.getLicense().getLanguage());
+                defaultLicense.setVersion(deviceTypeConfiguration.getLicense().getVersion());
+                defaultLicense.setText(deviceTypeConfiguration.getLicense().getText());
+                licenseManager.addLicense(deviceType, defaultLicense);
             }
         } catch (LicenseManagementException e) {
-            String msg = "Error occurred while adding default license for " + deviceType + " devices.";
+            String msg = "Error occurred while adding default license of device type: " + deviceType;
             throw new DeviceTypeDeployerPayloadException(msg, e);
         }
 

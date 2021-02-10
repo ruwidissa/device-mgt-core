@@ -19,28 +19,50 @@
 
 package org.wso2.carbon.device.mgt.extensions.device.type.template;
 
+import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.mockito.Mockito;
 import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.context.internal.OSGiDataHolder;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.license.mgt.License;
+import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
+import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.extensions.common.DataSourceConfig;
 import org.wso2.carbon.device.mgt.extensions.internal.DeviceTypeExtensionDataHolder;
+import org.wso2.carbon.device.mgt.extensions.license.mgt.meta.data.MetaRepositoryBasedLicenseManager;
+import org.wso2.carbon.device.mgt.extensions.mock.TypeXDeviceManagementService;
 import org.wso2.carbon.device.mgt.extensions.utils.Utils;
 import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.FileUtil;
 
+import javax.sql.DataSource;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Matchers.anyString;
 import static org.wso2.carbon.governance.api.util.GovernanceUtils.getGovernanceArtifactConfiguration;
 
 /**
@@ -48,8 +70,20 @@ import static org.wso2.carbon.governance.api.util.GovernanceUtils.getGovernanceA
  */
 public class BaseExtensionsTest {
 
+    protected static final String DATASOURCE_EXT = ".xml";
+    private DataSource dataSource;
+    private static String datasourceLocation;
+
     @BeforeSuite
-    public void init() throws RegistryException, IOException {
+    @Parameters({"datasource"})
+    public void init(
+            @Optional("src/test/resources/carbon-home/repository/conf/datasource/data-source-config") String datasource)
+            throws Exception {
+
+        datasourceLocation = datasource;
+        this.initDataSource();
+        this.initSQLScript();
+
         ClassLoader classLoader = getClass().getClassLoader();
         URL resourceUrl = classLoader.getResource(Utils.DEVICE_TYPE_FOLDER + "license.rxt");
         String rxt = null;
@@ -78,7 +112,59 @@ public class BaseExtensionsTest {
         GovernanceUtils.loadGovernanceArtifacts(systemRegistry, configurations);
         Registry governanceSystemRegistry = registryService.getConfigSystemRegistry();
         DeviceTypeExtensionDataHolder.getInstance().setRegistryService(registryService);
+
+        DeviceManagementProviderService deviceManagementProviderService = new DeviceManagementProviderServiceImpl();
+        deviceManagementProviderService.registerDeviceType(new TypeXDeviceManagementService("defectiveDeviceType"));
+        deviceManagementProviderService.registerDeviceType(new TypeXDeviceManagementService("arduino"));
+        deviceManagementProviderService.registerDeviceType(new TypeXDeviceManagementService("androidsense"));
+        deviceManagementProviderService.registerDeviceType(new TypeXDeviceManagementService("sample"));
+        deviceManagementProviderService.registerDeviceType(new TypeXDeviceManagementService("wrong"));
+
+        DeviceTypeExtensionDataHolder.getInstance().setDeviceManagementProviderService(deviceManagementProviderService);
+        DeviceTypeExtensionDataHolder.getInstance().setMetadataManagementService(new MetadataManagementServiceImpl());
+
         PrivilegedCarbonContext.getThreadLocalCarbonContext()
                 .setRegistry(RegistryType.SYSTEM_CONFIGURATION, governanceSystemRegistry);
+    }
+
+    protected void initDataSource() throws Exception {
+        this.dataSource = this.getDataSource(this.
+                readDataSourceConfig(datasourceLocation + DATASOURCE_EXT));
+        DeviceManagementDAOFactory.init(dataSource);
+        MetadataManagementDAOFactory.init(dataSource);
+    }
+
+    protected DataSourceConfig readDataSourceConfig(String configLocation) throws DeviceManagementException {
+        try {
+            File file = new File(configLocation);
+            Document doc = DeviceManagerUtil.convertToDocument(file);
+            JAXBContext testDBContext = JAXBContext.newInstance(DataSourceConfig.class);
+            Unmarshaller unmarshaller = testDBContext.createUnmarshaller();
+            return (DataSourceConfig) unmarshaller.unmarshal(doc);
+        } catch (JAXBException e) {
+            throw new DeviceManagementException("Error occurred while reading data source configuration", e);
+        }
+    }
+
+    protected DataSource getDataSource(DataSourceConfig config) {
+        PoolProperties properties = new PoolProperties();
+        properties.setUrl(config.getUrl());
+        properties.setDriverClassName(config.getDriverClassName());
+        properties.setUsername(config.getUser());
+        properties.setPassword(config.getPassword());
+        return new org.apache.tomcat.jdbc.pool.DataSource(properties);
+    }
+
+    protected DataSource getDataSource() {
+        return dataSource;
+    }
+
+    private void initSQLScript() throws Exception {
+        try (Connection conn = this.getDataSource().getConnection()) {
+            try (Statement stmt = conn.createStatement()) {
+                stmt.executeUpdate("RUNSCRIPT FROM './src/test/resources/sql-files/h2.sql'");
+                stmt.executeUpdate("RUNSCRIPT FROM './src/test/resources/sql-files/android_h2.sql'");
+            }
+        }
     }
 }
