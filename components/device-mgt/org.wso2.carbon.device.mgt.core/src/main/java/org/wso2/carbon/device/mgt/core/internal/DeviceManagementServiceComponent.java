@@ -89,6 +89,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -372,6 +373,9 @@ public class DeviceManagementServiceComponent {
         DeviceManagementDataHolder.getInstance().setDeviceInformationManager(deviceInformationManager);
 
         bundleContext.registerService(SearchManagerService.class, new SearchManagerServiceImpl(), null);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(50);
+        DeviceManagementDataHolder.getInstance().setEventConfigExecutors(executorService);
     }
 
     private void setupDeviceManagementSchema(DataSourceConfig config) throws DeviceManagementException {

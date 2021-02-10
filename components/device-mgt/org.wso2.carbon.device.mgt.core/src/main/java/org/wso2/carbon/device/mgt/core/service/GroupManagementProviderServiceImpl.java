@@ -1068,9 +1068,11 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         GeoFenceEventOperationManager eventManager = new GeoFenceEventOperationManager(eventOperationCode, tenantId, null);
         GroupAssignmentEventOperationExecutor eventOperationExecutor = eventManager
                 .getGroupAssignmentEventExecutor(groupId, deviceIdentifiers);
-        ExecutorService executorService = Executors.newFixedThreadPool(50);
         if (eventOperationExecutor != null) {
-            executorService.submit(eventOperationExecutor);
+            ExecutorService eventConfigExecutors = DeviceManagementDataHolder.getInstance().getEventConfigExecutors();
+            if (eventConfigExecutors != null) {
+                eventConfigExecutors.submit(eventOperationExecutor);
+            }
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Ignoring event creation since not enabled. Tenant id: " + tenantId + " Group Id: " + groupId);

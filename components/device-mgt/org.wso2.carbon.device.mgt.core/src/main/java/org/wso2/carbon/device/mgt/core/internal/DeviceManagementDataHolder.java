@@ -50,6 +50,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 public class DeviceManagementDataHolder {
 
@@ -79,6 +80,7 @@ public class DeviceManagementDataHolder {
     private EventConfigurationProviderService eventConfigurationService;
     private GeoLocationProviderService geoLocationProviderService;
     private GeoFenceEventOperationManager geoFenceEventOperationManager;
+    private ExecutorService eventConfigExecutors;
 
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
@@ -327,5 +329,13 @@ public class DeviceManagementDataHolder {
 
     public void setGeoFenceEventOperationManager(GeoFenceEventOperationManager geoFenceEventOperationManager) {
         this.geoFenceEventOperationManager = geoFenceEventOperationManager;
+    }
+
+    public ExecutorService getEventConfigExecutors() {
+        return eventConfigExecutors;
+    }
+
+    public void setEventConfigExecutors(ExecutorService eventConfigExecutors) {
+        this.eventConfigExecutors = eventConfigExecutors;
     }
 }

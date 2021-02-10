@@ -33,6 +33,7 @@ import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
+import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -49,8 +50,6 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
 
     public EventConfigurationProviderServiceImpl() {
         eventConfigDAO = DeviceManagementDAOFactory.getEventConfigDAO();
-        EventOperationTaskConfiguration eventConfig = DeviceConfigurationManager.getInstance()
-                .getDeviceManagementConfig().getEventOperationTaskConfiguration();
     }
 
     @Override
@@ -249,7 +248,6 @@ public class EventConfigurationProviderServiceImpl implements EventConfiguration
                                          List<Integer> groupIds) {
         GeoFenceEventOperationManager geoFenceEventOperationManager = new GeoFenceEventOperationManager(eventType, tenantId, null);
         EventOperationExecutor executor = geoFenceEventOperationManager.getEventOperationExecutor(groupIds, eventMeta);
-        ExecutorService executorService = Executors.newFixedThreadPool(50);
-        executorService.submit(executor);
+        DeviceManagementDataHolder.getInstance().getEventConfigExecutors().submit(executor);
     }
 }
