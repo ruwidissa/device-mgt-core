@@ -86,15 +86,13 @@ public class GroupAssignmentEventOperationExecutor implements Runnable {
         try {
             this.eventSources = eventConfigurationService.getEventsSourcesOfGroup(groupId, tenantId);
             if (this.eventSources == null || this.eventSources.isEmpty()) {
-                String msg = "No events applied for queried group with ID " + groupId;
                 if (log.isDebugEnabled()) {
-                    log.debug(msg);
+                    log.debug("No configured events for the queried group with ID " + groupId);
                 }
                 return;
             }
         } catch (EventConfigurationException e) {
-            String msg = "Failed while retrieving event records of group " + groupId + "of the tenant " + tenantId;
-            log.error(msg, e);
+            log.error("Failed while retrieving event records of group " + groupId + "of the tenant " + tenantId, e);
             return;
         }
 

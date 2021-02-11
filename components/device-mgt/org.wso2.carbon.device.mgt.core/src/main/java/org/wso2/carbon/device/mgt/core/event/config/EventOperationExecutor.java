@@ -38,9 +38,6 @@ import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
-import org.wso2.carbon.device.mgt.core.dao.GeofenceDAO;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
@@ -61,8 +58,6 @@ public class EventOperationExecutor implements Runnable {
     private static final Log log = LogFactory.getLog(EventOperationExecutor.class);
 
     private final GroupManagementProviderService groupManagementService;
-    private final EventConfigDAO eventConfigDAO;
-    private final GeofenceDAO geofenceDAO;
     private final List<Integer> groupIds;
     private final String eventSource;
     private final EventMetaData eventMetaData;
@@ -72,8 +67,6 @@ public class EventOperationExecutor implements Runnable {
     public EventOperationExecutor(EventMetaData eventMetaData, List<Integer> groupIds, int tenantId,
                                   String eventSource, String operationCode) {
         this.groupManagementService = DeviceManagementDataHolder.getInstance().getGroupManagementProviderService();
-        this.eventConfigDAO = DeviceManagementDAOFactory.getEventConfigDAO();
-        this.geofenceDAO = DeviceManagementDAOFactory.getGeofenceDAO();
         this.eventMetaData = eventMetaData;
         this.groupIds = groupIds;
         this.tenantId = tenantId;
@@ -223,11 +216,9 @@ public class EventOperationExecutor implements Runnable {
             //TODO introduce a proper mechanism
         } catch (OperationManagementException e) {
             log.error("Creating event operation failed with error ", e);
-            return;
         } catch (InvalidDeviceException e) {
             log.error("Creating event operation failed.\n" +
                     "Could not found device/devices for the defined device identifiers.", e);
-            return;
         }
     }
 }
