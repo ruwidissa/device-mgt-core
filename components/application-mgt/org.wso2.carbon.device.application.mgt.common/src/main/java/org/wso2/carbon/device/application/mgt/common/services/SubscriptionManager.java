@@ -134,7 +134,7 @@ public interface SubscriptionManager {
      * @throws {@link ApplicationManagementException} Exception of the application management
      */
     PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID,
-                                            String status) throws ApplicationManagementException;
+                                            List<String> status) throws ApplicationManagementException;
 
     /***
      * This method used to get category details.

@@ -884,7 +884,7 @@ public interface DeviceManagementProviderService {
      * @throws DeviceManagementException if any service level or DAO level error occurs.
      */
     PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue,
-                                             List<Integer> devicesIds, String status) throws DeviceManagementException;
+                                             List<Integer> devicesIds, List<String> status) throws DeviceManagementException;
 
     /**
      * This method is used to get a list of applications installed in all enrolled devices

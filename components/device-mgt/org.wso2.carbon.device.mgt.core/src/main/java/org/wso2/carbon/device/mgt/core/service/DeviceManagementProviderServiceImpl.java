@@ -4084,7 +4084,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     @Override
     public PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue, List<Integer> devicesIds,
-                                                    String status) throws DeviceManagementException {
+                                                    List<String> status) throws DeviceManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         if (log.isDebugEnabled()) {
