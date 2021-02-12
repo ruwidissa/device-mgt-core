@@ -914,11 +914,6 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
 
-//            if (status != null && !status.isEmpty()) {
-//                query = query + " AND DM_ENROLMENT.STATUS=?";
-//                isStatusProvided = true;
-//            }
-
             if (status != null && !status.isEmpty()) {
                 query += buildStatusQuery(status);
                 isStatusProvided = true;
@@ -973,10 +968,6 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
-
-//            if (!StringUtils.isBlank(status)) {
-//                query = query + " AND e.STATUS = ?";
-//            }
 
             if (status != null && !status.isEmpty()) {
                 query += buildStatusQuery(status);
