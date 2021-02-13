@@ -848,7 +848,7 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
     @Override
     public List<Device> getSubscribedDevices(int offsetValue, int limitValue,
-                                             List<Integer> deviceIds, int tenantId, String status)
+                                             List<Integer> deviceIds, int tenantId, List<String> status)
             throws DeviceManagementDAOException {
         Connection conn;
 
@@ -864,18 +864,18 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
                             + "DM_DEVICE.DESCRIPTION AS DESCRIPTION, "
                             + "DM_DEVICE.DEVICE_TYPE_ID, "
                             + "DM_DEVICE.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFICATION, "
-                            + "DM_ENROLMENT.ID AS ENROLMENT_ID, "
-                            + "DM_ENROLMENT.OWNER, "
-                            + "DM_ENROLMENT.OWNERSHIP, "
-                            + "DM_ENROLMENT.DATE_OF_ENROLMENT, "
-                            + "DM_ENROLMENT.DATE_OF_LAST_UPDATE, "
-                            + "DM_ENROLMENT.STATUS, "
-                            + "DM_ENROLMENT.IS_TRANSFERRED, "
+                            + "e.ID AS ENROLMENT_ID, "
+                            + "e.OWNER, "
+                            + "e.OWNERSHIP, "
+                            + "e.DATE_OF_ENROLMENT, "
+                            + "e.DATE_OF_LAST_UPDATE, "
+                            + "e.STATUS, "
+                            + "e.IS_TRANSFERRED, "
                             + "device_types.NAME AS DEVICE_TYPE "
                             + "FROM DM_DEVICE "
-                            + "INNER JOIN DM_ENROLMENT ON "
-                            + "DM_DEVICE.ID = DM_ENROLMENT.DEVICE_ID AND "
-                            + "DM_DEVICE.TENANT_ID = DM_ENROLMENT.TENANT_ID "
+                            + "INNER JOIN DM_ENROLMENT e ON "
+                            + "DM_DEVICE.ID = e.DEVICE_ID AND "
+                            + "DM_DEVICE.TENANT_ID = e.TENANT_ID "
                             + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
                             + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID "
                             + "WHERE DM_DEVICE.ID IN (",
@@ -885,7 +885,7 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
             String query = joiner.toString();
 
             if (status != null && !status.isEmpty()) {
-                query = query + " AND DM_ENROLMENT.STATUS=?";
+                query += buildStatusQuery(status);
                 isStatusProvided = true;
             }
 
@@ -899,7 +899,9 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
                 ps.setInt(index++, tenantId);
                 if (isStatusProvided) {
-                    ps.setString(index++, status);
+                    for (String deviceStatus : status) {
+                        ps.setString(index++, deviceStatus);
+                    }
                 }
                 ps.setInt(index++, offsetValue);
                 ps.setInt(index, limitValue);
@@ -921,7 +923,7 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
     }
 
     @Override
-    public int getSubscribedDeviceCount(List<Integer> deviceIds, int tenantId, String status)
+    public int getSubscribedDeviceCount(List<Integer> deviceIds, int tenantId, List<String> status)
             throws DeviceManagementDAOException {
         try {
             Connection conn = this.getConnection();
@@ -937,8 +939,8 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
 
-            if (!StringUtils.isBlank(status)) {
-                query = query + " AND e.STATUS = ?";
+            if (status != null && !status.isEmpty()) {
+                query += buildStatusQuery(status);
             }
 
             try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -947,8 +949,10 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
 
                 ps.setInt(index++, tenantId);
-                if (!StringUtils.isBlank(status)) {
-                    ps.setString(index, status);
+                if (status != null && !status.isEmpty()) {
+                    for (String deviceStatus : status) {
+                        ps.setString(index++, deviceStatus);
+                    }
                 }
 
                 try (ResultSet rs = ps.executeQuery()) {

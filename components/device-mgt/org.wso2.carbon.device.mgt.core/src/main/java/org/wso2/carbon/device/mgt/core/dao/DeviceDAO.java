@@ -647,7 +647,7 @@ public interface DeviceDAO {
      * @throws DeviceManagementDAOException if connections establishment fails.
      */
     List<Device> getSubscribedDevices(int offsetValue, int limitValue, List<Integer> deviceIds,
-                                      int tenantId, String status) throws DeviceManagementDAOException;
+                                      int tenantId, List<String> status) throws DeviceManagementDAOException;
 
     /**
      * @param deviceIds device ids of the subscribed devices.
@@ -656,7 +656,7 @@ public interface DeviceDAO {
      * @return number of subscribed device count.
      * @throws DeviceManagementDAOException if error occurred while processing the SQL statement.
      */
-    int getSubscribedDeviceCount(List<Integer> deviceIds, int tenantId, String status)
+    int getSubscribedDeviceCount(List<Integer> deviceIds, int tenantId, List<String> status)
             throws DeviceManagementDAOException;
 
     /**

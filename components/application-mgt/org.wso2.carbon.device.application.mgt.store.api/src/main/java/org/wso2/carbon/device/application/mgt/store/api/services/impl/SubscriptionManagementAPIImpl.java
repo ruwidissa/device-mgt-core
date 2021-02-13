@@ -278,7 +278,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @QueryParam("offset") int offset,
             @DefaultValue("5")
             @QueryParam("limit") int limit,
-            @QueryParam("status") String status) {
+            @QueryParam("status") List<String> status) {
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
             PaginationResult subscribedDeviceDetails = subscriptionManager

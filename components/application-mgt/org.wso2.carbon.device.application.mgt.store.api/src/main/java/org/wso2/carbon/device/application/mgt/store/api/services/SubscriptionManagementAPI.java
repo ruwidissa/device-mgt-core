@@ -355,7 +355,7 @@ public interface SubscriptionManagementAPI {
             @ApiParam(
                     name = "status",
                     value = "Provide the device status details, such as active or inactive.")
-            @QueryParam("status") String status
+            @QueryParam("status") List<String> status
     );
 
     @GET

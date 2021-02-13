@@ -1214,7 +1214,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID, String status)
+    public PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID, List<String> status)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
