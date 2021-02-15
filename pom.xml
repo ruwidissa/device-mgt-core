@@ -46,6 +46,7 @@
         <module>components/webapp-authenticator-framework</module>
         <module>components/email-sender</module>
         <module>components/ui-request-interceptor</module>
+        <module>components/sms-mgt</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -58,6 +59,7 @@
         <module>features/ui-request-interceptor</module>
         <module>features/jwt-client</module>
 	    <module>features/device-mgt-extensions</module>
+        <module>features/sms-mgt</module>
     </modules>
 
     <dependencyManagement>
@@ -381,6 +383,16 @@
             <dependency>
                 <groupId>org.wso2.carbon.devicemgt</groupId>
                 <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.sms.mgt.core</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.sms.mgt.common</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <!-- Device Management dependencies -->
