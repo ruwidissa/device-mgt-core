@@ -46,7 +46,7 @@
         <module>components/webapp-authenticator-framework</module>
         <module>components/email-sender</module>
         <module>components/ui-request-interceptor</module>
-        <module>components/sms-mgt</module>
+        <module>components/transport-mgt</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -59,7 +59,7 @@
         <module>features/ui-request-interceptor</module>
         <module>features/jwt-client</module>
 	    <module>features/device-mgt-extensions</module>
-        <module>features/sms-mgt</module>
+        <module>features/transport-mgt</module>
     </modules>
 
     <dependencyManagement>
@@ -387,12 +387,12 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.devicemgt</groupId>
-                <artifactId>io.entgra.sms.mgt.core</artifactId>
+                <artifactId>io.entgra.transport.mgt.sms.handler.core</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.devicemgt</groupId>
-                <artifactId>io.entgra.sms.mgt.common</artifactId>
+                <artifactId>io.entgra.transport.mgt.sms.handler.common</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <!-- Device Management dependencies -->
