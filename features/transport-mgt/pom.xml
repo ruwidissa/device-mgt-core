@@ -17,5 +17,6 @@
 
     <modules>
         <module>sms-handler</module>
+        <module>email-sender</module>
     </modules>
 </project>
