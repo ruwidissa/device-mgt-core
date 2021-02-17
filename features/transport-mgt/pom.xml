@@ -12,7 +12,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>transport-mgt-feature</artifactId>
     <packaging>pom</packaging>
-    <name>Entgra IoT - Transport Feature</name>
+    <name>Entgra - Transport Management Feature</name>
     <url>http://entgra.io</url>
 
     <modules>

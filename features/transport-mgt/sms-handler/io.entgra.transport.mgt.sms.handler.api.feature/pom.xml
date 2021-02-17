@@ -32,9 +32,9 @@
     <artifactId>io.entgra.transport.mgt.sms.handler.api.feature</artifactId>
     <packaging>pom</packaging>
     <version>4.1.12-SNAPSHOT</version>
-    <name>Entgra IoT - SMS Management API Feature</name>
+    <name>Entgra - SMS Handler API Feature</name>
     <url>https://entgra.io</url>
-    <description>This feature contains the APIs required for SMS Management</description>
+    <description>This feature contains the APIs required for SMS Handler</description>
 
     <build>
         <plugins>
