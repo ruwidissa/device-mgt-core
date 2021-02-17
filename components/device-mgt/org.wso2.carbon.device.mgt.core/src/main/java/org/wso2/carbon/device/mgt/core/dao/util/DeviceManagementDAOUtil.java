@@ -26,6 +26,7 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceMonitoringData;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
@@ -194,6 +195,23 @@ public final class DeviceManagementDAOUtil {
         device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
         device.setEnrolmentInfo(loadEnrolment(rs));
         return device;
+    }
+
+    public static DeviceMonitoringData loadDevice(ResultSet rs, String deviceTypeName) throws SQLException {
+        Device device = new Device();
+        device.setId(rs.getInt("DEVICE_ID"));
+        device.setName(rs.getString("DEVICE_NAME"));
+        device.setDescription(rs.getString("DESCRIPTION"));
+        device.setType(deviceTypeName);
+        device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
+        device.setEnrolmentInfo(loadEnrolment(rs));
+
+        DeviceMonitoringData deviceMonitoringData = new DeviceMonitoringData();
+        deviceMonitoringData.setLastUpdatedTime(rs
+                .getTimestamp("LAST_UPDATED_TIMESTAMP").getTime());
+        deviceMonitoringData.setTenantId(rs.getInt("TENANT_ID"));
+        deviceMonitoringData.setDevice(device);
+        return deviceMonitoringData;
     }
 
     //This method will retrieve most appropriate device information when there are multiple device enrollments for

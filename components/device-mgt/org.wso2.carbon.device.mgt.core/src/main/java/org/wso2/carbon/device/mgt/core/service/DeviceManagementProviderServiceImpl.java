@@ -1405,6 +1405,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     log.debug(msg);
                 }
                 return null;
+            } else {
+                Device deviceFromCache = getDeviceFromCache(deviceData.getDeviceIdentifier());
+                if (deviceFromCache != null && device.getEnrolmentInfo() != null &&
+                        deviceFromCache.getEnrolmentInfo().getStatus() != device.getEnrolmentInfo().getStatus()) {
+                    this.addDeviceToCache(deviceData.getDeviceIdentifier(), device);
+                }
             }
         } catch (DeviceManagementDAOException e) {
             String msg =

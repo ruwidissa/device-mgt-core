@@ -45,6 +45,7 @@ import org.wso2.carbon.device.mgt.common.Count;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceMonitoringData;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
@@ -680,6 +681,19 @@ public interface DeviceDAO {
      * @throws DeviceManagementDAOException Thrown if error occurs while database transactions
      */
     int getCountOfDeviceExpiredByOSVersion(String deviceType, Long osValue, int tenantId)
+            throws DeviceManagementDAOException;
+
+    /**
+     * Get All devices for monitoring
+     * @param deviceTypeId device type identifier
+     * @param deviceTypeName name of the type. (android, ios ...)
+     * @param activeServerCount Number of available servers
+     * @param serverHashIndex server index number
+     * @return device object
+     * @throws DeviceManagementDAOException
+     */
+    List<DeviceMonitoringData> getAllDevicesForMonitoring(int deviceTypeId, String deviceTypeName,
+                                                          int activeServerCount, int serverHashIndex)
             throws DeviceManagementDAOException;
 
     /**

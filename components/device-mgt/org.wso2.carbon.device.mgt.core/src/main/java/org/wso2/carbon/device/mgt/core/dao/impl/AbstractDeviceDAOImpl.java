@@ -47,6 +47,7 @@ import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceMonitoringData;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -2783,5 +2784,57 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
         return deviceCount;
+    }
+
+    @Override
+    public List<DeviceMonitoringData> getAllDevicesForMonitoring(
+            int deviceTypeId, String deviceTypeName, int activeServerCount, int serverHashIndex)
+            throws DeviceManagementDAOException {
+        List<DeviceMonitoringData> devices = new ArrayList<>();
+
+        String sql = "SELECT D.ID AS DEVICE_ID," +
+                " D.NAME AS DEVICE_NAME, " +
+                " D.DESCRIPTION AS DESCRIPTION," +
+                " D.DEVICE_IDENTIFICATION, " +
+                " D.LAST_UPDATED_TIMESTAMP, " +
+                " D.TENANT_ID, " +
+                " E.ENROLMENT_ID, " +
+                " EN.OWNER, " +
+                " EN.OWNERSHIP, " +
+                " EN.IS_TRANSFERRED, " +
+                " EN.DATE_OF_ENROLMENT, " +
+                " EN.DATE_OF_LAST_UPDATE, " +
+                " EN.STATUS " +
+                "FROM DM_DEVICE D, DM_ENROLMENT EN," +
+                " (SELECT DEVICE_ID, MAX(ID) AS ENROLMENT_ID" +
+                " FROM DM_ENROLMENT" +
+                " WHERE STATUS IN ('ACTIVE', 'UNREACHABLE') " +
+                " GROUP BY DEVICE_ID) E" +
+                " WHERE D.ID = E.DEVICE_ID AND E.ENROLMENT_ID = EN.ID AND D.DEVICE_TYPE_ID = ?";
+        if (activeServerCount > 0) {
+            sql += " AND MOD(D.ID, ?) = ?";
+        }
+
+        try {
+            Connection conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, deviceTypeId);
+                if (activeServerCount > 0) {
+                    stmt.setInt(2, activeServerCount);
+                    stmt.setInt(3, serverHashIndex);
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        devices.add(DeviceManagementDAOUtil.loadDevice(rs, deviceTypeName));
+                    }
+                    return devices;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving devices";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
     }
 }
