@@ -21,24 +21,18 @@ package org.wso2.carbon.device.mgt.core.status.task.impl;
 import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceMonitoringData;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.core.cache.impl.DeviceCacheManagerImpl;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
-import org.wso2.carbon.device.mgt.core.operation.mgt.OperationEnrolmentMapping;
-import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
-import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.status.task.DeviceStatusTaskException;
 import org.wso2.carbon.device.mgt.core.task.impl.DynamicPartitionedScheduleTask;
-import org.wso2.carbon.ntask.core.Task;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -67,102 +61,84 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
 
     @Override
     protected void setup() {
+    }
 
+    public List<DeviceMonitoringData> getAllDevicesForMonitoring() throws DeviceManagementException {
+
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            DynamicTaskContext ctx = getTaskContext();
+            if (ctx != null && ctx.isPartitioningEnabled()) {
+                return DeviceManagementDAOFactory.getDeviceDAO()
+                        .getAllDevicesForMonitoring(this.deviceTypeId, this.deviceType,
+                                ctx.getActiveServerCount(), ctx.getServerHashIndex());
+            } else {
+                return DeviceManagementDAOFactory.getDeviceDAO()
+                        .getAllDevicesForMonitoring(this.deviceTypeId, this.deviceType, -1, -1);
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving devices list for monitoring.";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
     }
 
     @Override
     public void executeDynamicTask() {
-        List<OperationEnrolmentMapping> operationEnrolmentMappings;
-        List<EnrolmentInfo> enrolmentInfoTobeUpdated = new ArrayList<>();
-        Map<Integer, Long> lastActivities = null;
-        EnrolmentInfo enrolmentInfo;
-        DeviceIdentifier deviceIdentifier;
-        Device device;
         try {
-            operationEnrolmentMappings = this.getOperationEnrolmentMappings(super.getTaskContext());
-            if (!operationEnrolmentMappings.isEmpty()) {
-                lastActivities = this.getLastDeviceActivities(super.getTaskContext());
-            }
-        } catch (DeviceStatusTaskException e) {
-            log.error("Error occurred while fetching OperationEnrolment mappings of deviceType '" + deviceType + "'", e);
-            return;
-        }
-        for (OperationEnrolmentMapping mapping : operationEnrolmentMappings) {
-            long lastActivity = -1;
-            if (lastActivities != null && lastActivities.containsKey(mapping.getEnrolmentId())) {
-                lastActivity = lastActivities.get(mapping.getEnrolmentId());
-            }
-            EnrolmentInfo.Status newStatus = this.determineDeviceStatus(mapping, lastActivity);
-            if (newStatus != mapping.getDeviceStatus()) {
-                deviceIdentifier = new DeviceIdentifier();
-                deviceIdentifier.setId(mapping.getDeviceId());
-                deviceIdentifier.setId(mapping.getDeviceType());
-                device = DeviceCacheManagerImpl.getInstance().getDeviceFromCache(deviceIdentifier, mapping.getTenantId());
-                if (device == null) {
-                    enrolmentInfo = new EnrolmentInfo();
-                    enrolmentInfo.setId(mapping.getEnrolmentId());
-                    enrolmentInfo.setStatus(newStatus);
-                } else {
-                    DeviceManagementProviderService dmps = DeviceManagementDataHolder.getInstance()
-                            .getDeviceManagementProvider();
-                    try {
-                        Device updatedDevice = dmps
-                                .getDevice(device.getDeviceIdentifier(), device.getDeviceInfo().getUpdatedTime(), true);
-                        if (updatedDevice != null) {
-                            device = updatedDevice;
-                        }
-                    } catch (DeviceManagementException e) {
-                        log.error(
-                                "Error occurred while getting the updated device information which has device identifier: "
-                                        + device.getDeviceIdentifier());
-                    }
-                    enrolmentInfo = device.getEnrolmentInfo();
-                    enrolmentInfo.setStatus(newStatus);
-                    device.setEnrolmentInfo(enrolmentInfo);
-                    DeviceCacheManagerImpl.getInstance().addDeviceToCache(deviceIdentifier, device, mapping.getTenantId());
+            List<EnrolmentInfo> enrolmentInfoTobeUpdated = new ArrayList<>();
+            List<DeviceMonitoringData> allDevicesForMonitoring = getAllDevicesForMonitoring();
+            long timeMillis = System.currentTimeMillis();
+            for (DeviceMonitoringData monitoringData : allDevicesForMonitoring) {
+                long lastUpdatedTime = (timeMillis - monitoringData
+                        .getLastUpdatedTime()) / 1000;
+
+                EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
+                enrolmentInfo.setId(monitoringData.getDevice().getEnrolmentInfo().getId());
+                EnrolmentInfo.Status status = null;
+                if (lastUpdatedTime >= this.deviceStatusTaskPluginConfig
+                        .getIdleTimeToMarkInactive()) {
+                    status = EnrolmentInfo.Status.INACTIVE;
+                } else if (lastUpdatedTime >= this.deviceStatusTaskPluginConfig
+                        .getIdleTimeToMarkUnreachable()) {
+                    status = EnrolmentInfo.Status.UNREACHABLE;
                 }
-                enrolmentInfoTobeUpdated.add(enrolmentInfo);
-                if(log.isDebugEnabled()){
-                    log.debug("Enrollment Information updated for device ID : " +  device.getDeviceIdentifier());
+
+                if (status != null) {
+                    enrolmentInfo.setStatus(status);
+                    enrolmentInfoTobeUpdated.add(enrolmentInfo);
+                    DeviceIdentifier deviceIdentifier =
+                            new DeviceIdentifier(monitoringData.getDevice()
+                                    .getDeviceIdentifier(), deviceType);
+                    DeviceCacheManagerImpl.getInstance().removeDeviceFromCache(deviceIdentifier,
+                            monitoringData.getTenantId());
+                    DeviceCacheManagerImpl.getInstance().addDeviceToCache(deviceIdentifier,
+                            monitoringData.getDevice(), monitoringData.getTenantId());
                 }
             }
-        }
 
-        if (!enrolmentInfoTobeUpdated.isEmpty()) {
-            try {
-                this.updateDeviceStatus(enrolmentInfoTobeUpdated);
-            } catch (DeviceStatusTaskException e) {
-                log.error("Error occurred while updating non-responsive device-status of devices of type '" + deviceType + "'", e);
+            if (!enrolmentInfoTobeUpdated.isEmpty()) {
+                try {
+                    this.updateDeviceStatus(enrolmentInfoTobeUpdated);
+                } catch (DeviceStatusTaskException e) {
+                    log.error("Error occurred while updating non-responsive " +
+                            "device-status of devices of type '" + deviceType + "'", e);
+                }
             }
+
+
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retrieving devices list for monitoring.";
+            log.error(msg, e);
         }
     }
 
-    private EnrolmentInfo.Status determineDeviceStatus(OperationEnrolmentMapping opMapping, long lastActivityTime) {
-        long lastPendingOpBefore = (System.currentTimeMillis() / 1000) - opMapping.getCreatedTime();
-        EnrolmentInfo.Status newStatus = null;
-        if (lastPendingOpBefore >= this.deviceStatusTaskPluginConfig.getIdleTimeToMarkInactive()) {
-            newStatus = EnrolmentInfo.Status.INACTIVE;
-        } else if (lastPendingOpBefore >= this.deviceStatusTaskPluginConfig.getIdleTimeToMarkUnreachable()) {
-            newStatus = EnrolmentInfo.Status.UNREACHABLE;
-        }
-        if (lastActivityTime != -1) {
-            long lastActivityBefore = (System.currentTimeMillis() / 1000) - lastActivityTime;
-            if (lastActivityBefore < lastPendingOpBefore) {
-                return opMapping.getDeviceStatus();
-            }
-        }
-        return newStatus;
-    }
-
-    private long getMinTimeWindow() {
-        return (System.currentTimeMillis() / 1000) - this.deviceStatusTaskPluginConfig.getIdleTimeToMarkUnreachable();
-    }
-
-    private long getMaxTimeWindow() {
-        //Need to consider the frequency of the task as well
-        return (System.currentTimeMillis() / 1000) - this.deviceStatusTaskPluginConfig.getIdleTimeToMarkInactive() -
-                this.deviceStatusTaskPluginConfig.getFrequency();
-    }
 
     private boolean updateDeviceStatus(List<EnrolmentInfo> enrolmentInfos) throws
             DeviceStatusTaskException {
@@ -184,56 +160,4 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
         return updateStatus;
     }
 
-    private List<OperationEnrolmentMapping> getOperationEnrolmentMappings(DynamicTaskContext ctx) throws DeviceStatusTaskException {
-        List<OperationEnrolmentMapping> operationEnrolmentMappings;
-        try {
-            OperationManagementDAOFactory.openConnection();
-            if(ctx != null && ctx.isPartitioningEnabled()){
-                operationEnrolmentMappings = OperationManagementDAOFactory.
-                        getOperationMappingDAO().getFirstPendingOperationMappingsForActiveEnrolments(this.getMinTimeWindow(),
-                                                                                                     this.getMaxTimeWindow(), this.deviceTypeId,
-                                                                                                     ctx.getActiveServerCount(), ctx.getServerHashIndex());
-            } else {
-                operationEnrolmentMappings = OperationManagementDAOFactory.
-                        getOperationMappingDAO().getFirstPendingOperationMappingsForActiveEnrolments(this.getMinTimeWindow(),
-                                                                                                     this.getMaxTimeWindow(), this.deviceTypeId);
-            }
-
-        } catch (SQLException e) {
-            throw new DeviceStatusTaskException("Error occurred while getting Enrolment operation mappings for " +
-                    "determining device status of deviceType '" + deviceType + "'", e);
-        } catch (OperationManagementDAOException e) {
-            throw new DeviceStatusTaskException("Error occurred obtaining a DB connection for fetching " +
-                    "operation-enrolment mappings for status monitoring of deviceType '" + deviceType + "'", e);
-        } finally {
-            OperationManagementDAOFactory.closeConnection();
-        }
-        return operationEnrolmentMappings;
-    }
-
-    private Map<Integer, Long> getLastDeviceActivities(DynamicTaskContext ctx) throws DeviceStatusTaskException {
-        Map<Integer, Long> lastActivities;
-        try {
-            OperationManagementDAOFactory.openConnection();
-            if(ctx != null && ctx.isPartitioningEnabled()) {
-                lastActivities = OperationManagementDAOFactory.
-                        getOperationMappingDAO().getLastConnectedTimeForActiveEnrolments(this.getMaxTimeWindow(),
-                                                                                         this.deviceTypeId,
-                                                                                         ctx.getActiveServerCount(), ctx.getServerHashIndex());
-            } else {
-                lastActivities = OperationManagementDAOFactory.
-                        getOperationMappingDAO().getLastConnectedTimeForActiveEnrolments(this.getMaxTimeWindow(),
-                                                                                         this.deviceTypeId);
-            }
-        } catch (SQLException e) {
-            throw new DeviceStatusTaskException("Error occurred while getting last activities for " +
-                    "determining device status of deviceType '" + deviceType + "'", e);
-        } catch (OperationManagementDAOException e) {
-            throw new DeviceStatusTaskException("Error occurred obtaining a DB connection for fetching " +
-                    "last activities for status monitoring of deviceType '" + deviceType + "'", e);
-        } finally {
-            OperationManagementDAOFactory.closeConnection();
-        }
-        return lastActivities;
-    }
 }
