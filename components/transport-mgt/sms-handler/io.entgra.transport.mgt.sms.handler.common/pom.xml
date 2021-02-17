@@ -31,8 +31,8 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.transport.mgt.sms.handler.common</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra IoT - SMS Management Common</name>
-    <description>Entgra IoT - SMS Management Common</description>
+    <name>Entgra - SMS Handler Common</name>
+    <description>Entgra - SMS Handler Common</description>
     <url>http://entgra.io</url>
 
     <build>
