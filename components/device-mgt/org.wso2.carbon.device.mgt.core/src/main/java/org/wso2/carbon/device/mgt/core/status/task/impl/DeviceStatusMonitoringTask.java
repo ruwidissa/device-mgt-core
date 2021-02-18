@@ -116,8 +116,7 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
                     DeviceIdentifier deviceIdentifier =
                             new DeviceIdentifier(monitoringData.getDevice()
                                     .getDeviceIdentifier(), deviceType);
-                    DeviceCacheManagerImpl.getInstance().removeDeviceFromCache(deviceIdentifier,
-                            monitoringData.getTenantId());
+                    monitoringData.getDevice().setEnrolmentInfo(enrolmentInfo);
                     DeviceCacheManagerImpl.getInstance().addDeviceToCache(deviceIdentifier,
                             monitoringData.getDevice(), monitoringData.getTenantId());
                 }
