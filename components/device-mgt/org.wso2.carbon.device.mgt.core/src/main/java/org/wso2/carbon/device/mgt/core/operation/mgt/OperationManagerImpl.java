@@ -408,7 +408,7 @@ public class OperationManagerImpl implements OperationManager {
         if (DeviceConfigurationManager.getInstance().getDeviceManagementConfig().
                 getPushNotificationConfiguration().getSchedulerBatchSize() <= enrolments.size() &&
                 notificationStrategy != null) {
-            isScheduled = notificationStrategy.getConfig().isScheduled();
+            isScheduled = notificationStrategy.getConfig() != null && notificationStrategy.getConfig().isScheduled();
         }
         int failAttempts = 0;
         while (true) {
