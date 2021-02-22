@@ -1503,7 +1503,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             }
             List<Integer> groupIdsOfGeoFence = geofenceDAO.getGroupIdsOfGeoFence(fenceId);
             if (!groupIdsOfGeoFence.isEmpty()) {
-                geofenceDAO.deleteGeofenceGroupMapping(groupIdsOfGeoFence);
+                geofenceDAO.deleteGeofenceGroupMapping(groupIdsOfGeoFence, fenceId);
             }
             geofenceDAO.deleteGeofenceById(fenceId);
             DeviceManagementDAOFactory.commitTransaction();
@@ -1554,7 +1554,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
                     groupIdsToAdd.add(newGroupId);
                 }
             }
-            geofenceDAO.deleteGeofenceGroupMapping(groupIdsToDelete);
+            geofenceDAO.deleteGeofenceGroupMapping(groupIdsToDelete, fenceId);
             geofenceDAO.createGeofenceGroupMapping(geofenceData, groupIdsToAdd);
             DeviceManagementDAOFactory.commitTransaction();
             if (updatedRowCount > 0) {

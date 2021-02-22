@@ -356,13 +356,14 @@ public class GeofenceDAOImpl implements GeofenceDAO {
     }
 
     @Override
-    public void deleteGeofenceGroupMapping(List<Integer> groupIdsToDelete) throws DeviceManagementDAOException {
+    public void deleteGeofenceGroupMapping(List<Integer> groupIdsToDelete, int fenceId) throws DeviceManagementDAOException {
         try {
             Connection conn = this.getConnection();
-            String sql = "DELETE FROM DM_GEOFENCE_GROUP_MAPPING WHERE GROUP_ID = ?";
+            String sql = "DELETE FROM DM_GEOFENCE_GROUP_MAPPING WHERE GROUP_ID = ? AND FENCE_ID = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 for (Integer groupId : groupIdsToDelete) {
                     stmt.setInt(1, groupId);
+                    stmt.setInt(2, fenceId);
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
