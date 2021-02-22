@@ -126,6 +126,7 @@ public class FCMNotificationStrategy implements NotificationStrategy {
         JsonObject fcmRequest = new JsonObject();
         fcmRequest.addProperty("delay_while_idle", false);
         fcmRequest.addProperty("time_to_live", TIME_TO_LIVE);
+        fcmRequest.addProperty("priority", "high");
 
         //Add message to FCM request
         JsonObject data = new JsonObject();
