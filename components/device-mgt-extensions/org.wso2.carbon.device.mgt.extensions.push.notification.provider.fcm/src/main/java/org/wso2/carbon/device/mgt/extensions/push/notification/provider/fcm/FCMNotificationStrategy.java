@@ -45,7 +45,7 @@ public class FCMNotificationStrategy implements NotificationStrategy {
     private static final String FCM_TOKEN = "FCM_TOKEN";
     private static final String FCM_ENDPOINT = "https://fcm.googleapis.com/fcm/send";
     private static final String FCM_API_KEY = "fcmAPIKey";
-    private static final int TIME_TO_LIVE = 5 * 60; //Set FCM TTL to 5 minutes
+    private static final int TIME_TO_LIVE = 2419199; // 1 second less that 28 days
     private static final int HTTP_STATUS_CODE_OK = 200;
     private final PushNotificationConfig config;
 
