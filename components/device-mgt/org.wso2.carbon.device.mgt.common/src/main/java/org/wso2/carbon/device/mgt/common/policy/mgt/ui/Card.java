@@ -31,7 +31,6 @@ public class Card {
     private String key;
     private List<APIContent> apiContents;
     private APIContent apiContent;
-    private Item item;
     private List<Item> items;
     private List<SubContent> subContents;
 
@@ -70,15 +69,6 @@ public class Card {
 
     public void setApiContent(APIContent apiContent) {
         this.apiContent = apiContent;
-    }
-
-    @XmlElement(name = "Item")
-    public Item getItem() {
-        return item;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
     }
 
     @XmlElementWrapper(name = "Items")
