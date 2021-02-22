@@ -18,9 +18,7 @@
 package org.wso2.carbon.device.mgt.common.policy.mgt.ui;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
 
 @XmlRootElement(name = "APITable")
 public class APITable {
@@ -28,9 +26,7 @@ public class APITable {
     private String url;
     private String payload;
     private String mainAttribute;
-    private String cardTitle;
-    private String cardKey;
-    private Modal modal;
+    private Card card;
 
     @XmlElement(name = "RequestMethod")
     public String getRequestMethod() {
@@ -59,15 +55,6 @@ public class APITable {
         this.payload = payload;
     }
 
-    @XmlElement(name = "Modal")
-    public Modal getModal() {
-        return modal;
-    }
-
-    public void setModal(Modal modal) {
-        this.modal = modal;
-    }
-
     @XmlElement(name = "MainAttribute")
     public String getMainAttribute() {
         return mainAttribute;
@@ -77,21 +64,8 @@ public class APITable {
         this.mainAttribute = mainAttribute;
     }
 
-    @XmlElement(name = "CardTitle")
-    public String getCardTitle() {
-        return cardTitle;
-    }
+    @XmlElement(name = "Card")
+    public Card getCard() { return card; }
 
-    public void setCardTitle(String cardTitle) {
-        this.cardTitle = cardTitle;
-    }
-
-    @XmlElement(name = "CardKey")
-    public String getCardKey() {
-        return cardKey;
-    }
-
-    public void setCardKey(String cardKey) {
-        this.cardKey = cardKey;
-    }
+    public void setCard(Card card) { this.card = card; }
 }
