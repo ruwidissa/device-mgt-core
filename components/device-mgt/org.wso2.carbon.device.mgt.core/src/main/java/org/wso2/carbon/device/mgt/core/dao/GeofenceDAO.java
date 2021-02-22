@@ -116,7 +116,7 @@ public interface GeofenceDAO {
      * @param groupIdsToDelete group ids to be removed from the mapping table
      * @throws DeviceManagementDAOException error occurred while deleting group id mapping records
      */
-    void deleteGeofenceGroupMapping(List<Integer> groupIdsToDelete) throws DeviceManagementDAOException;
+    void deleteGeofenceGroupMapping(List<Integer> groupIdsToDelete, int fenceId) throws DeviceManagementDAOException;
 
     /**
      * Create geofence-event mapping records
