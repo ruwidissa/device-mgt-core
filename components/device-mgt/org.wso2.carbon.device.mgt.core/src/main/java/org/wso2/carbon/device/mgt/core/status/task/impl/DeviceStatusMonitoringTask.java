@@ -99,8 +99,7 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
                 long lastUpdatedTime = (timeMillis - monitoringData
                         .getLastUpdatedTime()) / 1000;
 
-                EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
-                enrolmentInfo.setId(monitoringData.getDevice().getEnrolmentInfo().getId());
+                EnrolmentInfo enrolmentInfo = monitoringData.getDevice().getEnrolmentInfo();
                 EnrolmentInfo.Status status = null;
                 if (lastUpdatedTime >= this.deviceStatusTaskPluginConfig
                         .getIdleTimeToMarkInactive()) {
