@@ -2807,6 +2807,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     + deviceIdentifier.getType() + "'");
         }
         boolean isDeviceUpdated;
+        this.removeDeviceFromCache(deviceIdentifier);
         Device device = getDevice(deviceIdentifier, false);
         int deviceId = device.getId();
         EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
