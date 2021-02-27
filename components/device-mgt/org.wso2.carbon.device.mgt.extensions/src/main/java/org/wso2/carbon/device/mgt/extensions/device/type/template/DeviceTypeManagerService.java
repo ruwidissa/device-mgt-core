@@ -36,6 +36,7 @@ package org.wso2.carbon.device.mgt.extensions.device.type.template;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.DeviceManager;
 import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
@@ -336,7 +337,19 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     private Map<String, String> getConfigProperty(List<ConfigurationEntry> configs) {
         Map<String, String> propertMap = new HashMap<>();
         for (ConfigurationEntry entry : configs) {
-            propertMap.put(entry.getName(), entry.getValue().toString());
+            if (entry != null && entry.getValue() != null && entry.getName() != null) {
+                propertMap.put(entry.getName(), entry.getValue().toString());
+            } else {
+                int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+                String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                String message = "Could not find a property in tenant id: " + tenantId + ", " +
+                        "domain: " + domain;
+                if (entry != null && entry.getName() != null) {
+                    message += ", missing value for properly: " + entry.getName();
+                }
+
+                log.error(message);
+            }
         }
         return propertMap;
     }

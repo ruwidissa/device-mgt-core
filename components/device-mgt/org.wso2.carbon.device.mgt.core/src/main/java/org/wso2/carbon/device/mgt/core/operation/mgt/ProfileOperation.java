@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileOperation extends ConfigOperation implements Serializable {
+    private static final long serialVersionUID = -3322674908775087365L;
     private List<Integer> correctiveActionIds;
 
     private List<Integer> reactiveActionIds;
