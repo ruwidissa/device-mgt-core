@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.device.application.mgt.core.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
@@ -25,15 +26,11 @@ import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorag
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
-import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
-import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
@@ -54,38 +51,58 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
         return lifecycleStateManager.getLifecycleConfig();
     }
 
-    @Override public InputStream getArtifactStream(int tenantId, String uuid, String folderName, String artifactName)
+    @Override
+    public InputStream getArtifactStream(int tenantId, String appHashValue, String folderName, String artifactName)
             throws ApplicationManagementException {
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        ApplicationReleaseDAO applicationReleaseDAO = ApplicationManagementDAOFactory.getApplicationReleaseDAO();
-        String appReleaseHashValue;
+        validateArtifactDownloadRequest(tenantId, appHashValue, folderName, artifactName);
         try {
-            ConnectionManagerUtil.openDBConnection();
-            appReleaseHashValue = applicationReleaseDAO.getReleaseHashValue(uuid, tenantId);
-            if (appReleaseHashValue == null) {
-                String msg = "Could't find application release for UUID: " + uuid + ". Hence try with valid UUID.";
+            InputStream inputStream = applicationStorageManager
+                    .getFileStream(appHashValue, folderName, artifactName, tenantId);
+            if (inputStream == null) {
+                String msg = "Couldn't find the file in the file system. Tenant Id: " + tenantId + " App Has Value: "
+                        + appHashValue + " Folder Name: " + folderName + " Artifact name: " + artifactName;
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
-            InputStream inputStream = applicationStorageManager
-                    .getFileStream(appReleaseHashValue, folderName, artifactName, tenantId);
-            if (inputStream == null) {
-                String msg = "Couldn't find the file in the file system.";
-                log.error(msg);
-                throw new ApplicationManagementException(msg);
-            }
             return inputStream;
-        } catch (ApplicationManagementDAOException e) {
-            String msg = "Error occurred when retrieving application release hash value for given application release "
-                    + "UUID: " + uuid;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationStorageManagementException e) {
             String msg = "Error occurred when getting input stream of the " + artifactName + " file.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    /**
+     * Validate the artifact downloading request
+     * @param tenantId Tenat Id
+     * @param appHashValue Application hash value
+     * @param folderName Folder Name
+     * @param artifactName Artifact name
+     * @throws BadRequestException if there is an invalid data to retrieve application artifact.
+     */
+    private void validateArtifactDownloadRequest(int tenantId, String appHashValue, String folderName,
+            String artifactName) throws BadRequestException {
+        if (tenantId != -1234 && tenantId <= 0) {
+            String msg = "Found invalid tenant Id to get application artifact. Tenant Id: " + tenantId;
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        if (StringUtils.isBlank(appHashValue)) {
+            String msg = "Found invalid application has value to get application artifact. Application hash value: "
+                    + appHashValue;
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        if (StringUtils.isBlank(folderName)) {
+            String msg = "Found invalid folder name to get application artifact. Folder name: " + folderName;
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        if (StringUtils.isBlank(artifactName)) {
+            String msg = "Found invalid artifact name to get application artifact. Artifact name: " + artifactName;
+            log.error(msg);
+            throw new BadRequestException(msg);
         }
     }
 

@@ -48,19 +48,20 @@ import javax.ws.rs.core.Response;
 @Path("/artifact")
 public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
 
-    private static Log log = LogFactory.getLog(ArtifactDownloadAPIImpl.class);
+    private static final Log log = LogFactory.getLog(ArtifactDownloadAPIImpl.class);
 
     @GET
     @Override
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/{tenantId}/{uuid}/{folderName}/{fileName}")
+    @Path("/{tenantId}/{appHashValue}/{folderName}/{fileName}")
     public Response getArtifact(
             @PathParam("tenantId") int tenantId,
-            @PathParam("uuid") String uuid,
+            @PathParam("appHashValue") String appHashValue,
             @PathParam("folderName") String folderName,
             @PathParam("fileName") String fileName) {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
-        try (InputStream fileInputStream = dataHandler.getArtifactStream(tenantId, uuid, folderName, fileName)) {
+        try (InputStream fileInputStream = dataHandler
+                .getArtifactStream(tenantId, appHashValue, folderName, fileName)) {
             byte[] content = IOUtils.toByteArray(fileInputStream);
             try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
                 Response.ResponseBuilder response = Response
@@ -75,12 +76,13 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
         } catch (NotFoundException e) {
-            String msg = "Couldn't find an application release for UUID: " + uuid + " and file name:  " + fileName;
+            String msg = "Couldn't find an application release for app hash value: " + appHashValue
+                    + " and file name:  " + fileName;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
             String msg = "Invalid data is used with the request to get input stream of the application release. UUID: "
-                    + uuid + " and file name: " + fileName;
+                    + appHashValue + " and file name: " + fileName;
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
