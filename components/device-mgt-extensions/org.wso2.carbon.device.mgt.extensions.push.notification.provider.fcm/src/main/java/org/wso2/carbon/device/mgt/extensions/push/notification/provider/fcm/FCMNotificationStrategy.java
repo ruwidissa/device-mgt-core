@@ -64,7 +64,7 @@ public class FCMNotificationStrategy implements NotificationStrategy {
             if (NOTIFIER_TYPE_FCM.equals(config.getType())) {
                 Device device = FCMDataHolder.getInstance().getDeviceManagementProviderService()
                         .getDeviceWithTypeProperties(ctx.getDeviceId());
-                if(getFCMToken(device.getProperties()) != null) {
+                if(device.getProperties() != null && getFCMToken(device.getProperties()) != null) {
                     this.sendWakeUpCall(ctx.getOperation().getCode(), device);
                 }
             } else {
@@ -92,33 +92,35 @@ public class FCMNotificationStrategy implements NotificationStrategy {
 
     private void sendWakeUpCall(String message, Device device) throws IOException,
                                                                       PushNotificationExecutionFailedException {
-        OutputStream os = null;
-        byte[] bytes = getFCMRequest(message, getFCMToken(device.getProperties())).getBytes();
+        if (device.getProperties() != null) {
+            OutputStream os = null;
+            byte[] bytes = getFCMRequest(message, getFCMToken(device.getProperties())).getBytes();
 
-        HttpURLConnection conn = null;
-        try {
-            conn = (HttpURLConnection) new URL(FCM_ENDPOINT).openConnection();
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Authorization", "key=" + config.getProperty(FCM_API_KEY));
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            os = conn.getOutputStream();
-            os.write(bytes);
-        } finally {
-            if (os != null) {
-                os.close();
+            HttpURLConnection conn = null;
+            try {
+                conn = (HttpURLConnection) new URL(FCM_ENDPOINT).openConnection();
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Authorization", "key=" + config.getProperty(FCM_API_KEY));
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                os = conn.getOutputStream();
+                os.write(bytes);
+            } finally {
+                if (os != null) {
+                    os.close();
+                }
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
-            if (conn != null) {
-                conn.disconnect();
+            int status = conn.getResponseCode();
+            if (log.isDebugEnabled()) {
+                log.debug("Result code: " + status + ", Message: " + conn.getResponseMessage());
             }
-        }
-        int status = conn.getResponseCode();
-        if (log.isDebugEnabled()) {
-            log.debug("Result code: " + status + ", Message: " + conn.getResponseMessage());
-        }
-        if (status != HTTP_STATUS_CODE_OK) {
-            throw new PushNotificationExecutionFailedException("Push notification sending failed with the HTTP " +
-                    "error code '" + status + "'");
+            if (status != HTTP_STATUS_CODE_OK) {
+                throw new PushNotificationExecutionFailedException("Push notification sending failed with the HTTP " +
+                        "error code '" + status + "'");
+            }
         }
     }
 
