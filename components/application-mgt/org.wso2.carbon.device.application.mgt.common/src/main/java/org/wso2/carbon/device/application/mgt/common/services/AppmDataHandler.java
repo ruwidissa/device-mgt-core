@@ -28,7 +28,16 @@ public interface AppmDataHandler {
 
     Map<String, LifecycleState> getLifecycleConfiguration() throws LifecycleManagementException;
 
-    InputStream getArtifactStream(int tenantId, String uuid, String folderName, String artifactName)
+    /**
+     * Get the Input Stream of the Artifact
+     * @param tenantId Tenant Id
+     * @param appHashValue Hash Value of the application
+     * @param folderName Folder Name
+     * @param artifactName Artifact Name
+     * @return {@link InputStream}
+     * @throws ApplicationManagementException if error occurred while getting Input Stream of the artifact
+     */
+    InputStream getArtifactStream(int tenantId, String appHashValue, String folderName, String artifactName)
             throws ApplicationManagementException;
 
     /**
