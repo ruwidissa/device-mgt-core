@@ -931,6 +931,73 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
+    public List<Device> getDevicesOfUser(String username, int tenantId, List<String> deviceStatuses)
+            throws DeviceManagementDAOException {
+        List<Device> devices = new ArrayList<>();
+        try {
+            Connection conn = this.getConnection();
+            StringJoiner joiner = new StringJoiner(",","SELECT "
+                    + "e1.OWNER, "
+                    + "e1.OWNERSHIP, "
+                    + "e1.ENROLMENT_ID, "
+                    + "e1.DEVICE_ID, "
+                    + "e1.STATUS, "
+                    + "e1.IS_TRANSFERRED, "
+                    + "e1.DATE_OF_LAST_UPDATE, "
+                    + "e1.DATE_OF_ENROLMENT, "
+                    + "d.DESCRIPTION, "
+                    + "d.NAME AS DEVICE_NAME, "
+                    + "d.DEVICE_IDENTIFICATION, "
+                    + "t.NAME AS DEVICE_TYPE "
+                    + "FROM "
+                    + "DM_DEVICE d, "
+                    + "(SELECT "
+                        + "e.OWNER, "
+                        + "e.OWNERSHIP, "
+                        + "e.ID AS ENROLMENT_ID, "
+                        + "e.DEVICE_ID, "
+                        + "e.STATUS, "
+                        + "e.IS_TRANSFERRED, "
+                        + "e.DATE_OF_LAST_UPDATE, "
+                        + "e.DATE_OF_ENROLMENT "
+                        + "FROM "
+                        + "DM_ENROLMENT e "
+                        + "WHERE "
+                            + "e.TENANT_ID = ? AND "
+                            + "LOWER(e.OWNER) = LOWER(?) AND "
+                            + "e.STATUS IN (",
+                    ")) e1, "
+                    + "DM_DEVICE_TYPE t "
+                        + "WHERE d.ID = e1.DEVICE_ID AND "
+                        + "t.ID = d.DEVICE_TYPE_ID "
+                            + "ORDER BY e1.DATE_OF_LAST_UPDATE DESC");
+
+            deviceStatuses.stream().map(ignored -> "?").forEach(joiner::add);
+                        String query = joiner.toString();
+
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                int index = 1;
+                stmt.setInt(index++, tenantId);
+                stmt.setString(index++, username);
+                                for (String deviceId : deviceStatuses) {
+                                    stmt.setObject(index++, deviceId);
+                                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        devices.add(device);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching the list of devices belongs to '" + username + "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+        return devices;
+    }
+
+    @Override
     public int getCountOfDevicesInGroup(PaginationRequest request, int tenantId)
             throws DeviceManagementDAOException {
         int deviceCount = 0;

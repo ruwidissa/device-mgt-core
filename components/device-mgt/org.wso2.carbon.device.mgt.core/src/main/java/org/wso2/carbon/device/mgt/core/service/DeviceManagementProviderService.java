@@ -418,6 +418,20 @@ public interface DeviceManagementProviderService {
     List<Device> getDevicesOfUser(String userName, boolean requireDeviceInfo) throws DeviceManagementException;
 
     /**
+     * Method to get the list of devices owned by an user of given device statuses
+     *
+     * @param username username
+     * @param deviceStatuses device statuses
+     * @param requireDeviceInfo - A boolean indicating whether the device-info (location, app-info etc) is also required
+     *                          along with the device data.
+     * @return List of devices
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching the
+     *                                   device list
+     */
+    List<Device> getDevicesOfUser(String username, List<String> deviceStatuses, boolean requireDeviceInfo)
+            throws DeviceManagementException;
+
+    /**
      * This method returns the list of device owned by a user of given device type.
      *
      * @param userName   user name.
@@ -462,6 +476,20 @@ public interface DeviceManagementProviderService {
      *                                   device list
      */
     List<Device> getAllDevicesOfRole(String roleName, boolean requireDeviceInfo) throws DeviceManagementException;
+
+    /**
+     * Method to get the list of devices that are in one ohe given status and owned by users of a particular user-role.
+     *
+     * @param roleName Role name of the users
+     * @param requireDeviceInfo - A boolean indicating whether the device-info (location, app-info etc) is also required
+     *                          along with the device data.
+     * @param deviceStatuses List of device statuses
+     * @return List of devices
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching the
+     *                                   device list
+     */
+    List<Device> getAllDevicesOfRole(String roleName, List<String> deviceStatuses, boolean requireDeviceInfo)
+            throws DeviceManagementException;
 
     /**
      * This method is used to retrieve list of devices based on the device status with paging information.

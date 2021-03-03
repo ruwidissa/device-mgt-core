@@ -2227,6 +2227,45 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public List<Device> getDevicesOfUser(String username, List<String> deviceStatuses, boolean requireDeviceInfo)
+            throws DeviceManagementException {
+        if (username == null) {
+            String msg = "Username null in getDevicesOfUser";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get devices of user with username '" + username + "' and requiredDeviceInfo " + requireDeviceInfo);
+        }
+        List<Device> userDevices;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            userDevices = deviceDAO.getDevicesOfUser(username, this.getTenantId(), deviceStatuses);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving the list of devices that " +
+                    "belong to the user '" + username + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source to get devices of user: "
+                    + username;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getDevicesOfUser for username '" + username + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+
+        if (requireDeviceInfo) {
+            return this.populateAllDeviceInfo(userDevices);
+        }
+        return userDevices;
+    }
+
+    @Override
     public List<Device> getDevicesOfUser(String username, String deviceType) throws DeviceManagementException {
         return this.getDevicesOfUser(username, deviceType, true);
     }
@@ -2393,20 +2432,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.debug("Get devices of role '" + role + "' and requiredDeviceInfo: " + requireDeviceInfo);
         }
         List<Device> devices = new ArrayList<>();
-        String[] users;
+        String[] users = getUserListOfRole(role);
         int tenantId = this.getTenantId();
-        try {
-            users = DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
-                    .getUserStoreManager().getUserListOfRole(role);
-        } catch (UserStoreException e) {
-            String msg = "Error occurred while obtaining the users, who are assigned with the role '" + role + "'";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (Exception e) {
-            String msg = "Error occurred in getAllDevicesOfRole for role '" + role + "'";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        }
 
         List<Device> userDevices;
         for (String user : users) {
@@ -2430,6 +2457,45 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             devices.addAll(userDevices);
         }
         return devices;
+    }
+
+    @Override
+    public List<Device> getAllDevicesOfRole(String role, List<String> deviceStatuses, boolean requireDeviceInfo)
+            throws DeviceManagementException {
+        if (role == null || role.isEmpty()) {
+            String msg = "Received empty role for the method getAllDevicesOfRole";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get devices of role '" + role + "' and requiredDeviceInfo: " + requireDeviceInfo);
+        }
+        List<Device> devices = new ArrayList<>();
+        String[] users = getUserListOfRole(role);
+
+        for (String user : users) {
+            devices.addAll(getDevicesOfUser(user, deviceStatuses, requireDeviceInfo));
+        }
+        return devices;
+    }
+
+    private String[] getUserListOfRole(String role) throws DeviceManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Get users of role '" + role);
+        }
+        int tenantId = this.getTenantId();
+        try {
+            return DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                    .getUserStoreManager().getUserListOfRole(role);
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while obtaining the users, who are assigned with the role '" + role + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getAllDevicesOfRole for role '" + role + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
     }
 
     @Override

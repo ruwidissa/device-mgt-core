@@ -384,6 +384,18 @@ public interface DeviceDAO {
     List<Device> getDevicesOfUser(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
 
     /**
+     * This method is using to retrieve devices of a given user of given device statues
+     *
+     * @param username Username
+     * @param tenantId Tenant Id
+     * @param deviceStatuses Device Statuses
+     * @returnList of devices
+     * @throws DeviceManagementDAOException if error ccured while getting devices from the database
+     */
+    List<Device> getDevicesOfUser(String username, int tenantId, List<String> deviceStatuses)
+            throws DeviceManagementDAOException;
+
+    /**
      * This method is used to retrieve the device count of a given tenant.
      *
      * @param username user name.
