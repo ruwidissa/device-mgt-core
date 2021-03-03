@@ -236,6 +236,19 @@ public interface GroupDAO {
     List<Device> getDevices(int groupId, int startIndex, int rowCount, int tenantId)
             throws GroupManagementDAOException;
 
+    /**
+     * Get All the devices that are in one of the given device status and belongs to given group
+     *
+     * @param groupName Group name
+     * @param deviceStatuses Device Statuses
+     * @param tenantId Tenant Id
+     * @return List of devices
+     * @throws GroupManagementDAOException if error occurred while retreving list of devices that are in one of the
+     *                                     given device status and belongs to the given group
+     */
+    List<Device> getAllDevicesOfGroup(String groupName, List<String> deviceStatuses, int tenantId)
+            throws GroupManagementDAOException;
+
     List<Device> getAllDevicesOfGroup(String groupName, int tenantId) throws GroupManagementDAOException;
 
     /**

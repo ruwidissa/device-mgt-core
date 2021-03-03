@@ -38,6 +38,7 @@ import org.wso2.carbon.device.mgt.common.group.mgt.GroupNotExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.RoleDoesNotExistException;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
+import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupDAO;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
@@ -729,13 +730,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             GroupManagementDAOFactory.openConnection();
             devices = this.groupDAO.getAllDevicesOfGroup(groupName, tenantId);
             if (requireDeviceProps) {
-                DeviceManagementDAOFactory.openConnection();
-                for (Device device : devices) {
-                    Device retrievedDevice = deviceDAO.getDeviceProps(device.getDeviceIdentifier(), tenantId);
-                    if (retrievedDevice != null && !retrievedDevice.getProperties().isEmpty()) {
-                        device.setProperties(retrievedDevice.getProperties());
-                    }
-                }
+                return loadDeviceProperties(devices);
             }
         } catch (GroupManagementDAOException | SQLException e) {
             String msg = "Error occurred while getting devices in group.";
@@ -747,9 +742,66 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             throw new GroupManagementException(msg, e);
         } finally {
             GroupManagementDAOFactory.closeConnection();
+        }
+        return devices;
+    }
+
+    @Override
+    public List<Device> getAllDevicesOfGroup(String groupName, List<String> deviceStatuses, boolean requireDeviceProps)
+            throws GroupManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Group devices of group: " + groupName);
+        }
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        List<Device> devices;
+        try {
+            GroupManagementDAOFactory.openConnection();
+            devices = this.groupDAO.getAllDevicesOfGroup(groupName, deviceStatuses, tenantId);
             if (requireDeviceProps) {
-                DeviceManagementDAOFactory.closeConnection();
+                return loadDeviceProperties(devices);
             }
+        } catch (GroupManagementDAOException | SQLException e) {
+            String msg = "Error occurred while getting devices in group.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getDevices for group name: " + groupName;
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+        return devices;
+    }
+
+    /**
+     * Load Dice properties of given list of devices
+     *
+     * @param devices list of devices
+     * @return list of devices which contains device properties
+     * @throws GroupManagementException if error occurred while loading device properties of devices which are in a
+     *                                  particular device group
+     */
+    private List<Device> loadDeviceProperties(List<Device> devices) throws GroupManagementException {
+        try {
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            DeviceManagementDAOFactory.openConnection();
+            for (Device device : devices) {
+                Device retrievedDevice = deviceDAO.getDeviceProps(device.getDeviceIdentifier(), tenantId);
+                if (retrievedDevice != null && !retrievedDevice.getProperties().isEmpty()) {
+                    device.setProperties(retrievedDevice.getProperties());
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening the connection for loading device properties of group devices.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while loading device properties of group devices.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
         }
         return devices;
     }

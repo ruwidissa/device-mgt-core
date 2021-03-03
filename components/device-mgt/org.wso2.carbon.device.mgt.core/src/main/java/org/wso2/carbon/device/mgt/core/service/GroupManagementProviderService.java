@@ -194,6 +194,17 @@ public interface GroupManagementProviderService {
      */
     List<Device> getAllDevicesOfGroup(String groupName, boolean requireDeviceProps) throws GroupManagementException;
 
+    /**
+     * Get all devices that are in one of the given device status and belongs to given group.
+     *
+     * @param groupName Group name.
+     * @param deviceStatuses Device statuses list.
+     * @param requireDeviceProps to include device properties.
+     * @return List of devices in group.
+     * @throws GroupManagementException if error occurred while fetching devices
+     */
+    List<Device> getAllDevicesOfGroup(String groupName, List<String> deviceStatuses, boolean requireDeviceProps)
+            throws GroupManagementException;
 
     /**
      * This method is used to retrieve the device count of a given group.

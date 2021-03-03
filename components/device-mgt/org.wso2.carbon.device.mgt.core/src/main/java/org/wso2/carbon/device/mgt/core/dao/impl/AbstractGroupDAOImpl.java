@@ -25,6 +25,7 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
+import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.GroupDAO;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
@@ -767,6 +768,66 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
     }
 
     @Override
+    public List<Device> getAllDevicesOfGroup(String groupName, List<String> deviceStatuses, int tenantId)
+            throws GroupManagementDAOException {
+        List<Device> devices = new ArrayList<>();
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            StringJoiner joiner = new StringJoiner(",","SELECT "
+                    + "d1.DEVICE_ID, "
+                    + "d1.DESCRIPTION, "
+                    + "d1.NAME AS DEVICE_NAME, "
+                    + "d1.DEVICE_TYPE, "
+                    + "d1.DEVICE_IDENTIFICATION, "
+                    + "e.OWNER, "
+                    + "e.OWNERSHIP, "
+                    + "e.STATUS, "
+                    + "e.IS_TRANSFERRED, "
+                    + "e.DATE_OF_LAST_UPDATE, "
+                    + "e.DATE_OF_ENROLMENT, "
+                    + "e.ID AS ENROLMENT_ID "
+                    + "FROM "
+                    + "DM_ENROLMENT e, "
+                    + "(SELECT gd.DEVICE_ID, gd.DESCRIPTION, gd.NAME, gd.DEVICE_IDENTIFICATION, t.NAME AS DEVICE_TYPE "
+                    + "FROM "
+                    + "(SELECT d.ID AS DEVICE_ID, d.DESCRIPTION, d.NAME, d.DEVICE_IDENTIFICATION, d.DEVICE_TYPE_ID "
+                    + "FROM DM_DEVICE d, "
+                    + "(SELECT dgm.DEVICE_ID "
+                    + "FROM DM_DEVICE_GROUP_MAP dgm "
+                    + "WHERE dgm.GROUP_ID = (SELECT ID FROM DM_GROUP WHERE GROUP_NAME = ? )) dgm1 "
+                    + "WHERE d.ID = dgm1.DEVICE_ID AND d.TENANT_ID = ?) gd, DM_DEVICE_TYPE t "
+                    + "WHERE gd.DEVICE_TYPE_ID = t.ID) d1 "
+                    + "WHERE d1.DEVICE_ID = e.DEVICE_ID AND TENANT_ID = ? AND e.STATUS IN (",
+                    ")");
+
+            deviceStatuses.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                int index = 1;
+                stmt.setString(index++, groupName);
+                stmt.setInt(index++, tenantId);
+                stmt.setInt(index++, tenantId);
+                for (String deviceId : deviceStatuses) {
+                    stmt.setObject(index++, deviceId);
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        devices.add(device);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching the list of devices belongs to '" + groupName + "'";
+            log.error(msg, e);
+            throw new GroupManagementDAOException(msg, e);
+        }
+        return devices;
+    }
+
+
+        @Override
     public List<Device> getAllDevicesOfGroup(String groupName, int tenantId) throws GroupManagementDAOException {
         Connection conn;
         List<Device> devices;

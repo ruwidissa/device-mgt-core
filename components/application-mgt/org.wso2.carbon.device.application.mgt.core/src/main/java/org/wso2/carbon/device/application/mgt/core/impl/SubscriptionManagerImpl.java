@@ -67,6 +67,7 @@ import org.wso2.carbon.device.application.mgt.core.util.HelperUtil;
 import org.wso2.carbon.device.application.mgt.core.util.OAuthUtils;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.MDMAppConstants;
 import org.wso2.carbon.device.mgt.common.app.mgt.App;
 import org.wso2.carbon.device.mgt.common.app.mgt.MobileAppTypes;
@@ -441,6 +442,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         List<DeviceIdentifier> errorDeviceIdentifiers = new ArrayList<>();
         String deviceTypeName = null;
 
+        List<String> allowingDeviceStatuses = new ArrayList<>();
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
+
         try {
             if (!ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType())) {
                 deviceTypeName = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId()).getName();
@@ -472,21 +478,24 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     for (T param : params) {
                         String username = (String) param;
                         subscribers.add(username);
-                        devices.addAll(deviceManagementProviderService.getDevicesOfUser(username));
+                        devices.addAll(deviceManagementProviderService.getDevicesOfUser(username,
+                                allowingDeviceStatuses, false  ));
                     }
                 } else {
                     if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
                         for (T param : params) {
                             String roleName = (String) param;
                             subscribers.add(roleName);
-                            devices.addAll(deviceManagementProviderService.getAllDevicesOfRole(roleName));
+                            devices.addAll(deviceManagementProviderService
+                                    .getAllDevicesOfRole(roleName, allowingDeviceStatuses, false));
                         }
                     } else {
                         if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
                             for (T param : params) {
                                 String groupName = (String) param;
                                 subscribers.add(groupName);
-                                devices.addAll(groupManagementProviderService.getAllDevicesOfGroup(groupName, true));
+                                devices.addAll(groupManagementProviderService.getAllDevicesOfGroup(groupName,
+                                        allowingDeviceStatuses, true));
                             }
                         } else {
                             String msg =
