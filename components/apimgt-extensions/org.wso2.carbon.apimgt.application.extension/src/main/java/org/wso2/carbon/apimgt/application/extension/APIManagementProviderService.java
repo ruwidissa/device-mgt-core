@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.application.extension;
 import org.wso2.carbon.apimgt.application.extension.dto.ApiApplicationKey;
 import org.wso2.carbon.apimgt.application.extension.exception.APIManagerException;
 import org.wso2.carbon.apimgt.integration.client.store.StoreClient;
+import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 
 /**
  * This comprise on operation that is been done with api manager from CDMF. This service needs to be implemented in APIM.
@@ -88,7 +89,7 @@ public interface APIManagementProviderService {
      * @throws APIManagerException if error occurred while getting the access token for given scopes,
      * validity period etc.
      */
-    String getAccessToken(String scopes, String[] tags, String applicationName, String tokenType, String validityPeriod)
+    AccessTokenInfo getAccessToken(String scopes, String[] tags, String applicationName, String tokenType, String validityPeriod)
             throws APIManagerException;
 
 }

@@ -238,7 +238,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
     }
 
     @Override
-    public String getAccessToken(String scopes, String[] tags, String applicationName, String tokenType,
+    public AccessTokenInfo getAccessToken(String scopes, String[] tags, String applicationName, String tokenType,
             String validityPeriod) throws APIManagerException {
         try {
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
@@ -262,7 +262,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     .getAccessToken(clientCredentials.getConsumerKey(), clientCredentials.getConsumerSecret(), user,
                             scopes);
 
-            return accessTokenForAdmin.getAccessToken();
+            return accessTokenForAdmin;
         } catch (JWTClientException e) {
             String msg = "JWT Error occurred while registering Application to get access token.";
             log.error(msg, e);
