@@ -847,16 +847,23 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
     }
 
     @Override
-    public List<Device> getSubscribedDevices(int offsetValue, int limitValue,
-                                             List<Integer> deviceIds, int tenantId, List<String> status)
+    public List<Device> getSubscribedDevices(PaginationRequest request, List<Integer> deviceIds, int tenantId,
+                                             List<String> status)
             throws DeviceManagementDAOException {
         Connection conn;
-
+        int limitValue = request.getRowCount();
+        int offsetValue = request.getStartIndex();
+        String name = request.getDeviceName();
+        String user = request.getOwner();
+        String ownership = request.getOwnership();
         try {
             conn = this.getConnection();
             int index = 1;
 
             boolean isStatusProvided = false;
+            boolean isDeviceNameProvided = false;
+            boolean isOwnerProvided = false;
+            boolean isOwnershipProvided = false;
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT "
                             + "DM_DEVICE.ID AS DEVICE_ID, "
@@ -884,6 +891,18 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
 
+            if (name != null && !name.isEmpty()) {
+                query += " AND DM_DEVICE.NAME LIKE ?";
+                isDeviceNameProvided = true;
+            }
+            if (ownership != null && !ownership.isEmpty()) {
+                query += " AND e.OWNERSHIP = ?";
+                isOwnershipProvided = true;
+            }
+            if (user != null && !user.isEmpty()) {
+                query += " AND e.OWNER = ?";
+                isOwnerProvided = true;
+            }
             if (status != null && !status.isEmpty()) {
                 query += buildStatusQuery(status);
                 isStatusProvided = true;
@@ -898,6 +917,15 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
 
                 ps.setInt(index++, tenantId);
+                if (isDeviceNameProvided) {
+                    ps.setString(index++, name + "%");
+                }
+                if (isOwnershipProvided) {
+                    ps.setString(index++, ownership);
+                }
+                if (isOwnerProvided) {
+                    ps.setString(index++, user);
+                }
                 if (isStatusProvided) {
                     for (String deviceStatus : status) {
                         ps.setString(index++, deviceStatus);

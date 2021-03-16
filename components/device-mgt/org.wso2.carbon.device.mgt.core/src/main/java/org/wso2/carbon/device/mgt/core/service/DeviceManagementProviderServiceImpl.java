@@ -4156,9 +4156,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue, List<Integer> devicesIds,
+    public PaginationResult getAppSubscribedDevices(PaginationRequest request, List<Integer> devicesIds,
                                                     List<String> status) throws DeviceManagementException {
-
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         if (log.isDebugEnabled()) {
             log.debug("Getting all devices details for device ids: " + devicesIds);
@@ -4167,8 +4166,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         List<Device> subscribedDeviceDetails;
         try {
             DeviceManagementDAOFactory.openConnection();
-            subscribedDeviceDetails = deviceDAO
-                    .getSubscribedDevices(offsetValue, limitValue, devicesIds, tenantId, status);
+            subscribedDeviceDetails = deviceDAO.getSubscribedDevices(request, devicesIds, tenantId, status);
             if (subscribedDeviceDetails.isEmpty()) {
                 paginationResult.setData(new ArrayList<>());
                 paginationResult.setRecordsFiltered(0);

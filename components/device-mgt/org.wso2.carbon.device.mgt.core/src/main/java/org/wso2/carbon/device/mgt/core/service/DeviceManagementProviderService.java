@@ -905,14 +905,13 @@ public interface DeviceManagementProviderService {
      * This method retrieves a list of subscribed devices.
      *
      * @param devicesIds devices ids of the subscribed devices.
-     * @param offsetValue offset value for get paginated request.
-     * @param limitValue limit value for get paginated request.
-     * @param status status of the devices.
+     * @param request    paginated request object.
+     * @param status     status of the devices.
      * @return {@link PaginationResult}
      * @throws DeviceManagementException if any service level or DAO level error occurs.
      */
-    PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue,
-                                             List<Integer> devicesIds, List<String> status) throws DeviceManagementException;
+    PaginationResult getAppSubscribedDevices(PaginationRequest request, List<Integer> devicesIds, List<String> status)
+            throws DeviceManagementException;
 
     /**
      * This method is used to get a list of applications installed in all enrolled devices

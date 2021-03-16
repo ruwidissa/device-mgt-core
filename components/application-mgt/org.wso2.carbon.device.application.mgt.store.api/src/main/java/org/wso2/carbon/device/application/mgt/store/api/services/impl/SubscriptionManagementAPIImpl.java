@@ -33,6 +33,7 @@ import org.wso2.carbon.device.application.mgt.common.BasicUserInfo;
 import org.wso2.carbon.device.application.mgt.common.BasicUserInfoList;
 import org.wso2.carbon.device.application.mgt.common.RoleList;
 import org.wso2.carbon.device.application.mgt.common.DeviceGroupList;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
@@ -273,6 +274,9 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
     @Produces("application/json")
     @Path("/{uuid}/devices")
     public Response getAppInstalledDevices(
+            @QueryParam("name") String name,
+            @QueryParam("user") String user,
+            @QueryParam("ownership") String ownership,
             @PathParam("uuid") String uuid,
             @DefaultValue("0")
             @QueryParam("offset") int offset,
@@ -281,8 +285,17 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @QueryParam("status") List<String> status) {
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-            PaginationResult subscribedDeviceDetails = subscriptionManager
-                    .getAppInstalledDevices(offset, limit, uuid, status);
+            PaginationRequest request = new PaginationRequest(offset, limit);
+            if (name != null && !name.isEmpty()) {
+                request.setDeviceName(name);
+            }
+            if (user != null && !user.isEmpty()) {
+                request.setOwner(user);
+            }
+            if (ownership != null && !ownership.isEmpty()) {
+                request.setOwnership(ownership);
+            }
+            PaginationResult subscribedDeviceDetails = subscriptionManager.getAppInstalledDevices(request, uuid, status);
             DeviceList devices = new DeviceList();
             devices.setList((List<Device>) subscribedDeviceDetails.getData());
             devices.setCount(subscribedDeviceDetails.getRecordsTotal());

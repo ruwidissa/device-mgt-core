@@ -65,10 +65,7 @@ import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.HelperUtil;
 import org.wso2.carbon.device.application.mgt.core.util.OAuthUtils;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.MDMAppConstants;
+import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.app.mgt.App;
 import org.wso2.carbon.device.mgt.common.app.mgt.MobileAppTypes;
 import org.wso2.carbon.device.mgt.common.app.mgt.android.CustomApplication;
@@ -88,7 +85,6 @@ import org.wso2.carbon.device.mgt.core.util.MDMIOSOperationUtil;
 import org.wso2.carbon.device.mgt.core.util.MDMWindowsOperationUtil;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import javax.ws.rs.core.MediaType;
 import java.io.BufferedReader;
@@ -1223,7 +1219,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID, List<String> status)
+    public PaginationResult getAppInstalledDevices(PaginationRequest request, String appUUID, List<String> status)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
@@ -1262,8 +1258,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             }
             //pass the device id list to device manager service method
             try {
-                PaginationResult deviceDetails = deviceManagementProviderService
-                        .getAppSubscribedDevices(offsetValue, limitValue, deviceIdList, status);
+                PaginationResult deviceDetails = deviceManagementProviderService.getAppSubscribedDevices
+                        (request, deviceIdList, status);
 
                 if (deviceDetails == null) {
                     String msg = "Couldn't found an subscribed devices details for device ids: " + deviceIdList;
@@ -1344,6 +1340,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     @Override
     public PaginationResult getAppSubscriptionDetails(int offsetValue, int limitValue, String appUUID)
             throws ApplicationManagementException {
+        PaginationRequest request = new PaginationRequest(offsetValue, limitValue);
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
                 .getDeviceManagementProviderService();
@@ -1378,7 +1375,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             try {
                 //pass the device id list to device manager service method
                 PaginationResult paginationResult = deviceManagementProviderService
-                        .getAppSubscribedDevices(offsetValue, limitValue, deviceIdList, null);
+                        .getAppSubscribedDevices(request, deviceIdList, null);
                 List<DeviceSubscriptionData> deviceSubscriptionDataList = new ArrayList<>();
 
                 if (!paginationResult.getData().isEmpty()) {

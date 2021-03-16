@@ -22,6 +22,7 @@ import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDT
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.SubscriptionManagementException;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import java.util.List;
@@ -127,13 +128,12 @@ public interface SubscriptionManager {
      * This method used to get the app id ,device ids and pass them to DM service method.
      *
      * @param appUUID UUID of the application release.
-     * @param offsetValue offset value for get paginated request.
-     * @param limitValue limit value for get paginated request.
+     * @param request paginated request object.
      * @param status status of the devices.
      * @return deviceDetails - device details for given application release.
      * @throws {@link ApplicationManagementException} Exception of the application management
      */
-    PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID,
+    PaginationResult getAppInstalledDevices(PaginationRequest request, String appUUID,
                                             List<String> status) throws ApplicationManagementException;
 
     /***
