@@ -75,41 +75,62 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             if (user != null && !user.isEmpty()) {
                 request.setOwner(user);
             }
-//            if (status != null && !status.isEmpty()) {
-//                boolean isStatusEmpty = true;
-//                for (String statusString : status){
-//                    if (StringUtils.isNotBlank(statusString)){
-//                        isStatusEmpty = false;
-//                        break;
-//                    }
-//                }
-//                if (!isStatusEmpty) {
-//                    for (String status_ : status) {
-//                        switch (status_) {
-//                            case "ACTIVE":
-//                            case "INACTIVE":
-//                            case "UNCLAIMED":
-//                            case "UNREACHABLE":
-//                            case "SUSPENDED":
-//                            case "DISENROLLMENT_REQUESTED":
-//                            case "REMOVED":
-//                            case "BLOCKED":
-//                            case "CREATED":
-//                                break;
-//                            default:
-//                                String msg = "Invalid enrollment status type: " + status_ + ". \nValid status types are " +
-//                                        "ACTIVE | INACTIVE | UNCLAIMED | UNREACHABLE | SUSPENDED | " +
-//                                        "DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED";
-//                                log.error(msg);
-//                                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-//                        }
-//                    }
-//                    request.setStatusList(status);
-//                }
-//            }
+            if (status != null && !status.isEmpty()) {
+                boolean isStatusEmpty = true;
+                for (String statusString : status) {
+                    if (StringUtils.isNotBlank(statusString)) {
+                        isStatusEmpty = false;
+                        break;
+                    }
+                }
+                if (!isStatusEmpty) {
+                    for (String status_ : status) {
+                        switch (status_) {
+                            case "ACTIVE":
+                            case "INACTIVE":
+                            case "UNCLAIMED":
+                            case "UNREACHABLE":
+                            case "SUSPENDED":
+                            case "DISENROLLMENT_REQUESTED":
+                            case "REMOVED":
+                            case "BLOCKED":
+                            case "CREATED":
+                                break;
+                            default:
+                                String msg = "Invalid enrollment status type: " + status_ + ". \nValid status types " +
+                                        "are ACTIVE | INACTIVE | UNCLAIMED | UNREACHABLE | SUSPENDED | " +
+                                        "DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED";
+                                log.error(msg);
+                                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+                        }
+                    }
+                    request.setStatusList(status);
+                }
+            }
+
+            if (actionStatus != null && !actionStatus.isEmpty()) {
+                if (StringUtils.isNotBlank(actionStatus)) {
+                    switch (actionStatus) {
+                        case "PENDING":
+                        case "ERROR":
+                        case "IN_PROGRESS":
+                        case "NOTNOW":
+                        case "COMPLETED":
+                        case "REPEATED":
+                            break;
+                        default:
+                            String msg = "Invalid enrollment action status type: " + actionStatus + ". " +
+                                    "\nValid action status types are PENDING | ERROR | IN_PROGRESS | NOTNOW | " +
+                                    "COMPLETED | REPEATED";
+                            log.error(msg);
+                            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+                    }
+                }
+            }
+
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-            PaginationResult subscriptionData = subscriptionManager
-                    .getAppSubscriptionDetails(request, uuid, status, actionStatus);
+            PaginationResult subscriptionData = subscriptionManager.getAppSubscriptionDetails
+                    (request, uuid, actionStatus);
             return Response.status(Response.Status.OK).entity(subscriptionData).build();
         } catch (NotFoundException e) {
             String msg = "Application with application release UUID: " + uuid + " is not found";

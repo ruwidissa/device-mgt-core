@@ -654,12 +654,11 @@ public interface DeviceDAO {
      * @param deviceIds device ids of the subscribed devices.
      * @param tenantId  Id of the current tenant.
      * @param request   paginated request object.
-     * @param status    status of the devices.
      * @return devices - subscribed device details list
      * @throws DeviceManagementDAOException if connections establishment fails.
      */
-    List<Device> getSubscribedDevices(PaginationRequest request, List<Integer> deviceIds, int tenantId,
-                                      List<String> status) throws DeviceManagementDAOException;
+    List<Device> getSubscribedDevices(PaginationRequest request, List<Integer> deviceIds, int tenantId)
+            throws DeviceManagementDAOException;
 
     /**
      * @param deviceIds device ids of the subscribed devices.

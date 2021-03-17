@@ -827,12 +827,12 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
     }
 
     @Override
-    public List<Device> getSubscribedDevices(PaginationRequest request, List<Integer> deviceIds, int tenantId,
-                                             List<String> status)
+    public List<Device> getSubscribedDevices(PaginationRequest request, List<Integer> deviceIds, int tenantId)
             throws DeviceManagementDAOException {
         Connection conn;
         int limitValue = request.getRowCount();
         int offsetValue = request.getStartIndex();
+        List<String> status = request.getStatusList();
         String name = request.getDeviceName();
         String user = request.getOwner();
         String ownership = request.getOwnership();

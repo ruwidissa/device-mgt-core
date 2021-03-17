@@ -1219,7 +1219,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public PaginationResult getAppInstalledDevices(PaginationRequest request, String appUUID, List<String> status)
+    public PaginationResult getAppInstalledDevices(PaginationRequest request, String appUUID)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
@@ -1259,7 +1259,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             //pass the device id list to device manager service method
             try {
                 PaginationResult deviceDetails = deviceManagementProviderService.getAppSubscribedDevices
-                        (request, deviceIdList, status);
+                        (request, deviceIdList);
 
                 if (deviceDetails == null) {
                     String msg = "Couldn't found an subscribed devices details for device ids: " + deviceIdList;
@@ -1338,7 +1338,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, List<String> status,String actionStatus)
+    public PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus)
             throws ApplicationManagementException {
         int limitValue = request.getRowCount();
         int offsetValue = request.getStartIndex();
@@ -1375,8 +1375,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     .collect(Collectors.toList());
             try {
                 //pass the device id list to device manager service method
-                PaginationResult paginationResult = deviceManagementProviderService
-                        .getAppSubscribedDevices(request, deviceIdList, status);
+                PaginationResult paginationResult = deviceManagementProviderService.getAppSubscribedDevices
+                        (request, deviceIdList);
                 List<DeviceSubscriptionData> deviceSubscriptionDataList = new ArrayList<>();
 
                 if (!paginationResult.getData().isEmpty()) {

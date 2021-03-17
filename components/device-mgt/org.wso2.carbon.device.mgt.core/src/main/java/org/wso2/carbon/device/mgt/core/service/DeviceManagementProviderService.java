@@ -910,7 +910,7 @@ public interface DeviceManagementProviderService {
      * @return {@link PaginationResult}
      * @throws DeviceManagementException if any service level or DAO level error occurs.
      */
-    PaginationResult getAppSubscribedDevices(PaginationRequest request, List<Integer> devicesIds, List<String> status)
+    PaginationResult getAppSubscribedDevices(PaginationRequest request, List<Integer> devicesIds)
             throws DeviceManagementException;
 
     /**

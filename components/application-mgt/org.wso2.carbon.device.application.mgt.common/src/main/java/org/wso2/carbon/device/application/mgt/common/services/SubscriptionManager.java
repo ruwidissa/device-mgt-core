@@ -133,8 +133,7 @@ public interface SubscriptionManager {
      * @return deviceDetails - device details for given application release.
      * @throws {@link ApplicationManagementException} Exception of the application management
      */
-    PaginationResult getAppInstalledDevices(PaginationRequest request, String appUUID,
-                                            List<String> status) throws ApplicationManagementException;
+    PaginationResult getAppInstalledDevices(PaginationRequest request, String appUUID) throws ApplicationManagementException;
 
     /***
      * This method used to get category details.
@@ -153,7 +152,6 @@ public interface SubscriptionManager {
      * This method is responsible to provide application subscription data for given application release UUID.
      *
      * @param request paginated request object.
-     * @param status status of the devices.
      * @param actionStatus status of the operation.
      * @param appUUID application release UUID
      * @return {@link PaginationResult}
@@ -161,6 +159,6 @@ public interface SubscriptionManager {
      * application release for given UUID, if an error occurred while getting device details of subscribed device ids,
      * if an error occurred while getting subscription details of given application release UUID.
      */
-    PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, List<String> status,String actionStatus)
+    PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus)
             throws ApplicationManagementException;
 }
