@@ -295,6 +295,38 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             if (ownership != null && !ownership.isEmpty()) {
                 request.setOwnership(ownership);
             }
+//            if (status != null && !status.isEmpty()) {
+//                boolean isStatusEmpty = true;
+//                for (String statusString : status){
+//                    if (StringUtils.isNotBlank(statusString)){
+//                        isStatusEmpty = false;
+//                        break;
+//                    }
+//                }
+//                if (!isStatusEmpty) {
+//                    for (String status_ : status) {
+//                        switch (status_) {
+//                            case "ACTIVE":
+//                            case "INACTIVE":
+//                            case "UNCLAIMED":
+//                            case "UNREACHABLE":
+//                            case "SUSPENDED":
+//                            case "DISENROLLMENT_REQUESTED":
+//                            case "REMOVED":
+//                            case "BLOCKED":
+//                            case "CREATED":
+//                                break;
+//                            default:
+//                                String msg = "Invalid enrollment status type: " + status_ + ". \nValid status types are " +
+//                                        "ACTIVE | INACTIVE | UNCLAIMED | UNREACHABLE | SUSPENDED | " +
+//                                        "DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED";
+//                                log.error(msg);
+//                                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+//                        }
+//                    }
+//                    request.setStatusList(status);
+//                }
+//            }
             PaginationResult subscribedDeviceDetails = subscriptionManager.getAppInstalledDevices(request, uuid, status);
             DeviceList devices = new DeviceList();
             devices.setList((List<Device>) subscribedDeviceDetails.getData());

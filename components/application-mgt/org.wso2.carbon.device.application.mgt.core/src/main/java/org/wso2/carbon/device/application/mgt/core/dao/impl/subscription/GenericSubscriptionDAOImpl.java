@@ -332,12 +332,13 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId) throws
+    public List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId, String actionStatus) throws
             ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting device subscriptions for the application release id " + appReleaseId
                     + " from the database");
         }
+        boolean isActionStatusProvided = false;
         String sql = "SELECT "
                 + "DS.ID AS ID, "
                 + "DS.SUBSCRIBED_BY AS SUBSCRIBED_BY, "
@@ -350,11 +351,19 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 + "DS.DM_DEVICE_ID AS DEVICE_ID "
                 + "FROM AP_DEVICE_SUBSCRIPTION DS "
                 + "WHERE DS.AP_APP_RELEASE_ID = ? AND DS.TENANT_ID=?";
+
+        if (actionStatus != null && !actionStatus.isEmpty()) {
+            sql += " AND DS.STATUS= ?";
+            isActionStatusProvided = true;
+        }
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, appReleaseId);
                 stmt.setInt(2, tenantId);
+                if(isActionStatusProvided){
+                    stmt.setString(3, actionStatus);
+                }
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully retrieved device subscriptions for application release id "

@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 
+import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -111,6 +112,26 @@ public interface SubscriptionManagementAdminAPI {
                             response = ErrorResponse.class)
             })
     Response getAppInstalledDevices(
+            @ApiParam(
+                    name = "name",
+                    value = "The device name. For example, Nexus devices can have names, suhc as shamu, bullhead or angler.",
+                    required = false)
+            @Size(max = 45)
+                    String name,
+            @ApiParam(
+                    name = "user",
+                    value = "The username of the owner of the device.",
+                    required = false)
+            @QueryParam("user")
+                    String user,
+            @ApiParam(
+                    name = "actionStatus",
+                    value = "Provide the action status details")
+            @QueryParam("actionStatus") String actionStatus,
+            @ApiParam(
+            name = "status",
+            value = "Provide the device status details, such as active or inactive.")
+            @QueryParam("status") List<String> status,
             @ApiParam(
                     name = "uuid",
                     value = "uuid of the application release.",

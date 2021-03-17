@@ -377,7 +377,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 if (applicationDTO != null) {
                     List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = this.subscriptionDAO
                             .getDeviceSubscriptions(applicationDTO.getApplicationReleaseDTOs().get(0).getId(),
-                                    tenantId);
+                                    tenantId, null);
 
                     AtomicBoolean isAppSubscribable = new AtomicBoolean(true);
                     for (DeviceSubscriptionDTO deviceSubscriptionDTO : deviceSubscriptionDTOS) {
@@ -1231,7 +1231,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
 
             List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
-                    .getDeviceSubscriptions(applicationReleaseId, tenantId);
+                    .getDeviceSubscriptions(applicationReleaseId, tenantId, null);
             if (deviceSubscriptionDTOS.isEmpty()) {
                 PaginationResult paginationResult = new PaginationResult();
                 paginationResult.setData(new ArrayList<>());
@@ -1338,9 +1338,10 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public PaginationResult getAppSubscriptionDetails(int offsetValue, int limitValue, String appUUID)
+    public PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, List<String> status,String actionStatus)
             throws ApplicationManagementException {
-        PaginationRequest request = new PaginationRequest(offsetValue, limitValue);
+        int limitValue = request.getRowCount();
+        int offsetValue = request.getStartIndex();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
                 .getDeviceManagementProviderService();
@@ -1362,7 +1363,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
 
             List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
-                    .getDeviceSubscriptions(applicationReleaseId, tenantId);
+                    .getDeviceSubscriptions(applicationReleaseId, tenantId, actionStatus);
             if (deviceSubscriptionDTOS.isEmpty()) {
                 PaginationResult paginationResult = new PaginationResult();
                 paginationResult.setData(new ArrayList<>());
@@ -1375,7 +1376,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             try {
                 //pass the device id list to device manager service method
                 PaginationResult paginationResult = deviceManagementProviderService
-                        .getAppSubscribedDevices(request, deviceIdList, null);
+                        .getAppSubscribedDevices(request, deviceIdList, status);
                 List<DeviceSubscriptionData> deviceSubscriptionDataList = new ArrayList<>();
 
                 if (!paginationResult.getData().isEmpty()) {

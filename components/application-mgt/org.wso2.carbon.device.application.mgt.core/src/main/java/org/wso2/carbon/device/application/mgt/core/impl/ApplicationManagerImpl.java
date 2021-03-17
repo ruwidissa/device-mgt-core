@@ -1445,7 +1445,7 @@ ApplicationManagerImpl implements ApplicationManager {
                     log.error(msg);
                     throw new ForbiddenException(msg);
                 }
-                if (!subscriptionDAO.getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId).isEmpty()) {
+                if (!subscriptionDAO.getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId, null).isEmpty()) {
                     String msg = "Application release which has UUID: " + applicationReleaseDTO.getUuid()
                             + " either subscribed to device/s or it had subscribed to device/s. Therefore you are not "
                             + "permitted to delete the application release.";
@@ -1580,7 +1580,7 @@ ApplicationManagerImpl implements ApplicationManager {
                     try {
                         ConnectionManagerUtil.beginDBTransaction();
                         List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
-                                .getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId);
+                                .getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId, null);
                         if (!deviceSubscriptionDTOS.isEmpty()) {
                             String msg = "Application release which has UUID: " + applicationReleaseDTO.getUuid()
                                     + " either subscribed to device/s or it had subscribed to device/s. Therefore you "
