@@ -29,6 +29,7 @@ import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.store.api.services.admin.SubscriptionManagementAdminAPI;
+import org.wso2.carbon.device.application.mgt.store.api.services.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 
@@ -84,50 +85,15 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
                     }
                 }
                 if (!isStatusEmpty) {
-                    for (String status_ : status) {
-                        switch (status_) {
-                            case "ACTIVE":
-                            case "INACTIVE":
-                            case "UNCLAIMED":
-                            case "UNREACHABLE":
-                            case "SUSPENDED":
-                            case "DISENROLLMENT_REQUESTED":
-                            case "REMOVED":
-                            case "BLOCKED":
-                            case "CREATED":
-                                break;
-                            default:
-                                String msg = "Invalid enrollment status type: " + status_ + ". \nValid status types " +
-                                        "are ACTIVE | INACTIVE | UNCLAIMED | UNREACHABLE | SUSPENDED | " +
-                                        "DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED";
-                                log.error(msg);
-                                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-                        }
-                    }
+                    RequestValidationUtil.validateStatus(status);
                     request.setStatusList(status);
                 }
             }
-
             if (actionStatus != null && !actionStatus.isEmpty()) {
                 if (StringUtils.isNotBlank(actionStatus)) {
-                    switch (actionStatus) {
-                        case "PENDING":
-                        case "ERROR":
-                        case "IN_PROGRESS":
-                        case "NOTNOW":
-                        case "COMPLETED":
-                        case "REPEATED":
-                            break;
-                        default:
-                            String msg = "Invalid enrollment action status type: " + actionStatus + ". " +
-                                    "\nValid action status types are PENDING | ERROR | IN_PROGRESS | NOTNOW | " +
-                                    "COMPLETED | REPEATED";
-                            log.error(msg);
-                            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-                    }
+                    RequestValidationUtil.validateStatusFiltering(actionStatus);
                 }
             }
-
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
             PaginationResult subscriptionData = subscriptionManager.getAppSubscriptionDetails
                     (request, uuid, actionStatus);
@@ -137,8 +103,7 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload for getting application which has UUID: " + uuid
-                    + ". Hence verify the payload";
+            String msg = "User requested details are not valid";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {

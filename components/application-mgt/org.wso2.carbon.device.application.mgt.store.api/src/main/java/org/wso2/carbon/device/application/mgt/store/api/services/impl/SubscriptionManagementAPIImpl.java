@@ -33,6 +33,7 @@ import org.wso2.carbon.device.application.mgt.common.BasicUserInfo;
 import org.wso2.carbon.device.application.mgt.common.BasicUserInfoList;
 import org.wso2.carbon.device.application.mgt.common.RoleList;
 import org.wso2.carbon.device.application.mgt.common.DeviceGroupList;
+import org.wso2.carbon.device.application.mgt.store.api.services.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
@@ -293,6 +294,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
                 request.setOwner(user);
             }
             if (ownership != null && !ownership.isEmpty()) {
+                RequestValidationUtil.validateOwnershipType(ownership);
                 request.setOwnership(ownership);
             }
             if (status != null && !status.isEmpty()) {
@@ -304,26 +306,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
                     }
                 }
                 if (!isStatusEmpty) {
-                    for (String status_ : status) {
-                        switch (status_) {
-                            case "ACTIVE":
-                            case "INACTIVE":
-                            case "UNCLAIMED":
-                            case "UNREACHABLE":
-                            case "SUSPENDED":
-                            case "DISENROLLMENT_REQUESTED":
-                            case "REMOVED":
-                            case "BLOCKED":
-                            case "CREATED":
-                                break;
-                            default:
-                                String msg = "Invalid enrollment status type: " + status_ + ". \nValid status types are " +
-                                        "ACTIVE | INACTIVE | UNCLAIMED | UNREACHABLE | SUSPENDED | " +
-                                        "DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED";
-                                log.error(msg);
-                                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-                        }
-                    }
+                    RequestValidationUtil.validateStatus(status);
                     request.setStatusList(status);
                 }
             }
@@ -337,8 +320,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload for getting application which has UUID: " + uuid
-                    + ". Hence verify the payload";
+            String msg = "User requested details are not valid";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {

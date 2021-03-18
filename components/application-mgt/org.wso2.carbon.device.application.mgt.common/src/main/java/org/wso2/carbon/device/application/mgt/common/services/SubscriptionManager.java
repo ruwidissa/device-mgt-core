@@ -129,7 +129,6 @@ public interface SubscriptionManager {
      *
      * @param appUUID UUID of the application release.
      * @param request paginated request object.
-     * @param status status of the devices.
      * @return deviceDetails - device details for given application release.
      * @throws {@link ApplicationManagementException} Exception of the application management
      */
