@@ -18,11 +18,9 @@
 
 package org.wso2.carbon.device.application.mgt.store.api.services.impl.admin;
 
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
@@ -33,7 +31,6 @@ import org.wso2.carbon.device.application.mgt.store.api.services.impl.util.Reque
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 
-import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -60,6 +57,7 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
     public Response getAppInstalledDevices(
             @QueryParam("name") String name,
             @QueryParam("user") String user,
+            @QueryParam("action") String action,
             @QueryParam("actionStatus") String actionStatus,
             @QueryParam("status") List<String> status,
             @PathParam("uuid") String uuid,
@@ -75,6 +73,9 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             }
             if (user != null && !user.isEmpty()) {
                 request.setOwner(user);
+            }
+            if (action != null && !action.isEmpty()) {
+                RequestValidationUtil.validateAction(action);
             }
             if (status != null && !status.isEmpty()) {
                 boolean isStatusEmpty = true;
@@ -96,7 +97,7 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             }
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
             PaginationResult subscriptionData = subscriptionManager.getAppSubscriptionDetails
-                    (request, uuid, actionStatus);
+                    (request, uuid, actionStatus, action);
             return Response.status(Response.Status.OK).entity(subscriptionData).build();
         } catch (NotFoundException e) {
             String msg = "Application with application release UUID: " + uuid + " is not found";
@@ -108,7 +109,7 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting app installed devices which has application release UUID of: "
-                         + uuid;
+                    + uuid;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

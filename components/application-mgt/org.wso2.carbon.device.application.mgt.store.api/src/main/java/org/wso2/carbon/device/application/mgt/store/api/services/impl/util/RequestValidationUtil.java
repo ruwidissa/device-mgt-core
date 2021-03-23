@@ -58,6 +58,20 @@ public class RequestValidationUtil {
     }
 
     /**
+     * Checks if user requested action is valid.
+     *
+     * @param action action upon to filter devices using action
+     */
+    public static void validateAction(String action) throws BadRequestException {
+        if (action.equals("SUBSCRIBED") || action.equals("UNSUBSCRIBED")) {
+        } else {
+            String msg = "Invalid action type received.Valid action types are SUBSCRIBED | UNSUBSCRIBED";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+    }
+
+    /**
      * Checks if user requested ownerships are valid.
      *
      * @param ownership ownerships upon to filter devices using ownership

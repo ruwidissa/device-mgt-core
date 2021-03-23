@@ -906,7 +906,6 @@ public interface DeviceManagementProviderService {
      *
      * @param devicesIds devices ids of the subscribed devices.
      * @param request    paginated request object.
-     * @param status     status of the devices.
      * @return {@link PaginationResult}
      * @throws DeviceManagementException if any service level or DAO level error occurs.
      */

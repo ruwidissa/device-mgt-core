@@ -377,7 +377,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 if (applicationDTO != null) {
                     List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = this.subscriptionDAO
                             .getDeviceSubscriptions(applicationDTO.getApplicationReleaseDTOs().get(0).getId(),
-                                    tenantId, null);
+                                    tenantId, null, null);
 
                     AtomicBoolean isAppSubscribable = new AtomicBoolean(true);
                     for (DeviceSubscriptionDTO deviceSubscriptionDTO : deviceSubscriptionDTOS) {
@@ -1231,7 +1231,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
 
             List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
-                    .getDeviceSubscriptions(applicationReleaseId, tenantId, null);
+                    .getDeviceSubscriptions(applicationReleaseId, tenantId, null, null);
             if (deviceSubscriptionDTOS.isEmpty()) {
                 PaginationResult paginationResult = new PaginationResult();
                 paginationResult.setData(new ArrayList<>());
@@ -1338,8 +1338,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus)
-            throws ApplicationManagementException {
+    public PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus,
+                                                      String action) throws ApplicationManagementException {
         int limitValue = request.getRowCount();
         int offsetValue = request.getStartIndex();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -1363,7 +1363,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
 
             List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
-                    .getDeviceSubscriptions(applicationReleaseId, tenantId, actionStatus);
+                    .getDeviceSubscriptions(applicationReleaseId, tenantId, actionStatus, action);
             if (deviceSubscriptionDTOS.isEmpty()) {
                 PaginationResult paginationResult = new PaginationResult();
                 paginationResult.setData(new ArrayList<>());

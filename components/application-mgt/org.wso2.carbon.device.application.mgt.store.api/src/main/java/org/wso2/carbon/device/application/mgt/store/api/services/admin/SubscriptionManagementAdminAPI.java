@@ -125,6 +125,12 @@ public interface SubscriptionManagementAdminAPI {
             @QueryParam("user")
                     String user,
             @ApiParam(
+                    name = "action",
+                    value = "The action, subscribed or unsubscribed.",
+                    required = false)
+            @Size(max = 45)
+            @QueryParam("action") String action,
+            @ApiParam(
                     name = "actionStatus",
                     value = "Provide the action status details")
             @QueryParam("actionStatus") String actionStatus,
