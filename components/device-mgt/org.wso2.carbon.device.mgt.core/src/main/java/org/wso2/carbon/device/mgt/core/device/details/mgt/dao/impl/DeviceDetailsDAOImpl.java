@@ -19,10 +19,10 @@
 
 package org.wso2.carbon.device.mgt.core.device.details.mgt.dao.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -266,6 +266,12 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
         Connection conn;
         PreparedStatement stmt = null;
         try {
+            if (StringUtils.isNotBlank(deviceLocation.getZip())
+                    && deviceLocation.getZip().length() > 10) {
+                log.error("Adding unusually long zip " + deviceLocation.getZip() + ", deviceId:"
+                        + deviceLocation.getDeviceId() + ", enrollmentId:" + enrollmentId);
+                deviceLocation.setZip(null);
+            }
             conn = this.getConnection();
             stmt = conn.prepareStatement("INSERT INTO DM_DEVICE_LOCATION (DEVICE_ID, LATITUDE, LONGITUDE, STREET1, " +
                     "STREET2, CITY, ZIP, STATE, COUNTRY, GEO_HASH, UPDATE_TIMESTAMP, ENROLMENT_ID, ALTITUDE, SPEED, BEARING, " +
@@ -300,6 +306,13 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
         Connection conn;
         PreparedStatement stmt = null;
         try {
+            if (StringUtils.isNotBlank(deviceLocation.getZip())
+                    && deviceLocation.getZip().length() > 10) {
+                log.error("Updating unusually long zip " + deviceLocation.getZip() + ", deviceId:"
+                        + deviceLocation.getDeviceId() + ", enrollmentId:" + enrollmentId);
+                deviceLocation.setZip(null);
+            }
+
             conn = this.getConnection();
             stmt = conn.prepareStatement("UPDATE DM_DEVICE_LOCATION SET LATITUDE = ?, LONGITUDE = ?, " +
                     "STREET1 = ?, STREET2 = ?, CITY = ?, ZIP = ?, STATE = ?, COUNTRY = ?, GEO_HASH = ?, " +
