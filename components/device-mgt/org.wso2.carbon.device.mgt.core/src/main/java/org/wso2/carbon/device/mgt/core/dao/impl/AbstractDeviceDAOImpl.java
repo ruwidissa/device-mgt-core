@@ -380,6 +380,9 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         List<Device> devices = new ArrayList<>();
+        if (deviceProps.isEmpty()) {
+            return devices;
+        }
         try {
             List<List<String>> outputLists = new ArrayList<>();
             List<String> deviceList = null;
@@ -935,6 +938,9 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throws DeviceManagementDAOException {
         List<Device> devices = new ArrayList<>();
         try {
+            if (deviceStatuses.isEmpty()) {
+                return devices;
+            }
             Connection conn = this.getConnection();
             StringJoiner joiner = new StringJoiner(",","SELECT "
                     + "e1.OWNER, "
@@ -1222,6 +1228,9 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         Connection conn;
         PreparedStatement stmt = null;
         try {
+            if (devices.isEmpty()) {
+                return false;
+            }
             conn = this.getConnection();
             StringBuilder sql = new StringBuilder("UPDATE DM_ENROLMENT SET STATUS = ? WHERE DEVICE_ID IN " +
                     "(SELECT d.ID FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.DEVICE_IDENTIFICATION IN (");
@@ -1913,6 +1922,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             int counter = 0;
             List<Device> devices = new ArrayList<>();
 
+            if (deviceIdentifiers.isEmpty()) {
+                return devices;
+            }
+
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT "
                             + "d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, "
@@ -1960,6 +1973,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             int index = 1;
             int counter = 0;
             List<Device> devices = new ArrayList<>();
+
+            if (deviceIdentifiers.isEmpty() || statuses.isEmpty()) {
+                return devices;
+            }
 
             StringJoiner statusJoiner = new StringJoiner(",", "e.STATUS IN (", ") ");
             while (counter < statuses.size()) {

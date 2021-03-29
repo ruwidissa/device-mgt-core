@@ -110,6 +110,9 @@ public class GenericReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                     + "application. Commenting user: " + username + " and tenant-id: " + tenantId);
         }
         try {
+            if (appReleaseIds.isEmpty()) {
+                return false;
+            }
             Connection conn = this.getDBConnection();
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT rv.ID FROM AP_APP_REVIEW rv WHERE rv.AP_APP_RELEASE_ID IN (",
@@ -283,6 +286,9 @@ public class GenericReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             log.debug("DAO request is received to Get all active application reviews.");
         }
         try {
+            if (releaseIds.isEmpty()) {
+                return new ArrayList<>();
+            }
             Connection conn = this.getDBConnection();
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT " + "AP_APP_REVIEW.ID AS ID, "
@@ -336,6 +342,9 @@ public class GenericReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             log.debug("DAO request is received to Get all active application reviews of user " + username);
         }
         try {
+            if (releaseIds.isEmpty()) {
+                return new ArrayList<>();
+            }
             Connection conn = this.getDBConnection();
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT "
@@ -473,6 +482,10 @@ public class GenericReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             log.debug("DAO request is received to Get all application rating values of an application.");
         }
         try {
+            List<Integer> reviews = new ArrayList<>();
+            if (uuids.isEmpty()) {
+                return reviews;
+            }
             int index = 1;
             Connection conn = this.getDBConnection();
             StringJoiner joiner = new StringJoiner(",",
@@ -487,7 +500,6 @@ public class GenericReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                 }
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
-                    List<Integer> reviews = new ArrayList<>();
                     while (rs.next()) {
                         reviews.add(rs.getInt("RATING"));
                     }

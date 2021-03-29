@@ -24,6 +24,7 @@ import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.CategoryDTO;
 import org.wso2.carbon.device.application.mgt.common.Filter;
+import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
@@ -491,6 +492,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     + " from the database");
         }
         try {
+            if (packageNames.isEmpty()) {
+                return new ArrayList<>();
+            }
             Connection conn = this.getDBConnection();
             int index = 1;
             StringJoiner joiner = new StringJoiner(",",
@@ -826,9 +830,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             log.debug("Request received in DAO Layer to get category ids for given category names");
         }
         try {
+            List<Integer> tagIds = new ArrayList<>();
+            if (categoryNames.isEmpty()) {
+                return tagIds;
+            }
             Connection conn = this.getDBConnection();
             int index = 1;
-            List<Integer> tagIds = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT AP_APP_CATEGORY.ID AS ID FROM AP_APP_CATEGORY WHERE AP_APP_CATEGORY.CATEGORY IN (",
                     ") AND TENANT_ID = ?");
@@ -1117,9 +1124,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             log.debug("Request received in DAO Layer to get tag ids for given tag names");
         }
         try {
+            List<Integer> tagIds = new ArrayList<>();
+            if (tagNames.isEmpty()) {
+                return tagIds;
+            }
             Connection conn = this.getDBConnection();
             int index = 1;
-            List<Integer> tagIds = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT AP_APP_TAG.ID AS ID FROM AP_APP_TAG WHERE AP_APP_TAG.TAG IN (",
                     ") AND TENANT_ID = ?");
