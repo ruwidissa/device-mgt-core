@@ -772,6 +772,9 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             throws GroupManagementDAOException {
         List<Device> devices = new ArrayList<>();
         try {
+            if (deviceStatuses.isEmpty()) {
+                return devices;
+            }
             Connection conn = GroupManagementDAOFactory.getConnection();
             StringJoiner joiner = new StringJoiner(",","SELECT "
                     + "d1.DEVICE_ID, "

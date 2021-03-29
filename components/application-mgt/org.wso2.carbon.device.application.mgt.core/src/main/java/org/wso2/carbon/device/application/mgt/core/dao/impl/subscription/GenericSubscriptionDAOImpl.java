@@ -383,9 +383,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             log.debug("Request received in DAO Layer to get device subscriptions for given device ids.");
         }
         try {
+            Map<Integer, DeviceSubscriptionDTO> deviceSubscriptionDTOHashMap = new HashMap<>();
+            if (deviceIds.isEmpty()) {
+                return deviceSubscriptionDTOHashMap;
+            }
             Connection conn = this.getDBConnection();
             int index = 1;
-            Map<Integer, DeviceSubscriptionDTO> deviceSubscriptionDTOHashMap = new HashMap<>();
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT "
                             + "DS.ID AS ID, "
@@ -439,9 +442,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             log.debug("Request received in DAO Layer to get already subscribed users for given list of user names.");
         }
         try {
+            List<String> subscribedUsers = new ArrayList<>();
+            if (users.isEmpty()) {
+                return subscribedUsers;
+            }
             Connection conn = this.getDBConnection();
             int index = 1;
-            List<String> subscribedUsers = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT US.USER_NAME AS USER_NAME "
                             + "FROM AP_USER_SUBSCRIPTION US "
@@ -479,9 +485,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             log.debug("Request received in DAO Layer to get already subscribed role names for given list of roles.");
         }
         try {
+            List<String> subscribedRoles = new ArrayList<>();
+            if (roles.isEmpty()) {
+                return subscribedRoles;
+            }
             Connection conn = this.getDBConnection();
             int index = 1;
-            List<String> subscribedUsers = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT RS.ROLE_NAME AS ROLE "
                             + "FROM AP_ROLE_SUBSCRIPTION RS "
@@ -496,11 +505,11 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        subscribedUsers.add(rs.getString("ROLE"));
+                        subscribedRoles.add(rs.getString("ROLE"));
                     }
                 }
             }
-            return subscribedUsers;
+            return subscribedRoles;
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to getg subscribed roles for given role "
                     + "names.";
@@ -520,9 +529,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             log.debug("Request received in DAO Layer to get already subscribed groups for given list of groups.");
         }
         try {
+            List<String> subscribedGroups = new ArrayList<>();
+            if (groups.isEmpty()) {
+                return subscribedGroups;
+            }
             Connection conn = this.getDBConnection();
             int index = 1;
-            List<String> subscribedUsers = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT GS.GROUP_NAME AS GROUP_NAME "
                             + "FROM AP_GROUP_SUBSCRIPTION GS "
@@ -537,11 +549,11 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        subscribedUsers.add(rs.getString("GROUP_NAME"));
+                        subscribedGroups.add(rs.getString("GROUP_NAME"));
                     }
                 }
             }
-            return subscribedUsers;
+            return subscribedGroups;
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get already subscribed groups for given "
                     + "group names.";
@@ -562,9 +574,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             log.debug("Request received to DAO Layer to get already subscribed dvice Ids for given list of device Ids.");
         }
         try {
+            List<Integer> subscribedDevices = new ArrayList<>();
+            if (deviceIds.isEmpty()) {
+                return subscribedDevices;
+            }
             Connection conn = this.getDBConnection();
             int index = 1;
-            List<Integer> subscribedDevices = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT DS.ID AS DEVICE_SUBSCRIPTION_ID "
                             + "FROM AP_DEVICE_SUBSCRIPTION DS "
@@ -695,6 +710,9 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     public boolean updateDeviceSubStatus(int deviceId, List<Integer> deviceSubIds, String status, int tenantId)
             throws ApplicationManagementDAOException {
         try {
+            if (deviceSubIds.isEmpty()) {
+                return false;
+            }
             Connection conn = this.getDBConnection();
             int index = 1;
             StringJoiner joiner = new StringJoiner(",",

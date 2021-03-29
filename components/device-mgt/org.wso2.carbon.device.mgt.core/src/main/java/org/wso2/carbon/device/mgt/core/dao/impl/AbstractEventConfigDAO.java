@@ -68,6 +68,9 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
     public List<EventConfig> getEventsOfGroups(List<Integer> groupIds, int tenantId) throws EventManagementDAOException {
         try {
             List<EventConfig> eventList = new ArrayList<>();
+            if (groupIds.isEmpty()) {
+                return eventList;
+            }
             Connection conn = this.getConnection();
             String sql = "SELECT " +
                     "E.ID AS EVENT_ID, " +
@@ -145,6 +148,9 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
     @Override
     public void deleteEventGroupMappingRecordsByEventIds(List<Integer> eventsIdsToDelete) throws EventManagementDAOException {
         try {
+            if (eventsIdsToDelete.isEmpty()) {
+                return;
+            }
             Connection conn = this.getConnection();
             String sql = "DELETE FROM DM_DEVICE_EVENT_GROUP_MAPPING WHERE EVENT_ID IN (%s)";
             String inClause = String.join(", ", Collections.nCopies(eventsIdsToDelete.size(), "?"));
@@ -166,6 +172,9 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
     @Override
     public void deleteEventGroupMappingRecordsByGroupIds(List<Integer> groupIdsToDelete) throws EventManagementDAOException {
         try {
+            if (groupIdsToDelete.isEmpty()) {
+                return;
+            }
             Connection conn = this.getConnection();
             String sql = "DELETE FROM DM_DEVICE_EVENT_GROUP_MAPPING WHERE GROUP_ID IN (%s)";
             String inClause = String.join(", ", Collections.nCopies(groupIdsToDelete.size(), "?"));
@@ -230,6 +239,9 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
     public List<EventConfig> getEventsById(List<Integer> eventIdList) throws EventManagementDAOException {
         try {
             List<EventConfig> eventList = new ArrayList<>();
+            if (eventIdList.isEmpty()) {
+                return eventList;
+            }
             Connection conn = this.getConnection();
             String sql = "SELECT " +
                     "ID AS EVENT_ID, " +
@@ -269,6 +281,9 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
     public List<Integer> getGroupsOfEvents(List<Integer> eventIdList) throws EventManagementDAOException {
         try {
             List<Integer> groupIdList = new ArrayList<>();
+            if (eventIdList.isEmpty()) {
+                return groupIdList;
+            }
             Connection conn = this.getConnection();
             String sql = "SELECT " +
                     "GROUP_ID " +

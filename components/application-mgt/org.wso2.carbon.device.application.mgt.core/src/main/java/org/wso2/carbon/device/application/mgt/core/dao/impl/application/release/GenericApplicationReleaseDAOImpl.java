@@ -564,6 +564,11 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     public List<ApplicationReleaseDTO> getReleaseByPackages(List<String> packages, int tenantId) throws
             ApplicationManagementDAOException {
 
+        List<ApplicationReleaseDTO> releaseDTOs = new ArrayList<>();
+        if (packages.isEmpty()) {
+            return releaseDTOs;
+        }
+
         String sql = "SELECT "
                 + "AR.ID AS RELEASE_ID, "
                 + "AR.DESCRIPTION AS RELEASE_DESCRIPTION, "
@@ -600,7 +605,6 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                 }
                 statement.setInt(index, tenantId);
                 try (ResultSet resultSet = statement.executeQuery()) {
-                    List<ApplicationReleaseDTO> releaseDTOs = new ArrayList<>();
                     while (resultSet.next()) {
                         releaseDTOs.add(DAOUtil.constructAppReleaseDTO(resultSet));
                     }

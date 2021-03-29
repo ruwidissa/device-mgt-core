@@ -699,6 +699,10 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
         Connection conn;
 
         try {
+            List<Device> devices = new ArrayList<>();
+            if (deviceIds.isEmpty()) {
+                return devices;
+            }
             conn = this.getConnection();
             int index = 1;
 
@@ -753,7 +757,6 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 ps.setInt(index, limitValue);
 
                 try (ResultSet rs = ps.executeQuery()) {
-                    List<Device> devices = new ArrayList<>();
                     while (rs.next()) {
                         devices.add(DeviceManagementDAOUtil.loadDevice(rs));
                     }
@@ -1039,6 +1042,9 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
     public int getSubscribedDeviceCount(List<Integer> deviceIds, int tenantId, List<String> status)
             throws DeviceManagementDAOException {
         try {
+            if (deviceIds.isEmpty()) {
+                return 0;
+            }
             Connection conn = this.getConnection();
             int index = 1;
             StringJoiner joiner = new StringJoiner(",",
