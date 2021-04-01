@@ -55,6 +55,7 @@ public class HandlerConstants {
     public static final String PASSWORD_GRANT_TYPE = "password";
     public static final String JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
     public static final String PRODUCTION_KEY = "PRODUCTION";
+    public static final String LOGIN_CACHE = "LOGIN_CACHE";
 
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";
