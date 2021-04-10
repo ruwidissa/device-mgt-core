@@ -24,33 +24,22 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.task.impl.DynamicPartitionedScheduleTask;
 import org.wso2.carbon.policy.mgt.core.internal.PolicyManagementDataHolder;
 import org.wso2.carbon.policy.mgt.core.mgt.MonitoringManager;
+import org.wso2.carbon.policy.mgt.core.util.PolicyManagementConstants;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MonitoringTask extends DynamicPartitionedScheduleTask {
 
     private static final Log log = LogFactory.getLog(MonitoringTask.class);
 
-    @Override
-    public void setProperties(Map<String, String> map) {
-    }
-
-    @Override
-    public void executeDynamicTask() {
-        if (log.isDebugEnabled()) {
-            log.debug("Monitoring task started to run.");
-        }
-        this.executeforAllTenants();
-    }
+    private String tenant;
 
     /**
      * Check whether Device platform (ex: android) is exist in the cdm-config.xml file before adding a
@@ -66,30 +55,27 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
         return policyMonitoringManager != null;
     }
 
-    private void executeforAllTenants() {
-
+    @Override
+    public void executeDynamicTask() {
+        tenant = getProperty(PolicyManagementConstants.TENANT_ID);
+        if (tenant == null) {
+            log.warn("Tenant id of the Monitoring Task got null");
+            return;
+        }
+        int tenantId = Integer.parseInt(tenant);
         if (log.isDebugEnabled()) {
-            log.debug("Monitoring task started to run for all tenants.");
+            log.debug("Monitoring task started to run for tenant: " + tenant);
+        }
+        if (MultitenantConstants.SUPER_TENANT_ID == tenantId) {
+            this.executeTask();
+            return;
         }
         try {
-            DeviceManagementProviderService deviceManagementService = PolicyManagementDataHolder
-                    .getInstance().getDeviceManagementService();
-            List<Integer> tenants = deviceManagementService.getDeviceEnrolledTenants();
-            for (Integer tenant : tenants) {
-                if (MultitenantConstants.SUPER_TENANT_ID == tenant) {
-                    this.executeTask();
-                    continue;
-                }
-                try {
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenant, true);
-                    this.executeTask();
-                } finally {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
-            }
-        } catch (DeviceManagementException e) {
-            log.error("Error occurred while trying to get the available tenants from device manager service ", e);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
+            this.executeTask();
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
@@ -105,7 +91,7 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
                 }
             }
         } catch (PolicyComplianceException e) {
-            log.error("Error occurred while getting the device types.");
+            log.error("TID:[" + tenant + "] Error occurred while getting the device types.");
         }
         if (!deviceTypes.isEmpty()) {
             try {
@@ -113,42 +99,42 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
                         PolicyManagementDataHolder.getInstance().getDeviceManagementService();
                 for (String deviceType : configDeviceTypes) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Running task for device type : " + deviceType);
+                        log.debug("TID:[" + tenant + "] Running task for device type : " + deviceType);
                     }
                     PolicyMonitoringManager monitoringService =
                             PolicyManagementDataHolder.getInstance().getDeviceManagementService()
                                     .getPolicyMonitoringManager(deviceType);
                     List<Device> devices;
-                    if(super.isDynamicTaskEligible()){
-                        devices = deviceManagementProviderService.getAllocatedDevices(deviceType,
-                                                                                      super.getTaskContext().getActiveServerCount(),
-                                                                                      super.getTaskContext().getServerHashIndex());
+                    if(isDynamicTaskEligible()){
+                        devices = deviceManagementProviderService
+                                .getAllocatedDevices(deviceType, getTaskContext().getActiveServerCount(),
+                                        getTaskContext().getServerHashIndex());
                     } else {
                         devices = deviceManagementProviderService.getAllDevices(deviceType, false);
                     }
                     if (monitoringService != null && !devices.isEmpty()) {
                         List<Device> notifiableDevices = new ArrayList<>();
                         if (log.isDebugEnabled()) {
-                            log.debug("Removing inactive and blocked devices from the list for the device type : " +
-                                    deviceType);
+                            log.debug("TID:[" + tenant + "] Removing inactive and blocked devices from " +
+                                    "the list for the device type : " + deviceType);
                         }
+                        StringBuilder sb = new StringBuilder();
                         for (Device device : devices) {
                             EnrolmentInfo.Status status = device.getEnrolmentInfo().getStatus();
                             if (status.equals(EnrolmentInfo.Status.ACTIVE) ||
-                                    status.equals(EnrolmentInfo.Status.INACTIVE) ||
                                     status.equals(EnrolmentInfo.Status.UNREACHABLE)) {
                                 notifiableDevices.add(device);
-                            }
-                            if (log.isDebugEnabled()) {
-                                log.debug("Adding monitoring operation to device : " + device.getDeviceIdentifier());
+                                if (log.isDebugEnabled()) {
+                                    if (sb.length() > 0) {
+                                        sb.append(", ");
+                                    }
+                                    sb.append(device.getDeviceIdentifier());
+                                }
                             }
                         }
                         if (log.isDebugEnabled()) {
-                            log.debug("Following '" + deviceType + "' devices selected to send the notification " +
-                                    "for policy monitoring");
-                            for (Device device : notifiableDevices) {
-                                log.debug(device.getDeviceIdentifier());
-                            }
+                            log.debug("TID:[" + tenant + "] Sending monitoring to '" + deviceType +
+                                    "' devices with ids [" + sb + "]");
                         }
                         if (!notifiableDevices.isEmpty()) {
                             monitoringManager.addMonitoringOperation(deviceType, notifiableDevices);
@@ -156,13 +142,14 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
                     }
                 }
                 if (log.isDebugEnabled()) {
-                    log.debug("Monitoring task running completed.");
+                    log.debug("TID:[" + tenant + "] Monitoring task running completed.");
                 }
             } catch (Exception e) {
-                log.error("Error occurred while trying to run a task.", e);
+                log.error("TID:[" + tenant + "] Error occurred while trying to run a task.", e);
             }
         } else {
-            log.info("No device types registered currently. So did not run the monitoring task.");
+            log.info("TID:[" + tenant + "] No device types registered currently. " +
+                    "So did not run the monitoring task.");
         }
     }
 
@@ -170,4 +157,5 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
     protected void setup() {
 
     }
+
 }

@@ -21,8 +21,8 @@ package org.wso2.carbon.policy.mgt.core.enforcement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -36,18 +36,12 @@ import org.wso2.carbon.policy.mgt.core.mgt.impl.PolicyManagerImpl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class DelegationTask extends DynamicPartitionedScheduleTask {
 
     private static final Log log = LogFactory.getLog(DelegationTask.class);
-    private PolicyConfiguration policyConfiguration = DeviceConfigurationManager.getInstance()
+    private final PolicyConfiguration policyConfiguration = DeviceConfigurationManager.getInstance()
             .getDeviceManagementConfig().getPolicyConfiguration();
-
-    @Override
-    public void setProperties(Map<String, String> map) {
-
-    }
 
     @Override
     public void executeDynamicTask() {
@@ -70,10 +64,10 @@ public class DelegationTask extends DynamicPartitionedScheduleTask {
                     try {
                         devices = new ArrayList<>();
                         toBeNotified = new ArrayList<>();
-                        if (super.isDynamicTaskEligible()) {
+                        if (isDynamicTaskEligible()) {
                             devices.addAll(service.getAllocatedDevices(deviceType,
-                                                                       super.getTaskContext().getActiveServerCount(),
-                                                                       super.getTaskContext().getServerHashIndex()));
+                                                                       getTaskContext().getActiveServerCount(),
+                                                                       getTaskContext().getServerHashIndex()));
                         } else {
                             devices.addAll(service.getAllDevices(deviceType, false));
                         }
@@ -81,9 +75,9 @@ public class DelegationTask extends DynamicPartitionedScheduleTask {
                             if (device != null && device.getEnrolmentInfo() != null
                                 && device.getEnrolmentInfo().getStatus() != EnrolmentInfo.Status.REMOVED) {
                                 toBeNotified.add(device);
-                            }
-                            if (log.isDebugEnabled()) {
-                                log.debug("Adding policy operation to device : " + device.getDeviceIdentifier());
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Adding policy operation to device : " + device.getDeviceIdentifier());
+                                }
                             }
                         }
                         if (!toBeNotified.isEmpty()) {

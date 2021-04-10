@@ -52,6 +52,7 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
 
     @Override
     public void setProperties(Map<String, String> properties) {
+        super.setProperties(properties);
         deviceType = properties.get(DeviceStatusTaskManagerServiceImpl.DEVICE_TYPE);
         deviceTypeId = Integer.parseInt(properties.get(DeviceStatusTaskManagerServiceImpl.DEVICE_TYPE_ID));
         String deviceStatusTaskConfigStr = properties.get(DeviceStatusTaskManagerServiceImpl.DEVICE_STATUS_TASK_CONFIG);

@@ -39,7 +39,7 @@ import java.util.Map;
 public class TaskScheduleServiceImpl implements TaskScheduleService {
 
     private static final Log log = LogFactory.getLog(TaskScheduleServiceImpl.class);
-    private PolicyConfiguration policyConfiguration;
+    private final PolicyConfiguration policyConfiguration;
 
 
     public TaskScheduleServiceImpl() {
@@ -72,7 +72,7 @@ public class TaskScheduleServiceImpl implements TaskScheduleService {
                 Map<String, String> properties = new HashMap<>();
                 properties.put(PolicyManagementConstants.TENANT_ID, String.valueOf(tenantId));
 
-                String taskName = PolicyManagementConstants.MONITORING_TASK_NAME + "_" + String.valueOf(tenantId);
+                String taskName = PolicyManagementConstants.MONITORING_TASK_NAME + "_" + tenantId;
 
                 if (!taskManager.isTaskScheduled(taskName)) {
 
@@ -101,7 +101,7 @@ public class TaskScheduleServiceImpl implements TaskScheduleService {
     public void stopTask() throws PolicyMonitoringTaskException {
         int tenantId = getTenantId();
         try {
-            String taskName = PolicyManagementConstants.MONITORING_TASK_NAME + "_" + String.valueOf(tenantId);
+            String taskName = PolicyManagementConstants.MONITORING_TASK_NAME + "_" + tenantId;
             TaskService taskService = PolicyManagementDataHolder.getInstance().getTaskService();
             if (taskService.isServerInit()) {
                 TaskManager taskManager = taskService.getTaskManager(PolicyManagementConstants.MONITORING_TASK_TYPE);
@@ -117,7 +117,7 @@ public class TaskScheduleServiceImpl implements TaskScheduleService {
     public void updateTask(int monitoringFrequency) throws PolicyMonitoringTaskException {
         int tenantId = getTenantId();
         try {
-            String taskName = PolicyManagementConstants.MONITORING_TASK_NAME + "_" + String.valueOf(tenantId);
+            String taskName = PolicyManagementConstants.MONITORING_TASK_NAME + "_" + tenantId;
             TaskService taskService = PolicyManagementDataHolder.getInstance().getTaskService();
             TaskManager taskManager = taskService.getTaskManager(PolicyManagementConstants.MONITORING_TASK_TYPE);
 
@@ -129,7 +129,7 @@ public class TaskScheduleServiceImpl implements TaskScheduleService {
                 triggerInfo.setRepeatCount(-1);
 
                 Map<String, String> properties = new HashMap<>();
-                properties.put("tenantId", String.valueOf(tenantId));
+                properties.put(PolicyManagementConstants.TENANT_ID, String.valueOf(tenantId));
 
                 TaskInfo taskInfo = new TaskInfo(taskName, PolicyManagementConstants.MONITORING_TASK_CLAZZ, properties,
                         triggerInfo);
@@ -150,7 +150,7 @@ public class TaskScheduleServiceImpl implements TaskScheduleService {
     @Override
     public boolean isTaskScheduled() throws PolicyMonitoringTaskException {
         int tenantId = getTenantId();
-        String taskName = PolicyManagementConstants.MONITORING_TASK_NAME + "_" + String.valueOf(tenantId);
+        String taskName = PolicyManagementConstants.MONITORING_TASK_NAME + "_" + tenantId;
         TaskService taskService = PolicyManagementDataHolder.getInstance().getTaskService();
         TaskManager taskManager;
         try {
