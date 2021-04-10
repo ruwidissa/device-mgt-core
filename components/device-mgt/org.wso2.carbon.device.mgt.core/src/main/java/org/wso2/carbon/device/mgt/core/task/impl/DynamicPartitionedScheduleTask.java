@@ -26,12 +26,27 @@ import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.ntask.core.Task;
 
+import java.util.Map;
+
 
 public abstract class DynamicPartitionedScheduleTask implements Task {
 
     private static final Log log = LogFactory.getLog(DynamicPartitionedScheduleTask.class);
 
     private static DynamicTaskContext taskContext = null;
+    private Map<String, String> properties;
+
+    @Override
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
+    public String getProperty(String name) {
+        if (properties == null) {
+            return null;
+        }
+        return properties.get(name);
+    }
 
     @Override
     public final void init() {
@@ -97,11 +112,7 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
     }
 
     public static boolean isDynamicTaskEligible(){
-        if(taskContext != null && taskContext.isPartitioningEnabled()) {
-            return true;
-        } else {
-            return false;
-        }
+        return taskContext != null && taskContext.isPartitioningEnabled();
     }
 
 }

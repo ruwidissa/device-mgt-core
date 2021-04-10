@@ -39,28 +39,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.task.DeviceMgtTaskException;
 import org.wso2.carbon.device.mgt.core.task.DeviceTaskManager;
-import org.wso2.carbon.ntask.core.Task;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.List;
 import java.util.Map;
 
 public class DeviceDetailsRetrieverTask extends DynamicPartitionedScheduleTask {
 
-    private static Log log = LogFactory.getLog(DeviceDetailsRetrieverTask.class);
+    private static final Log log = LogFactory.getLog(DeviceDetailsRetrieverTask.class);
     private String deviceType;
     private DeviceManagementProviderService deviceManagementProviderService;
 
     @Override
     public void setProperties(Map<String, String> map) {
+        super.setProperties(map);
         deviceType = map.get("DEVICE_TYPE");
     }
 
@@ -122,7 +120,7 @@ public class DeviceDetailsRetrieverTask extends DynamicPartitionedScheduleTask {
         //pass the configurations also from here, monitoring tasks
         try {
             if (deviceManagementProviderService.isDeviceMonitoringEnabled(deviceType)) {
-                deviceTaskManager.addOperations(super.getTaskContext());
+                deviceTaskManager.addOperations(getTaskContext());
             }
         } catch (DeviceMgtTaskException e) {
             log.error("Error occurred while trying to add the operations to " +
