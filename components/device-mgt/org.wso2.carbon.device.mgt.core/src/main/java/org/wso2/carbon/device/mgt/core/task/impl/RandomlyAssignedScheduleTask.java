@@ -61,6 +61,8 @@ public abstract class RandomlyAssignedScheduleTask implements Task {
                 log.error("Error refreshing Variables necessary for Randomly Assigned Scheduled Task. " +
                           "Dynamic Tasks will not function.", e);
             }
+        } else {
+            qualifiedToExecuteTask = true;
         }
     }
 

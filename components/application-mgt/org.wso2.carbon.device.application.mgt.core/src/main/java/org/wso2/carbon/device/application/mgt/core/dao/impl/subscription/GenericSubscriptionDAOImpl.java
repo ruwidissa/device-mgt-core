@@ -765,7 +765,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 stmt.setString(2, subscriptionDTO.getApplicationUUID());
                 stmt.setString(3, subscriptionDTO.getSubscribersString());
                 stmt.setString(4, ExecutionStatus.PENDING.toString());
-                stmt.setTimestamp(5, Timestamp.valueOf(subscriptionDTO.getScheduledAt()));
+                stmt.setLong(5, subscriptionDTO.getScheduledAt());
                 stmt.setTimestamp(6, new Timestamp(calendar.getTime().getTime()));
                 stmt.setString(7, subscriptionDTO.getScheduledBy());
                 stmt.setBoolean(8, false);
@@ -785,7 +785,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public boolean updateScheduledSubscription(int id, LocalDateTime scheduledAt, String scheduledBy)
+    public boolean updateScheduledSubscription(int id, long scheduledAt, String scheduledBy)
             throws ApplicationManagementDAOException {
         String sql = "UPDATE AP_SCHEDULED_SUBSCRIPTION "
                      + "SET "
@@ -797,7 +797,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 Calendar calendar = Calendar.getInstance();
-                stmt.setTimestamp(1, Timestamp.valueOf(scheduledAt));
+                stmt.setLong(1, scheduledAt);
                 stmt.setString(2, scheduledBy);
                 stmt.setTimestamp(3, new Timestamp(calendar.getTime().getTime()));
                 stmt.setInt(4, id);

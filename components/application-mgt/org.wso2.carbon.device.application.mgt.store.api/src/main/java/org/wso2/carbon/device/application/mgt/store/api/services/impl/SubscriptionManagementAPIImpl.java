@@ -73,9 +73,9 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @PathParam("uuid") String uuid,
             @PathParam("action") String action,
             @Valid List<DeviceIdentifier> deviceIdentifiers,
-            @QueryParam("timestamp") String timestamp) {
+            @QueryParam("timestamp") long timestamp) {
         try {
-            if (StringUtils.isEmpty(timestamp)) {
+            if (0 == timestamp) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
                 ApplicationInstallResponse response = subscriptionManager
                         .performBulkAppOperation(uuid, deviceIdentifiers, SubscriptionType.DEVICE.toString(), action);
@@ -114,9 +114,9 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @PathParam("subType") String subType,
             @PathParam("action") String action,
             @Valid List<String> subscribers,
-            @QueryParam("timestamp") String timestamp) {
+            @QueryParam("timestamp") long timestamp) {
         try {
-            if (StringUtils.isEmpty(timestamp)) {
+            if (0 == timestamp) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
                 ApplicationInstallResponse response = subscriptionManager
                         .performBulkAppOperation(uuid, subscribers, subType, action);
@@ -155,10 +155,10 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @PathParam("uuid") String uuid,
             @PathParam("action") String action,
             @Valid List<DeviceIdentifier> deviceIdentifiers,
-            @QueryParam("timestamp") String timestamp,
+            @QueryParam("timestamp") long timestamp,
             @QueryParam("requiresUpdatingExternal") boolean requiresUpdatingExternal) {
         try {
-            if (StringUtils.isEmpty(timestamp)) {
+            if (0 == timestamp) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
                 subscriptionManager
                         .performEntAppSubscription(uuid, deviceIdentifiers, SubscriptionType.DEVICE.toString(),
@@ -202,10 +202,10 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @PathParam("subType") String subType,
             @PathParam("action") String action,
             @Valid List<String> subscribers,
-            @QueryParam("timestamp") String timestamp,
+            @QueryParam("timestamp") long timestamp,
             @QueryParam("requiresUpdatingExternal") boolean requiresUpdatingExternal) {
         try {
-            if (StringUtils.isEmpty(timestamp)) {
+            if (0 == timestamp) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
                 subscriptionManager.performEntAppSubscription(uuid, subscribers, subType, action, requiresUpdatingExternal);
                 String msg = "Application release which has UUID " + uuid + " is installed to subscriber's valid device"
@@ -253,11 +253,11 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
      * @return {@link Response} of the operation
      */
     private Response scheduleApplicationOperationTask(String applicationUUID, List<?> subscribers,
-            SubscriptionType subType, SubAction subAction, String timestamp) {
+            SubscriptionType subType, SubAction subAction, long timestamp) {
         try {
             ScheduledAppSubscriptionTaskManager subscriptionTaskManager = new ScheduledAppSubscriptionTaskManager();
             subscriptionTaskManager.scheduleAppSubscriptionTask(applicationUUID, subscribers, subType, subAction,
-                    LocalDateTime.parse(timestamp, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    timestamp);
         } catch (ApplicationOperationTaskException e) {
             String msg = "Error occurred while scheduling the application install operation";
             log.error(msg, e);
