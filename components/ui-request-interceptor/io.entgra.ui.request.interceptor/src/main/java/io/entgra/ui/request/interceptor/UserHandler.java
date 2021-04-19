@@ -52,7 +52,7 @@ public class UserHandler extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             String serverUrl =
-                    req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+                    req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                             + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
             HttpSession httpSession = req.getSession(false);
             if (httpSession == null) {

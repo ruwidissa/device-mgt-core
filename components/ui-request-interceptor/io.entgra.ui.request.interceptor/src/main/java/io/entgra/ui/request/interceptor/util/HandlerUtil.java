@@ -226,9 +226,9 @@ public class HandlerUtil {
      * @return {@link String} gateway port
      */
     public static String getGatewayPort(String scheme) {
-        String gatewayPort = System.getProperty("iot.gateway.https.port");
+        String gatewayPort = System.getProperty(HandlerConstants.IOT_GW_HTTPS_PORT_ENV_VAR);
         if (HandlerConstants.HTTP_PROTOCOL.equals(scheme)) {
-            gatewayPort = System.getProperty("iot.gateway.http.port");
+            gatewayPort = System.getProperty(HandlerConstants.IOT_GW_HTTP_PORT_ENV_VAR);
         }
         return gatewayPort;
     }
@@ -240,9 +240,9 @@ public class HandlerUtil {
      * @return {@link String} gateway port
      */
     public static String getCorePort(String scheme) {
-        String productCorePort = System.getProperty("iot.core.https.port");
+        String productCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
         if (HandlerConstants.HTTP_PROTOCOL.equals(scheme)) {
-            productCorePort = System.getProperty("iot.core.https.por");
+            productCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
         }
         return productCorePort;
     }
