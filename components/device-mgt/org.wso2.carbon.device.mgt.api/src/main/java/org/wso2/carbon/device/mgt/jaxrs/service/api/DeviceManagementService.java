@@ -270,6 +270,12 @@ public interface DeviceManagementService {
             @Size(max = 45)
                     String ownership,
             @ApiParam(
+                    name = "serialNumber",
+                    value = "The serialNumber of the device.",
+                    required = false)
+            @QueryParam("serialNumber")
+                    String serialNumber,
+            @ApiParam(
                     name = "status",
                     value = "Provide the device status details, such as active or inactive.",
                     required = false)

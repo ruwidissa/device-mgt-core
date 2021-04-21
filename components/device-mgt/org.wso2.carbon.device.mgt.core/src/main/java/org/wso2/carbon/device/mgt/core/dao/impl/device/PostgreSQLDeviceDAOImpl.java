@@ -67,6 +67,8 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
         boolean isStatusProvided = false;
         Date since = request.getSince();
         boolean isSinceProvided = false;
+        String serial = request.getSerialNumber();
+        boolean isSerialProvided = false;
 
         try {
             conn = getConnection();
@@ -88,10 +90,14 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "d.NAME, " +
                     "d.DEVICE_IDENTIFICATION, " +
                     "t.NAME AS DEVICE_TYPE " +
-                    "FROM DM_DEVICE d, " +
-                    "DM_DEVICE_TYPE t " +
-                    "WHERE DEVICE_TYPE_ID = t.ID " +
-                    "AND d.TENANT_ID = ?";
+                    "FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_INFO i " +
+                    "WHERE DEVICE_TYPE_ID = t.ID AND d.ID= i.DEVICE_ID AND i.KEY_FIELD='serial' ";
+
+            if (serial != null) {
+                sql = sql + "AND i.VALUE_FIELD = ? ";
+                isSerialProvided = true;
+            }
+            sql = sql + "AND d.TENANT_ID = ?";
             //Add the query for device-type
             if (deviceType != null && !deviceType.isEmpty()) {
                 sql = sql + " AND t.NAME = ?";
@@ -124,6 +130,9 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;
+                if (isSerialProvided) {
+                    stmt.setString(paramIdx++, serial);
+                }
                 stmt.setInt(paramIdx++, tenantId);
                 if (isDeviceTypeProvided) {
                     stmt.setString(paramIdx++, deviceType);
