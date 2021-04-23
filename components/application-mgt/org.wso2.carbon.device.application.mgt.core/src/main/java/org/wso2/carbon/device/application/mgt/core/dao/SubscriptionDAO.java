@@ -124,7 +124,7 @@ public interface SubscriptionDAO {
      * @param scheduledBy username of the user who scheduled the subscription
      * @throws ApplicationManagementDAOException if error occurred while updating the entry
      */
-    boolean updateScheduledSubscription(int id, LocalDateTime scheduledAt, String scheduledBy)
+    boolean updateScheduledSubscription(int id, long scheduledAt, String scheduledBy)
             throws ApplicationManagementDAOException;
 
     /**

@@ -1392,12 +1392,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                     deviceSubscriptionData.setAction(Constants.UNSUBSCRIBED);
                                     deviceSubscriptionData.setActionTriggeredBy(subscription.getUnsubscribedBy());
                                     deviceSubscriptionData
-                                            .setActionTriggeredTimestamp(subscription.getUnsubscribedTimestamp());
+                                            .setActionTriggeredTimestamp(subscription.getUnsubscribedTimestamp().getTime() / 1000);
                                 } else {
                                     deviceSubscriptionData.setAction(Constants.SUBSCRIBED);
                                     deviceSubscriptionData.setActionTriggeredBy(subscription.getSubscribedBy());
                                     deviceSubscriptionData
-                                            .setActionTriggeredTimestamp(subscription.getSubscribedTimestamp());
+                                            .setActionTriggeredTimestamp(subscription.getSubscribedTimestamp().getTime() / 1000);
                                 }
                                 deviceSubscriptionData.setActionType(subscription.getActionTriggeredFrom());
                                 deviceSubscriptionData.setStatus(subscription.getStatus());
