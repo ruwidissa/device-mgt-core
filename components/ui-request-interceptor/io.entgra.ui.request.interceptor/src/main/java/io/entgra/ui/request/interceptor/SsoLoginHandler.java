@@ -142,15 +142,15 @@ public class SsoLoginHandler extends HttpServlet {
      */
     private void dynamicClientRegistration(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            String iotsCorePort = System.getProperty("iot.core.https.port");
+            String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
 
             if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-                iotsCorePort = System.getProperty("iot.core.http.port");
+                iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
             }
 
-            gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+            gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                     + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-            iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
+            iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                     + HandlerConstants.COLON + iotsCorePort;
             String uiConfigUrl = iotsCoreUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
 

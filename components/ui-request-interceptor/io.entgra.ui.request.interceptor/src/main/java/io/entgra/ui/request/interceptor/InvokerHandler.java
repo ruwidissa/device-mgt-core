@@ -369,7 +369,7 @@ public class InvokerHandler extends HttpServlet {
             log.debug("refreshing the token");
         }
         HttpPost tokenEndpoint = new HttpPost(
-                apiEndpoint + HandlerConstants.API_COMMON_CONTEXT + HandlerConstants.TOKEN_ENDPOINT);
+                apiEndpoint + HandlerConstants.TOKEN_ENDPOINT);
         HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Couldn't find a session, hence it is required to login and proceed.");

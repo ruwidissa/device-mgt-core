@@ -241,7 +241,7 @@ public class OTPInvokerHandler extends HttpServlet {
     private static boolean validateRequest(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         String schema = req.getScheme();
-        apiEndpoint = schema + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
+        apiEndpoint = schema + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getCorePort(schema);
 
         if (StringUtils.isBlank(req.getHeader(HandlerConstants.OTP_HEADER))) {

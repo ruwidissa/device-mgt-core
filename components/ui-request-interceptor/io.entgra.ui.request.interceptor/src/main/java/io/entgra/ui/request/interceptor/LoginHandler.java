@@ -202,15 +202,15 @@ public class LoginHandler extends HttpServlet {
      * Define username and password static parameters.
      */
     private static void validateLoginRequest(HttpServletRequest req) throws LoginException {
-        String iotsCorePort = System.getProperty("iot.core.https.port");
+        String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
         if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-            iotsCorePort = System.getProperty("iot.core.http.port");
+            iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
         }
         username = req.getParameter("username");
         password = req.getParameter("password");
-        gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+        gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-        uiConfigUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
+        uiConfigUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                 + HandlerConstants.COLON + iotsCorePort + HandlerConstants.UI_CONFIG_ENDPOINT;
         if (username == null || password == null) {
             String msg = "Invalid login request. Username or Password is not received for login request.";
