@@ -80,5 +80,5 @@ public class HandlerConstants {
     public static final String IOT_GW_HOST_ENV_VAR = "iot.gateway.host";
     public static final String IOT_GW_HTTP_PORT_ENV_VAR = "iot.gateway.http.port";
     public static final String IOT_GW_HTTPS_PORT_ENV_VAR = "iot.gateway.https.port";
-
+    public static final String USER_SCOPES = "user-scopes";
 }
