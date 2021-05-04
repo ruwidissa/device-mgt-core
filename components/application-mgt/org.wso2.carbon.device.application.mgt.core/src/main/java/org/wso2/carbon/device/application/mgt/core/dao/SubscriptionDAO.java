@@ -81,7 +81,7 @@ public interface SubscriptionDAO {
     void addGroupSubscriptions(int tenantId, String subscribedBy, List<String> groups, int releaseId, String action)
             throws ApplicationManagementDAOException;
 
-    List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId) throws
+    List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId, String actionStatus, String action) throws
             ApplicationManagementDAOException;
 
     Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int appReleaseId, int tenantId)

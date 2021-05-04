@@ -33,6 +33,8 @@ import org.wso2.carbon.device.application.mgt.common.BasicUserInfo;
 import org.wso2.carbon.device.application.mgt.common.BasicUserInfoList;
 import org.wso2.carbon.device.application.mgt.common.RoleList;
 import org.wso2.carbon.device.application.mgt.common.DeviceGroupList;
+import org.wso2.carbon.device.application.mgt.store.api.services.impl.util.RequestValidationUtil;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
@@ -273,6 +275,9 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
     @Produces("application/json")
     @Path("/{uuid}/devices")
     public Response getAppInstalledDevices(
+            @QueryParam("name") String name,
+            @QueryParam("user") String user,
+            @QueryParam("ownership") String ownership,
             @PathParam("uuid") String uuid,
             @DefaultValue("0")
             @QueryParam("offset") int offset,
@@ -281,8 +286,31 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @QueryParam("status") List<String> status) {
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-            PaginationResult subscribedDeviceDetails = subscriptionManager
-                    .getAppInstalledDevices(offset, limit, uuid, status);
+            PaginationRequest request = new PaginationRequest(offset, limit);
+            if (name != null && !name.isEmpty()) {
+                request.setDeviceName(name);
+            }
+            if (user != null && !user.isEmpty()) {
+                request.setOwner(user);
+            }
+            if (ownership != null && !ownership.isEmpty()) {
+                RequestValidationUtil.validateOwnershipType(ownership);
+                request.setOwnership(ownership);
+            }
+            if (status != null && !status.isEmpty()) {
+                boolean isStatusEmpty = true;
+                for (String statusString : status) {
+                    if (StringUtils.isNotBlank(statusString)) {
+                        isStatusEmpty = false;
+                        break;
+                    }
+                }
+                if (!isStatusEmpty) {
+                    RequestValidationUtil.validateStatus(status);
+                    request.setStatusList(status);
+                }
+            }
+            PaginationResult subscribedDeviceDetails = subscriptionManager.getAppInstalledDevices(request, uuid);
             DeviceList devices = new DeviceList();
             devices.setList((List<Device>) subscribedDeviceDetails.getData());
             devices.setCount(subscribedDeviceDetails.getRecordsTotal());
@@ -292,8 +320,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload for getting application which has UUID: " + uuid
-                    + ". Hence verify the payload";
+            String msg = "User requested details are not valid";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
