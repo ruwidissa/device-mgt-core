@@ -1037,7 +1037,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, ExecutionStatus.PENDING.toString());
                 stmt.setBoolean(2, false);
-                stmt.setTimestamp(3, new Timestamp(Calendar.getInstance().getTime().getTime()));
+                stmt.setLong(3, Calendar.getInstance().getTime().getTime() / 1000);
                 try (ResultSet rs = stmt.executeQuery()) {
                     return DAOUtil.loadScheduledSubscriptions(rs);
                 }
