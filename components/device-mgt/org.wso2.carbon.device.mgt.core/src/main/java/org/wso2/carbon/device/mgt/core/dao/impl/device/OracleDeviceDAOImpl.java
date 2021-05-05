@@ -90,15 +90,16 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "d.DESCRIPTION, " +
                     "d.NAME, " +
                     "d.DEVICE_IDENTIFICATION, " +
-                    "t.NAME AS DEVICE_TYPE " +
-                    "FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_INFO i " +
-                    "WHERE DEVICE_TYPE_ID = t.ID AND d.ID= i.DEVICE_ID AND i.KEY_FIELD='serial' ";
+                    "t.NAME AS DEVICE_TYPE ";
 
             if (serial != null) {
-                sql = sql + "AND i.VALUE_FIELD = ? ";
+                sql = sql + "FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_INFO i " +
+                        "WHERE DEVICE_TYPE_ID = t.ID AND d.ID= i.DEVICE_ID " +
+                        "AND i.KEY_FIELD='serial' AND i.VALUE_FIELD = ? AND d.TENANT_ID = ? ";
                 isSerialProvided = true;
+            } else {
+                sql = sql + "FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ? ";
             }
-            sql = sql + "AND d.TENANT_ID = ?";
             //Add query for last updated timestamp
             if (since != null) {
                 sql = sql + " AND d.LAST_UPDATED_TIMESTAMP > ?";
