@@ -206,7 +206,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 RequestValidationUtil.validateOwnershipType(ownership);
                 request.setOwnership(ownership);
             }
-            if (serialNumber != null && !serialNumber.isEmpty()) {
+            if (StringUtils.isNotBlank(serialNumber)) {
                 request.setSerialNumber(serialNumber);
             }
             if (status != null && !status.isEmpty()) {

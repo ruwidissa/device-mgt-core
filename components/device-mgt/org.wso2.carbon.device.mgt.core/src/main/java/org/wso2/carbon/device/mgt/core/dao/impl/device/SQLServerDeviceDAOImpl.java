@@ -95,8 +95,11 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
             if (serial != null) {
                 sql = sql + "FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_INFO i " +
-                        "WHERE DEVICE_TYPE_ID = t.ID AND d.ID= i.DEVICE_ID " +
-                        "AND i.KEY_FIELD='serial' AND i.VALUE_FIELD = ? AND d.TENANT_ID = ? ";
+                        "WHERE DEVICE_TYPE_ID = t.ID " +
+                        "AND d.ID= i.DEVICE_ID " +
+                        "AND i.KEY_FIELD = 'serial' " +
+                        "AND i.VALUE_FIELD = ? " +
+                        "AND d.TENANT_ID = ? ";
                 isSerialProvided = true;
             } else {
                 sql = sql + "FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ? ";

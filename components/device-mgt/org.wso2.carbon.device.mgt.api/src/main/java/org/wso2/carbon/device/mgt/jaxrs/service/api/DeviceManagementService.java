@@ -271,7 +271,7 @@ public interface DeviceManagementService {
                     String ownership,
             @ApiParam(
                     name = "serialNumber",
-                    value = "The serialNumber of the device.",
+                    value = "The serial number of the device.",
                     required = false)
             @QueryParam("serialNumber")
                     String serialNumber,
