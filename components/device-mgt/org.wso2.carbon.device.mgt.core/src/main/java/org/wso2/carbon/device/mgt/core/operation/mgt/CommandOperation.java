@@ -24,6 +24,10 @@ public class CommandOperation extends Operation {
 
     private boolean enabled;
 
+    public CommandOperation() {
+        setControl(Control.NO_REPEAT);
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -34,9 +38,6 @@ public class CommandOperation extends Operation {
 
     public Type getType() {
         return Type.COMMAND;
-    }
-    public Control getControl(){
-        return Control.NO_REPEAT;
     }
 
 }
