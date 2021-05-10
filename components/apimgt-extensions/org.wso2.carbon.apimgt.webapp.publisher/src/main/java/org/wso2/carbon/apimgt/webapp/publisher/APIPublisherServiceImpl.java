@@ -44,9 +44,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-//import org.wso2.carbon.apimgt.integration.generated.client.publisher.model.*;
-//import org.wso2.carbon.apimgt.integration.client.publisher.PublisherClient;
-
 /**
  * This class represents the concrete implementation of the APIPublisherService that corresponds to providing all
  * API publishing related operations.
@@ -54,8 +51,6 @@ import java.util.Set;
 public class APIPublisherServiceImpl implements APIPublisherService {
     private static final String UNLIMITED_TIER = "Unlimited";
     private static final String API_PUBLISH_ENVIRONMENT = "Production and Sandbox";
-    private static final String CONTENT_TYPE = "application/json";
-    private static final String PUBLISHED_STATUS = "PUBLISHED";
     private static final String CREATED_STATUS = "CREATED";
     private static final String PUBLISH_ACTION = "Publish";
     public static final APIManagerFactory API_MANAGER_FACTORY = APIManagerFactory.getInstance();
@@ -118,7 +113,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         String context = config.getContext();
         context = context.startsWith("/") ? context : ("/" + context);
         api.setContext(context + "/" + config.getVersion());
-//        api.setContext(context);
         api.setStatus(CREATED_STATUS);
         api.setWsdlUrl(null);
         api.setResponseCache("Disabled");
@@ -172,8 +166,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT);
             api.setVisibility(APIConstants.API_PRIVATE_VISIBILITY);
         }
-        //        String endpointConfig = "{\"production_endpoints\":{\"url\":\"" + config.getEndpoint() +
-        //                "\",\"config\":null},\"endpoint_type\":\"http\"}";
         String endpointConfig = "{ \"endpoint_type\": \"http\", \"sandbox_endpoints\": { \"url\": \" " +
                 config.getEndpoint() + "\" }, \"production_endpoints\": { \"url\": \" "+ config.getEndpoint()+"\" } }";
 

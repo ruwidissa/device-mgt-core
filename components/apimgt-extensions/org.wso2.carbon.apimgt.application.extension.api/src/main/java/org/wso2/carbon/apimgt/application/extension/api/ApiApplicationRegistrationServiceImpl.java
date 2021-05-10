@@ -27,8 +27,6 @@ import org.wso2.carbon.apimgt.application.extension.api.util.RegistrationProfile
 import org.wso2.carbon.apimgt.application.extension.constants.ApiApplicationConstants;
 import org.wso2.carbon.apimgt.application.extension.dto.ApiApplicationKey;
 import org.wso2.carbon.apimgt.application.extension.exception.APIManagerException;
-//import org.wso2.carbon.apimgt.integration.client.OAuthRequestInterceptor;
-//import org.wso2.carbon.apimgt.integration.client.store.StoreClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;

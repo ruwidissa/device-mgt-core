@@ -18,20 +18,17 @@
 
 package org.wso2.carbon.apimgt.application.extension;
 
-//import feign.FeignException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.application.extension.bean.APIRegistrationProfile;
@@ -43,17 +40,6 @@ import org.wso2.carbon.apimgt.application.extension.util.APIManagerUtil;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-//import org.wso2.carbon.apimgt.integration.client.OAuthRequestInterceptor;
-//import org.wso2.carbon.apimgt.integration.client.store.StoreClient;
-//import org.wso2.carbon.apimgt.integration.generated.client.store.model.APIInfo;
-//import org.wso2.carbon.apimgt.integration.generated.client.store.model.APIList;
-//import org.wso2.carbon.apimgt.integration.generated.client.store.model.Application;
-//import org.wso2.carbon.apimgt.integration.generated.client.store.model.ApplicationInfo;
-//import org.wso2.carbon.apimgt.integration.generated.client.store.model.ApplicationKey;
-//import org.wso2.carbon.apimgt.integration.generated.client.store.model.ApplicationKeyGenerateRequest;
-//import org.wso2.carbon.apimgt.integration.generated.client.store.model.ApplicationList;
-//import org.wso2.carbon.apimgt.integration.generated.client.store.model.Subscription;
-//import org.wso2.carbon.apimgt.integration.generated.client.store.model.SubscriptionList;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.core.config.ui.UIConfiguration;
@@ -66,7 +52,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -78,66 +63,34 @@ import java.util.Set;
 public class APIManagementProviderServiceImpl implements APIManagementProviderService {
 
     private static final Log log = LogFactory.getLog(APIManagementProviderServiceImpl.class);
-    private static final String CONTENT_TYPE = "application/json";
-    private static final int MAX_API_PER_TAG = 200;
-    private static final String APP_TIER_TYPE = "application";
     public static final APIManagerFactory API_MANAGER_FACTORY = APIManagerFactory.getInstance();
 
     @Override
     public boolean isTierLoaded() {
-//        StoreClient storeClient = APIApplicationManagerExtensionDataHolder.getInstance().getIntegrationClientService()
-//                .getStoreClient();
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                .getTenantDomain();
-//        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-//        try {
+
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
         try {
             APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
+            return true;
         } catch (APIManagementException e) {
             log.error("APIs not ready", e);
         }
-        //            storeClient.getIndividualTier().tiersTierLevelTierNameGet(ApiApplicationConstants.DEFAULT_TIER,
-//                    APP_TIER_TYPE,
-//                    tenantDomain, CONTENT_TYPE, null, null);
-            return true;
-//        } catch (FeignException e) {
-//            log.error("Feign Exception", e);
-//            if (e.status() == 401) {
-//                OAuthRequestInterceptor oAuthRequestInterceptor = new OAuthRequestInterceptor();
-//                String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-//                oAuthRequestInterceptor.removeToken(username, tenantDomain);
-//                try {
-//                    storeClient.getIndividualTier().tiersTierLevelTierNameGet(ApiApplicationConstants.DEFAULT_TIER,
-//                            APP_TIER_TYPE, tenantDomain, CONTENT_TYPE, null, null);
-//                } catch (FeignException ex) {
-//                    log.error("Invalid Attempt : " + ex);
-//                }
-//            }
-//        } catch (Exception e) {
-//            log.error("APIs not ready", e);
-//        }
-//        return false;
+
+        return false;
     }
 
     @Override
     public void removeAPIApplication(String applicationName, String username) throws APIManagerException {
 
-//        StoreClient storeClient = APIApplicationManagerExtensionDataHolder.getInstance().getIntegrationClientService()
-//                .getStoreClient();
-//        ApplicationList applicationList = storeClient.getApplications()
-//                .applicationsGet("", applicationName, 1, 0, CONTENT_TYPE, null);
         try {
             APIConsumer apiConsumer = API_MANAGER_FACTORY.getAPIConsumer(username);
             Application application = apiConsumer.getApplicationsByName(username, applicationName, "");
             if (application != null) {
-//                ApplicationInfo applicationInfo = applicationList.getList().get(0);
-//                storeClient.getIndividualApplication().applicationsApplicationIdDelete(applicationInfo.getApplicationId(),
-//                        null, null);
                 apiConsumer.removeApplication(application, username);
             }
         } catch (APIManagementException e) {
-            //todo:amalka
-            e.printStackTrace();
+            throw new APIManagerException("Failed to remove api application : " + applicationName, e);
         }
 
 
@@ -148,9 +101,8 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
      */
     @Override
     public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
-                                                                             String keyType, String username,
-                                                                             boolean isAllowedAllDomains,
-            String validityTime, String scopes) throws APIManagerException {
+            String keyType, String username, boolean isAllowedAllDomains, String validityTime, String scopes)
+            throws APIManagerException {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (StringUtils.isEmpty(username)) {

@@ -27,8 +27,7 @@ import feign.slf4j.Slf4jLogger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.integration.client.configs.APIMConfigReader;
-import org.wso2.carbon.apimgt.integration.generated.client.publisher.api.ApIsApi;
-import org.wso2.carbon.apimgt.integration.generated.client.publisher.api.ApiLifecycleApi;
+import org.wso2.carbon.apimgt.integration.generated.client.publisher.api.*;
 import org.wso2.carbon.core.util.Utils;
 
 /**
@@ -37,15 +36,13 @@ import org.wso2.carbon.core.util.Utils;
 public class PublisherClient {
 
     private static final Log log = LogFactory.getLog(PublisherClient.class);
-    private ApIsApi apIsApi = null;
-    private ApiLifecycleApi apiLifecycleApi = null;
-//    private APIIndividualApi api = null;
-//    private APICollectionApi apis = null;
-//    private DocumentIndividualApi document = null;
-//    private ApplicationIndividualApi application = null;
-//    private EnvironmentCollectionApi environments = null;
-//    private SubscriptionApi subscriptions = null;
-//    private ThrottlingTierCollectionApi tiers = null;
+    private APIIndividualApi api = null;
+    private APICollectionApi apis = null;
+    private DocumentIndividualApi document = null;
+    private ApplicationIndividualApi application = null;
+    private EnvironmentCollectionApi environments = null;
+    private SubscriptionCollectionApi subscriptions = null;
+    private ThrottlingTierCollectionApi tiers = null;
 
 
     /**
@@ -60,50 +57,40 @@ public class PublisherClient {
                 .requestInterceptor(requestInterceptor).encoder(new GsonEncoder()).decoder(new GsonDecoder());
         String basePath = Utils.replaceSystemProperty(APIMConfigReader.getInstance().getConfig().getPublisherEndpoint());
 
-        apIsApi = builder.target(ApIsApi.class, basePath);
-        apiLifecycleApi = builder.target(ApiLifecycleApi.class, basePath);
-//        api = builder.target(APIIndividualApi.class, basePath);
-//        apis = builder.target(APICollectionApi.class, basePath);
-//        document = builder.target(DocumentIndividualApi.class, basePath);
-//        application = builder.target(ApplicationIndividualApi.class, basePath);
-//        environments = builder.target(EnvironmentCollectionApi.class, basePath);
-//        subscriptions = builder.target(SubscriptionCollectionApi.class, basePath);
-//        tiers = builder.target(ThrottlingTierCollectionApi.class, basePath);
+        api = builder.target(APIIndividualApi.class, basePath);
+        apis = builder.target(APICollectionApi.class, basePath);
+        document = builder.target(DocumentIndividualApi.class, basePath);
+        application = builder.target(ApplicationIndividualApi.class, basePath);
+        environments = builder.target(EnvironmentCollectionApi.class, basePath);
+        subscriptions = builder.target(SubscriptionCollectionApi.class, basePath);
+        tiers = builder.target(ThrottlingTierCollectionApi.class, basePath);
     }
 
-    public ApIsApi getApIsApi() {
-        return apIsApi;
+    public APIIndividualApi getApi() {
+        return api;
     }
 
-    public ApiLifecycleApi getApiLifecycleApi() {
-        return apiLifecycleApi;
+    public APICollectionApi getApis() {
+        return apis;
     }
 
-    //    public APIIndividualApi getApi() {
-//        return api;
-//    }
-//
-//    public APICollectionApi getApis() {
-//        return apis;
-//    }
-//
-//    public DocumentIndividualApi getDocument() {
-//        return document;
-//    }
-//
-//    public ApplicationIndividualApi getApplication() {
-//        return application;
-//    }
-//
-//    public EnvironmentCollectionApi getEnvironments() {
-//        return environments;
-//    }
-//
-//    public SubscriptionCollectionApi getSubscriptions() {
-//        return subscriptions;
-//    }
-//
-//    public ThrottlingTierCollectionApi getTiers() {
-//        return tiers;
-//    }
+    public DocumentIndividualApi getDocument() {
+        return document;
+    }
+
+    public ApplicationIndividualApi getApplication() {
+        return application;
+    }
+
+    public EnvironmentCollectionApi getEnvironments() {
+        return environments;
+    }
+
+    public SubscriptionCollectionApi getSubscriptions() {
+        return subscriptions;
+    }
+
+    public ThrottlingTierCollectionApi getTiers() {
+        return tiers;
+    }
 }
