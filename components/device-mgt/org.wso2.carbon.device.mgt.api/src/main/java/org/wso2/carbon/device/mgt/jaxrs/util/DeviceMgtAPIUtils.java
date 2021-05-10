@@ -46,14 +46,14 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
-import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
+//import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.Utils;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
+//import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -171,7 +171,7 @@ public class DeviceMgtAPIUtils {
     private static KeyStore trustStore;
     private static char[] keyStorePassword;
 
-    private static IntegrationClientService integrationClientService;
+//    private static IntegrationClientService integrationClientService;
     private static MetadataManagementService metadataManagementService;
     private static OTPManagementService otpManagementService;
 
@@ -374,22 +374,22 @@ public class DeviceMgtAPIUtils {
     }
 
 
-    public static IntegrationClientService getIntegrationClientService() {
-        if (integrationClientService == null) {
-            synchronized (DeviceMgtAPIUtils.class) {
-                if (integrationClientService == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    integrationClientService = (IntegrationClientService) ctx.getOSGiService(IntegrationClientService.class, null);
-                    if (integrationClientService == null) {
-                        String msg = "IntegrationClientService is not initialized";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
-                    }
-                }
-            }
-        }
-        return integrationClientService;
-    }
+//    public static IntegrationClientService getIntegrationClientService() {
+//        if (integrationClientService == null) {
+//            synchronized (DeviceMgtAPIUtils.class) {
+//                if (integrationClientService == null) {
+//                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+//                    integrationClientService = (IntegrationClientService) ctx.getOSGiService(IntegrationClientService.class, null);
+//                    if (integrationClientService == null) {
+//                        String msg = "IntegrationClientService is not initialized";
+//                        log.error(msg);
+//                        throw new IllegalStateException(msg);
+//                    }
+//                }
+//            }
+//        }
+//        return integrationClientService;
+//    }
 
     /**
      * Initializing and accessing method for OTPManagementService.
@@ -626,17 +626,18 @@ public class DeviceMgtAPIUtils {
         return username;
     }
 
-    public static EventsPublisherService getEventPublisherService() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        EventsPublisherService eventsPublisherService =
-                (EventsPublisherService) ctx.getOSGiService(EventsPublisherService.class, null);
-        if (eventsPublisherService == null) {
-            String msg = "Event Publisher service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return eventsPublisherService;
-    }
+    // todo: amalka: commented
+//    public static EventsPublisherService getEventPublisherService() {
+//        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+//        EventsPublisherService eventsPublisherService =
+//                (EventsPublisherService) ctx.getOSGiService(EventsPublisherService.class, null);
+//        if (eventsPublisherService == null) {
+//            String msg = "Event Publisher service has not initialized.";
+//            log.error(msg);
+//            throw new IllegalStateException(msg);
+//        }
+//        return eventsPublisherService;
+//    }
 
     public static String getStreamDefinition(String deviceType, String tenantDomain) {
         return STREAM_DEFINITION_PREFIX + tenantDomain + "." + deviceType.replace(" ", ".");

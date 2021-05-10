@@ -43,10 +43,22 @@
         <dependency>
             <groupId>org.eclipse.osgi</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.eclipse.osgi</groupId>
             <artifactId>org.eclipse.osgi.services</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -55,62 +67,166 @@
         <dependency>
             <groupId>org.wso2.tomcat</groupId>
             <artifactId>tomcat</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.tomcat</groupId>
             <artifactId>tomcat-servlet-api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.scannotation</groupId>
             <artifactId>scannotation</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>jsr311-api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.annotations</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.governance</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.governance</groupId>
             <artifactId>org.wso2.carbon.governance.lcm</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
             <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.integration.client</artifactId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+            <scope>provided</scope>
+            <version>9.0.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <version>9.0.5</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.h2database.wso2</groupId>
@@ -144,70 +260,62 @@
                             org.wso2.carbon.apimgt.webapp.publisher.*
                         </Export-Package>
                         <Import-Package>
-                            org.osgi.framework,
-                            org.osgi.service.component,
-                            org.apache.commons.logging,
-                            javax.servlet,
-                            javax.xml.*,
-                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
-                            com.google.gson.*,
-                            org.apache.catalina,
-                            org.apache.catalina.core,
-                            org.apache.axis2.*;version="${axis2.osgi.version.range}",
-                            org.wso2.carbon.core,
-                            org.apache.commons.lang,
-                            org.wso2.carbon.utils,
-                            org.wso2.carbon.apimgt.annotations.*,
-                            org.wso2.carbon.governance.lcm.util.*,
-                            org.wso2.carbon.registry.core.*,
-                            io.swagger.annotations,
-                            javax.net.ssl,
-                            org.scannotation,
-                            org.scannotation.archiveiterator,
-                            org.w3c.dom,
-                            org.wso2.carbon.apimgt.integration.client.*,
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.core.util,
-                            org.wso2.carbon.user.api,
-                            org.wso2.carbon.user.core.*,
-                            org.wso2.carbon.utils.multitenancy,
-                            org.wso2.carbon.apimgt.integration.generated.client.publisher.api,
-                            org.wso2.carbon.apimgt.integration.generated.client.publisher.model
+                            com.google.gson;version="2.3",com.google.gson.reflect;
+                            version="2.3",io.swagger.annotations,javax.servlet;version="2.6",javax.xml,javax.xml.bind,javax.xml.bind.annotat
+                            ion,javax.xml.parsers,org.apache.catalina;version="9.0",org.apache.ca
+                            talina.core;version="9.0",org.apache.commons.logging;version="1.2",org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",org.scannotation;version="1.0",org.scannotation.archiveiterator;ve
+                            rsion="1.0",org.w3c.dom,org.wso2.carbon.apimgt.annotations.api,org.ws
+                            o2.carbon.apimgt.api,org.wso2.carbon.apimgt.api.model,org.wso2.carbon
+                            .apimgt.impl,org.wso2.carbon.apimgt.webapp.publisher,org.wso2.carbon.
+                            apimgt.webapp.publisher.config,org.wso2.carbon.apimgt.webapp.publishe
+                            r.dto,org.wso2.carbon.apimgt.webapp.publisher.exception,org.wso2.carb
+                            on.apimgt.webapp.publisher.lifecycle.listener,org.wso2.carbon.apimgt.
+                            webapp.publisher.lifecycle.util,org.wso2.carbon.base;version="1.0",or
+                            g.wso2.carbon.context;version="4.6",org.wso2.carbon.core;version="4.6
+                            ",org.wso2.carbon.core.util;version="4.6",org.wso2.carbon.registry.co
+                            re.service;version="1.0",org.wso2.carbon.user.api;version="1.0",org.w
+                            so2.carbon.user.core.service;version="4.6",org.wso2.carbon.user.core.
+                            tenant;version="4.6",org.wso2.carbon.utils;version="4.6",org.wso2.car
+                            bon.utils.multitenancy;version="4.6"
                         </Import-Package>
                         <Embed-Dependency>
-                            javax.ws.rs-api,
-                            scribe;scope=compile|runtime;inline=false;
+                            <!--javax.ws.rs;scope=compile|runtime;inline=false-->
+                            jsr311-api;scope=compile|runtime;inline=false
+                            <!--scribe;scope=compile|runtime;inline=false;-->
                         </Embed-Dependency>
-                        <DynamicImport-Package>*</DynamicImport-Package>
+                        <!--<DynamicImport-Package>*</DynamicImport-Package>-->
                     </instructions>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <configuration>
-                    <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>jacoco-initialize</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>jacoco-site</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
-                            <outputDirectory>${basedir}/target/coverage-reports/site</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.jacoco</groupId>-->
+            <!--<artifactId>jacoco-maven-plugin</artifactId>-->
+            <!--<configuration>-->
+            <!--<destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>-->
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<id>jacoco-initialize</id>-->
+            <!--<goals>-->
+            <!--<goal>prepare-agent</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--<execution>-->
+            <!--<id>jacoco-site</id>-->
+            <!--<phase>test</phase>-->
+            <!--<goals>-->
+            <!--<goal>report</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+            <!--<dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>-->
+            <!--<outputDirectory>${basedir}/target/coverage-reports/site</outputDirectory>-->
+            <!--</configuration>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
+
         </plugins>
     </build>
+
 </project>

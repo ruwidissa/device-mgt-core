@@ -63,7 +63,7 @@ public class OAuthUtils {
             apiApplicationKeyInfo = apiManagementProviderService.
                     generateAndRetrieveApplicationKeys(registrationProfile.getApplicationName(),
                             registrationProfile.getTags(), Constants.ApplicationInstall.DEFAULT_TOKEN_TYPE,
-                            registrationProfile.getApplicationName(), registrationProfile.isAllowedToAllDomains(),
+                            null, registrationProfile.isAllowedToAllDomains(),
                             Constants.ApplicationInstall.DEFAULT_VALIDITY_PERIOD);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();

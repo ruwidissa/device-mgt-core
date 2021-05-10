@@ -19,7 +19,7 @@
 
 <UIConfiguration>
     <EnableOAuth>true</EnableOAuth>
-    <EnableSSO>true</EnableSSO>
+    <EnableSSO>false</EnableSSO>
     <AppRegistration>
         <Tags>
             <Tag>application_management</Tag>

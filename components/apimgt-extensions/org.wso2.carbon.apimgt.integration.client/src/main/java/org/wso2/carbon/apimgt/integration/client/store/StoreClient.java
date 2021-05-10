@@ -39,16 +39,17 @@ import java.util.concurrent.TimeUnit;
 public class StoreClient {
 
     private static final org.apache.commons.logging.Log log = LogFactory.getLog(StoreClient.class);
-    private APICollectionApi apis = null;
-    private APIIndividualApi individualApi = null;
-    private ApplicationCollectionApi applications = null;
-    private ApplicationIndividualApi individualApplication = null;
-    private SubscriptionCollectionApi subscriptions = null;
-    private SubscriptionIndividualApi individualSubscription = null;
-    private SubscriptionMultitpleApi subscriptionMultitpleApi = null;
-    private ThrottlingTierIndividualApi individualTier = null;
-    private TagCollectionApi tags = null;
-    private ThrottlingTierCollectionApi tiers = null;
+    private ApplicationsApi applicationsApi = null;
+//    private APICollectionApi apis = null;
+//    private ApIsApi individualApi = null;
+//    private ApplicationsApi applications = null;
+//    private ApplicationIndividualApi individualApplication = null;
+//    private SubscriptionCollectionApi subscriptions = null;
+//    private SubscriptionIndividualApi individualSubscription = null;
+//    private SubscriptionMultitpleApi subscriptionMultitpleApi = null;
+//    private ThrottlingTierIndividualApi individualTier = null;
+//    private TagsApi tags = null;
+//    private ThrottlingTierCollectionApi tiers = null;
 
 
     public StoreClient(RequestInterceptor requestInterceptor) {
@@ -60,58 +61,59 @@ public class StoreClient {
                 .requestInterceptor(requestInterceptor).encoder(new GsonEncoder()).decoder(new GsonDecoder());
         String basePath = Utils.replaceSystemProperty(APIMConfigReader.getInstance().getConfig().getStoreEndpoint());
 
-        apis = builder.target(APICollectionApi.class, basePath);
-        individualApi = builder.target(APIIndividualApi.class, basePath);
-        applications = builder.target(ApplicationCollectionApi.class, basePath);
-        individualApplication = builder.target(ApplicationIndividualApi.class, basePath);
-        subscriptions = builder.target(SubscriptionCollectionApi.class, basePath);
-        individualSubscription = builder.target(SubscriptionIndividualApi.class, basePath);
-        subscriptionMultitpleApi = builder.target(SubscriptionMultitpleApi.class, basePath);
-        tags = builder.target(TagCollectionApi.class, basePath);
-        individualTier = builder.target(ThrottlingTierIndividualApi.class, basePath);
-        tiers = builder.retryer(new Retryer.Default(100L, TimeUnit.SECONDS.toMillis(1L), 1))
-                .options(new Request.Options(10000, 5000))
-                .target(ThrottlingTierCollectionApi.class, basePath);
+        applicationsApi = builder.target(ApplicationsApi.class, basePath);
+//        apis = builder.target(APICollectionApi.class, basePath);
+//        individualApi = builder.target(ApIsApi.class, basePath);
+//        applications = builder.target(ApplicationCollectionApi.class, basePath);
+//        individualApplication = builder.target(ApplicationIndividualApi.class, basePath);
+//        subscriptions = builder.target(SubscriptionCollectionApi.class, basePath);
+//        individualSubscription = builder.target(SubscriptionIndividualApi.class, basePath);
+//        subscriptionMultitpleApi = builder.target(SubscriptionMultitpleApi.class, basePath);
+//        tags = builder.target(TagCollectionApi.class, basePath);
+//        individualTier = builder.target(ThrottlingTierIndividualApi.class, basePath);
+//        tiers = builder.retryer(new Retryer.Default(100L, TimeUnit.SECONDS.toMillis(1L), 1))
+//                .options(new Request.Options(10000, 5000))
+//                .target(ThrottlingTierCollectionApi.class, basePath);
 
     }
 
-    public APICollectionApi getApis() {
-        return apis;
-    }
-
-    public APIIndividualApi getIndividualApi() {
-        return individualApi;
-    }
-
-    public ApplicationCollectionApi getApplications() {
-        return applications;
-    }
-
-    public ApplicationIndividualApi getIndividualApplication() {
-        return individualApplication;
-    }
-
-    public SubscriptionCollectionApi getSubscriptions() {
-        return subscriptions;
-    }
-
-    public SubscriptionIndividualApi getIndividualSubscription() {
-        return individualSubscription;
-    }
-
-    public ThrottlingTierIndividualApi getIndividualTier() {
-        return individualTier;
-    }
-
-    public TagCollectionApi getTags() {
-        return tags;
-    }
-
-    public ThrottlingTierCollectionApi getTiers() {
-        return tiers;
-    }
-
-    public SubscriptionMultitpleApi getSubscriptionMultitpleApi() {
-        return subscriptionMultitpleApi;
-    }
+//    public APICollectionApi getApis() {
+//        return apis;
+//    }
+//
+//    public APIIndividualApi getIndividualApi() {
+//        return individualApi;
+//    }
+//
+//    public ApplicationCollectionApi getApplications() {
+//        return applications;
+//    }
+//
+//    public ApplicationIndividualApi getIndividualApplication() {
+//        return individualApplication;
+//    }
+//
+//    public SubscriptionCollectionApi getSubscriptions() {
+//        return subscriptions;
+//    }
+//
+//    public SubscriptionIndividualApi getIndividualSubscription() {
+//        return individualSubscription;
+//    }
+//
+//    public ThrottlingTierIndividualApi getIndividualTier() {
+//        return individualTier;
+//    }
+//
+//    public TagCollectionApi getTags() {
+//        return tags;
+//    }
+//
+//    public ThrottlingTierCollectionApi getTiers() {
+//        return tiers;
+//    }
+//
+//    public SubscriptionMultitpleApi getSubscriptionMultitpleApi() {
+//        return subscriptionMultitpleApi;
+//    }
 }

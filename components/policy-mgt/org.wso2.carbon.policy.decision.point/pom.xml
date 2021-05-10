@@ -35,9 +35,9 @@
                         <Bundle-Description>Policy Decision Point Bundle</Bundle-Description>
                         <Private-Package>org.wso2.carbon.policy.decision.point.internal</Private-Package>
                         <Import-Package>
-                            org.wso2.carbon.context.*;
-                            org.osgi.framework,
-                            org.osgi.service.component,
+                            org.wso2.carbon.context;version="${carbon.kernel.version.range}",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging,
                             org.wso2.carbon.policy.mgt.common.*,
                             org.wso2.carbon.policy.mgt.core.*,

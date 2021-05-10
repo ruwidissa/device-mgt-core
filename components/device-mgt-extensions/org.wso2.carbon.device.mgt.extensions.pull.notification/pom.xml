@@ -82,8 +82,8 @@
                             org.wso2.carbon.device.mgt.extensions.pull.notification.*
                         </Export-Package>
                         <Import-Package>
-							org.osgi.framework,
-                            org.osgi.service.component,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging,
                             org.wso2.carbon.device.mgt.common.*,
                             org.wso2.carbon.device.mgt.core.service

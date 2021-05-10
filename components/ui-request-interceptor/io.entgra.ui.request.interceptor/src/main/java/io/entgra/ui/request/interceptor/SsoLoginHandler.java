@@ -101,7 +101,7 @@ public class SsoLoginHandler extends HttpServlet {
      */
     private void dynamicClientRegistration(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            File userMgtConf = new File("conf/user-mgt.xml");
+            File userMgtConf = new File("repository/conf/user-mgt.xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(userMgtConf);
@@ -136,7 +136,7 @@ public class SsoLoginHandler extends HttpServlet {
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
 
             // Register the client application
-            HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
+            HttpPost apiRegEndpoint = new HttpPost(iotsCoreUrl + HandlerConstants.APP_REG_ENDPOINT);
             encodedAdminCredentials = Base64.getEncoder()
                     .encodeToString((adminUsername + HandlerConstants.COLON + adminPassword).getBytes());
             apiRegEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +
@@ -262,7 +262,7 @@ public class SsoLoginHandler extends HttpServlet {
      * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
     private ProxyResponse getTokenResult(String encodedClientApp) throws IOException {
-        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(iotsCoreUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 

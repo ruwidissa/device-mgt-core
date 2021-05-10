@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
+//import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
@@ -178,9 +178,9 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                         deviceInfo.getAvailableRAMMemory(),
                         deviceInfo.isPluggedIn()
                 };
-                DeviceManagerUtil.getEventPublisherService().publishEvent(
-                        DEVICE_INFO_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
-                );
+//                DeviceManagerUtil.getEventPublisherService().publishEvent(
+//                        DEVICE_INFO_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
+//                );
             }
         } catch (TransactionManagementException e) {
             throw new DeviceDetailsMgtException("Transactional error occurred while adding the device information.", e);
@@ -193,8 +193,8 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while updating the last update timestamp of the " +
                     "device", e);
-        } catch (DataPublisherConfigurationException e) {
-            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
+//        } catch (DataPublisherConfigurationException e) {
+//            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
@@ -389,9 +389,9 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                         deviceLocation.getBearing(),
                         deviceLocation.getDistance()
                 };
-                DeviceManagerUtil.getEventPublisherService().publishEvent(
-                        LOCATION_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
-                );
+//                DeviceManagerUtil.getEventPublisherService().publishEvent(
+//                        LOCATION_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
+//                );
             }
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
@@ -403,9 +403,9 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         } catch (DeviceManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while getting the device information.", e);
-        } catch (DataPublisherConfigurationException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
-            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
+//        } catch (DataPublisherConfigurationException e) {
+//            DeviceManagementDAOFactory.rollbackTransaction();
+//            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }

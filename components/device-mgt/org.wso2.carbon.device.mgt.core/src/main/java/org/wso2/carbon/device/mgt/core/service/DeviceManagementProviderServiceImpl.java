@@ -49,7 +49,7 @@ import org.apache.http.protocol.HTTP;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
+//import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceEnrollmentInfoNotification;
@@ -1964,20 +1964,20 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             operation.getStatus() != null ? operation.getStatus().toString() : null,
                             operation.getOperationResponse()
                     };
-                    DeviceManagerUtil.getEventPublisherService().publishEvent(
-                            OPERATION_RESPONSE_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
-                    );
+//                    DeviceManagerUtil.getEventPublisherService().publishEvent(
+//                            OPERATION_RESPONSE_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
+//                    );
                 }
             }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while reading configs.";
             log.error(msg, e);
             throw new OperationManagementException(msg, e);
-        } catch (DataPublisherConfigurationException e) {
-            String msg = "Error occurred while publishing event.";
-            log.error(msg, e);
-            throw new OperationManagementException(msg, e);
-        }
+        } //catch (DataPublisherConfigurationException e) {
+//            String msg = "Error occurred while publishing event.";
+//            log.error(msg, e);
+//            throw new OperationManagementException(msg, e);
+//        }
     }
 
     @Override
@@ -2006,20 +2006,20 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             operation.getStatus() != null ? operation.getStatus().toString() : null,
                             operation.getOperationResponse()
                     };
-                    DeviceManagerUtil.getEventPublisherService().publishEvent(
-                            OPERATION_RESPONSE_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
-                    );
+//                    DeviceManagerUtil.getEventPublisherService().publishEvent(
+//                            OPERATION_RESPONSE_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
+//                    );
                 }
             }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while reading configs.";
             log.error(msg, e);
             throw new OperationManagementException(msg, e);
-        } catch (DataPublisherConfigurationException e) {
-            String msg = "Error occurred while publishing event.";
-            log.error(msg, e);
-            throw new OperationManagementException(msg, e);
-        }
+        } //catch (DataPublisherConfigurationException e) {
+//            String msg = "Error occurred while publishing event.";
+//            log.error(msg, e);
+//            throw new OperationManagementException(msg, e);
+//        }
     }
 
     @Override

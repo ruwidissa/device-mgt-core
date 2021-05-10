@@ -23,7 +23,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;;
 import org.wso2.carbon.apimgt.application.extension.APIManagementProviderService;
 import org.wso2.carbon.apimgt.application.extension.APIManagementProviderServiceImpl;
-import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
+//import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -49,12 +49,6 @@ import org.wso2.carbon.user.core.service.RealmService;
  * policy="dynamic"
  * bind="setRealmService"
  * unbind="unsetRealmService"
- * @scr.reference name="integration.client.service"
- * interface="org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setIntegrationClientService"
- * unbind="unsetIntegrationClientService"
  */
 public class APIApplicationManagerExtensionServiceComponent {
 
@@ -97,16 +91,16 @@ public class APIApplicationManagerExtensionServiceComponent {
         APIApplicationManagerExtensionDataHolder.getInstance().setIndexLoaderService(null);
     }
 
-    protected void setIntegrationClientService(IntegrationClientService integrationClientService) {
-        if (integrationClientService != null && log.isDebugEnabled()) {
-            log.debug("integrationClientService initialized");
-        }
-        APIApplicationManagerExtensionDataHolder.getInstance().setIntegrationClientService(integrationClientService);
-    }
-
-    protected void unsetIntegrationClientService(IntegrationClientService integrationClientService) {
-        APIApplicationManagerExtensionDataHolder.getInstance().setIntegrationClientService(null);
-    }
+//    protected void setIntegrationClientService(IntegrationClientService integrationClientService) {
+//        if (integrationClientService != null && log.isDebugEnabled()) {
+//            log.debug("integrationClientService initialized");
+//        }
+//        APIApplicationManagerExtensionDataHolder.getInstance().setIntegrationClientService(integrationClientService);
+//    }
+//
+//    protected void unsetIntegrationClientService(IntegrationClientService integrationClientService) {
+//        APIApplicationManagerExtensionDataHolder.getInstance().setIntegrationClientService(null);
+//    }
 
     /**
      * Sets Realm Service.

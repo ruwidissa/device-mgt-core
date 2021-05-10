@@ -73,14 +73,14 @@
                     <groupId>org.codehaus.woodstox</groupId>
                     <artifactId>wstx-asl</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>org.wso2.carbon.devicemgt</groupId>
-                    <artifactId>org.wso2.carbon.device.mgt.analytics.data.publisher</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.wso2.carbon.analytics</groupId>
-                    <artifactId>org.wso2.carbon.analytics.api</artifactId>
-                </exclusion>
+                <!--<exclusion>-->
+                    <!--<groupId>org.wso2.carbon.devicemgt</groupId>-->
+                    <!--<artifactId>org.wso2.carbon.device.mgt.analytics.data.publisher</artifactId>-->
+                <!--</exclusion>-->
+                <!--<exclusion>-->
+                    <!--<groupId>org.wso2.carbon.analytics</groupId>-->
+                    <!--<artifactId>org.wso2.carbon.analytics.api</artifactId>-->
+                <!--</exclusion>-->
             </exclusions>
         </dependency>
     </dependencies>

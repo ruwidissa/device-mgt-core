@@ -35,7 +35,16 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
+import org.wso2.carbon.apimgt.application.extension.APIManagementProviderService;
+import org.wso2.carbon.apimgt.application.extension.APIManagementProviderServiceImpl;
+import org.wso2.carbon.apimgt.application.extension.constants.ApiApplicationConstants;
+import org.wso2.carbon.apimgt.application.extension.dto.ApiApplicationKey;
+import org.wso2.carbon.apimgt.application.extension.exception.APIManagerException;
+import org.wso2.carbon.authenticator.stub.AuthenticationAdmin;
+import org.wso2.carbon.authenticator.stub.Login;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -44,7 +53,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 @MultipartConfig
 @WebServlet("/login")
@@ -56,6 +67,7 @@ public class LoginHandler extends HttpServlet {
     private static String password;
     private static String gatewayUrl;
     private static String uiConfigUrl;
+    private static String keyManagerUrl;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -68,26 +80,37 @@ public class LoginHandler extends HttpServlet {
             httpSession = req.getSession(true);
             //setting session to expiry in 5 minutes
             httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
-
+            //todo: amalka do we need this remote call?
             JsonObject uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
 
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
 
-            HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
-            apiRegEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
-                    .encodeToString((username + HandlerConstants.COLON + password).getBytes()));
-            apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
-            apiRegEndpoint.setEntity(HandlerUtil.constructAppRegPayload(tags, HandlerConstants.PUBLISHER_APPLICATION_NAME, username, password));
-
-            ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
-
-            if (clientAppResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-                HandlerUtil.handleError(resp, clientAppResponse);
-                return;
+            List<String> list = new ArrayList<String>();
+            for(int i=0; i < tags.size(); i++) {
+                list.add(tags.get(i).getAsString());
             }
-            if (clientAppResponse.getCode() == HttpStatus.SC_CREATED && getTokenAndPersistInSession(req, resp,
-                    clientAppResponse.getData(), scopes)) {
+
+            String[] tagsAsStringArray = list.toArray(new String[list.size()]);
+
+            String scopeString = HandlerUtil.getScopeString(scopes);
+
+            if (scopeString != null) {
+                scopeString = scopeString.trim();
+            } else {
+                scopeString = "default";
+            }
+
+            APIManagementProviderService apiManagementProviderService = new APIManagementProviderServiceImpl();
+            ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
+                    HandlerConstants.PUBLISHER_APPLICATION_NAME,
+                    tagsAsStringArray, HandlerConstants.PRODUCTION_KEY, username, false,
+                    ApiApplicationConstants.DEFAULT_VALIDITY_PERIOD, scopeString);
+
+            if (apiApplicationKey != null && getTokenAndPersistInSession(apiApplicationKey.getConsumerKey(),
+                    apiApplicationKey.getConsumerSecret(), req, resp, scopes)) {
+                log.info("tenantDomain : " + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+                log.info("username : " + PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
                 ProxyResponse proxyResponse = new ProxyResponse();
                 proxyResponse.setCode(HttpStatus.SC_OK);
                 HandlerUtil.handleSuccess(resp, proxyResponse);
@@ -100,6 +123,8 @@ public class LoginHandler extends HttpServlet {
             log.error("Error occurred while parsing the response. ", e);
         } catch (LoginException e) {
             log.error("Error occurred while getting token data. ", e);
+        } catch (APIManagerException e) {
+            log.error("Error occurred while creating application. ", e);
         }
     }
 
@@ -107,19 +132,19 @@ public class LoginHandler extends HttpServlet {
      * Generates token from token endpoint and persists them inside the session
      *
      * @param req - {@link HttpServletRequest}
-     * @param clientAppResult - clientAppResult
+//     * @param clientAppResult - clientAppResult
      * @param scopes - scopes defied in the application-mgt.xml
      * @throws LoginException - login exception throws when getting token result
      */
-    private boolean getTokenAndPersistInSession(HttpServletRequest req, HttpServletResponse resp,
-                                                String clientAppResult, JsonArray scopes) throws LoginException {
+    private boolean getTokenAndPersistInSession(String clientId, String clientSecret, HttpServletRequest req,
+            HttpServletResponse resp, JsonArray scopes) throws LoginException {
         JsonParser jsonParser = new JsonParser();
         try {
-            JsonElement jClientAppResult = jsonParser.parse(clientAppResult);
-            if (jClientAppResult.isJsonObject()) {
-                JsonObject jClientAppResultAsJsonObject = jClientAppResult.getAsJsonObject();
-                String clientId = jClientAppResultAsJsonObject.get("client_id").getAsString();
-                String clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
+//            JsonElement jClientAppResult = jsonParser.parse(clientAppResult);
+            if (clientId != null && clientSecret != null) {
+//                JsonObject jClientAppResultAsJsonObject = jClientAppResult.getAsJsonObject();
+//                String clientId = jClientAppResultAsJsonObject.get("client_id").getAsString();
+//                String clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
                 String encodedClientApp = Base64.getEncoder()
                         .encodeToString((clientId + HandlerConstants.COLON + clientSecret).getBytes());
 
@@ -171,12 +196,18 @@ public class LoginHandler extends HttpServlet {
         if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
             iotsCorePort = System.getProperty("iot.core.http.port");
         }
+
+        String keyManagerPort = System.getProperty("iot.keymanager.https.port");
+
         username = req.getParameter("username");
         password = req.getParameter("password");
         gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
         uiConfigUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
                 + HandlerConstants.COLON + iotsCorePort + HandlerConstants.UI_CONFIG_ENDPOINT;
+        keyManagerUrl = HandlerConstants.HTTPS_PROTOCOL + HandlerConstants.SCHEME_SEPARATOR +
+                System.getProperty("iot.keymanager.host") + HandlerConstants.COLON + keyManagerPort;
+
         if (username == null || password == null) {
             String msg = "Invalid login request. Username or Password is not received for login request.";
             log.error(msg);
@@ -193,7 +224,7 @@ public class LoginHandler extends HttpServlet {
      * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
     private ProxyResponse getTokenResult(String encodedClientApp, JsonArray scopes) throws IOException {
-        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(keyManagerUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
         String scopeString = HandlerUtil.getScopeString(scopes);

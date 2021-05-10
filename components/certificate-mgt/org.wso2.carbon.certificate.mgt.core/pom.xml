@@ -72,8 +72,8 @@
                             org.wso2.carbon.certificate.mgt.core.util
                         </Private-Package>
                         <Import-Package>
-                            org.osgi.framework,
-                            org.osgi.service.component,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging,
                             org.apache.commons.collections.map,
                             javax.security.auth.x500,

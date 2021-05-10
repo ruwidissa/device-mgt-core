@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
+//import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
 import org.wso2.carbon.apimgt.webapp.publisher.APIPublisherService;
 import org.wso2.carbon.apimgt.webapp.publisher.APIPublisherServiceImpl;
 import org.wso2.carbon.apimgt.webapp.publisher.APIPublisherStartupHandler;
@@ -45,11 +45,7 @@ import org.wso2.carbon.user.core.service.RealmService;
  * policy="dynamic"
  * bind="setRegistryService"
  * unbind="unsetRegistryService"
- * interface="org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setIntegrationClientService"
- * unbind="unsetIntegrationClientService"
+
  */
 public class APIPublisherServiceComponent {
 
@@ -120,14 +116,14 @@ public class APIPublisherServiceComponent {
         APIPublisherDataHolder.getInstance().setRegistryService(null);
     }
 
-    protected void setIntegrationClientService(IntegrationClientService integrationClientService) {
-        if (integrationClientService != null && log.isDebugEnabled()) {
-            log.debug("integrationClientService initialized");
-        }
-        APIPublisherDataHolder.getInstance().setIntegrationClientService(integrationClientService);
-    }
-
-    protected void unsetIntegrationClientService(IntegrationClientService integrationClientService) {
-        APIPublisherDataHolder.getInstance().setIntegrationClientService(null);
-    }
+    //    protected void setIntegrationClientService(IntegrationClientService integrationClientService) {
+    //        if (integrationClientService != null && log.isDebugEnabled()) {
+    //            log.debug("integrationClientService initialized");
+    //        }
+    //        APIPublisherDataHolder.getInstance().setIntegrationClientService(integrationClientService);
+    //    }
+    //
+    //    protected void unsetIntegrationClientService(IntegrationClientService integrationClientService) {
+    //        APIPublisherDataHolder.getInstance().setIntegrationClientService(null);
+    //    }
 }

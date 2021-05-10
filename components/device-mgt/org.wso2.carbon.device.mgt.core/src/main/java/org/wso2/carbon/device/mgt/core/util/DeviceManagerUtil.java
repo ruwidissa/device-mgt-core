@@ -50,7 +50,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.caching.impl.CacheImpl;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
+//import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 import org.wso2.carbon.device.mgt.common.AppRegistrationCredentials;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistration;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistrationException;
@@ -595,17 +595,17 @@ public final class DeviceManagerUtil {
         return Caching.getCacheManagerFactory().getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER);
     }
 
-    public static EventsPublisherService getEventPublisherService() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        EventsPublisherService eventsPublisherService =
-                (EventsPublisherService) ctx.getOSGiService(EventsPublisherService.class, null);
-        if (eventsPublisherService == null) {
-            String msg = "Event Publisher service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return eventsPublisherService;
-    }
+//    public static EventsPublisherService getEventPublisherService() {
+//        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+//        EventsPublisherService eventsPublisherService =
+//                (EventsPublisherService) ctx.getOSGiService(EventsPublisherService.class, null);
+//        if (eventsPublisherService == null) {
+//            String msg = "Event Publisher service has not initialized.";
+//            log.error(msg);
+//            throw new IllegalStateException(msg);
+//        }
+//        return eventsPublisherService;
+//    }
 
     /**
      * Retrieve EventConfigurationProviderService osgi service component

@@ -25,14 +25,14 @@ import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
-import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
-import org.wso2.carbon.analytics.api.AnalyticsDataAPIUtil;
-import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse;
-import org.wso2.carbon.analytics.dataservice.commons.SearchResultEntry;
-import org.wso2.carbon.analytics.dataservice.commons.SortByField;
-import org.wso2.carbon.analytics.dataservice.commons.SortType;
-import org.wso2.carbon.analytics.datasource.commons.Record;
-import org.wso2.carbon.analytics.datasource.commons.exception.AnalyticsException;
+//import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
+//import org.wso2.carbon.analytics.api.AnalyticsDataAPIUtil;
+//import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse;
+//import org.wso2.carbon.analytics.dataservice.commons.SearchResultEntry;
+//import org.wso2.carbon.analytics.dataservice.commons.SortByField;
+//import org.wso2.carbon.analytics.dataservice.commons.SortType;
+//import org.wso2.carbon.analytics.datasource.commons.Record;
+//import org.wso2.carbon.analytics.datasource.commons.exception.AnalyticsException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
@@ -93,63 +93,63 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
 
     private static Log log = LogFactory.getLog(GeoLocationBasedServiceImpl.class);
 
-    @Path("stats/{deviceType}/{deviceId}")
-    @GET
-    @Consumes("application/json")
-    @Produces("application/json")
-    public Response getGeoDeviceStats(@PathParam("deviceId") String deviceId,
-                                      @PathParam("deviceType") String deviceType,
-                                      @QueryParam("from") long from, @QueryParam("to") long to) {
-        try {
-            if (!DeviceManagerUtil.isPublishLocationResponseEnabled()) {
-                return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-                        .entity("Unable to retrive Geo Device stats. Geo Data publishing does not enabled.").build();
-            }
-        } catch (DeviceManagementException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(e.getMessage()).build();
-        }
-        String tableName = "IOT_PER_DEVICE_STREAM_GEO_FUSEDSPATIALEVENT";
-        String fromDate = String.valueOf(from);
-        String toDate = String.valueOf(to);
-        String query = "id:" + deviceId + " AND type:" + deviceType;
-        if (from != 0 || to != 0) {
-            query += " AND timeStamp : [" + fromDate + " TO " + toDate + "]";
-        }
-        try {
-            if (!DeviceMgtAPIUtils.getDeviceAccessAuthorizationService().isUserAuthorized(
-                    new DeviceIdentifier(deviceId, deviceType),
-                    DeviceGroupConstants.Permissions.DEFAULT_STATS_MONITOR_PERMISSIONS)) {
-                return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
-            }
-            List<SortByField> sortByFields = new ArrayList<>();
-            SortByField sortByField = new SortByField("timeStamp", SortType.ASC);
-            sortByFields.add(sortByField);
-
-            // this is the user who initiates the request
-            String authorizedUser = MultitenantUtils.getTenantAwareUsername(
-                    CarbonContext.getThreadLocalCarbonContext().getUsername());
-
-            try {
-                String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-                int tenantId = DeviceMgtAPIUtils.getRealmService().getTenantManager().getTenantId(tenantDomain);
-                AnalyticsDataAPI analyticsDataAPI = DeviceMgtAPIUtils.getAnalyticsDataAPI();
-                List<SearchResultEntry> searchResults = analyticsDataAPI.search(tenantId, tableName, query,
-                        0,
-                        100,
-                        sortByFields);
-                List<Event> events = getEventBeans(analyticsDataAPI, tenantId, tableName, new ArrayList<String>(),
-                        searchResults);
-                return Response.ok().entity(events).build();
-            } catch (AnalyticsException | UserStoreException e) {
-                log.error("Failed to perform search on table: " + tableName + " : " + e.getMessage(), e);
-                throw DeviceMgtUtil.buildBadRequestException(
-                        Constants.ErrorMessages.STATUS_BAD_REQUEST_MESSAGE_DEFAULT);
-            }
-        } catch (DeviceAccessAuthorizationException e) {
-            log.error(e.getErrorMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
-        }
-    }
+//    @Path("stats/{deviceType}/{deviceId}")
+//    @GET
+//    @Consumes("application/json")
+//    @Produces("application/json")
+//    public Response getGeoDeviceStats(@PathParam("deviceId") String deviceId,
+//                                      @PathParam("deviceType") String deviceType,
+//                                      @QueryParam("from") long from, @QueryParam("to") long to) {
+//        try {
+//            if (!DeviceManagerUtil.isPublishLocationResponseEnabled()) {
+//                return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
+//                        .entity("Unable to retrive Geo Device stats. Geo Data publishing does not enabled.").build();
+//            }
+//        } catch (DeviceManagementException e) {
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(e.getMessage()).build();
+//        }
+//        String tableName = "IOT_PER_DEVICE_STREAM_GEO_FUSEDSPATIALEVENT";
+//        String fromDate = String.valueOf(from);
+//        String toDate = String.valueOf(to);
+//        String query = "id:" + deviceId + " AND type:" + deviceType;
+//        if (from != 0 || to != 0) {
+//            query += " AND timeStamp : [" + fromDate + " TO " + toDate + "]";
+//        }
+//        try {
+//            if (!DeviceMgtAPIUtils.getDeviceAccessAuthorizationService().isUserAuthorized(
+//                    new DeviceIdentifier(deviceId, deviceType),
+//                    DeviceGroupConstants.Permissions.DEFAULT_STATS_MONITOR_PERMISSIONS)) {
+//                return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
+//            }
+//            List<SortByField> sortByFields = new ArrayList<>();
+//            SortByField sortByField = new SortByField("timeStamp", SortType.ASC);
+//            sortByFields.add(sortByField);
+//
+//            // this is the user who initiates the request
+//            String authorizedUser = MultitenantUtils.getTenantAwareUsername(
+//                    CarbonContext.getThreadLocalCarbonContext().getUsername());
+//
+//            try {
+//                String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+//                int tenantId = DeviceMgtAPIUtils.getRealmService().getTenantManager().getTenantId(tenantDomain);
+//                AnalyticsDataAPI analyticsDataAPI = DeviceMgtAPIUtils.getAnalyticsDataAPI();
+//                List<SearchResultEntry> searchResults = analyticsDataAPI.search(tenantId, tableName, query,
+//                        0,
+//                        100,
+//                        sortByFields);
+//                List<Event> events = getEventBeans(analyticsDataAPI, tenantId, tableName, new ArrayList<String>(),
+//                        searchResults);
+//                return Response.ok().entity(null).build();
+//            } catch (AnalyticsException| UserStoreException e) {
+//                log.error("Failed to perform search on table: " + tableName + " : " + e.getMessage(), e);
+//                throw DeviceMgtUtil.buildBadRequestException(
+//                        Constants.ErrorMessages.STATUS_BAD_REQUEST_MESSAGE_DEFAULT);
+//            }
+//        } catch (DeviceAccessAuthorizationException e) {
+//            log.error(e.getErrorMessage());
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
+//        }
+//    }
 
     @Path("stats/device-locations")
     @GET
@@ -471,142 +471,142 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         }
     }
 
-    @Path("alerts/history/{deviceType}/{deviceId}")
-    @GET
-    @Consumes("application/json")
-    @Produces("application/json")
-    public Response getGeoAlertsHistory(@PathParam("deviceId") String deviceId,
-                                        @PathParam("deviceType") String deviceType,
-                                        @QueryParam("from") long from, @QueryParam("to") long to) {
-        String tableName = "IOT_PER_DEVICE_STREAM_GEO_ALERTNOTIFICATIONS";
-        String fromDate = String.valueOf(from);
-        String toDate = String.valueOf(to);
-        String query = "id:" + deviceId + " AND type:" + deviceType;
-        if (from != 0 || to != 0) {
-            query += " AND timeStamp : [" + fromDate + " TO " + toDate + "]";
-        }
-        try {
-            if (!DeviceMgtAPIUtils.getDeviceAccessAuthorizationService().isUserAuthorized(
-                    new DeviceIdentifier(deviceId, deviceType),
-                    DeviceGroupConstants.Permissions.DEFAULT_STATS_MONITOR_PERMISSIONS)) {
-                return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
-            }
-            List<SortByField> sortByFields = new ArrayList<>();
-            SortByField sortByField = new SortByField("timeStamp", SortType.ASC);
-            sortByFields.add(sortByField);
+//    @Path("alerts/history/{deviceType}/{deviceId}")
+//    @GET
+//    @Consumes("application/json")
+//    @Produces("application/json")
+//    public Response getGeoAlertsHistory(@PathParam("deviceId") String deviceId,
+//                                        @PathParam("deviceType") String deviceType,
+//                                        @QueryParam("from") long from, @QueryParam("to") long to) {
+//        String tableName = "IOT_PER_DEVICE_STREAM_GEO_ALERTNOTIFICATIONS";
+//        String fromDate = String.valueOf(from);
+//        String toDate = String.valueOf(to);
+//        String query = "id:" + deviceId + " AND type:" + deviceType;
+//        if (from != 0 || to != 0) {
+//            query += " AND timeStamp : [" + fromDate + " TO " + toDate + "]";
+//        }
+//        try {
+//            if (!DeviceMgtAPIUtils.getDeviceAccessAuthorizationService().isUserAuthorized(
+//                    new DeviceIdentifier(deviceId, deviceType),
+//                    DeviceGroupConstants.Permissions.DEFAULT_STATS_MONITOR_PERMISSIONS)) {
+//                return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
+//            }
+//            List<SortByField> sortByFields = new ArrayList<>();
+//            SortByField sortByField = new SortByField("timeStamp", SortType.ASC);
+//            sortByFields.add(sortByField);
+//
+//            // this is the user who initiates the request
+//            String authorizedUser = MultitenantUtils.getTenantAwareUsername(
+//                    CarbonContext.getThreadLocalCarbonContext().getUsername());
+//
+//            try {
+//                String tenantDomain = MultitenantUtils.getTenantDomain(authorizedUser);
+//                int tenantId = DeviceMgtAPIUtils.getRealmService().getTenantManager().getTenantId(tenantDomain);
+//                AnalyticsDataAPI analyticsDataAPI = DeviceMgtAPIUtils.getAnalyticsDataAPI();
+//                List<SearchResultEntry> searchResults = analyticsDataAPI.search(tenantId, tableName, query,
+//                        0,
+//                        100,
+//                        sortByFields);
+//                List<Event> events = getEventBeans(analyticsDataAPI, tenantId, tableName, new ArrayList<String>(),
+//                        searchResults);
+//                return Response.ok().entity(events).build();
+//            } catch (AnalyticsException | UserStoreException e) {
+//                log.error("Failed to perform search on table: " + tableName + " : " + e.getMessage(), e);
+//                throw DeviceMgtUtil.buildBadRequestException(
+//                        Constants.ErrorMessages.STATUS_BAD_REQUEST_MESSAGE_DEFAULT);
+//            }
+//        } catch (DeviceAccessAuthorizationException e) {
+//            log.error(e.getErrorMessage());
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
+//        }
+//    }
 
-            // this is the user who initiates the request
-            String authorizedUser = MultitenantUtils.getTenantAwareUsername(
-                    CarbonContext.getThreadLocalCarbonContext().getUsername());
+//    @Path("alerts/history")
+//    @GET
+//    @Consumes("application/json")
+//    @Produces("application/json")
+//    public Response getGeoAlertsHistoryForGeoClusters(@QueryParam("from") long from, @QueryParam("to") long to) {
+//        String tableName = "IOT_PER_DEVICE_STREAM_GEO_ALERTNOTIFICATIONS";
+//        String fromDate = String.valueOf(from);
+//        String toDate = String.valueOf(to);
+//        String query = "";
+//        if (from != 0 || to != 0) {
+//            query = "timeStamp : [" + fromDate + " TO " + toDate + "]";
+//        }
+//        try {
+//            List<SortByField> sortByFields = new ArrayList<>();
+//            SortByField sortByField = new SortByField("timeStamp", SortType.ASC);
+//            sortByFields.add(sortByField);
+//
+//            // this is the user who initiates the request
+//            String authorizedUser = MultitenantUtils.getTenantAwareUsername(
+//                    CarbonContext.getThreadLocalCarbonContext().getUsername());
+//
+//            String tenantDomain = MultitenantUtils.getTenantDomain(authorizedUser);
+//            int tenantId = DeviceMgtAPIUtils.getRealmService().getTenantManager().getTenantId(tenantDomain);
+//            AnalyticsDataAPI analyticsDataAPI = DeviceMgtAPIUtils.getAnalyticsDataAPI();
+//            List<SearchResultEntry> searchResults = analyticsDataAPI.search(tenantId, tableName, query,
+//                    0,
+//                    100,
+//                    sortByFields);
+//            List<Event> events = getEventBeans(analyticsDataAPI, tenantId, tableName, new ArrayList<String>(),
+//                    searchResults);
+//            return Response.ok().entity(events).build();
+//
+//        } catch (AnalyticsException | UserStoreException e) {
+//            log.error("Failed to perform search on table: " + tableName + " : " + e.getMessage(), e);
+//            throw DeviceMgtUtil.buildBadRequestException(
+//                    Constants.ErrorMessages.STATUS_BAD_REQUEST_MESSAGE_DEFAULT);
+//        }
+//    }
 
-            try {
-                String tenantDomain = MultitenantUtils.getTenantDomain(authorizedUser);
-                int tenantId = DeviceMgtAPIUtils.getRealmService().getTenantManager().getTenantId(tenantDomain);
-                AnalyticsDataAPI analyticsDataAPI = DeviceMgtAPIUtils.getAnalyticsDataAPI();
-                List<SearchResultEntry> searchResults = analyticsDataAPI.search(tenantId, tableName, query,
-                        0,
-                        100,
-                        sortByFields);
-                List<Event> events = getEventBeans(analyticsDataAPI, tenantId, tableName, new ArrayList<String>(),
-                        searchResults);
-                return Response.ok().entity(events).build();
-            } catch (AnalyticsException | UserStoreException e) {
-                log.error("Failed to perform search on table: " + tableName + " : " + e.getMessage(), e);
-                throw DeviceMgtUtil.buildBadRequestException(
-                        Constants.ErrorMessages.STATUS_BAD_REQUEST_MESSAGE_DEFAULT);
-            }
-        } catch (DeviceAccessAuthorizationException e) {
-            log.error(e.getErrorMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
-        }
-    }
+//    private List<Event> getEventBeans(AnalyticsDataAPI analyticsDataAPI, int tenantId, String tableName,
+//                                      List<String> columns,
+//                                      List<SearchResultEntry> searchResults) throws AnalyticsException {
+//        List<String> ids = getIds(searchResults);
+//        List<String> requiredColumns = (columns == null || columns.isEmpty()) ? null : columns;
+//        AnalyticsDataResponse response = analyticsDataAPI.get(tenantId, tableName, 1, requiredColumns, ids);
+//        List<Record> records = AnalyticsDataAPIUtil.listRecords(analyticsDataAPI, response);
+//        Map<String, Event> eventBeanMap = getEventBeanKeyedWithIds(records);
+//        return getSortedEventBeans(eventBeanMap, searchResults);
+//    }
 
-    @Path("alerts/history")
-    @GET
-    @Consumes("application/json")
-    @Produces("application/json")
-    public Response getGeoAlertsHistoryForGeoClusters(@QueryParam("from") long from, @QueryParam("to") long to) {
-        String tableName = "IOT_PER_DEVICE_STREAM_GEO_ALERTNOTIFICATIONS";
-        String fromDate = String.valueOf(from);
-        String toDate = String.valueOf(to);
-        String query = "";
-        if (from != 0 || to != 0) {
-            query = "timeStamp : [" + fromDate + " TO " + toDate + "]";
-        }
-        try {
-            List<SortByField> sortByFields = new ArrayList<>();
-            SortByField sortByField = new SortByField("timeStamp", SortType.ASC);
-            sortByFields.add(sortByField);
+//    private List<Event> getSortedEventBeans(Map<String, Event> eventBeanMap,
+//                                            List<SearchResultEntry> searchResults) {
+//        List<Event> sortedRecords = new ArrayList<>();
+//        for (SearchResultEntry entry : searchResults) {
+//            sortedRecords.add(eventBeanMap.get(entry.getId()));
+//        }
+//        return sortedRecords;
+//    }
 
-            // this is the user who initiates the request
-            String authorizedUser = MultitenantUtils.getTenantAwareUsername(
-                    CarbonContext.getThreadLocalCarbonContext().getUsername());
+//    private Map<String, Event> getEventBeanKeyedWithIds(List<Record> records) {
+//        Map<String, Event> eventBeanMap = new HashMap<>();
+//        for (Record record : records) {
+//            Event event = getEventBean(record);
+//            eventBeanMap.put(event.getId(), event);
+//        }
+//        return eventBeanMap;
+//    }
 
-            String tenantDomain = MultitenantUtils.getTenantDomain(authorizedUser);
-            int tenantId = DeviceMgtAPIUtils.getRealmService().getTenantManager().getTenantId(tenantDomain);
-            AnalyticsDataAPI analyticsDataAPI = DeviceMgtAPIUtils.getAnalyticsDataAPI();
-            List<SearchResultEntry> searchResults = analyticsDataAPI.search(tenantId, tableName, query,
-                    0,
-                    100,
-                    sortByFields);
-            List<Event> events = getEventBeans(analyticsDataAPI, tenantId, tableName, new ArrayList<String>(),
-                    searchResults);
-            return Response.ok().entity(events).build();
+//    private List<String> getIds(List<SearchResultEntry> searchResults) {
+//        List<String> ids = new ArrayList<>();
+//        if (searchResults != null) {
+//            for (SearchResultEntry resultEntry : searchResults) {
+//                ids.add(resultEntry.getId());
+//            }
+//        }
+//        return ids;
+//    }
 
-        } catch (AnalyticsException | UserStoreException e) {
-            log.error("Failed to perform search on table: " + tableName + " : " + e.getMessage(), e);
-            throw DeviceMgtUtil.buildBadRequestException(
-                    Constants.ErrorMessages.STATUS_BAD_REQUEST_MESSAGE_DEFAULT);
-        }
-    }
-
-    private List<Event> getEventBeans(AnalyticsDataAPI analyticsDataAPI, int tenantId, String tableName,
-                                      List<String> columns,
-                                      List<SearchResultEntry> searchResults) throws AnalyticsException {
-        List<String> ids = getIds(searchResults);
-        List<String> requiredColumns = (columns == null || columns.isEmpty()) ? null : columns;
-        AnalyticsDataResponse response = analyticsDataAPI.get(tenantId, tableName, 1, requiredColumns, ids);
-        List<Record> records = AnalyticsDataAPIUtil.listRecords(analyticsDataAPI, response);
-        Map<String, Event> eventBeanMap = getEventBeanKeyedWithIds(records);
-        return getSortedEventBeans(eventBeanMap, searchResults);
-    }
-
-    private List<Event> getSortedEventBeans(Map<String, Event> eventBeanMap,
-                                            List<SearchResultEntry> searchResults) {
-        List<Event> sortedRecords = new ArrayList<>();
-        for (SearchResultEntry entry : searchResults) {
-            sortedRecords.add(eventBeanMap.get(entry.getId()));
-        }
-        return sortedRecords;
-    }
-
-    private Map<String, Event> getEventBeanKeyedWithIds(List<Record> records) {
-        Map<String, Event> eventBeanMap = new HashMap<>();
-        for (Record record : records) {
-            Event event = getEventBean(record);
-            eventBeanMap.put(event.getId(), event);
-        }
-        return eventBeanMap;
-    }
-
-    private List<String> getIds(List<SearchResultEntry> searchResults) {
-        List<String> ids = new ArrayList<>();
-        if (searchResults != null) {
-            for (SearchResultEntry resultEntry : searchResults) {
-                ids.add(resultEntry.getId());
-            }
-        }
-        return ids;
-    }
-
-    private static Event getEventBean(Record record) {
-        Event eventBean = new Event();
-        eventBean.setId(record.getId());
-        eventBean.setTableName(record.getTableName());
-        eventBean.setTimestamp(record.getTimestamp());
-        eventBean.setValues(record.getValues());
-        return eventBean;
-    }
+//    private static Event getEventBean(Record record) {
+//        Event eventBean = new Event();
+//        eventBean.setId(record.getId());
+//        eventBean.setTableName(record.getTableName());
+//        eventBean.setTimestamp(record.getTimestamp());
+//        eventBean.setValues(record.getValues());
+//        return eventBean;
+//    }
 
     @Path("/geo-fence")
     @POST

@@ -63,15 +63,15 @@
                             javax.xml.bind.annotation,
                             javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
                             javax.xml.validation,
-                            org.apache.catalina,
-                            org.apache.catalina.connector,
-                            org.apache.catalina.util,
+                            <!--org.apache.catalina,-->
+                            <!--org.apache.catalina.connector,-->
+                            <!--org.apache.catalina.util,-->
                             org.apache.commons.logging,
-                            org.apache.coyote,
-                            org.apache.tomcat.util.buf,
-                            org.apache.tomcat.util.http,
-                            org.osgi.service.component,
-                            org.osgi.framework,
+                            <!--org.apache.coyote,-->
+                            <!--org.apache.tomcat.util.buf,-->
+                            <!--org.apache.tomcat.util.http,-->
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.w3c.dom,
                             org.wso2.carbon.context,
                             org.wso2.carbon.core.util,
@@ -79,7 +79,7 @@
                             org.wso2.carbon.identity.core.util; version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.identity.oauth2.*;
                             version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
-                            org.wso2.carbon.tomcat.ext.valves,
+                            <!--org.wso2.carbon.tomcat.ext.valves,-->
                             org.wso2.carbon.user.api,
                             org.wso2.carbon.user.core.service,
                             org.wso2.carbon.user.core.tenant,
@@ -106,8 +106,8 @@
                             org.apache.commons.pool.impl,
                             org.apache.http.conn,
                             org.apache.http.impl.conn,
-                            javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
-                            javax.xml.stream,
+                            <!--javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",-->
+                            <!--javax.xml.stream,-->
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.wso2.carbon.registry.core.*,
                             org.wso2.carbon.registry.common.*;version="${carbon.registry.imp.pkg.version.range}",

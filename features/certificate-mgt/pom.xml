@@ -27,7 +27,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.devicemgt</groupId>
     <artifactId>certificate-mgt-feature</artifactId>
     <version>4.1.16-SNAPSHOT</version>
     <packaging>pom</packaging>

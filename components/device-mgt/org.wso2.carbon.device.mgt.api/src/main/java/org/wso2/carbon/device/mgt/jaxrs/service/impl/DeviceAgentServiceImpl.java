@@ -26,7 +26,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
+//import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -280,19 +280,20 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                 i++;
             }
 
-            if (DeviceMgtAPIUtils.getEventPublisherService().publishEvent(DeviceMgtAPIUtils.getStreamDefinition(type
-                    , PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())
-                    , Constants.DEFAULT_STREAM_VERSION, metaData
-                    , null, payloadData)) {
+            // todo: amalka: commented data publishing
+//            if (DeviceMgtAPIUtils.getEventPublisherService().publishEvent(DeviceMgtAPIUtils.getStreamDefinition(type
+//                    , PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())
+//                    , Constants.DEFAULT_STREAM_VERSION, metaData
+//                    , null, payloadData)) {
                 return Response.status(Response.Status.OK).build();
-            } else {
-                String msg = "Error occurred while publishing the event.";
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            }
-        } catch (DataPublisherConfigurationException e) {
-            String msg = "Error occurred while publishing the event.";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+//            } else {
+//                String msg = "Error occurred while publishing the event.";
+//                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+//            }
+//        } catch (DataPublisherConfigurationException e) {
+//            String msg = "Error occurred while publishing the event.";
+//            log.error(msg, e);
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (DeviceAccessAuthorizationException e) {
             String msg = "Error occurred when checking for authorization";
             log.error(msg, e);
@@ -380,19 +381,20 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                 i++;
             }
 
-            if (DeviceMgtAPIUtils.getEventPublisherService().publishEvent(DeviceMgtAPIUtils.getStreamDefinition(type
-                    , PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())
-                    , Constants.DEFAULT_STREAM_VERSION, metaData
-                    , null, payloadData)) {
+            // todo: amalka: commented data publishing
+//            if (DeviceMgtAPIUtils.getEventPublisherService().publishEvent(DeviceMgtAPIUtils.getStreamDefinition(type
+//                    , PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())
+//                    , Constants.DEFAULT_STREAM_VERSION, metaData
+//                    , null, payloadData)) {
                 return Response.status(Response.Status.OK).build();
-            } else {
-                String msg = "Error occurred while publishing the event.";
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            }
-        } catch (DataPublisherConfigurationException e) {
-            String msg = "Error occurred while publishing the event.";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+//            } else {
+//                String msg = "Error occurred while publishing the event.";
+//                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+//            }
+//        } catch (DataPublisherConfigurationException e) {
+//            String msg = "Error occurred while publishing the event.";
+//            log.error(msg, e);
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (DeviceAccessAuthorizationException e) {
             String msg = "Error occurred when checking for authorization";
             log.error(msg, e);

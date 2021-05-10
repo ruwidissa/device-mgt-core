@@ -64,8 +64,9 @@ public class CredentialManagementResponseBuilder {
             username = CarbonContext.getThreadLocalCarbonContext().getUsername();
             userStoreManager.updateCredential(username, credentials.getNewPassword(),
                     credentials.getOldPassword());
-            DeviceMgtAPIUtils.getIntegrationClientService().resetUserInfo(username,
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            //todo:amalka
+//            DeviceMgtAPIUtils.getIntegrationClientService().resetUserInfo(username,
+//                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             return Response.status(Response.Status.OK).entity("UserImpl password by username: " +
                     username + " was successfully changed.").build();
         } catch (UserStoreException e) {
@@ -108,8 +109,9 @@ public class CredentialManagementResponseBuilder {
                         new ErrorResponse.ErrorResponseBuilder().setMessage(errorMsg).build()).build();
             }
             userStoreManager.updateCredentialByAdmin(username, credentials.getNewPassword());
-            DeviceMgtAPIUtils.getIntegrationClientService().resetUserInfo(username,
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            //todo:amalka
+//            DeviceMgtAPIUtils.getIntegrationClientService().resetUserInfo(username,
+//                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             return Response.status(Response.Status.OK).entity("UserImpl password by username: " +
                     username + " was successfully changed.").build();
         } catch (UserStoreException e) {

@@ -22,7 +22,7 @@ public class HandlerConstants {
     public static final String PUBLISHER_APPLICATION_NAME = "application-mgt-publisher";
     public static final String APP_REG_ENDPOINT = "/api-application-registration/register";
     public static final String UI_CONFIG_ENDPOINT = "/api/device-mgt-config/v1.0/configurations/ui-config";
-    public static final String TOKEN_ENDPOINT = "/token";
+    public static final String TOKEN_ENDPOINT = "/oauth2/token";
     public static final String INTROSPECT_ENDPOINT = "/oauth2/introspect";
     public static final String AUTHORIZATION_ENDPOINT = "/oauth2/authorize";
     public static final String APIM_APPLICATIONS_ENDPOINT = "/api/am/store/v0.12/applications/";
@@ -59,6 +59,7 @@ public class HandlerConstants {
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";
     public static final String HTTP_PROTOCOL = "http";
+    public static final String HTTPS_PROTOCOL = "https";
     public static final String UNDERSCORE = "_";
 
     public static final int INTERNAL_ERROR_CODE = 500;

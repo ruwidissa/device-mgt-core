@@ -26,61 +26,59 @@
 	<url>http://wso2.org</url>
 
 	<build>
+
 		<plugins>
-			<!--swagger yaml is used to generate code-->
-			<plugin>
-				<groupId>io.swagger</groupId>
-				<artifactId>swagger-codegen-maven-plugin</artifactId>
-				<version>2.2.1</version>
-				<executions>
-					<execution>
-						<phase>process-resources</phase>
-						<id>publisher</id>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<configuration>
-							<inputSpec>${project.basedir}/src/main/resources/publisher-api.yaml</inputSpec>
-							<language>java</language>
-							<configOptions>
-								<apiPackage>${project.artifactId}.publisher.api</apiPackage>
-								<modelPackage>${project.artifactId}.publisher.model</modelPackage>
-							</configOptions>
-							<library>feign</library>
-						</configuration>
-					</execution>
-					<execution>
-						<phase>process-resources</phase>
-						<id>store</id>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<configuration>
-							<inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>
-							<language>java</language>
-							<configOptions>
-								<apiPackage>${project.artifactId}.store.api</apiPackage>
-								<modelPackage>${project.artifactId}.store.model</modelPackage>
-							</configOptions>
-							<library>feign</library>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>5.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <id>publisher</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/publisher-api.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <configOptions>
+                                <apiPackage>${project.artifactId}.publisher.api</apiPackage>
+                                <modelPackage>${project.artifactId}.publisher.model</modelPackage>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <id>store</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/devportal-api.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <configOptions>
+                                <apiPackage>${project.artifactId}.store.api</apiPackage>
+                                <modelPackage>${project.artifactId}.store.model</modelPackage>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>com.google.code.maven-replacer-plugin</groupId>
 				<artifactId>replacer</artifactId>
 				<version>1.5.2</version>
 				<executions>
-					<!-- Replace java code that is generated from swagger to fix swagger client generation issues. -->
+					 <!--Replace java code that is generated from swagger to fix swagger client generation issues.-->
 					<execution>
 						<phase>process-resources</phase>
-						<id>replace-for-swagger-genenerated-code-publisher</id>
+						<id>replace-for-openapi-genenerated-code-publisher</id>
 						<goals>
 							<goal>replace</goal>
 						</goals>
 						<configuration>
-							<file>${project.basedir}/target/generated-sources/swagger/src/main/java/org/wso2/carbon/apimgt/integration/generated/client/publisher/model/API.java</file>
+							<file>${project.basedir}/target/generated-sources/openapi/src/main/java/org/wso2/carbon/apimgt/integration/generated/client/publisher/model/API.java</file>
 							<replacements>
 								<replacement>
 									<token>CURRENT_TENANT</token>
@@ -115,28 +113,33 @@
 							org.wso2.carbon.apimgt.integration.generated.client.store.api.*,
 							org.wso2.carbon.apimgt.integration.generated.client.store.model.*
 						</Export-Package>
-						<Import-Package>
-							feign;version="${io.github.openfeign.version.range}",
-							feign.jackson;version="${io.github.openfeign.version.range}",
-							feign.codec;version="${io.github.openfeign.version.range}",
-							feign.auth;version="${io.github.openfeign.version.range}",
-							feign.gson;version="${io.github.openfeign.version.range}",
-							feign.slf4j;version="${io.github.openfeign.version.range}",
-							com.google.gson,
-							com.fasterxml.jackson.core;resolution:=optional,
-							com.fasterxml.jackson.annotation,
-							com.fasterxml.jackson.databind;resolution:=optional,
-							io.swagger.annotations,
-							javax.net.ssl,
-							com.fasterxml.jackson.datatype.joda;resolution:=optional,
-							org.apache.oltu.oauth2.client.*;resolution:=optional,
-							org.apache.oltu.oauth2.common.*;resolution:=optional,
-							org.junit;resolution:=optional,
-						</Import-Package>
-						<Embed-Dependency>
-							jsr311-api,
-							feign-jaxrs
-						</Embed-Dependency>
+                        <Import-Package>
+                            com.google.gson;version="[2.8,3)",
+                            com.google.gson.annotations;version="[2.8,3)",
+                            com.google.gson.internal.bind.util,
+                            com.google.gson.reflect;version="[2.8,3)",
+                            com.google.gson.stream;version="[2.8,3)",
+                            io.gsonfire;version="[1.8,2)",
+                            io.swagger.annotations;version="[1.5,2)",
+                            javax.annotation;version="[3.0,4)",
+                            javax.net.ssl,
+                            okhttp3,
+                            okhttp3.internal.http,
+                            okhttp3.internal.tls,
+                            okhttp3.logging,
+                            okio,
+                            org.apache.oltu.oauth2.client;version="[1.0,2)",
+                            org.apache.oltu.oauth2.client.request;version="[1.0,2)",
+                            org.apache.oltu.oauth2.client.response;version="[1.0,2)",
+                            org.apache.oltu.oauth2.common.exception;version="[1.0,2)",
+                            org.apache.oltu.oauth2.common.message.types;version="[1.0,2)",
+                            org.threeten.bp;version="[1.5,2)",
+                            org.threeten.bp.format;version="[1.5,2)",
+                            org.threeten.bp.temporal;version="[1.5,2)",
+                            org.wso2.carbon.apimgt.integration.generated.client.publisher.model,
+                            org.wso2.carbon.apimgt.integration.generated.client.store.model
+                        </Import-Package>
+
 					</instructions>
 				</configuration>
 			</plugin>
@@ -145,60 +148,105 @@
 	</build>
 
 	<dependencies>
+
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>2.1.7</version>
+        </dependency>
+
+        <!---->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
+            <version>2.8.5</version>
 		</dependency>
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>javax.ws.rs</groupId>-->
+			<!--<artifactId>jsr311-api</artifactId>-->
+		<!--</dependency>-->
 
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.openfeign</groupId>
-			<artifactId>feign-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.openfeign</groupId>
-			<artifactId>feign-jackson</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.openfeign</groupId>
-			<artifactId>feign-jaxrs</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.openfeign</groupId>
-			<artifactId>feign-gson</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.oltu.oauth2</groupId>
-			<artifactId>org.apache.oltu.oauth2.client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.github.openfeign</groupId>
-			<artifactId>feign-slf4j</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson-databind.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-joda</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.9.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.oltu.oauth2</groupId>
+            <artifactId>org.apache.oltu.oauth2.client</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>logging-interceptor</artifactId>
+            <version>4.9.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.threeten</groupId>
+            <artifactId>threetenbp</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.gsonfire</groupId>
+            <artifactId>gson-fire</artifactId>
+            <version>1.8.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser</artifactId>
+            <version>2.0.25</version>
+        </dependency>
+
+
+        <!--<dependency>-->
+			<!--<groupId>junit</groupId>-->
+			<!--<artifactId>junit</artifactId>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>io.github.openfeign</groupId>-->
+			<!--<artifactId>feign-core</artifactId>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>io.github.openfeign</groupId>-->
+			<!--<artifactId>feign-jackson</artifactId>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>io.github.openfeign</groupId>-->
+			<!--<artifactId>feign-jaxrs</artifactId>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>io.github.openfeign</groupId>-->
+			<!--<artifactId>feign-gson</artifactId>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>org.testng</groupId>-->
+			<!--<artifactId>testng</artifactId>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>org.apache.oltu.oauth2</groupId>-->
+			<!--<artifactId>org.apache.oltu.oauth2.client</artifactId>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>io.github.openfeign</groupId>-->
+			<!--<artifactId>feign-slf4j</artifactId>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>-->
+			<!--<artifactId>jackson-databind</artifactId>-->
+			<!--<version>${jackson-databind.version}</version>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>com.fasterxml.jackson.datatype</groupId>-->
+			<!--<artifactId>jackson-datatype-joda</artifactId>-->
+		<!--</dependency>-->
 	</dependencies>
         <properties>
              <maven.javadoc.skip>true</maven.javadoc.skip>

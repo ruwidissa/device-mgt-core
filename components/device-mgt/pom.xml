@@ -38,9 +38,9 @@
         <module>org.wso2.carbon.device.mgt.extensions</module>
         <module>org.wso2.carbon.device.mgt.ui</module>
         <module>org.wso2.carbon.device.mgt.api</module>
-        <module>org.wso2.carbon.device.mgt.analytics.data.publisher</module>
+        <!--<module>org.wso2.carbon.device.mgt.analytics.data.publisher</module>-->
         <module>org.wso2.carbon.device.mgt.url.printer</module>
-        <module>org.wso2.carbon.device.mgt.analytics.wsproxy</module>
+        <!--<module>org.wso2.carbon.device.mgt.analytics.wsproxy</module>-->
         <module>io.entgra.carbon.device.mgt.config.api</module>
     </modules>
 
