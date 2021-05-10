@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.oauth.extensions.handlers.grant;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
@@ -34,8 +35,8 @@ public class ExtendedSAML2BearerGrantHandler extends SAML2BearerGrantHandler {
     private static Log log = LogFactory.getLog(ExtendedSAML2BearerGrantHandler.class);
 
     @Override
-    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception {
-        return super.validateScope(tokReqMsgCtx);
+    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
+        return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
     }
 
     @Override

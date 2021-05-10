@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.oauth.extensions.handlers.grant;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.device.mgt.oauth.extensions.handlers.grant.oauth.validator.LocalOAuthValidator;
 import org.wso2.carbon.device.mgt.oauth.extensions.handlers.grant.oauth.validator.OAuthValidationResponse;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
@@ -57,8 +58,8 @@ public class AccessTokenGrantHandler extends AbstractAuthorizationGrantHandler {
     }
 
     @Override
-    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception {
-        return super.validateScope(tokReqMsgCtx);
+    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
+        return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
     }
 
     @Override
