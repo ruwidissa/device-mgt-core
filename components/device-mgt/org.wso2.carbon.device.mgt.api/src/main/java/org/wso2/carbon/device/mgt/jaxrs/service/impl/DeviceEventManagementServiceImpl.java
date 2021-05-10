@@ -4,29 +4,13 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Stub;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-//import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
-//import org.wso2.carbon.analytics.api.AnalyticsDataAPIUtil;
-//import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse;
-//import org.wso2.carbon.analytics.dataservice.commons.SearchResultEntry;
-//import org.wso2.carbon.analytics.dataservice.commons.SortByField;
-//import org.wso2.carbon.analytics.dataservice.commons.SortType;
-//import org.wso2.carbon.analytics.datasource.commons.Record;
-//import org.wso2.carbon.analytics.datasource.commons.exception.AnalyticsException;
-//import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceEventStreamPersistenceAdminServiceExceptionException;
-//import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
-//import org.wso2.carbon.analytics.stream.persistence.stub.dto.AnalyticsTable;
-//import org.wso2.carbon.analytics.stream.persistence.stub.dto.AnalyticsTableRecord;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Attribute;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AttributeType;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.DeviceTypeEvent;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventRecords;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.TransportType;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceEventManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
@@ -43,21 +27,14 @@ import org.wso2.carbon.event.stream.stub.types.EventStreamDefinitionDto;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.user.api.UserStoreException;
 
-import javax.validation.Valid;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -81,6 +58,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     private static final String MQTT_CONTENT_VALIDATOR = "default";
     private static final String TIMESTAMP_FIELD_NAME = "_timestamp";
 
+    //todo:amalka
 //    private static AnalyticsDataAPI getAnalyticsDataAPI() {
 //        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
 //        AnalyticsDataAPI analyticsDataAPI =
@@ -195,6 +173,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     /**
      * Deploy Event Stream, Receiver, Publisher and Store Configuration.
      */
+    //todo:amalka
 //    @POST
 //    @Path("/{type}")
 //    @Override
@@ -349,6 +328,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     /**
      * Returns device specific data for the give period of time.
      */
+    //todo:amalka
 //    @GET
 //    @Path("/{type}/{deviceId}")
 //    @Override
@@ -403,6 +383,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
      * Returns last known data points up to the limit if limit is specified. Otherwise returns last known data point.
      * Limit parameter needs to be zero or positive.
      */
+    //todo:amalka
 //    @GET
 //    @Path("/last-known/{type}/{deviceId}")
 //    @Override
@@ -453,6 +434,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
      * Returns the filterd device list. Devices are filterd using the paramter given and the timestamp of the record.
      * parameter should given as a range.
      */
+    //todo:amalka
 //    @GET
 //    @Path("filter/{type}/{parameter}")
 //    @Override
@@ -613,6 +595,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
         }
     }
 
+    //todo:amalka
 //    private void publishEventStore(String streamName, String version, EventAttributeList eventAttributes)
 //            throws RemoteException, UserStoreException, JWTClientException,
 //            EventStreamPersistenceAdminServiceEventStreamPersistenceAdminServiceExceptionException {

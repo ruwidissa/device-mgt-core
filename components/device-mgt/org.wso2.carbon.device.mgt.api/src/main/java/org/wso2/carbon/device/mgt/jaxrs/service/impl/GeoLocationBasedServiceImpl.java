@@ -25,15 +25,6 @@ import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
-//import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
-//import org.wso2.carbon.analytics.api.AnalyticsDataAPIUtil;
-//import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse;
-//import org.wso2.carbon.analytics.dataservice.commons.SearchResultEntry;
-//import org.wso2.carbon.analytics.dataservice.commons.SortByField;
-//import org.wso2.carbon.analytics.dataservice.commons.SortType;
-//import org.wso2.carbon.analytics.datasource.commons.Record;
-//import org.wso2.carbon.analytics.datasource.commons.exception.AnalyticsException;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
@@ -46,7 +37,6 @@ import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationExceptio
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.Alert;
 import org.wso2.carbon.device.mgt.common.geo.service.AlertAlreadyExistException;
-import org.wso2.carbon.device.mgt.common.geo.service.Event;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoFence;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
@@ -57,18 +47,13 @@ import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.GeoHashLengthStrategy;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.ZoomGeoHashLengthStrategy;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.EventAction;
 import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.GeoLocationBasedService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtUtil;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -82,9 +67,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The api for
@@ -93,6 +76,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
 
     private static Log log = LogFactory.getLog(GeoLocationBasedServiceImpl.class);
 
+    //todo:amalka
 //    @Path("stats/{deviceType}/{deviceId}")
 //    @GET
 //    @Consumes("application/json")
@@ -471,6 +455,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         }
     }
 
+    //todo:amalka
 //    @Path("alerts/history/{deviceType}/{deviceId}")
 //    @GET
 //    @Consumes("application/json")
@@ -521,6 +506,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
 //        }
 //    }
 
+    //todo:amalka
 //    @Path("alerts/history")
 //    @GET
 //    @Consumes("application/json")

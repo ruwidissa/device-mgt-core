@@ -200,8 +200,8 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
             KeyManagerConfigurations kmConfig = deviceManagementConfig.getKeyManagerConfigurations();
             AppRegistrationCredentials credentials = DeviceManagerUtil.getApplicationRegistrationCredentials(
-                    System.getProperty(DeviceManagementConstants.ConfigurationManagement.IOT_CORE_HOST),
-                    System.getProperty(DeviceManagementConstants.ConfigurationManagement.IOT_CORE_HTTPS_PORT),
+                    System.getProperty(DeviceManagementConstants.ConfigurationManagement.IOT_GATEWAY_HOST),
+                    System.getProperty(DeviceManagementConstants.ConfigurationManagement.IOT_GATEWAY_HTTPS_PORT),
                     kmConfig.getAdminUsername(),
                     kmConfig.getAdminPassword());
             AccessTokenInfo accessTokenForAdmin = DeviceManagerUtil.getAccessTokenForDeviceOwner(

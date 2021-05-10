@@ -49,7 +49,6 @@ import org.apache.http.protocol.HTTP;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-//import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceEnrollmentInfoNotification;
@@ -162,6 +161,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
+
+//import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
         PluginInitializationListener {
@@ -1964,6 +1965,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             operation.getStatus() != null ? operation.getStatus().toString() : null,
                             operation.getOperationResponse()
                     };
+                    //todo:amalka
 //                    DeviceManagerUtil.getEventPublisherService().publishEvent(
 //                            OPERATION_RESPONSE_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
 //                    );
@@ -1973,6 +1975,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred while reading configs.";
             log.error(msg, e);
             throw new OperationManagementException(msg, e);
+            //todo:amalka
         } //catch (DataPublisherConfigurationException e) {
 //            String msg = "Error occurred while publishing event.";
 //            log.error(msg, e);
@@ -2006,6 +2009,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             operation.getStatus() != null ? operation.getStatus().toString() : null,
                             operation.getOperationResponse()
                     };
+                    //todo:amalka
 //                    DeviceManagerUtil.getEventPublisherService().publishEvent(
 //                            OPERATION_RESPONSE_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
 //                    );
@@ -2015,6 +2019,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred while reading configs.";
             log.error(msg, e);
             throw new OperationManagementException(msg, e);
+            //todo:amalka
         } //catch (DataPublisherConfigurationException e) {
 //            String msg = "Error occurred while publishing event.";
 //            log.error(msg, e);

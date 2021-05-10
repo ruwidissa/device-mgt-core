@@ -22,22 +22,17 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-//import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceDetailsWrapper;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.EventPublishingException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
-import org.wso2.carbon.device.mgt.core.config.tenant.PlatformConfigurationManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -46,18 +41,14 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManag
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDAOException;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
-
-import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
-import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -178,6 +169,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                         deviceInfo.getAvailableRAMMemory(),
                         deviceInfo.isPluggedIn()
                 };
+                //todo:amalka
 //                DeviceManagerUtil.getEventPublisherService().publishEvent(
 //                        DEVICE_INFO_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
 //                );
@@ -193,6 +185,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while updating the last update timestamp of the " +
                     "device", e);
+            //todo:amalka
 //        } catch (DataPublisherConfigurationException e) {
 //            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
         } finally {
@@ -389,6 +382,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                         deviceLocation.getBearing(),
                         deviceLocation.getDistance()
                 };
+                //todo:amalka
 //                DeviceManagerUtil.getEventPublisherService().publishEvent(
 //                        LOCATION_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
 //                );
@@ -403,6 +397,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         } catch (DeviceManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while getting the device information.", e);
+            //todo:amalka
 //        } catch (DataPublisherConfigurationException e) {
 //            DeviceManagementDAOFactory.rollbackTransaction();
 //            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
