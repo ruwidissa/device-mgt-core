@@ -61,12 +61,6 @@
                             org.wso2.carbon.utils.*,
                             org.wso2.carbon.ndatasource.core,
                             org.w3c.dom,
-                            <!--org.apache.velocity;version="${velocity.version}",-->
-                            <!--org.apache.velocity.app;version="${velocity.version}",-->
-                            <!--org.apache.velocity.context;version="${velocity.version}",-->
-                            <!--org.apache.velocity.exception;version="${velocity.version}",-->
-                            <!--org.apache.velocity.runtime.resource;version="${velocity.version}",-->
-                            <!--org.apache.velocity.runtime.resource.loader;version="${velocity.version}",-->
                             org.apache.commons.io,
                             org.apache.axis2.transport.mail,
                             org.apache.commons.collections,
@@ -149,14 +143,6 @@
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.orbit.org.apache.velocity</groupId>-->
-            <!--<artifactId>velocity</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.velocity</groupId>-->
-            <!--<artifactId>velocity</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>commons-io.wso2</groupId>
             <artifactId>commons-io</artifactId>
