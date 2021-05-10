@@ -23,8 +23,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,12 +36,12 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
-import org.wso2.carbon.apimgt.application.extension.APIManagementProviderService;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -82,7 +80,6 @@ public class HandlerUtil {
                         HandlerConstants.INTERNAL_ERROR_CODE));
                 return proxyResponse;
             } else {
-
                 int statusCode = response.getStatusLine().getStatusCode();
                 try (BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
                     StringBuilder result = new StringBuilder();
@@ -402,17 +399,5 @@ public class HandlerUtil {
         }
 
         return stringOutput;
-    }
-
-    public static APIManagementProviderService getAPIManagementProviderService() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        APIManagementProviderService apiManagementProviderService =
-                (APIManagementProviderService) ctx.getOSGiService(APIManagementProviderService.class, null);
-        if (apiManagementProviderService == null) {
-            String msg = "API management provider service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return apiManagementProviderService;
     }
 }

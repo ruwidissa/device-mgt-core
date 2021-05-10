@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.entgra.ui.request.interceptor.beans.AuthData;
+import io.entgra.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.ui.request.interceptor.exceptions.LoginException;
 import io.entgra.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.ui.request.interceptor.util.HandlerUtil;
@@ -34,17 +35,12 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.protocol.HTTP;
 import org.wso2.carbon.apimgt.application.extension.APIManagementProviderService;
 import org.wso2.carbon.apimgt.application.extension.APIManagementProviderServiceImpl;
 import org.wso2.carbon.apimgt.application.extension.constants.ApiApplicationConstants;
 import org.wso2.carbon.apimgt.application.extension.dto.ApiApplicationKey;
 import org.wso2.carbon.apimgt.application.extension.exception.APIManagerException;
-import org.wso2.carbon.authenticator.stub.AuthenticationAdmin;
-import org.wso2.carbon.authenticator.stub.Login;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.ui.request.interceptor.beans.ProxyResponse;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -81,7 +77,8 @@ public class LoginHandler extends HttpServlet {
             //setting session to expiry in 5 minutes
             httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
             //todo: amalka do we need this remote call?
-            JsonObject uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
+            JsonObject uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(
+                    uiConfigUrl, gatewayUrl, httpSession, resp);
 
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
@@ -140,11 +137,7 @@ public class LoginHandler extends HttpServlet {
             HttpServletResponse resp, JsonArray scopes) throws LoginException {
         JsonParser jsonParser = new JsonParser();
         try {
-//            JsonElement jClientAppResult = jsonParser.parse(clientAppResult);
             if (clientId != null && clientSecret != null) {
-//                JsonObject jClientAppResultAsJsonObject = jClientAppResult.getAsJsonObject();
-//                String clientId = jClientAppResultAsJsonObject.get("client_id").getAsString();
-//                String clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
                 String encodedClientApp = Base64.getEncoder()
                         .encodeToString((clientId + HandlerConstants.COLON + clientSecret).getBytes());
 

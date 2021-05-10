@@ -33,6 +33,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
+import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -72,9 +74,9 @@ public class UserHandler extends HttpServlet {
             HttpPost introspectionEndpoint = new HttpPost(serverUrl + HandlerConstants.INTROSPECT_ENDPOINT);
             introspectionEndpoint.setHeader(HttpHeaders.CONTENT_TYPE,
                     ContentType.APPLICATION_FORM_URLENCODED.toString());
-            //todo:amalka
-            String username = "admin";
-            String password = "admin";
+            DeviceManagementConfig dmc = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+            String username = dmc.getKeyManagerConfigurations().getAdminUsername();
+            String password = dmc.getKeyManagerConfigurations().getAdminPassword();
             introspectionEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
                     .encodeToString((username + HandlerConstants.COLON + password).getBytes()));
             StringEntity introspectionPayload = new StringEntity("token=" + accessToken,
