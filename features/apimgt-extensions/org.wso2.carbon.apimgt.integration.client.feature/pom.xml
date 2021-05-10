@@ -107,9 +107,9 @@
 								<bundleDef>
 									org.wso2.carbon.devicemgt:org.wso2.carbon.apimgt.integration.client:${project.version}
 								</bundleDef>
-								<!--<bundleDef>-->
-									<!--org.wso2.carbon.devicemgt:org.wso2.carbon.apimgt.integration.generated.client:${project.version}-->
-								<!--</bundleDef>-->
+								<bundleDef>
+									org.wso2.carbon.devicemgt:org.wso2.carbon.apimgt.integration.generated.client:${project.version}
+								</bundleDef>
 							</bundles>
 						</configuration>
 					</execution>

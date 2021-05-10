@@ -35,11 +35,9 @@
     <modules>
         <module>org.wso2.carbon.device.mgt.basics.feature</module>
         <module>org.wso2.carbon.device.mgt.server.feature</module>
-        <!--<module>org.wso2.carbon.device.mgt.ui.feature</module>-->
         <module>org.wso2.carbon.device.mgt.api.feature</module>
         <module>org.wso2.carbon.device.mgt.feature</module>
         <module>org.wso2.carbon.device.mgt.extensions.feature</module>
-        <!--<module>org.wso2.carbon.device.mgt.analytics.feature</module>-->
     </modules>
 
 </project>
