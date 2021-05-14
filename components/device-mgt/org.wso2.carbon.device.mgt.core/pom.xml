@@ -119,9 +119,7 @@
                             org.wso2.carbon.device.mgt.core.*
                         </Export-Package>
                         <Embed-Dependency>
-                            javax.ws.rs-api,
                             scribe;scope=compile|runtime;inline=false,
-							javassist;inline=false
                         </Embed-Dependency>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>

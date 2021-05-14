@@ -42,8 +42,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.core.config.ui.UIConfiguration;
-import org.wso2.carbon.device.mgt.core.config.ui.UIConfigurationManager;
 import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
@@ -101,7 +99,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
      */
     @Override
     public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
-            String keyType, String username, boolean isAllowedAllDomains, String validityTime, String scopes)
+            String keyType, String username, boolean isAllowedAllDomains, String validityTime)
             throws APIManagerException {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -125,14 +123,14 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 application = new Application(applicationName, subscriber);
                 application.setTier(ApiApplicationConstants.DEFAULT_TIER);
                 application.setGroupId("");
-                applicationId = apiConsumer.addApplication(application, username);
+                apiConsumer.addApplication(application, username);
+                application = apiConsumer.getApplicationsByName(username, applicationName, "");
             } else {
-                applicationId = application.getId();
                 subscriber = apiConsumer.getSubscriber(username);
             }
 
             Set<SubscribedAPI> subscribedAPIs =
-                    apiConsumer.getSubscribedAPIsByApplicationId(subscriber, applicationId, "");
+                    apiConsumer.getSubscribedAPIs(subscriber, applicationName, "");
 
             log.info("Already subscribed API count: " + subscribedAPIs.size());
 
@@ -160,9 +158,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                                 }
                             }
                             if (!subscriptionExist && !tempApiIds.contains(id)) {
-                                ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiInfo);
+                                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(
+                                        apiInfo.getUuid(), tenantDomain);
                                 apiTypeWrapper.setTier(ApiApplicationConstants.DEFAULT_TIER);
-                                apiConsumer.addSubscription(apiTypeWrapper, username, applicationId, "");
+
+                                apiConsumer.addSubscription(apiTypeWrapper, username, application);
                                 tempApiIds.add(id);
                             }
                         }
@@ -210,31 +210,9 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         "\\\"id_token_expiry_time\\\":\\\"N\\/A\\\"}\"," +
                         "\"username\":\"" + username + "\"}";
 
-                // if scopes not defined
-                if (StringUtils.isEmpty(scopes)) {
-                    UIConfigurationManager uiConfigurationManager = UIConfigurationManager.getInstance();
-                    UIConfiguration uiConfiguration = uiConfigurationManager.getUIConfig();
-                    List<String> scopeList = uiConfiguration.getScopes();
-
-                    if (scopeList != null && scopeList.size() > 0) {
-                        StringBuilder builder = new StringBuilder();
-                        for (String scope : scopeList) {
-                            String tmpScope = scope + " ";
-                            builder.append(tmpScope);
-                        }
-                        scopes = builder.toString();
-                    }
-
-                    if (StringUtils.isEmpty(scopes)) {
-                        scopes = scopes.trim();
-                    } else {
-                        scopes = "default";
-                    }
-                }
-
                 Map<String, Object> keyDetails = apiConsumer
                         .requestApprovalForApplicationRegistration(username, applicationName, keyType, "",
-                                allowedDomains.toArray(new String[allowedDomains.size()]), validityTime, scopes, "",
+                                allowedDomains.toArray(new String[allowedDomains.size()]), validityTime, "default", "",
                                 jsonString, keyManagerId, tenantDomain);
 
                 if (keyDetails != null) {
@@ -250,19 +228,6 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         } catch (APIManagementException e) {
             throw new APIManagerException("Failed to create api application for tenant: " + tenantDomain, e);
         }
-    }
-
-        /**
-     * {@inheritDoc}
-     */
-    @Override
-    public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
-                                                                             String keyType, String username,
-                                                                             boolean isAllowedAllDomains,
-                                                                             String validityTime)
-            throws APIManagerException {
-        return this.generateAndRetrieveApplicationKeys(applicationName, tags, keyType, username,
-                isAllowedAllDomains, validityTime, null);
     }
 
     @Override

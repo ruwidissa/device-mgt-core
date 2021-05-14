@@ -102,7 +102,7 @@ public class LoginHandler extends HttpServlet {
             ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
                     HandlerConstants.PUBLISHER_APPLICATION_NAME,
                     tagsAsStringArray, HandlerConstants.PRODUCTION_KEY, username, false,
-                    ApiApplicationConstants.DEFAULT_VALIDITY_PERIOD, scopeString);
+                    ApiApplicationConstants.DEFAULT_VALIDITY_PERIOD);
 
             if (apiApplicationKey != null && getTokenAndPersistInSession(apiApplicationKey.getConsumerKey(),
                     apiApplicationKey.getConsumerSecret(), req, resp, scopes)) {

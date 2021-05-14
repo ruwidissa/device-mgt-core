@@ -51,27 +51,6 @@ public interface APIManagementProviderService {
                                                          String validityTime) throws APIManagerException;
 
     /**
-     * Generate and retreive application keys. if the application does exist then
-     * create it and subscribe to apis that are grouped with the tags.
-     *
-     * @param apiApplicationName name of the application.
-     * @param tags               tags of the apis that application needs to be subscribed.
-     * @param keyType            of the application.
-     * @param username           to whom the application is created
-     * @param isAllowedAllDomains application is allowed to all the tenants
-     * @param validityTime       validity period of the application
-     * @param scopes            scopes
-     * @return consumerkey and secrete of the created application.
-     * @throws APIManagerException
-     */
-    ApiApplicationKey generateAndRetrieveApplicationKeys(String apiApplicationName,
-                                                         String tags[],
-                                                         String keyType,
-                                                         String username,
-                                                         boolean isAllowedAllDomains,
-                                                         String validityTime, String scopes) throws APIManagerException;
-
-    /**
      * Remove APIM Application.
      */
     void removeAPIApplication(String applicationName, String username) throws APIManagerException;

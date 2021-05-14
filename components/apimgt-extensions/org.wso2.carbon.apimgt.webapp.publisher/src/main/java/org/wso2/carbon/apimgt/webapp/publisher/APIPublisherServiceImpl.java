@@ -50,7 +50,7 @@ import java.util.Set;
  */
 public class APIPublisherServiceImpl implements APIPublisherService {
     private static final String UNLIMITED_TIER = "Unlimited";
-    private static final String API_PUBLISH_ENVIRONMENT = "Production and Sandbox";
+    private static final String API_PUBLISH_ENVIRONMENT = "Default";
     private static final String CREATED_STATUS = "CREATED";
     private static final String PUBLISH_ACTION = "Publish";
     public static final APIManagerFactory API_MANAGER_FACTORY = APIManagerFactory.getInstance();
@@ -179,7 +179,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         accessControlAllowHeaders.add("Content-Type");
         accessControlAllowHeaders.add("SOAPAction");
         accessControlAllowHeaders.add("apikey");
-        accessControlAllowHeaders.add("testKey");
+        accessControlAllowHeaders.add("Internal-Key");
         List<String> accessControlAllowMethods = new ArrayList<>();
         accessControlAllowMethods.add("GET");
         accessControlAllowMethods.add("PUT");
