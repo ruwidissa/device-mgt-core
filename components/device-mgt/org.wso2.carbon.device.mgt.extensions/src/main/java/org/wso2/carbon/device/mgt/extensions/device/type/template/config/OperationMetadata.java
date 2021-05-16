@@ -58,6 +58,7 @@ import java.util.List;
         "method",
         "contentType",
         "permission",
+        "scope",
         "filterList"
 })
 public class OperationMetadata {
@@ -73,6 +74,9 @@ public class OperationMetadata {
 
     @XmlElement(name = "permission")
     private String permission;
+
+    @XmlElement(name = "scope")
+    private String scope;
 
     @XmlElementWrapper(name = "filters")
     @XmlElement(name = "filter")
@@ -108,6 +112,14 @@ public class OperationMetadata {
 
     public void setPermission(String permission) {
         this.permission = permission;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     public List<Filter> getFilterList() {
