@@ -1,3 +1,5 @@
 instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/webapps/);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.application.extension_${feature.version}/webapps/,target:${installFolder}/../../deployment/server/webapps/,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.application.extension_${feature.version}/synapse-configs/default/api/_API_Application_Registration_.xml,target:${installFolder}/../../deployment/server/synapse-configs/default/api/_API_Application_Registration_.xml,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.application.extension_${feature.version}/synapse-configs/default/sequences/_api_registration_fault_.xml,target:${installFolder}/../../deployment/server/synapse-configs/default/sequences/_api_registration_fault_.xml,overwrite:true);\
