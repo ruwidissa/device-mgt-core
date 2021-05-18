@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~ Copyright (C) 2020 Entgra (Pvt) Ltd, Inc - All Rights Reserved.
+  ~
+  ~ Unauthorised copying/redistribution of this file, via any medium is strictly prohibited.
+  ~
+  ~ Licensed under the Entgra Commercial License, Version 1.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://entgra.io/licenses/entgra-commercial/1.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<HeartBeatBeaconConfig>
+    <!--
+     ~  Only to be turned on in distributed mode, in which case
+     ~  Dynamic Partitoned Task, Randomly Assigned Task modes will be activated.
+     ~  These modes are deviations from the regular worker manager mode, in which the server will function.
+     ~
+     ~   * DynamicPartitionedScheduleTask -> Tasks will execute on all nodes but will only focus on a subset of operations
+     ~      broken up amongst active nodes based on following parameters that are made available via DynamicTaskContext abstract class.
+     ~      - serverHashIndex : dynamic index assigned to each server based on number of active servers present
+     ~      - activeServerCount : total no. of active servers present at a given time
+     ~      - partitioningEnabled : whether or not heart-beat-config/dynamic task config is enabled.
+     ~      Any task extending the DynamicPartitionedScheduleTask class will inherit the above variables.
+     ~      These can then be used to split up the no. of devices said node is allocated with.
+     ~
+     ~   * RandomlyAssignedScheduleTask -> Tasks will only execute on a particular node elected at a time interval determined by ServerTimeOutIntervalInSeconds, parameter.
+     ~      When running tasks in this mode, it is mandatory that each task be given a unique name, so as not to run in to scenarios where tasks execution is duplicated.
+     ~      Each node, on a periodic basis will check to see if it is qualfied to execute the random task, if the following variable is true only said node will execute the task.
+     ~      - qualifiedToExecuteTask : dynamic index assigned to each server based on number of active servers present
+     ~      Any task extending the RandomlyAssignedScheduleTask class will inherit the above variable.
+     ~      Note that random task may execute on any node.
+     -->
+     <!-- Heart Beat Data Source Name, this should be either MySQL, PostGreSQL, Oracle or MSSQL -->
+     <DataSourceConfiguration>
+         <JndiLookupDefinition>
+             <Name>jdbc/HeartBeat_DS</Name>
+         </JndiLookupDefinition>
+     </DataSourceConfiguration>
+     {% if heart_beat_beacon_conf is defined %}
+     <Enable>{{heart_beat_beacon_conf.enable}}</Enable>
+     <NotifierInitialDelayInSeconds>{{heart_beat_beacon_conf.notifier_initial_delay_in_seconds}}</NotifierInitialDelayInSeconds>
+     <NotifierFrequencyInSeconds>{{heart_beat_beacon_conf.notifier_frequency_in_seconds}}</NotifierFrequencyInSeconds>
+     <TimeSkewInSeconds>{{heart_beat_beacon_conf.time_skew_in_seconds}}</TimeSkewInSeconds>
+     <ServerTimeOutIntervalInSeconds>{{heart_beat_beacon_conf.sever_timeout_interval_in_seconds}}</ServerTimeOutIntervalInSeconds>
+     {% else %}
+     <Enable>false</Enable>
+     <NotifierInitialDelayInSeconds>30</NotifierInitialDelayInSeconds>
+     <NotifierFrequencyInSeconds>300</NotifierFrequencyInSeconds>
+     <TimeSkewInSeconds>5</TimeSkewInSeconds>
+     <ServerTimeOutIntervalInSeconds>600</ServerTimeOutIntervalInSeconds>
+     {% endif %}
+</HeartBeatBeaconConfig>

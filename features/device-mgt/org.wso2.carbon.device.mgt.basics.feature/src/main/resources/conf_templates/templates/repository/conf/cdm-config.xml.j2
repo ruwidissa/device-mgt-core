@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~ Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ you may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<DeviceMgtConfiguration>
+    <ManagementRepository>
+        <DataSourceConfiguration>
+            <JndiLookupDefinition>
+                <Name>jdbc/DM_DS</Name>
+            </JndiLookupDefinition>
+        </DataSourceConfiguration>
+    </ManagementRepository>
+    <PushNotificationConfiguration>
+        {% if device_mgt_conf.push_notification_conf is defined %}
+        <SchedulerBatchSize>{{device_mgt_conf.push_notification_conf.scheduler_batch_size}}</SchedulerBatchSize>
+        <SchedulerBatchDelayMills>{{device_mgt_conf.push_notification_conf.scheduler_batch_delay_mills}}</SchedulerBatchDelayMills>
+        <SchedulerTaskInitialDelay>{{device_mgt_conf.push_notification_conf.scheduler_task_initial_delay}}</SchedulerTaskInitialDelay>
+        <SchedulerTaskEnabled>{{device_mgt_conf.push_notification_conf.scheduler_task_enabled}}</SchedulerTaskEnabled>
+        {% else %}
+        <SchedulerBatchSize>1000</SchedulerBatchSize>
+        <SchedulerBatchDelayMills>60000</SchedulerBatchDelayMills>
+        <SchedulerTaskInitialDelay>60000</SchedulerTaskInitialDelay>
+        <SchedulerTaskEnabled>true</SchedulerTaskEnabled>
+        {% endif %}
+        <PushNotificationProviders>
+            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.fcm.FCMBasedPushNotificationProvider</Provider>
+            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.mqtt.MQTTBasedPushNotificationProvider</Provider>
+            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.http.HTTPBasedPushNotificationProvider</Provider>
+            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider</Provider>
+        {% if device_mgt_conf.push_notification_conf.push_notification_providers is defined %}
+            {%- for push_notification_provider in device_mgt_conf.push_notification_conf.push_notification_providers -%}
+            <Provider>{{push_notification_provider}}</Provider>
+            {% endfor %}
+        {% endif %}
+        </PushNotificationProviders>
+    </PushNotificationConfiguration>
+    <PullNotificationConfiguration>
+        {% if device_mgt_conf.pull_notification_conf is defined %}
+        <Enabled>{{device_mgt_conf.pull_notification_conf.enabled}}</Enabled>
+        {% else %}
+        <Enabled>false</Enabled>
+        {% endif %}
+    </PullNotificationConfiguration>
+    <IdentityConfiguration>
+        {% if device_mgt_conf.identity_conf is defined %}
+        <ServerUrl>{{device_mgt_conf.identity_conf.server_url}}</ServerUrl>
+        <AdminUsername>{{device_mgt_conf.identity_conf.admin_username}}</AdminUsername>
+        <AdminPassword>{{device_mgt_conf.identity_conf.admin_password}}</AdminPassword>
+        {% else %}
+        <ServerUrl>https://localhost:9443</ServerUrl>
+        <AdminUsername>admin</AdminUsername>
+        <AdminPassword>admin</AdminPassword>
+        {% endif %}
+    </IdentityConfiguration>
+    <KeyManagerConfiguration>
+        {% if device_mgt_conf.key_manager_conf is defined %}
+        <ServerUrl>{{device_mgt_conf.key_manager_conf.server_url}}</ServerUrl>
+        <AdminUsername>{{device_mgt_conf.key_manager_conf.admin_username}}</AdminUsername>
+        <AdminPassword>{{device_mgt_conf.key_manager_conf.admin_password}}</AdminPassword>
+        {% else %}
+        <ServerUrl>https://localhost:9443</ServerUrl>
+        <AdminUsername>admin</AdminUsername>
+        <AdminPassword>admin</AdminPassword>
+        {% endif %}
+    </KeyManagerConfiguration>
+    <PolicyConfiguration>
+        {% if device_mgt_conf.policy_conf is defined %}
+        <MonitoringClass>{{device_mgt_conf.policy_conf.monitoring_class}}</MonitoringClass>
+        <MonitoringEnable>{{device_mgt_conf.policy_conf.monitoring_enable}}</MonitoringEnable>
+        <MonitoringFrequency>{{device_mgt_conf.policy_conf.monitoring_frequency}}</MonitoringFrequency>
+        <MaxRetries>{{device_mgt_conf.policy_conf.max_retries}}</MaxRetries>
+        <MinRetriesToMarkUnreachable>{{device_mgt_conf.policy_conf.min_retries_to_mark_unreachable}}</MinRetriesToMarkUnreachable>
+        <MinRetriesToMarkInactive>{{device_mgt_conf.policy_conf.min_retries-to_mark_inactive}}</MinRetriesToMarkInactive>
+        <!--Set the policy evaluation point name-->
+        <!--Simple ->  Simple policy evaluation point-->
+        <!--Merged ->  Merged policy evaluation point -->
+        <PolicyEvaluationPoint>{{device_mgt_conf.policy_conf.policy.evaluation_point}}</PolicyEvaluationPoint>
+        <CacheEnable>{{device_mgt_conf.policy_conf.cache_enable}}</CacheEnable>
+        {% else %}
+        <MonitoringClass>org.wso2.carbon.policy.mgt</MonitoringClass>
+        <MonitoringEnable>true</MonitoringEnable>
+        <MonitoringFrequency>60000</MonitoringFrequency>
+        <MaxRetries>5</MaxRetries>
+        <MinRetriesToMarkUnreachable>8</MinRetriesToMarkUnreachable>
+        <MinRetriesToMarkInactive>20</MinRetriesToMarkInactive>
+        <!--Set the policy evaluation point name-->
+        <!--Simple ->  Simple policy evaluation point-->
+        <!--Merged ->  Merged policy evaluation point -->
+        <PolicyEvaluationPoint>Simple</PolicyEvaluationPoint>
+        <CacheEnable>true</CacheEnable>
+        {% endif %}
+    </PolicyConfiguration>
+    <!-- Default Page size configuration for paginated DM APIs-->
+    <PaginationConfiguration>
+        {% if device_mgt_conf.pagination_conf is defined %}
+        <DeviceListPageSize>{{device_mgt_conf.pagination_conf.device_list_page_size}}</DeviceListPageSize>
+        <GroupListPageSize>{{device_mgt_conf.pagination_conf.group_list_page_size}}</GroupListPageSize>
+        <NotificationListPageSize>{{device_mgt_conf.pagination_conf.notification_list_page_size}}</NotificationListPageSize>
+        <ActivityListPageSize>{{device_mgt_conf.pagination_conf.activity_list_page_size}}</ActivityListPageSize>
+        <OperationListPageSize>{{device_mgt_conf.pagination_conf.operation_list_page_size}}</OperationListPageSize>
+        <TopicListPageSize>{{device_mgt_conf.pagination_conf.topic_list_page_size}}</TopicListPageSize>
+        <MetadataListPageSize>{{device_mgt_conf.pagination_conf.metadata_list_page_size}}</MetadataListPageSize>
+        {% else %}
+        <DeviceListPageSize>20</DeviceListPageSize>
+        <GroupListPageSize>20</GroupListPageSize>
+        <NotificationListPageSize>20</NotificationListPageSize>
+        <ActivityListPageSize>20</ActivityListPageSize>
+        <OperationListPageSize>20</OperationListPageSize>
+        <TopicListPageSize>20</TopicListPageSize>
+        <MetadataListPageSize>20</MetadataListPageSize>
+        {% endif %}
+    </PaginationConfiguration>
+    <!--This specifies whether to enable the DeviceStatus Task in this node. In clustered setup only master node
+     should  have to run this task.-->
+    <DeviceStatusTaskConfig>
+        {% if device_mgt_conf.device_status_task_config is defined %}
+        <Enable>{{device_mgt_conf.device_status_task_config.enable}}</Enable>
+        {% else %}
+        <Enable>true</Enable>
+        {% endif %}
+    </DeviceStatusTaskConfig>
+    <!--This controls the in-memory device cache which is local to this node. Setting it enable will activate the
+    device caching for upto configured expiry-time in seconds. In clustered setup all worker nodes can enable the
+    device-cache to improve performance. -->
+    <DeviceCacheConfiguration>
+        {% if device_mgt_conf.device_cache_conf is defined %}
+        <Enable>{{device_mgt_conf.device_cache_conf.enable}}</Enable>
+        <ExpiryTime>{{device_mgt_conf.device_cache_conf.expiry_time}}</ExpiryTime>
+        <!--This configuration specifies the number of cache entries in device cache. default capacity is 10000 entries.
+        This can be configured to higher number if cache eviction happens due to large number of devices in the
+        server environment-->
+        <Capacity>{{device_mgt_conf.device_cache_conf.capacity}}</Capacity>
+        {% else %}
+        <Enable>true</Enable>
+        <ExpiryTime>600</ExpiryTime>
+        <!--This configuration specifies the number of cache entries in device cache. default capacity is 10000 entries.
+        This can be configured to higher number if cache eviction happens due to large number of devices in the
+        server environment-->
+        <Capacity>10000</Capacity>
+        {% endif %}
+    </DeviceCacheConfiguration>
+    <GeoFenceCacheConfiguration>
+        {% if device_mgt_conf.geo_fence_cache_conf is defined %}
+        <Enable>{{device_mgt_conf.geo_fence_cache_conf.enable}}</Enable>
+        <ExpiryTime>{{device_mgt_conf.geo_fence_cache_conf.expiry_time}}</ExpiryTime>
+        <Capacity>{{device_mgt_conf.geo_fence_cache_conf.capacity}}</Capacity>
+        {% else %}
+        <Enable>true</Enable>
+        <ExpiryTime>600</ExpiryTime>
+        <Capacity>10000</Capacity>
+        {% endif %}
+    </GeoFenceCacheConfiguration>
+    <EventOperationTaskConfiguration>
+        {% if device_mgt_conf.event_operation_task_conf is defined %}
+        <Enable>{{device_mgt_conf.event_operation_task_conf.enable}}</Enable>
+        {% else %}
+        <Enable>true</Enable>
+        {% endif %}
+    </EventOperationTaskConfiguration>
+    <CertificateCacheConfiguration>
+        {% if device_mgt_conf.certificate_cache_conf is defined %}
+        <Enable>{{device_mgt_conf.certificate_cache_conf.enable}}</Enable>
+        <ExpiryTime>{{device_mgt_conf.certificate_cache_conf.expiry_time}}</ExpiryTime>
+        {% else %}
+        <Enable>true</Enable>
+        <ExpiryTime>86400</ExpiryTime>
+        {% endif %}
+    </CertificateCacheConfiguration>
+    <ArchivalConfiguration>
+        <DataSourceConfiguration>
+            <JndiLookupDefinition>
+                <Name>jdbc/DM_ARCHIVAL_DS</Name>
+            </JndiLookupDefinition>
+        </DataSourceConfiguration>
+        <ArchivalTask>
+            {% if device_mgt_conf.archival_conf.archival_task is defined %}
+            <Enabled>{{device_mgt_conf.archival_conf.archival_task.enabled}}</Enabled>
+            <ArchivePendingOperations>{{device_mgt_conf.archival_conf.archival_task.archival_pending_operations}}</ArchivePendingOperations>
+            <DBConfig>
+                <SourceDB>DM_DB</SourceDB>
+                <DestinationDB>ARCHIVAL_DB</DestinationDB>
+            </DBConfig>
+            <TaskClass>{{device_mgt_conf.archival_conf.archival_task.task_class}}</TaskClass>
+            <!-- Cron expression to run the task at specified time -->
+            <CronExpression>{{device_mgt_conf.archival_conf.archival_task.cron_expression}}</CronExpression>
+            <!-- How many days of data should we keep in transactional tables? Must be in number of days -->
+            <RetentionPeriod>{{device_mgt_conf.archival_conf.archival_task.retention_period}}</RetentionPeriod>
+            <ExecutionBatchSize>{{device_mgt_conf.archival_conf.archival_task.execution_batch_size}}</ExecutionBatchSize>
+            <PurgingTask>
+                <Enabled>{{device_mgt_conf.archival_conf.archival_task.purging_task.enabled}}</Enabled>
+                <TaskClass>{{device_mgt_conf.archival_conf.archival_task.purging_task.task_class}}</TaskClass>
+                <!-- Cron expression to run the task at specified time -->
+                <CronExpression>{{device_mgt_conf.archival_conf.archival_task.purging_task.cron_expression}}</CronExpression>
+                <!-- After this number of days, data will be permanently deleted from archival tables.
+                Data retention period must be in number of DAYS -->
+                <RetentionPeriod>{{device_mgt_conf.archival_conf.archival_task.purging_task.retention_period}}</RetentionPeriod>
+            </PurgingTask>
+            {% else %}
+            <Enabled>false</Enabled>
+            <ArchivePendingOperations>false</ArchivePendingOperations>
+            <DBConfig>
+                <SourceDB>DM_DB</SourceDB>
+                <DestinationDB>ARCHIVAL_DB</DestinationDB>
+            </DBConfig>
+            <TaskClass>org.wso2.carbon.device.mgt.core.task.impl.ArchivalTask</TaskClass>
+            <!-- Cron expression to run the task at specified time -->
+            <CronExpression>0 0 0 1/1 * ? *</CronExpression>
+            <!-- How many days of data should we keep in transactional tables? Must be in number of days -->
+            <RetentionPeriod>30</RetentionPeriod>
+            <ExecutionBatchSize>1000</ExecutionBatchSize>
+            <PurgingTask>
+                <Enabled>false</Enabled>
+                <TaskClass>org.wso2.carbon.device.mgt.core.task.impl.ArchivedDataDeletionTask</TaskClass>
+                <!-- Cron expression to run the task at specified time -->
+                <CronExpression>0 0 3 1/1 * ? *</CronExpression>
+                <!-- After this number of days, data will be permanently deleted from archival tables.
+                Data retention period must be in number of DAYS -->
+                <RetentionPeriod>365</RetentionPeriod>
+            </PurgingTask>
+            {% endif %}
+        </ArchivalTask>
+    </ArchivalConfiguration>
+    <GeoLocationConfiguration>
+        {% if device_mgt_conf.geo_location_conf is defined %}
+        <Enabled>{{device_mgt_conf.geo_location_conf.enabled}}</Enabled>
+        {% else %}
+        <Enabled>false</Enabled>
+        {% endif %}
+    </GeoLocationConfiguration>
+    <OperationAnalyticsConfiguration>
+        <PublishLocationResponse>false</PublishLocationResponse>
+        <PublishDeviceInfoResponse>false</PublishDeviceInfoResponse>
+        <PublishOperationResponse>
+            <Enabled>false</Enabled>
+            <Operations>
+                <!-- Publish specific operation responses -->
+                <!--
+                    <Operation>BATTERY_LEVEL</Operation>
+                    <Operation>CHECK_LOCK_STATUS</Operation>
+                -->
+                <!-- use wildcard '*' to publish all responses -->
+                <Operation>*</Operation>
+            </Operations>
+        </PublishOperationResponse>
+    </OperationAnalyticsConfiguration>
+    <!--This configuration used to configure the options for remote device control feature -->
+    <RemoteSessionConfiguration>
+        {% if device_mgt_conf.remote_session_conf is defined %}
+        <Enabled>{{device_mgt_conf.remote_session_conf.enabled}}</Enabled>
+        <RemoteSessionServerUrl>{{device_mgt_conf.remote_session_conf.remote_session_server_url}}</RemoteSessionServerUrl>
+        <MaximumHTTPConnectionPerHost>{{device_mgt_conf.remote_session_conf.max_http_connection_per_host}}</MaximumHTTPConnectionPerHost>
+        <MaximumTotalHTTPConnections>{{device_mgt_conf.remote_session_conf.max_total_http_connections}}</MaximumTotalHTTPConnections>
+        <MaximumMessagesPerSecond>{{device_mgt_conf.remote_session_conf.max_messages_per_second}}</MaximumMessagesPerSecond>
+        <SessionIdleTimeOut>{{device_mgt_conf.remote_session_conf.session_idle_timeout}}</SessionIdleTimeOut>
+        <MaximumMessageBufferSize>{{device_mgt_conf.remote_session_conf.max_message_buffer.size}}</MaximumMessageBufferSize>
+        {% else %}
+        <Enabled>true</Enabled>
+        <RemoteSessionServerUrl>ws://localhost:9763</RemoteSessionServerUrl>
+        <MaximumHTTPConnectionPerHost>2</MaximumHTTPConnectionPerHost>
+        <MaximumTotalHTTPConnections>100</MaximumTotalHTTPConnections>
+        <MaximumMessagesPerSecond>20</MaximumMessagesPerSecond>
+        <SessionIdleTimeOut>15</SessionIdleTimeOut>
+        <MaximumMessageBufferSize>640</MaximumMessageBufferSize>
+        {% endif %}
+    </RemoteSessionConfiguration>
+    {% if device_mgt_conf.default_groups_conf is defined %}
+    <DefaultGroupsConfiguration>{{device_mgt_conf.default_groups_conf}}</DefaultGroupsConfiguration>
+    {% else %}
+    <DefaultGroupsConfiguration>BYOD,COPE</DefaultGroupsConfiguration>
+    {% endif %}
+    <EnrolmentNotificationConfiguration>
+        {% if device_mgt_conf.enrolement_notification_conf is defined %}
+        <Enabled>{{device_mgt_conf.enrolement_notification_conf.enabled}}</Enabled>
+        <NotifyThroughExtension>{{device_mgt_conf.enrolement_notification_conf.notify_through_extension}}</NotifyThroughExtension>
+        <ExtensionClass>{{device_mgt_conf.enrolement_notification_conf.extension_class}}</ExtensionClass>
+        <NotifyingInternalHost>{{device_mgt_conf.enrolement_notification_conf.notify_internal_host}}</NotifyingInternalHost>
+        {% else %}
+        <Enabled>false</Enabled>
+        <NotifyThroughExtension>false</NotifyThroughExtension>
+        <ExtensionClass>org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifier</ExtensionClass>
+        <NotifyingInternalHost>http://localhost:8280</NotifyingInternalHost>
+        {% endif %}
+    </EnrolmentNotificationConfiguration>
+    <DefaultRoles>
+        {% if device_mgt_conf.default_roles is defined %}
+        <Enabled>{{device_mgt_conf.default_roles.enabled}}</Enabled>
+        {% else %}
+        <Enabled>false</Enabled>
+        {% endif %}
+        <Roles>
+            <Role>
+                <Name>test_role</Name>
+                <Permissions>
+                    <Permission>/permission/admin/Login</Permission>
+                </Permissions>
+            </Role>
+        </Roles>
+    </DefaultRoles>
+</DeviceMgtConfiguration>
+

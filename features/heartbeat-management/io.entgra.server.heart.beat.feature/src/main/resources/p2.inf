@@ -2,6 +2,7 @@ instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.server.heart.beat_${feature.version}/datasources/,target:${installFolder}/../../conf/datasources/,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.server.heart.beat_${feature.version}/conf/heart-beat-config.xml,target:${installFolder}/../../conf/heart-beat-config.xml,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.server.heart.beat_${feature.version}/dbscripts/heart-beat/,target:${installFolder}/../../../dbscripts/heart-beat,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.server.heart.beat_${feature.version}/conf_templates/,target:${installFolder}/../../resources/conf/,overwrite:true);\
 
 instructions.unconfigure = \
 org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/../../conf/datasources/heart-beat-datasources.xml);\
