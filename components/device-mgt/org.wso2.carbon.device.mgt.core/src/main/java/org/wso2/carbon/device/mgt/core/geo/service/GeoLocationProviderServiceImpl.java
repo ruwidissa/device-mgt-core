@@ -44,11 +44,11 @@ import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationExceptio
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.Alert;
+import org.wso2.carbon.device.mgt.common.geo.service.AlertAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoFence;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoFenceEventMeta;
-import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
-import org.wso2.carbon.device.mgt.common.geo.service.AlertAlreadyExistException;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.core.cache.impl.GeoCacheManagerImpl;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
@@ -85,11 +85,11 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Collections;
 import java.util.Set;
 
 import static org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices.DAS_PORT;
@@ -101,7 +101,7 @@ import static org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoSer
  */
 public class GeoLocationProviderServiceImpl implements GeoLocationProviderService {
 
-    private static Log log = LogFactory.getLog(GeoLocationProviderServiceImpl.class);
+    private static final Log log = LogFactory.getLog(GeoLocationProviderServiceImpl.class);
 
     /**
      * required soap header for authorization
@@ -134,6 +134,18 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
 
     public GeoLocationProviderServiceImpl() {
         this.geofenceDAO = DeviceManagementDAOFactory.getGeofenceDAO();
+    }
+
+    public static JWTClientManagerService getJWTClientManagerService() {
+        JWTClientManagerService jwtClientManagerService;
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        jwtClientManagerService = (JWTClientManagerService) ctx.getOSGiService(JWTClientManagerService.class, null);
+        if (jwtClientManagerService == null) {
+            String msg = "jwtClientManagerServicehas not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return jwtClientManagerService;
     }
 
     @Override
@@ -227,7 +239,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             return fences;
         } catch (RegistryException | IOException e) {
             throw new GeoLocationBasedServiceException(
-                    "Error occurred while getting the geo alerts" , e);
+                    "Error occurred while getting the geo alerts", e);
         }
     }
 
@@ -334,7 +346,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
 
     @Override
     public boolean createGeoAlert(Alert alert, String alertType)
-            throws GeoLocationBasedServiceException,AlertAlreadyExistException {
+            throws GeoLocationBasedServiceException, AlertAlreadyExistException {
         return saveGeoAlert(alert, alertType, false);
     }
 
@@ -346,12 +358,12 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
 
     @Override
     public boolean updateGeoAlert(Alert alert, String alertType)
-            throws GeoLocationBasedServiceException,AlertAlreadyExistException {
+            throws GeoLocationBasedServiceException, AlertAlreadyExistException {
         return saveGeoAlert(alert, alertType, true);
     }
 
     private boolean saveGeoAlert(Alert alert, String alertType, boolean isUpdate)
-            throws GeoLocationBasedServiceException,AlertAlreadyExistException {
+            throws GeoLocationBasedServiceException, AlertAlreadyExistException {
 
         Type type = new TypeToken<Map<String, String>>() {
         }.getType();
@@ -408,7 +420,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             if (validationResponse.equals("success")) {
                 allActiveExecutionPlanConfigs = eventprocessorStub.getAllActiveExecutionPlanConfigurations();
                 if (isUpdate) {
-                    for (ExecutionPlanConfigurationDto activeExectionPlanConfig:allActiveExecutionPlanConfigs) {
+                    for (ExecutionPlanConfigurationDto activeExectionPlanConfig : allActiveExecutionPlanConfigs) {
                         activeExecutionPlan = activeExectionPlanConfig.getExecutionPlan();
                         if (activeExecutionPlan.contains(executionPlanName)) {
                             eventprocessorStub.editActiveExecutionPlan(parsedTemplate, executionPlanName);
@@ -417,14 +429,14 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
                     }
                     eventprocessorStub.deployExecutionPlan(parsedTemplate);
                 } else {
-                    for (ExecutionPlanConfigurationDto activeExectionPlanConfig:allActiveExecutionPlanConfigs) {
+                    for (ExecutionPlanConfigurationDto activeExectionPlanConfig : allActiveExecutionPlanConfigs) {
                         activeExecutionPlan = activeExectionPlanConfig.getExecutionPlan();
                         if (activeExecutionPlan.contains(executionPlanName)) {
                             throw new AlertAlreadyExistException("Execution plan already exists with name "
                                     + executionPlanName);
                         }
                     }
-                    updateRegistry(getRegistryPath(alertType, alert.getQueryName()),content,options);
+                    updateRegistry(getRegistryPath(alertType, alert.getQueryName()), content, options);
                     eventprocessorStub.deployExecutionPlan(parsedTemplate);
                 }
             } else {
@@ -519,7 +531,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             if (validationResponse.equals("success")) {
                 allActiveExecutionPlanConfigs = eventprocessorStub.getAllActiveExecutionPlanConfigurations();
                 if (isUpdate) {
-                    for (ExecutionPlanConfigurationDto activeExectionPlanConfig:allActiveExecutionPlanConfigs) {
+                    for (ExecutionPlanConfigurationDto activeExectionPlanConfig : allActiveExecutionPlanConfigs) {
                         activeExecutionPlan = activeExectionPlanConfig.getExecutionPlan();
                         if (activeExecutionPlan.contains(executionPlanName)) {
                             eventprocessorStub.editActiveExecutionPlan(parsedTemplate, executionPlanName);
@@ -528,7 +540,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
                     }
                     eventprocessorStub.deployExecutionPlan(parsedTemplate);
                 } else {
-                    for (ExecutionPlanConfigurationDto activeExectionPlanConfig:allActiveExecutionPlanConfigs) {
+                    for (ExecutionPlanConfigurationDto activeExectionPlanConfig : allActiveExecutionPlanConfigs) {
                         activeExecutionPlan = activeExectionPlanConfig.getExecutionPlan();
                         if (activeExecutionPlan.contains(executionPlanName)) {
                             throw new AlertAlreadyExistException("Execution plan already exists with name "
@@ -605,32 +617,32 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
     }
 
     private String getRegistryPath(String alertType, String queryName)
-                throws GeoLocationBasedServiceException {
-            String path = "";
-            if (GeoServices.ALERT_TYPE_WITHIN.equals(alertType)) {
-                path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_WITHIN +
-                        "/" + "/" + queryName;
-            } else if (GeoServices.ALERT_TYPE_EXIT.equals(alertType)) {
-                path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_EXIT +
-                        "/" + queryName;
-            } else if (GeoServices.ALERT_TYPE_SPEED.equals(alertType)) {
-                path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_SPEED +
-                        "/" ;
-            } else if (GeoServices.ALERT_TYPE_PROXIMITY.equals(alertType)) {
-                path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_PROXIMITY +
-                        "/" + queryName;
-            } else if (GeoServices.ALERT_TYPE_STATIONARY.equals(alertType)) {
-                path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_STATIONARY +
-                        "/" + queryName;
-            } else if (GeoServices.ALERT_TYPE_TRAFFIC.equals(alertType)) {
-                path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_TRAFFIC +
-                        "/" + queryName;
-            } else {
-                throw new GeoLocationBasedServiceException(
-                        "Unrecognized execution plan type: " + alertType);
-            }
-            return path;
+            throws GeoLocationBasedServiceException {
+        String path = "";
+        if (GeoServices.ALERT_TYPE_WITHIN.equals(alertType)) {
+            path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_WITHIN +
+                    "/" + "/" + queryName;
+        } else if (GeoServices.ALERT_TYPE_EXIT.equals(alertType)) {
+            path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_EXIT +
+                    "/" + queryName;
+        } else if (GeoServices.ALERT_TYPE_SPEED.equals(alertType)) {
+            path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_SPEED +
+                    "/";
+        } else if (GeoServices.ALERT_TYPE_PROXIMITY.equals(alertType)) {
+            path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_PROXIMITY +
+                    "/" + queryName;
+        } else if (GeoServices.ALERT_TYPE_STATIONARY.equals(alertType)) {
+            path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_STATIONARY +
+                    "/" + queryName;
+        } else if (GeoServices.ALERT_TYPE_TRAFFIC.equals(alertType)) {
+            path = GeoServices.REGISTRY_PATH_FOR_ALERTS + GeoServices.ALERT_TYPE_TRAFFIC +
+                    "/" + queryName;
+        } else {
+            throw new GeoLocationBasedServiceException(
+                    "Unrecognized execution plan type: " + alertType);
         }
+        return path;
+    }
 
     private String getExecutionPlanName(String alertType, String queryName, String deviceId, String owner) {
         if (GeoServices.ALERT_TYPE_TRAFFIC.equals(alertType)) {
@@ -798,7 +810,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             InputStream inputStream = resource.getContentStream();
             StringWriter writer = new StringWriter();
             IOUtils.copy(inputStream, writer, "UTF-8");
-            return "{'speedLimit':" + writer.toString() + "}";
+            return "{'speedLimit':" + writer + "}";
         } catch (RegistryException | IOException e) {
             return "{'content': false}";
         }
@@ -816,7 +828,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             InputStream inputStream = resource.getContentStream();
             StringWriter writer = new StringWriter();
             IOUtils.copy(inputStream, writer, "UTF-8");
-            return "{'speedLimit':" + writer.toString() + "}";
+            return "{'speedLimit':" + writer + "}";
         } catch (RegistryException | IOException e) {
             return "{'content': false}";
         }
@@ -835,8 +847,8 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
                 List proxTimeObj = (List) props.get(GeoServices.PROXIMITY_TIME);
 
                 return String.format("{proximityDistance:\"%s\", proximityTime:\"%s\"}",
-                                     proxDisObj != null ? proxDisObj.get(0).toString() : "",
-                                     proxTimeObj != null ? proxTimeObj.get(0).toString() : "");
+                        proxDisObj != null ? proxDisObj.get(0).toString() : "",
+                        proxTimeObj != null ? proxTimeObj.get(0).toString() : "");
             } else {
                 return "{'content': false}";
             }
@@ -867,7 +879,6 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             return "{'content': false}";
         }
     }
-
 
     @Override
     public List<GeoFence> getStationaryAlerts(DeviceIdentifier identifier, String owner) throws GeoLocationBasedServiceException {
@@ -1079,7 +1090,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
     }
 
     private String parseTemplate(String alertType, Map<String, String> parseMap) throws
-                                                                                 GeoLocationBasedServiceException {
+            GeoLocationBasedServiceException {
         String templatePath = "alerts/Geo-ExecutionPlan-" + alertType + "_alert.siddhiql";
         InputStream resource = getClass().getClassLoader().getResourceAsStream(templatePath);
         if (resource == null) {
@@ -1142,22 +1153,22 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
     }
 
     private void updateRegistry(String path, Object content, Map<String, String> options)
-                throws GeoLocationBasedServiceException {
-            try {
+            throws GeoLocationBasedServiceException {
+        try {
 
-                Registry registry = getGovernanceRegistry();
-                Resource newResource = registry.newResource();
-                newResource.setContent(content);
-                newResource.setMediaType("application/json");
-                for (Map.Entry<String, String> option : options.entrySet()) {
-                    newResource.addProperty(option.getKey(), option.getValue());
-                }
-                registry.put(path, newResource);
-            } catch (RegistryException e) {
-                throw new GeoLocationBasedServiceException(
-                        "Error occurred while setting the Within Alert", e);
+            Registry registry = getGovernanceRegistry();
+            Resource newResource = registry.newResource();
+            newResource.setContent(content);
+            newResource.setMediaType("application/json");
+            for (Map.Entry<String, String> option : options.entrySet()) {
+                newResource.addProperty(option.getKey(), option.getValue());
             }
+            registry.put(path, newResource);
+        } catch (RegistryException e) {
+            throw new GeoLocationBasedServiceException(
+                    "Error occurred while setting the Within Alert", e);
         }
+    }
 
     /**
      * Loads the keystore.
@@ -1207,7 +1218,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
      */
     private SSLContext initSSLConnection(String tenantAdminUser)
             throws NoSuchAlgorithmException, UnrecoverableKeyException,
-                   KeyStoreException, KeyManagementException, IOException, CertificateException {
+            KeyStoreException, KeyManagementException, IOException, CertificateException {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
         String trustStorePassword = ServerConfiguration.getInstance().getFirstProperty(
                 "Security.TrustStore.Password");
@@ -1241,18 +1252,6 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
                 //do nothing
             }
         }
-    }
-
-    public static JWTClientManagerService getJWTClientManagerService() {
-        JWTClientManagerService jwtClientManagerService;
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        jwtClientManagerService = (JWTClientManagerService) ctx.getOSGiService(JWTClientManagerService.class, null);
-        if (jwtClientManagerService == null) {
-            String msg = "jwtClientManagerServicehas not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return jwtClientManagerService;
     }
 
     @Override
@@ -1291,7 +1290,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         List<Integer> createdEventIds;
         try {
             setEventSource(geofenceData.getEventConfig());
-            eventConfigService =  DeviceManagementDataHolder.getInstance().getEventConfigurationService();
+            eventConfigService = DeviceManagementDataHolder.getInstance().getEventConfigurationService();
             createdEventIds = eventConfigService.createEventsOfDeviceGroup(geofenceData.getEventConfig(), geofenceData.getGroupIds());
             DeviceManagementDAOFactory.beginTransaction();
             geofenceDAO.createGeofenceEventMapping(geofenceData.getId(), createdEventIds);
@@ -1333,6 +1332,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
 
     /**
      * Set source of the event to GEOFENCE
+     *
      * @param eventConfig event list to be set event source
      */
     private void setEventSource(List<EventConfig> eventConfig) {
@@ -1365,7 +1365,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             }
             return geofence;
         } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while retrieving Geofence data with ID "+fenceId;
+            String msg = "Error occurred while retrieving Geofence data with ID " + fenceId;
             log.error(msg, e);
             throw new GeoLocationBasedServiceException(msg, e);
         } catch (SQLException e) {
@@ -1608,7 +1608,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         try {
             tenantId = DeviceManagementDAOUtil.getTenantId();
             setEventSource(geofenceData.getEventConfig());
-            eventConfigService =  DeviceManagementDataHolder.getInstance().getEventConfigurationService();
+            eventConfigService = DeviceManagementDataHolder.getInstance().getEventConfigurationService();
             if (eventConfigService == null) {
                 String msg = "Failed to load EventConfigurationProviderService osgi service of tenant " + tenantId;
                 log.error(msg);
@@ -1747,8 +1747,9 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
 
     /**
      * Delete events of geofence
+     *
      * @param geofenceData geofence mapped with deleting events
-     * @param eventList events to be deleted
+     * @param eventList    events to be deleted
      */
     private void deleteGeoFenceEvents(GeofenceData geofenceData, List<EventConfig> eventList)
             throws GeoLocationBasedServiceException {
@@ -1762,7 +1763,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         }
 
         try {
-            EventConfigurationProviderService eventConfigService =  DeviceManagementDataHolder
+            EventConfigurationProviderService eventConfigService = DeviceManagementDataHolder
                     .getInstance().getEventConfigurationService();
             eventConfigService.deleteEvents(eventList);
             eventConfigService.createEventOperationTask(OperationMgtConstants.OperationCodes.EVENT_REVOKE,

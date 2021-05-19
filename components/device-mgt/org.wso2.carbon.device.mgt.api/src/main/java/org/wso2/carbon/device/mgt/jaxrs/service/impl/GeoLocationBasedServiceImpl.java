@@ -38,6 +38,7 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
@@ -47,13 +48,14 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.Alert;
 import org.wso2.carbon.device.mgt.common.geo.service.AlertAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.geo.service.Event;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoFence;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoQuery;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
-import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
-import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.GeoHashLengthStrategy;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.ZoomGeoHashLengthStrategy;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -81,7 +83,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +96,7 @@ import java.util.Map;
  */
 public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
 
-    private static Log log = LogFactory.getLog(GeoLocationBasedServiceImpl.class);
+    private static final Log log = LogFactory.getLog(GeoLocationBasedServiceImpl.class);
 
     @Path("stats/{deviceType}/{deviceId}")
     @GET
@@ -155,6 +160,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
     @GET
     @Consumes("application/json")
     @Produces("application/json")
+    @Deprecated
     public Response getGeoDeviceLocations(
             @QueryParam("deviceType") String deviceType,
             @QueryParam("minLat") double minLat,
@@ -162,6 +168,64 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             @QueryParam("minLong") double minLong,
             @QueryParam("maxLong") double maxLong,
             @QueryParam("zoom") int zoom) {
+        GeoHashLengthStrategy geoHashLengthStrategy = new ZoomGeoHashLengthStrategy();
+        GeoCoordinate southWest = new GeoCoordinate(minLat, minLong);
+        GeoCoordinate northEast = new GeoCoordinate(maxLat, maxLong);
+        int geohashLength = geoHashLengthStrategy.getGeohashLength(southWest, northEast, zoom);
+        DeviceManagementProviderService deviceManagementService = DeviceMgtAPIUtils.getDeviceManagementService();
+        GeoQuery geoQuery = new GeoQuery(southWest, northEast, geohashLength);
+        if (deviceType != null) {
+            geoQuery.setDeviceTypes(Collections.singletonList(deviceType));
+        }
+        List<org.wso2.carbon.device.mgt.jaxrs.beans.GeoCluster> geoClusters = new ArrayList<>();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        try {
+            List<GeoCluster> newClusters = deviceManagementService.findGeoClusters(geoQuery);
+            org.wso2.carbon.device.mgt.jaxrs.beans.GeoCluster geoCluster;
+            String deviceIdentification = null;
+            String deviceName = null;
+            String lastSeen = null;
+            for (GeoCluster gc : newClusters) {
+                if (gc.getDevice() != null) {
+                    deviceIdentification = gc.getDevice().getDeviceIdentifier();
+                    deviceName = gc.getDevice().getName();
+                    deviceType = gc.getDevice().getType();
+                    lastSeen = simpleDateFormat.format(new Date(gc.getDevice()
+                            .getEnrolmentInfo().getDateOfLastUpdate()));
+                }
+                geoCluster = new org.wso2.carbon.device.mgt.jaxrs.beans.GeoCluster(gc.getCoordinates(),
+                        gc.getSouthWestBound(), gc.getNorthEastBound(), gc.getCount(), gc.getGeohashPrefix(),
+                        deviceIdentification, deviceName, deviceType, lastSeen);
+                geoClusters.add(geoCluster);
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retrieving geo clusters query: " + new Gson().toJson(geoQuery);
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
+        }
+        return Response.ok().entity(geoClusters).build();
+    }
+
+    @Path("stats/geo-view")
+    @GET
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response getGeoDeviceView(
+            @QueryParam("minLat") double minLat,
+            @QueryParam("maxLat") double maxLat,
+            @QueryParam("minLong") double minLong,
+            @QueryParam("maxLong") double maxLong,
+            @QueryParam("zoom") int zoom,
+            @QueryParam("deviceType") List<String> deviceTypes,
+            @QueryParam("deviceIdentifier") List<String> deviceIdentifiers,
+            @QueryParam("status") List<EnrolmentInfo.Status> statuses,
+            @QueryParam("ownership") List<String> ownerships,
+            @QueryParam("owner") List<String> owners,
+            @QueryParam("noClusters") boolean noClusters,
+            @QueryParam("createdBefore") long createdBefore,
+            @QueryParam("createdAfter") long createdAfter,
+            @QueryParam("updatedBefore") long updatedBefore,
+            @QueryParam("updatedAfter") long updatedAfter) {
 
         GeoHashLengthStrategy geoHashLengthStrategy = new ZoomGeoHashLengthStrategy();
         GeoCoordinate southWest = new GeoCoordinate(minLat, minLong);
@@ -169,15 +233,25 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         int geohashLength = geoHashLengthStrategy.getGeohashLength(southWest, northEast, zoom);
         DeviceManagementProviderService deviceManagementService = DeviceMgtAPIUtils.getDeviceManagementService();
         List<GeoCluster> geoClusters;
+        GeoQuery geoQuery = new GeoQuery(southWest, northEast, geohashLength);
+        geoQuery.setDeviceTypes(deviceTypes);
+        geoQuery.setDeviceIdentifiers(deviceIdentifiers);
+        geoQuery.setStatuses(statuses);
+        geoQuery.setOwners(owners);
+        geoQuery.setOwnerships(ownerships);
+        geoQuery.setNoClusters(noClusters);
+        geoQuery.setCreatedBefore(createdBefore);
+        geoQuery.setCreatedAfter(createdAfter);
+        geoQuery.setUpdatedBefore(updatedBefore);
+        geoQuery.setUpdatedAfter(updatedAfter);
         try {
-            geoClusters = deviceManagementService.findGeoClusters(deviceType, southWest, northEast, geohashLength);
+            geoClusters = deviceManagementService.findGeoClusters(geoQuery);
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while retrieving geo clusters ";
+            String msg = "Error occurred while retrieving geo clusters for query: " + new Gson().toJson(geoQuery);
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).build();
         }
         return Response.ok().entity(geoClusters).build();
-
     }
 
     @Path("alerts/{alertType}/{deviceType}/{deviceId}")
