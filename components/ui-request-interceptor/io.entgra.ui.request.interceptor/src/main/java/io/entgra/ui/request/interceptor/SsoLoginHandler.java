@@ -69,6 +69,7 @@ public class SsoLoginHandler extends HttpServlet {
     private static String adminPassword;
     private static String gatewayUrl;
     private static String iotsCoreUrl;
+    private static String keyManagerUrl;
     private static String encodedAdminCredentials;
     private static String encodedClientApp;
     private static String applicationId;
@@ -101,7 +102,7 @@ public class SsoLoginHandler extends HttpServlet {
      */
     private void dynamicClientRegistration(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            File userMgtConf = new File("conf/user-mgt.xml");
+            File userMgtConf = new File("repository/conf/user-mgt.xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(userMgtConf);
@@ -123,6 +124,9 @@ public class SsoLoginHandler extends HttpServlet {
             iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
                     + HandlerConstants.COLON + iotsCorePort;
             String uiConfigUrl = iotsCoreUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
+            keyManagerUrl = HandlerConstants.HTTPS_PROTOCOL + HandlerConstants.SCHEME_SEPARATOR +
+                    System.getProperty("iot.keymanager.host") + HandlerConstants.COLON
+                    + System.getProperty("iot.keymanager.https.port");
 
             httpSession = req.getSession(false);
             if (httpSession != null) {
@@ -211,7 +215,7 @@ public class SsoLoginHandler extends HttpServlet {
             ProxyResponse updateApplicationGrantTypesEndpointResponse = HandlerUtil.execute(updateApplicationGrantTypesEndpoint);
 
             // Update app as a SaaS app
-            this.updateSaasApp(applicationName);
+            this.updateSaasApp(applicationId);
 
             if (updateApplicationGrantTypesEndpointResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
                 HandlerUtil.handleError(resp, updateApplicationGrantTypesEndpointResponse);
@@ -262,7 +266,7 @@ public class SsoLoginHandler extends HttpServlet {
      * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
     private ProxyResponse getTokenResult(String encodedClientApp) throws IOException {
-        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(keyManagerUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 

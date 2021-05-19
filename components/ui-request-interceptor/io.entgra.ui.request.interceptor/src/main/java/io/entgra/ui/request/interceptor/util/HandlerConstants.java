@@ -25,7 +25,7 @@ public class HandlerConstants {
     public static final String TOKEN_ENDPOINT = "/oauth2/token";
     public static final String INTROSPECT_ENDPOINT = "/oauth2/introspect";
     public static final String AUTHORIZATION_ENDPOINT = "/oauth2/authorize";
-    public static final String APIM_APPLICATIONS_ENDPOINT = "/api/am/store/v0.12/applications/";
+    public static final String APIM_APPLICATIONS_ENDPOINT = "/api/am/devportal/v2/applications/";
     public static final String IDENTITY_APP_MGT_ENDPOINT = "/services/IdentityApplicationManagementService.IdentityApplicationManagementServiceHttpsSoap11Endpoint";
     public static final String LOGIN_PAGE = "/login";
     public static final String SSO_LOGIN_CALLBACK = "/ssoLoginCallback";
@@ -67,7 +67,7 @@ public class HandlerConstants {
 
     public static final String OTP_HEADER = "one-time-token";
 
-    public static final String AX_PREFIX = "ax2317:";
+    public static final String AX_PREFIX = "ax2251:";
     public static final String PAYLOADS_DIR = "repository/resources/payloads";
     public static final String SOAP_ACTION_HEADER = "SOAPAction";
 

@@ -123,6 +123,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 application = new Application(applicationName, subscriber);
                 application.setTier(ApiApplicationConstants.DEFAULT_TIER);
                 application.setGroupId("");
+                application.setTokenType("OAUTH");
                 apiConsumer.addApplication(application, username);
                 application = apiConsumer.getApplicationsByName(username, applicationName, "");
             } else {

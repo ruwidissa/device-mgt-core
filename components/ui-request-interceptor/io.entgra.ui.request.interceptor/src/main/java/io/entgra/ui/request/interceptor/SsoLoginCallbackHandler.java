@@ -60,8 +60,11 @@ public class SsoLoginCallbackHandler extends HttpServlet {
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
         String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
                 + HandlerConstants.COLON + iotsCorePort;
+        String keyManagerUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR
+                + System.getProperty("iot.keymanager.host") + HandlerConstants.COLON
+                + System.getProperty("iot.keymanager.https.port");
 
-        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(keyManagerUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + session.getAttribute("encodedClientApp"));
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 
