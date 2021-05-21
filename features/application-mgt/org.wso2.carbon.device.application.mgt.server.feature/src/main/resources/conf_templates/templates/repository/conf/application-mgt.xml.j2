@@ -195,11 +195,11 @@
         <Category>Video Players &amp; Editors</Category>
         <Category>Weather</Category>
         <Category>GooglePlaySyncedApp</Category>
-        {% if application_mgt_conf.app_categories is defined %}
-            {%- for app_category in application_mgt_conf.app_categories -%}
-            <Category>{{app_category}}</Category>
-            {% endfor %}
-        {% endif %}
+    {% if application_mgt_conf.app_categories is defined %}
+        {%- for app_category in application_mgt_conf.app_categories -%}
+        <Category>{{app_category}}</Category>
+        {% endfor %}
+    {% endif %}
     </AppCategories>
 
     <RatingConfig>

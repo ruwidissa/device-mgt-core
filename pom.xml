@@ -44,6 +44,7 @@
         <module>components/certificate-mgt</module>
         <module>components/ui-request-interceptor</module>
         <module>components/transport-mgt</module>
+        <module>components/webapp-authenticator-framework</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -54,6 +55,7 @@
         <module>features/jwt-client</module>
 	    <module>features/device-mgt-extensions</module>
         <module>features/transport-mgt</module>
+        <module>features/webapp-authenticator-framework</module>
     </modules>
 
     <dependencyManagement>
