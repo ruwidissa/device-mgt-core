@@ -48,7 +48,6 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
-import org.wso2.carbon.context.CarbonContext;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -111,11 +110,6 @@ public class InvokerHandler extends HttpServlet {
                 HttpGet getRequest = new HttpGet(generateBackendRequestURL(req));
                 copyRequestHeaders(req, getRequest, false);
                 getRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-                if (apiEndpoint.equals(System.getProperty("iot.reporting.webapp.host"))) {
-                    getRequest.setHeader("Tenant-Id", String.valueOf(
-                            CarbonContext.getThreadLocalCarbonContext().getTenantId()
-                    ));
-                }
                 ProxyResponse proxyResponse = HandlerUtil.execute(getRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
                     proxyResponse = retryRequestWithRefreshedToken(req, resp, getRequest);
