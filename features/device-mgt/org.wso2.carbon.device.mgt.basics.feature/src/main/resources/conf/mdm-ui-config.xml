@@ -20,6 +20,8 @@
 <UIConfiguration>
     <EnableOAuth>true</EnableOAuth>
     <EnableSSO>true</EnableSSO>
+    <!-- session time out in seconds -->
+    <SessionTimeOut>3600</SessionTimeOut>
     <AppRegistration>
         <Tags>
             <Tag>application_management</Tag>

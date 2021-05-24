@@ -39,6 +39,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
+import org.json.JSONString;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -69,13 +70,14 @@ public class LoginHandler extends HttpServlet {
                 httpSession.invalidate();
             }
             httpSession = req.getSession(true);
-            //setting session to expiry in 5 minutes
-            httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
 
             JsonObject uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
-
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
+            int sessionTimeOut = Integer.parseInt(String.valueOf(uiConfigJsonObject.get("sessionTimeOut")));
+
+            //setting session to expire in 1h
+            httpSession.setMaxInactiveInterval(sessionTimeOut);
 
             // Check if OAuth app cache exists. If not create a new application.
             LoginCacheManager loginCacheManager = new LoginCacheManager();
