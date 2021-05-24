@@ -27,6 +27,7 @@ public class Item {
 
     private String label;
     private String tooltip;
+    private String docLink;
     private String key;
     private String value;
     private boolean isRequired;
@@ -64,6 +65,16 @@ public class Item {
     public void setTooltip(String tooltip) {
         this.tooltip = tooltip;
     }
+
+    @XmlElement(name = "DocLink")
+    public String getDocLink() {
+        return docLink;
+    }
+
+    public void setDocLink(String docLink) {
+        this.docLink = docLink;
+    }
+
 
     @XmlElement(name = "Key", required = true)
     public String getKey() {

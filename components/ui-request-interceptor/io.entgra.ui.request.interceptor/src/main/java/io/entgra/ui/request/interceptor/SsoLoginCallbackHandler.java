@@ -27,6 +27,7 @@ import io.entgra.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -50,21 +51,18 @@ public class SsoLoginCallbackHandler extends HttpServlet {
         String code = req.getParameter("code");
         HttpSession session = req.getSession(false);
         String scope = session.getAttribute("scope").toString();
-        String iotsCorePort = System.getProperty("iot.core.https.port");
+        String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
 
         if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-            iotsCorePort = System.getProperty("iot.core.http.port");
+            iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
         }
 
-        String gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+        String gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-        String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
+        String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                 + HandlerConstants.COLON + iotsCorePort;
-        String keyManagerUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR
-                + System.getProperty("iot.keymanager.host") + HandlerConstants.COLON
-                + System.getProperty("iot.keymanager.https.port");
 
-        HttpPost tokenEndpoint = new HttpPost(keyManagerUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(iotsCoreUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + session.getAttribute("encodedClientApp"));
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 

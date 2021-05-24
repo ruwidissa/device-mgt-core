@@ -2258,6 +2258,8 @@
 
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
         <imp.package.version.osgi.service>[1.2.0,1.3.0)</imp.package.version.osgi.service>
+
+        <maven.test.skip>true</maven.test.skip>
     </properties>
 
     <distributionManagement>

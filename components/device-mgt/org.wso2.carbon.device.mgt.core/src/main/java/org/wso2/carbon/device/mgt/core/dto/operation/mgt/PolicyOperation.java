@@ -19,7 +19,13 @@ package org.wso2.carbon.device.mgt.core.dto.operation.mgt;
 
 import java.util.List;
 
-public class PolicyOperation extends Operation{
+public class PolicyOperation extends Operation {
+
+    private List<ProfileOperation> profileOperations;
+
+    public PolicyOperation() {
+        setControl(Control.REPEAT);
+    }
 
     public List<ProfileOperation> getProfileOperations() {
         return profileOperations;
@@ -27,12 +33,6 @@ public class PolicyOperation extends Operation{
 
     public void setProfileOperations(List<ProfileOperation> profileOperations) {
         this.profileOperations = profileOperations;
-    }
-
-    private List<ProfileOperation> profileOperations;
-
-    public Control getControl(){
-        return Control.REPEAT;
     }
 
 }

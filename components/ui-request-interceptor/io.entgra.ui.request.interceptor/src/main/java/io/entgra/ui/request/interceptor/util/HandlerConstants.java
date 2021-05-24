@@ -55,6 +55,7 @@ public class HandlerConstants {
     public static final String PASSWORD_GRANT_TYPE = "password";
     public static final String JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
     public static final String PRODUCTION_KEY = "PRODUCTION";
+    public static final String LOGIN_CACHE = "LOGIN_CACHE";
 
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";
@@ -75,6 +76,10 @@ public class HandlerConstants {
     public static final String REMOTE_SESSION_CONTEXT = "/remote/session/clients";
 
     public static final String IOT_CORE_HOST_ENV_VAR = "iot.core.host";
-    public static final String IOT_CORE_PORT_ENV_VAR = "iot.core.https.port";
-
+    public static final String IOT_CORE_HTTP_PORT_ENV_VAR = "iot.core.http.port";
+    public static final String IOT_CORE_HTTPS_PORT_ENV_VAR = "iot.core.https.port";
+    public static final String IOT_GW_HOST_ENV_VAR = "iot.gateway.host";
+    public static final String IOT_GW_HTTP_PORT_ENV_VAR = "iot.gateway.http.port";
+    public static final String IOT_GW_HTTPS_PORT_ENV_VAR = "iot.gateway.https.port";
+    public static final String USER_SCOPES = "user-scopes";
 }

@@ -172,6 +172,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("userPattern") String userPattern,
             @QueryParam("role") String role,
             @QueryParam("ownership") String ownership,
+            @QueryParam("serialNumber") String serialNumber,
             @QueryParam("status") List<String> status,
             @QueryParam("groupId") int groupId,
             @QueryParam("since") String since,
@@ -204,6 +205,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             if (ownership != null && !ownership.isEmpty()) {
                 RequestValidationUtil.validateOwnershipType(ownership);
                 request.setOwnership(ownership);
+            }
+            if (StringUtils.isNotBlank(serialNumber)) {
+                request.setSerialNumber(serialNumber);
             }
             if (status != null && !status.isEmpty()) {
                 boolean isStatusEmpty = true;

@@ -81,7 +81,7 @@ public interface SubscriptionDAO {
     void addGroupSubscriptions(int tenantId, String subscribedBy, List<String> groups, int releaseId, String action)
             throws ApplicationManagementDAOException;
 
-    List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId) throws
+    List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId, String actionStatus, String action) throws
             ApplicationManagementDAOException;
 
     Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int appReleaseId, int tenantId)
@@ -124,7 +124,7 @@ public interface SubscriptionDAO {
      * @param scheduledBy username of the user who scheduled the subscription
      * @throws ApplicationManagementDAOException if error occurred while updating the entry
      */
-    boolean updateScheduledSubscription(int id, LocalDateTime scheduledAt, String scheduledBy)
+    boolean updateScheduledSubscription(int id, long scheduledAt, String scheduledBy)
             throws ApplicationManagementDAOException;
 
     /**

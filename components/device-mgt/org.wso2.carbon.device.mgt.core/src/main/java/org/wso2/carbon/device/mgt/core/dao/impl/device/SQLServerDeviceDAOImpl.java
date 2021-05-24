@@ -69,6 +69,8 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
         boolean isStatusProvided = false;
         Date since = request.getSince();
         boolean isSinceProvided = false;
+        String serial = request.getSerialNumber();
+        boolean isSerialProvided = false;
 
         try {
             conn = getConnection();
@@ -89,8 +91,19 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "d.DESCRIPTION, " +
                     "d.NAME, " +
                     "d.DEVICE_IDENTIFICATION, " +
-                    "t.NAME AS DEVICE_TYPE " +
-                    "FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?";
+                    "t.NAME AS DEVICE_TYPE ";
+
+            if (serial != null) {
+                sql = sql + "FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_INFO i " +
+                        "WHERE DEVICE_TYPE_ID = t.ID " +
+                        "AND d.ID= i.DEVICE_ID " +
+                        "AND i.KEY_FIELD = 'serial' " +
+                        "AND i.VALUE_FIELD = ? " +
+                        "AND d.TENANT_ID = ? ";
+                isSerialProvided = true;
+            } else {
+                sql = sql + "FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ? ";
+            }
             //Add query for last updated timestamp
             if (since != null) {
                 sql = sql + " AND d.LAST_UPDATED_TIMESTAMP > ?";
@@ -128,6 +141,9 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;
+                if (isSerialProvided) {
+                    stmt.setString(paramIdx++, serial);
+                }
                 stmt.setInt(paramIdx++, tenantId);
                 if (isSinceProvided) {
                     stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
@@ -693,11 +709,15 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
     }
 
     @Override
-    public List<Device> getSubscribedDevices(int offsetValue, int limitValue,
-                                             List<Integer> deviceIds, int tenantId, List<String> status)
+    public List<Device> getSubscribedDevices(PaginationRequest request, List<Integer> deviceIds, int tenantId)
             throws DeviceManagementDAOException {
         Connection conn;
-
+        int limitValue = request.getRowCount();
+        int offsetValue = request.getStartIndex();
+        List<String> status = request.getStatusList();
+        String name = request.getDeviceName();
+        String user = request.getOwner();
+        String ownership = request.getOwnership();
         try {
             List<Device> devices = new ArrayList<>();
             if (deviceIds.isEmpty()) {
@@ -707,6 +727,9 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
             int index = 1;
 
             boolean isStatusProvided = false;
+            boolean isDeviceNameProvided = false;
+            boolean isOwnerProvided = false;
+            boolean isOwnershipProvided = false;
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT "
                             + "DM_DEVICE.ID AS DEVICE_ID, "
@@ -734,6 +757,18 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
 
+            if (name != null && !name.isEmpty()) {
+                query += " AND DM_DEVICE.NAME LIKE ?";
+                isDeviceNameProvided = true;
+            }
+            if (ownership != null && !ownership.isEmpty()) {
+                query += " AND e.OWNERSHIP = ?";
+                isOwnershipProvided = true;
+            }
+            if (user != null && !user.isEmpty()) {
+                query += " AND e.OWNER = ?";
+                isOwnerProvided = true;
+            }
             if (status != null && !status.isEmpty()) {
                 query += buildStatusQuery(status);
                 isStatusProvided = true;
@@ -748,6 +783,15 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
 
                 ps.setInt(index++, tenantId);
+                if (isDeviceNameProvided) {
+                    ps.setString(index++, name + "%");
+                }
+                if (isOwnershipProvided) {
+                    ps.setString(index++, ownership);
+                }
+                if (isOwnerProvided) {
+                    ps.setString(index++, user);
+                }
                 if (isStatusProvided) {
                     for (String deviceStatus : status) {
                         ps.setString(index++, deviceStatus);

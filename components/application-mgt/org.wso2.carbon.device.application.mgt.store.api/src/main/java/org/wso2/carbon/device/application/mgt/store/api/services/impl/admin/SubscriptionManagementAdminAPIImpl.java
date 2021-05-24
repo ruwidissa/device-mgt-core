@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.application.mgt.store.api.services.impl.admin;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -26,6 +27,8 @@ import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.store.api.services.admin.SubscriptionManagementAdminAPI;
+import org.wso2.carbon.device.application.mgt.store.api.services.impl.util.RequestValidationUtil;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import javax.ws.rs.Consumes;
@@ -36,6 +39,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Implementation of Subscription Management related APIs.
@@ -51,6 +55,11 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
     @Produces("application/json")
     @Path("/{uuid}")
     public Response getAppInstalledDevices(
+            @QueryParam("name") String name,
+            @QueryParam("user") String user,
+            @QueryParam("action") String action,
+            @QueryParam("actionStatus") String actionStatus,
+            @QueryParam("status") List<String> status,
             @PathParam("uuid") String uuid,
             @DefaultValue("0")
             @QueryParam("offset") int offset,
@@ -58,22 +67,49 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             @QueryParam("limit") int limit) {
 
         try {
+            PaginationRequest request = new PaginationRequest(offset, limit);
+            if (name != null && !name.isEmpty()) {
+                request.setDeviceName(name);
+            }
+            if (user != null && !user.isEmpty()) {
+                request.setOwner(user);
+            }
+            if (action != null && !action.isEmpty()) {
+                RequestValidationUtil.validateAction(action);
+            }
+            if (status != null && !status.isEmpty()) {
+                boolean isStatusEmpty = true;
+                for (String statusString : status) {
+                    if (StringUtils.isNotBlank(statusString)) {
+                        isStatusEmpty = false;
+                        break;
+                    }
+                }
+                if (!isStatusEmpty) {
+                    RequestValidationUtil.validateStatus(status);
+                    request.setStatusList(status);
+                }
+            }
+            if (actionStatus != null && !actionStatus.isEmpty()) {
+                if (StringUtils.isNotBlank(actionStatus)) {
+                    RequestValidationUtil.validateStatusFiltering(actionStatus);
+                }
+            }
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-            PaginationResult subscriptionData = subscriptionManager
-                    .getAppSubscriptionDetails(offset, limit, uuid);
+            PaginationResult subscriptionData = subscriptionManager.getAppSubscriptionDetails
+                    (request, uuid, actionStatus, action);
             return Response.status(Response.Status.OK).entity(subscriptionData).build();
         } catch (NotFoundException e) {
             String msg = "Application with application release UUID: " + uuid + " is not found";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload for getting application which has UUID: " + uuid
-                    + ". Hence verify the payload";
+            String msg = "User requested details are not valid";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting app installed devices which has application release UUID of: "
-                         + uuid;
+                    + uuid;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

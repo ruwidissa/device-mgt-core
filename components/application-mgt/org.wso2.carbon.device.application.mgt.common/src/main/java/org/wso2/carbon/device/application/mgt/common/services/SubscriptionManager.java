@@ -22,6 +22,7 @@ import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDT
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.SubscriptionManagementException;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import java.util.List;
@@ -127,14 +128,11 @@ public interface SubscriptionManager {
      * This method used to get the app id ,device ids and pass them to DM service method.
      *
      * @param appUUID UUID of the application release.
-     * @param offsetValue offset value for get paginated request.
-     * @param limitValue limit value for get paginated request.
-     * @param status status of the devices.
+     * @param request paginated request object.
      * @return deviceDetails - device details for given application release.
      * @throws {@link ApplicationManagementException} Exception of the application management
      */
-    PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID,
-                                            List<String> status) throws ApplicationManagementException;
+    PaginationResult getAppInstalledDevices(PaginationRequest request, String appUUID) throws ApplicationManagementException;
 
     /***
      * This method used to get category details.
@@ -152,14 +150,15 @@ public interface SubscriptionManager {
     /**
      * This method is responsible to provide application subscription data for given application release UUID.
      *
-     * @param offsetValue offset
-     * @param limitValue limit
+     * @param request paginated request object.
+     * @param actionStatus status of the operation.
+     * @param action action related to the device.
      * @param appUUID application release UUID
      * @return {@link PaginationResult}
      * @throws ApplicationManagementException if offset or limit contains incorrect values, if it couldn't find an
      * application release for given UUID, if an error occurred while getting device details of subscribed device ids,
      * if an error occurred while getting subscription details of given application release UUID.
      */
-    PaginationResult getAppSubscriptionDetails(int offsetValue, int limitValue, String appUUID)
+    PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus, String action)
             throws ApplicationManagementException;
 }

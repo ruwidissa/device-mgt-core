@@ -40,6 +40,7 @@ public class PaginationRequest {
     private String ownerRole;
     private Date since;
     private String filter;
+    private String serialNumber;
     private Map<String, Object> property = new HashMap<>();
     private List<String> statusList = new ArrayList<>();
     private OperationLogFilters operationLogFilters = new OperationLogFilters();
@@ -152,6 +153,10 @@ public class PaginationRequest {
     public Object getProperty(String key) {
         return this.property.get(key);
     }
+
+    public String getSerialNumber() { return serialNumber; }
+
+    public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
 
     public Map<String, Object> getProperties() {
         Map<String, Object> temp = new HashMap<>();

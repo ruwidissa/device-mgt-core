@@ -651,16 +651,14 @@ public interface DeviceDAO {
     /**
      * This method is used to get the details of subscribed devices.
      *
-     * @param deviceIds   device ids of the subscribed devices.
-     * @param tenantId    Id of the current tenant.
-     * @param offsetValue offset value for get paginated request.
-     * @param limitValue  limit value for get paginated request.
-     * @param status      status of the devices.
+     * @param deviceIds device ids of the subscribed devices.
+     * @param tenantId  Id of the current tenant.
+     * @param request   paginated request object.
      * @return devices - subscribed device details list
      * @throws DeviceManagementDAOException if connections establishment fails.
      */
-    List<Device> getSubscribedDevices(int offsetValue, int limitValue, List<Integer> deviceIds,
-                                      int tenantId, List<String> status) throws DeviceManagementDAOException;
+    List<Device> getSubscribedDevices(PaginationRequest request, List<Integer> deviceIds, int tenantId)
+            throws DeviceManagementDAOException;
 
     /**
      * @param deviceIds device ids of the subscribed devices.

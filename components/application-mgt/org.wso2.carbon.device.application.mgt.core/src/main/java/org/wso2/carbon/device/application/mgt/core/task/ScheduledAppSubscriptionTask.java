@@ -68,7 +68,7 @@ public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
 
     @Override
     public void executeRandomlyAssignedTask() {
-        if(super.isQualifiedToExecuteTask()) {
+        if(isQualifiedToExecuteTask()) {
             try {
                 ScheduledSubscriptionDTO subscriptionDTO = subscriptionManager.getPendingScheduledSubscription(
                         this.taskName);

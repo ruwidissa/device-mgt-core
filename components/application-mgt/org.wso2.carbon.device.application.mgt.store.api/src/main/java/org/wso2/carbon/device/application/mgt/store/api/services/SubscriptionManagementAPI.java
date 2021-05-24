@@ -32,6 +32,7 @@ import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import javax.ws.rs.Path;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -129,7 +130,7 @@ public interface SubscriptionManagementAPI {
                     name = "timestamp",
                     value = "Timestamp of scheduled install/uninstall operation"
             )
-            @QueryParam("timestamp") String timestamp
+            @QueryParam("timestamp") long timestamp
     );
 
     @POST
@@ -182,7 +183,7 @@ public interface SubscriptionManagementAPI {
                     name = "timestamp",
                     value = "Timestamp of scheduled install/uninstall operation"
             )
-            @QueryParam("timestamp") String timestamp
+            @QueryParam("timestamp") long timestamp
     );
 
     @POST
@@ -229,7 +230,7 @@ public interface SubscriptionManagementAPI {
                     name = "timestamp",
                     value = "Timestamp of scheduled ent. install operation"
             )
-            @QueryParam("timestamp") String timestamp,
+            @QueryParam("timestamp") long timestamp,
             @ApiParam(
                     name = "requiresUpdatingExternal",
                     value = "Should external system such as Google EMM APIs need to be updated."
@@ -287,7 +288,7 @@ public interface SubscriptionManagementAPI {
                     name = "timestamp",
                     value = "Timestamp of scheduled ent app install operation"
             )
-            @QueryParam("timestamp") String timestamp,
+            @QueryParam("timestamp") long timestamp,
             @ApiParam(
                     name = "requiresUpdatingExternal",
                     value = "Should external system such as Google EMM APIs need to be updated."
@@ -337,6 +338,28 @@ public interface SubscriptionManagementAPI {
                             response = ErrorResponse.class)
             })
     Response getAppInstalledDevices(
+            @ApiParam(
+                    name = "name",
+                    value = "The device name. For example, Nexus devices can have names, suhc as shamu, bullhead or angler.",
+                    required = false)
+            @Size(max = 45)
+                    String name,
+            @ApiParam(
+                    name = "user",
+                    value = "The username of the owner of the device.",
+                    required = false)
+            @QueryParam("user")
+                    String user,
+            @ApiParam(
+                    name = "ownership",
+                    allowableValues = "BYOD, COPE",
+                    value = "Provide the ownership status of the device. The following values can be assigned:\n" +
+                            "- BYOD: Bring Your Own Device\n" +
+                            "- COPE: Corporate-Owned, Personally-Enabled",
+                    required = false)
+            @QueryParam("ownership")
+            @Size(max = 45)
+                    String ownership,
             @ApiParam(
                     name="uuid",
                     value="uuid of the application release.",

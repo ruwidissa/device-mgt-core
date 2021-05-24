@@ -55,7 +55,8 @@ public class UserHandler extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             String serverUrl =
-                    req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
+                    req.getScheme() + HandlerConstants.SCHEME_SEPARATOR +
+                            System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                             + HandlerConstants.COLON + HandlerUtil.getCorePort(req.getScheme());
             HttpSession httpSession = req.getSession(false);
             if (httpSession == null) {
@@ -71,32 +72,31 @@ public class UserHandler extends HttpServlet {
 
             String accessToken = authData.getAccessToken();
 
-            HttpPost introspectionEndpoint = new HttpPost(serverUrl + HandlerConstants.INTROSPECT_ENDPOINT);
-            introspectionEndpoint.setHeader(HttpHeaders.CONTENT_TYPE,
-                    ContentType.APPLICATION_FORM_URLENCODED.toString());
+            HttpPost tokenEndpoint = new HttpPost(serverUrl + HandlerConstants.INTROSPECT_ENDPOINT);
+            tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
             DeviceManagementConfig dmc = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
-            String username = dmc.getKeyManagerConfigurations().getAdminUsername();
-            String password = dmc.getKeyManagerConfigurations().getAdminPassword();
-            introspectionEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
-                    .encodeToString((username + HandlerConstants.COLON + password).getBytes()));
-            StringEntity introspectionPayload = new StringEntity("token=" + accessToken,
+            String adminUsername = dmc.getKeyManagerConfigurations().getAdminUsername();
+            String adminPassword = dmc.getKeyManagerConfigurations().getAdminPassword();
+            tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
+                    .encodeToString((adminUsername + HandlerConstants.COLON + adminPassword).getBytes()));
+            StringEntity tokenEPPayload = new StringEntity("token=" + accessToken,
                     ContentType.APPLICATION_FORM_URLENCODED);
-            introspectionEndpoint.setEntity(introspectionPayload);
-            ProxyResponse introspectionStatus = HandlerUtil.execute(introspectionEndpoint);
+            tokenEndpoint.setEntity(tokenEPPayload);
+            ProxyResponse tokenStatus = HandlerUtil.execute(tokenEndpoint);
 
-            if (introspectionStatus.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+            if (tokenStatus.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                 log.error("Error occurred while invoking the API to get token status.");
-                HandlerUtil.handleError(resp, introspectionStatus);
+                HandlerUtil.handleError(resp, tokenStatus);
                 return;
             }
-            String introspectionData = introspectionStatus.getData();
-            if (introspectionData == null) {
+            String tokenData = tokenStatus.getData();
+            if (tokenData == null) {
                 log.error("Invalid token data is received.");
-                HandlerUtil.handleError(resp, introspectionStatus);
+                HandlerUtil.handleError(resp, tokenStatus);
                 return;
             }
             JsonParser jsonParser = new JsonParser();
-            JsonElement jTokenResult = jsonParser.parse(introspectionData);
+            JsonElement jTokenResult = jsonParser.parse(tokenData);
             if (jTokenResult.isJsonObject()) {
                 JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
                 if (!jTokenResultAsJsonObject.get("active").getAsBoolean()) {
