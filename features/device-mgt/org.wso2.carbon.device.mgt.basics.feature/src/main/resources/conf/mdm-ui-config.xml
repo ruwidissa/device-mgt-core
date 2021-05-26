@@ -177,6 +177,7 @@
         <Scope>perm:metadata:view</Scope>
         <Scope>perm:metadata:create</Scope>
         <Scope>perm:metadata:update</Scope>
+        <Scope>perm:android:google-account</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
