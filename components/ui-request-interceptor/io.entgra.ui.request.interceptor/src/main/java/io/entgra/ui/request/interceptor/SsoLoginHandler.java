@@ -88,12 +88,12 @@ public class SsoLoginHandler extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             httpSession = req.getSession(false);
-
             if (httpSession != null) {
                 httpSession.invalidate();
             }
 
             httpSession = req.getSession(true);
+            httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
             initializeAdminCredentials();
             baseContextPath = req.getContextPath();
             applicationName = baseContextPath.substring(1, baseContextPath.indexOf("-ui-request-handler"));

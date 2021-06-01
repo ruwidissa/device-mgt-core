@@ -27,7 +27,6 @@ import io.entgra.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -50,9 +49,7 @@ public class SsoLoginCallbackHandler extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String code = req.getParameter("code");
         HttpSession session = req.getSession(false);
-        String scope = session.getAttribute("scope").toString();
         String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
-
         if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
             iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
         }
@@ -61,6 +58,19 @@ public class SsoLoginCallbackHandler extends HttpServlet {
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
         String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                 + HandlerConstants.COLON + iotsCorePort;
+
+        if (session == null) {
+            String baseContextPath = req.getContextPath();
+            String applicationName = baseContextPath.substring(1, baseContextPath.indexOf("-ui-request-handler"));
+            if (applicationName.equals("entgra")) {
+                resp.sendRedirect(iotsCoreUrl + "/endpoint-mgt");
+            } else {
+                resp.sendRedirect(iotsCoreUrl + "/" + applicationName);
+            }
+            return;
+        }
+
+        String scope = session.getAttribute("scope").toString();
 
         HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + session.getAttribute("encodedClientApp"));
@@ -76,11 +86,9 @@ public class SsoLoginCallbackHandler extends HttpServlet {
         ProxyResponse tokenResultResponse = HandlerUtil.execute(tokenEndpoint);
 
         JsonParser jsonParser = new JsonParser();
-
         JsonElement jTokenResult = jsonParser.parse(tokenResultResponse.getData());
         if (jTokenResult.isJsonObject()) {
             JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
-
             AuthData authData = new AuthData();
             authData.setClientId(session.getAttribute("clientId").toString());
             authData.setClientSecret(session.getAttribute("clientSecret").toString());
@@ -89,7 +97,6 @@ public class SsoLoginCallbackHandler extends HttpServlet {
             authData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
             authData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
             session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
-
             resp.sendRedirect(session.getAttribute("redirectUrl").toString());
         }
     }
