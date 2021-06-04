@@ -72,6 +72,7 @@ public class SsoLoginHandler extends HttpServlet {
     private static String adminPassword;
     private static String gatewayUrl;
     private static String iotsCoreUrl;
+    private static int sessionTimeOut;
     private static String encodedAdminCredentials;
     private static String encodedClientApp;
     private static String applicationId;
@@ -93,7 +94,7 @@ public class SsoLoginHandler extends HttpServlet {
             }
 
             httpSession = req.getSession(true);
-            httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
+
             initializeAdminCredentials();
             baseContextPath = req.getContextPath();
             applicationName = baseContextPath.substring(1, baseContextPath.indexOf("-ui-request-handler"));
@@ -157,6 +158,7 @@ public class SsoLoginHandler extends HttpServlet {
             uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
+            sessionTimeOut = Integer.parseInt(String.valueOf(uiConfigJsonObject.get("sessionTimeOut")));
 
             // Register the client application
             HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
@@ -294,6 +296,7 @@ public class SsoLoginHandler extends HttpServlet {
         httpSession.setAttribute("encodedClientApp", encodedClientApp);
         httpSession.setAttribute("scope", scopes);
         httpSession.setAttribute("redirectUrl", req.getParameter("redirect"));
+        httpSession.setMaxInactiveInterval(sessionTimeOut);
     }
 
     /***
