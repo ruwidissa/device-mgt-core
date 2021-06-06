@@ -18,7 +18,8 @@
 
 package org.wso2.carbon.device.mgt.core.geo.task;
 
-public class EventOperationTaskException extends Exception{
+public class EventOperationTaskException extends Exception {
+
     public EventOperationTaskException(String message) {
         super(message);
     }

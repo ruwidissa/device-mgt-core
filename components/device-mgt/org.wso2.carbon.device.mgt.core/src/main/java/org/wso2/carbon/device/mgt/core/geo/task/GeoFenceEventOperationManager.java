@@ -45,14 +45,15 @@ public class GeoFenceEventOperationManager {
         this.eventOperationCode = eventOperationCode;
         this.tenantId = tenantId;
         this.callback = callback;
-        isEventEnabled= DeviceConfigurationManager.getInstance().getDeviceManagementConfig()
+        isEventEnabled = DeviceConfigurationManager.getInstance().getDeviceManagementConfig()
                 .getEventOperationTaskConfiguration().isEnabled();
     }
 
     /**
      * Get executor for create EVENT_CONFIG / EVENT_REVOKE operations at the time of a device/s
      * assigned into a group or removed from a group
-     * @param groupId Id of the assigned / removed group
+     *
+     * @param groupId           Id of the assigned / removed group
      * @param deviceIdentifiers Device identifiers assigned to / removed from the group
      * @return {@link GroupAssignmentEventOperationExecutor} Created executor to create operations
      */
@@ -72,7 +73,8 @@ public class GeoFenceEventOperationManager {
 
     /**
      * Get executor for create EVENT_CONFIG / EVENT_REVOKE operations at the time of a event is created
-     * @param groupIds list of group ids to apply the created event
+     *
+     * @param groupIds      list of group ids to apply the created event
      * @param eventMetaData contains all the data of the related event
      * @return {@link EventOperationExecutor} The created event executor object
      */

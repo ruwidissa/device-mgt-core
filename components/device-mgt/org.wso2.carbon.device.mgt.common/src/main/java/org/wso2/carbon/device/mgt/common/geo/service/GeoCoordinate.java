@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ * Copyright (c) 2018-2021, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,8 +16,24 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.core.geo.task;
+package org.wso2.carbon.device.mgt.common.geo.service;
 
-public interface EventCreateCallback {
-    void onCompleteEventOperation(Object values);
+public class GeoCoordinate {
+
+    private final double latitude;
+    private final double longitude;
+
+    public GeoCoordinate(double latitude, double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
 }

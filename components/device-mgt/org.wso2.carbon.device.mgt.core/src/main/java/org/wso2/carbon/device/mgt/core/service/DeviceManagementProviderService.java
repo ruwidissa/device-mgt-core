@@ -62,6 +62,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoQuery;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
@@ -74,8 +75,8 @@ import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
-import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
-import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -827,8 +828,7 @@ public interface DeviceManagementProviderService {
 
     List<Integer> getDeviceEnrolledTenants() throws DeviceManagementException;
 
-    List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
-                                     int geohashLength) throws DeviceManagementException;
+    List<GeoCluster> findGeoClusters(GeoQuery geoQuery) throws DeviceManagementException;
 
     int getDeviceCountOfTypeByStatus(String deviceType, String deviceStatus) throws DeviceManagementException;
 

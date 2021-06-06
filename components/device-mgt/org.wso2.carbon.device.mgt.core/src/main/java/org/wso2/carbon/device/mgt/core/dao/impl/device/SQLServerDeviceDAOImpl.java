@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.device.mgt.core.dao.impl.device;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Count;
@@ -29,8 +28,8 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.impl.AbstractDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
-import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
-import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 
 import java.sql.Connection;
@@ -1133,6 +1132,8 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
         }
     }
 
+    //TODO: Override for MSSQL
+    /*
     @Override
     public List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
                                             int geohashLength, int tenantId) throws DeviceManagementDAOException {
@@ -1207,4 +1208,5 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
         }
         return geoClusters;
     }
+     */
 }
