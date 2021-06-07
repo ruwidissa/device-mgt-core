@@ -22,7 +22,7 @@
     <Gateways>
         <!-- multiple gateways can be listed and the gateway having the isDefault=true is picked up or gateway
         extensionClass can be passed and relevant impl can be used-->
-        <Gateway name="sample" extensionClass="io.entgra.transport.mgt.sms.handler.core.impl.SampleSenderImpl" isDefault="true">
+        <Gateway name="sample" extensionClass="io.entgra.transport.mgt.sms.handler.core.impl.SampleSenderImpl" {% if sms_conf.gateways.sample is defined %} isDefault="{{sms_conf.gateways.sample.is_default}} {% else%} isDefault="true" {% endif %}>
             <!-- properties can be listed and can be picked up in the relevant implementation class as required-->
             <Properties>
                 <Property name="sample-property">sample</Property>
