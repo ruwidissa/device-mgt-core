@@ -22,7 +22,7 @@
     <Gateways>
         <!-- multiple gateways can be listed and the gateway having the isDefault=true is picked up or gateway
         extensionClass can be passed and relevant impl can be used-->
-        <Gateway name="sample" extensionClass="io.entgra.transport.mgt.sms.handler.core.impl.SampleSenderImpl" {% if sms_conf.gateways.sample is defined %} isDefault="{{sms_conf.gateways.sample.is_default}} {% else%} isDefault="true" {% endif %}>
+        <Gateway name="sample" extensionClass="io.entgra.transport.mgt.sms.handler.core.impl.SampleSenderImpl" {% if sms_conf.gateway.sample is defined %} isDefault="{{sms_conf.gateway.sample.is_default}}" {% else%} isDefault="true" {% endif %}>
             <!-- properties can be listed and can be picked up in the relevant implementation class as required-->
             <Properties>
                 <Property name="sample-property">sample</Property>
@@ -34,9 +34,6 @@
         {%- for gateway in sms_conf.gateways -%}
         <Gateway name="{{gateway.name}}" extensionClass="{{gateway.extension_class}}" isDefault="{{gateway.is_default}}">
             <Properties>
-                <Property name="sample-property">sample</Property>
-                <Property name="country-code">+94</Property>
-                <Property name="max-msg-size">160</Property>
                 {% for property_name,property_value in gateway.properties_options.items() %}
                 <Property name="{{property_name}}">{{property_value}}</Property>
                 {% endfor %}
