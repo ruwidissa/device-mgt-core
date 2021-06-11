@@ -8,6 +8,48 @@
             <xsd1:applicationName>${applicationName}</xsd1:applicationName>
             <!-- <xsd1:certificateContent>?</xsd1:certificateContent> -->
             <xsd1:description>${description}</xsd1:description>
+             <xsd1:claimConfig>
+                 <!--Optional:-->
+                 <!--<xsd1:alwaysSendMappedLocalSubjectId>?</xsd1:alwaysSendMappedLocalSubjectId>-->
+                 <!--Zero or more repetitions:-->
+                 <xsd1:claimMappings>
+                     <!--Optional:-->
+                     <!--<xsd1:defaultValue>?</xsd1:defaultValue>-->
+                     <!--Optional:-->
+                     <xsd1:localClaim>
+                         <!--Optional:-->
+                         <!--<xsd1:claimId>?</xsd1:claimId>-->
+                         <!--Optional:-->
+                         <xsd1:claimUri>http://wso2.org/claims/username</xsd1:claimUri>
+                     </xsd1:localClaim>
+                     <!--Optional:-->
+                     <xsd1:mandatory>true</xsd1:mandatory>
+                     <!--Optional:-->
+                     <xsd1:remoteClaim>
+                         <!--Optional:-->
+                         <!--<xsd1:claimId>?</xsd1:claimId>-->
+                         <!--Optional:-->
+                         <xsd1:claimUri>http://testclaims/claims/username</xsd1:claimUri>
+                     </xsd1:remoteClaim>
+                     <!--Optional:-->
+                     <xsd1:requested>true</xsd1:requested>
+                 </xsd1:claimMappings>
+                 <!--&lt;!&ndash;Zero or more repetitions:&ndash;&gt;-->
+                 <!--<xsd1:idpClaims>-->
+                     <!--&lt;!&ndash;Optional:&ndash;&gt;-->
+                     <!--<xsd1:claimId>?</xsd1:claimId>-->
+                     <!--&lt;!&ndash;Optional:&ndash;&gt;-->
+                     <!--<xsd1:claimUri>?</xsd1:claimUri>-->
+                 <!--</xsd1:idpClaims>-->
+                 <!--&lt;!&ndash;Optional:&ndash;&gt;-->
+                 <!--<xsd1:localClaimDialect>?</xsd1:localClaimDialect>-->
+                 <!--&lt;!&ndash;Optional:&ndash;&gt;-->
+                 <!--<xsd1:roleClaimURI>?</xsd1:roleClaimURI>-->
+                 <!--&lt;!&ndash;Zero or more repetitions:&ndash;&gt;-->
+                 <!--<xsd1:spClaimDialects>?</xsd1:spClaimDialects>-->
+                 <!--&lt;!&ndash;Optional:&ndash;&gt;-->
+                 <!--<xsd1:userClaimURI>?</xsd1:userClaimURI>-->
+             </xsd1:claimConfig>
             <xsd1:inboundAuthenticationConfig>
                <xsd1:inboundAuthenticationRequestConfigs>
                   <!-- <xsd1:friendlyName>?</xsd1:friendlyName> -->
