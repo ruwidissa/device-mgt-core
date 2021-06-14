@@ -180,6 +180,7 @@
         <Scope>perm:metadata:create</Scope>
         <Scope>perm:metadata:update</Scope>
         <Scope>perm:android:google-account</Scope>
+        <Scope>perm:android:update-default-sim</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
