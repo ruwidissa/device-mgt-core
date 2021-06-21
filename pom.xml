@@ -871,11 +871,6 @@
             <!--</dependency>-->
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
-                <version>${carbon.api.mgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.api</artifactId>
                 <version>${carbon.api.mgt.version}</version>
             </dependency>

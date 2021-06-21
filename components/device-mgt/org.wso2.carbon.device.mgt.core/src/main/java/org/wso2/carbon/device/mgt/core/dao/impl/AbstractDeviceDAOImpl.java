@@ -48,13 +48,14 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceMonitoringData;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoQuery;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
-import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
-import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -64,6 +65,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -1850,62 +1852,161 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         return tenants;
     }
 
-    public List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
-                                            int geohashLength, int tenantId) throws DeviceManagementDAOException {
+    public List<GeoCluster> findGeoClusters(GeoQuery geoQuery, int tenantId) throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<GeoCluster> geoClusters = new ArrayList<>();
         try {
             conn = this.getConnection();
-            String sql = "SELECT AVG(DEVICE_LOCATION.LATITUDE) AS LATITUDE,AVG(DEVICE_LOCATION.LONGITUDE) AS LONGITUDE," +
-                    " MIN(DEVICE_LOCATION.LATITUDE) AS MIN_LATITUDE, MAX(DEVICE_LOCATION.LATITUDE) AS MAX_LATITUDE," +
-                    " MIN(DEVICE_LOCATION.LONGITUDE) AS MIN_LONGITUDE," +
-                    " MAX(DEVICE_LOCATION.LONGITUDE) AS MAX_LONGITUDE," +
-                    " SUBSTRING(DEVICE_LOCATION.GEO_HASH,1,?) AS GEOHASH_PREFIX, COUNT(*) AS COUNT," +
-                    " MIN(DEVICE.DEVICE_IDENTIFICATION) AS DEVICE_IDENTIFICATION," +
-                    " MIN(DEVICE.NAME) AS NAME," +
-                    " MIN(DEVICE_TYPE.NAME) AS TYPE, " +
-                    " MIN(DEVICE.LAST_UPDATED_TIMESTAMP) AS LAST_UPDATED_TIMESTAMP " +
-                    "FROM DM_DEVICE_LOCATION AS DEVICE_LOCATION,DM_DEVICE AS DEVICE, DM_DEVICE_TYPE AS DEVICE_TYPE " +
-                    "WHERE DEVICE_LOCATION.LATITUDE BETWEEN ? AND ? AND " +
-                    "DEVICE_LOCATION.LONGITUDE BETWEEN ? AND ? AND " +
-                    "DEVICE.TENANT_ID=? AND " +
-                    "DEVICE.ID=DEVICE_LOCATION.DEVICE_ID  AND DEVICE.DEVICE_TYPE_ID=DEVICE_TYPE.ID";
-            if (deviceType != null && !deviceType.isEmpty()) {
-                sql += " AND DEVICE_TYPE.NAME=?";
+            String sql = "SELECT AVG(DEVICE_LOCATION.LATITUDE) AS LATITUDE, " +
+                    "AVG(DEVICE_LOCATION.LONGITUDE) AS LONGITUDE, " +
+                    "MIN(DEVICE_LOCATION.LATITUDE) AS MIN_LATITUDE,  " +
+                    "MAX(DEVICE_LOCATION.LATITUDE) AS MAX_LATITUDE, " +
+                    "MIN(DEVICE_LOCATION.LONGITUDE) AS MIN_LONGITUDE, " +
+                    "MAX(DEVICE_LOCATION.LONGITUDE) AS MAX_LONGITUDE, " +
+                    "SUBSTRING(DEVICE_LOCATION.GEO_HASH,1,?) AS GEOHASH_PREFIX,  " +
+                    "COUNT(DEVICE_LOCATION.ID) AS COUNT, " +
+                    "MIN(DEVICE.ID) AS DEVICE_ID, " +
+                    "MIN(DEVICE.NAME) AS DEVICE_NAME, " +
+                    "MIN(DEVICE.DESCRIPTION) AS DESCRIPTION, " +
+                    "MIN(DEVICE_TYPE.NAME) AS DEVICE_TYPE, " +
+                    "MIN(DEVICE.DEVICE_IDENTIFICATION) AS DEVICE_IDENTIFICATION, " +
+                    "MIN(ENROLMENT.ID) AS ENROLMENT_ID, " +
+                    "MIN(ENROLMENT.OWNER) AS OWNER, " +
+                    "MIN(ENROLMENT.OWNERSHIP) AS OWNERSHIP, " +
+                    "MIN(ENROLMENT.IS_TRANSFERRED) AS IS_TRANSFERRED, " +
+                    "MIN(ENROLMENT.DATE_OF_ENROLMENT) AS DATE_OF_ENROLMENT, " +
+                    "MIN(ENROLMENT.DATE_OF_LAST_UPDATE) AS DATE_OF_LAST_UPDATE, " +
+                    "MIN(ENROLMENT.STATUS) AS STATUS " +
+                    "FROM DM_DEVICE_LOCATION AS DEVICE_LOCATION, DM_DEVICE AS DEVICE, " +
+                    "DM_DEVICE_TYPE AS DEVICE_TYPE, DM_ENROLMENT AS ENROLMENT " +
+                    "WHERE DEVICE_LOCATION.LATITUDE BETWEEN ? AND ? " +
+                    "AND DEVICE_LOCATION.LONGITUDE BETWEEN ? AND ? ";
+            if (geoQuery.getDeviceTypes() != null && !geoQuery.getDeviceTypes().isEmpty()) {
+                sql += "AND DEVICE_TYPE.NAME IN (";
+                sql += String.join(", ",
+                        Collections.nCopies(geoQuery.getDeviceTypes().size(), "?"));
+                sql += ") ";
             }
-            sql += " GROUP BY GEOHASH_PREFIX";
+            if (geoQuery.getDeviceIdentifiers() != null && !geoQuery.getDeviceIdentifiers().isEmpty()) {
+                sql += "AND DEVICE.DEVICE_IDENTIFICATION IN (";
+                sql += String.join(", ",
+                        Collections.nCopies(geoQuery.getDeviceIdentifiers().size(), "?"));
+                sql += ") ";
+            }
+            if (geoQuery.getOwners() != null && !geoQuery.getOwners().isEmpty()) {
+                sql += "AND ENROLMENT.OWNER IN (";
+                sql += String.join(", ",
+                        Collections.nCopies(geoQuery.getOwners().size(), "?"));
+                sql += ") ";
+            }
+            if (geoQuery.getOwnerships() != null && !geoQuery.getOwnerships().isEmpty()) {
+                sql += "AND ENROLMENT.OWNERSHIP IN (";
+                sql += String.join(", ",
+                        Collections.nCopies(geoQuery.getOwnerships().size(), "?"));
+                sql += ") ";
+            }
+            if (geoQuery.getStatuses() != null && !geoQuery.getStatuses().isEmpty()) {
+                sql += "AND ENROLMENT.STATUS IN (";
+                sql += String.join(", ",
+                        Collections.nCopies(geoQuery.getStatuses().size(), "?"));
+                sql += ") ";
+            } else {
+                sql += "AND ENROLMENT.STATUS != 'REMOVED' ";
+            }
+            if (geoQuery.getCreatedBefore() != 0 || geoQuery.getCreatedAfter() != 0) {
+                sql += "AND ENROLMENT.DATE_OF_ENROLMENT BETWEEN ? AND ? ";
+            }
+            if (geoQuery.getUpdatedBefore() != 0 || geoQuery.getUpdatedAfter() != 0) {
+                sql += "AND ENROLMENT.DATE_OF_LAST_UPDATE BETWEEN ? AND ? ";
+            }
+            sql += "AND DEVICE.ID = DEVICE_LOCATION.DEVICE_ID AND DEVICE.DEVICE_TYPE_ID = DEVICE_TYPE.ID " +
+                    "AND DEVICE.ID = ENROLMENT.DEVICE_ID " +
+                    "AND DEVICE.TENANT_ID = ? AND DEVICE.TENANT_ID = ENROLMENT.TENANT_ID GROUP BY GEOHASH_PREFIX";
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, geohashLength);
-            stmt.setDouble(2, southWest.getLatitude());
-            stmt.setDouble(3, northEast.getLatitude());
-            stmt.setDouble(4, southWest.getLongitude());
-            stmt.setDouble(5, northEast.getLongitude());
-            stmt.setDouble(6, tenantId);
-            if (deviceType != null && !deviceType.isEmpty()) {
-                stmt.setString(7, deviceType);
+
+            int index = 1;
+            stmt.setInt(index++, geoQuery.getGeohashLength());
+            stmt.setDouble(index++, geoQuery.getSouthWest().getLatitude());
+            stmt.setDouble(index++, geoQuery.getNorthEast().getLatitude());
+            stmt.setDouble(index++, geoQuery.getSouthWest().getLongitude());
+            stmt.setDouble(index++, geoQuery.getNorthEast().getLongitude());
+            if (geoQuery.getDeviceTypes() != null) {
+                for (String s: geoQuery.getDeviceTypes()) {
+                    stmt.setString(index++, s);
+                }
             }
+            if (geoQuery.getDeviceIdentifiers() != null) {
+                for (String s: geoQuery.getDeviceIdentifiers()) {
+                    stmt.setString(index++, s);
+                }
+            }
+            if (geoQuery.getOwners() != null) {
+                for (String s: geoQuery.getOwners()) {
+                    stmt.setString(index++, s);
+                }
+            }
+            if (geoQuery.getOwnerships() != null) {
+                for (String s: geoQuery.getOwnerships()) {
+                    stmt.setString(index++, s);
+                }
+            }
+            if (geoQuery.getStatuses() != null) {
+                for (Status s: geoQuery.getStatuses()) {
+                    stmt.setString(index++, s.toString());
+                }
+            }
+
+            if (geoQuery.getCreatedBefore() != 0 || geoQuery.getCreatedAfter() != 0) {
+                stmt.setTimestamp(index++, new Timestamp(geoQuery.getCreatedAfter()));
+                if (geoQuery.getCreatedBefore() == 0) {
+                    stmt.setTimestamp(index++, new Timestamp(System.currentTimeMillis()));
+                } else {
+                    stmt.setTimestamp(index++, new Timestamp(geoQuery.getCreatedBefore()));
+                }
+            }
+            if (geoQuery.getUpdatedBefore() != 0 || geoQuery.getUpdatedAfter() != 0) {
+                stmt.setTimestamp(index++, new Timestamp(geoQuery.getUpdatedAfter()));
+                if (geoQuery.getUpdatedBefore() == 0) {
+                    stmt.setTimestamp(index++, new Timestamp(System.currentTimeMillis()));
+                } else {
+                    stmt.setTimestamp(index++, new Timestamp(geoQuery.getUpdatedBefore()));
+                }
+            }
+            stmt.setInt(index, tenantId);
+
             rs = stmt.executeQuery();
+
+            double latitude;
+            double longitude;
+            double minLatitude;
+            double maxLatitude;
+            double minLongitude;
+            double maxLongitude;
+            long count;
+            String geohashPrefix;
+            Device device;
             while (rs.next()) {
-                double latitude = rs.getDouble("LATITUDE");
-                double longitude = rs.getDouble("LONGITUDE");
-                double min_latitude = rs.getDouble("MIN_LATITUDE");
-                double max_latitude = rs.getDouble("MAX_LATITUDE");
-                double min_longitude = rs.getDouble("MIN_LONGITUDE");
-                double max_longitude = rs.getDouble("MAX_LONGITUDE");
-                String device_identification = rs.getString("DEVICE_IDENTIFICATION");
-                String device_name = rs.getString("NAME");
-                String device_type = rs.getString("TYPE");
-                String last_seen = rs.getString("LAST_UPDATED_TIMESTAMP");
-                long count = rs.getLong("COUNT");
-                String geohashPrefix = rs.getString("GEOHASH_PREFIX");
+                latitude = rs.getDouble("LATITUDE");
+                longitude = rs.getDouble("LONGITUDE");
+                minLatitude = rs.getDouble("MIN_LATITUDE");
+                maxLatitude = rs.getDouble("MAX_LATITUDE");
+                minLongitude = rs.getDouble("MIN_LONGITUDE");
+                maxLongitude = rs.getDouble("MAX_LONGITUDE");
+                count = rs.getLong("COUNT");
+                geohashPrefix = rs.getString("GEOHASH_PREFIX");
+                if (count == 1) {
+                    device = DeviceManagementDAOUtil.loadDevice(rs);
+                } else {
+                    device = null;
+                }
                 geoClusters.add(new GeoCluster(new GeoCoordinate(latitude, longitude),
-                        new GeoCoordinate(min_latitude, min_longitude), new GeoCoordinate(max_latitude, max_longitude),
-                        count, geohashPrefix, device_identification, device_name, device_type, last_seen));
+                        new GeoCoordinate(minLatitude, minLongitude), new GeoCoordinate(maxLatitude, maxLongitude),
+                        count, geohashPrefix, device));
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while retrieving information of  " +
+            throw new DeviceManagementDAOException("Error occurred while retrieving information of " +
                     "Geo Clusters", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);

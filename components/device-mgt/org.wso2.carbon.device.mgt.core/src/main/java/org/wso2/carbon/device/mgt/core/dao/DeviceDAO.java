@@ -46,9 +46,10 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceMonitoringData;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoQuery;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
-import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
-import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -555,14 +556,11 @@ public interface DeviceDAO {
      * This method is used to retrieve the details of geoclusters formed relatively to the zoom level and map
      * boundaries.
      *
-     * @param deviceType Optional device type name.
-     * @param southWest  the coordinates of southWest corner of the map.
-     * @param northEast  the coordinates of northEast corner of the map.
-     * @param tenantId   tenant id.
+     * @param geoQuery  the query to determine the geo data.
+     * @param tenantId  tenant id.
      * @return returns a list of enrolment info objects.
      */
-    List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
-                                     int geohashLength,int tenantId) throws DeviceManagementDAOException;
+    List<GeoCluster> findGeoClusters(GeoQuery geoQuery, int tenantId) throws DeviceManagementDAOException;
 
     /**
      * This method is used to identify whether given device ids are exist or not.

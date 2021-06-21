@@ -91,6 +91,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoQuery;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
@@ -127,8 +128,8 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManag
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
-import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
-import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementServiceComponent;
 import org.wso2.carbon.device.mgt.core.internal.PluginInitializationListener;
@@ -3376,18 +3377,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
-                                            int geohashLength) throws DeviceManagementException {
+    public List<GeoCluster> findGeoClusters(GeoQuery geoQuery) throws DeviceManagementException {
         if (log.isDebugEnabled()) {
-            if (deviceType == null || deviceType.isEmpty()) {
-                log.debug("get information about geo clusters.");
-            } else {
-                log.debug("get information about geo clusters for device type: " + deviceType);
-            }
+            log.debug("Get information about geo clusters for query: " + new Gson().toJson(geoQuery));
         }
         try {
             DeviceManagementDAOFactory.openConnection();
-            return deviceDAO.findGeoClusters(deviceType, southWest, northEast, geohashLength, this.getTenantId());
+            return deviceDAO.findGeoClusters(geoQuery, this.getTenantId());
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred while retrieving the geo clusters.";
             log.error(msg, e);

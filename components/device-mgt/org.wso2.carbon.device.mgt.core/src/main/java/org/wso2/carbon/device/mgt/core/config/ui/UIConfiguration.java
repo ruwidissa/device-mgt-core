@@ -31,6 +31,7 @@ public class UIConfiguration {
     private AppRegistration appRegistration;
     private List<String> scopes;
     private boolean isSsoEnable;
+    private int sessionTimeOut;
 
     @XmlElement(name = "AppRegistration", required=true)
     public AppRegistration getAppRegistration() {
@@ -58,5 +59,14 @@ public class UIConfiguration {
 
     public void setSsoEnable(boolean ssoEnable) {
         isSsoEnable = ssoEnable;
+    }
+
+    @XmlElement(name = "SessionTimeOut")
+    public int getSessionTimeOut() {
+        return sessionTimeOut;
+    }
+
+    public void setSessionTimeOut(int sessionTimeOut) {
+        this.sessionTimeOut = sessionTimeOut;
     }
 }

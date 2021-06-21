@@ -45,10 +45,6 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>com.googlecode.json-simple.wso2</groupId>
 			<artifactId>json-simple</artifactId>
@@ -103,7 +99,7 @@
                             org.wso2.carbon.utils,
                             org.wso2.carbon.context,
                             org.wso2.carbon.identity.oauth.*;version="${carbon.identity.framework.version.range}",
-							org.wso2.carbon.apimgt.keymgt.*;version="${carbon.api.mgt.version.range}",
+							<!--org.wso2.carbon.apimgt.keymgt.*;version="${carbon.api.mgt.version.range}",-->
 							org.wso2.carbon.base,
 							org.wso2.carbon.identity.application.authentication.framework.model;version="${carbon.identity.framework.version.range}",
 							org.wso2.carbon.identity.base;version="${carbon.identity.framework.version.range}",
