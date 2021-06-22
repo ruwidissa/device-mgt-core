@@ -1,0 +1,87 @@
+<!--
+  ~ Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<datasources-configuration xmlns:svns="http://org.wso2.securevault/configuration">
+    <providers>
+        <provider>org.wso2.carbon.ndatasource.rdbms.RDBMSDataSourceReader</provider>
+    </providers>
+    <datasources>
+        <datasource>
+            <name>DM_DS</name>
+            <description>The datasource used for CDM</description>
+            <jndiConfig>
+                <name>jdbc/DM_DS</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                {% if database.device_mgt is defined %}
+                    <url>{{database.device_mgt.url}}</url>
+                    <username>{{database.device_mgt.username}}</username>
+                    <password>{{database.device_mgt.password}}</password>
+                    <driverClassName>{{database.device_mgt.driver}}</driverClassName>
+                    <validationQuery>{{database.device_mgt.validationQuery}}</validationQuery>
+                    {% for property_name,property_value in database.device_mgt.pool_options.items() %}
+                    <{{property_name}}>{{property_value}}</{{property_name}}>
+                    {% endfor %}
+                 {% else %}
+                    <url>jdbc:h2:./repository/database/WSO2DM_DB;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE;LOCK_TIMEOUT=60000</url>
+                    <username>wso2carbon</username>
+                    <password>wso2carbon</password>
+                    <driverClassName>org.h2.Driver</driverClassName>
+                    <maxActive>50</maxActive>
+                    <maxWait>60000</maxWait>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                  {% endif %}
+                </configuration>
+            </definition>
+        </datasource>
+        <datasource>
+            <name>DM_ARCHIVAL_DS</name>
+            <description>The archival datasource used for CDM</description>
+            <jndiConfig>
+                <name>jdbc/DM_ARCHIVAL_DS</name>
+            </jndiConfig>
+            <definition type="RDBMS">
+                <configuration>
+                {% if database.device_mgt_archival is defined %}
+                    <url>{{database.device_mgt_archival.url}}</url>
+                    <username>{{database.device_mgt_archival.username}}</username>
+                    <password>{{database.device_mgt_archival.password}}</password>
+                    <driverClassName>{{database.device_mgt_archival.driver}}</driverClassName>
+                    <validationQuery>{{database.device_mgt_archival.validationQuery}}</validationQuery>
+                    {% for property_name,property_value in database.device_mgt_archival.pool_options.items() %}
+                    <{{property_name}}>{{property_value}}</{{property_name}}>
+                    {% endfor %}
+                 {% else %}
+                    <url>jdbc:h2:./repository/database/WSO2DM_ARCHIVAL_DS;DB_CLOSE_ON_EXIT=FALSE</url>
+                    <username>wso2carbon</username>
+                    <password>wso2carbon</password>
+                    <driverClassName>org.h2.Driver</driverClassName>
+                    <maxActive>50</maxActive>
+                    <maxWait>60000</maxWait>
+                    <testOnBorrow>true</testOnBorrow>
+                    <validationQuery>SELECT 1</validationQuery>
+                    <validationInterval>30000</validationInterval>
+                 {% endif %}
+                </configuration>
+            </definition>
+        </datasource>
+    </datasources>
+</datasources-configuration>

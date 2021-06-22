@@ -18,15 +18,31 @@
  */
 package org.wso2.carbon.apimgt.webapp.publisher;
 
-import feign.FeignException;
-import org.wso2.carbon.apimgt.integration.generated.client.publisher.model.*;
-import org.wso2.carbon.apimgt.integration.client.publisher.PublisherClient;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.webapp.publisher.config.WebappPublisherConfig;
+import org.wso2.carbon.apimgt.webapp.publisher.dto.ApiUriTemplate;
 import org.wso2.carbon.apimgt.webapp.publisher.exception.APIManagerPublisherException;
-import org.wso2.carbon.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This class represents the concrete implementation of the APIPublisherService that corresponds to providing all
@@ -34,11 +50,10 @@ import java.util.*;
  */
 public class APIPublisherServiceImpl implements APIPublisherService {
     private static final String UNLIMITED_TIER = "Unlimited";
-    private static final String API_PUBLISH_ENVIRONMENT = "Production and Sandbox";
-    private static final String CONTENT_TYPE = "application/json";
-    private static final String PUBLISHED_STATUS = "PUBLISHED";
+    private static final String API_PUBLISH_ENVIRONMENT = "Default";
     private static final String CREATED_STATUS = "CREATED";
     private static final String PUBLISH_ACTION = "Publish";
+    public static final APIManagerFactory API_MANAGER_FACTORY = APIManagerFactory.getInstance();
 
     @Override
     public void publishAPI(APIConfig apiConfig) throws APIManagerPublisherException {
@@ -47,99 +62,124 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(apiConfig.getOwner());
         try {
-            PublisherClient publisherClient = APIPublisherDataHolder.getInstance().getIntegrationClientService()
-                    .getPublisherClient();
+            APIProvider apiProvider = API_MANAGER_FACTORY.getAPIProvider(apiConfig.getOwner());
             API api = getAPI(apiConfig);
-            APIList apiList = publisherClient.getApis().apisGet(100, 0, "name:" + api.getName(), CONTENT_TYPE, null);
 
-            if (!isExist(api, apiList)) {
-                api = publisherClient.getApi().apisPost(api, CONTENT_TYPE, null);
-                if (CREATED_STATUS.equals(api.getStatus())) {
-                    publisherClient.getApi().apisChangeLifecyclePost(PUBLISH_ACTION, api.getId(), null, null, null);
+            if (!apiProvider.isAPIAvailable(api.getId())) {
+                API createdAPI = apiProvider.addAPI(api);
+                if (CREATED_STATUS.equals(createdAPI.getStatus())) {
+                    apiProvider.changeLifeCycleStatus(tenantDomain, createdAPI.getUuid(), PUBLISH_ACTION, null);
+                    APIRevision apiRevision = new APIRevision();
+                    apiRevision.setApiUUID(createdAPI.getUuid());
+                    apiRevision.setDescription("Initial Revision");
+                    String apiRevisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
+                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                    apiRevisionDeployment.setDeployment(API_PUBLISH_ENVIRONMENT);
+                    apiRevisionDeployment.setVhost("localhost");
+                    apiRevisionDeployment.setDisplayOnDevportal(true);
+
+                    List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+                    apiRevisionDeploymentList.add(apiRevisionDeployment);
+                    apiProvider.deployAPIRevision(createdAPI.getUuid(), apiRevisionId, apiRevisionDeploymentList);
+
                 }
             } else {
                 if (WebappPublisherConfig.getInstance().isEnabledUpdateApi()) {
-                    for (APIInfo apiInfo : apiList.getList()) {
-                        if (api.getName().equals(apiInfo.getName()) && api.getVersion().equals(apiInfo.getVersion())) {
-                            api = publisherClient.getApi().apisApiIdPut(apiInfo.getId(), api, CONTENT_TYPE, null, null);
-                            if (api != null && CREATED_STATUS.equals(api.getStatus())) {
-                                publisherClient.getApi().apisChangeLifecyclePost(PUBLISH_ACTION, api.getId(), null, null,
-                                                                                 null);
-                            }
+                    API existingAPI = apiProvider.getAPI(api.getId());
+                    api.setStatus(existingAPI.getStatus());
+                    apiProvider.updateAPI(api);
+                    if (api.getId().getName().equals(existingAPI.getId().getName()) &&
+                            api.getId().getVersion().equals(existingAPI.getId().getVersion())) {
+                        if (CREATED_STATUS.equals(existingAPI.getStatus())) {
+                            apiProvider.changeLifeCycleStatus(tenantDomain, existingAPI.getUuid(), PUBLISH_ACTION, null);
                         }
-
                     }
                 }
             }
-        } catch (FeignException e) {
+
+
+        } catch (FaultGatewaysException | APIManagementException e) {
             throw new APIManagerPublisherException(e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
-    private boolean isExist(API api, APIList apiList) {
-        if (apiList == null || apiList.getList() == null || apiList.getList().size() == 0) {
-            return false;
-        }
-        for (APIInfo existingApi : apiList.getList()) {
-            if (existingApi.getName() != null && existingApi.getName().equals(api.
-                    getName()) && existingApi.getVersion() != null &&
-                    existingApi.getVersion().equals(api.getVersion())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private API getAPI(APIConfig config) {
 
-        API api = new API();
-        api.setName(config.getName());
+        APIIdentifier apiIdentifier = new APIIdentifier(config.getOwner(), config.getName(), config.getVersion());
+        API api = new API(apiIdentifier);
         api.setDescription("");
-
         String context = config.getContext();
         context = context.startsWith("/") ? context : ("/" + context);
-        api.setContext(context);
-        api.setVersion(config.getVersion());
-        api.setProvider(config.getOwner());
-        api.setApiDefinition(APIPublisherUtil.getSwaggerDefinition(config));
-        api.setWsdlUri(null);
-        api.setStatus(PUBLISHED_STATUS);
-        api.setResponseCaching("DISABLED");
-        api.setDestinationStatsEnabled("false");
-        api.isDefaultVersion(config.isDefault());
-        List<String> transport = new ArrayList<>();
-        transport.add("https");
-        transport.add("http");
-        api.transport(transport);
-        api.setTags(Arrays.asList(config.getTags()));
-        api.addTiersItem(UNLIMITED_TIER);
-        api.setGatewayEnvironments(API_PUBLISH_ENVIRONMENT);
-        if (config.isSharedWithAllTenants()) {
-            api.setSubscriptionAvailability(API.SubscriptionAvailabilityEnum.all_tenants);
-            api.setVisibility(API.VisibilityEnum.PUBLIC);
-        } else {
-            api.setSubscriptionAvailability(API.SubscriptionAvailabilityEnum.current_tenant);
-            api.setVisibility(API.VisibilityEnum.PRIVATE);
-        }
-        String endpointConfig = "{\"production_endpoints\":{\"url\":\"" + config.getEndpoint() +
-                "\",\"config\":null},\"implementation_status\":\"managed\",\"endpoint_type\":\"http\"}";
+        api.setContext(context + "/" + config.getVersion());
+        api.setStatus(CREATED_STATUS);
+        api.setWsdlUrl(null);
+        api.setResponseCache("Disabled");
+        api.setContextTemplate(context + "/{version}" );
+        api.setSwaggerDefinition(APIPublisherUtil.getSwaggerDefinition(config));
+        api.setType("HTTP");
 
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        Iterator<ApiUriTemplate> iterator;
+        for (iterator = config.getUriTemplates().iterator(); iterator.hasNext(); ) {
+            ApiUriTemplate apiUriTemplate = iterator.next();
+            URITemplate uriTemplate = new URITemplate();
+            uriTemplate.setAuthType(apiUriTemplate.getAuthType());
+            uriTemplate.setHTTPVerb(apiUriTemplate.getHttpVerb());
+            uriTemplate.setResourceURI(apiUriTemplate.getResourceURI());
+            uriTemplate.setUriTemplate(apiUriTemplate.getUriTemplate());
+            Scope scope = new Scope();
+            if (apiUriTemplate.getScope() != null) {
+                scope.setName(apiUriTemplate.getScope().getName());
+                scope.setDescription(apiUriTemplate.getScope().getDescription());
+                scope.setKey(apiUriTemplate.getScope().getKey());
+                scope.setRoles(apiUriTemplate.getScope().getRoles());
+                uriTemplate.setScope(scope);
+            }
+            uriTemplates.add(uriTemplate);
+        }
+        api.setUriTemplates(uriTemplates);
+
+        api.setApiOwner(config.getOwner());
+
+
+        api.setDefaultVersion(config.isDefault());
+        api.setTransports("https,http");
+
+        Set<String> tags = new HashSet<>();
+        tags.addAll(Arrays.asList(config.getTags()));
+        api.setTags(tags);
+
+        Set<Tier> availableTiers = new HashSet<>();
+        availableTiers.add(new Tier(UNLIMITED_TIER));
+        api.setAvailableTiers(availableTiers);
+
+        Set<String> environments = new HashSet<>();
+        environments.add(API_PUBLISH_ENVIRONMENT);
+        api.setEnvironments(environments);
+
+        if (config.isSharedWithAllTenants()) {
+            api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_ALL_TENANTS);
+            api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
+        } else {
+            api.setSubscriptionAvailability(APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT);
+            api.setVisibility(APIConstants.API_PRIVATE_VISIBILITY);
+        }
+        String endpointConfig = "{ \"endpoint_type\": \"http\", \"sandbox_endpoints\": { \"url\": \" " +
+                config.getEndpoint() + "\" }, \"production_endpoints\": { \"url\": \" "+ config.getEndpoint()+"\" } }";
 
         api.setEndpointConfig(endpointConfig);
-        APICorsConfiguration apiCorsConfiguration = new APICorsConfiguration();
         List<String> accessControlAllowOrigins = new ArrayList<>();
         accessControlAllowOrigins.add("*");
-        apiCorsConfiguration.setAccessControlAllowOrigins(accessControlAllowOrigins);
 
         List<String> accessControlAllowHeaders = new ArrayList<>();
         accessControlAllowHeaders.add("authorization");
         accessControlAllowHeaders.add("Access-Control-Allow-Origin");
         accessControlAllowHeaders.add("Content-Type");
         accessControlAllowHeaders.add("SOAPAction");
-        apiCorsConfiguration.setAccessControlAllowHeaders(accessControlAllowHeaders);
-
+        accessControlAllowHeaders.add("apikey");
+        accessControlAllowHeaders.add("Internal-Key");
         List<String> accessControlAllowMethods = new ArrayList<>();
         accessControlAllowMethods.add("GET");
         accessControlAllowMethods.add("PUT");
@@ -147,10 +187,16 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         accessControlAllowMethods.add("POST");
         accessControlAllowMethods.add("PATCH");
         accessControlAllowMethods.add("OPTIONS");
-        apiCorsConfiguration.setAccessControlAllowMethods(accessControlAllowMethods);
-        apiCorsConfiguration.setAccessControlAllowCredentials(false);
-        apiCorsConfiguration.corsConfigurationEnabled(false);
-        api.setCorsConfiguration(apiCorsConfiguration);
+        CORSConfiguration corsConfiguration = new CORSConfiguration(false, accessControlAllowOrigins, false,
+                accessControlAllowHeaders, accessControlAllowMethods);
+        api.setCorsConfiguration(corsConfiguration);
+
+        api.setAuthorizationHeader("Authorization");
+        List<String> keyManagers = new ArrayList<>();
+        keyManagers.add("all");
+        api.setKeyManagers(keyManagers);
+        api.setEnableStore(true);
+
         return api;
     }
 }

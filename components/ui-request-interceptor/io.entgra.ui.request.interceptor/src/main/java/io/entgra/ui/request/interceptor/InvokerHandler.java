@@ -73,6 +73,7 @@ public class InvokerHandler extends HttpServlet {
     private static final long serialVersionUID = -6508020875358160165L;
     private static AuthData authData;
     private static String apiEndpoint;
+    private static String iotsCoreUrl;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -368,8 +369,14 @@ public class InvokerHandler extends HttpServlet {
         if (log.isDebugEnabled()) {
             log.debug("refreshing the token");
         }
+        String iotsCorePort = System.getProperty("iot.core.https.port");
+        if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
+            iotsCorePort = System.getProperty("iot.core.http.port");
+        }
+        iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
+                + HandlerConstants.COLON + iotsCorePort;
         HttpPost tokenEndpoint = new HttpPost(
-                apiEndpoint + HandlerConstants.API_COMMON_CONTEXT + HandlerConstants.TOKEN_ENDPOINT);
+                iotsCoreUrl + HandlerConstants.TOKEN_ENDPOINT);
         HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Couldn't find a session, hence it is required to login and proceed.");

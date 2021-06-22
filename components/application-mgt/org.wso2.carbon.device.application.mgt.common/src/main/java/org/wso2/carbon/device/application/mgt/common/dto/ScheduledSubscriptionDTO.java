@@ -69,7 +69,7 @@ public class ScheduledSubscriptionDTO {
     /**
      * Scheduled time of subscription.
      */
-    private LocalDateTime scheduledAt;
+    private long scheduledAt;
 
     /**
      * Username of the scheduler.
@@ -86,7 +86,7 @@ public class ScheduledSubscriptionDTO {
 
     }
 
-    public ScheduledSubscriptionDTO(String taskName, String applicationUUID, LocalDateTime scheduledAt,
+    public ScheduledSubscriptionDTO(String taskName, String applicationUUID, long scheduledAt,
             List<?> subscriberList, String scheduledBy) {
         this.taskName = taskName;
         this.applicationUUID = applicationUUID;
@@ -135,11 +135,11 @@ public class ScheduledSubscriptionDTO {
         this.status = status;
     }
 
-    public LocalDateTime getScheduledAt() {
+    public long getScheduledAt() {
         return scheduledAt;
     }
 
-    public void setScheduledAt(LocalDateTime scheduledAt) {
+    public void setScheduledAt(long scheduledAt) {
         this.scheduledAt = scheduledAt;
     }
 

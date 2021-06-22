@@ -21,8 +21,6 @@ package org.wso2.carbon.device.mgt.core.operation.mgt;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ConfigOperation extends Operation {
 
@@ -37,6 +35,15 @@ public class ConfigOperation extends Operation {
     public void addConfigProperty(String name, Object value, Class<?> type) {
         properties.add(new Property(name, value, type));
     }*/
+
+    public ConfigOperation() {
+        //properties = new ArrayList<>();
+        setControl(Control.REPEAT);
+    }
+
+    public Type getType() {
+        return Type.CONFIG;
+    }
 
     public static class Property implements Serializable {
         private String name;
@@ -72,14 +79,6 @@ public class ConfigOperation extends Operation {
         public void setType(Class<?> type) {
             this.type = type;
         }
-    }
-
-    public Type getType() {
-        return Type.CONFIG;
-    }
-
-    public Control getControl(){
-        return Control.REPEAT;
     }
 
 }

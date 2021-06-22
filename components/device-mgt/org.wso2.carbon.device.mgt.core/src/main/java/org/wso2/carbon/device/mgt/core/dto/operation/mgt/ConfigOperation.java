@@ -23,10 +23,11 @@ import java.util.List;
 
 public class ConfigOperation extends Operation {
 
-    private List<Property> properties;
+    private final List<Property> properties;
 
     public ConfigOperation() {
-        properties = new ArrayList<Property>();
+        properties = new ArrayList<>();
+        setControl(Control.REPEAT);
     }
 
     public List<Property> getConfigProperties() {
@@ -35,6 +36,10 @@ public class ConfigOperation extends Operation {
 
     public void addConfigProperty(String name, Object value, Class<?> type) {
         properties.add(new Property(name, value, type));
+    }
+
+    public Type getType() {
+        return Type.CONFIG;
     }
 
     public static class Property {
@@ -71,15 +76,6 @@ public class ConfigOperation extends Operation {
         public void setType(Class<?> type) {
             this.type = type;
         }
-    }
-
-    public Type getType() {
-        return Type.CONFIG;
-    }
-
-
-    public Control getControl(){
-        return Control.REPEAT;
     }
 
 }

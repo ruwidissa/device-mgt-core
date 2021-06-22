@@ -1,4 +1,5 @@
 instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.basics_${feature.version}/conf/datasources/cdm-datasources.xml,target:${installFolder}/../../conf/datasources/cdm-datasources.xml,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.basics_${feature.version}/conf/cdm-config.xml,target:${installFolder}/../../conf/cdm-config.xml,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.basics_${feature.version}/conf/mdm-ui-config.xml,target:${installFolder}/../../conf/mdm-ui-config.xml,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.basics_${feature.version}/conf/license-config.xml,target:${installFolder}/../../conf/etc/license-config.xml,overwrite:true);\
@@ -7,5 +8,4 @@ org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../featur
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.basics_${feature.version}/rxts/license.rxt,target:${installFolder}/../../../repository/resources/rxts/license.rxt,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../../repository/resources/email-templates);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.basics_${feature.version}/email/templates,target:${installFolder}/../../../repository/resources/email-templates,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.basics_${feature.version}/apis/admin--OAuth2TokenManagement.xml,target:${installFolder}/../../deployment/server/synapse-configs/default/api/admin--OAuth2TokenManagement.xml,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.basics_${feature.version}/apis/admin--UserManagementValidateUser.xml,target:${installFolder}/../../deployment/server/synapse-configs/default/api/admin--UserManagementValidateUser.xml,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.basics_${feature.version}/conf_templates/,target:${installFolder}/../../resources/conf/,overwrite:true);\

@@ -40,7 +40,7 @@ public class ScheduledAppSubscriptionCleanupTask extends RandomlyAssignedSchedul
     @Override
     public void executeRandomlyAssignedTask() {
         try {
-            if(super.isQualifiedToExecuteTask()) {
+            if(isQualifiedToExecuteTask()) {
                 subscriptionManager.cleanScheduledSubscriptions();
             }
         } catch (SubscriptionManagementException e) {

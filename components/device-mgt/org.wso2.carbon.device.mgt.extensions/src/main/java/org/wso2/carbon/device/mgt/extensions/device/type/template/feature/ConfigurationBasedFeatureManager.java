@@ -63,6 +63,7 @@ public class ConfigurationBasedFeatureManager implements FeatureManager {
     private static final String OPERATION_META = "operationMeta";
     private static final String CONTENT_TYPE = "contentType";
     private static final String PERMISSION = "permission";
+    private static final String SCOPE = "scope";
     private static final String ICON = "icon";
     private static final String FILTERS = "filters";
     private static final String PATH_PARAMS = "pathParams";
@@ -107,6 +108,9 @@ public class ConfigurationBasedFeatureManager implements FeatureManager {
                     }
                     if (StringUtils.isNotEmpty(metadata.getPermission())) {
                         operationMeta.put(PERMISSION, metadata.getPermission());
+                    }
+                    if (StringUtils.isNotEmpty(metadata.getScope())) {
+                        operationMeta.put(SCOPE, metadata.getScope());
                     }
                     if (metadata.getFilterList() != null && metadata.getFilterList().size() > 0) {
                         operationMeta.put(FILTERS, metadata.getFilterList());

@@ -24,7 +24,7 @@ import java.sql.Timestamp;
 public class DeviceSubscriptionData {
 
     private String action;
-    private Timestamp actionTriggeredTimestamp;
+    private long actionTriggeredTimestamp;
     private String actionTriggeredBy;
     private String actionType;
     private String status;
@@ -38,11 +38,11 @@ public class DeviceSubscriptionData {
         this.action = action;
     }
 
-    public Timestamp getActionTriggeredTimestamp() {
+    public long getActionTriggeredTimestamp() {
         return actionTriggeredTimestamp;
     }
 
-    public void setActionTriggeredTimestamp(Timestamp actionTriggeredTimestamp) {
+    public void setActionTriggeredTimestamp(long actionTriggeredTimestamp) {
         this.actionTriggeredTimestamp = actionTriggeredTimestamp;
     }
 

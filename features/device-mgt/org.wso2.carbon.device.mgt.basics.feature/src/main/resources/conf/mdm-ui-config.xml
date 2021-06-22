@@ -20,6 +20,8 @@
 <UIConfiguration>
     <EnableOAuth>true</EnableOAuth>
     <EnableSSO>true</EnableSSO>
+    <!-- session time out in seconds -->
+    <SessionTimeOut>3600</SessionTimeOut>
     <AppRegistration>
         <Tags>
             <Tag>application_management</Tag>
@@ -177,6 +179,8 @@
         <Scope>perm:metadata:view</Scope>
         <Scope>perm:metadata:create</Scope>
         <Scope>perm:metadata:update</Scope>
+        <Scope>perm:android:google-account</Scope>
+        <Scope>perm:android:update-default-sim</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

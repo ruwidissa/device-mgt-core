@@ -22,7 +22,7 @@
     <parent>
         <artifactId>device-mgt</artifactId>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -146,28 +146,18 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-transports-http</artifactId>
+            <artifactId>cxf-bundle-jaxrs</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-httpclient.wso2</groupId>
             <artifactId>commons-httpclient</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>jsr311-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -200,11 +190,6 @@
             <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
             <scope>provided</scope>
         </dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.devicemgt</groupId>
-			<artifactId>org.wso2.carbon.device.mgt.analytics.data.publisher</artifactId>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon.devicemgt</groupId>
 			<artifactId>org.wso2.carbon.device.mgt.extensions</artifactId>
@@ -340,6 +325,12 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <scope>provided</scope>
         </dependency>
 		<dependency>
 			<groupId>org.wso2.carbon.commons</groupId>
@@ -349,11 +340,6 @@
         <dependency>
             <groupId>org.wso2.carbon.analytics</groupId>
             <artifactId>org.wso2.carbon.analytics.api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.analytics</groupId>
-            <artifactId>org.wso2.carbon.analytics.datasource.commons</artifactId>
             <scope>provided</scope>
         </dependency>
 		<dependency>
@@ -402,11 +388,6 @@
 			<artifactId>org.wso2.carbon.event.stream.persistence.stub</artifactId>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.integration.client</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-testng</artifactId>

@@ -79,7 +79,8 @@ public class SQLServerApplicationDAOImpl extends GenericApplicationDAOImpl {
                 + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
                 + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
                 + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
-                + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT "
+                + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT, "
+                + "NEW_AP_APP_LIFECYCLE_STATE.UPDATED_AT AS LATEST_UPDATE "
                 + "FROM AP_APP "
                 + "INNER JOIN AP_APP_RELEASE ON "
                 + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
@@ -124,7 +125,17 @@ public class SQLServerApplicationDAOImpl extends GenericApplicationDAOImpl {
         if (filter.getLimit() != -1) {
             sql += "ORDER BY ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
         }
-        sql += ") AS app_data ON app_data.ID = AP_APP.ID WHERE AP_APP.TENANT_ID = ? ORDER BY AP_APP.ID";
+        sql += ") AS app_data ON app_data.ID = AP_APP.ID "
+                + "INNER JOIN ("
+                + "SELECT AP_APP_LIFECYCLE_STATE.UPDATED_AT, AP_APP_LIFECYCLE_STATE.AP_APP_RELEASE_ID "
+                + "FROM AP_APP_LIFECYCLE_STATE WHERE AP_APP_LIFECYCLE_STATE.ID "
+                + "IN(SELECT MAX(AP_APP_LIFECYCLE_STATE.ID) "
+                + "FROM AP_APP_LIFECYCLE_STATE "
+                + "GROUP BY AP_APP_LIFECYCLE_STATE.AP_APP_RELEASE_ID)) AS NEW_AP_APP_LIFECYCLE_STATE "
+                + "ON AP_APP_RELEASE.ID = NEW_AP_APP_LIFECYCLE_STATE.AP_APP_RELEASE_ID "
+                + "WHERE AP_APP.TENANT_ID = ? "
+                + "ORDER BY AP_APP.ID, LATEST_UPDATE DESC";
+
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {

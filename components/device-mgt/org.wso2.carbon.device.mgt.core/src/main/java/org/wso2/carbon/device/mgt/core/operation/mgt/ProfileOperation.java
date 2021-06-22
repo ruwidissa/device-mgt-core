@@ -19,21 +19,21 @@
 package org.wso2.carbon.device.mgt.core.operation.mgt;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileOperation extends ConfigOperation implements Serializable {
+
     private static final long serialVersionUID = -3322674908775087365L;
     private List<Integer> correctiveActionIds;
 
     private List<Integer> reactiveActionIds;
 
-    public Type getType() {
-        return Type.PROFILE;
+    public ProfileOperation() {
+        super();
     }
 
-    public Control getControl(){
-        return Control.REPEAT;
+    public Type getType() {
+        return Type.PROFILE;
     }
 
     public List<Integer> getCorrectiveActionIds() {
@@ -51,4 +51,5 @@ public class ProfileOperation extends ConfigOperation implements Serializable {
     public void setReactiveActionIds(List<Integer> reactiveActionIds) {
         this.reactiveActionIds = reactiveActionIds;
     }
+
 }

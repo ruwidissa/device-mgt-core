@@ -23,6 +23,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import io.entgra.ui.request.interceptor.cache.LoginCacheManager;
+import io.entgra.ui.request.interceptor.cache.OAuthApp;
+import io.entgra.ui.request.interceptor.cache.OAuthAppCacheKey;
 import io.entgra.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.lang.text.StrSubstitutor;
@@ -69,27 +72,66 @@ public class SsoLoginHandler extends HttpServlet {
     private static String adminPassword;
     private static String gatewayUrl;
     private static String iotsCoreUrl;
+    private static int sessionTimeOut;
     private static String encodedAdminCredentials;
     private static String encodedClientApp;
     private static String applicationId;
+    private static String applicationName;
     private static String baseContextPath;
 
     private JsonObject uiConfigJsonObject;
     private HttpSession httpSession;
 
+    private LoginCacheManager loginCacheManager;
+    private OAuthApp oAuthApp;
+
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        dynamicClientRegistration(req, resp);
-        String clientId = httpSession.getAttribute("clientId").toString();
-        JsonArray scopesSsoJson = uiConfigJsonObject.get("scopes").getAsJsonArray();
-        String scopesSsoString = HandlerUtil.getScopeString(scopesSsoJson);
-        String loginCallbackUrl = iotsCoreUrl + baseContextPath + HandlerConstants.SSO_LOGIN_CALLBACK;
-        resp.sendRedirect(iotsCoreUrl + HandlerConstants.AUTHORIZATION_ENDPOINT +
-                "?response_type=code" +
-                "&client_id=" + clientId +
-                "&state=" +
-                "&scope=openid " + scopesSsoString +
-                "&redirect_uri=" + loginCallbackUrl);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            httpSession = req.getSession(false);
+            if (httpSession != null) {
+                httpSession.invalidate();
+            }
+
+            httpSession = req.getSession(true);
+
+            initializeAdminCredentials();
+            baseContextPath = req.getContextPath();
+            applicationName = baseContextPath.substring(1, baseContextPath.indexOf("-ui-request-handler"));
+
+            // Check if oauth app cache is available
+            loginCacheManager = new LoginCacheManager();
+            loginCacheManager.initializeCacheManager();
+            oAuthApp = loginCacheManager.getOAuthAppCache(
+                    new OAuthAppCacheKey(applicationName, adminUsername)
+            );
+
+            if (oAuthApp == null) {
+                dynamicClientRegistration(req, resp);
+            }
+
+            String clientId = oAuthApp.getClientId();
+            JsonArray scopesSsoJson = uiConfigJsonObject.get("scopes").getAsJsonArray();
+            String scopesSsoString = HandlerUtil.getScopeString(scopesSsoJson);
+            String loginCallbackUrl = iotsCoreUrl + baseContextPath + HandlerConstants.SSO_LOGIN_CALLBACK;
+            persistAuthSessionData(req, oAuthApp.getClientId(), oAuthApp.getClientSecret(),
+                    oAuthApp.getEncodedClientApp(), scopesSsoString);
+
+            resp.sendRedirect(iotsCoreUrl + HandlerConstants.AUTHORIZATION_ENDPOINT +
+                    "?response_type=code" +
+                    "&client_id=" + clientId +
+                    "&state=" +
+                    "&scope=openid " + scopesSsoString +
+                    "&redirect_uri=" + loginCallbackUrl);
+        } catch (IOException e) {
+            log.error("Error occurred while sending the response into the socket. ", e);
+        } catch (JsonSyntaxException e) {
+            log.error("Error occurred while parsing the response. ", e);
+        } catch (ParserConfigurationException e) {
+            log.error("Error while creating the document builder.");
+        } catch (SAXException e) {
+            log.error("Error while parsing xml file.", e);
+        }
     }
 
     /***
@@ -101,39 +143,22 @@ public class SsoLoginHandler extends HttpServlet {
      */
     private void dynamicClientRegistration(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            File userMgtConf = new File("conf/user-mgt.xml");
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(userMgtConf);
-
-            adminUsername = doc.getElementsByTagName("UserName").item(0).getTextContent();
-            adminPassword = doc.getElementsByTagName("Password").item(0).getTextContent();
-
-            baseContextPath = req.getContextPath();
-            String applicationName = baseContextPath.substring(1, baseContextPath.indexOf("-ui-request-handler"));
-
-            String iotsCorePort = System.getProperty("iot.core.https.port");
+            String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
 
             if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-                iotsCorePort = System.getProperty("iot.core.http.port");
+                iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
             }
 
-            gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+            gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                     + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-            iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
+            iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                     + HandlerConstants.COLON + iotsCorePort;
             String uiConfigUrl = iotsCoreUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
 
-            httpSession = req.getSession(false);
-            if (httpSession != null) {
-                httpSession.invalidate();
-            }
-
-            httpSession = req.getSession(true);
             uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
-
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
+            sessionTimeOut = Integer.parseInt(String.valueOf(uiConfigJsonObject.get("sessionTimeOut")));
 
             // Register the client application
             HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
@@ -153,19 +178,22 @@ public class SsoLoginHandler extends HttpServlet {
             if (clientAppResponse.getCode() == HttpStatus.SC_CREATED) {
                 JsonParser jsonParser = new JsonParser();
                 JsonElement jClientAppResult = jsonParser.parse(clientAppResponse.getData());
+                String clientId = null;
+                String clientSecret = null;
+
                 if (jClientAppResult.isJsonObject()) {
                     JsonObject jClientAppResultAsJsonObject = jClientAppResult.getAsJsonObject();
-                    String clientId = jClientAppResultAsJsonObject.get("client_id").getAsString();
-                    String clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
+                    clientId = jClientAppResultAsJsonObject.get("client_id").getAsString();
+                    clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
                     encodedClientApp = Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes());
-                    String redirectUrl = req.getParameter("redirect");
-                    httpSession = req.getSession(false);
-                    httpSession.setAttribute("clientId", clientId);
-                    httpSession.setAttribute("clientSecret", clientSecret);
-                    httpSession.setAttribute("encodedClientApp", encodedClientApp);
-                    httpSession.setAttribute("scope", HandlerUtil.getScopeString(scopes));
-                    httpSession.setAttribute("redirectUrl", redirectUrl);
+                    String scopesString = HandlerUtil.getScopeString(scopes);
+                    persistAuthSessionData(req, clientId, clientSecret, encodedClientApp, scopesString);
                 }
+
+                // cache the oauth app credentials
+                OAuthAppCacheKey oAuthAppCacheKey = new OAuthAppCacheKey(applicationName, adminUsername);
+                oAuthApp = new OAuthApp(applicationName, adminUsername, clientId, clientSecret, encodedClientApp);
+                loginCacheManager.addOAuthAppToCache(oAuthAppCacheKey, oAuthApp);
             }
 
             // Get the details of the registered application
@@ -211,7 +239,7 @@ public class SsoLoginHandler extends HttpServlet {
             ProxyResponse updateApplicationGrantTypesEndpointResponse = HandlerUtil.execute(updateApplicationGrantTypesEndpoint);
 
             // Update app as a SaaS app
-            this.updateSaasApp(applicationName);
+            this.updateSaasApp(applicationId);
 
             if (updateApplicationGrantTypesEndpointResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
                 HandlerUtil.handleError(resp, updateApplicationGrantTypesEndpointResponse);
@@ -221,7 +249,6 @@ public class SsoLoginHandler extends HttpServlet {
             if (updateApplicationGrantTypesEndpointResponse.getCode() == HttpStatus.SC_OK) {
                 return;
             }
-
             HandlerUtil.handleError(resp, null);
         } catch (IOException e) {
             log.error("Error occurred while sending the response into the socket. ", e);
@@ -229,9 +256,47 @@ public class SsoLoginHandler extends HttpServlet {
             log.error("Error occurred while parsing the response. ", e);
         } catch (ParserConfigurationException e) {
             log.error("Error while creating the document builder.");
-        } catch ( SAXException e) {
+        } catch (SAXException e) {
             log.error("Error while parsing xml file.", e);
         }
+    }
+
+    /**
+     * Initialize the admin credential variables
+     *
+     * @throws ParserConfigurationException - Throws when error occur during initializing the document builder
+     * @throws IOException                  - Throws when error occur during document parsing
+     * @throws SAXException                 - Throws when error occur during document parsing
+     */
+    private void initializeAdminCredentials() throws ParserConfigurationException, IOException, SAXException {
+        File userMgtConf = new File("repository/conf/user-mgt.xml");
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(userMgtConf);
+
+        adminUsername = doc.getElementsByTagName("UserName").item(0).getTextContent();
+        adminPassword = doc.getElementsByTagName("Password").item(0).getTextContent();
+    }
+
+
+    /**
+     * Persist the Auth data inside the session
+     *
+     * @param req              - Http Servlet request
+     * @param clientId         - Client ID of the SP
+     * @param clientSecret     - Client secret of the SP
+     * @param encodedClientApp - Base64 encoded clientId:clientSecret.
+     * @param scopes           - User scopes
+     */
+    private void persistAuthSessionData(HttpServletRequest req, String clientId, String clientSecret,
+                                        String encodedClientApp, String scopes) {
+        httpSession = req.getSession(false);
+        httpSession.setAttribute("clientId", clientId);
+        httpSession.setAttribute("clientSecret", clientSecret);
+        httpSession.setAttribute("encodedClientApp", encodedClientApp);
+        httpSession.setAttribute("scope", scopes);
+        httpSession.setAttribute("redirectUrl", req.getParameter("redirect"));
+        httpSession.setMaxInactiveInterval(sessionTimeOut);
     }
 
     /***
@@ -262,7 +327,7 @@ public class SsoLoginHandler extends HttpServlet {
      * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
     private ProxyResponse getTokenResult(String encodedClientApp) throws IOException {
-        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(iotsCoreUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 
@@ -311,7 +376,7 @@ public class SsoLoginHandler extends HttpServlet {
      */
     private void updateSaasApp(String appName) throws ParserConfigurationException, IOException, SAXException {
         File getAppRequestXmlFile = new File(HandlerConstants.PAYLOADS_DIR + "/get-app-request.xml");
-        String identityAppMgtUrl = iotsCoreUrl + HandlerConstants.IDENTITY_APP_MGT_ENDPOINT;;
+        String identityAppMgtUrl = iotsCoreUrl + HandlerConstants.IDENTITY_APP_MGT_ENDPOINT;
 
         HttpPost getApplicationEndpoint = new HttpPost(identityAppMgtUrl);
         getApplicationEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +

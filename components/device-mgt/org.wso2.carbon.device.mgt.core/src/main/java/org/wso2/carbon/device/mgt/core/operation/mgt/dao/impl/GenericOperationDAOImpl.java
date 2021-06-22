@@ -53,8 +53,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -167,7 +165,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
         try {
             Connection connection = OperationManagementDAOFactory.getConnection();
             StringBuilder query = new StringBuilder("SELECT OPERATION_ID, ENROLMENT_ID FROM DM_ENROLMENT_OP_MAPPING " +
-                    "WHERE OPERATION_CODE = ? AND STATUS = ? AND ENROLMENT_ID IN (");
+                    "WHERE OPERATION_CODE = ? AND STATUS IN ('NOTNOW', 'PENDING') AND ENROLMENT_ID IN (");
             for (int i = 0; i < enrolmentIds.length; i++) {
                 query.append(" ?,");
             }
@@ -175,10 +173,9 @@ public class GenericOperationDAOImpl implements OperationDAO {
             query.append(")");
             stmt = connection.prepareStatement(query.toString());
             stmt.setString(1, operationCode);
-            stmt.setString(2, Operation.Status.PENDING.toString());
 
             for (int i = 0; i < enrolmentIds.length; i++) {
-                stmt.setInt(i + 3, enrolmentIds[i]);
+                stmt.setInt(i + 2, enrolmentIds[i]);
             }
 
             rs = stmt.executeQuery();
@@ -324,7 +321,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
             for (int i = 0; i < operationResponseIds.size(); i++) {
                 builder.append("?,");
             }
-            sql1 += builder.deleteCharAt(builder.length() - 1).toString() + ")";
+            sql1 += builder.deleteCharAt(builder.length() - 1) + ")";
             stmt = conn.prepareStatement(sql1);
             int i;
             for (i = 0; i < operationResponseIds.size(); i++) {

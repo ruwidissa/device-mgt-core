@@ -1,0 +1,57 @@
+<!--
+  ~ Copyright (C) 2018 - 2020 Entgra (Pvt) Ltd, Inc - All Rights Reserved.
+  ~
+  ~ Unauthorised copying/redistribution of this file, via any medium is strictly prohibited.
+  ~
+  ~ Licensed under the Entgra Commercial License, Version 1.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://entgra.io/licenses/entgra-commercial/1.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<datasources-configuration xmlns:svns="http://org.wso2.securevault/configuration">
+	<providers>
+		<provider>org.wso2.carbon.ndatasource.rdbms.RDBMSDataSourceReader</provider>
+	</providers>
+	<datasources>
+		<datasource>
+			<name>HeartBeat_DS</name>
+			<description>The datasource Server Heart Beat</description>
+			<jndiConfig>
+				<name>jdbc/HeartBeat_DS</name>
+			</jndiConfig>
+			<definition type="RDBMS">
+				<configuration>
+				{% if database.heart_beat is defined %}
+                                        <url>{{database.heart_beat.url}}</url>
+                                        <username>{{database.heart_beat.username}}</username>
+                                        <password>{{database.heart_beat.password}}</password>
+                                        <driverClassName>{{database.heart_beat.driver}}</driverClassName>
+                                        <validationQuery>{{database.heart_beat.validationQuery}}</validationQuery>
+                                        {% for property_name,property_value in database.heart_beat.pool_options.items() %}
+                                        <{{property_name}}>{{property_value}}</{{property_name}}>
+                                        {% endfor %}
+                                {% else %}
+					<url>jdbc:mysql://localhost:3306/heart_beat</url>
+					<username>root</username>
+					<password>root</password>
+					<driverClassName>com.mysql.jdbc.Driver</driverClassName>
+					<maxActive>50</maxActive>
+					<maxWait>60000</maxWait>
+					<testOnBorrow>true</testOnBorrow>
+					<validationQuery>SELECT 1</validationQuery>
+					<validationInterval>30000</validationInterval>
+			        {% endif %}
+				</configuration>
+			</definition>
+		</datasource>
+	</datasources>
+</datasources-configuration>
+

@@ -17,6 +17,7 @@
  */
 
 package org.wso2.carbon.device.mgt.core.geo.task;
+
 public interface EventCreateCallback {
     void onCompleteEventOperation(Object values);
 }

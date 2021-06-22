@@ -274,7 +274,7 @@ public class DAOUtil {
             }
 
             subscription.setStatus(ExecutionStatus.valueOf(rs.getString("STATUS")));
-            subscription.setScheduledAt(rs.getTimestamp("SCHEDULED_AT").toLocalDateTime());
+            subscription.setScheduledAt(rs.getLong("SCHEDULED_AT"));
             subscription.setScheduledBy(rs.getString("SCHEDULED_BY"));
             subscription.setDeleted(rs.getBoolean("DELETED"));
             subscriptionDTOS.add(subscription);

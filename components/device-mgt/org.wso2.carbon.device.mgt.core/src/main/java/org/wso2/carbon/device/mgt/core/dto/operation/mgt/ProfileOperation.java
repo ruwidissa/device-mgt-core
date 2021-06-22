@@ -22,13 +22,12 @@ import java.io.Serializable;
 
 public class ProfileOperation extends ConfigOperation implements Serializable {
 
-    public Type getType() {
-        return Type.PROFILE;
+    public ProfileOperation() {
+        super();
     }
 
-
-    public Control getControl(){
-        return Control.REPEAT;
+    public Type getType() {
+        return Type.PROFILE;
     }
 
 }

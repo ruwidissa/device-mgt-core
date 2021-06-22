@@ -332,12 +332,15 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId) throws
+    public List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId, String actionStatus, String action) throws
             ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting device subscriptions for the application release id " + appReleaseId
                     + " from the database");
         }
+        boolean isActionStatusProvided = false;
+        boolean isActionProvided = false;
+        int index = 1;
         String sql = "SELECT "
                 + "DS.ID AS ID, "
                 + "DS.SUBSCRIBED_BY AS SUBSCRIBED_BY, "
@@ -350,11 +353,30 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 + "DS.DM_DEVICE_ID AS DEVICE_ID "
                 + "FROM AP_DEVICE_SUBSCRIPTION DS "
                 + "WHERE DS.AP_APP_RELEASE_ID = ? AND DS.TENANT_ID=?";
+
+        if (actionStatus != null && !actionStatus.isEmpty()) {
+            sql += " AND DS.STATUS= ?";
+            isActionStatusProvided = true;
+        }
+        if (action != null && !action.isEmpty()) {
+            sql += " AND DS.UNSUBSCRIBED= ?";
+            isActionProvided = true;
+        }
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, appReleaseId);
-                stmt.setInt(2, tenantId);
+                stmt.setInt(index++, appReleaseId);
+                stmt.setInt(index++, tenantId);
+                if (isActionStatusProvided) {
+                    stmt.setString(index++, actionStatus);
+                }
+                if (isActionProvided) {
+                    if (action.equals("SUBSCRIBED")) {
+                        stmt.setString(index, "FALSE");
+                    } else {
+                        stmt.setString(index, "TRUE");
+                    }
+                }
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully retrieved device subscriptions for application release id "
@@ -765,7 +787,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 stmt.setString(2, subscriptionDTO.getApplicationUUID());
                 stmt.setString(3, subscriptionDTO.getSubscribersString());
                 stmt.setString(4, ExecutionStatus.PENDING.toString());
-                stmt.setTimestamp(5, Timestamp.valueOf(subscriptionDTO.getScheduledAt()));
+                stmt.setLong(5, subscriptionDTO.getScheduledAt());
                 stmt.setTimestamp(6, new Timestamp(calendar.getTime().getTime()));
                 stmt.setString(7, subscriptionDTO.getScheduledBy());
                 stmt.setBoolean(8, false);
@@ -785,7 +807,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public boolean updateScheduledSubscription(int id, LocalDateTime scheduledAt, String scheduledBy)
+    public boolean updateScheduledSubscription(int id, long scheduledAt, String scheduledBy)
             throws ApplicationManagementDAOException {
         String sql = "UPDATE AP_SCHEDULED_SUBSCRIPTION "
                      + "SET "
@@ -797,7 +819,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 Calendar calendar = Calendar.getInstance();
-                stmt.setTimestamp(1, Timestamp.valueOf(scheduledAt));
+                stmt.setLong(1, scheduledAt);
                 stmt.setString(2, scheduledBy);
                 stmt.setTimestamp(3, new Timestamp(calendar.getTime().getTime()));
                 stmt.setInt(4, id);
@@ -1037,7 +1059,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, ExecutionStatus.PENDING.toString());
                 stmt.setBoolean(2, false);
-                stmt.setTimestamp(3, new Timestamp(Calendar.getInstance().getTime().getTime()));
+                stmt.setLong(3, Calendar.getInstance().getTime().getTime() / 1000);
                 try (ResultSet rs = stmt.executeQuery()) {
                     return DAOUtil.loadScheduledSubscriptions(rs);
                 }

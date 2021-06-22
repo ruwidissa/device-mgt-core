@@ -21,14 +21,13 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>webapp-authenticator-framework</artifactId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.devicemgt</groupId>
     <artifactId>org.wso2.carbon.webapp.authenticator.framework</artifactId>
-    <version>4.1.16-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Web Application Authenticator Framework Bundle</name>
     <description>WSO2 Carbon - Web Application Authenticator Framework Bundle</description>
@@ -63,13 +62,13 @@
                             javax.xml.bind.annotation,
                             javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
                             javax.xml.validation,
-                            org.apache.catalina,
-                            org.apache.catalina.connector,
-                            org.apache.catalina.util,
+                            <!--org.apache.catalina,-->
+                            <!--org.apache.catalina.connector,-->
+                            <!--org.apache.catalina.util,-->
                             org.apache.commons.logging,
-                            org.apache.coyote,
-                            org.apache.tomcat.util.buf,
-                            org.apache.tomcat.util.http,
+                            <!--org.apache.coyote,-->
+                            <!--org.apache.tomcat.util.buf,-->
+                            <!--org.apache.tomcat.util.http,-->
                             org.osgi.service.component,
                             org.osgi.framework,
                             org.w3c.dom,
@@ -106,7 +105,7 @@
                             org.apache.commons.pool.impl,
                             org.apache.http.conn,
                             org.apache.http.impl.conn,
-                            javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
+                            <!--javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",-->
                             javax.xml.stream,
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.wso2.carbon.registry.core.*,

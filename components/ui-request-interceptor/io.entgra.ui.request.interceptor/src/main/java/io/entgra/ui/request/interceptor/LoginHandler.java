@@ -24,6 +24,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.entgra.ui.request.interceptor.beans.AuthData;
+import io.entgra.ui.request.interceptor.cache.LoginCacheManager;
+import io.entgra.ui.request.interceptor.cache.OAuthApp;
+import io.entgra.ui.request.interceptor.cache.OAuthAppCacheKey;
 import io.entgra.ui.request.interceptor.exceptions.LoginException;
 import io.entgra.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.ui.request.interceptor.util.HandlerUtil;
@@ -36,6 +39,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
+import org.json.JSONString;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -56,6 +60,7 @@ public class LoginHandler extends HttpServlet {
     private static String password;
     private static String gatewayUrl;
     private static String uiConfigUrl;
+    private static String iotsCoreUrl;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -66,34 +71,70 @@ public class LoginHandler extends HttpServlet {
                 httpSession.invalidate();
             }
             httpSession = req.getSession(true);
-            //setting session to expiry in 5 minutes
-            httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
 
             JsonObject uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
-
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
+            int sessionTimeOut = Integer.parseInt(String.valueOf(uiConfigJsonObject.get("sessionTimeOut")));
 
-            HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
-            apiRegEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
-                    .encodeToString((username + HandlerConstants.COLON + password).getBytes()));
-            apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
-            apiRegEndpoint.setEntity(HandlerUtil.constructAppRegPayload(tags, HandlerConstants.PUBLISHER_APPLICATION_NAME, username, password));
+            //setting session to expire in 1h
+            httpSession.setMaxInactiveInterval(sessionTimeOut);
 
-            ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
+            // Check if OAuth app cache exists. If not create a new application.
+            LoginCacheManager loginCacheManager = new LoginCacheManager();
+            loginCacheManager.initializeCacheManager();
+            OAuthAppCacheKey oAuthAppCacheKey = new OAuthAppCacheKey(HandlerConstants.PUBLISHER_APPLICATION_NAME, username);
+            OAuthApp oAuthApp = loginCacheManager.getOAuthAppCache(oAuthAppCacheKey);
 
-            if (clientAppResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-                HandlerUtil.handleError(resp, clientAppResponse);
-                return;
+            if (oAuthApp == null) {
+                HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
+                apiRegEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
+                        .encodeToString((username + HandlerConstants.COLON + password).getBytes()));
+                apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+                apiRegEndpoint.setEntity(HandlerUtil.constructAppRegPayload(tags, HandlerConstants.PUBLISHER_APPLICATION_NAME, username, password));
+
+                ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
+
+                if (clientAppResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
+                    HandlerUtil.handleError(resp, clientAppResponse);
+                    return;
+                }
+
+                if (clientAppResponse.getCode() == HttpStatus.SC_CREATED) {
+                    JsonParser jsonParser = new JsonParser();
+                    JsonElement jClientAppResult = jsonParser.parse(clientAppResponse.getData());
+                    String clientId = null;
+                    String clientSecret = null;
+                    String encodedClientApp = null;
+                    if (jClientAppResult.isJsonObject()) {
+                        JsonObject jClientAppResultAsJsonObject = jClientAppResult.getAsJsonObject();
+                        clientId = jClientAppResultAsJsonObject.get("client_id").getAsString();
+                        clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
+                        encodedClientApp = Base64.getEncoder()
+                                .encodeToString((clientId + HandlerConstants.COLON + clientSecret).getBytes());
+
+                        oAuthAppCacheKey = new OAuthAppCacheKey(HandlerConstants.PUBLISHER_APPLICATION_NAME, username);
+                        oAuthApp = new OAuthApp(
+                                HandlerConstants.PUBLISHER_APPLICATION_NAME,
+                                username,
+                                clientId,
+                                clientSecret,
+                                encodedClientApp
+                        );
+                        loginCacheManager.addOAuthAppToCache(oAuthAppCacheKey, oAuthApp);
+                    }
+
+                    if (getTokenAndPersistInSession(req, resp, clientId, clientSecret, encodedClientApp, scopes)) {
+                        ProxyResponse proxyResponse = new ProxyResponse();
+                        proxyResponse.setCode(HttpStatus.SC_OK);
+                        HandlerUtil.handleSuccess(resp, proxyResponse);
+                        return;
+                    }
+                }
+                HandlerUtil.handleError(resp, null);
+            } else {
+                getTokenAndPersistInSession(req, resp, oAuthApp.getClientId(), oAuthApp.getClientSecret(), oAuthApp.getEncodedClientApp(), scopes);
             }
-            if (clientAppResponse.getCode() == HttpStatus.SC_CREATED && getTokenAndPersistInSession(req, resp,
-                    clientAppResponse.getData(), scopes)) {
-                ProxyResponse proxyResponse = new ProxyResponse();
-                proxyResponse.setCode(HttpStatus.SC_OK);
-                HandlerUtil.handleSuccess(resp, proxyResponse);
-                return;
-            }
-            HandlerUtil.handleError(resp, null);
         } catch (IOException e) {
             log.error("Error occurred while sending the response into the socket. ", e);
         } catch (JsonSyntaxException e) {
@@ -103,57 +144,54 @@ public class LoginHandler extends HttpServlet {
         }
     }
 
-    /***
+    /**
      * Generates token from token endpoint and persists them inside the session
      *
-     * @param req - {@link HttpServletRequest}
-     * @param clientAppResult - clientAppResult
-     * @param scopes - scopes defied in the application-mgt.xml
-     * @throws LoginException - login exception throws when getting token result
+     * @param req              - {@link HttpServletRequest}
+     * @param resp             - {@link HttpServletResponse}
+     * @param clientId         - clientId of the OAuth app
+     * @param clientSecret     - clientSecret of the OAuth app
+     * @param encodedClientApp - Base64 encoded clientId:clientSecret.
+     * @param scopes           - User scopes JSON Array
+     * @return boolean response
+     * @throws LoginException - Throws if any error occurs while getting login response
      */
     private boolean getTokenAndPersistInSession(HttpServletRequest req, HttpServletResponse resp,
-                                                String clientAppResult, JsonArray scopes) throws LoginException {
+                                                String clientId, String clientSecret, String encodedClientApp,
+                                                JsonArray scopes) throws LoginException {
         JsonParser jsonParser = new JsonParser();
         try {
-            JsonElement jClientAppResult = jsonParser.parse(clientAppResult);
-            if (jClientAppResult.isJsonObject()) {
-                JsonObject jClientAppResultAsJsonObject = jClientAppResult.getAsJsonObject();
-                String clientId = jClientAppResultAsJsonObject.get("client_id").getAsString();
-                String clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
-                String encodedClientApp = Base64.getEncoder()
-                        .encodeToString((clientId + HandlerConstants.COLON + clientSecret).getBytes());
 
-                ProxyResponse tokenResultResponse = getTokenResult(encodedClientApp, scopes);
+            ProxyResponse tokenResultResponse = getTokenResult(encodedClientApp, scopes);
 
-                if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                    log.error("Error occurred while invoking the API to get token data.");
-                    HandlerUtil.handleError(resp, tokenResultResponse);
+            if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+                log.error("Error occurred while invoking the API to get token data.");
+                HandlerUtil.handleError(resp, tokenResultResponse);
+                return false;
+            }
+            String tokenResult = tokenResultResponse.getData();
+            if (tokenResult == null) {
+                log.error("Invalid token response is received.");
+                HandlerUtil.handleError(resp, tokenResultResponse);
+                return false;
+            }
+
+            JsonElement jTokenResult = jsonParser.parse(tokenResult);
+            if (jTokenResult.isJsonObject()) {
+                JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
+                HttpSession session = req.getSession(false);
+                if (session == null) {
                     return false;
                 }
-                String tokenResult = tokenResultResponse.getData();
-                if (tokenResult == null) {
-                    log.error("Invalid token response is received.");
-                    HandlerUtil.handleError(resp, tokenResultResponse);
-                    return false;
-                }
-
-                JsonElement jTokenResult = jsonParser.parse(tokenResult);
-                if (jTokenResult.isJsonObject()) {
-                    JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
-                    HttpSession session = req.getSession(false);
-                    if (session == null) {
-                        return false;
-                    }
-                    AuthData authData = new AuthData();
-                    authData.setClientId(clientId);
-                    authData.setClientSecret(clientSecret);
-                    authData.setEncodedClientApp(encodedClientApp);
-                    authData.setAccessToken(jTokenResultAsJsonObject.get("access_token").getAsString());
-                    authData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
-                    authData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
-                    session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
-                    return true;
-                }
+                AuthData authData = new AuthData();
+                authData.setClientId(clientId);
+                authData.setClientSecret(clientSecret);
+                authData.setEncodedClientApp(encodedClientApp);
+                authData.setAccessToken(jTokenResultAsJsonObject.get("access_token").getAsString());
+                authData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
+                authData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
+                session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
+                return true;
             }
             return false;
         } catch (IOException e) {
@@ -167,16 +205,18 @@ public class LoginHandler extends HttpServlet {
      * Define username and password static parameters.
      */
     private static void validateLoginRequest(HttpServletRequest req) throws LoginException {
-        String iotsCorePort = System.getProperty("iot.core.https.port");
+        String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
         if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-            iotsCorePort = System.getProperty("iot.core.http.port");
+            iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
         }
         username = req.getParameter("username");
         password = req.getParameter("password");
-        gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+        gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-        uiConfigUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
+        uiConfigUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                 + HandlerConstants.COLON + iotsCorePort + HandlerConstants.UI_CONFIG_ENDPOINT;
+        iotsCoreUrl = HandlerConstants.HTTPS_PROTOCOL + HandlerConstants.SCHEME_SEPARATOR +
+                System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR) + HandlerConstants.COLON + iotsCorePort;
         if (username == null || password == null) {
             String msg = "Invalid login request. Username or Password is not received for login request.";
             log.error(msg);
@@ -193,7 +233,7 @@ public class LoginHandler extends HttpServlet {
      * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
     private ProxyResponse getTokenResult(String encodedClientApp, JsonArray scopes) throws IOException {
-        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(iotsCoreUrl+ HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
         String scopeString = HandlerUtil.getScopeString(scopes);

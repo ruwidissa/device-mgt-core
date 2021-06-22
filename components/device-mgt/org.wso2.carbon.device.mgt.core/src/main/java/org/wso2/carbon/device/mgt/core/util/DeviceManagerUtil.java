@@ -50,7 +50,6 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.caching.impl.CacheImpl;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 import org.wso2.carbon.device.mgt.common.AppRegistrationCredentials;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistration;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistrationException;
@@ -67,11 +66,11 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
-import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
@@ -128,6 +127,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
+
+//import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 
 public final class DeviceManagerUtil {
 
@@ -595,17 +596,18 @@ public final class DeviceManagerUtil {
         return Caching.getCacheManagerFactory().getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER);
     }
 
-    public static EventsPublisherService getEventPublisherService() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        EventsPublisherService eventsPublisherService =
-                (EventsPublisherService) ctx.getOSGiService(EventsPublisherService.class, null);
-        if (eventsPublisherService == null) {
-            String msg = "Event Publisher service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return eventsPublisherService;
-    }
+    //todo:amalka
+//    public static EventsPublisherService getEventPublisherService() {
+//        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+//        EventsPublisherService eventsPublisherService =
+//                (EventsPublisherService) ctx.getOSGiService(EventsPublisherService.class, null);
+//        if (eventsPublisherService == null) {
+//            String msg = "Event Publisher service has not initialized.";
+//            log.error(msg);
+//            throw new IllegalStateException(msg);
+//        }
+//        return eventsPublisherService;
+//    }
 
     /**
      * Retrieve EventConfigurationProviderService osgi service component

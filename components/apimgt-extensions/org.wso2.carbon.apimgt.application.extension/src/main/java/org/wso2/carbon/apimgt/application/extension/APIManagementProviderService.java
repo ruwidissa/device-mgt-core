@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.application.extension;
 
 import org.wso2.carbon.apimgt.application.extension.dto.ApiApplicationKey;
 import org.wso2.carbon.apimgt.application.extension.exception.APIManagerException;
-import org.wso2.carbon.apimgt.integration.client.store.StoreClient;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 
 /**
@@ -50,28 +49,6 @@ public interface APIManagementProviderService {
     ApiApplicationKey generateAndRetrieveApplicationKeys(String apiApplicationName, String tags[],
                                                          String keyType, String username, boolean isAllowedAllDomains,
                                                          String validityTime) throws APIManagerException;
-
-    /**
-     * Generate and retreive application keys. if the application does exist then
-     * create it and subscribe to apis that are grouped with the tags.
-     *
-     * @param apiApplicationName name of the application.
-     * @param tags               tags of the apis that application needs to be subscribed.
-     * @param keyType            of the application.
-     * @param username           to whom the application is created
-     * @param isAllowedAllDomains application is allowed to all the tenants
-     * @param validityTime       validity period of the application
-     * @param storeClient        Specified store client
-     * @return consumerkey and secrete of the created application.
-     * @throws APIManagerException
-     */
-    ApiApplicationKey generateAndRetrieveApplicationKeys(String apiApplicationName,
-                                                         String tags[],
-                                                         String keyType,
-                                                         String username,
-                                                         boolean isAllowedAllDomains,
-                                                         String validityTime,
-                                                         StoreClient storeClient) throws APIManagerException;
 
     /**
      * Remove APIM Application.

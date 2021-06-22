@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.application.extension.internal;
 
 import org.wso2.carbon.apimgt.application.extension.APIManagementProviderService;
-import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
@@ -35,7 +34,6 @@ public class APIApplicationManagerExtensionDataHolder {
     private TenantManager tenantManager;
     private TenantRegistryLoader tenantRegistryLoader;
     private TenantIndexingLoader indexLoader;
-    private IntegrationClientService integrationClientService;
     private JWTClientManagerService jwtClientManagerService;
 
     private APIApplicationManagerExtensionDataHolder() {
@@ -92,15 +90,6 @@ public class APIApplicationManagerExtensionDataHolder {
 
     public TenantIndexingLoader getIndexLoaderService(){
         return indexLoader;
-    }
-
-    public IntegrationClientService getIntegrationClientService() {
-        return integrationClientService;
-    }
-
-    public void setIntegrationClientService(
-            IntegrationClientService integrationClientService) {
-        this.integrationClientService = integrationClientService;
     }
 
     public JWTClientManagerService getJwtClientManagerService() {

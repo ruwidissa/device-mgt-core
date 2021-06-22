@@ -22,14 +22,13 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>application-mgt-feature</artifactId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.device.application.mgt.server.feature</artifactId>
     <packaging>pom</packaging>
-    <version>4.1.16-SNAPSHOT</version>
 
     <name>WSO2 Carbon - Application Management Server Feature</name>
     <url>https://entgra.io</url>
@@ -59,6 +58,10 @@
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
             <version>${cxf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database.wso2</groupId>
+            <artifactId>h2-database-engine</artifactId>
         </dependency>
 
         <!--<dependency>-->
@@ -104,6 +107,39 @@
                                     </includes>
                                 </resource>
                             </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>create-app-mgt-schema</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <echo message="########### Create Application Management H2 Schema ###########" />
+                                <property name="db.dir" value="target/maven-shared-archive-resources/database" />
+                                <property name="userid" value="wso2carbon" />
+                                <property name="password" value="wso2carbon" />
+                                <property name="dbURL" value="jdbc:h2:file:${basedir}/${db.dir}/WSO2DM_APPM_DB;DB_CLOSE_ON_EXIT=FALSE" />
+
+                                <mkdir dir="${basedir}/${db.dir}" />
+
+                                <sql driver="org.h2.Driver" url="${dbURL}" userid="${userid}" password="${password}" autocommit="true" onerror="continue">
+                                    <classpath refid="maven.dependency.classpath" />
+                                    <classpath refid="maven.compile.classpath" />
+                                    <classpath refid="maven.runtime.classpath" />
+
+                                    <fileset file="${basedir}/src/main/resources/dbscripts/cdm/application-mgt/h2.sql" />
+                                </sql>
+                                <echo message="##################### END ####################" />
+                            </tasks>
                         </configuration>
                     </execution>
                 </executions>

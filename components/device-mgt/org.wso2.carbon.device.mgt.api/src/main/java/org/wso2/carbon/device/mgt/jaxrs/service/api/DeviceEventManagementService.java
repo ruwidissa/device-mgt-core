@@ -67,64 +67,65 @@ import javax.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public interface DeviceEventManagementService {
 
-    @POST
-    @Path("/{type}")
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "POST",
-            value = "Adding the Event Type Definition",
-            notes = "Add the event definition for a device.",
-            tags = "Device Event Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events")
-                    })
-            }
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 200,
-                            message = "OK. \n Successfully added the event defintion.",
-                            responseHeaders = {
-                                    @ResponseHeader(
-                                            name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                    "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                            "Used by caches, or in conditional requests."),
-                            }
-                    ),
-                    @ApiResponse(
-                            code = 400,
-                            message =
-                                    "Bad Request. \n"),
-                    @ApiResponse(
-                            code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported"),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Server error occurred while fetching the " +
-                                    "list of supported device types.",
-                            response = ErrorResponse.class)
-            }
-    )
-    Response deployDeviceTypeEventDefinition(
-            @ApiParam(name = "type", value = "The device type, such as android, ios, and windows.")
-            @PathParam("type")String deviceType,
-            @ApiParam(name = "skipPersist", value = "Is it required to persist the data or not")
-            @QueryParam("skipPersist") boolean skipPersist,
-            @ApiParam(name = "isSharedWithAllTenants", value = "Should artifacts be available to all tenants")
-            @QueryParam("isSharedWithAllTenants") boolean isSharedWithAllTenants,
-            @ApiParam(name = "deviceTypeEvent", value = "Add the data to complete the  DeviceTypeEvent object.",
-                    required = true)
-            @Valid DeviceTypeEvent deviceTypeEvent);
+    //todo:amalka
+//    @POST
+//    @Path("/{type}")
+//    @ApiOperation(
+//            produces = MediaType.APPLICATION_JSON,
+//            httpMethod = "POST",
+//            value = "Adding the Event Type Definition",
+//            notes = "Add the event definition for a device.",
+//            tags = "Device Event Management",
+//            extensions = {
+//                    @Extension(properties = {
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events")
+//                    })
+//            }
+//    )
+//    @ApiResponses(
+//            value = {
+//                    @ApiResponse(
+//                            code = 200,
+//                            message = "OK. \n Successfully added the event defintion.",
+//                            responseHeaders = {
+//                                    @ResponseHeader(
+//                                            name = "Content-Type",
+//                                            description = "The content type of the body"),
+//                                    @ResponseHeader(
+//                                            name = "ETag",
+//                                            description = "Entity Tag of the response resource.\n" +
+//                                                    "Used by caches, or in conditional requests."),
+//                                    @ResponseHeader(
+//                                            name = "Last-Modified",
+//                                            description =
+//                                                    "Date and time the resource was last modified.\n" +
+//                                                            "Used by caches, or in conditional requests."),
+//                            }
+//                    ),
+//                    @ApiResponse(
+//                            code = 400,
+//                            message =
+//                                    "Bad Request. \n"),
+//                    @ApiResponse(
+//                            code = 406,
+//                            message = "Not Acceptable.\n The requested media type is not supported"),
+//                    @ApiResponse(
+//                            code = 500,
+//                            message = "Internal Server Error. \n Server error occurred while fetching the " +
+//                                    "list of supported device types.",
+//                            response = ErrorResponse.class)
+//            }
+//    )
+//    Response deployDeviceTypeEventDefinition(
+//            @ApiParam(name = "type", value = "The device type, such as android, ios, and windows.")
+//            @PathParam("type")String deviceType,
+//            @ApiParam(name = "skipPersist", value = "Is it required to persist the data or not")
+//            @QueryParam("skipPersist") boolean skipPersist,
+//            @ApiParam(name = "isSharedWithAllTenants", value = "Should artifacts be available to all tenants")
+//            @QueryParam("isSharedWithAllTenants") boolean isSharedWithAllTenants,
+//            @ApiParam(name = "deviceTypeEvent", value = "Add the data to complete the  DeviceTypeEvent object.",
+//                    required = true)
+//            @Valid DeviceTypeEvent deviceTypeEvent);
 
     @DELETE
     @Path("/{type}")
@@ -178,183 +179,186 @@ public interface DeviceEventManagementService {
             "ios, and windows.", required = false)
                                               @PathParam("type")String deviceType);
 
-    @GET
-    @Path("/{type}/{deviceId}")
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "Getting Device Events",
-            notes = "Get the events for the device.",
-            tags = "Device Event Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events:view")
-                    })
-            }
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 200,
-                            message = "OK. \n Successfully fetched the event definition.",
-                            response = EventRecords.class,
-                            responseHeaders = {
-                                    @ResponseHeader(
-                                            name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                    "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                            "Used by caches, or in conditional requests."),
-                            }
-                    ),
-                    @ApiResponse(
-                            code = 400,
-                            message =
-                                    "Bad Request. \n"),
-                    @ApiResponse(
-                            code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported"),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Server error occurred while fetching the " +
-                                    "list of supported device types.",
-                            response = ErrorResponse.class)
-            }
-    )
-    Response getData(@ApiParam(name = "deviceId", value = "id of the device ", required = false)
-                     @PathParam("deviceId") String deviceId,
-                     @ApiParam(name = "from", value = "unix timestamp to retrieve", required = false)
-                     @QueryParam("from") long from,
-                     @ApiParam(name = "to", value = "unix time to retrieve", required = false)
-                     @QueryParam("to") long to,
-                     @ApiParam(name = "type", value = "name of the device type", required = false)
-                     @PathParam("type")  String deviceType,
-                     @ApiParam(name = "offset", value = "offset of the records that needs to be picked up", required = false)
-                     @QueryParam("offset") int offset,
-                     @ApiParam(name = "limit", value = "limit of the records that needs to be picked up", required = false)
-                     @QueryParam("limit") int limit);
+    //todo:amalka
+//    @GET
+//    @Path("/{type}/{deviceId}")
+//    @ApiOperation(
+//            produces = MediaType.APPLICATION_JSON,
+//            httpMethod = "GET",
+//            value = "Getting Device Events",
+//            notes = "Get the events for the device.",
+//            tags = "Device Event Management",
+//            extensions = {
+//                    @Extension(properties = {
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events:view")
+//                    })
+//            }
+//    )
+//    @ApiResponses(
+//            value = {
+//                    @ApiResponse(
+//                            code = 200,
+//                            message = "OK. \n Successfully fetched the event definition.",
+//                            response = EventRecords.class,
+//                            responseHeaders = {
+//                                    @ResponseHeader(
+//                                            name = "Content-Type",
+//                                            description = "The content type of the body"),
+//                                    @ResponseHeader(
+//                                            name = "ETag",
+//                                            description = "Entity Tag of the response resource.\n" +
+//                                                    "Used by caches, or in conditional requests."),
+//                                    @ResponseHeader(
+//                                            name = "Last-Modified",
+//                                            description =
+//                                                    "Date and time the resource was last modified.\n" +
+//                                                            "Used by caches, or in conditional requests."),
+//                            }
+//                    ),
+//                    @ApiResponse(
+//                            code = 400,
+//                            message =
+//                                    "Bad Request. \n"),
+//                    @ApiResponse(
+//                            code = 406,
+//                            message = "Not Acceptable.\n The requested media type is not supported"),
+//                    @ApiResponse(
+//                            code = 500,
+//                            message = "Internal Server Error. \n Server error occurred while fetching the " +
+//                                    "list of supported device types.",
+//                            response = ErrorResponse.class)
+//            }
+//    )
+//    Response getData(@ApiParam(name = "deviceId", value = "id of the device ", required = false)
+//                     @PathParam("deviceId") String deviceId,
+//                     @ApiParam(name = "from", value = "unix timestamp to retrieve", required = false)
+//                     @QueryParam("from") long from,
+//                     @ApiParam(name = "to", value = "unix time to retrieve", required = false)
+//                     @QueryParam("to") long to,
+//                     @ApiParam(name = "type", value = "name of the device type", required = false)
+//                     @PathParam("type")  String deviceType,
+//                     @ApiParam(name = "offset", value = "offset of the records that needs to be picked up", required = false)
+//                     @QueryParam("offset") int offset,
+//                     @ApiParam(name = "limit", value = "limit of the records that needs to be picked up", required = false)
+//                     @QueryParam("limit") int limit);
 
-    @GET
-    @Path("last-known/{type}/{deviceId}")
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "Getting Last Known Device Events",
-            notes = "Get the last known events for the device.",
-            tags = "Device Event Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events:view")
-                    })
-            }
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 200,
-                            message = "OK. \n Successfully fetched the event.",
-                            response = EventRecords.class,
-                            responseHeaders = {
-                                    @ResponseHeader(
-                                            name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                    "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                            "Used by caches, or in conditional requests."),
-                            }
-                    ),
-                    @ApiResponse(
-                            code = 400,
-                            message =
-                                    "Bad Request. \n"),
-                    @ApiResponse(
-                            code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported"),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Server error occurred while fetching the " +
-                                    "list of supported device types.",
-                            response = ErrorResponse.class)
-            }
-    )
-    Response getLastKnownData(@ApiParam(name = "deviceId", value = "id of the device ", required = true)
-                              @PathParam("deviceId") String deviceId,
-                              @ApiParam(name = "type", value = "name of the device type", required = true)
-                              @PathParam("type") String deviceType,
-                              @ApiParam(name = "limit", value = "limit of the records that needs to be picked up", required = false)
-                              @QueryParam("limit") int limit);
+    //todo:amalka
+//    @GET
+//    @Path("last-known/{type}/{deviceId}")
+//    @ApiOperation(
+//            produces = MediaType.APPLICATION_JSON,
+//            httpMethod = "GET",
+//            value = "Getting Last Known Device Events",
+//            notes = "Get the last known events for the device.",
+//            tags = "Device Event Management",
+//            extensions = {
+//                    @Extension(properties = {
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events:view")
+//                    })
+//            }
+//    )
+//    @ApiResponses(
+//            value = {
+//                    @ApiResponse(
+//                            code = 200,
+//                            message = "OK. \n Successfully fetched the event.",
+//                            response = EventRecords.class,
+//                            responseHeaders = {
+//                                    @ResponseHeader(
+//                                            name = "Content-Type",
+//                                            description = "The content type of the body"),
+//                                    @ResponseHeader(
+//                                            name = "ETag",
+//                                            description = "Entity Tag of the response resource.\n" +
+//                                                    "Used by caches, or in conditional requests."),
+//                                    @ResponseHeader(
+//                                            name = "Last-Modified",
+//                                            description =
+//                                                    "Date and time the resource was last modified.\n" +
+//                                                            "Used by caches, or in conditional requests."),
+//                            }
+//                    ),
+//                    @ApiResponse(
+//                            code = 400,
+//                            message =
+//                                    "Bad Request. \n"),
+//                    @ApiResponse(
+//                            code = 406,
+//                            message = "Not Acceptable.\n The requested media type is not supported"),
+//                    @ApiResponse(
+//                            code = 500,
+//                            message = "Internal Server Error. \n Server error occurred while fetching the " +
+//                                    "list of supported device types.",
+//                            response = ErrorResponse.class)
+//            }
+//    )
+//    Response getLastKnownData(@ApiParam(name = "deviceId", value = "id of the device ", required = true)
+//                              @PathParam("deviceId") String deviceId,
+//                              @ApiParam(name = "type", value = "name of the device type", required = true)
+//                              @PathParam("type") String deviceType,
+//                              @ApiParam(name = "limit", value = "limit of the records that needs to be picked up", required = false)
+//                              @QueryParam("limit") int limit);
 
-    @GET
-    @Path("filter/{type}/{parameter}")
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "Getting the filtered devices",
-            notes = "Get the list of devices based on the filter parameter",
-            tags = "Device Event Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events:view")
-                    })
-            }
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 200,
-                            message = "OK. \n Successfully fetched the event.",
-                            response = EventRecords.class,
-                            responseHeaders = {
-                                    @ResponseHeader(
-                                            name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                    "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                            "Used by caches, or in conditional requests."),
-                            }
-                    ),
-                    @ApiResponse(
-                            code = 400,
-                            message =
-                                    "Bad Request. \n"),
-                    @ApiResponse(
-                            code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported"),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Server error occurred while fetching the " +
-                                    "list of supported device types.",
-                            response = ErrorResponse.class)
-            }
-    )
-    Response getFilteredDevices(
-            @ApiParam(name = "type", value = "name of the device type", required = true)
-            @PathParam("type") String deviceType,
-            @ApiParam(name = "type", value = "name of the parameter", required = true)
-            @PathParam("type") String parameter,
-            @ApiParam(name = "limit", value = "minimum value the parameter can have", required = false)
-            @QueryParam("min") double min,
-            @ApiParam(name = "max", value = "max value the parameter can have", required = false)
-            @QueryParam("max") double max
-    );
+    //todo:amalka
+//    @GET
+//    @Path("filter/{type}/{parameter}")
+//    @ApiOperation(
+//            produces = MediaType.APPLICATION_JSON,
+//            httpMethod = "GET",
+//            value = "Getting the filtered devices",
+//            notes = "Get the list of devices based on the filter parameter",
+//            tags = "Device Event Management",
+//            extensions = {
+//                    @Extension(properties = {
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events:view")
+//                    })
+//            }
+//    )
+//    @ApiResponses(
+//            value = {
+//                    @ApiResponse(
+//                            code = 200,
+//                            message = "OK. \n Successfully fetched the event.",
+//                            response = EventRecords.class,
+//                            responseHeaders = {
+//                                    @ResponseHeader(
+//                                            name = "Content-Type",
+//                                            description = "The content type of the body"),
+//                                    @ResponseHeader(
+//                                            name = "ETag",
+//                                            description = "Entity Tag of the response resource.\n" +
+//                                                    "Used by caches, or in conditional requests."),
+//                                    @ResponseHeader(
+//                                            name = "Last-Modified",
+//                                            description =
+//                                                    "Date and time the resource was last modified.\n" +
+//                                                            "Used by caches, or in conditional requests."),
+//                            }
+//                    ),
+//                    @ApiResponse(
+//                            code = 400,
+//                            message =
+//                                    "Bad Request. \n"),
+//                    @ApiResponse(
+//                            code = 406,
+//                            message = "Not Acceptable.\n The requested media type is not supported"),
+//                    @ApiResponse(
+//                            code = 500,
+//                            message = "Internal Server Error. \n Server error occurred while fetching the " +
+//                                    "list of supported device types.",
+//                            response = ErrorResponse.class)
+//            }
+//    )
+//    Response getFilteredDevices(
+//            @ApiParam(name = "type", value = "name of the device type", required = true)
+//            @PathParam("type") String deviceType,
+//            @ApiParam(name = "type", value = "name of the parameter", required = true)
+//            @PathParam("type") String parameter,
+//            @ApiParam(name = "limit", value = "minimum value the parameter can have", required = false)
+//            @QueryParam("min") double min,
+//            @ApiParam(name = "max", value = "max value the parameter can have", required = false)
+//            @QueryParam("max") double max
+//    );
 
     @GET
     @Path("/{type}")

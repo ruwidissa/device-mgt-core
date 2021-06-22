@@ -21,13 +21,12 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>application-mgt</artifactId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.device.application.mgt.common</artifactId>
-    <version>4.1.16-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Application Management Common</name>
     <description>WSO2 Carbon - Application Management Common</description>
@@ -56,7 +55,7 @@
                             io.swagger.annotations.*;resolution:=optional,
                             com.fasterxml.jackson.annotation,
                             javax.validation.constraints,
-                            javax.xml.bind.annotation.*,
+                            javax.xml.bind.annotation; version="${javax.xml.bind.imp.pkg.version}",
                         </Import-Package>
                         <Export-Package>
                             org.wso2.carbon.device.application.mgt.common.*

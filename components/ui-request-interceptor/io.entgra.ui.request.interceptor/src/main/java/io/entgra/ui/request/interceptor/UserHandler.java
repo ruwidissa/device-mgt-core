@@ -33,6 +33,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
+import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -41,6 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Base64;
 
 @MultipartConfig
 @WebServlet("/user")
@@ -52,8 +55,9 @@ public class UserHandler extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             String serverUrl =
-                    req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
-                            + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
+                    req.getScheme() + HandlerConstants.SCHEME_SEPARATOR +
+                            System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
+                            + HandlerConstants.COLON + HandlerUtil.getCorePort(req.getScheme());
             HttpSession httpSession = req.getSession(false);
             if (httpSession == null) {
                 HandlerUtil.sendUnAuthorizeResponse(resp);
@@ -70,6 +74,11 @@ public class UserHandler extends HttpServlet {
 
             HttpPost tokenEndpoint = new HttpPost(serverUrl + HandlerConstants.INTROSPECT_ENDPOINT);
             tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
+            DeviceManagementConfig dmc = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+            String adminUsername = dmc.getKeyManagerConfigurations().getAdminUsername();
+            String adminPassword = dmc.getKeyManagerConfigurations().getAdminPassword();
+            tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
+                    .encodeToString((adminUsername + HandlerConstants.COLON + adminPassword).getBytes()));
             StringEntity tokenEPPayload = new StringEntity("token=" + accessToken,
                     ContentType.APPLICATION_FORM_URLENCODED);
             tokenEndpoint.setEntity(tokenEPPayload);

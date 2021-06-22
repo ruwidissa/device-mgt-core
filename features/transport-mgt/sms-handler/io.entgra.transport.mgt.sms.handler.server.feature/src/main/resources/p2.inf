@@ -1,4 +1,5 @@
 instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.transport.mgt.sms.handler.server_${feature.version}/conf/sms-config.xml,target:${installFolder}/../../conf/sms-config.xml,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.transport.mgt.sms.handler.server_${feature.version}/conf_templates/,target:${installFolder}/../../resources/conf/,overwrite:true);\
 
 instructions.unconfigure = \

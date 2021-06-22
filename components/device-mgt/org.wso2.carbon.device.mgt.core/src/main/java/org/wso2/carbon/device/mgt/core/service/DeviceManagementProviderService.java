@@ -62,6 +62,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoQuery;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
@@ -74,8 +75,8 @@ import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
-import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
-import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -827,8 +828,7 @@ public interface DeviceManagementProviderService {
 
     List<Integer> getDeviceEnrolledTenants() throws DeviceManagementException;
 
-    List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
-                                     int geohashLength) throws DeviceManagementException;
+    List<GeoCluster> findGeoClusters(GeoQuery geoQuery) throws DeviceManagementException;
 
     int getDeviceCountOfTypeByStatus(String deviceType, String deviceStatus) throws DeviceManagementException;
 
@@ -905,14 +905,12 @@ public interface DeviceManagementProviderService {
      * This method retrieves a list of subscribed devices.
      *
      * @param devicesIds devices ids of the subscribed devices.
-     * @param offsetValue offset value for get paginated request.
-     * @param limitValue limit value for get paginated request.
-     * @param status status of the devices.
+     * @param request    paginated request object.
      * @return {@link PaginationResult}
      * @throws DeviceManagementException if any service level or DAO level error occurs.
      */
-    PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue,
-                                             List<Integer> devicesIds, List<String> status) throws DeviceManagementException;
+    PaginationResult getAppSubscribedDevices(PaginationRequest request, List<Integer> devicesIds)
+            throws DeviceManagementException;
 
     /**
      * This method is used to get a list of applications installed in all enrolled devices

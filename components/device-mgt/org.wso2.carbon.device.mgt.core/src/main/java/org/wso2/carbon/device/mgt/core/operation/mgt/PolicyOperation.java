@@ -18,6 +18,7 @@
 package org.wso2.carbon.device.mgt.core.operation.mgt;
 
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
+
 import java.util.List;
 
 public class PolicyOperation extends Operation {
@@ -25,16 +26,16 @@ public class PolicyOperation extends Operation {
     public static final String POLICY_OPERATION_CODE = "POLICY_BUNDLE";
     private List<ProfileOperation> profileOperations;
 
+    public PolicyOperation() {
+        setControl(Control.REPEAT);
+    }
+
     public List<ProfileOperation> getProfileOperations() {
         return profileOperations;
     }
 
     public void setProfileOperations(List<ProfileOperation> profileOperations) {
         this.profileOperations = profileOperations;
-    }
-
-    public Control getControl(){
-        return Control.REPEAT;
     }
 
 }
