@@ -25,3 +25,4 @@ deploy:
     - mvn $MAVEN_CLI_OPTS deploy -Dmaven.test.skip=true
   only:
     - master@entgra/carbon-device-mgt
+    - kernel-4.6.x@entgra/carbon-device-mgt
