@@ -14,6 +14,23 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2021, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.device.mgt.common.group.mgt;
 
@@ -21,6 +38,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,6 +64,15 @@ public class DeviceGroup implements Serializable {
 
     @ApiModelProperty(name = "status", value = "The status of group that needs updating/retrieval.")
     private String status;
+
+    @ApiModelProperty(name = "parentGroupId", value = "Group ID of parent group")
+    private int parentGroupId;
+
+    @ApiModelProperty(name = "parentPath", value = "Path of parent group")
+    private String parentPath;
+
+    @ApiModelProperty(name = "childrenGroups", value = "Children groups")
+    private List<DeviceGroup> childrenGroups;
 
     public String getStatus() {
         return status;
@@ -103,4 +130,27 @@ public class DeviceGroup implements Serializable {
         this.groupProperties = groupProperties;
     }
 
+    public int getParentGroupId() {
+        return parentGroupId;
+    }
+
+    public void setParentGroupId(int parentGroupId) {
+        this.parentGroupId = parentGroupId;
+    }
+
+    public String getParentPath() {
+        return parentPath;
+    }
+
+    public void setParentPath(String parentPath) {
+        this.parentPath = parentPath;
+    }
+
+    public List<DeviceGroup> getChildrenGroups() {
+        return childrenGroups;
+    }
+
+    public void setChildrenGroups(List<DeviceGroup> childrenGroups) {
+        this.childrenGroups = childrenGroups;
+    }
 }
