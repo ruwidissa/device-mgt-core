@@ -15,6 +15,22 @@
  *   specific language governing permissions and limitations
  *   under the License.
  *
+ *
+ *   Copyright (c) 2021, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.impl.admin;
 
@@ -31,6 +47,10 @@ import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.GroupManagementAdminSe
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 
@@ -71,6 +91,37 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
             String msg = "ErrorResponse occurred while retrieving all groups.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Path("/hierarchy")
+    @Override
+    public Response getGroupsWithHierarchy(
+            @QueryParam("name") String name,
+            @QueryParam("owner") String owner,
+            @QueryParam("status") String status,
+            @QueryParam("requireGroupProps") boolean requireGroupProps,
+            @DefaultValue("3") @QueryParam("depth") int depth,
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("5") @QueryParam("limit") int limit) {
+        try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
+            GroupPaginationRequest request = new GroupPaginationRequest(offset, limit);
+            request.setGroupName(name);
+            request.setOwner(owner);
+            request.setStatus(status);
+            request.setDepth(depth);
+            PaginationResult deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                    .getGroupsWithHierarchy(null, request, requireGroupProps);
+            DeviceGroupList deviceGroupList = new DeviceGroupList();
+            deviceGroupList.setList(deviceGroupsResult.getData());
+            deviceGroupList.setCount(deviceGroupsResult.getRecordsTotal());
+            return Response.status(Response.Status.OK).entity(deviceGroupList).build();
+        } catch (GroupManagementException e) {
+            String error = "Error occurred while retrieving groups with hierarchy.";
+            log.error(error, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
         }
     }
 
