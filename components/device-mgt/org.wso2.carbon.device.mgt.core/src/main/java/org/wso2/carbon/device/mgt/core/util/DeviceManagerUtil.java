@@ -1162,4 +1162,17 @@ public final class DeviceManagerUtil {
                 .getUserStoreManager();
         return userStoreManager.getUserClaimValue(username, claimUri, null);
     }
+
+    /**
+     * Create the parent path that the children groups can have
+     * @param deviceGroup parent group
+     * @return created parent path
+     */
+    public static String createParentPath(DeviceGroup deviceGroup) {
+        if ("/".equals(deviceGroup.getParentPath())) {
+            return deviceGroup.getParentPath() + deviceGroup.getGroupId();
+        } else {
+            return deviceGroup.getParentPath() + "/" + deviceGroup.getGroupId();
+        }
+    }
 }
