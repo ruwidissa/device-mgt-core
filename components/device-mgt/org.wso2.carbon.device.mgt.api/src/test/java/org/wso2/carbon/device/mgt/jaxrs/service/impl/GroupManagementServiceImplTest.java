@@ -15,11 +15,26 @@
  *   specific language governing permissions and limitations
  *   under the License.
  *
+ *
+ *   Copyright (c) 2021, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
  */
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -130,13 +145,14 @@ public class GroupManagementServiceImplTest {
                 .toReturn(groupManagementProviderService);
         PowerMockito.stub(PowerMockito.method(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext"))
                 .toReturn(context);
-        Mockito.doReturn(2).when(groupManagementProviderService).getGroupCount(Mockito.anyString());
+        Mockito.doReturn(2).when(groupManagementProviderService)
+                .getGroupCount(Mockito.anyString(), Mockito.anyString());
         Response response = groupManagementService.getGroupCount();
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "GetGroupCount request failed with valid parameters");
         Mockito.reset(groupManagementProviderService);
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService)
-                .getGroupCount(Mockito.anyString());
+                .getGroupCount(Mockito.anyString(), Mockito.anyString());
         response = groupManagementService.getGroupCount();
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "GetGroupCount request succeeded with in-valid parameters");
@@ -174,16 +190,16 @@ public class GroupManagementServiceImplTest {
     public void testGetGroup() throws GroupManagementException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
-        Mockito.doReturn(new DeviceGroup()).when(groupManagementProviderService).getGroup(1, false);
-        Mockito.doReturn(null).when(groupManagementProviderService).getGroup(2, false);
-        Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).getGroup(3, false);
-        Response response = groupManagementService.getGroup(1, false);
+        Mockito.doReturn(new DeviceGroup()).when(groupManagementProviderService).getGroup(1, false, 1);
+        Mockito.doReturn(null).when(groupManagementProviderService).getGroup(2, false, 1);
+        Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).getGroup(3, false, 1);
+        Response response = groupManagementService.getGroup(1, false, 1);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "getGroup request failed for a request with valid parameters");
-        response = groupManagementService.getGroup(2, false);
+        response = groupManagementService.getGroup(2, false, 1);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
                 "getGroup request returned a group for a non-existing group");
-        response = groupManagementService.getGroup(3, false);
+        response = groupManagementService.getGroup(3, false, 1);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "getGroup request returned a group for a in-valid request");
     }
@@ -216,16 +232,16 @@ public class GroupManagementServiceImplTest {
     public void testDeleteGroup() throws GroupManagementException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
-        Mockito.doReturn(true).when(groupManagementProviderService).deleteGroup(1);
-        Mockito.doReturn(false).when(groupManagementProviderService).deleteGroup(2);
-        Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).deleteGroup(3);
-        Response response = groupManagementService.deleteGroup(1);
+        Mockito.doReturn(true).when(groupManagementProviderService).deleteGroup(1, false);
+        Mockito.doReturn(false).when(groupManagementProviderService).deleteGroup(2, false);
+        Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).deleteGroup(3, false);
+        Response response = groupManagementService.deleteGroup(1, false);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "delete group request failed for a request with valid parameters");
-        response = groupManagementService.deleteGroup(2);
+        response = groupManagementService.deleteGroup(2, false);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
                 "Non-existing group was successfully deleted");
-        response = groupManagementService.deleteGroup(3);
+        response = groupManagementService.deleteGroup(3, false);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "Deletion succeeded with an erroneous condition.");
     }
