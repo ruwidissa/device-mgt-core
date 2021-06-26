@@ -274,16 +274,9 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
     @Path("/permissions")
     @Produces({MediaType.APPLICATION_JSON})
     public Response addPermission(List<String> permissions) {
-//        PermissionManagerService permissionService = DeviceMgtAPIUtils.getPermissionManagerService();
-//        org.wso2.carbon.device.mgt.common.permission.mgt.Permission permission = new org
-//                .wso2.carbon.device.mgt.common.permission.mgt.Permission();
-
         for (String path : permissions) {
-//            permission.setPath(path);
-//            permission.setUrl(path);
             try {
                 PermissionUtils.putPermission(path);
-//                permissionService.addPermission(permission);
             } catch (PermissionManagementException e) {
                 String msg = "Error occurred adding permission";
                 log.error(msg, e);
