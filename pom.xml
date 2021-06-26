@@ -2175,8 +2175,8 @@
         <eclipse.paho.version>1.0.2</eclipse.paho.version>
 
         <!-- Nimbus Jose-->
-        <nimbus.orbit.version>2.26.1.wso2v3</nimbus.orbit.version>
-        <nimbus.orbit.version.range>[2.26.1, 3.0.0)</nimbus.orbit.version.range>
+        <nimbus.orbit.version>7.3.0.wso2v1</nimbus.orbit.version>
+        <nimbus.orbit.version.range>[7.3, 8)</nimbus.orbit.version.range>
 
         <!--javax ws rs version-->
         <javax.ws.rs.version>2.0.1</javax.ws.rs.version>

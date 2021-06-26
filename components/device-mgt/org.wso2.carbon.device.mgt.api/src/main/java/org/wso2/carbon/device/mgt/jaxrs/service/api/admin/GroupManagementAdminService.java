@@ -70,18 +70,21 @@ import javax.ws.rs.core.Response;
                         name = "View groups",
                         description = "",
                         key = "perm:admin-groups:view",
+                        roles = {"admin"},
                         permissions = {"/device-mgt/admin/groups/view"}
                 ),
                 @Scope(
                         name = "Count groups",
                         description = "",
                         key = "perm:admin-groups:count",
+                        roles = {"admin"},
                         permissions = {"/device-mgt/admin/groups/view"}
                 ),
                 @Scope(
                         name = "Add groups",
                         description = "",
                         key = "perm:admin-groups:add",
+                        roles = {"admin"},
                         permissions = {"/device-mgt/admin/groups/add"}
                 )
         }

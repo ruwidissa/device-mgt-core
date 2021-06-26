@@ -68,6 +68,7 @@ import javax.ws.rs.core.Response;
                         name = "Get Application Details",
                         description = "Get application details",
                         key = "perm:app:store:view",
+                        roles = {"Internal/everyone"},
                         permissions = {"/app-mgt/store/application/view"}
                 )
         }

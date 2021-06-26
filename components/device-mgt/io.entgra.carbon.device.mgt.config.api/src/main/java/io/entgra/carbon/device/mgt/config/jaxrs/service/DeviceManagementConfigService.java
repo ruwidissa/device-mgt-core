@@ -71,24 +71,28 @@ import java.util.List;
                 name = "View configurations",
                 description = "",
                 key = "perm:view-configuration",
+                roles = {"Internal/everyone"},
                 permissions = {"/device-mgt/platform-configurations/view"}
         ),
         @Scope(
                 name = "Manage configurations",
                 description = "",
                 key = "perm:manage-configuration",
+                roles = {"Internal/everyone"},
                 permissions = {"/device-mgt/platform-configurations/manage"}
         ),
         @Scope(
                 name = "Getting Details of Device tenants",
                 description = "Getting Details of Device tenants",
                 key = "perm:admin:tenant:view",
+                roles = {"Internal/everyone"},
                 permissions = {"/tenants/view"}
         ),
         @Scope(
                 name = "Add a permission to the permission tree",
                 description = "Add a permission to the permission tree",
                 key = "perm:admin:permissions:add",
+                roles = {"Internal/everyone"},
                 permissions = {"/permissions/add"}
         )
 }

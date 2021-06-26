@@ -73,8 +73,10 @@ import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.permission.mgt.Permission;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
+import org.wso2.carbon.device.mgt.core.cache.APIResourcePermissionCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.GeoCacheKey;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
@@ -136,6 +138,7 @@ public final class DeviceManagerUtil {
     public static final String GENERAL_CONFIG_RESOURCE_PATH = "general";
 
     private  static boolean isDeviceCacheInitialized = false;
+    private  static boolean isAPIResourcePermissionCacheInitialized = false;
     private static boolean isGeoFenceCacheInitialized = false;
 
     public static Document convertToDocument(File file) throws DeviceManagementException {
@@ -663,6 +666,44 @@ public final class DeviceManagerUtil {
         }
     }
 
+    public static void initializeAPIResourcePermissionCache() {
+//        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+//        int deviceCacheExpiry = config.getDeviceCacheConfiguration().getExpiryTime();
+//        long deviceCacheCapacity = config.getDeviceCacheConfiguration().getCapacity();
+        CacheManager manager = getCacheManager();
+//        if (config.getDeviceCacheConfiguration().isEnabled()) {
+            if(!isDeviceCacheInitialized) {
+                isDeviceCacheInitialized = true;
+                if (manager != null) {
+//                    if (deviceCacheExpiry > 0) {
+//                        manager.<DeviceCacheKey, Device>createCacheBuilder(DeviceManagementConstants.DEVICE_CACHE).
+//                                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+//                                        deviceCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
+//                                Duration(TimeUnit.SECONDS, deviceCacheExpiry)).setStoreByValue(true).build();
+//                        if(deviceCacheCapacity > 0 ) {
+//                            ((CacheImpl) manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.DEVICE_CACHE)).
+//                                    setCapacity(deviceCacheCapacity);
+//                        }
+//                    } else {
+                        manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
+//                    }
+                } else {
+//                    if (deviceCacheExpiry > 0) {
+//                        Caching.getCacheManager().
+//                                <DeviceCacheKey, Device>createCacheBuilder(DeviceManagementConstants.DEVICE_CACHE).
+//                                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+//                                        deviceCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
+//                                Duration(TimeUnit.SECONDS, deviceCacheExpiry)).setStoreByValue(true).build();
+//                        ((CacheImpl)(manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.DEVICE_CACHE))).
+//                                setCapacity(deviceCacheCapacity);
+//                    } else {
+                        Caching.getCacheManager().<DeviceCacheKey, Device>getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
+//                    }
+                }
+            }
+//        }
+    }
+
     /**
      * Enable Geofence caching according to the configurations proviced by cdm-config.xml
      */
@@ -720,6 +761,24 @@ public final class DeviceManagerUtil {
             }
         }
         return deviceCache;
+    }
+
+    public static Cache<APIResourcePermissionCacheKey, List<Permission>> getAPIResourcePermissionCache() {
+//        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        CacheManager manager = getCacheManager();
+        Cache<APIResourcePermissionCacheKey, List<Permission>> apiResourcePermissionCache = null;
+//        if (config.getDeviceCacheConfiguration().isEnabled()) {
+            if(!isAPIResourcePermissionCacheInitialized) {
+                initializeAPIResourcePermissionCache();
+            }
+            if (manager != null) {
+                apiResourcePermissionCache = manager.getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
+            } else {
+                apiResourcePermissionCache =  Caching.getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER)
+                        .getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
+            }
+//        }
+        return apiResourcePermissionCache;
     }
 
     /**

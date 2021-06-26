@@ -70,6 +70,7 @@ public class AnnotationProcessor {
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_DESCRIPTION = "description";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_KEY = "key";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_PERMISSIONS = "permissions";
+    private static final String SWAGGER_ANNOTATIONS_PROPERTIES_ROLES = "roles";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_VERSION = "version";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_CONTEXT = "context";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_VALUE = "value";
@@ -78,6 +79,7 @@ public class AnnotationProcessor {
     private static final String DEFAULT_SCOPE_NAME = "default admin scope";
     private static final String DEFAULT_SCOPE_KEY = "perm:admin";
     private static final String DEFAULT_SCOPE_PERMISSION = "/permision/device-mgt";
+    private static final String DEFAULT_SCOPE_ROLE = "admin";
 
     private static final String PERMISSION_PREFIX = "/permission/admin";
 
@@ -217,8 +219,11 @@ public class AnnotationProcessor {
         ApiScope scope;
         String permissions[];
         StringBuilder aggregatedPermissions;
+        String roles[];
+        StringBuilder aggregatedRoles;
         for(int i=0; i<annotatedScopes.length; i++){
             aggregatedPermissions = new StringBuilder();
+            aggregatedRoles = new StringBuilder();
             methodHandler = Proxy.getInvocationHandler(annotatedScopes[i]);
             scope = new ApiScope();
             scope.setName(invokeMethod(scopeClass
@@ -234,7 +239,14 @@ public class AnnotationProcessor {
                 aggregatedPermissions.append(permission);
                 aggregatedPermissions.append(" ");
             }
-            scope.setRoles(aggregatedPermissions.toString().trim());
+            scope.setPermissions(aggregatedPermissions.toString().trim());
+            roles = (String[])methodHandler.invoke(annotatedScopes[i], scopeClass
+                    .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_ROLES, null),null);
+            for (String role : roles) {
+                aggregatedRoles.append(role);
+                aggregatedRoles.append(",");
+            }
+            scope.setRoles(aggregatedRoles.substring(0, aggregatedRoles.lastIndexOf(",")));
             scopes.put(scope.getKey(), scope);
         }
         return scopes;
@@ -288,7 +300,8 @@ public class AnnotationProcessor {
                             scope.setName(DEFAULT_SCOPE_NAME);
                             scope.setDescription(DEFAULT_SCOPE_NAME);
                             scope.setKey(DEFAULT_SCOPE_KEY);
-                            scope.setRoles(DEFAULT_SCOPE_PERMISSION);
+                            scope.setRoles(DEFAULT_SCOPE_ROLE);
+                            scope.setPermissions(DEFAULT_SCOPE_PERMISSION);
                             resource.setScope(scope);
                         }
                     }

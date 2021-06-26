@@ -18,6 +18,8 @@
  */
 package org.wso2.carbon.apimgt.webapp.publisher;
 
+import org.wso2.carbon.apimgt.webapp.publisher.dto.ApiScope;
+import org.wso2.carbon.apimgt.webapp.publisher.dto.ApiUriTemplate;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -32,7 +34,6 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.webapp.publisher.config.WebappPublisherConfig;
-import org.wso2.carbon.apimgt.webapp.publisher.dto.ApiUriTemplate;
 import org.wso2.carbon.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -61,11 +62,26 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(apiConfig.getOwner());
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             APIProvider apiProvider = API_MANAGER_FACTORY.getAPIProvider(apiConfig.getOwner());
-            API api = getAPI(apiConfig);
+            APIIdentifier apiIdentifier = new APIIdentifier(apiConfig.getOwner(), apiConfig.getName(), apiConfig.getVersion());
 
-            if (!apiProvider.isAPIAvailable(api.getId())) {
+            if (!apiProvider.isAPIAvailable(apiIdentifier)) {
+
+                // add new scopes as shared scopes
+                Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain);
+                for (ApiScope apiScope : apiConfig.getScopes()) {
+                    if (!allSharedScopeKeys.contains(apiScope.getKey())) {
+                        Scope scope = new Scope();
+                        scope.setName(apiScope.getName());
+                        scope.setDescription(apiScope.getDescription());
+                        scope.setKey(apiScope.getKey());
+                        scope.setRoles(apiScope.getRoles());
+                        apiProvider.addSharedScope(scope, tenantDomain);
+                    }
+                }
+                API api = getAPI(apiConfig, true);
                 API createdAPI = apiProvider.addAPI(api);
                 if (CREATED_STATUS.equals(createdAPI.getStatus())) {
                     apiProvider.changeLifeCycleStatus(tenantDomain, createdAPI.getUuid(), PUBLISH_ACTION, null);
@@ -73,6 +89,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     apiRevision.setApiUUID(createdAPI.getUuid());
                     apiRevision.setDescription("Initial Revision");
                     String apiRevisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
+
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                     apiRevisionDeployment.setDeployment(API_PUBLISH_ENVIRONMENT);
                     apiRevisionDeployment.setVhost("localhost");
@@ -85,14 +102,83 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 }
             } else {
                 if (WebappPublisherConfig.getInstance().isEnabledUpdateApi()) {
-                    API existingAPI = apiProvider.getAPI(api.getId());
+
+                    // With 4.x to 5.x upgrade
+                    // - there cannot be same local scope assigned in 2 different APIs
+                    // - local scopes will be deprecated in the future, so need to move all scopes as shared scopes
+
+                    // if an api scope is not available as shared scope, but already assigned as local scope -> that means, the scopes available for this API has not moved as shared scopes
+                    // in order to do that :
+                    // 1. update the same API removing scopes from URI templates
+                    // 2. add scopes as shared scopes
+                    // 3. update the API again adding scopes for the URI Templates
+
+                    // if an api scope is not available as shared scope, and not assigned as local scope -> that means, there are new scopes
+                    // 1. add new scopes as shared scopes
+                    // 2. update the API adding scopes for the URI Templates
+
+                    Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain);
+                    Set<ApiScope> scopesToMoveAsSharedScopes = new HashSet<>();
+                    for (ApiScope apiScope : apiConfig.getScopes()) {
+                        // if the scope is not available as shared scope and it is assigned to an API as a local scope
+                        // need remove the local scope and add as a shared scope
+                        if (!allSharedScopeKeys.contains(apiScope.getKey())) {
+                            if (apiProvider.isScopeKeyAssignedLocally(apiIdentifier, apiScope.getKey(), tenantId)) {
+                                // collect scope to move as shared scopes
+                                scopesToMoveAsSharedScopes.add(apiScope);
+                            } else {
+                                // if new scope add as shared scope
+                                Scope scope = new Scope();
+                                scope.setName(apiScope.getName());
+                                scope.setDescription(apiScope.getDescription());
+                                scope.setKey(apiScope.getKey());
+                                scope.setRoles(apiScope.getRoles());
+                                apiProvider.addSharedScope(scope, tenantDomain);
+                            }
+                        } else {
+                            // if already available as shared scope -> update
+                            Scope scope = new Scope();
+                            scope.setName(apiScope.getName());
+                            scope.setDescription(apiScope.getDescription());
+                            scope.setKey(apiScope.getKey());
+                            scope.setRoles(apiScope.getRoles());
+                            apiProvider.updateSharedScope(scope, tenantDomain);
+                        }
+                    }
+
+                    // Get existing API
+                    API existingAPI = apiProvider.getAPI(apiIdentifier);
+
+                    if (scopesToMoveAsSharedScopes.size() > 0) {
+                        // update API to remove local scopes
+                        API api = getAPI(apiConfig, false);
+                        api.setStatus(existingAPI.getStatus());
+                        apiProvider.updateAPI(api);
+
+                        for (ApiScope apiScope : scopesToMoveAsSharedScopes) {
+                            Scope scope = new Scope();
+                            scope.setName(apiScope.getName());
+                            scope.setDescription(apiScope.getDescription());
+                            scope.setKey(apiScope.getKey());
+                            scope.setRoles(apiScope.getRoles());
+                            apiProvider.addSharedScope(scope, tenantDomain);
+                        }
+                    }
+
+                    existingAPI = apiProvider.getAPI(apiIdentifier);
+                    API api = getAPI(apiConfig, true);
                     api.setStatus(existingAPI.getStatus());
                     apiProvider.updateAPI(api);
-                    if (api.getId().getName().equals(existingAPI.getId().getName()) &&
-                            api.getId().getVersion().equals(existingAPI.getId().getVersion())) {
-                        if (CREATED_STATUS.equals(existingAPI.getStatus())) {
-                            apiProvider.changeLifeCycleStatus(tenantDomain, existingAPI.getUuid(), PUBLISH_ACTION, null);
-                        }
+
+                    if (CREATED_STATUS.equals(existingAPI.getStatus())) {
+                        apiProvider.changeLifeCycleStatus(tenantDomain, existingAPI.getUuid(), PUBLISH_ACTION, null);
+                        APIRevision apiRevision = new APIRevision();
+                        apiRevision.setApiUUID(existingAPI.getUuid());
+                        apiRevision.setDescription("Updated Revision");
+                        String apiRevisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
+
+                        List<APIRevisionDeployment> apiRevisionDeploymentList = apiProvider.getAPIRevisionDeploymentList(apiRevisionId);
+                        apiProvider.deployAPIRevision(existingAPI.getUuid(), apiRevisionId, apiRevisionDeploymentList);
                     }
                 }
             }
@@ -105,7 +191,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         }
     }
 
-    private API getAPI(APIConfig config) {
+    private API getAPI(APIConfig config, boolean includeScopes) {
 
         APIIdentifier apiIdentifier = new APIIdentifier(config.getOwner(), config.getName(), config.getVersion());
         API api = new API(apiIdentifier);
@@ -129,13 +215,15 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             uriTemplate.setHTTPVerb(apiUriTemplate.getHttpVerb());
             uriTemplate.setResourceURI(apiUriTemplate.getResourceURI());
             uriTemplate.setUriTemplate(apiUriTemplate.getUriTemplate());
-            Scope scope = new Scope();
-            if (apiUriTemplate.getScope() != null) {
-                scope.setName(apiUriTemplate.getScope().getName());
-                scope.setDescription(apiUriTemplate.getScope().getDescription());
-                scope.setKey(apiUriTemplate.getScope().getKey());
-                scope.setRoles(apiUriTemplate.getScope().getRoles());
-                uriTemplate.setScope(scope);
+            if (includeScopes) {
+                Scope scope = new Scope();
+                if (apiUriTemplate.getScope() != null) {
+                    scope.setName(apiUriTemplate.getScope().getName());
+                    scope.setDescription(apiUriTemplate.getScope().getDescription());
+                    scope.setKey(apiUriTemplate.getScope().getKey());
+                    scope.setRoles(apiUriTemplate.getScope().getRoles());
+                    uriTemplate.setScopes(scope);
+                }
             }
             uriTemplates.add(uriTemplate);
         }

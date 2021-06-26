@@ -67,12 +67,14 @@ import javax.ws.rs.core.Response;
                         name = "Installing an Application (Internal API)",
                         description = "Installing an Application (Internal API)",
                         key = "perm:applications:install",
+                        roles = {"admin"},
                         permissions = {"/device-mgt/applications/manage"}
                 ),
                 @Scope(
                         name = "Uninstalling an Application (Internal API)",
                         description = "Uninstalling an Application (Internal API)",
                         key = "perm:applications:uninstall",
+                        roles = {"admin"},
                         permissions = {"/device-mgt/applications/manage"}
                 )
         }
