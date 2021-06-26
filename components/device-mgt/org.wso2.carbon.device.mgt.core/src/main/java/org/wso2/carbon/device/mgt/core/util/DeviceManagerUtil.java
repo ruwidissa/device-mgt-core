@@ -599,19 +599,6 @@ public final class DeviceManagerUtil {
         return Caching.getCacheManagerFactory().getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER);
     }
 
-    //todo:amalka
-//    public static EventsPublisherService getEventPublisherService() {
-//        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-//        EventsPublisherService eventsPublisherService =
-//                (EventsPublisherService) ctx.getOSGiService(EventsPublisherService.class, null);
-//        if (eventsPublisherService == null) {
-//            String msg = "Event Publisher service has not initialized.";
-//            log.error(msg);
-//            throw new IllegalStateException(msg);
-//        }
-//        return eventsPublisherService;
-//    }
-
     /**
      * Retrieve EventConfigurationProviderService osgi service component
      * @return {@link EventConfigurationProviderService} service component
@@ -667,41 +654,15 @@ public final class DeviceManagerUtil {
     }
 
     public static void initializeAPIResourcePermissionCache() {
-//        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
-//        int deviceCacheExpiry = config.getDeviceCacheConfiguration().getExpiryTime();
-//        long deviceCacheCapacity = config.getDeviceCacheConfiguration().getCapacity();
         CacheManager manager = getCacheManager();
-//        if (config.getDeviceCacheConfiguration().isEnabled()) {
-            if(!isDeviceCacheInitialized) {
-                isDeviceCacheInitialized = true;
+            if(!isAPIResourcePermissionCacheInitialized) {
+                isAPIResourcePermissionCacheInitialized = true;
                 if (manager != null) {
-//                    if (deviceCacheExpiry > 0) {
-//                        manager.<DeviceCacheKey, Device>createCacheBuilder(DeviceManagementConstants.DEVICE_CACHE).
-//                                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
-//                                        deviceCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
-//                                Duration(TimeUnit.SECONDS, deviceCacheExpiry)).setStoreByValue(true).build();
-//                        if(deviceCacheCapacity > 0 ) {
-//                            ((CacheImpl) manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.DEVICE_CACHE)).
-//                                    setCapacity(deviceCacheCapacity);
-//                        }
-//                    } else {
                         manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
-//                    }
                 } else {
-//                    if (deviceCacheExpiry > 0) {
-//                        Caching.getCacheManager().
-//                                <DeviceCacheKey, Device>createCacheBuilder(DeviceManagementConstants.DEVICE_CACHE).
-//                                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
-//                                        deviceCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
-//                                Duration(TimeUnit.SECONDS, deviceCacheExpiry)).setStoreByValue(true).build();
-//                        ((CacheImpl)(manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.DEVICE_CACHE))).
-//                                setCapacity(deviceCacheCapacity);
-//                    } else {
                         Caching.getCacheManager().<DeviceCacheKey, Device>getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
-//                    }
                 }
             }
-//        }
     }
 
     /**
@@ -764,10 +725,8 @@ public final class DeviceManagerUtil {
     }
 
     public static Cache<APIResourcePermissionCacheKey, List<Permission>> getAPIResourcePermissionCache() {
-//        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
         CacheManager manager = getCacheManager();
         Cache<APIResourcePermissionCacheKey, List<Permission>> apiResourcePermissionCache = null;
-//        if (config.getDeviceCacheConfiguration().isEnabled()) {
             if(!isAPIResourcePermissionCacheInitialized) {
                 initializeAPIResourcePermissionCache();
             }
@@ -777,7 +736,6 @@ public final class DeviceManagerUtil {
                 apiResourcePermissionCache =  Caching.getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER)
                         .getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
             }
-//        }
         return apiResourcePermissionCache;
     }
 

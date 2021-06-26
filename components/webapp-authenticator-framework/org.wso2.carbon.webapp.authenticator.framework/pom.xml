@@ -114,9 +114,6 @@
                             org.wso2.carbon.base,
                             org.owasp.encoder
                         </Import-Package>
-                        <!--<Embed-Dependency>-->
-                            <!--tomcat-coyote,-->
-                        <!--</Embed-Dependency>-->
                     </instructions>
                 </configuration>
             </plugin>
@@ -199,18 +196,12 @@
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
             <exclusions>
                 <exclusion>
-                    <!--<dependency>-->
                         <groupId>org.wso2.orbit.com.nimbusds</groupId>
                         <artifactId>nimbus-jose-jwt</artifactId>
-                    <!--</dependency>-->
                 </exclusion>
                 <exclusion>
-                    <!--<dependency>-->
                         <groupId>com.nimbusds</groupId>
                         <artifactId>nimbus-jose-jwt</artifactId>
-                        <!--<version>9.10</version>-->
-                    <!--</dependency>-->
-
                 </exclusion>
             </exclusions>
         </dependency>
