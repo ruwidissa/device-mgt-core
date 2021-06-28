@@ -49,7 +49,7 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
                     DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
                             .getUserStoreManager();
             String tenantAdminName = userRealm.getRealmConfiguration().getAdminUserName();
-            userStoreManager.addRole(User.DEFAULT_DEVICE_USER, null, User.PERMISSIONS_FOR_DEVICE_USER);
+            userStoreManager.addRole(User.DEFAULT_DEVICE_USER, new String[]{tenantAdminName}, User.PERMISSIONS_FOR_DEVICE_USER);
             userStoreManager.addRole(User.DEFAULT_DEVICE_ADMIN, new String[]{tenantAdminName},
                                      User.PERMISSIONS_FOR_DEVICE_ADMIN);
             if (log.isDebugEnabled()) {

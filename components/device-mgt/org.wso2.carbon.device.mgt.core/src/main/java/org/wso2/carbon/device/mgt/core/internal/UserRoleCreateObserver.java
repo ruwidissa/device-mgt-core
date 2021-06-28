@@ -46,7 +46,8 @@ public class UserRoleCreateObserver implements ServerStartupObserver {
                     new String[]{tenantAdminName},
                     DeviceManagementConstants.User.PERMISSIONS_FOR_DEVICE_ADMIN);
             userStoreManager.addRole(
-                    DeviceManagementConstants.User.DEFAULT_DEVICE_USER, null,
+                    DeviceManagementConstants.User.DEFAULT_DEVICE_USER,
+                    new String[]{tenantAdminName},
                     DeviceManagementConstants.User.PERMISSIONS_FOR_DEVICE_USER);
 
             if (log.isDebugEnabled()) {
