@@ -68,41 +68,49 @@ import javax.ws.rs.core.Response;
                         name = "Create Event Stream Artifact",
                         description = "Create Event Stream Artifact",
                         key = "perm:analytics:artifacts:stream",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/stream/add"}),
                 @Scope(
                         name = "Delete Stream Artifact",
                         description = "Delete Stream Artifact",
                         key = "perm:analytics:artifacts:stream:delete",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/stream/delete"}),
                 @Scope(
                         name = "Create Event Receiver Artifact",
                         description = "Create Event Receiver Artifact",
                         key = "perm:analytics:artifacts:receiver",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/receiver/add"}),
                 @Scope(
                         name = "Delete Receiver Artifact",
                         description = "Delete Receiver Artifact",
                         key = "perm:analytics:artifacts:receiver:delete",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/receiver/delete"}),
                 @Scope(
                         name = "Create Event Publisher Artifact",
                         description = "Create Event Publisher Artifact",
                         key = "perm:analytics:artifacts:publisher",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/publisher/add"}),
                 @Scope(
                         name = "Delete Publisher Artifact",
                         description = "Delete Publisher Artifact",
                         key = "perm:analytics:artifacts:publisher:delete",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/publisher/delete"}),
                 @Scope(
                         name = "Create Siddhi Script Artifact",
                         description = "Create Siddhi Script Artifact",
                         key = "perm:analytics:artifacts:siddhi",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/siddhi-script/add"}),
                 @Scope(
                         name = "Delete Siddhi Script Artifact",
                         description = "Delete Siddhi Script Artifact",
                         key = "perm:analytics:artifacts:siddhi:delete",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/siddhi-script/delete"})
         }
 )

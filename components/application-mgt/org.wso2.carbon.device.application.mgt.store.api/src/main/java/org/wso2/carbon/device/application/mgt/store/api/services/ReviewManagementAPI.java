@@ -73,12 +73,14 @@ import java.util.List;
                         name = "Get Review Details",
                         description = "Get review details from application store.",
                         key = "perm:app:review:view",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/app-mgt/store/review/view"}
                 ),
                 @Scope(
                         name = "Update a Review",
                         description = "Update a Review from the application store.",
                         key = "perm:app:review:update",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/app-mgt/store/review/update"}
                 ),
         }

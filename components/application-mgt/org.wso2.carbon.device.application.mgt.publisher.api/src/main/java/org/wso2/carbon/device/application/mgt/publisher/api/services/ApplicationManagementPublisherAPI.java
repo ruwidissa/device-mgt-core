@@ -86,12 +86,14 @@ import javax.ws.rs.core.Response;
                         name = "Get ApplicationDTO Details",
                         description = "Get application details",
                         key = "perm:app:publisher:view",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/app-mgt/publisher/application/view"}
                 ),
                 @Scope(
                         name = "Update an ApplicationDTO",
                         description = "Update an application",
                         key = "perm:app:publisher:update",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/app-mgt/publisher/application/update"}
                 )
         }

@@ -55,22 +55,22 @@
                             org.wso2.carbon.webapp.authenticator.framework.*
                         </Export-Package>
                         <Import-Package>
-                            com.nimbusds.jose,
-                            com.nimbusds.jose.crypto,
-                            com.nimbusds.jwt,
+                            com.nimbusds.jose;version="${nimbus.orbit.version.range}",
+                            com.nimbusds.jose.crypto;version="${nimbus.orbit.version.range}",
+                            com.nimbusds.jwt;version="${nimbus.orbit.version.range}",
                             javax.xml.bind,
                             javax.xml.bind.annotation,
                             javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
                             javax.xml.validation,
-                            <!--org.apache.catalina,-->
-                            <!--org.apache.catalina.connector,-->
-                            <!--org.apache.catalina.util,-->
+                            org.apache.catalina;version="9.0",
+                            org.apache.catalina.connector;version="9.0",
+                            org.apache.catalina.util;version="9.0",
                             org.apache.commons.logging,
-                            <!--org.apache.coyote,-->
-                            <!--org.apache.tomcat.util.buf,-->
-                            <!--org.apache.tomcat.util.http,-->
-                            org.osgi.service.component,
-                            org.osgi.framework,
+                            org.apache.coyote;version="9.0",
+                            org.apache.tomcat.util.buf;version="9.0",
+                            org.apache.tomcat.util.http;version="9.0",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.w3c.dom,
                             org.wso2.carbon.context,
                             org.wso2.carbon.core.util,
@@ -85,15 +85,15 @@
                             org.wso2.carbon.utils,
                             org.wso2.carbon.utils.multitenancy,
                             org.xml.sax,
-                            com.google.gson.*,
+                            <!--com.google.gson.*,-->
                             javax.servlet,
                             javax.servlet.http,
                             javax.xml,
                             org.apache.axis2.transport.http,
                             org.wso2.carbon.certificate.mgt.core.*,
-                            org.wso2.carbon.device.mgt.core.permission.mgt,
+                            org.wso2.carbon.device.mgt.core.permission.mgt.*,
                             org.wso2.carbon.device.mgt.common.*,
-                            org.wso2.carbon.device.mgt.common.permission.mgt,
+                            org.wso2.carbon.device.mgt.common.permission.mgt.*,
                             org.apache.axis2,
                             org.apache.axis2.client,
                             org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
@@ -194,6 +194,16 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+            <exclusions>
+                <exclusion>
+                        <groupId>org.wso2.orbit.com.nimbusds</groupId>
+                        <artifactId>nimbus-jose-jwt</artifactId>
+                </exclusion>
+                <exclusion>
+                        <groupId>com.nimbusds</groupId>
+                        <artifactId>nimbus-jose-jwt</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -202,6 +212,7 @@
         <dependency>
             <groupId>org.wso2.orbit.com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>

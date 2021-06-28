@@ -67,6 +67,7 @@ import javax.ws.rs.core.Response;
                         name = "Verify device authorization",
                         description = "Verify device authorization",
                         key = "perm:authorization:verify",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/authorization/verify"}
                 )
         }

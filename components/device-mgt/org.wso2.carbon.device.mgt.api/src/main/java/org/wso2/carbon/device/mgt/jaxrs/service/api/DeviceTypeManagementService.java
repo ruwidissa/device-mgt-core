@@ -87,24 +87,28 @@ import javax.ws.rs.core.Response;
                         name = "Getting the Supported Device Platforms",
                         description = "Getting the Supported Device Platforms",
                         key = "perm:device-types:types",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/device-type/view"}
                 ),
                 @Scope(
                         name = "Get Feature Details of a Device Type",
                         description = "Get Feature Details of a Device Type",
                         key = "perm:device-types:features",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/device-type/features/view"}
                 ),
                 @Scope(
                         name = "Get Config Details of a Device Type",
                         description = "Get Config Details of a Device Type",
                         key = "perm:device-types:configs",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/device-type/config/view"}
                 ),
                 @Scope(
                         name = "Getting Details of Policies",
                         description = "Getting Details of Policies",
                         key = "perm:policies:get-details",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/view"}
                 )
         }

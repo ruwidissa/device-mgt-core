@@ -20,4 +20,6 @@ public @interface Scope {
 
     String[] permissions();
 
+    String[] roles();
+
 }

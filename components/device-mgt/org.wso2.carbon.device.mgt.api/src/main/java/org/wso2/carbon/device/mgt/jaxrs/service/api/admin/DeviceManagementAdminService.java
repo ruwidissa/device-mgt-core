@@ -94,18 +94,21 @@ import java.util.List;
                         name = "Getting Details of a Device",
                         description = "Getting Details of a Device",
                         key = "perm:admin:devices:view",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Update the Device Owner",
                         description = "Update the ownership of the device",
                         key = "perm:admin:devices:update-enrollment",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/devices/update-enrollment"}
                 ),
                 @Scope(
                         name = "Permanently Delete the device specified by device id",
                         description = "Permanently Delete the device specified by device id",
                         key = "perm:devices:permanent-delete",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/devices/permanent-delete"}
                 )
         }

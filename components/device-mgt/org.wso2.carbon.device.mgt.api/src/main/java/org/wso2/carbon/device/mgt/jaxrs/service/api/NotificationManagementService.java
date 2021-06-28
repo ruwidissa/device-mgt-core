@@ -73,12 +73,14 @@ import javax.ws.rs.core.Response;
                         name = "Getting All Device Notification Details",
                         description = "Getting All Device Notification Details",
                         key = "perm:notifications:view",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/notifications/view"}
                 ),
                 @Scope(
                         name = "Updating the Device Notification Status",
                         description = "Updating the Device Notification Status",
                         key = "perm:notifications:mark-checked",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/notifications/view"}
                 )
         }

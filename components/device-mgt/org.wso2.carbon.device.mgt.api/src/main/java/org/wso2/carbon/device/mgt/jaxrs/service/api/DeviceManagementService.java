@@ -107,66 +107,77 @@ import java.util.List;
                         name = "Getting Details of Registered Devices",
                         description = "Getting Details of Registered Devices",
                         key = "perm:devices:view",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Getting Details of a Device",
                         description = "Getting Details of a Device",
                         key = "perm:devices:details",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Update the device specified by device id",
                         description = "Update the device specified by device id",
                         key = "perm:devices:update",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Delete the device specified by device id",
                         description = "Delete the device specified by device id",
                         key = "perm:devices:delete",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Getting Feature Details of a Device",
                         description = "Getting Feature Details of a Device",
                         key = "perm:devices:features",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Advanced Search for Devices",
                         description = "Advanced Search for Devices",
                         key = "perm:devices:search",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Getting Installed Application Details of a Device",
                         description = "Getting Installed Application Details of a Device",
                         key = "perm:devices:applications",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Getting Device Operation Details",
                         description = "Getting Device Operation Details",
                         key = "perm:devices:operations",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Get the details of the policy that is enforced on a device.",
                         description = "Get the details of the policy that is enforced on a device.",
                         key = "perm:devices:effective-policy",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Getting Policy Compliance Details of a Device",
                         description = "Getting Policy Compliance Details of a Device",
                         key = "perm:devices:compliance-data",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Change device status.",
                         description = "Change device status.",
                         key = "perm:devices:change-status",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/change-status"}
                 ),
         }

@@ -53,12 +53,14 @@ import javax.ws.rs.core.Response;
                         name = "View Users",
                         description = "View Users",
                         key = "perm:admin-users:view",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/users/manage"}
                 ),
                 @Scope(
                         name = "Delete Users Device Information",
                         description = "Delete users device details",
                         key = "perm:admin-users:remove",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/users/manage"}
                 )
         }

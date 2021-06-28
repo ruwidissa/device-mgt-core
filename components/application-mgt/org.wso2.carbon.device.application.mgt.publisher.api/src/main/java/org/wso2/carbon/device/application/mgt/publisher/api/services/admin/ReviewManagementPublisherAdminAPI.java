@@ -65,12 +65,14 @@ scopes = {
                 name = "Update a Review",
                 description = "Update a Review of application.",
                 key = "perm:admin:app:review:update",
+                roles = {"Internal/devicemgt-admin"},
                 permissions = {"/app-mgt/publisher/admin/review/update"}
         ),
         @Scope(
                 name = "Get Review Details",
                 description = "Get review details of application.",
                 key = "perm:admin:app:review:view",
+                roles = {"Internal/devicemgt-admin"},
                 permissions = {"/app-mgt/publisher/admin/review/view"}
         )
 }

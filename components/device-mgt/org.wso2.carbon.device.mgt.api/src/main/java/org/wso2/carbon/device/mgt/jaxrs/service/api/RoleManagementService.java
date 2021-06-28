@@ -53,48 +53,56 @@ import java.util.List;
                         name = "Getting the List of Roles",
                         description = "Getting the List of Roles",
                         key = "perm:roles:view",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/roles/view"}
                 ),
                 @Scope(
                         name = "Getting Permission Details of a Role",
                         description = "Getting Permission Details of a Role",
                         key = "perm:roles:permissions",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/roles/view"}
                 ),
                 @Scope(
                         name = "Getting the List of Roles",
                         description = "Getting the List of Roles",
                         key = "perm:roles:details",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/roles/view"}
                 ),
                 @Scope(
                         name = "Adding a Role",
                         description = "Adding a Role",
                         key = "perm:roles:add",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/roles/manage"}
                 ),
                 @Scope(
                         name = "Adding a combined Role",
                         description = "Adding a combined Role",
                         key = "perm:roles:create-combined-role",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/roles/manage"}
                 ),
                 @Scope(
                         name = "Updating Role Details",
                         description = "Updating Role Details",
                         key = "perm:roles:update",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/roles/manage"}
                 ),
                 @Scope(
                         name = "Deleting a Role",
                         description = "Deleting a Role",
                         key = "perm:roles:delete",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/roles/manage"}
                 ),
                 @Scope(
                         name = "Adding Users to a Role",
                         description = "Adding Users to a Role",
                         key = "perm:roles:add-users",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/roles/manage"}
                 )
         }

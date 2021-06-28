@@ -27,6 +27,7 @@ import io.swagger.annotations.ExtensionProperty;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
+import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
@@ -65,16 +66,18 @@ import java.util.List;
 )
 @Scopes(
         scopes = {
-                @org.wso2.carbon.apimgt.annotations.api.Scope(
+                @Scope(
                         name = "Install an ApplicationDTO",
                         description = "Install an application",
                         key = "perm:app:subscription:install",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/app-mgt/store/subscription/install"}
                 ),
-                @org.wso2.carbon.apimgt.annotations.api.Scope(
+                @Scope(
                         name = "Uninstall an Application",
                         description = "Uninstall an application",
                         key = "perm:app:subscription:uninstall",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/app-mgt/store/subscription/uninstall"}
                 )
         }

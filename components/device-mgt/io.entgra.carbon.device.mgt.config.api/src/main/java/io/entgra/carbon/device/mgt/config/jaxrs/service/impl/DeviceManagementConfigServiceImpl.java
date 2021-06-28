@@ -37,13 +37,13 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.general.TenantDetail;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
-import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.config.keymanager.KeyManagerConfigurations;
 import org.wso2.carbon.device.mgt.core.config.ui.UIConfiguration;
 import org.wso2.carbon.device.mgt.core.config.ui.UIConfigurationManager;
+import org.wso2.carbon.device.mgt.core.permission.mgt.PermissionUtils;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
@@ -274,15 +274,9 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
     @Path("/permissions")
     @Produces({MediaType.APPLICATION_JSON})
     public Response addPermission(List<String> permissions) {
-        PermissionManagerService permissionService = DeviceMgtAPIUtils.getPermissionManagerService();
-        org.wso2.carbon.device.mgt.common.permission.mgt.Permission permission = new org
-                .wso2.carbon.device.mgt.common.permission.mgt.Permission();
-
         for (String path : permissions) {
-            permission.setPath(path);
-            permission.setUrl(path);
             try {
-                permissionService.addPermission(permission);
+                PermissionUtils.putPermission(path);
             } catch (PermissionManagementException e) {
                 String msg = "Error occurred adding permission";
                 log.error(msg, e);

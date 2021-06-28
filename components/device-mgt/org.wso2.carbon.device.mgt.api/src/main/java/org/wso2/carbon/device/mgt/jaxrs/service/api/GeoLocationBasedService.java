@@ -73,18 +73,21 @@ import java.util.List;
                         name = "View Analytics",
                         description = "",
                         key = "perm:geo-service:analytics-view",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view-analytics"}
                 ),
                 @Scope(
                         name = "Manage Alerts",
                         description = "",
                         key = "perm:geo-service:alerts-manage",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/manage-alerts"}
                 ),
                 @Scope(
                         name = "Manage Geo Fences",
                         description = "",
                         key = "perm:geo-service:geo-fence",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/manage-geo-fence"}
                 )
         }

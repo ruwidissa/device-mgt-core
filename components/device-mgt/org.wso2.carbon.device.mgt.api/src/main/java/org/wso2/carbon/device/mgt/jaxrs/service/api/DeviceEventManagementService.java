@@ -51,12 +51,14 @@ import javax.ws.rs.core.Response;
                         name = "Add or Delete Event Definition for device type",
                         description = "Add or Delete Event Definition for device type",
                         key = "perm:device-types:events",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/device-type/add"}
                 ),
                 @Scope(
                         name = "Get Events Details of a Device Type",
                         description = "Get Events Details of a Device Type",
                         key = "perm:device-types:events:view",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 )
         }

@@ -63,6 +63,7 @@ scopes = {
                 name = "Update a Review",
                 description = "Update a Review of applications.",
                 key = "perm:admin:app:review:update",
+                roles = {"Internal/devicemgt-admin"},
                 permissions = {"/app-mgt/store/admin/review/update"}
         )
 }

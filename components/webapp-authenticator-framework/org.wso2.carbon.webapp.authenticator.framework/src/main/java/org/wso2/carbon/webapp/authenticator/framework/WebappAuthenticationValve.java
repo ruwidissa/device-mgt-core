@@ -18,11 +18,9 @@
  */
 package org.wso2.carbon.webapp.authenticator.framework;
 
-import com.google.gson.Gson;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.owasp.encoder.Encode;
@@ -33,6 +31,7 @@ import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.webapp.authenticator.framework.authenticator.WebappAuthenticator;
+import org.wso2.carbon.webapp.authenticator.framework.authorizer.PermissionAuthorizer;
 import org.wso2.carbon.webapp.authenticator.framework.authorizer.WebappTenantAuthorizer;
 
 import javax.servlet.http.HttpServletResponse;
@@ -48,9 +47,6 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
 
     private static final Log log = LogFactory.getLog(WebappAuthenticationValve.class);
     private static final TreeMap<String, String> nonSecuredEndpoints = new TreeMap<>();
-    private static final String PERMISSION_PREFIX = "/permission/admin";
-    public static final String AUTHORIZE_PERMISSION = "Authorize-Permission";
-
     private static InetAddress inetAddress = null;
 
     @Override
@@ -81,8 +77,7 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
             }
         }
 
-        if ((this.isContextSkipped(request) ||  this.skipAuthentication(request))
-                && (StringUtils.isEmpty(request.getHeader(AUTHORIZE_PERMISSION)))) {
+        if ((this.isContextSkipped(request) ||  this.skipAuthentication(request))) {
                 this.getNext().invoke(request, response, compositeValve);
             return;
         }
@@ -103,29 +98,12 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
         // This section will allow to validate a given access token is authenticated to access given
         // resource(permission)
         if (request.getCoyoteRequest() != null
-                && StringUtils.isNotEmpty(request.getHeader(AUTHORIZE_PERMISSION))
                 && (authenticationInfo.getStatus() == WebappAuthenticator.Status.CONTINUE ||
                 authenticationInfo.getStatus() == WebappAuthenticator.Status.SUCCESS)) {
             boolean isAllowed;
-            try {
-                isAllowed = AuthenticationFrameworkUtil.isUserAuthorized(
-                        authenticationInfo.getTenantId(), authenticationInfo.getTenantDomain(),
-                        authenticationInfo.getUsername(),
-                        PERMISSION_PREFIX + request.getHeader (AUTHORIZE_PERMISSION));
-            } catch (AuthenticationException e) {
-                String msg = "Could not authorize permission";
-                log.error(msg);
-                AuthenticationFrameworkUtil.handleResponse(request, response,
-                        HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
-                return;
-            }
-
-            if (isAllowed) {
-                Gson gson = new Gson();
-                AuthenticationFrameworkUtil.handleResponse(request, response, HttpServletResponse.SC_OK,
-                        gson.toJson(authenticationInfo));
-                return;
-            } else {
+            WebappAuthenticator.Status authorizeStatus = PermissionAuthorizer.authorize(request, authenticationInfo);
+            isAllowed = WebappAuthenticator.Status.SUCCESS == authorizeStatus;
+            if (!isAllowed) {
                 log.error("Unauthorized message from user " + authenticationInfo.getUsername());
                 AuthenticationFrameworkUtil.handleResponse(request, response,
                         HttpServletResponse.SC_FORBIDDEN, "Unauthorized to access the API");
@@ -133,7 +111,7 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
             }
         }
 
-        Tenant tenant = null;
+            Tenant tenant = null;
         if (authenticationInfo.getTenantId() != -1) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();

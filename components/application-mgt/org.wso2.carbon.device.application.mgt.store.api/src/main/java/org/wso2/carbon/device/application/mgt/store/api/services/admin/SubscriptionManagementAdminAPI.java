@@ -67,6 +67,7 @@ import java.util.List;
                         name = "View Application Subscriptions",
                         description = "View Application Subscriptions.",
                         key = "perm:admin:app:subscription:view",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/app-mgt/store/admin/subscription/view"}
                 )
         }

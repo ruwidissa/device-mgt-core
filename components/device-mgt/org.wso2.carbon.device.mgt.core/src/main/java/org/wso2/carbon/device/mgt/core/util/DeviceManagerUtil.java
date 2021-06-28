@@ -73,8 +73,10 @@ import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.permission.mgt.Permission;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
+import org.wso2.carbon.device.mgt.core.cache.APIResourcePermissionCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.GeoCacheKey;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
@@ -136,6 +138,7 @@ public final class DeviceManagerUtil {
     public static final String GENERAL_CONFIG_RESOURCE_PATH = "general";
 
     private  static boolean isDeviceCacheInitialized = false;
+    private  static boolean isAPIResourcePermissionCacheInitialized = false;
     private static boolean isGeoFenceCacheInitialized = false;
 
     public static Document convertToDocument(File file) throws DeviceManagementException {
@@ -596,19 +599,6 @@ public final class DeviceManagerUtil {
         return Caching.getCacheManagerFactory().getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER);
     }
 
-    //todo:amalka
-//    public static EventsPublisherService getEventPublisherService() {
-//        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-//        EventsPublisherService eventsPublisherService =
-//                (EventsPublisherService) ctx.getOSGiService(EventsPublisherService.class, null);
-//        if (eventsPublisherService == null) {
-//            String msg = "Event Publisher service has not initialized.";
-//            log.error(msg);
-//            throw new IllegalStateException(msg);
-//        }
-//        return eventsPublisherService;
-//    }
-
     /**
      * Retrieve EventConfigurationProviderService osgi service component
      * @return {@link EventConfigurationProviderService} service component
@@ -661,6 +651,18 @@ public final class DeviceManagerUtil {
                 }
             }
         }
+    }
+
+    public static void initializeAPIResourcePermissionCache() {
+        CacheManager manager = getCacheManager();
+            if(!isAPIResourcePermissionCacheInitialized) {
+                isAPIResourcePermissionCacheInitialized = true;
+                if (manager != null) {
+                        manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
+                } else {
+                        Caching.getCacheManager().<DeviceCacheKey, Device>getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
+                }
+            }
     }
 
     /**
@@ -720,6 +722,21 @@ public final class DeviceManagerUtil {
             }
         }
         return deviceCache;
+    }
+
+    public static Cache<APIResourcePermissionCacheKey, List<Permission>> getAPIResourcePermissionCache() {
+        CacheManager manager = getCacheManager();
+        Cache<APIResourcePermissionCacheKey, List<Permission>> apiResourcePermissionCache = null;
+            if(!isAPIResourcePermissionCacheInitialized) {
+                initializeAPIResourcePermissionCache();
+            }
+            if (manager != null) {
+                apiResourcePermissionCache = manager.getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
+            } else {
+                apiResourcePermissionCache =  Caching.getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER)
+                        .getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
+            }
+        return apiResourcePermissionCache;
     }
 
     /**
