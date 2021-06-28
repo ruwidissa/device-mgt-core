@@ -68,7 +68,7 @@ import java.util.List;
                         name = "Delete Application Release",
                         description = "Delete Application Release",
                         key = "perm:admin:app:publisher:update",
-                        roles = {"admin"},
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/app-mgt/publisher/admin/application/update"}
                 )
         }

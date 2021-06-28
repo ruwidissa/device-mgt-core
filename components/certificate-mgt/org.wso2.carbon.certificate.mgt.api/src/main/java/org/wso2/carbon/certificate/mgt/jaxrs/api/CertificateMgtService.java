@@ -41,7 +41,7 @@ import javax.ws.rs.core.Response;
                 name = "Sign CSR",
                 description = "Sign CSR",
                 key = "perm:sign-csr",
-                roles = {"Internal/everyone"},
+                roles = {"Internal/devicemgt-user"},
                 permissions = {"/device-mgt/certificates/manage"}
         )
 }

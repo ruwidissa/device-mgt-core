@@ -70,14 +70,14 @@ import java.util.List;
                         name = "Install an ApplicationDTO",
                         description = "Install an application",
                         key = "perm:app:subscription:install",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/app-mgt/store/subscription/install"}
                 ),
                 @Scope(
                         name = "Uninstall an Application",
                         description = "Uninstall an application",
                         key = "perm:app:subscription:uninstall",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/app-mgt/store/subscription/uninstall"}
                 )
         }

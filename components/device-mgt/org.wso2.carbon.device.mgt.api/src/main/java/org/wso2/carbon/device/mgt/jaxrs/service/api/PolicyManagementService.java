@@ -79,70 +79,70 @@ import java.util.List;
                         name = "Adding a Policy",
                         description = "Adding a Policy",
                         key = "perm:policies:manage",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/manage"}
                 ),
                 @Scope(
                         name = "Getting Details of Policies",
                         description = "Getting Details of Policies",
                         key = "perm:policies:get-details",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/view"}
                 ),
                 @Scope(
                         name = "Getting Details of a Policy",
                         description = "Getting Details of a Policy",
                         key = "perm:policies:get-policy-details",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/view"}
                 ),
                 @Scope(
                         name = "Updating a Policy",
                         description = "Updating a Policy",
                         key = "perm:policies:update",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/manage"}
                 ),
                 @Scope(
                         name = "Removing Multiple Policies",
                         description = "Removing Multiple Policies",
                         key = "perm:policies:remove",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/manage"}
                 ),
                 @Scope(
                         name = "Activating Policies",
                         description = "Activating Policies",
                         key = "perm:policies:activate",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/manage"}
                 ),
                 @Scope(
                         name = "Deactivating Policies",
                         description = "Deactivating Policies",
                         key = "perm:policies:deactivate",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/manage"}
                 ),
                 @Scope(
                         name = "Applying Changes on Policies",
                         description = "Applying Changes on Policies",
                         key = "perm:policies:changes",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/manage"}
                 ),
                 @Scope(
                         name = "Updating the Policy Priorities",
                         description = "Updating the Policy Priorities",
                         key = "perm:policies:priorities",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/manage"}
                 ),
                 @Scope(
                         name = "Fetching the Effective Policy",
                         description = "Fetching the Effective Policy",
                         key = "perm:policies:effective-policy",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/view"}
                 )
         }

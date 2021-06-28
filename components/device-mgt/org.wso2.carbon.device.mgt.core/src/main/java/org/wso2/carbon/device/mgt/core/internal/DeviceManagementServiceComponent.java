@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
@@ -290,6 +291,9 @@ public class DeviceManagementServiceComponent {
         BundleContext bundleContext = componentContext.getBundleContext();
         TenantCreateObserver listener = new TenantCreateObserver();
         bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
+
+        UserRoleCreateObserver userRoleCreateObserver = new UserRoleCreateObserver();
+        bundleContext.registerService(ServerStartupObserver.class.getName(), userRoleCreateObserver, null);
 
         /* Registering Device Management Service */
         DeviceManagementProviderService deviceManagementProvider = new DeviceManagementProviderServiceImpl();

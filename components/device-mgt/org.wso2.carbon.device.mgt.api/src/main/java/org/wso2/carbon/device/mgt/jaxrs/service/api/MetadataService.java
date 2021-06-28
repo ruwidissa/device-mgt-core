@@ -73,28 +73,28 @@ import javax.ws.rs.core.Response;
                         name = "View metadata records",
                         description = "View metadata records",
                         key = "perm:metadata:view",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/metadata/view"}
                 ),
                 @Scope(
                         name = "Create a metadata record",
                         description = "Create a metadata record",
                         key = "perm:metadata:create",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/metadata/create"}
                 ),
                 @Scope(
                         name = "Update a metadata record",
                         description = "Updating a specified metadata record",
                         key = "perm:metadata:update",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/metadata/update"}
                 ),
                 @Scope(
                         name = "Delete a metadata record",
                         description = "Delete a specified metadata record",
                         key = "perm:metadata:remove",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/metadata/remove"}
                 )
         }

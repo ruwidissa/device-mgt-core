@@ -64,7 +64,7 @@ import javax.ws.rs.core.Response;
                 name = "View configurations",
                 description = "",
                 key = "perm:sms-handler:view-configuration",
-                roles = {"Internal/everyone"},
+                roles = {"Internal/devicemgt-user"},
                 permissions = {"/sms-handler/platform-configurations/view"}
         )
 })

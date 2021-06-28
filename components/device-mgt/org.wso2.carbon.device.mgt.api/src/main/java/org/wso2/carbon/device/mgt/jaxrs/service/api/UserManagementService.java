@@ -97,91 +97,91 @@ import javax.ws.rs.core.Response;
                         name = "Adding a User",
                         description = "Adding a User",
                         key = "perm:users:add",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/manage"}
                 ),
                 @Scope(
                         name = "Getting Details of a User",
                         description = "Getting Details of a User",
                         key = "perm:users:details",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Updating Details of a User",
                         description = "Updating Details of a User",
                         key = "perm:users:update",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/manage"}
                 ),
                 @Scope(
                         name = "Deleting a User",
                         description = "Deleting a User",
                         key = "perm:users:delete",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/manage"}
                 ),
                 @Scope(
                         name = "Getting the Role Details of a User",
                         description = "Getting the Role Details of a User",
                         key = "perm:users:roles",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Getting Details of Users",
                         description = "Getting Details of Users",
                         key = "perm:users:user-details",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Getting the User Count",
                         description = "Getting the User Count",
                         key = "perm:users:count",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Getting the User existence status",
                         description = "Getting the User existence status",
                         key = "perm:users:is-exist",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Searching for a User Name",
                         description = "Searching for a User Name",
                         key = "perm:users:search",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Changing the User Password",
                         description = "Adding a User",
                         key = "perm:users:credentials",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/login"}
                 ),
                 @Scope(
                         name = "Sending Enrollment Invitations to Users",
                         description = "Sending Enrollment Invitations to Users",
                         key = "perm:users:send-invitation",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/manage"}
                 ),
                 @Scope(
                         name = "Get activities",
                         description = "Get activities",
                         key = "perm:get-activity",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Getting the Permissions of the User",
                         description = "Getting the Permissions of the User",
                         key = "perm:user:permission-view",
-                        roles = {"Internal/everyone"},
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/login"}
                 )
         }
