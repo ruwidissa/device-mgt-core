@@ -3022,4 +3022,154 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throw new DeviceManagementDAOException(msg, e);
         }
     }
+
+    @Override
+    public List<Device> getGroupedDevicesDetails(PaginationRequest request, List<Integer> deviceIds, String groupName,
+                                                 int tenantId) throws DeviceManagementDAOException {
+        int limitValue = request.getRowCount();
+        int offsetValue = request.getStartIndex();
+        List<String> status = request.getStatusList();
+        String name = request.getDeviceName();
+        String user = request.getOwner();
+        String ownership = request.getOwnership();
+        try {
+            List<Device> devices = new ArrayList<>();
+            if (deviceIds.isEmpty()) {
+                return devices;
+            }
+            Connection conn = this.getConnection();
+            int index = 1;
+            StringJoiner joiner = new StringJoiner(",",
+                    "SELECT "
+                            + "DM_DEVICE.ID AS DEVICE_ID, "
+                            + "DM_DEVICE.NAME AS DEVICE_NAME, "
+                            + "DM_DEVICE.DESCRIPTION AS DESCRIPTION, "
+                            + "DM_DEVICE.DEVICE_TYPE_ID, "
+                            + "DM_DEVICE.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFICATION, "
+                            + "e.ID AS ENROLMENT_ID, "
+                            + "e.OWNER, "
+                            + "e.OWNERSHIP, "
+                            + "e.DATE_OF_ENROLMENT, "
+                            + "e.DATE_OF_LAST_UPDATE, "
+                            + "e.STATUS, "
+                            + "e.IS_TRANSFERRED, "
+                            + "device_types.NAME AS DEVICE_TYPE "
+                            + "FROM DM_DEVICE_GROUP_MAP "
+                            + "INNER JOIN DM_DEVICE ON "
+                            + "DM_DEVICE_GROUP_MAP.DEVICE_ID = DM_DEVICE.ID "
+                            + "INNER JOIN DM_GROUP ON "
+                            + "DM_DEVICE_GROUP_MAP.GROUP_ID = DM_GROUP.ID "
+                            + "INNER JOIN DM_ENROLMENT e ON "
+                            + "DM_DEVICE.ID = e.DEVICE_ID AND "
+                            + "DM_DEVICE.TENANT_ID = e.TENANT_ID "
+                            + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
+                            + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID "
+                            + "WHERE DM_DEVICE.ID IN (",
+                    ") AND DM_DEVICE.TENANT_ID = ?");
+
+            deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+            if (StringUtils.isNotBlank(groupName)) {
+                query += " AND DM_GROUP.GROUP_NAME = ?";
+            }
+            if (StringUtils.isNotBlank(name)) {
+                query += " AND DM_DEVICE.NAME LIKE ?";
+            }
+            if (StringUtils.isNotBlank(user)) {
+                query += " AND e.OWNER = ?";
+            }
+            if (StringUtils.isNotBlank(ownership)) {
+                query += " AND e.OWNERSHIP = ?";
+            }
+            if (status != null && !status.isEmpty()) {
+                query += buildStatusQuery(status);
+            }
+
+            query += "LIMIT ? OFFSET ?";
+
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                for (Integer deviceId : deviceIds) {
+                    ps.setInt(index++, deviceId);
+                }
+                ps.setInt(index++, tenantId);
+                if (StringUtils.isNotBlank(groupName)) {
+                    ps.setString(index++, groupName);
+                }
+                if (StringUtils.isNotBlank(name)) {
+                    ps.setString(index++, name);
+                }
+                if (StringUtils.isNotBlank(user)) {
+                    ps.setString(index++, user);
+                }
+                if (StringUtils.isNotBlank(ownership)) {
+                    ps.setString(index++, ownership);
+                }
+                if (status != null && !status.isEmpty()) {
+                    for (String deviceStatus : status) {
+                        ps.setString(index++, deviceStatus);
+                    }
+                }
+                ps.setInt(index++, limitValue);
+                ps.setInt(index, offsetValue);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        devices.add(DeviceManagementDAOUtil.loadDevice(rs));
+                    }
+                    return devices;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of all registered devices " +
+                    "according to device ids and the limit area.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int getGroupedDevicesCount(PaginationRequest request, List<Integer> deviceIds, String groupName,
+                                      int tenantId) throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            if (deviceIds.isEmpty()) {
+                return 0;
+            }
+            int index = 1;
+            StringJoiner joiner = new StringJoiner(",",
+                    "SELECT "
+                            + "COUNT(DM_DEVICE_GROUP_MAP.DEVICE_ID) AS DEVICE_COUNT "
+                            + "FROM DM_DEVICE_GROUP_MAP "
+                            + "INNER JOIN DM_GROUP ON "
+                            + "DM_DEVICE_GROUP_MAP.GROUP_ID = DM_GROUP.ID "
+                            + "WHERE DM_DEVICE_GROUP_MAP.DEVICE_ID IN (",
+                    ") AND DM_GROUP.TENANT_ID = ?");
+            deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+            if (StringUtils.isNotBlank(groupName)) {
+                query += " AND DM_GROUP.GROUP_NAME = ?";
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                for (Integer deviceId : deviceIds) {
+                    ps.setInt(index++, deviceId);
+                }
+                ps.setInt(index++, tenantId);
+                if (StringUtils.isNotBlank(groupName)) {
+                    ps.setString(index, groupName);
+                }
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("DEVICE_COUNT");
+                    }
+                    return 0;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of all registered devices " +
+                    "according to device ids and the limit area.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
 }

@@ -161,4 +161,16 @@ public interface SubscriptionManager {
      */
     PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus, String action)
             throws ApplicationManagementException;
+
+    /***
+     * This method is responsible to provide application subscription devices data for given application release UUID.
+     * @param request  PaginationRequest object holding the data for pagination
+     * @param appUUID UUID of the application release.
+     * @param subType subscription type of the application(eg: GROUP, USER, ...)
+     * @param subTypeName subscription type name of the application (Name of the group, Name of the user, ...).
+     * @return {@link PaginationResult} pagination result of the category details.
+     * @throws {@link ApplicationManagementException} Exception of the application management
+     */
+    PaginationResult getAppInstalledSubscribeDevices(PaginationRequest request, String appUUID, String subType,
+                                                     String subTypeName) throws ApplicationManagementException;
 }

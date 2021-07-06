@@ -1271,4 +1271,45 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
+
+    @Override
+    public List<Integer> getAppSubscribedDevicesForGroups(int appReleaseId, String subType, int tenantId)
+            throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get already subscribed devices for " +
+                    "given app release id.");
+        }
+        // retrieve all device list by action triggered type and app release id
+        try {
+            Connection conn = this.getDBConnection();
+            List<Integer> subscribedGroupDevices = new ArrayList<>();
+            String sql = "SELECT "
+                    + "AP_DEVICE_SUBSCRIPTION.DM_DEVICE_ID AS DEVICES "
+                    + "FROM AP_DEVICE_SUBSCRIPTION "
+                    + "WHERE "
+                    + "AP_APP_RELEASE_ID = ? AND ACTION_TRIGGERED_FROM=? AND "
+                    + "UNSUBSCRIBED=FALSE AND TENANT_ID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, appReleaseId);
+                ps.setString(2, subType.toLowerCase());;
+                ps.setInt(3, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        subscribedGroupDevices.add(rs.getInt("DEVICES"));
+                    }
+                }
+                return subscribedGroupDevices;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get already " +
+                    "subscribed groups for given app release id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while getting subscribed devices for given " +
+                    "app release id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
 }
