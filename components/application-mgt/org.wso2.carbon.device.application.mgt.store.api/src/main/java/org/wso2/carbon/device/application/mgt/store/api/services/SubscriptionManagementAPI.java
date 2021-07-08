@@ -446,4 +446,101 @@ public interface SubscriptionManagementAPI {
                     defaultValue = "5")
             @QueryParam("limit") int limit
     );
+
+    @GET
+    @Path("/{uuid}/{subType}/{subTypeName}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Get device details in categories that have a given application install",
+            notes = "This will get the category's device details that have a given application install, if exists",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:uninstall")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully retrieved device details.",
+                            response = List.class,
+                            responseContainer = "List"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n No Devices found which has application " +
+                                    "release of UUID.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Found invalid payload with the request.",
+                            response = List.class),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Forbidden. \n Don't have permission to get the details.",
+                            response = List.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting data",
+                            response = ErrorResponse.class)
+            })
+    Response getAppInstalledDevicesOnCategories(
+            @ApiParam(
+                    name="uuid",
+                    value="uuid of the application release.",
+                    required = true)
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name="subType",
+                    value="Subscription type of the application release.",
+                    required = true)
+            @PathParam("subType") String subType,
+            @ApiParam(
+                    name="subTypeName",
+                    value="Subscription type name of the application release.",
+                    required = true)
+            @PathParam("subTypeName") String subTypeName,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    defaultValue = "0")
+            @QueryParam("offset") int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many device details you require from the starting " +
+                            "pagination index/offset.",
+                    defaultValue = "5")
+            @QueryParam("limit") int limit,
+            @ApiParam(
+                    name = "name",
+                    value = "The device name. For example, Nexus devices can have names, such as shamu, bullhead or angler.",
+                    required = false)
+            @Size(max = 45)
+                    String name,
+            @ApiParam(
+                    name = "user",
+                    value = "The username of the owner of the device.",
+                    required = false)
+            @QueryParam("user")
+                    String user,
+            @ApiParam(
+                    name = "ownership",
+                    allowableValues = "BYOD, COPE",
+                    value = "Provide the ownership status of the device. The following values can be assigned:\n" +
+                            "- BYOD: Bring Your Own Device\n" +
+                            "- COPE: Corporate-Owned, Personally-Enabled",
+                    required = false)
+            @QueryParam("ownership")
+            @Size(max = 45)
+                    String ownership,
+            @ApiParam(
+                    name = "status",
+                    value = "Provide the device status details, such as active or inactive.")
+            @QueryParam("status") List<String> status
+    );
 }

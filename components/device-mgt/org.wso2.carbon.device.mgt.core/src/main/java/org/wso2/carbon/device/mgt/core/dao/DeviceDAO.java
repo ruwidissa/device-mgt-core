@@ -758,4 +758,27 @@ public interface DeviceDAO {
                                            String version) throws DeviceManagementDAOException;
 
     int getFunctioningDevicesInSystem() throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to get the details of devices when give deviceIDs list and group name.
+     * @param deviceIds device ids of the devices.
+     * @param tenantId  Id of the current tenant.
+     * @param request   paginated request object.
+     * @param groupName group name.
+     * @return devices -  device details list
+     * @throws DeviceManagementDAOException if connections establishment fails.
+     */
+    List<Device> getGroupedDevicesDetails(PaginationRequest request, List<Integer> deviceIds, String groupName,
+                                          int tenantId) throws DeviceManagementDAOException;
+
+    /**
+     * @param deviceIds device ids of the devices.
+     * @param tenantId  tenant id
+     * @param request   paginated request object.
+     * @param groupName group name.
+     * @return number of device count under the group name.
+     * @throws DeviceManagementDAOException if error occurred while processing the SQL statement.
+     */
+    int getGroupedDevicesCount(PaginationRequest request, List<Integer> deviceIds, String groupName, int tenantId)
+            throws DeviceManagementDAOException;
 }
