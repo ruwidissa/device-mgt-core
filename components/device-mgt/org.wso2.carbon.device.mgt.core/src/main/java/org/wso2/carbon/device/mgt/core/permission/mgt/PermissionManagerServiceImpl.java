@@ -18,16 +18,11 @@
 
 package org.wso2.carbon.device.mgt.core.permission.mgt;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.permission.mgt.Permission;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
-import org.wso2.carbon.device.mgt.core.cache.APIResourcePermissionCacheKey;
-import org.wso2.carbon.device.mgt.core.cache.impl.APIResourcePermissionCacheManagerImpl;
 
 import java.util.List;
-import java.util.Properties;
 
 /**
  * This class will add, update custom permissions defined in permission.xml in webapps and it will
@@ -36,7 +31,7 @@ import java.util.Properties;
 public class PermissionManagerServiceImpl implements PermissionManagerService {
 
     private static PermissionManagerServiceImpl registryBasedPermissionManager;
-
+    private static APIResourcePermissions apiResourcePermissions;
     private PermissionManagerServiceImpl() {
     }
 
@@ -45,6 +40,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService {
             synchronized (PermissionManagerServiceImpl.class) {
                 if (registryBasedPermissionManager == null) {
                     registryBasedPermissionManager = new PermissionManagerServiceImpl();
+                    apiResourcePermissions = new APIResourcePermissions();
                 }
             }
         }
@@ -57,8 +53,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService {
             for (Permission permission : permissions) {
                 PermissionUtils.putPermission(permission);
             }
-            APIResourcePermissionCacheManagerImpl.getInstance().addAPIResourcePermissionToCache(
-                    new APIResourcePermissionCacheKey(context), permissions);
+            apiResourcePermissions.addPermissionList(context, permissions);
         } catch (PermissionManagementException e) {
             return false;
         }
@@ -67,7 +62,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerService {
 
     @Override
     public List<Permission> getPermission(String context) throws PermissionManagementException {
-        return APIResourcePermissionCacheManagerImpl.getInstance().getAPIResourceRermissionFromCache(
-                new APIResourcePermissionCacheKey(context));
+        return apiResourcePermissions.getPermissions(context);
     }
 }

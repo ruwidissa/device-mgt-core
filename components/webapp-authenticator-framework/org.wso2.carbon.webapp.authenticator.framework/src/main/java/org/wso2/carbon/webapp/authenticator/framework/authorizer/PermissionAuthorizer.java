@@ -46,6 +46,10 @@ public class PermissionAuthorizer {
             return WebappAuthenticator.Status.CONTINUE;
         }
 
+        if (requestUri.endsWith("/")) {
+            requestUri = requestUri.substring(0, requestUri.length() - 1);
+        }
+
         PermissionManagerService registryBasedPermissionManager =
                 PermissionManagerServiceImpl.getInstance();
         List<Permission> matchingPermissions = null;

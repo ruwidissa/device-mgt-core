@@ -4,9 +4,9 @@
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
- * You may obtain a copy of the License at
+ * you may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -15,17 +15,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.core.cache;
+package org.wso2.carbon.device.mgt.core.permission.mgt;
 
 import org.wso2.carbon.device.mgt.common.permission.mgt.Permission;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public interface APIResourcePermissionCacheManager {
+public class APIResourcePermissions {
+    private Map<String, List<Permission>> apiResourcePermissions;
 
-    void addAPIResourcePermissionToCache(APIResourcePermissionCacheKey cacheKey, List<Permission> permissions);
+    public APIResourcePermissions() {
+        apiResourcePermissions = new HashMap<>();
+    }
 
-    void updateAPIResourcePermissionInCache(APIResourcePermissionCacheKey cacheKey, List<Permission> permissions);
+    public void addPermissionList(String context, List<Permission> permissions){
+        apiResourcePermissions.put(context, permissions);
+    }
 
-    List<Permission> getAPIResourceRermissionFromCache(APIResourcePermissionCacheKey cacheKey);
+    public List<Permission> getPermissions(String context) {
+        return apiResourcePermissions.get(context);
+    }
 }
