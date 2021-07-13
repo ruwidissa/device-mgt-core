@@ -1427,4 +1427,50 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
+
+    @Override
+    public PaginationResult getAppInstalledSubscribeDevices(PaginationRequest request, String appUUID, String subType,
+                                                            String subTypeName) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        DeviceManagementProviderService deviceManagementProviderService = HelperUtil
+                .getDeviceManagementProviderService();
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(appUUID, tenantId);
+            int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
+            List<Integer> subscriptionDeviceList = new ArrayList<>();
+            //todo update the API for other subscription types
+            if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+                subscriptionDeviceList = subscriptionDAO
+                        .getAppSubscribedDevicesForGroups(applicationReleaseId, subType, tenantId);
+            } else {
+                String msg = "Found invalid sub type: " + subType;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            if (subscriptionDeviceList.isEmpty()) {
+                PaginationResult paginationResult = new PaginationResult();
+                paginationResult.setData(subscriptionDeviceList);
+                paginationResult.setRecordsFiltered(0);
+                paginationResult.setRecordsTotal(0);
+                return paginationResult;
+            }
+            return deviceManagementProviderService.getDevicesDetails(request, subscriptionDeviceList, subTypeName);
+        } catch (DeviceManagementException e) {
+            String msg = "service error occurred while getting device data from the device management service.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when get application release devices data for application release UUID: "
+                    + appUUID;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while getting category details that given application id";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
 }

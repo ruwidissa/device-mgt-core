@@ -21,6 +21,7 @@ package org.wso2.carbon.webapp.authenticator.framework;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.owasp.encoder.Encode;
@@ -194,7 +195,8 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
                 ctx = tokenizer.nextToken();
             }
         }
-        return ("carbon".equalsIgnoreCase(ctx) || "services".equalsIgnoreCase(ctx));
+        return ("carbon".equalsIgnoreCase(ctx) || "services".equalsIgnoreCase(ctx)
+                || "oauth2".equalsIgnoreCase(ctx));
     }
 
     private boolean isNonSecuredEndPoint(Request request) {

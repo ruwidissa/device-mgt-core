@@ -228,4 +228,16 @@ public interface SubscriptionDAO {
             throws ApplicationManagementDAOException;
 
     int getSubscribedGroupCount(int appReleaseId, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * This method is used to get the details of subscribed groups
+     *
+     * @param tenantId id of the current tenant
+     * @param appReleaseId id of the application release..
+     * @param subtype application subscribed type.
+     * @return subscribedDevices - list of app subscribed devices under the subtype.
+     * @throws {@link ApplicationManagementDAOException} if connections establishment fails.
+     */
+    List<Integer> getAppSubscribedDevicesForGroups(int appReleaseId, String subtype, int tenantId)
+            throws ApplicationManagementDAOException;
 }

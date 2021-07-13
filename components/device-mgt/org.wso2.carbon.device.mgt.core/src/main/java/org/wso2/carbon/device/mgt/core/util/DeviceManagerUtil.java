@@ -76,7 +76,6 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementExcept
 import org.wso2.carbon.device.mgt.common.permission.mgt.Permission;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
-import org.wso2.carbon.device.mgt.core.cache.APIResourcePermissionCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.GeoCacheKey;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
@@ -722,21 +721,6 @@ public final class DeviceManagerUtil {
             }
         }
         return deviceCache;
-    }
-
-    public static Cache<APIResourcePermissionCacheKey, List<Permission>> getAPIResourcePermissionCache() {
-        CacheManager manager = getCacheManager();
-        Cache<APIResourcePermissionCacheKey, List<Permission>> apiResourcePermissionCache = null;
-            if(!isAPIResourcePermissionCacheInitialized) {
-                initializeAPIResourcePermissionCache();
-            }
-            if (manager != null) {
-                apiResourcePermissionCache = manager.getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
-            } else {
-                apiResourcePermissionCache =  Caching.getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER)
-                        .getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
-            }
-        return apiResourcePermissionCache;
     }
 
     /**

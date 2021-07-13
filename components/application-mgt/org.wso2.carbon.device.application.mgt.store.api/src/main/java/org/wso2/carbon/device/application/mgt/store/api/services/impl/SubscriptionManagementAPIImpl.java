@@ -400,4 +400,73 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
+
+    @GET
+    @Consumes("application/json")
+    @Produces("application/json")
+    @Path("/{uuid}/{subType}/{subTypeName}/devices")
+    public Response getAppInstalledDevicesOnCategories(
+            @PathParam("uuid") String uuid,
+            @PathParam("subType") String subType,
+            @PathParam("subTypeName") String subTypeName,
+            @DefaultValue("0")
+            @QueryParam("offset") int offset,
+            @DefaultValue("5")
+            @QueryParam("limit") int limit,
+            @QueryParam("name") String name,
+            @QueryParam("user") String user,
+            @QueryParam("ownership") String ownership,
+            @QueryParam("status") List<String> status) {
+        try {
+            SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
+            PaginationRequest request = new PaginationRequest(offset, limit);
+
+            if (StringUtils.isNotBlank(name)) {
+                request.setDeviceName(name);
+            }
+            if (StringUtils.isNotBlank(user)) {
+                request.setOwner(user);
+            }
+            if (StringUtils.isNotBlank(ownership)) {
+                RequestValidationUtil.validateOwnershipType(ownership);
+                request.setOwnership(ownership);
+            }
+            if (status != null && !status.isEmpty()) {
+                boolean isStatusEmpty = true;
+                for (String statusString : status) {
+                    if (StringUtils.isNotBlank(statusString)) {
+                        isStatusEmpty = false;
+                        break;
+                    }
+                }
+                if (!isStatusEmpty) {
+                    RequestValidationUtil.validateStatus(status);
+                    request.setStatusList(status);
+                }
+            }
+
+            //todo need to update the API for other subscription types
+            if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+                PaginationResult subscribedCategoryDetails = subscriptionManager
+                        .getAppInstalledSubscribeDevices(request, uuid, subType, subTypeName);
+                DeviceList devices = new DeviceList();
+                devices.setList((List<Device>) subscribedCategoryDetails.getData());
+                devices.setCount(subscribedCategoryDetails.getRecordsTotal());
+                return Response.status(Response.Status.OK).entity(devices).build();
+            } else {
+                String msg = "Found invalid sub type: " + subType;
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+        } catch (NotFoundException e) {
+            String msg = "Application with application release UUID: " + uuid + " is not found";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting application with the application " +
+                    "release uuid: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
 }
