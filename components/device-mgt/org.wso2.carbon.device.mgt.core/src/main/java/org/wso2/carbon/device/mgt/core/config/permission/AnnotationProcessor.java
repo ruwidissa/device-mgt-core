@@ -240,7 +240,7 @@ public class AnnotationProcessor {
                     subCtx = makeContextURLReady(resourceRootContext) + makeContextURLReady(subCtx);
                 }
                 permission.setUrl(replaceDynamicPathVariables(subCtx));
-                permission.setUrlPattern(permission.getUrl().replace("*", "[a-zA-Z0-9-_]+"));
+                permission.setUrlPattern(permission.getUrl().replace("*", "[a-zA-Z0-9-_.]+"));
                 String httpMethod;
                 for (int i = 0; i < annotations.length; i++) {
                     httpMethod = getHTTPMethodAnnotation(annotations[i]);
