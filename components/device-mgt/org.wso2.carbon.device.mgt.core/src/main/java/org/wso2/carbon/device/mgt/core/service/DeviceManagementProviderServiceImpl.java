@@ -4434,4 +4434,39 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         return deviceManagementService.getLicenseConfig();
     }
 
+    @Override
+    public PaginationResult getDevicesDetails(PaginationRequest request, List<Integer> devicesIds,
+                                              String groupName) throws DeviceManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        if (log.isDebugEnabled()) {
+            log.debug("Getting all devices details for device ids: " + devicesIds);
+        }
+        PaginationResult paginationResult = new PaginationResult();
+        List<Device> subscribedDeviceDetails;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            subscribedDeviceDetails = deviceDAO.getGroupedDevicesDetails(request, devicesIds, groupName, tenantId);
+            if (subscribedDeviceDetails.isEmpty()) {
+                paginationResult.setData(new ArrayList<>());
+                paginationResult.setRecordsFiltered(0);
+                paginationResult.setRecordsTotal(0);
+                return paginationResult;
+            }
+            int count = deviceDAO.getGroupedDevicesCount(request, devicesIds, groupName, tenantId);
+            paginationResult.setRecordsFiltered(count);
+            paginationResult.setRecordsTotal(count);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving device list for device ids " + devicesIds;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        paginationResult.setData(populateAllDeviceInfo(subscribedDeviceDetails));
+        return paginationResult;
+    }
 }

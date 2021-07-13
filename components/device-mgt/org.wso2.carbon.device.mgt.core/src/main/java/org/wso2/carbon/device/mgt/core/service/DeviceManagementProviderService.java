@@ -992,4 +992,14 @@ public interface DeviceManagementProviderService {
 
     License getLicenseConfig (String deviceTypeName) throws DeviceManagementException;
 
+    /**
+     * This method retrieves a list of devices details.
+     * @param request paginated request object.
+     * @param devicesIds devices ids list
+     * @param groupName name of the group
+     * @return {@link PaginationResult}
+     * @throws DeviceManagementException if any service level or DAO level error occurs.
+     */
+    PaginationResult getDevicesDetails(PaginationRequest request, List<Integer> devicesIds, String groupName)
+            throws DeviceManagementException;
 }
