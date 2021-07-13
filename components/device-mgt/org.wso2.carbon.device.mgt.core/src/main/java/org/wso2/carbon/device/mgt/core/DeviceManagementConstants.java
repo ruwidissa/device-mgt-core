@@ -167,6 +167,7 @@ public final class DeviceManagementConstants {
                 new Permission("/permission/admin/device-mgt/devices/enroll", "ui.execute"),
                 new Permission("/permission/admin/device-mgt/devices/disenroll", "ui.execute"),
                 new Permission("/permission/admin/device-mgt/devices/owning-device/view", "ui.execute"),
+                new Permission("/permission/admin/device-mgt/metadata", "ui.execute"),
                 new Permission("/permission/admin/manage/portal", "ui.execute")
         };
 

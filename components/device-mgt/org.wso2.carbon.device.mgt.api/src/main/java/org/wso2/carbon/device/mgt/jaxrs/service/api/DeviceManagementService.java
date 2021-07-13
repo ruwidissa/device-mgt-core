@@ -180,6 +180,13 @@ import java.util.List;
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/change-status"}
                 ),
+                @Scope(
+                        name = "Enroll Device",
+                        description = "Register a device",
+                        key = "perm:device:enroll",
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/device-mgt/devices/owning-device/add"}
+                ),
         }
 )
 @Path("/devices")
