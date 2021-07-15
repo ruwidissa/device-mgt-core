@@ -96,10 +96,12 @@ import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
+import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.NetworkUtils;
@@ -1164,5 +1166,56 @@ public final class DeviceManagerUtil {
         UserStoreManager userStoreManager = CarbonContext.getThreadLocalCarbonContext().getUserRealm()
                 .getUserStoreManager();
         return userStoreManager.getUserClaimValue(username, claimUri, null);
+    }
+
+    public static String replaceSystemProperty(String text) {
+
+        int indexOfStartingChars = -1;
+        int indexOfClosingBrace;
+
+        // The following condition deals with properties.
+        // Properties are specified as ${system.property},
+        // and are assumed to be System properties
+        while (indexOfStartingChars < text.indexOf("${")
+                && (indexOfStartingChars = text.indexOf("${")) != -1
+                && (indexOfClosingBrace = text.indexOf('}')) != -1) { // Is a
+            // property
+            // used?
+            String sysProp = text.substring(indexOfStartingChars + 2,
+                    indexOfClosingBrace);
+            String propValue = System.getProperty(sysProp);
+
+            if (propValue == null) {
+                if ("carbon.context".equals(sysProp)) {
+                    propValue = DeviceManagementDataHolder.getInstance().getConfigurationContextService()
+                            .getServerConfigContext().getContextRoot();
+                } else if ("admin.username".equals(sysProp) || "admin.password".equals(sysProp)) {
+                    try {
+                        RealmConfiguration realmConfig =
+                                new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
+                        if ("admin.username".equals(sysProp)) {
+                            propValue = realmConfig.getAdminUserName();
+                        } else {
+                            propValue = realmConfig.getAdminPassword();
+                        }
+                    } catch (UserStoreException e) {
+                        // Can't throw an exception because the server is
+                        // starting and can't be halted.
+                        log.error("Unable to build the Realm Configuration", e);
+                        return null;
+                    }
+                }
+            }
+            //Derive original text value with resolved system property value
+            if (propValue != null) {
+                text = text.substring(0, indexOfStartingChars) + propValue
+                        + text.substring(indexOfClosingBrace + 1);
+            }
+            if ("carbon.home".equals(sysProp) && propValue != null
+                    && ".".equals(propValue)) {
+                text = new File(".").getAbsolutePath() + File.separator + text;
+            }
+        }
+        return text;
     }
 }

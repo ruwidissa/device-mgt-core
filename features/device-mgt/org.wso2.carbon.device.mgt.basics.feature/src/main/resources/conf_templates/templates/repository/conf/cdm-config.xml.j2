@@ -63,8 +63,8 @@
         <AdminPassword>{{device_mgt_conf.identity_conf.admin_password}}</AdminPassword>
         {% else %}
         <ServerUrl>https://localhost:9443</ServerUrl>
-        <AdminUsername>admin</AdminUsername>
-        <AdminPassword>admin</AdminPassword>
+        <AdminUsername>${admin.username}</AdminUsername>
+        <AdminPassword>${admin.username}</AdminPassword>
         {% endif %}
     </IdentityConfiguration>
     <KeyManagerConfiguration>
@@ -74,8 +74,8 @@
         <AdminPassword>{{device_mgt_conf.key_manager_conf.admin_password}}</AdminPassword>
         {% else %}
         <ServerUrl>https://localhost:9443</ServerUrl>
-        <AdminUsername>admin</AdminUsername>
-        <AdminPassword>admin</AdminPassword>
+        <AdminUsername>${admin.username}</AdminUsername>
+        <AdminPassword>${admin.username}</AdminPassword>
         {% endif %}
     </KeyManagerConfiguration>
     <PolicyConfiguration>
