@@ -21,6 +21,7 @@ package org.wso2.carbon.webapp.authenticator.framework.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -98,12 +99,12 @@ public class Utils {
         if ((url == null) || (url.isEmpty())) {
             throw new IllegalArgumentException("OAuth token validation endpoint url is not provided");
         }
-        String adminUsername = properties.getProperty("Username");
+        String adminUsername = DeviceManagerUtil.replaceSystemProperty(properties.getProperty("Username"));
         if (adminUsername == null) {
             throw new IllegalArgumentException(
                     "Username to connect to the OAuth token validation endpoint is not provided");
         }
-        String adminPassword = properties.getProperty("Password");
+        String adminPassword = DeviceManagerUtil.replaceSystemProperty(properties.getProperty("Password"));
         if (adminPassword == null) {
             throw new IllegalArgumentException(
                     "Password to connect to the OAuth token validation endpoint is not provided");

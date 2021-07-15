@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.device.mgt.core.config.identity;
 
+import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -31,7 +33,7 @@ public class IdentityConfigurations {
 
 	@XmlElement(name = "AdminUsername", required = true)
 	public String getAdminUsername() {
-		return adminUsername;
+		return DeviceManagerUtil.replaceSystemProperty(adminUsername);
 	}
 
 	public void setAdminUsername(String adminUsername) {
@@ -40,7 +42,7 @@ public class IdentityConfigurations {
 
 	@XmlElement(name = "AdminPassword", required = true)
 	public String getAdminPassword() {
-		return adminPassword;
+		return DeviceManagerUtil.replaceSystemProperty(adminPassword);
 	}
 
 	public void setAdminPassword(String adminPassword) {
