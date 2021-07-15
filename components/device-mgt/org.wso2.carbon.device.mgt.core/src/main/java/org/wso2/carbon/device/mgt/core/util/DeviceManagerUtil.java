@@ -70,6 +70,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementException;
@@ -1169,10 +1170,11 @@ public final class DeviceManagerUtil {
      * @return created parent path
      */
     public static String createParentPath(DeviceGroup deviceGroup) {
-        if ("/".equals(deviceGroup.getParentPath())) {
+        if (DeviceGroupConstants.HierarchicalGroup.SEPERATOR.equals(deviceGroup.getParentPath())) {
             return deviceGroup.getParentPath() + deviceGroup.getGroupId();
         } else {
-            return deviceGroup.getParentPath() + "/" + deviceGroup.getGroupId();
+            return deviceGroup.getParentPath() + DeviceGroupConstants.HierarchicalGroup.SEPERATOR
+                    + deviceGroup.getGroupId();
         }
     }
 }

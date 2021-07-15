@@ -84,4 +84,8 @@ public class DeviceGroupConstants {
         public static final String[] DEFAULT_VIEW_EVENTS_PERMISSIONS =
                 {"/permission/device-mgt/user/groups/device_events"};
     }
+
+    public static final class HierarchicalGroup {
+        public static final String SEPERATOR = "/";
+    }
 }

@@ -113,7 +113,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             DeviceGroup existingGroup = this.groupDAO.getGroup(deviceGroup.getName(), tenantId);
             if (existingGroup == null) {
                 if (deviceGroup.getParentGroupId() == 0) {
-                    deviceGroup.setParentPath("/");
+                    deviceGroup.setParentPath(DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
                 } else {
                     DeviceGroup immediateParentGroup = groupDAO.getGroup(deviceGroup.getParentGroupId(), tenantId);
                     if (immediateParentGroup == null) {
@@ -178,10 +178,10 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             DeviceGroup existingGroup = this.groupDAO.getGroup(groupId, tenantId);
             if (existingGroup != null) {
                 List<DeviceGroup> groupsToUpdate = new ArrayList<>();
-                String immediateParentID = StringUtils.substringAfterLast(existingGroup.getParentPath(), "/");
+                String immediateParentID = StringUtils.substringAfterLast(existingGroup.getParentPath(), DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
                 String parentPath = "";
                 if (deviceGroup.getParentGroupId() == 0) {
-                    deviceGroup.setParentPath("/");
+                    deviceGroup.setParentPath(DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
                 } else {
                     DeviceGroup immediateParentGroup = groupDAO.getGroup(deviceGroup.getParentGroupId(), tenantId);
                     if (immediateParentGroup == null) {
@@ -197,7 +197,8 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 deviceGroup.setGroupId(groupId);
                 groupsToUpdate.add(deviceGroup);
                 if (StringUtils.isNotBlank(immediateParentID)) {
-                    List<DeviceGroup> childrenGroups = groupDAO.getChildrenGroups(DeviceManagerUtil.createParentPath(existingGroup), tenantId);
+                    List<DeviceGroup> childrenGroups = groupDAO.getChildrenGroups(
+                            DeviceManagerUtil.createParentPath(existingGroup), tenantId);
                     for (DeviceGroup childrenGroup : childrenGroups) {
                         childrenGroup.setParentPath(childrenGroup.getParentPath()
                                 .replace(existingGroup.getParentPath(), parentPath));
@@ -258,9 +259,9 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 } else {
                     for (DeviceGroup childrenGroup : childrenGroups) {
                         String newParentPath = childrenGroup.getParentPath()
-                                .replace("/" + deviceGroup.getGroupId(), "");
+                                .replace(DeviceGroupConstants.HierarchicalGroup.SEPERATOR + deviceGroup.getGroupId(), "");
                         if (StringUtils.isEmpty(newParentPath)) {
-                            newParentPath = "/";
+                            newParentPath = DeviceGroupConstants.HierarchicalGroup.SEPERATOR;
                         }
                         childrenGroup.setParentPath(newParentPath);
                     }
@@ -437,7 +438,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             GroupManagementDAOFactory.openConnection();
-            request.setParentPath("/");
+            request.setParentPath(DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
             rootGroups = this.groupDAO.getGroups(request, tenantId);
             for (DeviceGroup rootGroup : rootGroups) {
                 if (requireGroupProps) {
@@ -480,7 +481,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         List<DeviceGroup> rootGroups;
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            request.setParentPath("/");
+            request.setParentPath(DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
             if (StringUtils.isBlank(username)) {
                 GroupManagementDAOFactory.openConnection();
                 rootGroups = groupDAO.getGroups(request, tenantId);
@@ -616,7 +617,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             GroupManagementDAOFactory.openConnection();
-            request.setParentPath("/");
+            request.setParentPath(DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
             rootGroups = this.groupDAO.getGroups(request, allDeviceGroupIdsOfUser, tenantId);
             for (DeviceGroup rootGroup : rootGroups) {
                 if (requireGroupProps) {
@@ -1306,7 +1307,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         while (iterator.hasNext()) {
             DeviceGroup childGroup = iterator.next();
             int immediateParentID = Integer.parseInt(StringUtils.substringAfterLast(
-                    childGroup.getParentPath(), "/"));
+                    childGroup.getParentPath(), DeviceGroupConstants.HierarchicalGroup.SEPERATOR));
             if (immediateParentID == parentGroup.getGroupId()) {
                 if (requireGroupProps) {
                     populateGroupProperties(childGroup, tenantId);
