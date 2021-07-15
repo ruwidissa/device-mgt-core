@@ -177,6 +177,9 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             GroupManagementDAOFactory.beginTransaction();
             DeviceGroup existingGroup = this.groupDAO.getGroup(groupId, tenantId);
             if (existingGroup != null) {
+                List<DeviceGroup> groupsToUpdate = new ArrayList<>();
+                String immediateParentID = StringUtils.substringAfterLast(existingGroup.getParentPath(), "/");
+                String parentPath = "";
                 if (deviceGroup.getParentGroupId() == 0) {
                     deviceGroup.setParentPath("/");
                 } else {
@@ -188,10 +191,20 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                         log.error(msg);
                         throw new GroupManagementException(msg);
                     }
-                    String parentPath = DeviceManagerUtil.createParentPath(immediateParentGroup);
+                    parentPath = DeviceManagerUtil.createParentPath(immediateParentGroup);
                     deviceGroup.setParentPath(parentPath);
                 }
-                this.groupDAO.updateGroup(deviceGroup, groupId, tenantId);
+                deviceGroup.setGroupId(groupId);
+                groupsToUpdate.add(deviceGroup);
+                if (StringUtils.isNotBlank(immediateParentID)) {
+                    List<DeviceGroup> childrenGroups = groupDAO.getChildrenGroups(DeviceManagerUtil.createParentPath(existingGroup), tenantId);
+                    for (DeviceGroup childrenGroup : childrenGroups) {
+                        childrenGroup.setParentPath(childrenGroup.getParentPath()
+                                .replace(existingGroup.getParentPath(), parentPath));
+                        groupsToUpdate.add(childrenGroup);
+                    }
+                }
+                this.groupDAO.updateGroups(groupsToUpdate, tenantId);
                 if (deviceGroup.getGroupProperties() != null && deviceGroup.getGroupProperties().size() > 0) {
                     this.groupDAO.updateGroupProperties(deviceGroup, groupId, tenantId);
                 }
