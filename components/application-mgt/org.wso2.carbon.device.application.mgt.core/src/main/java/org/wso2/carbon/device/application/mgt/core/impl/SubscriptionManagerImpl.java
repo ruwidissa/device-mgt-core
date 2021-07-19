@@ -848,16 +848,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     }
                 }
 
+                subscriptionDAO.addDeviceSubscription(username, subInsertingDeviceIds, subType,
+                        Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
                 if (!subUpdatingDeviceIds.isEmpty()) {
                     subscriptionDAO.updateDeviceSubscription(username, subUpdatingDeviceIds, action, subType,
                             Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
                 }
-
-                if (!subInsertingDeviceIds.isEmpty()) {
-                    subscriptionDAO.addDeviceSubscription(username, subInsertingDeviceIds, subType,
-                            Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
+                subUpdatingDeviceIds.addAll(subInsertingDeviceIds);
+                if (!subUpdatingDeviceIds.isEmpty()) {
                     List<Integer> deviceSubIds = new ArrayList<>(
-                            subscriptionDAO.getDeviceSubIds(subInsertingDeviceIds, applicationReleaseId, tenantId));
+                            subscriptionDAO.getDeviceSubIds(subUpdatingDeviceIds, applicationReleaseId, tenantId));
                     subscriptionDAO.addOperationMapping(operationId, deviceSubIds, tenantId);
                 }
             }
