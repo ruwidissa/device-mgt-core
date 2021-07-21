@@ -315,7 +315,7 @@ public class ReportManagementServiceImpl implements ReportManagementService {
                 }
                 //Map date blocks and counts
                 resultObject.addProperty(
-                        dateFormat.format(endDate) + " - " + dateFormat.format(previousDate), sum);
+                        dateFormat.format(previousDate) + " - " + dateFormat.format(endDate), sum);
                 endDate = previousDate;
 
             }
