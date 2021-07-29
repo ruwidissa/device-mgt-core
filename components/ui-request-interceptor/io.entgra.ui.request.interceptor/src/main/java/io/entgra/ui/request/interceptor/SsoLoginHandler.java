@@ -23,7 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import io.entgra.ui.request.interceptor.cache.LoginCacheManager;
+import io.entgra.ui.request.interceptor.cache.LoginCache;
 import io.entgra.ui.request.interceptor.cache.OAuthApp;
 import io.entgra.ui.request.interceptor.cache.OAuthAppCacheKey;
 import io.entgra.ui.request.interceptor.util.HandlerConstants;
@@ -81,9 +81,9 @@ public class SsoLoginHandler extends HttpServlet {
 
     private JsonObject uiConfigJsonObject;
     private HttpSession httpSession;
-
-    private LoginCacheManager loginCacheManager;
+    private LoginCache loginCache;
     private OAuthApp oAuthApp;
+    private OAuthAppCacheKey oAuthAppCacheKey;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
@@ -99,13 +99,23 @@ public class SsoLoginHandler extends HttpServlet {
             baseContextPath = req.getContextPath();
             applicationName = baseContextPath.substring(1, baseContextPath.indexOf("-ui-request-handler"));
 
-            // Check if oauth app cache is available
-            loginCacheManager = new LoginCacheManager();
-            loginCacheManager.initializeCacheManager();
-            oAuthApp = loginCacheManager.getOAuthAppCache(
-                    new OAuthAppCacheKey(applicationName, adminUsername)
-            );
+            String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
+            if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
+                iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
+            }
+            gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
+                    + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
+            iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
+                    + HandlerConstants.COLON + iotsCorePort;
 
+            // Fetch ui config and persists in session
+            String uiConfigUrl = iotsCoreUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
+            uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
+
+            // Retrieving login cache and do a DCR if the cache is not available.
+            loginCache = HandlerUtil.getLoginCache(httpSession);
+            oAuthAppCacheKey = new OAuthAppCacheKey(applicationName, adminUsername);
+            oAuthApp = loginCache.getOAuthAppCache(oAuthAppCacheKey);
             if (oAuthApp == null) {
                 dynamicClientRegistration(req, resp);
             }
@@ -143,19 +153,6 @@ public class SsoLoginHandler extends HttpServlet {
      */
     private void dynamicClientRegistration(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
-
-            if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-                iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
-            }
-
-            gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
-                    + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-            iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
-                    + HandlerConstants.COLON + iotsCorePort;
-            String uiConfigUrl = iotsCoreUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
-
-            uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
             sessionTimeOut = Integer.parseInt(String.valueOf(uiConfigJsonObject.get("sessionTimeOut")));
@@ -191,9 +188,8 @@ public class SsoLoginHandler extends HttpServlet {
                 }
 
                 // cache the oauth app credentials
-                OAuthAppCacheKey oAuthAppCacheKey = new OAuthAppCacheKey(applicationName, adminUsername);
                 oAuthApp = new OAuthApp(applicationName, adminUsername, clientId, clientSecret, encodedClientApp);
-                loginCacheManager.addOAuthAppToCache(oAuthAppCacheKey, oAuthApp);
+                loginCache.addOAuthAppToCache(oAuthAppCacheKey, oAuthApp);
             }
 
             // Get the details of the registered application

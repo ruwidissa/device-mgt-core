@@ -22,6 +22,8 @@
     <EnableSSO>true</EnableSSO>
     <!-- session time out in seconds -->
     <SessionTimeOut>3600</SessionTimeOut>
+    <!--  maximum number of login cache entries  -->
+    <LoginCacheCapacity>10000</LoginCacheCapacity>
     <AppRegistration>
         <Tags>
             <Tag>application_management</Tag>
