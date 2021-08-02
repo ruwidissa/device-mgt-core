@@ -14,6 +14,23 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2021, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.device.mgt.core.dao;
@@ -75,6 +92,15 @@ public interface GroupDAO {
     void deleteAllGroupProperties(int groupId, int tenantId) throws GroupManagementDAOException;
 
     /**
+     * Remove properties of device groups.
+     *
+     * @param groupIds to be deleted.
+     * @param tenantId of the group.
+     * @throws GroupManagementDAOException on error during deletion of group properties of groups
+     */
+    void deleteAllGroupsProperties(List<Integer> groupIds, int tenantId) throws GroupManagementDAOException;
+
+    /**
      * Retrives all properties stored against a group.
      *
      * @param groupId to be deleted.
@@ -96,6 +122,15 @@ public interface GroupDAO {
             throws GroupManagementDAOException;
 
     /**
+     * Update existing Device Groups.
+     *
+     * @param deviceGroups groups to update.
+     * @param tenantId of the group.
+     * @throws GroupManagementDAOException on error during updating of groups
+     */
+    void updateGroups(List<DeviceGroup> deviceGroups, int tenantId) throws GroupManagementDAOException;
+
+    /**
      * Delete an existing Device Group.
      *
      * @param groupId of Device Group.
@@ -103,6 +138,24 @@ public interface GroupDAO {
      * @throws GroupManagementDAOException
      */
     void deleteGroup(int groupId, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Delete mappings of Device Groups.
+     *
+     * @param groupIds of Device Groups.
+     * @param tenantId  of the group.
+     * @throws GroupManagementDAOException on error during deletion of mappings of groups
+     */
+    void deleteGroupsMapping(List<Integer> groupIds, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Delete existing Device Groups.
+     *
+     * @param groupIds of Device Groups.
+     * @param tenantId  of the group.
+     * @throws GroupManagementDAOException on error during deletion of groups
+     */
+    void deleteGroups(List<Integer> groupIds, int tenantId) throws GroupManagementDAOException;
 
     /**
      * Get device group by id.
@@ -113,6 +166,25 @@ public interface GroupDAO {
      * @throws GroupManagementDAOException
      */
     DeviceGroup getGroup(int groupId, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Get children groups by parent path.
+     *
+     * @param parentPath of parent group.
+     * @param tenantId  of the group.
+     * @return {@link List<DeviceGroup>} list of children device groups
+     * @throws GroupManagementDAOException on error during retrieval of children groups
+     */
+    List<DeviceGroup> getChildrenGroups(String parentPath, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Get root groups.
+     *
+     * @param tenantId  of the group.
+     * @return {@link List<DeviceGroup>} list of root device groups
+     * @throws GroupManagementDAOException on error during retrieval of root groups
+     */
+    List<DeviceGroup> getRootGroups(int tenantId) throws GroupManagementDAOException;
 
     /**
      * Get the groups of device with device id provided
@@ -306,10 +378,11 @@ public interface GroupDAO {
      *
      * @param roles    of the group.
      * @param tenantId of user's tenant.
+     * @param parentPath of the group.
      * @return count of device groups.
      * @throws GroupManagementDAOException
      */
-    int getGroupsCount(String[] roles, int tenantId) throws GroupManagementDAOException;
+    int getGroupsCount(String[] roles, int tenantId, String parentPath) throws GroupManagementDAOException;
 
     /**
      * Get all device groups which owned by user.
@@ -336,10 +409,11 @@ public interface GroupDAO {
      *
      * @param username of the owner.
      * @param tenantId of user's tenant.
+     * @param parentPath of the group.
      * @return count of device groups.
      * @throws GroupManagementDAOException
      */
-    int getOwnGroupsCount(String username, int tenantId) throws GroupManagementDAOException;
+    int getOwnGroupsCount(String username, int tenantId, String parentPath) throws GroupManagementDAOException;
 
     /**
      * Get device Ids of devices which are assigned to groups.

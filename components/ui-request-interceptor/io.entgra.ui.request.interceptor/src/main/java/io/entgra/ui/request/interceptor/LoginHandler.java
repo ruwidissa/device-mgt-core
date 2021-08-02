@@ -24,7 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.entgra.ui.request.interceptor.beans.AuthData;
-import io.entgra.ui.request.interceptor.cache.LoginCacheManager;
+import io.entgra.ui.request.interceptor.cache.LoginCache;
 import io.entgra.ui.request.interceptor.cache.OAuthApp;
 import io.entgra.ui.request.interceptor.cache.OAuthAppCacheKey;
 import io.entgra.ui.request.interceptor.exceptions.LoginException;
@@ -39,7 +39,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
-import org.json.JSONString;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -81,10 +80,9 @@ public class LoginHandler extends HttpServlet {
             httpSession.setMaxInactiveInterval(sessionTimeOut);
 
             // Check if OAuth app cache exists. If not create a new application.
-            LoginCacheManager loginCacheManager = new LoginCacheManager();
-            loginCacheManager.initializeCacheManager();
+            LoginCache loginCache = HandlerUtil.getLoginCache(httpSession);
             OAuthAppCacheKey oAuthAppCacheKey = new OAuthAppCacheKey(HandlerConstants.PUBLISHER_APPLICATION_NAME, username);
-            OAuthApp oAuthApp = loginCacheManager.getOAuthAppCache(oAuthAppCacheKey);
+            OAuthApp oAuthApp = loginCache.getOAuthAppCache(oAuthAppCacheKey);
 
             if (oAuthApp == null) {
                 HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
@@ -112,8 +110,6 @@ public class LoginHandler extends HttpServlet {
                         clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
                         encodedClientApp = Base64.getEncoder()
                                 .encodeToString((clientId + HandlerConstants.COLON + clientSecret).getBytes());
-
-                        oAuthAppCacheKey = new OAuthAppCacheKey(HandlerConstants.PUBLISHER_APPLICATION_NAME, username);
                         oAuthApp = new OAuthApp(
                                 HandlerConstants.PUBLISHER_APPLICATION_NAME,
                                 username,
@@ -121,7 +117,7 @@ public class LoginHandler extends HttpServlet {
                                 clientSecret,
                                 encodedClientApp
                         );
-                        loginCacheManager.addOAuthAppToCache(oAuthAppCacheKey, oAuthApp);
+                        loginCache.addOAuthAppToCache(oAuthAppCacheKey, oAuthApp);
                     }
 
                     if (getTokenAndPersistInSession(req, resp, clientId, clientSecret, encodedClientApp, scopes)) {

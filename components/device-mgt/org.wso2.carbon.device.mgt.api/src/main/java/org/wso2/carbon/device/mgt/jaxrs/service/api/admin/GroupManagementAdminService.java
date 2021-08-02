@@ -15,6 +15,22 @@
  *   specific language governing permissions and limitations
  *   under the License.
  *
+ *
+ *   Copyright (c) 2021, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
  */
 
 package org.wso2.carbon.device.mgt.jaxrs.service.api.admin;
@@ -165,6 +181,90 @@ public interface GroupManagementAdminService {
                                defaultValue = "false")
                        @QueryParam("requireGroupProps")
                                boolean requireGroupProps);
+
+    @GET
+    @Path("hierarchy")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HTTPConstants.HEADER_GET,
+            value = "Getting the List of Hierarchical Groups",
+            notes = "Returns all groups enrolled with the system hierarchically.",
+            tags = "Device Group Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of device groups hierarchically.",
+                    response = DeviceGroupList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource has been modified the last time.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client has already the latest version of " +
+                            "the requested resource."),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the groups list.",
+                    response = ErrorResponse.class)
+    })
+    Response getGroupsWithHierarchy(@ApiParam(
+            name = "name",
+            value = "Name of the group.")
+            @QueryParam("name")
+                    String name,
+            @ApiParam(
+                    name = "owner",
+                    value = "Owner of the group.")
+            @QueryParam("owner")
+                    String owner,
+            @ApiParam(
+                    name = "status",
+                    value = "status of group to be retrieve.")
+            @QueryParam("status")
+                    String status,
+            @ApiParam(
+                    name = "requireGroupProps",
+                    value = "Request group properties to include in the response",
+                    defaultValue = "false")
+            @QueryParam("requireGroupProps")
+                    boolean requireGroupProps,
+            @ApiParam(
+                    name = "depth",
+                    value = "Depth of the group hierarchy.")
+            @DefaultValue("3")
+            @QueryParam("depth")
+                    int depth,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    defaultValue = "0")
+            @DefaultValue("0")
+            @QueryParam("offset")
+                    int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many records require from the starting pagination index/offset.",
+                    defaultValue = "5")
+            @DefaultValue("5")
+            @QueryParam("limit")
+                    int limit);
 
     @Path("/count")
     @GET

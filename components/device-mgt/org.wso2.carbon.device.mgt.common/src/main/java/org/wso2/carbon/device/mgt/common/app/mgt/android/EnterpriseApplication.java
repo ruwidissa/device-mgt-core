@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.common.app.mgt.android;
 import com.google.gson.Gson;
 
 import java.io.Serializable;
+import java.util.Properties;
 
 /**
  * This class represents the Enterprise AuthenticationImpl information.
@@ -30,6 +31,7 @@ public class EnterpriseApplication implements Serializable {
     private String type;
     private String url;
     private String appIdentifier;
+    private Properties properties;
 
     public String getAppIdentifier() {
         return appIdentifier;
@@ -60,4 +62,11 @@ public class EnterpriseApplication implements Serializable {
         return gson.toJson(this);
     }
 
+    public Properties getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Properties properties) {
+        this.properties = properties;
+    }
 }

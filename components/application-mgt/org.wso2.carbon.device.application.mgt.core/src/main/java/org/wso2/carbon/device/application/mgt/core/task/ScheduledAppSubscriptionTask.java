@@ -37,6 +37,7 @@ import org.wso2.carbon.device.mgt.core.task.impl.RandomlyAssignedScheduleTask;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,7 @@ public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
     private static final String TASK_NAME = "SCHEDULE_APP_SUBSCRIPTION";
 
     private SubscriptionManager subscriptionManager;
+    private String payload;
     private String subscribers;
     private String subscriptionType;
     private String application;
@@ -57,6 +59,7 @@ public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
     @Override
     public void setProperties(Map<String, String> map) {
         this.subscribers = map.get(Constants.SUBSCRIBERS);
+        this.payload = map.get(Constants.PAYLOAD);
         this.subscriptionType = map.get(Constants.SUB_TYPE);
         this.application = map.get(Constants.APP_UUID);
         this.action = map.get(Constants.ACTION);
@@ -89,8 +92,9 @@ public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
                                                                                        new TypeToken<List<DeviceIdentifier>>() {
                                                                                        }.getType());
                         try {
+                            Properties properties = new Gson().fromJson(payload, Properties.class);
                             subscriptionManager.performBulkAppOperation(this.application, deviceIdentifiers,
-                                                                        this.subscriptionType, this.action);
+                                                                        this.subscriptionType, this.action, properties);
                             subscriptionDTO.setStatus(ExecutionStatus.EXECUTED);
                         } catch (ApplicationManagementException e) {
                             log.error(
@@ -102,8 +106,9 @@ public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
                         List<String> subscriberList = Pattern.compile(",").splitAsStream(this.subscribers).collect(
                                 Collectors.toList());
                         try {
+                            Properties properties = new Gson().fromJson(payload, Properties.class);
                             subscriptionManager.performBulkAppOperation(this.application, subscriberList,
-                                                                        this.subscriptionType, this.action);
+                                                                        this.subscriptionType, this.action, properties);
                             subscriptionDTO.setStatus(ExecutionStatus.EXECUTED);
                         } catch (ApplicationManagementException e) {
                             log.error(

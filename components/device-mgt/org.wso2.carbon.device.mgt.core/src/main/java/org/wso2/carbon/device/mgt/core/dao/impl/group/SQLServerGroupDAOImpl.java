@@ -14,10 +14,28 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2021, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.device.mgt.core.dao.impl.group;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
@@ -56,7 +74,8 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
 
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE TENANT_ID = ?";
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
+                    + "WHERE TENANT_ID = ?";
             if (groupName != null && !groupName.isEmpty()) {
                 sql += " AND GROUP_NAME LIKE ?";
                 hasGroupName = true;
@@ -68,6 +87,9 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
             if (status != null && !status.isEmpty()) {
                 sql += " AND STATUS = ?";
                 hasStatus = true;
+            }
+            if (StringUtils.isNotBlank(request.getParentPath())) {
+                sql += " AND PARENT_PATH LIKE ?";
             }
             if (hasLimit) {
                 sql += " ORDER BY ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -84,6 +106,9 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
             }
             if (hasStatus) {
                 stmt.setString(paramIndex++, status.toUpperCase());
+            }
+            if (StringUtils.isNotBlank(request.getParentPath())) {
+                stmt.setString(paramIndex++, request.getParentPath());
             }
             if (hasLimit) {
                 stmt.setInt(paramIndex++, request.getStartIndex());
@@ -121,7 +146,8 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
 
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE TENANT_ID = ?";
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
+                    + "WHERE TENANT_ID = ?";
             if (groupName != null && !groupName.isEmpty()) {
                 sql += " AND GROUP_NAME LIKE ?";
                 hasGroupName = true;
@@ -129,6 +155,9 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
             if (owner != null && !owner.isEmpty()) {
                 sql += " AND OWNER LIKE ?";
                 hasOwner = true;
+            }
+            if (StringUtils.isNotBlank(request.getParentPath())) {
+                sql += " AND PARENT_PATH LIKE ?";
             }
             sql += " AND ID IN (";
             for (int i = 0; i < deviceGroupIdsCount; i++) {
@@ -147,6 +176,9 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
             }
             if (hasOwner) {
                 stmt.setString(paramIndex++, owner + "%");
+            }
+            if (StringUtils.isNotBlank(request.getParentPath())) {
+                stmt.setString(paramIndex++, request.getParentPath());
             }
             for (Integer deviceGroupId : deviceGroupIds) {
                 stmt.setInt(paramIndex++, deviceGroupId);

@@ -23,13 +23,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.entgra.ui.request.interceptor.beans.AuthData;
+import io.entgra.ui.request.interceptor.cache.LoginCache;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Consts;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.entity.ContentType;
@@ -60,6 +64,9 @@ import java.io.StringWriter;
 public class HandlerUtil {
 
     private static final Log log = LogFactory.getLog(HandlerUtil.class);
+    private static LoginCache loginCache = null;
+    private static boolean isLoginCacheInitialized = false;
+    private static AuthData authData;
 
     /***
      *
@@ -166,9 +173,11 @@ public class HandlerUtil {
 
 
     /***
+     * Handle error requests.
      *
      * @param resp {@link HttpServletResponse}
-     * Return Error Response.
+     * @param proxyResponse {@link ProxyResponse}
+     * @throws IOException If error occurred when trying to send the error response.
      */
     public static void handleError(HttpServletResponse resp, ProxyResponse proxyResponse) throws IOException {
         Gson gson = new Gson();
@@ -186,6 +195,22 @@ public class HandlerUtil {
         try (PrintWriter writer = resp.getWriter()) {
             writer.write(gson.toJson(proxyResponse));
         }
+    }
+
+    /**
+     * Handle error requests with custom error codes.
+     *
+     * @param resp {@link HttpServletResponse}
+     * @param errorCode HTTP error status code
+     * @throws IOException If error occurred when trying to send the error response.
+     */
+    public static void handleError(HttpServletResponse resp, int errorCode)
+            throws IOException {
+        ProxyResponse proxyResponse = new ProxyResponse();
+        proxyResponse.setCode(errorCode);
+        proxyResponse.setExecutorResponse(
+                HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(errorCode));
+        HandlerUtil.handleError(resp, proxyResponse);
     }
 
     /***
@@ -399,5 +424,137 @@ public class HandlerUtil {
         }
 
         return stringOutput;
+    }
+
+    /***
+     * Search a key from a given json string object.
+     *
+     * @param jsonObjectString - json object in string format.
+     * @param key - the key to be searched.
+     * @return string value of the key value.
+     */
+    private static String searchFromJsonObjectString(String jsonObjectString, String key) {
+        JsonParser jsonParser = new JsonParser();
+        JsonElement jsonElement = jsonParser.parse(jsonObjectString);
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        return jsonObject.get(key).getAsString();
+    }
+
+    /***
+     * Initializes the login cache.
+     *
+     * @param httpSession - current active HttpSession.
+     */
+    private static void initializeLoginCache(HttpSession httpSession) {
+        String uiConfig = httpSession.getAttribute(HandlerConstants.UI_CONFIG_KEY).toString();
+        int capacity = Integer.parseInt(searchFromJsonObjectString(uiConfig, HandlerConstants.LOGIN_CACHE_CAPACITY_KEY));
+        loginCache = new LoginCache(capacity);
+    }
+
+    /***
+     * Retrieves login cache and initializes if its not done already.
+     *
+     * @param httpSession - current active HttpSession.
+     */
+    public static LoginCache getLoginCache(HttpSession httpSession) {
+        if (!isLoginCacheInitialized || loginCache == null) {
+            isLoginCacheInitialized = true;
+            initializeLoginCache(httpSession);
+        }
+        return loginCache;
+    }
+
+    /**
+     * Retry request again after refreshing the access token
+     *
+     * @param req incoming {@link HttpServletRequest}
+     * @param resp resp {@link HttpServletResponse}
+     * @param httpRequest subclass of {@link HttpRequestBase} related to the current request.
+     * @return {@link ProxyResponse} if successful and <code>null</code> if failed.
+     * @throws IOException If an error occurs when try to retry the request.
+     */
+    public static ProxyResponse retryRequestWithRefreshedToken(HttpServletRequest req, HttpServletResponse resp,
+                                                               HttpRequestBase httpRequest, String apiEndpoint) throws IOException {
+        if (refreshToken(req, resp, apiEndpoint)) {
+            HttpSession session = req.getSession(false);
+            if (session == null) {
+                log.error("Unauthorized, You are not logged in. Please log in to the portal");
+                handleError(resp, HttpStatus.SC_UNAUTHORIZED);
+                return null;
+            }
+            httpRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
+            ProxyResponse proxyResponse = HandlerUtil.execute(httpRequest);
+            if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+                log.error("Error occurred while invoking the API after refreshing the token.");
+                HandlerUtil.handleError(resp, proxyResponse);
+                return null;
+            }
+            return proxyResponse;
+        }
+        return null;
+    }
+
+    /***
+     * This method is responsible to get the refresh token
+     *
+     * @param req {@link HttpServletRequest}
+     * @param resp {@link HttpServletResponse}
+     * @return If successfully renew tokens, returns TRUE otherwise return FALSE
+     * @throws IOException If an error occurs while witting error response to client side or invoke token renewal API
+     */
+    private static boolean refreshToken(HttpServletRequest req, HttpServletResponse resp, String gatewayUrl)
+            throws IOException {
+        if (log.isDebugEnabled()) {
+            log.debug("refreshing the token");
+        }
+        HttpPost tokenEndpoint = new HttpPost(
+                gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpSession session = req.getSession(false);
+        if (session == null) {
+            log.error("Couldn't find a session, hence it is required to login and proceed.");
+            handleError(resp, HttpStatus.SC_UNAUTHORIZED);
+            return false;
+        }
+
+        authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
+        StringEntity tokenEndpointPayload = new StringEntity(
+                "grant_type=refresh_token&refresh_token=" + authData.getRefreshToken() + "&scope=PRODUCTION",
+                ContentType.APPLICATION_FORM_URLENCODED);
+
+        tokenEndpoint.setEntity(tokenEndpointPayload);
+        String encodedClientApp = authData.getEncodedClientApp();
+        tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +
+                encodedClientApp);
+        tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
+
+        ProxyResponse tokenResultResponse = HandlerUtil.execute(tokenEndpoint);
+        if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+            log.error("Error occurred while refreshing access token.");
+            HandlerUtil.handleError(resp, tokenResultResponse);
+            return false;
+        }
+
+        JsonParser jsonParser = new JsonParser();
+        JsonElement jTokenResult = jsonParser.parse(tokenResultResponse.getData());
+
+        if (jTokenResult.isJsonObject()) {
+            JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
+            AuthData newAuthData = new AuthData();
+
+            newAuthData.setAccessToken(jTokenResultAsJsonObject.get("access_token").getAsString());
+            newAuthData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
+            newAuthData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
+            newAuthData.setClientId(authData.getClientId());
+            newAuthData.setClientSecret(authData.getClientSecret());
+            newAuthData.setEncodedClientApp(authData.getEncodedClientApp());
+            newAuthData.setUsername(authData.getUsername());
+            authData = newAuthData;
+            session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, newAuthData);
+            return true;
+        }
+
+        log.error("Error Occurred in token renewal process.");
+        handleError(resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        return false;
     }
 }

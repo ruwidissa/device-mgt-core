@@ -136,6 +136,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Properties;
 
 @Path("/devices")
 public class DeviceManagementServiceImpl implements DeviceManagementService {
@@ -915,7 +916,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             if (UUID != null) {
                 ApplicationInstallResponse response = subscriptionManager
                         .performBulkAppOperation(UUID, deviceIdentifiers, SubscriptionType.DEVICE.toString(),
-                                "uninstall");
+                                "uninstall", new Properties());
                 return Response.status(Response.Status.OK).entity(response).build();
                 //if the applications not installed via entgra store
             } else {

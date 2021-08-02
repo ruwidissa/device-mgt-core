@@ -32,6 +32,7 @@ public class UIConfiguration {
     private List<String> scopes;
     private boolean isSsoEnable;
     private int sessionTimeOut;
+    private int loginCacheCapacity;
 
     @XmlElement(name = "AppRegistration", required=true)
     public AppRegistration getAppRegistration() {
@@ -68,5 +69,14 @@ public class UIConfiguration {
 
     public void setSessionTimeOut(int sessionTimeOut) {
         this.sessionTimeOut = sessionTimeOut;
+    }
+
+    @XmlElement(name = "LoginCacheCapacity")
+    public int getLoginCacheCapacity() {
+        return loginCacheCapacity;
+    }
+
+    public void setLoginCacheCapacity(int loginCacheCapacity) {
+        this.loginCacheCapacity = loginCacheCapacity;
     }
 }

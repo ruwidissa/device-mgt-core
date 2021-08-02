@@ -85,9 +85,13 @@ public class UserHandler extends HttpServlet {
             ProxyResponse tokenStatus = HandlerUtil.execute(tokenEndpoint);
 
             if (tokenStatus.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                log.error("Error occurred while invoking the API to get token status.");
-                HandlerUtil.handleError(resp, tokenStatus);
-                return;
+                if (tokenStatus.getCode() == HttpStatus.SC_UNAUTHORIZED) {
+                    tokenStatus = HandlerUtil.retryRequestWithRefreshedToken(req, resp, tokenEndpoint, serverUrl);
+                } else {
+                    log.error("Error occurred while invoking the API to get token status.");
+                    HandlerUtil.handleError(resp, tokenStatus);
+                    return;
+                }
             }
             String tokenData = tokenStatus.getData();
             if (tokenData == null) {

@@ -15,6 +15,22 @@
  *   specific language governing permissions and limitations
  *   under the License.
  *
+ *
+ *   Copyright (c) 2021, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
  */
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
@@ -36,7 +52,6 @@ import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupNotExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.RoleDoesNotExistException;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceGroupList;
@@ -47,10 +62,12 @@ import org.wso2.carbon.device.mgt.jaxrs.service.api.GroupManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.policy.mgt.common.PolicyAdministratorPoint;
-import org.wso2.carbon.policy.mgt.common.PolicyEvaluationException;
-import org.wso2.carbon.policy.mgt.common.PolicyEvaluationPoint;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,11 +106,41 @@ public class GroupManagementServiceImpl implements GroupManagementService {
         }
     }
 
+    @GET
+    @Path("/hierarchy")
+    @Override
+    public Response getGroupsWithHierarchy(
+            @QueryParam("name") String name,
+            @QueryParam("owner") String owner,
+            @QueryParam("requireGroupProps") boolean requireGroupProps,
+            @DefaultValue("3") @QueryParam("depth") int depth,
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("5") @QueryParam("limit") int limit) {
+        try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
+            String currentUser = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+            GroupPaginationRequest request = new GroupPaginationRequest(offset, limit);
+            request.setGroupName(name);
+            request.setOwner(owner);
+            request.setDepth(depth);
+            PaginationResult deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                    .getGroupsWithHierarchy(currentUser, request, requireGroupProps);
+            DeviceGroupList deviceGroupList = new DeviceGroupList();
+            deviceGroupList.setList(deviceGroupsResult.getData());
+            deviceGroupList.setCount(deviceGroupsResult.getRecordsTotal());
+            return Response.status(Response.Status.OK).entity(deviceGroupList).build();
+        } catch (GroupManagementException e) {
+            String error = "Error occurred while retrieving groups with hierarchy.";
+            log.error(error, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
+        }
+    }
+
     @Override
     public Response getGroupCount() {
         try {
             String currentUser = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-            int count = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroupCount(currentUser);
+            int count = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroupCount(currentUser, null);
             return Response.status(Response.Status.OK).entity(count).build();
         } catch (GroupManagementException e) {
             String msg = "Error occurred while retrieving group count.";
@@ -125,10 +172,10 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     }
 
     @Override
-    public Response getGroup(int groupId, boolean requireGroupProps) {
+    public Response getGroup(int groupId, boolean requireGroupProps, int depth) {
         try {
             GroupManagementProviderService service = DeviceMgtAPIUtils.getGroupManagementProviderService();
-            DeviceGroup deviceGroup = service.getGroup(groupId, requireGroupProps);
+            DeviceGroup deviceGroup = service.getGroup(groupId, requireGroupProps, depth);
             if (deviceGroup != null) {
                 return Response.status(Response.Status.OK).entity(deviceGroup).build();
             } else {
@@ -142,7 +189,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     }
 
     @Override
-    public Response getGroup(String groupName, boolean requireGroupProps) {
+    public Response getGroup(String groupName, boolean requireGroupProps, int depth) {
         try {
             GroupManagementProviderService service = DeviceMgtAPIUtils.getGroupManagementProviderService();
             DeviceGroup deviceGroup = service.getGroup(groupName, requireGroupProps);
@@ -178,9 +225,9 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     }
 
     @Override
-    public Response deleteGroup(int groupId) {
+    public Response deleteGroup(int groupId, boolean isDeleteChildren) {
         try {
-            if (DeviceMgtAPIUtils.getGroupManagementProviderService().deleteGroup(groupId)) {
+            if (DeviceMgtAPIUtils.getGroupManagementProviderService().deleteGroup(groupId, isDeleteChildren)) {
                 return Response.status(Response.Status.OK).build();
             } else {
                 return Response.status(Response.Status.NOT_FOUND).entity("Group not found.").build();

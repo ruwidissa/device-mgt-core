@@ -14,6 +14,23 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2021, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.device.mgt.core.service;
@@ -60,10 +77,11 @@ public interface GroupManagementProviderService {
      * Delete existing device group.
      *
      * @param groupId to be deleted.
+     * @param isDeleteChildren to delete the children groups or not.
      * @return status of the delete operation.
      * @throws GroupManagementException
      */
-    boolean deleteGroup(int groupId) throws GroupManagementException;
+    boolean deleteGroup(int groupId, boolean isDeleteChildren) throws GroupManagementException;
 
     /**
      * Get the device group provided the device group id.
@@ -76,6 +94,17 @@ public interface GroupManagementProviderService {
     DeviceGroup getGroup(int groupId, boolean requireGroupProps) throws GroupManagementException;
 
     /**
+     * Get the device group provided the device group id and depth of children groups.
+     *
+     * @param groupId of the group.
+     * @param requireGroupProps to include group properties.
+     * @param depth of children groups to retrieve.
+     * @return {@link DeviceGroup} group with details.
+     * @throws GroupManagementException on error during retrieval of group
+     */
+    DeviceGroup getGroup(int groupId, boolean requireGroupProps, int depth) throws GroupManagementException;
+
+    /**
      * Get the device group provided the device group name.
      *
      * @param groupName of the group.
@@ -84,6 +113,17 @@ public interface GroupManagementProviderService {
      * @throws GroupManagementException
      */
     DeviceGroup getGroup(String groupName, boolean requireGroupProps) throws GroupManagementException;
+
+    /**
+     * Get the device group provided the device group id and depth of children groups.
+     *
+     * @param groupName of the group.
+     * @param requireGroupProps to include group properties.
+     * @param depth of children groups to retrieve.
+     * @return {@link DeviceGroup} group with details.
+     * @throws GroupManagementException on error during retrieval of group
+     */
+    DeviceGroup getGroup(String groupName, boolean requireGroupProps, int depth) throws GroupManagementException;
 
     /**
      * Get all device groups in tenant.
@@ -128,6 +168,18 @@ public interface GroupManagementProviderService {
             throws GroupManagementException;
 
     /**
+     * Get device groups with children groups hierarchically which belongs to specified user with pagination.
+     *
+     * @param username of the user.
+     * @param request to filter results
+     * @param requireGroupProps to include group properties
+     * @return {@link PaginationResult} paginated groups.
+     * @throws GroupManagementException on error during retrieval of groups with hierarchy
+     */
+    PaginationResult getGroupsWithHierarchy(String username, GroupPaginationRequest request,
+            boolean requireGroupProps) throws GroupManagementException;
+
+    /**
      * Get all device group count in tenant
      *
      * @return group count
@@ -147,10 +199,11 @@ public interface GroupManagementProviderService {
      * Get device group count of user
      *
      * @param username of the user
+     * @param parentPath of the group
      * @return group count
      * @throws GroupManagementException
      */
-    int getGroupCount(String username) throws GroupManagementException;
+    int getGroupCount(String username, String parentPath) throws GroupManagementException;
 
     /**
      * Manage device group sharing with user with list of roles.

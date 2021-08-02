@@ -18,25 +18,19 @@
 
 package io.entgra.ui.request.interceptor.cache;
 
-import io.entgra.ui.request.interceptor.util.HandlerConstants;
-
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
+import java.util.LinkedHashMap;
 
 /**
  * Contains necessary functions to manage oAuth app cache during login handling
  */
-public class LoginCacheManager {
+public class LoginCache {
 
-    private CacheManager cacheManager = null;
-    private Cache<OAuthAppCacheKey, OAuthApp> cache = null;
+    private final LinkedHashMap<OAuthAppCacheKey, OAuthApp> cache;
+    private final int capacity;
 
-    /**
-     * Initialize the cache manager if it is not already initialized
-     */
-    public void initializeCacheManager() {
-        cacheManager = Caching.getCacheManagerFactory().getCacheManager(HandlerConstants.LOGIN_CACHE);
+    public LoginCache(int capacity) {
+        this.capacity = capacity;
+        this.cache = new LinkedHashMap<>(capacity);
     }
 
     /**
@@ -46,7 +40,9 @@ public class LoginCacheManager {
      * @param oAuthApp         - The value of the cache which contains OAuth app data
      */
     public void addOAuthAppToCache(OAuthAppCacheKey oAuthAppCacheKey, OAuthApp oAuthApp) {
-        cache = cacheManager.getCache(HandlerConstants.LOGIN_CACHE);
+        if (cache.size() == capacity) {
+            cache.remove(cache.entrySet().iterator().next().getKey());
+        }
         cache.put(oAuthAppCacheKey, oAuthApp);
     }
 
@@ -57,7 +53,13 @@ public class LoginCacheManager {
      * @return - Returns OAuthApp object
      */
     public OAuthApp getOAuthAppCache(OAuthAppCacheKey oAuthAppCacheKey) {
-        cache = cacheManager.getCache(HandlerConstants.LOGIN_CACHE);
-        return cache.get(oAuthAppCacheKey);
+        OAuthApp oAuthApp = cache.get(oAuthAppCacheKey);
+        if (oAuthApp != null) {
+            if (cache.size() == capacity) {
+                cache.remove(oAuthAppCacheKey);
+                cache.put(oAuthAppCacheKey, oAuthApp);
+            }
+        }
+        return oAuthApp;
     }
 }

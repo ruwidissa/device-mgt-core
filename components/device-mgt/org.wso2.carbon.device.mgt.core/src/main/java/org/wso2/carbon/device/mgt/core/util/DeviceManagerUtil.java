@@ -70,10 +70,10 @@ import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
-import org.wso2.carbon.device.mgt.common.permission.mgt.Permission;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
@@ -130,8 +130,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
-
-//import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 
 public final class DeviceManagerUtil {
 
@@ -652,18 +650,6 @@ public final class DeviceManagerUtil {
                 }
             }
         }
-    }
-
-    public static void initializeAPIResourcePermissionCache() {
-        CacheManager manager = getCacheManager();
-            if(!isAPIResourcePermissionCacheInitialized) {
-                isAPIResourcePermissionCacheInitialized = true;
-                if (manager != null) {
-                        manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
-                } else {
-                        Caching.getCacheManager().<DeviceCacheKey, Device>getCache(DeviceManagementConstants.API_RESOURCE_PERMISSION_CACHE);
-                }
-            }
     }
 
     /**
@@ -1217,5 +1203,19 @@ public final class DeviceManagerUtil {
             }
         }
         return text;
+    }
+
+    /**
+     * Create the parent path that the children groups can have
+     * @param deviceGroup parent group
+     * @return created parent path
+     */
+    public static String createParentPath(DeviceGroup deviceGroup) {
+        if (DeviceGroupConstants.HierarchicalGroup.SEPERATOR.equals(deviceGroup.getParentPath())) {
+            return deviceGroup.getParentPath() + deviceGroup.getGroupId();
+        } else {
+            return deviceGroup.getParentPath() + DeviceGroupConstants.HierarchicalGroup.SEPERATOR
+                    + deviceGroup.getGroupId();
+        }
     }
 }
