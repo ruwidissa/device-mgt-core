@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.common.app.mgt.android;
 import com.google.gson.Gson;
 
 import java.io.Serializable;
+import java.util.Properties;
 
 /**
  * This class represents the Appstore AuthenticationImpl information.
@@ -29,6 +30,7 @@ public class AppStoreApplication implements Serializable {
 
 	private String type;
 	private String appIdentifier;
+	private Properties properties;
 
 	public String getType() {
 		return type;
@@ -51,4 +53,11 @@ public class AppStoreApplication implements Serializable {
         return gson.toJson(this);
 	}
 
+	public Properties getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Properties properties) {
+		this.properties = properties;
+	}
 }

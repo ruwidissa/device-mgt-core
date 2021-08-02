@@ -52,6 +52,7 @@ public class MDMAndroidOperationUtil {
 				enterpriseApplication.setType(application.getType().toString());
 				enterpriseApplication.setUrl(application.getLocation());
 				enterpriseApplication.setAppIdentifier(application.getIdentifier());
+				enterpriseApplication.setProperties(application.getProperties());
 				operation.setPayLoad(enterpriseApplication.toJSON());
 				break;
 			case PUBLIC:
@@ -59,6 +60,7 @@ public class MDMAndroidOperationUtil {
 						new AppStoreApplication();
 				appStoreApplication.setType(application.getType().toString());
 				appStoreApplication.setAppIdentifier(application.getIdentifier());
+				appStoreApplication.setProperties(application.getProperties());
 				operation.setPayLoad(appStoreApplication.toJSON());
 				break;
 			case WEBAPP:
@@ -67,6 +69,7 @@ public class MDMAndroidOperationUtil {
 				webApplication.setUrl(application.getLocation());
 				webApplication.setName(application.getName());
 				webApplication.setType(application.getType().toString());
+				webApplication.setProperties(application.getProperties());
 				operation.setPayLoad(webApplication.toJSON());
 				break;
 			default:
@@ -93,6 +96,7 @@ public class MDMAndroidOperationUtil {
 						new EnterpriseApplication();
 				enterpriseApplication.setType(application.getType().toString());
 				enterpriseApplication.setAppIdentifier(application.getIdentifier());
+				enterpriseApplication.setProperties(application.getProperties());
 				operation.setPayLoad(enterpriseApplication.toJSON());
 				break;
 			case PUBLIC:

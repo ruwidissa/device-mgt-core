@@ -58,6 +58,7 @@ public class Constants {
     public static final String SUB_TYPE = "SUBSCRIPTION_TYPE";
     public static final String ACTION = "ACTION";
     public static final String APP_UUID = "APP_UUID";
+    public static final String APP_PROPERTIES = "APP_PROPERTIES";
     public static final String SUBSCRIBER = "SUBSCRIBER";
     public static final String TENANT_DOMAIN = "TENANT_DOMAIN";
     public static final String TENANT_ID = "__TENANT_ID_PROP__";

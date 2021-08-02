@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 public class ScheduledAppSubscriptionTaskManager {
@@ -73,7 +74,7 @@ public class ScheduledAppSubscriptionTaskManager {
      * @throws ApplicationOperationTaskException if error occurred while scheduling the subscription
      */
     public void scheduleAppSubscriptionTask(String applicationUUID, List<?> subscribers,
-            SubscriptionType subscriptionType, SubAction action, long timestamp)
+                                            SubscriptionType subscriptionType, SubAction action, long timestamp, Properties properties)
             throws ApplicationOperationTaskException {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(timestamp * 1000));
@@ -106,7 +107,6 @@ public class ScheduledAppSubscriptionTaskManager {
             taskProperties.put(Constants.APP_UUID, applicationUUID);
             taskProperties.put(Constants.TENANT_DOMAIN, carbonContext.getTenantDomain(true));
             taskProperties.put(Constants.SUBSCRIBER, carbonContext.getUsername());
-
             String subscribersString;
             if (SubscriptionType.DEVICE.equals(subscriptionType)) {
                 subscribersString = new Gson().toJson(subscribers);
@@ -114,6 +114,10 @@ public class ScheduledAppSubscriptionTaskManager {
             } else {
                 subscribersString = subscribers.stream().map(String.class::cast).collect(Collectors.joining(","));
                 taskProperties.put(Constants.SUBSCRIBERS, subscribersString);
+            }
+            if(properties != null) {
+                String payload = new Gson().toJson(properties);
+                taskProperties.put(Constants.PAYLOAD, payload);
             }
             if (log.isDebugEnabled()) {
                 log.debug("Scheduling a task to " + action.toString() + " application: " + applicationUUID +

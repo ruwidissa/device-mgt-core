@@ -130,7 +130,12 @@ public interface SubscriptionManagementAPI {
                     name = "timestamp",
                     value = "Timestamp of scheduled install/uninstall operation"
             )
-            @QueryParam("timestamp") long timestamp
+            @QueryParam("timestamp") long timestamp,
+            @ApiParam(
+                    name = "block-uninstall",
+                    value = "App removal status of the install operation"
+            )
+            @QueryParam("block-uninstall") Boolean isUninstallBlocked
     );
 
     @POST
@@ -183,7 +188,12 @@ public interface SubscriptionManagementAPI {
                     name = "timestamp",
                     value = "Timestamp of scheduled install/uninstall operation"
             )
-            @QueryParam("timestamp") long timestamp
+            @QueryParam("timestamp") long timestamp,
+            @ApiParam(
+                    name = "block-uninstall",
+                    value = "App removal status of the install operation"
+            )
+            @QueryParam("block-uninstall") Boolean isUninstallBlocked
     );
 
     @POST
