@@ -121,7 +121,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
     @Override
     public <T> ApplicationInstallResponse performBulkAppOperation(String applicationUUID, List<T> params,
-            String subType, String action) throws ApplicationManagementException {
+                                                                  String subType, String action, Properties properties) throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Install application release which has UUID " + applicationUUID + " to " + params.size()
                     + " users.");
@@ -134,7 +134,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 params);
         ApplicationInstallResponse applicationInstallResponse = performActionOnDevices(
                 applicationSubscriptionInfo.getAppSupportingDeviceTypeName(), applicationSubscriptionInfo.getDevices(),
-                applicationDTO, subType, applicationSubscriptionInfo.getSubscribers(), action);
+                applicationDTO, subType, applicationSubscriptionInfo.getSubscribers(), action, properties);
 
         applicationInstallResponse.setErrorDeviceIdentifiers(applicationSubscriptionInfo.getErrorDeviceIdentifiers());
         return applicationInstallResponse;
@@ -347,7 +347,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public void installAppsForDevice(DeviceIdentifier deviceIdentifier, List<String> releaseUUIDs)
+    public void installAppsForDevice(DeviceIdentifier deviceIdentifier, List<App> apps)
             throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -370,7 +370,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         List<DeviceIdentifier> appInstallingDevices = new ArrayList<>();
 
-        for (String releaseUUID : releaseUUIDs) {
+        for (App app : apps) {
+            String releaseUUID = app.getId();
             try {
                 ConnectionManagerUtil.openDBConnection();
                 ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUUID, tenantId);
@@ -409,7 +410,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             if (!appInstallingDevices.isEmpty()) {
                 performBulkAppOperation(releaseUUID, appInstallingDevices, SubscriptionType.DEVICE.toString(),
-                        SubAction.INSTALL.toString());
+                        SubAction.INSTALL.toString(), app.getProperties());
             }
         }
     }
@@ -621,7 +622,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
      *                                        data.
      */
     private ApplicationInstallResponse performActionOnDevices(String deviceType, List<Device> devices,
-            ApplicationDTO applicationDTO, String subType, List<String> subscribers, String action)
+            ApplicationDTO applicationDTO, String subType, List<String> subscribers, String action, Properties properties)
             throws ApplicationManagementException {
 
         //Get app subscribing info of each device
@@ -667,11 +668,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             }
             for (Map.Entry<String, List<DeviceIdentifier>> entry : deviceIdentifierMap.entrySet()) {
                 Activity activity = addAppOperationOnDevices(applicationDTO, new ArrayList<>(entry.getValue()),
-                        entry.getKey(), action);
+                        entry.getKey(), action, properties);
                 activityList.add(activity);
             }
         } else {
-            Activity activity = addAppOperationOnDevices(applicationDTO, deviceIdentifiers, deviceType, action);
+            Activity activity = addAppOperationOnDevices(applicationDTO, deviceIdentifiers, deviceType, action, properties);
             activityList.add(activity);
         }
 
@@ -982,13 +983,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
      * @throws ApplicationManagementException if found an invalid device.
      */
     private Activity addAppOperationOnDevices(ApplicationDTO applicationDTO,
-            List<DeviceIdentifier> deviceIdentifierList, String deviceType, String action)
+            List<DeviceIdentifier> deviceIdentifierList, String deviceType, String action, Properties properties)
             throws ApplicationManagementException {
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
                 .getDeviceManagementProviderService();
         try {
             Application application = APIUtil.appDtoToAppResponse(applicationDTO);
-            Operation operation = generateOperationPayloadByDeviceType(deviceType, application, action);
+            Operation operation = generateOperationPayloadByDeviceType(deviceType, application, action, properties);
             return deviceManagementProviderService.addOperation(deviceType, operation, deviceIdentifierList);
         } catch (OperationManagementException e) {
             String msg = "Error occurred while adding the application install operation to devices";
@@ -1010,7 +1011,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
      * @throws ApplicationManagementException if unknown application type is found to generate operation payload or
      *                                        invalid action is found to generate operation payload.
      */
-    private Operation generateOperationPayloadByDeviceType(String deviceType, Application application, String action)
+    private Operation generateOperationPayloadByDeviceType(String deviceType, Application application, String action, Properties properties)
             throws ApplicationManagementException {
         try {
             if (ApplicationType.CUSTOM.toString().equalsIgnoreCase(application.getType())) {
@@ -1046,6 +1047,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
                     app.setIdentifier(application.getPackageName());
                     app.setName(application.getName());
+                    app.setProperties(properties);
                     if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                         return MDMAndroidOperationUtil.createInstallAppOperation(app);
                     } else {
@@ -1067,7 +1069,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                             app.setType(mobileAppType);
                             app.setLocation(plistDownloadEndpoint);
                             app.setIconImage(application.getApplicationReleases().get(0).getIconPath());
-                            Properties properties = new Properties();
                             properties.put(MDMAppConstants.IOSConstants.IS_PREVENT_BACKUP, true);
                             properties.put(MDMAppConstants.IOSConstants.IS_REMOVE_APP, true);
                             properties.put(MDMAppConstants.IOSConstants.I_TUNES_ID, application.getPackageName());

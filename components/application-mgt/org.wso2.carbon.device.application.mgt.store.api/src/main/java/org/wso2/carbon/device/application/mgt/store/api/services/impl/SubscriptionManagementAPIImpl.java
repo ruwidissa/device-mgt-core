@@ -34,8 +34,6 @@ import org.wso2.carbon.device.application.mgt.common.BasicUserInfoList;
 import org.wso2.carbon.device.application.mgt.common.RoleList;
 import org.wso2.carbon.device.application.mgt.common.DeviceGroupList;
 import org.wso2.carbon.device.application.mgt.store.api.services.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
@@ -44,6 +42,9 @@ import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.store.api.services.SubscriptionManagementAPI;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.MDMAppConstants;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import javax.validation.Valid;
 import javax.ws.rs.Path;
@@ -55,9 +56,8 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.core.Response;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Implementation of Subscription Management related APIs.
@@ -75,16 +75,22 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @PathParam("uuid") String uuid,
             @PathParam("action") String action,
             @Valid List<DeviceIdentifier> deviceIdentifiers,
-            @QueryParam("timestamp") long timestamp) {
+            @QueryParam("timestamp") long timestamp,
+            @QueryParam("block-uninstall") Boolean isUninstallBlocked
+    ) {
+        Properties properties = new Properties();
+        if(isUninstallBlocked != null) {
+            properties.put(MDMAppConstants.AndroidConstants.IS_BLOCK_UNINSTALL, isUninstallBlocked);
+        }
         try {
             if (0 == timestamp) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
                 ApplicationInstallResponse response = subscriptionManager
-                        .performBulkAppOperation(uuid, deviceIdentifiers, SubscriptionType.DEVICE.toString(), action);
+                        .performBulkAppOperation(uuid, deviceIdentifiers, SubscriptionType.DEVICE.toString(), action, properties);
                 return Response.status(Response.Status.OK).entity(response).build();
             } else {
                 return scheduleApplicationOperationTask(uuid, deviceIdentifiers, SubscriptionType.DEVICE,
-                        SubAction.valueOf(action.toUpperCase()), timestamp);
+                        SubAction.valueOf(action.toUpperCase()), timestamp, properties);
             }
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application release for UUI: " + uuid;
@@ -116,17 +122,23 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @PathParam("subType") String subType,
             @PathParam("action") String action,
             @Valid List<String> subscribers,
-            @QueryParam("timestamp") long timestamp) {
+            @QueryParam("timestamp") long timestamp,
+            @QueryParam("block-uninstall") Boolean isUninstallBlocked
+    ) {
+        Properties properties = new Properties();
+        if(isUninstallBlocked != null) {
+            properties.put(MDMAppConstants.AndroidConstants.IS_BLOCK_UNINSTALL, isUninstallBlocked);
+        }
         try {
             if (0 == timestamp) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
                 ApplicationInstallResponse response = subscriptionManager
-                        .performBulkAppOperation(uuid, subscribers, subType, action);
+                        .performBulkAppOperation(uuid, subscribers, subType, action, properties);
                 return Response.status(Response.Status.OK).entity(response).build();
             } else {
                 return scheduleApplicationOperationTask(uuid, subscribers,
                         SubscriptionType.valueOf(subType.toUpperCase()), SubAction.valueOf(action.toUpperCase()),
-                        timestamp);
+                        timestamp, properties);
             }
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application release for UUID: " + uuid + ". Hence, verify the payload";
@@ -170,7 +182,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
                 return Response.status(Response.Status.OK).entity(msg).build();
             } else {
                 return scheduleApplicationOperationTask(uuid, deviceIdentifiers, SubscriptionType.DEVICE,
-                        SubAction.valueOf(SubAction.INSTALL.toString().toUpperCase()), timestamp);
+                        SubAction.valueOf(SubAction.INSTALL.toString().toUpperCase()), timestamp, null);
             }
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application release for UUI: " + uuid + " to perform ent app installation "
@@ -216,7 +228,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             } else {
                 return scheduleApplicationOperationTask(uuid, subscribers,
                         SubscriptionType.valueOf(subType.toUpperCase()),
-                        SubAction.valueOf(SubAction.INSTALL.toString().toUpperCase()), timestamp);
+                        SubAction.valueOf(SubAction.INSTALL.toString().toUpperCase()), timestamp, null);
             }
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application release for UUID: " + uuid + ". Hence, verify the payload";
@@ -255,11 +267,11 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
      * @return {@link Response} of the operation
      */
     private Response scheduleApplicationOperationTask(String applicationUUID, List<?> subscribers,
-            SubscriptionType subType, SubAction subAction, long timestamp) {
+            SubscriptionType subType, SubAction subAction, long timestamp, Properties payload) {
         try {
             ScheduledAppSubscriptionTaskManager subscriptionTaskManager = new ScheduledAppSubscriptionTaskManager();
             subscriptionTaskManager.scheduleAppSubscriptionTask(applicationUUID, subscribers, subType, subAction,
-                    timestamp);
+                    timestamp, payload);
         } catch (ApplicationOperationTaskException e) {
             String msg = "Error occurred while scheduling the application install operation";
             log.error(msg, e);
@@ -330,7 +342,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting application with the application release uuid: "
-                         + uuid;
+                    + uuid;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
@@ -385,17 +397,17 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
             String msg = "Found invalid payload for getting application which has UUID: " + uuid
-                         + ". Hence verify the payload";
+                    + ". Hence verify the payload";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
             String msg = "Application release is not in the installable state."
-                         + "Hence you are not permitted to get the devices details.";
+                    + "Hence you are not permitted to get the devices details.";
             log.error(msg, e);
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting application with the application " +
-                         "release uuid: " + uuid;
+                    "release uuid: " + uuid;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
