@@ -14,18 +14,34 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2021, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.device.mgt.core.dao.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.solr.common.StringUtils;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.GroupDAO;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
@@ -50,6 +66,127 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
     private static final Log log = LogFactory.getLog(AbstractGroupDAOImpl.class);
 
     @Override
+    public List<DeviceGroup> getGroups(GroupPaginationRequest request, int tenantId)
+            throws GroupManagementDAOException {
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
+                    + "WHERE TENANT_ID = ?";
+            if (StringUtils.isNotBlank(request.getGroupName())) {
+                sql += " AND UPPER(GROUP_NAME) LIKE ?";
+            }
+            if (StringUtils.isNotBlank(request.getOwner())) {
+                sql += " AND UPPER(OWNER) LIKE ?";
+            }
+            if (StringUtils.isNotBlank(request.getStatus())) {
+                sql += " AND STATUS = ?";
+            }
+            if (StringUtils.isNotBlank(request.getParentPath())) {
+                sql += " AND PARENT_PATH LIKE ?";
+            }
+            if (request.getRowCount() != 0) {
+                sql += " LIMIT ? OFFSET ?";
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, tenantId);
+                if (StringUtils.isNotBlank(request.getGroupName())) {
+                    stmt.setString(paramIndex++, request.getGroupName() + "%");
+                }
+                if (StringUtils.isNotBlank(request.getOwner())) {
+                    stmt.setString(paramIndex++, request.getOwner() + "%");
+                }
+                if (StringUtils.isNotBlank(request.getStatus())) {
+                    stmt.setString(paramIndex++, request.getStatus().toUpperCase());
+                }
+                if (StringUtils.isNotBlank(request.getParentPath())) {
+                    stmt.setString(paramIndex++, request.getParentPath());
+                }
+                if (request.getRowCount() != 0) {
+                    stmt.setInt(paramIndex++, request.getRowCount());
+                    stmt.setInt(paramIndex, request.getStartIndex());
+                }
+                List<DeviceGroup> deviceGroupList = new ArrayList<>();
+                try (ResultSet resultSet = stmt.executeQuery()) {
+                    while (resultSet.next()) {
+                        deviceGroupList.add(GroupManagementDAOUtil.loadGroup(resultSet));
+                    }
+                }
+                return deviceGroupList;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving groups in tenant: " + tenantId;
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<DeviceGroup> getGroups(GroupPaginationRequest request, List<Integer> deviceGroupIds,
+            int tenantId) throws GroupManagementDAOException {
+        int deviceGroupIdsCount = deviceGroupIds.size();
+        if (deviceGroupIdsCount == 0) {
+            return new ArrayList<>();
+        }
+
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP WHERE TENANT_ID = ?";
+            if (StringUtils.isNotBlank(request.getGroupName())) {
+                sql += " AND GROUP_NAME LIKE ?";
+            }
+            if (StringUtils.isNotBlank(request.getOwner())) {
+                sql += " AND OWNER LIKE ?";
+            }
+            if (StringUtils.isNotBlank(request.getParentPath())) {
+                sql += " AND PARENT_PATH LIKE ?";
+            }
+            sql += " AND ID IN (";
+            for (int i = 0; i < deviceGroupIdsCount; i++) {
+                sql += (deviceGroupIdsCount - 1 != i) ? "?," : "?";
+            }
+            sql += ")";
+            if (request.getRowCount() != 0) {
+                sql += " LIMIT ? OFFSET ?";
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, tenantId);
+                if (StringUtils.isNotBlank(request.getGroupName())) {
+                    stmt.setString(paramIndex++, request.getGroupName() + "%");
+                }
+                if (StringUtils.isNotBlank(request.getOwner())) {
+                    stmt.setString(paramIndex++, request.getOwner() + "%");
+                }
+                if (StringUtils.isNotBlank(request.getParentPath())) {
+                    stmt.setString(paramIndex++, request.getParentPath());
+                }
+                for (Integer deviceGroupId : deviceGroupIds) {
+                    stmt.setInt(paramIndex++, deviceGroupId);
+                }
+                if (request.getRowCount() != 0) {
+                    stmt.setInt(paramIndex++, request.getRowCount());
+                    stmt.setInt(paramIndex, request.getStartIndex());
+                }
+                List<DeviceGroup> deviceGroupList = new ArrayList<>();
+                try (ResultSet resultSet = stmt.executeQuery()) {
+                    while (resultSet.next()) {
+                        deviceGroupList.add(GroupManagementDAOUtil.loadGroup(resultSet));
+                    }
+                }
+                return deviceGroupList;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving groups of groups IDs " + deviceGroupIds.toString()
+                    +  " in tenant: " + tenantId;
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
     public int addGroup(DeviceGroup deviceGroup, int tenantId) throws GroupManagementDAOException {
         PreparedStatement stmt = null;
         ResultSet rs;
@@ -59,9 +196,11 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             Connection conn = GroupManagementDAOFactory.getConnection();
             String sql;
             if (deviceGroup.getStatus() == null || deviceGroup.getStatus().isEmpty()) {
-                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID) VALUES (?, ?, ?, ?)";
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, PARENT_PATH) "
+                        + "VALUES (?, ?, ?, ?, ?)";
             } else {
-                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, STATUS) VALUES (?, ?, ?, ?, ?)";
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, PARENT_PATH, STATUS) "
+                        + "VALUES (?, ?, ?, ?, ?, ?)";
                 hasStatus = true;
             }
             stmt = conn.prepareStatement(sql, new String[]{"ID"});
@@ -69,8 +208,9 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             stmt.setString(2, deviceGroup.getName());
             stmt.setString(3, deviceGroup.getOwner());
             stmt.setInt(4, tenantId);
+            stmt.setString(5, deviceGroup.getParentPath());
             if (hasStatus) {
-                stmt.setString(5, deviceGroup.getStatus());
+                stmt.setString(6, deviceGroup.getStatus());
             }
 
             stmt.executeUpdate();
@@ -151,10 +291,12 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
             String sql =
-                    "UPDATE DM_GROUP SET DESCRIPTION = ?, GROUP_NAME = ?, OWNER = ? WHERE ID = ? AND TENANT_ID = ?";
+                    "UPDATE DM_GROUP SET DESCRIPTION = ?, GROUP_NAME = ?, OWNER = ?, PARENT_PATH = ? WHERE ID = ? "
+                            + "AND TENANT_ID = ?";
 
             if (deviceGroup.getStatus() != null && !deviceGroup.getStatus().isEmpty()) {
-                sql = "UPDATE DM_GROUP SET DESCRIPTION = ?, GROUP_NAME = ?, OWNER = ?, STATUS = ? WHERE ID = ? AND TENANT_ID = ?";
+                sql = "UPDATE DM_GROUP SET DESCRIPTION = ?, GROUP_NAME = ?, OWNER = ?, PARENT_PATH = ?, STATUS = ? "
+                        + "WHERE ID = ? AND TENANT_ID = ?";
                 hasStatus = true;
             }
             stmt = conn.prepareStatement(sql);
@@ -162,17 +304,44 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             stmt.setString(paramIndex++, deviceGroup.getDescription());
             stmt.setString(paramIndex++, deviceGroup.getName());
             stmt.setString(paramIndex++, deviceGroup.getOwner());
+            stmt.setString(paramIndex++, deviceGroup.getParentPath());
             if (hasStatus) {
                 stmt.setString(paramIndex++, deviceGroup.getStatus());
             }
             stmt.setInt(paramIndex++, groupId);
-            stmt.setInt(paramIndex++, tenantId);
+            stmt.setInt(paramIndex, tenantId);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new GroupManagementDAOException("Error occurred while updating deviceGroup '" +
                     deviceGroup.getName() + "'", e);
         } finally {
             GroupManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public void updateGroups(List<DeviceGroup> deviceGroups, int tenantId) throws GroupManagementDAOException {
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "UPDATE DM_GROUP SET DESCRIPTION = ?, GROUP_NAME = ?, OWNER = ?, STATUS = ?, "
+                    + "PARENT_PATH = ? WHERE ID = ? AND TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                for (DeviceGroup deviceGroup : deviceGroups) {
+                    stmt.setString(1, deviceGroup.getDescription());
+                    stmt.setString(2, deviceGroup.getName());
+                    stmt.setString(3, deviceGroup.getOwner());
+                    stmt.setString(4, deviceGroup.getStatus());
+                    stmt.setString(5, deviceGroup.getParentPath());
+                    stmt.setInt(6, deviceGroup.getGroupId());
+                    stmt.setInt(7, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while updating groups as batch";
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
         }
     }
 
@@ -217,6 +386,64 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         }
     }
 
+    @Override
+    public void deleteGroupsMapping(List<Integer> groupIds, int tenantId) throws GroupManagementDAOException {
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "DELETE FROM DM_ROLE_GROUP_MAP WHERE GROUP_ID = ? AND TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (int groupId : groupIds) {
+                    stmt.setInt(1, groupId);
+                    stmt.setInt(2, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+            sql = "DELETE FROM DM_DEVICE_GROUP_MAP WHERE GROUP_ID = ? AND TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (int groupId : groupIds) {
+                    stmt.setInt(1, groupId);
+                    stmt.setInt(2, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+            sql = "DELETE FROM DM_DEVICE_GROUP_POLICY WHERE DEVICE_GROUP_ID = ? AND TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (int groupId : groupIds) {
+                    stmt.setInt(1, groupId);
+                    stmt.setInt(2, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while removing mappings of groups as batches";
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteGroups(List<Integer> groupIds, int tenantId) throws GroupManagementDAOException {
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "DELETE FROM DM_GROUP WHERE ID = ? AND TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (int groupId : groupIds) {
+                    stmt.setInt(1, groupId);
+                    stmt.setInt(2, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting groups as batches";
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
+        }
+    }
+
     public void deleteAllGroupProperties(int groupId, int tenantId)
             throws GroupManagementDAOException {
         PreparedStatement stmt = null;
@@ -232,6 +459,25 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             throw new GroupManagementDAOException(msg, e);
         } finally {
             GroupManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    public void deleteAllGroupsProperties(List<Integer> groupIds, int tenantId) throws GroupManagementDAOException {
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "DELETE FROM GROUP_PROPERTIES WHERE GROUP_ID = ? AND TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (Integer groupId : groupIds) {
+                    stmt.setInt(1, groupId);
+                    stmt.setInt(2, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting properties of groups as batches";
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
         }
     }
 
@@ -266,7 +512,8 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         ResultSet resultSet = null;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE ID = ? AND TENANT_ID = ?";
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP WHERE ID = ? "
+                    + "AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, groupId);
             stmt.setInt(2, tenantId);
@@ -285,13 +532,63 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
     }
 
     @Override
+    public List<DeviceGroup> getChildrenGroups(String parentPath, int tenantId) throws GroupManagementDAOException {
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
+                    + "WHERE PARENT_PATH LIKE ? AND TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, parentPath + "%");
+                stmt.setInt(2, tenantId);
+                List<DeviceGroup> deviceGroupList = new ArrayList<>();
+                try (ResultSet resultSet = stmt.executeQuery()) {
+                    while (resultSet.next()) {
+                        deviceGroupList.add(GroupManagementDAOUtil.loadGroup(resultSet));
+                    }
+                }
+                return deviceGroupList;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving children group having parent path '" + parentPath
+                    + "' in tenant: " + tenantId;
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<DeviceGroup> getRootGroups(int tenantId) throws GroupManagementDAOException {
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
+                    + "WHERE PARENT_PATH LIKE ? AND TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, "/");
+                stmt.setInt(2, tenantId);
+                List<DeviceGroup> deviceGroupList = new ArrayList<>();
+                try (ResultSet resultSet = stmt.executeQuery()) {
+                    deviceGroupList = new ArrayList<>();
+                    while (resultSet.next()) {
+                        deviceGroupList.add(GroupManagementDAOUtil.loadGroup(resultSet));
+                    }
+                }
+                return deviceGroupList;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving root groups in tenant: " + tenantId;
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
     public List<DeviceGroup> getGroups(int deviceId, int tenantId) throws GroupManagementDAOException {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         List<DeviceGroup> deviceGroupBuilders = new ArrayList<>();
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT G.ID, G.GROUP_NAME, G.DESCRIPTION, G.OWNER, G.STATUS FROM DM_GROUP G " +
+            String sql = "SELECT G.ID, G.GROUP_NAME, G.DESCRIPTION, G.OWNER, G.STATUS, G.PARENT_PATH FROM DM_GROUP G " +
                     "INNER JOIN DM_DEVICE_GROUP_MAP GM ON G.ID = GM.GROUP_ID " +
                     "WHERE GM.DEVICE_ID = ? AND GM.TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -316,7 +613,8 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         List<DeviceGroup> deviceGroupList = null;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE TENANT_ID = ?";
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
+                    + "WHERE TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             resultSet = stmt.executeQuery();
@@ -389,6 +687,9 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                 sql += " AND STATUS = ?";
                 hasStatus = true;
             }
+            if (StringUtils.isNotBlank(request.getParentPath())) {
+                sql += " AND PARENT_PATH = ?";
+            }
 
             int paramIndex = 1;
             stmt = conn.prepareStatement(sql);
@@ -397,10 +698,13 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                 stmt.setString(paramIndex++, groupName + "%");
             }
             if (hasOwner) {
-                stmt.setString(paramIndex, owner + "%");
+                stmt.setString(paramIndex++, owner + "%");
             }
             if (hasStatus) {
-                stmt.setString(paramIndex, request.getStatus());
+                stmt.setString(paramIndex++, request.getStatus());
+            }
+            if (StringUtils.isNotBlank(request.getParentPath())) {
+                stmt.setString(paramIndex, request.getParentPath());
             }
             resultSet = stmt.executeQuery();
             if (resultSet.next()) {
@@ -422,7 +726,8 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
             String sql =
-                    "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE GROUP_NAME = ? AND TENANT_ID = ?";
+                    "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
+                            + "WHERE GROUP_NAME = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, groupName);
             stmt.setInt(2, tenantId);
@@ -592,7 +897,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         List<DeviceGroup> deviceGroupList = null;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP g, " +
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP g, " +
                     "(SELECT GROUP_ID FROM DM_ROLE_GROUP_MAP WHERE ROLE IN (";
 
             int index = 0;
@@ -658,7 +963,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
     }
 
     @Override
-    public int getGroupsCount(String[] roles, int tenantId) throws GroupManagementDAOException {
+    public int getGroupsCount(String[] roles, int tenantId, String parentPath) throws GroupManagementDAOException {
         int rolesCount = roles.length;
         if (rolesCount == 0) {
             return 0;
@@ -672,14 +977,20 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             for (int i = 0; i < rolesCount; i++) {
                 sql += (rolesCount - 1 != i) ? "?," : "?";
             }
-            sql += ")) gr WHERE g.ID = gr.GROUP_ID AND TENANT_ID = ? GROUP BY g.ID";
-
+            sql += ")) gr WHERE g.ID = gr.GROUP_ID AND TENANT_ID = ? ";
+            if (StringUtils.isNotBlank(parentPath)) {
+                sql += " AND g.PARENT_PATH = ? ";
+            }
+            sql +=  "GROUP BY g.ID";
             stmt = conn.prepareStatement(sql);
             int index = 0;
             while (index++ < rolesCount) {
                 stmt.setString(index, roles[index - 1]);
             }
-            stmt.setInt(index, tenantId);
+            stmt.setInt(index++, tenantId);
+            if (StringUtils.isNotBlank(parentPath)) {
+                stmt.setString(index, parentPath);
+            }
             resultSet = stmt.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt("GROUP_COUNT");
@@ -700,7 +1011,8 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         List<DeviceGroup> deviceGroupList = null;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE OWNER = ? AND TENANT_ID = ?";
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
+                    + "WHERE OWNER = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setInt(2, tenantId);
@@ -744,15 +1056,21 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
     }
 
     @Override
-    public int getOwnGroupsCount(String username, int tenantId) throws GroupManagementDAOException {
+    public int getOwnGroupsCount(String username, int tenantId, String parentPath) throws GroupManagementDAOException {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
             String sql = "SELECT COUNT(ID) AS GROUP_COUNT FROM DM_GROUP WHERE OWNER = ? AND TENANT_ID = ?";
+            if (StringUtils.isNotBlank(parentPath)) {
+                sql += " AND PARENT_PATH = ?";
+            }
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setInt(2, tenantId);
+            if (StringUtils.isNotBlank(parentPath)) {
+                stmt.setString(3, parentPath);
+            }
             resultSet = stmt.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt("GROUP_COUNT");
