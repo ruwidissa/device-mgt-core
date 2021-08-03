@@ -14,13 +14,29 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2021, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.device.mgt.core.dao.impl.group;
 
 import org.apache.solr.common.StringUtils;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
@@ -50,10 +66,10 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
             Connection conn = GroupManagementDAOFactory.getConnection();
             String sql;
             if(StringUtils.isEmpty(deviceGroup.getStatus())) {
-                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID) " +
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, PARENT_PATH) " +
                       "VALUES (?, ?, ?, ?) RETURNING ID";
             } else {
-                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, STATUS) " +
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, PARENT_PATH, STATUS) " +
                       "VALUES (?, ?, ?, ?, ?) RETURNING ID";
                 hasStatus = true;
             }
@@ -62,8 +78,9 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
             stmt.setString(2, deviceGroup.getName());
             stmt.setString(3, deviceGroup.getOwner());
             stmt.setInt(4, tenantId);
+            stmt.setString(5, deviceGroup.getParentPath());
             if(hasStatus) {
-                stmt.setString(5, deviceGroup.getStatus());
+                stmt.setString(6, deviceGroup.getStatus());
             }
             stmt.execute();
             rs = stmt.getGeneratedKeys();
@@ -77,135 +94,6 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
         } finally {
             GroupManagementDAOUtil.cleanupResources(stmt, null);
         }
-    }
-
-    @Override
-    public List<DeviceGroup> getGroups(GroupPaginationRequest request, int tenantId)
-            throws GroupManagementDAOException {
-        PreparedStatement stmt = null;
-        ResultSet resultSet = null;
-        List<DeviceGroup> deviceGroupList = null;
-
-        String groupName = request.getGroupName();
-        boolean hasGroupName = false;
-        String owner = request.getOwner();
-        String status = request.getStatus();
-        boolean hasOwner = false;
-        boolean hasStatus = false;
-        boolean hasLimit = request.getRowCount() != 0;
-
-        try {
-            Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE TENANT_ID = ?";
-            if (groupName != null && !groupName.isEmpty()) {
-                sql += " AND GROUP_NAME LIKE ?";
-                hasGroupName = true;
-            }
-            if (owner != null && !owner.isEmpty()) {
-                sql += " AND OWNER LIKE ?";
-                hasOwner = true;
-            }
-            if (status != null && !status.isEmpty()) {
-                sql += " AND STATUS = ?";
-                hasStatus = true;
-            }
-            if (hasLimit) {
-                sql += " LIMIT ? OFFSET ?";
-            }
-
-            int paramIndex = 1;
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(paramIndex++, tenantId);
-            if (hasGroupName) {
-                stmt.setString(paramIndex++, groupName + "%");
-            }
-            if (hasOwner) {
-                stmt.setString(paramIndex++, owner + "%");
-            }
-            if (hasStatus) {
-                stmt.setString(paramIndex++, status.toUpperCase());
-            }
-            if (hasLimit) {
-                stmt.setInt(paramIndex++, request.getRowCount());
-                stmt.setInt(paramIndex, request.getStartIndex());
-            }
-            resultSet = stmt.executeQuery();
-            deviceGroupList = new ArrayList<>();
-            while (resultSet.next()) {
-                deviceGroupList.add(GroupManagementDAOUtil.loadGroup(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new GroupManagementDAOException("Error occurred while listing all groups in tenant: " + tenantId, e);
-        } finally {
-            GroupManagementDAOUtil.cleanupResources(stmt, resultSet);
-        }
-        return deviceGroupList;
-    }
-
-    @Override
-    public List<DeviceGroup> getGroups(GroupPaginationRequest request, List<Integer> deviceGroupIds,
-                                       int tenantId) throws GroupManagementDAOException {
-        int deviceGroupIdsCount = deviceGroupIds.size();
-        if (deviceGroupIdsCount == 0) {
-            return new ArrayList<>();
-        }
-        PreparedStatement stmt = null;
-        ResultSet resultSet = null;
-        List<DeviceGroup> deviceGroupList = null;
-
-        String groupName = request.getGroupName();
-        boolean hasGroupName = false;
-        String owner = request.getOwner();
-        boolean hasOwner = false;
-        boolean hasLimit = request.getRowCount() != 0;
-
-        try {
-            Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE TENANT_ID = ?";
-            if (groupName != null && !groupName.isEmpty()) {
-                sql += " AND GROUP_NAME LIKE ?";
-                hasGroupName = true;
-            }
-            if (owner != null && !owner.isEmpty()) {
-                sql += " AND OWNER LIKE ?";
-                hasOwner = true;
-            }
-            sql += " AND ID IN (";
-            for (int i = 0; i < deviceGroupIdsCount; i++) {
-                sql += (deviceGroupIdsCount - 1 != i) ? "?," : "?";
-            }
-            sql += ")";
-            if (hasLimit) {
-                sql += " LIMIT ? OFFSET ?";
-            }
-
-            int paramIndex = 1;
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(paramIndex++, tenantId);
-            if (hasGroupName) {
-                stmt.setString(paramIndex++, groupName + "%");
-            }
-            if (hasOwner) {
-                stmt.setString(paramIndex++, owner + "%");
-            }
-            for (Integer deviceGroupId : deviceGroupIds) {
-                stmt.setInt(paramIndex++, deviceGroupId);
-            }
-            if (hasLimit) {
-                stmt.setInt(paramIndex++, request.getRowCount());
-                stmt.setInt(paramIndex, request.getStartIndex());
-            }
-            resultSet = stmt.executeQuery();
-            deviceGroupList = new ArrayList<>();
-            while (resultSet.next()) {
-                deviceGroupList.add(GroupManagementDAOUtil.loadGroup(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new GroupManagementDAOException("Error occurred while listing all groups in tenant: " + tenantId, e);
-        } finally {
-            GroupManagementDAOUtil.cleanupResources(stmt, resultSet);
-        }
-        return deviceGroupList;
     }
 
     @Override

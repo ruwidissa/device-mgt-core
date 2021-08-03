@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.common.app.mgt.android;
 import com.google.gson.Gson;
 
 import java.io.Serializable;
+import java.util.Properties;
 
 /**
  * This class represents the Web AuthenticationImpl information.
@@ -30,6 +31,7 @@ public class WebApplication implements Serializable {
 	private String name;
 	private String url;
 	private String type;
+	private Properties properties;
 
 	public String getName() {
 		return name;
@@ -60,4 +62,11 @@ public class WebApplication implements Serializable {
         return gson.toJson(this);
     }
 
+	public Properties getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Properties properties) {
+		this.properties = properties;
+	}
 }

@@ -85,7 +85,7 @@ public class InvokerHandler extends HttpServlet {
                 ProxyResponse proxyResponse = HandlerUtil.execute(postRequest);
 
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = retryRequestWithRefreshedToken(req, resp, postRequest);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, postRequest, apiEndpoint);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -113,15 +113,19 @@ public class InvokerHandler extends HttpServlet {
                 getRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(getRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = retryRequestWithRefreshedToken(req, resp, getRequest);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, getRequest, apiEndpoint);
                     if (proxyResponse == null) {
                         return;
                     }
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                    log.error("Error occurred while invoking the GET API endpoint.");
-                    HandlerUtil.handleError(resp, proxyResponse);
-                    return;
+                    if (proxyResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
+                        proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, getRequest, apiEndpoint);
+                    } else {
+                        log.error("Error occurred while invoking the GET API endpoint.");
+                        HandlerUtil.handleError(resp, proxyResponse);
+                        return;
+                    }
                 }
                 HandlerUtil.handleSuccess(resp, proxyResponse);
             }
@@ -139,7 +143,7 @@ public class InvokerHandler extends HttpServlet {
                 headRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(headRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = retryRequestWithRefreshedToken(req, resp, headRequest);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, headRequest, apiEndpoint);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -166,7 +170,7 @@ public class InvokerHandler extends HttpServlet {
                 ProxyResponse proxyResponse = HandlerUtil.execute(putRequest);
 
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = retryRequestWithRefreshedToken(req, resp, putRequest);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, putRequest, apiEndpoint);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -194,7 +198,7 @@ public class InvokerHandler extends HttpServlet {
                 deleteRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(deleteRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = retryRequestWithRefreshedToken(req, resp, deleteRequest);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, deleteRequest, apiEndpoint);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -305,7 +309,7 @@ public class InvokerHandler extends HttpServlet {
             apiEndpoint = System.getProperty("iot.reporting.webapp.host");
             if (StringUtils.isBlank(apiEndpoint)){
                 log.error("Reporting Endpoint is not defined in the iot-server.sh properly.");
-                handleError(resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+                HandlerUtil.handleError(resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
                 return false;
             }
         }
@@ -313,20 +317,20 @@ public class InvokerHandler extends HttpServlet {
         HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Unauthorized, You are not logged in. Please log in to the portal");
-            handleError(resp, HttpStatus.SC_UNAUTHORIZED);
+            HandlerUtil.handleError(resp, HttpStatus.SC_UNAUTHORIZED);
             return false;
         }
 
         authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
         if (authData == null) {
             log.error("Unauthorized, Access token not found in the current session");
-            handleError(resp, HttpStatus.SC_UNAUTHORIZED);
+            HandlerUtil.handleError(resp, HttpStatus.SC_UNAUTHORIZED);
             return false;
         }
 
         if (req.getMethod() == null) {
             log.error("Bad Request, Request method is empty");
-            handleError(resp, HttpStatus.SC_BAD_REQUEST);
+            HandlerUtil.handleError(resp, HttpStatus.SC_BAD_REQUEST);
             return false;
         }
         return true;
