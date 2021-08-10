@@ -38,7 +38,7 @@
     </jaxrs:server>
 
     <bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
-        <property name="resourcePackage" value="org.wso2.carbon.device.application.mgt.publisher.api"/>
+        <property name="resourcePackage" value="io.entgra.application.mgt.publisher.api"/>
         <property name="version" value="1.0"/>
         <property name="host" value="localhost:9443"/>
         <property name="schemes" value="https" />
@@ -54,9 +54,9 @@
     <bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
     <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
 
-    <bean id="applicationMgtServiceBean" class="org.wso2.carbon.device.application.mgt.publisher.api.services.impl.ApplicationManagementPublisherAPIImpl"/>
-    <bean id="applicationMgtAdminServiceBean" class="org.wso2.carbon.device.application.mgt.publisher.api.services.impl.admin.ApplicationManagementPublisherAdminAPIImpl"/>
-    <bean id="reviewMgtAdminServiceBean" class="org.wso2.carbon.device.application.mgt.publisher.api.services.impl.admin.ReviewManagementPublisherAdminAPIImpl" />
+    <bean id="applicationMgtServiceBean" class="io.entgra.application.mgt.publisher.api.services.impl.ApplicationManagementPublisherAPIImpl"/>
+    <bean id="applicationMgtAdminServiceBean" class="io.entgra.application.mgt.publisher.api.services.impl.admin.ApplicationManagementPublisherAdminAPIImpl"/>
+    <bean id="reviewMgtAdminServiceBean" class="io.entgra.application.mgt.publisher.api.services.impl.admin.ReviewManagementPublisherAdminAPIImpl" />
     <bean id="jsonProvider" class="org.wso2.carbon.device.application.mgt.addons.JSONMessageHandler"/>
     <bean id="multipartProvider" class="org.wso2.carbon.device.application.mgt.addons.MultipartCustomProvider"/>
 

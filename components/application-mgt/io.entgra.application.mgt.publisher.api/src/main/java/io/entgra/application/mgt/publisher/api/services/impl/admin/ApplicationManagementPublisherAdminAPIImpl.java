@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.application.mgt.publisher.api.services.impl.admin;
+package io.entgra.application.mgt.publisher.api.services.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +25,7 @@ import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.publisher.api.services.admin.ApplicationManagementPublisherAdminAPI;
+import io.entgra.application.mgt.publisher.api.services.admin.ApplicationManagementPublisherAdminAPI;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
