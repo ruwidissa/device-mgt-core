@@ -17,7 +17,7 @@
  */
 package io.entgra.application.mgt.core.exception;
 
-import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
+import io.entgra.application.mgt.common.exception.ReviewManagementException;
 
 /**
  * Exception thrown during the Review Management DAO operations.

@@ -20,11 +20,11 @@ package io.entgra.application.mgt.core;
 import org.junit.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
+import io.entgra.application.mgt.common.exception.LifecycleManagementException;
 import io.entgra.application.mgt.core.config.Configuration;
 import io.entgra.application.mgt.core.config.ConfigurationManager;
 import io.entgra.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
+import io.entgra.application.mgt.common.config.LifecycleState;
 
 import java.util.List;
 

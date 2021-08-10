@@ -17,7 +17,7 @@
  */
 package io.entgra.application.mgt.core.dto;
 
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.application.mgt.common.dto.ApplicationDTO;
 
 import java.util.ArrayList;
 import java.util.List;

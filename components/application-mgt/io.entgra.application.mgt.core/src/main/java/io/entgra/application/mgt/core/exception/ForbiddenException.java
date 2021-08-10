@@ -19,7 +19,7 @@
 package io.entgra.application.mgt.core.exception;
 
 
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.application.mgt.common.exception.ApplicationManagementException;
 
 /**
  * Exception class that is corresponding to 401 Forbidden response

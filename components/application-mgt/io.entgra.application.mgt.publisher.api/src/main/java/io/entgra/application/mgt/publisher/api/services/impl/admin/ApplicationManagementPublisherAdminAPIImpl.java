@@ -19,8 +19,8 @@ package io.entgra.application.mgt.publisher.api.services.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
+import io.entgra.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.application.mgt.common.services.ApplicationManager;
 import io.entgra.application.mgt.core.exception.BadRequestException;
 import io.entgra.application.mgt.core.exception.ForbiddenException;
 import io.entgra.application.mgt.core.exception.NotFoundException;

@@ -18,9 +18,9 @@
 package io.entgra.application.mgt.core.dao;
 
 import org.wso2.carbon.device.application.mgt.common.*;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
-import org.wso2.carbon.device.application.mgt.common.dto.CategoryDTO;
-import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
+import io.entgra.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.application.mgt.common.dto.CategoryDTO;
+import io.entgra.application.mgt.common.dto.TagDTO;
 import io.entgra.application.mgt.core.exception.ApplicationManagementDAOException;
 
 import java.util.List;

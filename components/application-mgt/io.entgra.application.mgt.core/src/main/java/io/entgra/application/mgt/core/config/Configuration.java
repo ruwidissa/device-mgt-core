@@ -17,9 +17,9 @@
  */
 package io.entgra.application.mgt.core.config;
 
-import org.wso2.carbon.device.application.mgt.common.config.MDMConfig;
-import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
-import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
+import io.entgra.application.mgt.common.config.MDMConfig;
+import io.entgra.application.mgt.common.config.RatingConfiguration;
+import io.entgra.application.mgt.common.config.LifecycleState;
 
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;

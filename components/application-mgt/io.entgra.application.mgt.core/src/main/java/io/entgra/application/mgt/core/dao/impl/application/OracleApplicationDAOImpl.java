@@ -22,8 +22,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.Filter;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
-import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
+import io.entgra.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.exception.ApplicationManagementDAOException;
 import io.entgra.application.mgt.core.util.DAOUtil;
 

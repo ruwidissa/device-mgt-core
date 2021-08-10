@@ -19,9 +19,9 @@ package io.entgra.application.mgt.core.lifecycle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
+import io.entgra.application.mgt.common.exception.LifecycleManagementException;
 import io.entgra.application.mgt.core.internal.DataHolder;
-import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
+import io.entgra.application.mgt.common.config.LifecycleState;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
 import org.wso2.carbon.device.mgt.core.permission.mgt.PermissionUtils;
 import org.wso2.carbon.device.mgt.core.search.mgt.Constants;

@@ -19,7 +19,7 @@ package io.entgra.application.mgt.core.dao.common;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.exception.UnsupportedDatabaseEngineException;
+import io.entgra.application.mgt.common.exception.UnsupportedDatabaseEngineException;
 import io.entgra.application.mgt.core.dao.ApplicationDAO;
 import io.entgra.application.mgt.core.dao.ApplicationReleaseDAO;
 import io.entgra.application.mgt.core.dao.LifecycleStateDAO;

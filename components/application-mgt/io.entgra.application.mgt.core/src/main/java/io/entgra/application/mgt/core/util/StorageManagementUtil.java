@@ -24,8 +24,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.ImageArtifact;
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
-import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
+import io.entgra.application.mgt.common.exception.ApplicationStorageManagementException;
+import io.entgra.application.mgt.common.exception.ResourceManagementException;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -17,7 +17,7 @@
  */
 package io.entgra.application.mgt.core.dao.impl;
 
-import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
+import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
 
 import java.sql.Connection;

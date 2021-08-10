@@ -21,7 +21,7 @@ import org.junit.Assert;
 import org.testng.annotations.Test;
 import io.entgra.application.mgt.core.config.Configuration;
 import io.entgra.application.mgt.core.config.ConfigurationManager;
-import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
+import io.entgra.application.mgt.common.config.LifecycleState;
 
 import java.util.List;
 

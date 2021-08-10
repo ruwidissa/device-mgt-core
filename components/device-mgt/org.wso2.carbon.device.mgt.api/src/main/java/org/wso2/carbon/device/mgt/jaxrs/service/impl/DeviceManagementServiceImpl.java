@@ -45,8 +45,8 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
 import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
-import org.wso2.carbon.device.application.mgt.common.exception.SubscriptionManagementException;
-import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
+import io.entgra.application.mgt.common.exception.SubscriptionManagementException;
+import io.entgra.application.mgt.common.services.SubscriptionManager;
 import io.entgra.application.mgt.core.util.HelperUtil;
 import org.wso2.carbon.device.mgt.common.DeviceFilters;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -944,7 +944,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (SubscriptionManagementException |
-                org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException
+                io.entgra.application.mgt.common.exception.ApplicationManagementException
                 e) {
             String msg = "Error occurred while getting the " + type + "application is of device " + id + "subscribed " +
                     "at entgra store";

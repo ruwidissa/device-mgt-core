@@ -21,7 +21,7 @@ package org.wso2.carbon.device.mgt.extensions.pull.notification.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
+import io.entgra.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 

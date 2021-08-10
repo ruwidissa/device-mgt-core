@@ -21,8 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
-import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
+import io.entgra.application.mgt.common.dto.ReviewDTO;
+import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.dao.ReviewDAO;
 import io.entgra.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.application.mgt.core.util.DAOUtil;

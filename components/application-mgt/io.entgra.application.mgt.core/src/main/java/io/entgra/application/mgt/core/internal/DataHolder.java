@@ -17,11 +17,11 @@
  */
 package io.entgra.application.mgt.core.internal;
 
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
-import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
-import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
-import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
+import io.entgra.application.mgt.common.services.ApplicationManager;
+import io.entgra.application.mgt.common.services.ApplicationStorageManager;
+import io.entgra.application.mgt.common.services.AppmDataHandler;
+import io.entgra.application.mgt.common.services.ReviewManager;
+import io.entgra.application.mgt.common.services.SubscriptionManager;
 import io.entgra.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ntask.core.service.TaskService;

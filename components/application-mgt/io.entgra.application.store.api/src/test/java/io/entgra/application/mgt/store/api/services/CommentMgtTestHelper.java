@@ -17,7 +17,7 @@
  */
 package io.entgra.application.mgt.store.api.services;
 
-import org.wso2.carbon.device.application.mgt.common.response.Review;
+import io.entgra.application.mgt.common.response.Review;
 
 /**
  * Helper class for Review Management API test cases.

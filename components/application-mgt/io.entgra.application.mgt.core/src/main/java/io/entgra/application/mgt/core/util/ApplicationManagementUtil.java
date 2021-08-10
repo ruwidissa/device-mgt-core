@@ -19,11 +19,11 @@ package io.entgra.application.mgt.core.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.exception.InvalidConfigurationException;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
-import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
-import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
+import io.entgra.application.mgt.common.exception.InvalidConfigurationException;
+import io.entgra.application.mgt.common.services.ApplicationManager;
+import io.entgra.application.mgt.common.services.ApplicationStorageManager;
+import io.entgra.application.mgt.common.services.ReviewManager;
+import io.entgra.application.mgt.common.services.SubscriptionManager;
 import io.entgra.application.mgt.core.config.ConfigurationManager;
 import io.entgra.application.mgt.core.config.Extension;
 import io.entgra.application.mgt.core.lifecycle.LifecycleStateManager;

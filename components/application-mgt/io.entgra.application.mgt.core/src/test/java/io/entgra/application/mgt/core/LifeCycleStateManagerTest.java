@@ -18,7 +18,7 @@
 package io.entgra.application.mgt.core;
 
 import io.entgra.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
+import io.entgra.application.mgt.common.config.LifecycleState;
 
 import java.util.HashMap;
 import java.util.List;

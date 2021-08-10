@@ -17,7 +17,7 @@
  */
 package io.entgra.application.mgt.core.exception;
 
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.application.mgt.common.exception.ApplicationManagementException;
 
 /**
  * This exception will be thrown when the requested application or platform not found.

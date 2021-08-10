@@ -161,7 +161,7 @@
                             org.wso2.carbon.device.mgt.core.operation.mgt,
                             org.wso2.carbon.core,
                             org.wso2.carbon.device.application.mgt.common.*,
-                            org.wso2.carbon.device.application.mgt.common.services.*
+                            io.entgra.application.mgt.common.services.*
                         </Import-Package>
                     </instructions>
                 </configuration>

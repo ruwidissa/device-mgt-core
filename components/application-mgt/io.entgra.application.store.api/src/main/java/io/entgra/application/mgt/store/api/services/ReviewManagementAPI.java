@@ -31,8 +31,8 @@ import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.response.Review;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
+import io.entgra.application.mgt.common.response.Review;
+import io.entgra.application.mgt.common.wrapper.ReviewWrapper;
 
 import javax.validation.Valid;
 import javax.ws.rs.Path;

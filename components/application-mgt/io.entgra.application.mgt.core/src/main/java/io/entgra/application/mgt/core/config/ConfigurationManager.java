@@ -19,8 +19,8 @@ package io.entgra.application.mgt.core.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
-import org.wso2.carbon.device.application.mgt.common.exception.InvalidConfigurationException;
+import io.entgra.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.application.mgt.common.exception.InvalidConfigurationException;
 import io.entgra.application.mgt.core.util.Constants;
 
 import java.io.File;

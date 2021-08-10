@@ -24,12 +24,12 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.wso2.carbon.device.application.mgt.common.ExecutionStatus;
 import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.application.mgt.common.dto.ApplicationDTO;
 
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
-import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
-import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
-import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDTO;
+import io.entgra.application.mgt.common.dto.ApplicationReleaseDTO;
+import io.entgra.application.mgt.common.dto.DeviceSubscriptionDTO;
+import io.entgra.application.mgt.common.dto.ReviewDTO;
+import io.entgra.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import io.entgra.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 

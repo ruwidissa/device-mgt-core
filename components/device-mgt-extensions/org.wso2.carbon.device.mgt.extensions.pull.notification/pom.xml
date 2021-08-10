@@ -87,12 +87,12 @@
                             org.apache.commons.logging,
                             org.wso2.carbon.device.mgt.common.*,
                             org.wso2.carbon.device.mgt.core.service
-							org.wso2.carbon.policy.mgt.core.*,
-							org.wso2.carbon.policy.mgt.core,
-							com.google.gson,
-							org.wso2.carbon.device.mgt.core.service.*,
+                            org.wso2.carbon.policy.mgt.core.*,
+                            org.wso2.carbon.policy.mgt.core,
+                            com.google.gson,
+                            org.wso2.carbon.device.mgt.core.service.*,
                             org.wso2.carbon.device.application.mgt.common.*,
-                            org.wso2.carbon.device.application.mgt.common.services.*
+                            io.entgra.application.mgt.common.services.*
                         </Import-Package>
                     </instructions>
                 </configuration>

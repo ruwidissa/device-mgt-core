@@ -19,7 +19,7 @@ package io.entgra.application.mgt.core.dao.impl.visibility;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
+import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.dao.VisibilityDAO;
 import io.entgra.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.application.mgt.core.exception.VisibilityManagementDAOException;

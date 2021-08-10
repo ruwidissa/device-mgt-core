@@ -17,7 +17,7 @@
  */
 package io.entgra.application.mgt.core.dao;
 
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
+import io.entgra.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.Rating;
 import io.entgra.application.mgt.core.exception.ApplicationManagementDAOException;
 

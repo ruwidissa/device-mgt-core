@@ -18,7 +18,7 @@
 package io.entgra.application.mgt.core;
 
 import org.testng.annotations.BeforeSuite;
-import org.wso2.carbon.device.application.mgt.common.exception.InvalidConfigurationException;
+import io.entgra.application.mgt.common.exception.InvalidConfigurationException;
 import io.entgra.application.mgt.core.config.ConfigurationManager;
 
 import java.io.File;

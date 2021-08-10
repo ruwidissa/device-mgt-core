@@ -20,8 +20,8 @@ package io.entgra.application.mgt.core.task;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.exception.SubscriptionManagementException;
-import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
+import io.entgra.application.mgt.common.exception.SubscriptionManagementException;
+import io.entgra.application.mgt.common.services.SubscriptionManager;
 import io.entgra.application.mgt.core.impl.SubscriptionManagerImpl;
 import org.wso2.carbon.device.mgt.core.task.impl.RandomlyAssignedScheduleTask;
 

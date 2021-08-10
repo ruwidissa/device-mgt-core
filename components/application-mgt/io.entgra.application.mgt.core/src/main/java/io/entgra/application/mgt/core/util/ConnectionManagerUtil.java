@@ -19,9 +19,9 @@ package io.entgra.application.mgt.core.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
-import org.wso2.carbon.device.application.mgt.common.exception.IllegalTransactionStateException;
-import org.wso2.carbon.device.application.mgt.common.exception.TransactionManagementException;
+import io.entgra.application.mgt.common.exception.DBConnectionException;
+import io.entgra.application.mgt.common.exception.IllegalTransactionStateException;
+import io.entgra.application.mgt.common.exception.TransactionManagementException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
