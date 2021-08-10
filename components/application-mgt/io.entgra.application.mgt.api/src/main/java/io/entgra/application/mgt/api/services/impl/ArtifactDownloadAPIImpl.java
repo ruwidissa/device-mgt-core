@@ -24,10 +24,10 @@ import io.entgra.application.mgt.api.services.ArtifactDownloadAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
-import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
-import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
-import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.core.util.Constants;
+import io.entgra.application.mgt.core.exception.BadRequestException;
+import io.entgra.application.mgt.core.exception.NotFoundException;
+import io.entgra.application.mgt.core.util.APIUtil;
+import io.entgra.application.mgt.core.util.Constants;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -20,7 +20,7 @@ package io.entgra.application.mgt.store.api.services.impl.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
+import io.entgra.application.mgt.core.exception.BadRequestException;
 import io.entgra.application.mgt.store.api.util.Constants;
 
 import java.util.List;

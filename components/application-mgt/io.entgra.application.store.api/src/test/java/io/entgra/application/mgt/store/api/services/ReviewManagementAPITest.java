@@ -25,7 +25,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
-import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
+import io.entgra.application.mgt.core.util.APIUtil;
 
 @PowerMockIgnore("javax.ws.rs.*")
 @SuppressStaticInitializationFor({

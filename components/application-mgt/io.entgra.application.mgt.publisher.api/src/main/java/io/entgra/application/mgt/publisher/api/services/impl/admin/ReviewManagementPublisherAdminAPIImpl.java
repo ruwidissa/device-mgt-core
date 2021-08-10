@@ -24,8 +24,8 @@ import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
-import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
-import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
+import io.entgra.application.mgt.core.exception.NotFoundException;
+import io.entgra.application.mgt.core.util.APIUtil;
 import io.entgra.application.mgt.publisher.api.services.admin.ReviewManagementPublisherAdminAPI;
 
 import javax.ws.rs.DefaultValue;

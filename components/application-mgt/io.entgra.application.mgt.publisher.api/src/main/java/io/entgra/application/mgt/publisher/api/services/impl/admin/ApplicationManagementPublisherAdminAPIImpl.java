@@ -21,10 +21,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
-import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
-import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
-import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
+import io.entgra.application.mgt.core.exception.BadRequestException;
+import io.entgra.application.mgt.core.exception.ForbiddenException;
+import io.entgra.application.mgt.core.exception.NotFoundException;
+import io.entgra.application.mgt.core.util.APIUtil;
 import io.entgra.application.mgt.publisher.api.services.admin.ApplicationManagementPublisherAdminAPI;
 
 import javax.ws.rs.Consumes;

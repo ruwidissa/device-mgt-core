@@ -23,10 +23,10 @@ import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
-import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
-import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
-import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
+import io.entgra.application.mgt.core.exception.BadRequestException;
+import io.entgra.application.mgt.core.exception.NotFoundException;
+import io.entgra.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.application.mgt.core.util.APIUtil;
 import io.entgra.application.mgt.store.api.services.ApplicationManagementAPI;
 
 import javax.validation.Valid;

@@ -47,7 +47,7 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
 import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
 import org.wso2.carbon.device.application.mgt.common.exception.SubscriptionManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.application.mgt.core.util.HelperUtil;
+import io.entgra.application.mgt.core.util.HelperUtil;
 import org.wso2.carbon.device.mgt.common.DeviceFilters;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.OperationLogFilters;

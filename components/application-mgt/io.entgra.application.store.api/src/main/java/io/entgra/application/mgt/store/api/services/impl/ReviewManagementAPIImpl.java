@@ -25,14 +25,14 @@ import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.response.Review;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
-import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
-import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
-import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
+import io.entgra.application.mgt.core.exception.BadRequestException;
+import io.entgra.application.mgt.core.exception.ForbiddenException;
+import io.entgra.application.mgt.core.exception.NotFoundException;
 import io.entgra.application.mgt.store.api.services.ReviewManagementAPI;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
-import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
+import io.entgra.application.mgt.core.util.APIUtil;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Path;

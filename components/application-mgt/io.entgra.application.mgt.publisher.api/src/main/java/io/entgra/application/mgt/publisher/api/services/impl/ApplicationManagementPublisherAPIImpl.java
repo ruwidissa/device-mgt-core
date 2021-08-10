@@ -38,15 +38,15 @@ import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppReleaseWra
 import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
-import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
-import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
-import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
-import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.core.util.Constants;
+import io.entgra.application.mgt.core.exception.BadRequestException;
+import io.entgra.application.mgt.core.exception.ForbiddenException;
+import io.entgra.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.application.mgt.core.util.APIUtil;
+import io.entgra.application.mgt.core.util.Constants;
 import io.entgra.application.mgt.publisher.api.services.ApplicationManagementPublisherAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
+import io.entgra.application.mgt.core.exception.NotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
