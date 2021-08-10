@@ -51,7 +51,7 @@
         <property name="scan" value="true"/>
     </bean>
 
-    <bean id="org.wso2.carbon.device.application.mgt.addons.ValidationInterceptor" class="org.wso2.carbon.device.application.mgt.addons.ValidationInterceptor"/>
+    <bean id="org.wso2.carbon.device.application.mgt.addons.ValidationInterceptor" class="io.entgra.application.mgt.addons.ValidationInterceptor"/>
     <bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
     <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
 
@@ -60,12 +60,12 @@
     <bean id="applicationMgtServiceBean" class="io.entgra.application.mgt.store.api.services.impl.ApplicationManagementAPIImpl"/>
     <bean id="reviewMgtServiceBean" class="io.entgra.application.mgt.store.api.services.impl.ReviewManagementAPIImpl" />
     <bean id="subscriptionMgtServiceBean" class="io.entgra.application.mgt.store.api.services.impl.SubscriptionManagementAPIImpl"/>
-    <bean id="jsonProvider" class="org.wso2.carbon.device.application.mgt.addons.JSONMessageHandler"/>
-    <bean id="multipartProvider" class="org.wso2.carbon.device.application.mgt.addons.MultipartCustomProvider"/>
+    <bean id="jsonProvider" class="io.entgra.application.mgt.addons.JSONMessageHandler"/>
+    <bean id="multipartProvider" class="io.entgra.application.mgt.addons.MultipartCustomProvider"/>
 
     <cxf:bus>
         <cxf:inInterceptors>
-            <ref bean="org.wso2.carbon.device.application.mgt.addons.ValidationInterceptor"/>
+            <ref bean="io.entgra.application.mgt.addons.ValidationInterceptor"/>
         </cxf:inInterceptors>
     </cxf:bus>
 

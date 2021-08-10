@@ -14,7 +14,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.application.mgt.addons;
+package io.entgra.application.mgt.addons;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

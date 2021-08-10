@@ -14,11 +14,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.application.mgt.addons;
+package io.entgra.application.mgt.addons;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.wso2.carbon.device.application.mgt.addons.jaxrs.AnnotationExclusionStrategy;
+import io.entgra.application.mgt.addons.jaxrs.AnnotationExclusionStrategy;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;

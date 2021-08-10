@@ -74,7 +74,7 @@
 
     <filter>
         <filter-name>ApiOriginFilter</filter-name>
-        <filter-class>org.wso2.carbon.device.application.mgt.addons.ApiOriginFilter</filter-class>
+        <filter-class>io.entgra.application.mgt.addons.ApiOriginFilter</filter-class>
     </filter>
 
     <filter>
