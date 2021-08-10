@@ -15,12 +15,12 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.application.mgt.api.services.impl;
+package io.entgra.application.mgt.api.services.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.api.services.ArtifactDownloadAPI;
+import io.entgra.application.mgt.api.services.ArtifactDownloadAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;

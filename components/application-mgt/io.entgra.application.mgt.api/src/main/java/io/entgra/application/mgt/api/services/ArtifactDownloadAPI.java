@@ -15,7 +15,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.application.mgt.api.services;
+package io.entgra.application.mgt.api.services;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
