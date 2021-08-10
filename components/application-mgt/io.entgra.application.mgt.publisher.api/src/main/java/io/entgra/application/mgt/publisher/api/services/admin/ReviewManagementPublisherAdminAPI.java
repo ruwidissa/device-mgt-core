@@ -28,8 +28,8 @@ import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
-import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.PaginationResult;
+import io.entgra.application.mgt.common.ErrorResponse;
+import io.entgra.application.mgt.common.PaginationResult;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

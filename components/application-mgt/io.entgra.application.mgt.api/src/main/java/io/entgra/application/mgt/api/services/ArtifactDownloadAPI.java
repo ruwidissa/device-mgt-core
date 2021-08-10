@@ -26,8 +26,8 @@ import io.swagger.annotations.Extension;
 import io.swagger.annotations.ExtensionProperty;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
-import org.wso2.carbon.device.application.mgt.common.ApplicationList;
-import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import io.entgra.application.mgt.common.ApplicationList;
+import io.entgra.application.mgt.common.ErrorResponse;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

@@ -18,7 +18,7 @@
 package io.entgra.application.mgt.core.dao;
 
 import io.entgra.application.mgt.common.response.Review;
-import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
+import io.entgra.application.mgt.common.PaginationRequest;
 import io.entgra.application.mgt.common.dto.ReviewDTO;
 import io.entgra.application.mgt.core.exception.ReviewManagementDAOException;
 

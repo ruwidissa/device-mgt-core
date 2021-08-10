@@ -130,7 +130,7 @@ public abstract class BaseTestCase {
         try {
             conn = this.getDataSource().getConnection();
             stmt = conn.createStatement();
-            stmt.executeUpdate("RUNSCRIPT FROM '../../../features/application-mgt/org.wso2.carbon.device.application.mgt.server.feature/src/main/resources/dbscripts/cdm/application-mgt/h2.sql'");
+            stmt.executeUpdate("RUNSCRIPT FROM '../../../features/application-mgt/io.entgra.application.mgt.server.feature/src/main/resources/dbscripts/cdm/application-mgt/h2.sql'");
             stmt.executeUpdate("RUNSCRIPT FROM '../../../features/device-mgt/org.wso2.carbon.device.mgt.basics.feature/src/main/resources/dbscripts/cdm/h2.sql'");
 
         } finally {

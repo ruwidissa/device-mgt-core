@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * org.wso2.carbon.device.application.mgt.addons.FileStreamingOutput to allow the user to send the files as Stream.
+ * io.entgra.application.mgt.addons.FileStreamingOutput to allow the user to send the files as Stream.
  */
 public class FileStreamingOutput implements StreamingOutput {
     private InputStream inputStream;

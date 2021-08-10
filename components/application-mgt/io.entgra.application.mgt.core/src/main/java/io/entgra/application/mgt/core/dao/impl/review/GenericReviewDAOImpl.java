@@ -20,7 +20,7 @@ package io.entgra.application.mgt.core.dao.impl.review;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
+import io.entgra.application.mgt.common.PaginationRequest;
 import io.entgra.application.mgt.common.dto.ReviewDTO;
 import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.dao.ReviewDAO;

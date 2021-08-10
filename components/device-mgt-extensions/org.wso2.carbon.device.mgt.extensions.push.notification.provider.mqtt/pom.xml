@@ -113,7 +113,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>org.wso2.carbon.device.application.mgt.common</artifactId>
+            <artifactId>io.entgra.application.mgt.common</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -160,7 +160,7 @@
                             org.wso2.carbon.event.output.adapter.core.exception,
                             org.wso2.carbon.device.mgt.core.operation.mgt,
                             org.wso2.carbon.core,
-                            org.wso2.carbon.device.application.mgt.common.*,
+                            io.entgra.application.mgt.common.*,
                             io.entgra.application.mgt.common.services.*
                         </Import-Package>
                     </instructions>

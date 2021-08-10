@@ -22,8 +22,8 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-import org.wso2.carbon.device.application.mgt.common.ExecutionStatus;
-import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
+import io.entgra.application.mgt.common.ExecutionStatus;
+import io.entgra.application.mgt.common.SubscriptionType;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
 
 import io.entgra.application.mgt.common.dto.ApplicationReleaseDTO;

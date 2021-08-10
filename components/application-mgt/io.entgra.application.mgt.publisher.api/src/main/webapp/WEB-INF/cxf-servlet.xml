@@ -50,7 +50,7 @@
         <property name="scan" value="true"/>
     </bean>
 
-    <bean id="org.wso2.carbon.device.application.mgt.addons.ValidationInterceptor" class="io.entgra.application.mgt.addons.ValidationInterceptor"/>
+    <bean id="io.entgra.application.mgt.addons.ValidationInterceptor" class="io.entgra.application.mgt.addons.ValidationInterceptor"/>
     <bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
     <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
 

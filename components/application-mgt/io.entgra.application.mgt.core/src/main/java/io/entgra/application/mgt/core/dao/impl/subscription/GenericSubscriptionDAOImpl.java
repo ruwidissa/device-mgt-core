@@ -19,9 +19,9 @@ package io.entgra.application.mgt.core.dao.impl.subscription;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.ExecutionStatus;
-import org.wso2.carbon.device.application.mgt.common.SubAction;
-import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
+import io.entgra.application.mgt.common.ExecutionStatus;
+import io.entgra.application.mgt.common.SubAction;
+import io.entgra.application.mgt.common.SubscriptionType;
 import io.entgra.application.mgt.common.dto.DeviceSubscriptionDTO;
 import io.entgra.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import io.entgra.application.mgt.common.exception.DBConnectionException;

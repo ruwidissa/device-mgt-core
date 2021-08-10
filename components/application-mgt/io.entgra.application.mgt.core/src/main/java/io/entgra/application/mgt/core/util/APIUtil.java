@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.application.mgt.common.ApplicationType;
+import io.entgra.application.mgt.common.ApplicationType;
 import io.entgra.application.mgt.common.config.MDMConfig;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.application.mgt.common.dto.ApplicationReleaseDTO;
@@ -31,7 +31,7 @@ import io.entgra.application.mgt.common.exception.ApplicationManagementException
 import io.entgra.application.mgt.common.response.Application;
 import io.entgra.application.mgt.common.response.ApplicationRelease;
 import io.entgra.application.mgt.common.services.*;
-import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import io.entgra.application.mgt.common.ErrorResponse;
 import io.entgra.application.mgt.common.wrapper.CustomAppReleaseWrapper;
 import io.entgra.application.mgt.common.wrapper.CustomAppWrapper;
 import io.entgra.application.mgt.common.wrapper.EntAppReleaseWrapper;

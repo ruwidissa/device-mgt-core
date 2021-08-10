@@ -23,7 +23,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.ImageArtifact;
+import io.entgra.application.mgt.common.ImageArtifact;
 import io.entgra.application.mgt.common.exception.ApplicationStorageManagementException;
 import io.entgra.application.mgt.common.exception.ResourceManagementException;
 

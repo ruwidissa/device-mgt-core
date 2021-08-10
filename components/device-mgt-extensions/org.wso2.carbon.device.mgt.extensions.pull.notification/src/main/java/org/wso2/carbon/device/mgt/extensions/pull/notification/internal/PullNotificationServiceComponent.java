@@ -40,7 +40,7 @@ import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
  * bind="setPolicyManagerService"
  * unbind="unsetPolicyManagerService"
  * @scr.reference name="org.wso2.carbon.application.mgt.service"
- * interface="org.wso2.carbon.device.application.mgt.common.services.ApplicationManager"
+ * interface="io.entgra.application.mgt.common.services.ApplicationManager"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setApplicationManagerService"

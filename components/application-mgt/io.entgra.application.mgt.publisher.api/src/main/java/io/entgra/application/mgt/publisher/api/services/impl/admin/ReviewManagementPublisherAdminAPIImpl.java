@@ -18,9 +18,9 @@ package io.entgra.application.mgt.publisher.api.services.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.application.mgt.common.PaginationResult;
-import org.wso2.carbon.device.application.mgt.common.Rating;
+import io.entgra.application.mgt.common.PaginationRequest;
+import io.entgra.application.mgt.common.PaginationResult;
+import io.entgra.application.mgt.common.Rating;
 import io.entgra.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.application.mgt.common.exception.ReviewManagementException;
 import io.entgra.application.mgt.common.services.ReviewManager;

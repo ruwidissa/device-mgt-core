@@ -17,7 +17,7 @@
  */
 package io.entgra.application.mgt.core.dao;
 
-import org.wso2.carbon.device.application.mgt.common.LifecycleState;
+import io.entgra.application.mgt.common.LifecycleState;
 import io.entgra.application.mgt.core.exception.LifeCycleManagementDAOException;
 
 import java.util.List;

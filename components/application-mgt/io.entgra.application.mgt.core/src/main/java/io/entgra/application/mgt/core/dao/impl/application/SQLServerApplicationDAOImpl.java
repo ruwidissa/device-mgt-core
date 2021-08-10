@@ -20,7 +20,7 @@ package io.entgra.application.mgt.core.dao.impl.application;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.Filter;
+import io.entgra.application.mgt.common.Filter;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.exception.ApplicationManagementDAOException;

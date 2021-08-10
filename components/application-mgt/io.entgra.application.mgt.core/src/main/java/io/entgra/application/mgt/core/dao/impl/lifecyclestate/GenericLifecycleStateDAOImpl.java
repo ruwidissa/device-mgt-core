@@ -19,8 +19,8 @@ package io.entgra.application.mgt.core.dao.impl.lifecyclestate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
-import org.wso2.carbon.device.application.mgt.common.LifecycleState;
+import io.entgra.application.mgt.common.AppLifecycleState;
+import io.entgra.application.mgt.common.LifecycleState;
 import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.dao.LifecycleStateDAO;
 import io.entgra.application.mgt.core.util.DAOUtil;

@@ -40,7 +40,7 @@ public class ScheduledSubscriptionDTO {
      * Task name is a generated field and in the following pattern:
      * {@code <SUBSCRIPTION-TYPE>_<ACTION>_<HASH-VALUE>}
      * {@code SUBSCRIPTION-TYPE} - {@see {@linkplain SubscriptionType}}
-     * {@code ACTION} - {@see {@linkplain org.wso2.carbon.device.application.mgt.common.SubAction}
+     * {@code ACTION} - {@see {@linkplain io.entgra.application.mgt.common.SubAction}
      * {@code HASH-VALUE} - this is a hash value of the combination of application uuid and the subscriber list.
      *
      * Example: {@code DEVICE_INSTALL_e593e00e8ef55efc764295b6aa9ad56b}

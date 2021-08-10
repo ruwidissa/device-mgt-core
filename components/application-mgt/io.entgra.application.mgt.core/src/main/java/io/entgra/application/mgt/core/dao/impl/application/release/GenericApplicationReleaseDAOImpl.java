@@ -21,7 +21,7 @@ package io.entgra.application.mgt.core.dao.impl.application.release;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.application.mgt.common.dto.ApplicationReleaseDTO;
-import org.wso2.carbon.device.application.mgt.common.Rating;
+import io.entgra.application.mgt.common.Rating;
 import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.dao.ApplicationReleaseDAO;
 import io.entgra.application.mgt.core.util.DAOUtil;

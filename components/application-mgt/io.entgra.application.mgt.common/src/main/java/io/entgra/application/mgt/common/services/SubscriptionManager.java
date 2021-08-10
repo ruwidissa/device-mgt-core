@@ -45,8 +45,8 @@ public interface SubscriptionManager {
  * @param <T>             generic type of the method.
  * @return {@link ApplicationInstallResponse}
  * @throws ApplicationManagementException if error occurs when subscribing to the given application
- * @link org.wso2.carbon.device.application.mgt.common.SubscriptionType}}
- * @link org.wso2.carbon.device.application.mgt.common.SubAction}}
+ * @link io.entgra.application.mgt.common.SubscriptionType}}
+ * @link io.entgra.application.mgt.common.SubAction}}
      * @param properties
      */
     <T> ApplicationInstallResponse performBulkAppOperation(String applicationUUID, List<T> params, String subType,
@@ -109,7 +109,7 @@ public interface SubscriptionManager {
      * @return {@link ApplicationInstallResponse}
      * @throws ApplicationManagementException ApplicationManagementException if error occurs when subscribing to the
      * given application
-     * @link org.wso2.carbon.device.application.mgt.common.SubscriptionType}}
+     * @link io.entgra.application.mgt.common.SubscriptionType}}
      */
     <T> void performEntAppSubscription(String applicationUUID, List<T> params, String subType, String action,
                                        boolean requiresUpdatingExternal) throws ApplicationManagementException;

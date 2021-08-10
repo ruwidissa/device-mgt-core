@@ -29,8 +29,8 @@ import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
-import org.wso2.carbon.device.application.mgt.common.ApplicationList;
-import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import io.entgra.application.mgt.common.ApplicationList;
+import io.entgra.application.mgt.common.ErrorResponse;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
