@@ -1,0 +1,10 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.application.mgt.server_${feature.version}/database/,target:${installFolder}/../../../repository/database/,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.application.mgt.server_${feature.version}/conf/application-mgt.xml,target:${installFolder}/../../conf/application-mgt.xml,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.application.mgt.server_${feature.version}/conf/datasources/application-mgt-datasources.xml,target:${installFolder}/../../conf/datasources/application-mgt-datasources.xml,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.application.mgt.server_${feature.version}/dbscripts/cdm/application-mgt,target:${installFolder}/../../../dbscripts/cdm/application-mgt,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.application.mgt.server_${feature.version}/conf_templates/,target:${installFolder}/../../resources/conf/,overwrite:true);\
+
+instructions.unconfigure = \
+org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/../../conf/datasources/application-mgt-datasources.xml);\
+org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/../../../dbscripts/cdm/application-mgt);\

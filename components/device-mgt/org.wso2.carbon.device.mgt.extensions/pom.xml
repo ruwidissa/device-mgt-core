@@ -83,7 +83,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>org.wso2.carbon.device.application.mgt.common</artifactId>
+            <artifactId>io.entgra.application.mgt.common</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -28,6 +28,13 @@
     {% else %}
     <EnableSSO>true</EnableSSO>
     {% endif %}
+    <!--  maximum number of login cache entries  -->
+    {% if mdm_ui_conf.login_cache_capacity is defined %}
+    <LoginCacheCapacity>{{mdm_ui_conf.login_cache_capacity}}</LoginCacheCapacity>
+    {% else %}
+    <LoginCacheCapacity>10000</LoginCacheCapacity>
+    {% endif %}
+
     <AppRegistration>
         <Tags>
             <Tag>application_management</Tag>

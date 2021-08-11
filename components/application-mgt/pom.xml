@@ -34,12 +34,12 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.device.application.mgt.core</module>
-        <module>org.wso2.carbon.device.application.mgt.common</module>
-        <module>org.wso2.carbon.device.application.mgt.addons</module>
-        <module>org.wso2.carbon.device.application.mgt.publisher.api</module>
-        <module>org.wso2.carbon.device.application.mgt.store.api</module>
-        <module>org.wso2.carbon.device.application.mgt.api</module>
+        <module>io.entgra.application.mgt.common</module>
+        <module>io.entgra.application.mgt.core</module>
+        <module>io.entgra.application.mgt.addons</module>
+        <module>io.entgra.application.mgt.publisher.api</module>
+        <module>io.entgra.application.mgt.store.api</module>
+        <module>io.entgra.application.mgt.api</module>
     </modules>
 
     <build>
