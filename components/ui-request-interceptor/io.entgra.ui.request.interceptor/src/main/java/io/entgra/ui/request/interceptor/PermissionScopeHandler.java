@@ -59,6 +59,7 @@ public class PermissionScopeHandler extends HttpServlet {
             proxyResponse.setCode(HttpStatus.SC_OK);
             proxyResponse.setData(jsonObject.toString());
             HandlerUtil.handleSuccess(resp, proxyResponse);
+            return;
         }
         HandlerUtil.handleError(resp, null);
     }

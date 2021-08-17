@@ -507,8 +507,14 @@ public class HandlerUtil {
         if (log.isDebugEnabled()) {
             log.debug("refreshing the token");
         }
-        HttpPost tokenEndpoint = new HttpPost(
-                gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        String iotsCorePort = System.getProperty("iot.core.https.port");
+        if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
+            iotsCorePort = System.getProperty("iot.core.http.port");
+        }
+        String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
+                + HandlerConstants.COLON + iotsCorePort;
+
+        HttpPost tokenEndpoint = new HttpPost(iotsCoreUrl + HandlerConstants.TOKEN_ENDPOINT);
         HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Couldn't find a session, hence it is required to login and proceed.");
