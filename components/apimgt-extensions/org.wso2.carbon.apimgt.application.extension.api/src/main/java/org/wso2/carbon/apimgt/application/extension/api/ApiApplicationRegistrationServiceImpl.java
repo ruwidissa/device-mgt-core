@@ -122,7 +122,7 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
             synchronized (ApiApplicationRegistrationServiceImpl.class) {
                 ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
                         applicationName, registrationProfile.getTags(),
-                        ApiApplicationConstants.DEFAULT_TOKEN_TYPE, username,
+                        ApiApplicationConstants.DEFAULT_TOKEN_TYPE, registrationProfile.getUsername(),
                         registrationProfile.isAllowedToAllDomains(), validityPeriod);
                 return Response.status(Response.Status.CREATED).entity(apiApplicationKey.toString()).build();
             }
