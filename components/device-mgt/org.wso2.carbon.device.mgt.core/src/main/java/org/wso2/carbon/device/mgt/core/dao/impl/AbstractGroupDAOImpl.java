@@ -1115,7 +1115,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                     + "FROM DM_DEVICE d, "
                     + "(SELECT dgm.DEVICE_ID "
                     + "FROM DM_DEVICE_GROUP_MAP dgm "
-                    + "WHERE dgm.GROUP_ID = (SELECT ID FROM DM_GROUP WHERE GROUP_NAME = ? )) dgm1 "
+                    + "WHERE dgm.GROUP_ID = (SELECT ID FROM DM_GROUP WHERE GROUP_NAME = ? AND TENANT_ID = ?)) dgm1 "
                     + "WHERE d.ID = dgm1.DEVICE_ID AND d.TENANT_ID = ?) gd, DM_DEVICE_TYPE t "
                     + "WHERE gd.DEVICE_TYPE_ID = t.ID) d1 "
                     + "WHERE d1.DEVICE_ID = e.DEVICE_ID AND TENANT_ID = ? AND e.STATUS IN (",
@@ -1127,6 +1127,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 int index = 1;
                 stmt.setString(index++, groupName);
+                stmt.setInt(index++, tenantId);
                 stmt.setInt(index++, tenantId);
                 stmt.setInt(index++, tenantId);
                 for (String deviceId : deviceStatuses) {
