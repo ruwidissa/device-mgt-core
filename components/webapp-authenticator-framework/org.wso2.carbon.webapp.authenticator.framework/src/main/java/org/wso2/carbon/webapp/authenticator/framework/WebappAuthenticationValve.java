@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.webapp.authenticator.framework;
 
+import com.google.gson.Gson;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
@@ -48,6 +49,9 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
 
     private static final Log log = LogFactory.getLog(WebappAuthenticationValve.class);
     private static final TreeMap<String, String> nonSecuredEndpoints = new TreeMap<>();
+    private static final String PERMISSION_PREFIX = "/permission/admin";
+    public static final String AUTHORIZE_PERMISSION = "Authorize-Permission";
+
     private static InetAddress inetAddress = null;
 
     @Override
@@ -78,7 +82,8 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
             }
         }
 
-        if ((this.isContextSkipped(request) ||  this.skipAuthentication(request))) {
+        if ((this.isContextSkipped(request) ||  this.skipAuthentication(request))
+                && (StringUtils.isEmpty(request.getHeader(AUTHORIZE_PERMISSION)))) {
                 this.getNext().invoke(request, response, compositeValve);
             return;
         }
@@ -99,6 +104,39 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
         // This section will allow to validate a given access token is authenticated to access given
         // resource(permission)
         if (request.getCoyoteRequest() != null
+                && StringUtils.isNotEmpty(request.getHeader(AUTHORIZE_PERMISSION))
+                && (authenticationInfo.getStatus() == WebappAuthenticator.Status.CONTINUE ||
+                authenticationInfo.getStatus() == WebappAuthenticator.Status.SUCCESS)) {
+            boolean isAllowed;
+            try {
+                isAllowed = AuthenticationFrameworkUtil.isUserAuthorized(
+                        authenticationInfo.getTenantId(), authenticationInfo.getTenantDomain(),
+                        authenticationInfo.getUsername(),
+                        PERMISSION_PREFIX + request.getHeader (AUTHORIZE_PERMISSION));
+            } catch (AuthenticationException e) {
+                String msg = "Could not authorize permission";
+                log.error(msg);
+                AuthenticationFrameworkUtil.handleResponse(request, response,
+                        HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
+                return;
+            }
+
+            if (isAllowed) {
+                Gson gson = new Gson();
+                AuthenticationFrameworkUtil.handleResponse(request, response, HttpServletResponse.SC_OK,
+                        gson.toJson(authenticationInfo));
+                return;
+            } else {
+                log.error("Unauthorized message from user " + authenticationInfo.getUsername());
+                AuthenticationFrameworkUtil.handleResponse(request, response,
+                        HttpServletResponse.SC_FORBIDDEN, "Unauthorized to access the API");
+                return;
+            }
+        }
+
+        // This section will allow to validate a given access token is authenticated to access permission defined per API
+        if (request.getCoyoteRequest() != null
+                && isResourcePermissionValidate(request)
                 && (authenticationInfo.getStatus() == WebappAuthenticator.Status.CONTINUE ||
                 authenticationInfo.getStatus() == WebappAuthenticator.Status.SUCCESS)) {
             boolean isAllowed;
@@ -112,7 +150,7 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
             }
         }
 
-            Tenant tenant = null;
+        Tenant tenant = null;
         if (authenticationInfo.getTenantId() != -1) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
@@ -176,6 +214,11 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
     private boolean isManagedAPI(Request request) {
         String param = request.getContext().findParameter("managed-api-enabled");
         return (param != null && Boolean.parseBoolean(param));
+    }
+
+    private boolean isResourcePermissionValidate(Request request) {
+        String param = request.getContext().findParameter("resource-permission-validate");
+        return (param == null) ||  Boolean.parseBoolean(param);
     }
 
     private boolean isContextSkipped(Request request) {
