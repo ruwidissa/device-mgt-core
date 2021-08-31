@@ -37,14 +37,15 @@
 
     <AppRegistration>
         <Tags>
-            <Tag>application_management</Tag>
-            <Tag>device_management</Tag>
-            <Tag>subscription_management</Tag>
-            <Tag>review_management</Tag>
         {% if mdm_ui_conf.app_registration.tags is defined %}
             {%- for tag in mdm_ui_conf.app_registration.tags -%}
             <Tag>{{tag}}</Tag>
             {% endfor %}
+        {% else %}
+            <Tag>application_management</Tag>
+            <Tag>device_management</Tag>
+            <Tag>subscription_management</Tag>
+            <Tag>review_management</Tag>
         {% endif %}
         </Tags>
         {% if mdm_ui_conf.app_registration.allow_to_all_domains is defined %}
