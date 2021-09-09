@@ -73,10 +73,10 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
                     + "WHERE TENANT_ID = ?";
             if (StringUtils.isNotBlank(request.getGroupName())) {
-                sql += " AND UPPER(GROUP_NAME) LIKE ?";
+                sql += " AND GROUP_NAME LIKE ?";
             }
             if (StringUtils.isNotBlank(request.getOwner())) {
-                sql += " AND UPPER(OWNER) LIKE ?";
+                sql += " AND OWNER LIKE ?";
             }
             if (StringUtils.isNotBlank(request.getStatus())) {
                 sql += " AND STATUS = ?";
