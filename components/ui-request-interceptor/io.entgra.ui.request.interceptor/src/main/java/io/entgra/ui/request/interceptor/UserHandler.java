@@ -54,10 +54,10 @@ public class UserHandler extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            String serverUrl =
+            String keymanagerUrl =
                     req.getScheme() + HandlerConstants.SCHEME_SEPARATOR +
-                            System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
-                            + HandlerConstants.COLON + HandlerUtil.getCorePort(req.getScheme());
+                            System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
+                            + HandlerConstants.COLON + HandlerUtil.getKeymanagerPort(req.getScheme());
             HttpSession httpSession = req.getSession(false);
             if (httpSession == null) {
                 HandlerUtil.sendUnAuthorizeResponse(resp);
@@ -72,7 +72,7 @@ public class UserHandler extends HttpServlet {
 
             String accessToken = authData.getAccessToken();
 
-            HttpPost tokenEndpoint = new HttpPost(serverUrl + HandlerConstants.INTROSPECT_ENDPOINT);
+            HttpPost tokenEndpoint = new HttpPost(keymanagerUrl + HandlerConstants.INTROSPECT_ENDPOINT);
             tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
             DeviceManagementConfig dmc = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
             String adminUsername = dmc.getKeyManagerConfigurations().getAdminUsername();
@@ -86,7 +86,7 @@ public class UserHandler extends HttpServlet {
 
             if (tokenStatus.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                 if (tokenStatus.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-                    tokenStatus = HandlerUtil.retryRequestWithRefreshedToken(req, resp, tokenEndpoint, serverUrl);
+                    tokenStatus = HandlerUtil.retryRequestWithRefreshedToken(req, resp, tokenEndpoint, keymanagerUrl);
                 } else {
                     log.error("Error occurred while invoking the API to get token status.");
                     HandlerUtil.handleError(resp, tokenStatus);

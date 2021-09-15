@@ -69,14 +69,10 @@ public class DefaultTokenHandler extends HttpServlet {
                 String clientId = authData.getClientId();
                 String clientSecret = authData.getClientSecret();
 
-                String iotsCorePort = System.getProperty("iot.core.https.port");
-                if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-                    iotsCorePort = System.getProperty("iot.core.http.port");
-                }
-
-                String tokenUrl =
-                        req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
-                                + HandlerConstants.COLON + iotsCorePort + "/api/device-mgt/v1.0/devices/" + clientId
+                String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR
+                        + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
+                        + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
+                String tokenUrl = iotsCoreUrl + "/api/device-mgt/v1.0/devices/" + clientId
                                 + "/" + clientSecret + "/default-token";
 
                 HttpGet defaultTokenRequest = new HttpGet(tokenUrl);
@@ -131,8 +127,8 @@ public class DefaultTokenHandler extends HttpServlet {
 
         URIBuilder ub = new URIBuilder();
         ub.setScheme(HandlerConstants.WSS_PROTOCOL);
-        ub.setHost(System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR));
-        ub.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR)));
+        ub.setHost(System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR));
+        ub.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_GW_HTTPS_PORT_ENV_VAR)));
         ub.setPath(HandlerConstants.REMOTE_SESSION_CONTEXT);
 
         JsonObject responseJsonObj = new JsonObject();

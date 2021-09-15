@@ -73,7 +73,7 @@ public class InvokerHandler extends HttpServlet {
     private static final long serialVersionUID = -6508020875358160165L;
     private static AuthData authData;
     private static String apiEndpoint;
-    private static String iotsCoreUrl;
+    private static String kmManagerUrl;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -85,7 +85,7 @@ public class InvokerHandler extends HttpServlet {
                 ProxyResponse proxyResponse = HandlerUtil.execute(postRequest);
 
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, postRequest, apiEndpoint);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, postRequest, kmManagerUrl);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -113,14 +113,14 @@ public class InvokerHandler extends HttpServlet {
                 getRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(getRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, getRequest, apiEndpoint);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, getRequest, kmManagerUrl);
                     if (proxyResponse == null) {
                         return;
                     }
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                     if (proxyResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-                        proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, getRequest, apiEndpoint);
+                        proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, getRequest, kmManagerUrl);
                     } else {
                         log.error("Error occurred while invoking the GET API endpoint.");
                         HandlerUtil.handleError(resp, proxyResponse);
@@ -143,7 +143,7 @@ public class InvokerHandler extends HttpServlet {
                 headRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(headRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, headRequest, apiEndpoint);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, headRequest, kmManagerUrl);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -170,7 +170,7 @@ public class InvokerHandler extends HttpServlet {
                 ProxyResponse proxyResponse = HandlerUtil.execute(putRequest);
 
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, putRequest, apiEndpoint);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, putRequest, kmManagerUrl);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -198,7 +198,7 @@ public class InvokerHandler extends HttpServlet {
                 deleteRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(deleteRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, deleteRequest, apiEndpoint);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, deleteRequest, kmManagerUrl);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -302,8 +302,11 @@ public class InvokerHandler extends HttpServlet {
      */
     private static boolean validateRequest(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        apiEndpoint = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+        apiEndpoint = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
+
+        kmManagerUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
+                + HandlerConstants.COLON + HandlerUtil.getKeymanagerPort(req.getScheme());
 
         if (HandlerConstants.REPORTS.equalsIgnoreCase(req.getHeader(HandlerConstants.APP_NAME))){
             apiEndpoint = System.getProperty("iot.reporting.webapp.host");
@@ -373,14 +376,9 @@ public class InvokerHandler extends HttpServlet {
         if (log.isDebugEnabled()) {
             log.debug("refreshing the token");
         }
-        String iotsCorePort = System.getProperty("iot.core.https.port");
-        if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-            iotsCorePort = System.getProperty("iot.core.http.port");
-        }
-        iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
-                + HandlerConstants.COLON + iotsCorePort;
+
         HttpPost tokenEndpoint = new HttpPost(
-                iotsCoreUrl + HandlerConstants.TOKEN_ENDPOINT);
+                kmManagerUrl + HandlerConstants.TOKEN_ENDPOINT);
         HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Couldn't find a session, hence it is required to login and proceed.");

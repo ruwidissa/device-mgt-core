@@ -78,6 +78,12 @@ public class HandlerConstants {
     public static final String IOT_CORE_HOST_ENV_VAR = "iot.core.host";
     public static final String IOT_CORE_HTTP_PORT_ENV_VAR = "iot.core.http.port";
     public static final String IOT_CORE_HTTPS_PORT_ENV_VAR = "iot.core.https.port";
+    public static final String IOT_APIM_HOST_ENV_VAR = "iot.apim.host";
+    public static final String IOT_APIM_HTTP_PORT_ENV_VAR = "iot.apim.http.port";
+    public static final String IOT_APIM_HTTPS_PORT_ENV_VAR = "iot.apim.https.port";
+    public static final String IOT_KM_HOST_ENV_VAR = "iot.keymanager.host";
+    public static final String IOT_KM_HTTP_PORT_ENV_VAR = "iot.keymanager.http.port";
+    public static final String IOT_KM_HTTPS_PORT_ENV_VAR = "iot.keymanager.https.port";
     public static final String IOT_GW_HOST_ENV_VAR = "iot.gateway.host";
     public static final String IOT_GW_HTTP_PORT_ENV_VAR = "iot.gateway.http.port";
     public static final String IOT_GW_HTTPS_PORT_ENV_VAR = "iot.gateway.https.port";
