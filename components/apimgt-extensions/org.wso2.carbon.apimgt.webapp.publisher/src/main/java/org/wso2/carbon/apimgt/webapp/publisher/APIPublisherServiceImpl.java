@@ -92,7 +92,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                     apiRevisionDeployment.setDeployment(API_PUBLISH_ENVIRONMENT);
-                    apiRevisionDeployment.setVhost("localhost");
+                    apiRevisionDeployment.setVhost(System.getProperty("iot.gateway.host"));
                     apiRevisionDeployment.setDisplayOnDevportal(true);
 
                     List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
