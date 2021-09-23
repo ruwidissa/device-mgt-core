@@ -68,7 +68,9 @@ public class MDMAndroidOperationUtil {
 				WebApplication webApplication = new WebApplication();
 				webApplication.setUrl(application.getLocation());
 				webApplication.setName(application.getName());
-				webApplication.setType(application.getType().toString());
+//				webApplication.setType(application.getType().toString());
+//				Hard-corded "type" to "webapp". Some agent versions accept only "webapp" as the type.
+				webApplication.setType("webapp");
 				webApplication.setProperties(application.getProperties());
 				operation.setPayLoad(webApplication.toJSON());
 				break;
@@ -111,7 +113,9 @@ public class MDMAndroidOperationUtil {
 				WebApplication webApplication = new WebApplication();
 				webApplication.setUrl(application.getLocation());
 				webApplication.setName(application.getName());
-				webApplication.setType(application.getType().toString());
+//				webApplication.setType(application.getType().toString());
+//				Hard-corded "type" to "webapp". Some agent versions accept only "webapp" as the type.
+				webApplication.setType("webapp");
 				operation.setPayLoad(webApplication.toJSON());
 				break;
 			default:
