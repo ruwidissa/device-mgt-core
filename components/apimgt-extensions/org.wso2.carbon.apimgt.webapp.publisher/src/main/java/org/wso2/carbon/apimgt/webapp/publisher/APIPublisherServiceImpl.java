@@ -135,14 +135,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 scope.setRoles(apiScope.getRoles());
                                 apiProvider.addSharedScope(scope, tenantDomain);
                             }
-                        } else {
-                            // if already available as shared scope -> update
-                            Scope scope = new Scope();
-                            scope.setName(apiScope.getName());
-                            scope.setDescription(apiScope.getDescription());
-                            scope.setKey(apiScope.getKey());
-                            scope.setRoles(apiScope.getRoles());
-                            apiProvider.updateSharedScope(scope, tenantDomain);
                         }
                     }
 
