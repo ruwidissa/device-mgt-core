@@ -489,13 +489,14 @@ public class DeviceTypeManager implements DeviceManager {
             throws DeviceManagementException {
         boolean status = false;
         if (propertiesExist) {
+            Device updatedDevice = new Device();
+            updatedDevice.setDeviceIdentifier(deviceId.getId());
+            updatedDevice.setProperties(propertyList);
             try {
                 if (log.isDebugEnabled()) {
-                    log.debug("Getting the details of " + deviceType + " device : '" + deviceId.getId() + "'");
+                    log.debug("Updating device properties of " + deviceType + " device : '"
+                            + deviceId.getId() + "'");
                 }
-                Device updatedDevice = new Device();
-                updatedDevice.setDeviceIdentifier(deviceId.getId());
-                updatedDevice.setProperties(propertyList);
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().beginTransaction();
                 status = deviceTypePluginDAOManager.getDeviceDAO().updateDevice(updatedDevice);
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().commitTransaction();
@@ -505,6 +506,24 @@ public class DeviceTypeManager implements DeviceManager {
                         "Error occurred while fetching the " + deviceType + " device: '" + deviceId.getId() + "'", e);
             } finally {
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
+            }
+            if (propertyBasedDeviceTypePluginDAOManager != null && status) {
+                try {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Updating device properties of " + deviceType + " device : '"
+                                + deviceId.getId() + "'");
+                    }
+                    propertyBasedDeviceTypePluginDAOManager.getDeviceTypeDAOHandler().beginTransaction();
+                    status = propertyBasedDeviceTypePluginDAOManager.getDeviceDAO().updateDevice(updatedDevice);
+                    propertyBasedDeviceTypePluginDAOManager.getDeviceTypeDAOHandler().commitTransaction();
+                } catch (DeviceTypeMgtPluginException e) {
+                    propertyBasedDeviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
+                    String msg = "Error while updating properties for " + deviceType + " device : " +
+                            deviceId.getId();
+                    throw new DeviceManagementException(msg, e);
+                } finally {
+                    propertyBasedDeviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
+                }
             }
         }
         return status;
