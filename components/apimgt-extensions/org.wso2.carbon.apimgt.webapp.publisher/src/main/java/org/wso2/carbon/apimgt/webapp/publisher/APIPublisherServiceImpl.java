@@ -162,15 +162,30 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     api.setStatus(existingAPI.getStatus());
                     apiProvider.updateAPI(api);
 
+                    // Assumption: Assume the latest revision is the published one
+                    String latestRevisionUUID = apiProvider.getLatestRevisionUUID(existingAPI.getUuid());
+                    List<APIRevisionDeployment> latestRevisionDeploymentList =
+                            apiProvider.getAPIRevisionDeploymentList(latestRevisionUUID);
+
+                    List<APIRevision> apiRevisionList = apiProvider.getAPIRevisions(existingAPI.getUuid());
+                    if (apiRevisionList.size() >= 5) {
+                        String earliestRevisionUUID = apiProvider.getEarliestRevisionUUID(existingAPI.getUuid());
+                        List<APIRevisionDeployment> earliestRevisionDeploymentList =
+                                apiProvider.getAPIRevisionDeploymentList(earliestRevisionUUID);
+                        apiProvider.undeployAPIRevisionDeployment(existingAPI.getUuid(), earliestRevisionUUID, earliestRevisionDeploymentList);
+                        apiProvider.deleteAPIRevision(existingAPI.getUuid(), earliestRevisionUUID, tenantDomain);
+                    }
+
+                    // create new revision
+                    APIRevision apiRevision = new APIRevision();
+                    apiRevision.setApiUUID(existingAPI.getUuid());
+                    apiRevision.setDescription("Updated Revision");
+                    String apiRevisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
+
+                    apiProvider.deployAPIRevision(existingAPI.getUuid(), apiRevisionId, latestRevisionDeploymentList);
+
                     if (CREATED_STATUS.equals(existingAPI.getStatus())) {
                         apiProvider.changeLifeCycleStatus(tenantDomain, existingAPI.getUuid(), PUBLISH_ACTION, null);
-                        APIRevision apiRevision = new APIRevision();
-                        apiRevision.setApiUUID(existingAPI.getUuid());
-                        apiRevision.setDescription("Updated Revision");
-                        String apiRevisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
-
-                        List<APIRevisionDeployment> apiRevisionDeploymentList = apiProvider.getAPIRevisionDeploymentList(apiRevisionId);
-                        apiProvider.deployAPIRevision(existingAPI.getUuid(), apiRevisionId, apiRevisionDeploymentList);
                     }
                 }
             }
