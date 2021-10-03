@@ -157,7 +157,7 @@ public class DeviceAccessAuthorizationServiceTest {
         //Adding a non Admin User
         userStoreManager.addUser(NON_ADMIN_ALLOWED_USER, PASSWORD, null, defaultUserClaims, null);
         //Adding a normal user
-        userStoreManager.addUser(NORMAL_USER, PASSWORD, null, defaultUserClaims, null);
+        userStoreManager.addUser(NORMAL_USER, PASSWORD, null, buildDefaultUserClaims(FIRST_NAME, LAST_NAME, EMAIL), null);
         //Adding role with permission to Admin user
         userStoreManager.addRole(ADMIN_ROLE, new String[]{ADMIN_USER}, new Permission[]{adminPermission});
         //Adding role with permission to non Admin user

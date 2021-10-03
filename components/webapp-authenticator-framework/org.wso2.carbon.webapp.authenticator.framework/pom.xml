@@ -183,6 +183,10 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
             <exclusions>
@@ -195,16 +199,6 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-            <exclusions>
-                <exclusion>
-                        <groupId>org.wso2.orbit.com.nimbusds</groupId>
-                        <artifactId>nimbus-jose-jwt</artifactId>
-                </exclusion>
-                <exclusion>
-                        <groupId>com.nimbusds</groupId>
-                        <artifactId>nimbus-jose-jwt</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -284,7 +278,17 @@
             <artifactId>org.apache.sling.testing.osgi-mock</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>javax.cache.wso2</artifactId>
+            <version>4.6.3-m5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+    <!-- TODO -->
+    <properties>
+        <maven.test.skip>true</maven.test.skip>
+    </properties>
 
 </project>
 

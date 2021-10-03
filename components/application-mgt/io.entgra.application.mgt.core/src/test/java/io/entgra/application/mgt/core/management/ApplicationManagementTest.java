@@ -20,6 +20,7 @@ package io.entgra.application.mgt.core.management;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import io.entgra.application.mgt.common.*;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
@@ -40,6 +41,7 @@ import io.entgra.application.mgt.core.dto.ApplicationsDTO;
 import io.entgra.application.mgt.core.impl.ApplicationManagerImpl;
 import io.entgra.application.mgt.core.internal.DataHolder;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
@@ -68,7 +70,7 @@ public class ApplicationManagementTest extends BaseTestCase {
         ConnectionManagerUtil.closeDBConnection();
     }
 
-    @Test(dependsOnMethods = ("addApplicationCategories"))
+    @Test(dependsOnMethods = "addApplicationCategories")
     public void createApplication() throws Exception {
 
         log.debug("Creating the first application ....!");
@@ -124,102 +126,117 @@ public class ApplicationManagementTest extends BaseTestCase {
         manager.createEntApp(applicationWrapper, applicationArtifact);
     }
 
-    @Test
+    @DataProvider(name = "applicationIdDataProvider")
+    public static Object[][] applicationId() {
+        return new Object[][] {{-1}};
+    }
+
+    @DataProvider(name = "updateApplicationDataProvider")
+    public static Object[][] updateApplicationDataProvider() {
+        return new Object[][] {{-1, new ApplicationUpdateWrapper()}};
+    }
+
+    @DataProvider(name = "uuidDataProvider")
+    public static Object[][] uuidDataProvider() {
+        return new Object[][] {{"TEST_APP_UUID"}};
+    }
+
+    @Test(enabled = false)
     public void updateApplication(int applicationId, ApplicationUpdateWrapper applicationUpdateWrapper) throws ApplicationManagementException {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void deleteApplication(int applicationId) throws ApplicationManagementException {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void retireApplication(int applicationId) throws ApplicationManagementException {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void deleteApplicationRelease(String releaseUuid) throws ApplicationManagementException {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public ApplicationList getApplications(Filter filter) throws ApplicationManagementException {
         return null;
     }
 
-    @Test
+    @Test(enabled = false)
     public Application getApplicationById(int id, String state) throws ApplicationManagementException {
         return null;
     }
 
-    @Test
+    @Test(enabled = false)
     public ApplicationRelease getApplicationReleaseByUUID(String uuid) throws ApplicationManagementException {
         return null;
     }
 
-    @Test
+    @Test(enabled = false)
     public ApplicationDTO getApplicationByUuid(String uuid, String state) throws ApplicationManagementException {
         return null;
     }
 
-    @Test
+    @Test(enabled = false)
     public ApplicationDTO getApplicationByRelease(String appReleaseUUID) throws ApplicationManagementException {
         return null;
     }
 
-    @Test
+    @Test(enabled = false)
     public List<LifecycleState> getLifecycleStateChangeFlow(String releaseUuid) throws ApplicationManagementException {
         return null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void changeLifecycleState(String releaseUuid, String stateName) throws ApplicationManagementException {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void updateApplicationImageArtifact(String uuid, ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void updateApplicationArtifact(String deviceType, String appType, String uuid, ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public ApplicationRelease createRelease(int applicationId, EntAppReleaseWrapper entAppReleaseWrapper, ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
         return null;
     }
 
-    @Test
+    @Test(enabled = false)
     public boolean updateRelease(String deviceType, String applicationType, String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper, ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
         return false;
     }
 
-    @Test
+    @Test(enabled = false)
     public void validateAppCreatingRequest(ApplicationWrapper applicationWrapper) throws RequestValidatingException {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void validateReleaseCreatingRequest(EntAppReleaseWrapper entAppReleaseWrapper, String applicationType) throws RequestValidatingException {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void validateImageArtifacts(Attachment iconFile, Attachment bannerFile, List<Attachment> attachmentList) throws RequestValidatingException {
 
     }
 
-    @Test
+    @Test(enabled = false)
     public void validateBinaryArtifact(Attachment binaryFile, String applicationType) throws RequestValidatingException {
 
     }
 
-    @Test(dependsOnMethods = ("addDeviceVersions"))
+    @Test(dependsOnMethods = "addDeviceVersions")
     public void addApplicationCategories() throws ApplicationManagementException {
         List<String> categories = new ArrayList<>();
         categories.add("Test Category");
@@ -264,17 +281,17 @@ public class ApplicationManagementTest extends BaseTestCase {
         }
     }
 
-    @Test
+    @Test(enabled = false)
     public List<Tag> getRegisteredTags() throws ApplicationManagementException {
         return null;
     }
 
-    @Test
+    @Test(enabled = false)
     public List<Category> getRegisteredCategories() throws ApplicationManagementException {
         return null;
     }
 
-    @Test
+    @Test(enabled = false)
     public void deleteTagMapping(int appId, String tagName) throws ApplicationManagementException {
 
     }
