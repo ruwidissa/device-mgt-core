@@ -31,6 +31,8 @@ import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementExce
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -46,11 +48,15 @@ public class PermissionManagerServiceTest {
     private static final String PERMISSION_PATH = "permission/admin/device-mgt/test/testPermission";
     private static final String PERMISSION_METHOD = "ui.execute";
     private static final String PERMISSION_NAME = "Test Permission";
+    private static final String PERMISSION_CONTEXT = "permission/admin/device-mgt/test/testPermission";
+    private static final String INVALID_PERMISSION_CONTEXT = "permission/INVALID";
+
 
     //For create properties to retrieve permission.
     private static final String HTTP_METHOD = "HTTP_METHOD";
     private static final String URL = "URL";
     private Permission permission;
+    private final List<Permission> permissionList = new ArrayList<>();
     private PermissionManagerService permissionManagerService;
 
     @ObjectFactory
@@ -61,12 +67,13 @@ public class PermissionManagerServiceTest {
     @BeforeClass
     public void init() throws RegistryException {
         initMocks(this);
-        permissionManagerService = PermissionManagerServiceImpl.getInstance();
+        this.permissionManagerService = PermissionManagerServiceImpl.getInstance();
         this.permission = new Permission();
-        permission.setName(PERMISSION_NAME);
-        permission.setPath(PERMISSION_PATH);
-        permission.setMethod(PERMISSION_METHOD);
-        permission.setUrl(PERMISSION_URL);
+        this.permission.setName(PERMISSION_NAME);
+        this.permission.setPath(PERMISSION_PATH);
+        this.permission.setMethod(PERMISSION_METHOD);
+        this.permission.setUrl(PERMISSION_URL);
+        this.permissionList.add(this.permission);
     }
 
     @Test (description = "Create a new permission in the permission tree.")
@@ -74,7 +81,7 @@ public class PermissionManagerServiceTest {
         try {
             PowerMockito.mockStatic(PermissionUtils.class);
             PowerMockito.when(PermissionUtils.putPermission(permission)).thenReturn(true);
-            Assert.assertTrue(permissionManagerService.addPermission(permission));
+            Assert.assertTrue(permissionManagerService.addPermission(PERMISSION_CONTEXT, this.permissionList));
         } catch (PermissionManagementException e) {
             log.error("Error creating permission " + e.getErrorMessage());
         }
@@ -83,39 +90,18 @@ public class PermissionManagerServiceTest {
     @Test (dependsOnMethods = {"testCreatePermission"}, description = "Test for retrieving the created permission " +
             "from the permission tree.")
     public void testGetPermission() throws PermissionManagementException {
-        Permission permission = permissionManagerService.getPermission(createProperties());
-        Assert.assertEquals(permission.getMethod(), PERMISSION_METHOD);
-        Assert.assertEquals(permission.getName(), PERMISSION_NAME);
-        Assert.assertEquals(permission.getPath(), PERMISSION_PATH);
-        Assert.assertEquals(permission.getUrl(), PERMISSION_URL);
+        List<Permission> permissions = permissionManagerService.getPermission(PERMISSION_CONTEXT);
+        for (Permission permission : permissions) {
+            Assert.assertEquals(permission.getMethod(), PERMISSION_METHOD);
+            Assert.assertEquals(permission.getName(), PERMISSION_NAME);
+            Assert.assertEquals(permission.getPath(), PERMISSION_PATH);
+            Assert.assertEquals(permission.getUrl(), PERMISSION_URL);
+        }
     }
 
-    @Test (dependsOnMethods = {"testCreatePermission"},
-            expectedExceptions = {PermissionManagementException.class},
-            expectedExceptionsMessageRegExp = "Resource URI/HTTP method is empty")
+    @Test (dependsOnMethods = {"testCreatePermission"})
     public void testGetPermissionError() throws PermissionManagementException {
-            Permission permission = permissionManagerService.getPermission(createErrorProperty());
-    }
-
-    /**
-     * Create a Property object which will be passed to getPermission method to retrieve a permission.
-     * @return : Property object which contains permission url and method.
-     * */
-    private Properties createProperties() {
-        Properties properties = new Properties();
-        properties.setProperty(URL, PERMISSION_URL);
-        properties.setProperty(HTTP_METHOD, PERMISSION_METHOD);
-        return properties;
-    }
-
-    /**
-     * Creates property object with empty properties.
-     * @return : Properties object with empty set of properties.
-     * */
-    private Properties createErrorProperty() {
-        Properties properties = new Properties();
-        properties.setProperty(URL, "");
-        properties.setProperty(HTTP_METHOD, "");
-        return properties;
+        List<Permission> permissions = permissionManagerService.getPermission(INVALID_PERMISSION_CONTEXT);
+        Assert.assertNull(permissions);
     }
 }

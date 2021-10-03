@@ -23,6 +23,7 @@ import junit.framework.Assert;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
@@ -90,7 +91,12 @@ public class PolicyEvaluationTestCase extends BasePolicyManagementDAOTest {
         //administratorPoint.publishChanges();
     }
 
-    @Test(dependsOnMethods = ("activatePolicies"))
+    @DataProvider(name = "deviceIdentifierDataProvider")
+    public static Object[][] deviceIdentifierData() {
+        return new Object[][] {{new DeviceIdentifier()}};
+    }
+
+    @Test(dependsOnMethods = "activatePolicies", dataProvider = "deviceIdentifierDataProvider")
     public void getEffectivePolicy(DeviceIdentifier identifier) throws DeviceManagementException, PolicyEvaluationException {
 
         log.debug("Getting effective policy for device started ..........");

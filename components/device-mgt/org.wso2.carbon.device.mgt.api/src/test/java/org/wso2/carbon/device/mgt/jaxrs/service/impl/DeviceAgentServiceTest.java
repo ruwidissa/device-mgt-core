@@ -34,9 +34,6 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.caching.impl.CacheImpl;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherServiceImpl;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -480,125 +477,6 @@ public class DeviceAgentServiceTest {
         Assert.assertEquals(response2.getStatus(), Response.Status.BAD_REQUEST.getStatusCode(),
                 "The response status should be 400");
         Mockito.reset(eventStreamAdminServiceStub);
-    }
-
-    @Test(description = "Test the error scenario of Publishing Events with null event attributes.")
-    public void testEventPublishWithEventAttributesNULLAndPublishEventsFailure() throws
-            DeviceAccessAuthorizationException, RemoteException {
-        PowerMockito.stub(PowerMockito.method(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext"))
-                .toReturn(this.privilegedCarbonContext);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
-                "getDeviceAccessAuthorizationService")).toReturn(this.deviceAccessAuthorizationService);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
-                .thenReturn(true);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventStreamAdminServiceStub"))
-                .toReturn(this.eventStreamAdminServiceStub);
-        EventStreamAttributeDto eventStreamAttributeDto = Mockito.mock(EventStreamAttributeDto.class,
-                Mockito.RETURNS_MOCKS);
-        EventStreamDefinitionDto eventStreamDefinitionDto = Mockito.mock(EventStreamDefinitionDto.class,
-                Mockito.RETURNS_MOCKS);
-        Mockito.when(this.eventStreamAdminServiceStub.getStreamDefinitionDto(Mockito.anyString()))
-                .thenReturn(eventStreamDefinitionDto);
-        Mockito.when(eventStreamDefinitionDto.getPayloadData()).thenReturn(new EventStreamAttributeDto[]{});
-        EventsPublisherService eventPublisherService = Mockito.mock(EventsPublisherServiceImpl.class,
-                Mockito.RETURNS_MOCKS);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventPublisherService"))
-                .toReturn(eventPublisherService);
-        Map<String, Object> payload = new HashMap<>();
-        CacheImpl cache = Mockito.mock(CacheImpl.class);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDynamicEventCache"))
-                .toReturn(cache);
-        Response response = this.deviceAgentService.publishEvents(payload, TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
-        Assert.assertNotNull(response, "Response should not be null");
-        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                "The response status should be 500");
-        List<Object> payloadList = new ArrayList<>();
-        Response response2 = this.deviceAgentService.publishEvents(payloadList, TEST_DEVICE_TYPE,
-                TEST_DEVICE_IDENTIFIER);
-        Assert.assertNotNull(response2, "Response should not be null");
-        Assert.assertEquals(response2.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                "The response status should be 500");
-    }
-
-    @Test(description = "Test Event publishing success scenario.")
-    public void testEventPublishWithEventAttributesNULLAndPublishEventsSuccess()
-            throws DeviceAccessAuthorizationException, RemoteException, DataPublisherConfigurationException {
-        PowerMockito.stub(PowerMockito.method(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext"))
-                .toReturn(this.privilegedCarbonContext);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
-                "getDeviceAccessAuthorizationService")).toReturn(this.deviceAccessAuthorizationService);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
-                .thenReturn(true);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventStreamAdminServiceStub"))
-                .toReturn(this.eventStreamAdminServiceStub);
-        EventStreamAttributeDto eventStreamAttributeDto = Mockito.mock(EventStreamAttributeDto.class,
-                Mockito.RETURNS_MOCKS);
-        EventStreamDefinitionDto eventStreamDefinitionDto = Mockito.mock(EventStreamDefinitionDto.class,
-                Mockito.RETURNS_MOCKS);
-        Mockito.when(this.eventStreamAdminServiceStub.getStreamDefinitionDto(Mockito.anyString()))
-                .thenReturn(eventStreamDefinitionDto);
-        Mockito.when(eventStreamDefinitionDto.getPayloadData()).thenReturn(new EventStreamAttributeDto[]{});
-        EventsPublisherService eventPublisherService = Mockito.mock(EventsPublisherServiceImpl.class,
-                Mockito.RETURNS_MOCKS);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventPublisherService"))
-                .toReturn(eventPublisherService);
-        Mockito.when(eventPublisherService.publishEvent(Mockito.anyString(), Mockito.anyString(), Mockito.any(),
-                Mockito.any(), Mockito.any())).thenReturn(true);
-        Map<String, Object> payload = new HashMap<>();
-        CacheImpl cache = Mockito.mock(CacheImpl.class);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDynamicEventCache"))
-                .toReturn(cache);
-        Response response = this.deviceAgentService.publishEvents(payload, TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
-        Assert.assertNotNull(response, "Response should not be null");
-        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
-                "The response status should be 200");
-        List<Object> payloadList = new ArrayList<>();
-        Response response2 = this.deviceAgentService.publishEvents(payloadList,
-                TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
-        Assert.assertNotNull(response2, "Response should not be null");
-        Assert.assertEquals(response2.getStatus(), Response.Status.OK.getStatusCode(),
-                "The response status should be 200");
-    }
-
-    @Test(description = "Test event publishing when PublishEvents throws DataPublisherConfigurationException.")
-    public void testPublishEventsDataPublisherConfigurationException() throws DeviceAccessAuthorizationException,
-            RemoteException, DataPublisherConfigurationException {
-        PowerMockito.stub(PowerMockito.method(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext"))
-                .toReturn(this.privilegedCarbonContext);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
-                "getDeviceAccessAuthorizationService")).toReturn(this.deviceAccessAuthorizationService);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
-                .thenReturn(true);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventStreamAdminServiceStub"))
-                .toReturn(this.eventStreamAdminServiceStub);
-        EventStreamAttributeDto eventStreamAttributeDto = Mockito.mock(EventStreamAttributeDto.class,
-                Mockito.RETURNS_MOCKS);
-        EventStreamDefinitionDto eventStreamDefinitionDto = Mockito.mock(EventStreamDefinitionDto.class,
-                Mockito.RETURNS_MOCKS);
-        Mockito.when(this.eventStreamAdminServiceStub.getStreamDefinitionDto(Mockito.anyString()))
-                .thenReturn(eventStreamDefinitionDto);
-        Mockito.when(eventStreamDefinitionDto.getPayloadData()).thenReturn(new EventStreamAttributeDto[]{});
-        EventsPublisherService eventPublisherService = Mockito.mock(EventsPublisherServiceImpl.class,
-                Mockito.RETURNS_MOCKS);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventPublisherService"))
-                .toReturn(eventPublisherService);
-        Mockito.when(eventPublisherService.publishEvent(Mockito.anyString(), Mockito.anyString(), Mockito.any(),
-                Mockito.any(), Mockito.any())).thenThrow(
-                new DataPublisherConfigurationException("meta data[0] should have the device Id field"));
-        Map<String, Object> payload = new HashMap<>();
-        CacheImpl cache = Mockito.mock(CacheImpl.class);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDynamicEventCache"))
-                .toReturn(cache);
-        Response response = this.deviceAgentService.publishEvents(payload, TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
-        Assert.assertNotNull(response, "Response should not be null");
-        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                "The response status should be 500");
-        List<Object> payloadList = new ArrayList<>();
-        Response response2 = this.deviceAgentService.publishEvents(payloadList, TEST_DEVICE_TYPE,
-                TEST_DEVICE_IDENTIFIER);
-        Assert.assertNotNull(response2, "Response should not be null");
-        Assert.assertEquals(response2.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                "The response status should be 500");
     }
 
     @Test(description = "Test Publish events with Axis Fault.")

@@ -259,6 +259,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>xerces.wso2</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.8.1.wso2v2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.h2database.wso2</groupId>
             <artifactId>h2-database-engine</artifactId>
             <scope>test</scope>
