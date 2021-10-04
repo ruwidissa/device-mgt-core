@@ -99,84 +99,98 @@ import java.util.List;
                         name = "Get the list of groups belongs to current user.",
                         description = "Get the list of groups belongs to current user.",
                         key = "perm:groups:groups",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/view"}
                 ),
                 @Scope(
                         name = "Get the count of groups belongs to current user.",
                         description = "Get the count of groups belongs to current user.",
                         key = "perm:groups:count",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/view"}
                 ),
                 @Scope(
                         name = "Add new device group to the system.",
                         description = "Add new device group to the system.",
                         key = "perm:groups:add",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/add"}
                 ),
                 @Scope(
                         name = "View group specified",
                         description = "View group specified",
                         key = "perm:groups:groups-view",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/view"}
                 ),
                 @Scope(
                         name = "Update a group",
                         description = "Update a group",
                         key = "perm:groups:update",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/update"}
                 ),
                 @Scope(
                         name = "Delete a group",
                         description = "Delete a group",
                         key = "perm:groups:remove",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/remove"}
                 ),
                 @Scope(
                         name = "Manage group sharing with a user",
                         description = "Manage group sharing with a user",
                         key = "perm:groups:share",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/share"}
                 ),
                 @Scope(
                         name = "View list of roles of a device group",
                         description = "View list of roles of a device group",
                         key = "perm:groups:roles",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/roles/view"}
                 ),
                 @Scope(
                         name = "View list of devices in the device group",
                         description = "View list of devices in the device group",
                         key = "perm:groups:devices",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/view"}
                 ),
                 @Scope(
                         name = "View list of device count in the device group",
                         description = "View list of device count in the device group",
                         key = "perm:groups:devices-count",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/view"}
                 ),
                 @Scope(
                         name = "Add devices to group",
                         description = "Add devices to group",
                         key = "perm:groups:devices-add",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/add"}
                 ),
                 @Scope(
                         name = "Remove devices from group",
                         description = "Remove devices from group",
                         key = "perm:groups:devices-remove",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/remove"}
                 ),
                 @Scope(
                         name = "Assign devices to groups",
                         description = "Assign devices to groups",
                         key = "perm:groups:assign",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/add"}
                 ),
                 @Scope(
                         name = "List of groups that have the device",
                         description = "List of groups that have the device",
                         key = "perm:groups:device",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/view"}
                 )
         }

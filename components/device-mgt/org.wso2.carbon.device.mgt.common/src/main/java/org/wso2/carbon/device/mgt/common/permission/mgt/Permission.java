@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.device.mgt.common.permission.mgt;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * This class represents the information related to permission.
  */
@@ -30,6 +27,7 @@ public class Permission {
     private String path; // permission string
     private String url; // url of the resource
     private String method; // http method
+    private String urlPattern;
 
     public String getUrl() {
         return url;
@@ -61,5 +59,13 @@ public class Permission {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getUrlPattern() {
+        return urlPattern;
+    }
+
+    public void setUrlPattern(String urlPattern) {
+        this.urlPattern = urlPattern;
     }
 }

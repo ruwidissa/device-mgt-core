@@ -245,6 +245,35 @@ public class HandlerUtil {
     }
 
     /**
+     * Get api manager port according to request received scheme
+     *
+     * @param scheme https or https
+     * @return {@link String} api manager port
+     */
+    public static String getAPIManagerPort(String scheme) {
+        String apiManagerPort = System.getProperty(HandlerConstants.IOT_APIM_HTTPS_PORT_ENV_VAR);
+        if (HandlerConstants.HTTP_PROTOCOL.equals(scheme)) {
+            apiManagerPort = System.getProperty(HandlerConstants.IOT_APIM_HTTP_PORT_ENV_VAR);
+        }
+        return apiManagerPort;
+    }
+
+
+    /**
+     * Get keymanager port according to request received scheme
+     *
+     * @param scheme https or https
+     * @return {@link String} keymanager port
+     */
+    public static String getKeymanagerPort(String scheme) {
+        String keymanagerPort = System.getProperty(HandlerConstants.IOT_KM_HTTPS_PORT_ENV_VAR);
+        if (HandlerConstants.HTTP_PROTOCOL.equals(scheme)) {
+            keymanagerPort = System.getProperty(HandlerConstants.IOT_KM_HTTP_PORT_ENV_VAR);
+        }
+        return keymanagerPort;
+    }
+
+    /**
      * Get gateway port according to request received scheme
      *
      * @param scheme https or https
@@ -502,13 +531,13 @@ public class HandlerUtil {
      * @return If successfully renew tokens, returns TRUE otherwise return FALSE
      * @throws IOException If an error occurs while witting error response to client side or invoke token renewal API
      */
-    private static boolean refreshToken(HttpServletRequest req, HttpServletResponse resp, String gatewayUrl)
+    private static boolean refreshToken(HttpServletRequest req, HttpServletResponse resp, String keymanagerUrl)
             throws IOException {
         if (log.isDebugEnabled()) {
             log.debug("refreshing the token");
         }
-        HttpPost tokenEndpoint = new HttpPost(
-                gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+
+        HttpPost tokenEndpoint = new HttpPost(keymanagerUrl + HandlerConstants.TOKEN_ENDPOINT);
         HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Couldn't find a session, hence it is required to login and proceed.");

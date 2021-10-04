@@ -21,14 +21,13 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>webapp-authenticator-framework</artifactId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.devicemgt</groupId>
     <artifactId>org.wso2.carbon.webapp.authenticator.framework</artifactId>
-    <version>4.1.16-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Web Application Authenticator Framework Bundle</name>
     <description>WSO2 Carbon - Web Application Authenticator Framework Bundle</description>
@@ -56,22 +55,22 @@
                             org.wso2.carbon.webapp.authenticator.framework.*
                         </Export-Package>
                         <Import-Package>
-                            com.nimbusds.jose,
-                            com.nimbusds.jose.crypto,
-                            com.nimbusds.jwt,
+                            com.nimbusds.jose;version="${nimbus.orbit.version.range}",
+                            com.nimbusds.jose.crypto;version="${nimbus.orbit.version.range}",
+                            com.nimbusds.jwt;version="${nimbus.orbit.version.range}",
                             javax.xml.bind,
                             javax.xml.bind.annotation,
                             javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
                             javax.xml.validation,
-                            org.apache.catalina,
-                            org.apache.catalina.connector,
-                            org.apache.catalina.util,
+                            org.apache.catalina;version="9.0",
+                            org.apache.catalina.connector;version="9.0",
+                            org.apache.catalina.util;version="9.0",
                             org.apache.commons.logging,
-                            org.apache.coyote,
-                            org.apache.tomcat.util.buf,
-                            org.apache.tomcat.util.http,
-                            org.osgi.service.component,
-                            org.osgi.framework,
+                            org.apache.coyote;version="9.0",
+                            org.apache.tomcat.util.buf;version="9.0",
+                            org.apache.tomcat.util.http;version="9.0",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.w3c.dom,
                             org.wso2.carbon.context,
                             org.wso2.carbon.core.util,
@@ -86,15 +85,16 @@
                             org.wso2.carbon.utils,
                             org.wso2.carbon.utils.multitenancy,
                             org.xml.sax,
-                            com.google.gson.*,
+                            <!--com.google.gson.*,-->
                             javax.servlet,
                             javax.servlet.http,
                             javax.xml,
                             org.apache.axis2.transport.http,
                             org.wso2.carbon.certificate.mgt.core.*,
-                            org.wso2.carbon.device.mgt.core.permission.mgt,
+                            org.wso2.carbon.device.mgt.core.permission.mgt.*,
+                            org.wso2.carbon.device.mgt.core.util.*,
                             org.wso2.carbon.device.mgt.common.*,
-                            org.wso2.carbon.device.mgt.common.permission.mgt,
+                            org.wso2.carbon.device.mgt.common.permission.mgt.*,
                             org.apache.axis2,
                             org.apache.axis2.client,
                             org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
@@ -106,7 +106,7 @@
                             org.apache.commons.pool.impl,
                             org.apache.http.conn,
                             org.apache.http.impl.conn,
-                            javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
+                            <!--javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",-->
                             javax.xml.stream,
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.wso2.carbon.registry.core.*,
@@ -183,6 +183,10 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
             <exclusions>
@@ -203,6 +207,7 @@
         <dependency>
             <groupId>org.wso2.orbit.com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
@@ -273,7 +278,17 @@
             <artifactId>org.apache.sling.testing.osgi-mock</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>javax.cache.wso2</artifactId>
+            <version>4.6.3-m5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+    <!-- TODO -->
+    <properties>
+        <maven.test.skip>true</maven.test.skip>
+    </properties>
 
 </project>
 

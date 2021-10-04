@@ -21,6 +21,7 @@ public class Scope implements Serializable {
     String key;
     String name;
     String roles;
+    String permissions;
     String description;
     int id;
 
@@ -65,6 +66,14 @@ public class Scope implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(String permissions) {
+        this.permissions = permissions;
     }
 }
 

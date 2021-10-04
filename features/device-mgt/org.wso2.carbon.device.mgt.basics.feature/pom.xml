@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>device-mgt-feature</artifactId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -42,34 +42,6 @@
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
             <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.analytics.data.publisher</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.registry</groupId>
-            <artifactId>org.wso2.carbon.registry.indexing</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.receiver.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.stream.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.publisher.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.carbon.event.stream.persistence.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.org.scannotation</groupId>
-            <artifactId>scannotation</artifactId>
         </dependency>
     </dependencies>
 
@@ -126,27 +98,6 @@
                                 </bundleDef>
                                 <bundleDef>
                                     org.wso2.carbon.devicemgt:org.wso2.carbon.device.mgt.common:${carbon.device.mgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.devicemgt:org.wso2.carbon.device.mgt.analytics.data.publisher:${carbon.device.mgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.analytics-common:org.wso2.carbon.event.receiver.stub:${carbon.analytics.common.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.analytics-common:org.wso2.carbon.event.stream.stub:${carbon.analytics.common.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.analytics-common:org.wso2.carbon.event.publisher.stub:${carbon.analytics.common.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.analytics-common:org.wso2.carbon.event.stream.persistence.stub:${carbon.analytics.common.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.orbit.com.fasterxml.jackson.core:jackson-annotations:${jackson-annotations.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.orbit.org.scannotation:scannotation:${scannotation.version}
                                 </bundleDef>
                             </bundles>
                             <importBundles>

@@ -61,6 +61,7 @@ import javax.ws.rs.core.Response;
                         name = "Remote Session Connection",
                         description = "",
                         key = "perm:remote-session-service:connect",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/remote-session"}
                 )
         }

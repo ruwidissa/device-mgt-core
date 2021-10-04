@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+~ Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+~
+~ Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+~ Version 2.0 (the "License"); you may not use this file except
+~ in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~    http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing,
+~ software distributed under the License is distributed on an
+~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~ KIND, either express or implied.  See the License for the
+~ specific language governing permissions and limitations
+~ under the License.
+-->
+<ApplicationManagementConfiguration>
+
+    <!-- Application Mgt DB schema -->
+    <DatasourceName>jdbc/APPM_DS</DatasourceName>
+
+    <Extensions>
+        <Extension name="ApplicationManager">
+        {% if application_mgt_conf.extension.application_manager is defined %}
+            <ClassName>{{application_mgt_conf.extension.application_manager}}</ClassName>
+        {% else %}
+            <ClassName>io.entgra.application.mgt.core.impl.ApplicationManagerImpl</ClassName>
+        {% endif %}
+        </Extension>
+        <Extension name="ReviewManager">
+        {% if application_mgt_conf.extension.review_manager is defined %}
+            <ClassName>{{application_mgt_conf.extension.review_manager}}</ClassName>
+        {% else %}
+            <ClassName>io.entgra.application.mgt.core.impl.ReviewManagerImpl</ClassName>
+        {% endif %}
+        </Extension>
+        <Extension name="LifecycleStateManager">
+        {% if application_mgt_conf.extension.life_cycle_state_manager is defined %}
+            <ClassName>{{application_mgt_conf.extension.life_cycle_state_manager}}</ClassName>
+        {% else %}
+            <ClassName>io.entgra.application.mgt.core.lifecycle.LifecycleStateManager</ClassName>
+        {% endif %}
+        </Extension>
+        <Extension name="SubscriptionManager">
+         {% if application_mgt_conf.extension.subscription_manager is defined %}
+            <ClassName>{{application_mgt_conf.extension.subscription_manager}}</ClassName>
+         {% else %}
+            <ClassName>io.entgra.application.mgt.core.impl.SubscriptionManagerImpl</ClassName>
+         {% endif %}
+        </Extension>
+        <Extension name="ApplicationStorageManager">
+         {% if application_mgt_conf.extension.application_storage_manager is defined %}
+            <ClassName>{{application_mgt_conf.extension.application_storage_manager}}</ClassName>
+            {% if application_mgt_conf.extension.application_storage_manager.parameter_options is defined %}
+            <Parameters>
+                {% for property_name,property_value in application_mgt_conf.extension.application_storage_manager.parameter_options.items() %}
+                <Parameter name="{{property_name}}">{{property_value}}</Parameter>
+                {% endfor %}
+            </Parameters>
+            {% endif %}
+         {% else %}
+            <ClassName>io.entgra.application.mgt.core.impl.ApplicationStorageManagerImpl</ClassName>
+            <Parameters>
+                <Parameter name="StoragePath">repository/resources/apps/</Parameter>
+                <Parameter name="MaxScreenShotCount">6</Parameter>
+            </Parameters>
+         {% endif %}
+        </Extension>
+    </Extensions>
+
+    <!-- This is for publisher lifecycle -->
+    <!-- The current lifecycle as follows
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        [Created] -> [In-Review] -> [Approved] -> [Published] -> [Unpublished] -> [Removed]
+                        ^                               |                               ^
+                        |                               |                               |
+                        |                               |-> [Deprecated] - - - - - - - -|
+                        |                                                               |
+                        |-> [Rejected]  - - - - - - - - - - - - - - - - - - - - - - - - |
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    If there is a requirement to introduce a new state to the lifecycle, please refer above
+    diagram and add relevant state to the below configuration appropriately.
+    -->
+
+    <!-- a lifecyclestate can have following properties
+        <LifecycleState name="In-Review">
+            <IsAppInstallable>false</IsAppInstallable>
+            <IsAppUpdatable>true</IsAppUpdatable>
+            <IsInitialState>false</IsInitialState>
+            <IsEndState>false</IsEndState>
+            <Permission>
+                /device-mgt/applications/life-cycle/in-review
+            </Permission>
+            <ProceedingStates>
+                <State>Rejected</State>
+                <State>Approved</State>
+            </ProceedingStates>
+        </LifecycleState>
+    -->
+    <LifecycleStates>
+        <LifecycleState name="Created">
+            <IsAppUpdatable>true</IsAppUpdatable>
+            <IsInitialState>true</IsInitialState>
+            <IsDeletableState>true</IsDeletableState>
+            <Permission>/app-mgt/life-cycle/application/create</Permission>
+            <ProceedingStates>
+                <State>In-Review</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="In-Review">
+            <Permission>/app-mgt/life-cycle/application/review</Permission>
+            <ProceedingStates>
+                <State>Rejected</State>
+                <State>Approved</State>
+                <State>Created</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Approved">
+            <Permission>/app-mgt/life-cycle/application/approve</Permission>
+            <ProceedingStates>
+                <State>In-Review</State>
+                <State>Published</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Rejected">
+            <IsDeletableState>true</IsDeletableState>
+            <Permission>/app-mgt/life-cycle/application/reject</Permission>
+            <ProceedingStates>
+                <State>In-Review</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Published">
+            <IsAppInstallable>true</IsAppInstallable>
+            <Permission>/app-mgt/life-cycle/application/publish</Permission>
+            <ProceedingStates>
+                <State>Blocked</State>
+                <State>Deprecated</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Blocked">
+            <Permission>/app-mgt/life-cycle/application/block</Permission>
+            <ProceedingStates>
+                <State>Published</State>
+                <State>Deprecated</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Deprecated">
+            <Permission>/app-mgt/life-cycle/application/deprecate</Permission>
+            <ProceedingStates>
+                <State>Published</State>
+                <State>Retired</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Retired">
+            <IsEndState>true</IsEndState>
+            <Permission>/app-mgt/life-cycle/application/retire</Permission>
+        </LifecycleState>
+    </LifecycleStates>
+
+    <AppCategories>
+        <Category>EMM</Category>
+        <Category>IoT</Category>
+        <Category>Art &amp; Design</Category>
+        <Category>Auto &amp; Vehicles</Category>
+        <Category>Beauty</Category>
+        <Category>Books &amp; Reference</Category>
+        <Category>Business</Category>
+        <Category>Comics</Category>
+        <Category>Communications</Category>
+        <Category>Dating</Category>
+        <Category>Education</Category>
+        <Category>Entertainment</Category>
+        <Category>Events</Category>
+        <Category>Finance</Category>
+        <Category>Food &amp; Drink</Category>
+        <Category>Health &amp; Fitness</Category>
+        <Category>House &amp; Home</Category>
+        <Category>Libraries &amp; Demo</Category>
+        <Category>Lifestyle</Category>
+        <Category>Maps &amp; Navigation</Category>
+        <Category>Medical</Category>
+        <Category>Music &amp; Audio</Category>
+        <Category>News &amp; Magazines</Category>
+        <Category>Parenting</Category>
+        <Category>Personalization</Category>
+        <Category>Photography</Category>
+        <Category>Productivity</Category>
+        <Category>Shopping</Category>
+        <Category>Social</Category>
+        <Category>Sports</Category>
+        <Category>Tools</Category>
+        <Category>Travel &amp; Local</Category>
+        <Category>Video Players &amp; Editors</Category>
+        <Category>Weather</Category>
+        <Category>GooglePlaySyncedApp</Category>
+    {% if application_mgt_conf.app_categories is defined %}
+        {%- for app_category in application_mgt_conf.app_categories -%}
+        <Category>{{app_category}}</Category>
+        {% endfor %}
+    {% endif %}
+    </AppCategories>
+
+    <RatingConfig>
+        {% if application_mgt_conf.rating_conf.min_rating_value is defined %}
+        <MinRatingValue>{{application_mgt_conf.rating_conf.min_rating_value}}</MinRatingValue>
+        {% else %}
+        <MinRatingValue>1</MinRatingValue>
+        {% endif %}
+        {% if application_mgt_conf.rating_conf.max_rating_value is defined %}
+        <MaxRatingValue>{{application_mgt_conf.rating_conf.max_rating_value}}</MaxRatingValue>
+        {% else %}
+        <MaxRatingValue>10</MaxRatingValue>
+        {% endif %}
+    </RatingConfig>
+
+    <MDMConfig>
+        {% if application_mgt_conf.mdm_conf.artifact_download_protocol is defined %}
+        <ArtifactDownloadProtocol>{{application_mgt_conf.mdm_conf.artifact_download_protocol}}</ArtifactDownloadProtocol>
+        {% else %}
+        <ArtifactDownloadProtocol>http</ArtifactDownloadProtocol>
+        {% endif %}
+
+        {% if application_mgt_conf.mdm_conf.artifact_download_endpoint is defined %}
+        <ArtifactDownloadEndpoint>{{application_mgt_conf.mdm_conf.artifact_download_endpoint}}</ArtifactDownloadEndpoint>
+        {% else %}
+        <ArtifactDownloadEndpoint>/api/application-mgt/v1.0/artifact</ArtifactDownloadEndpoint>
+        {% endif %}
+    </MDMConfig>
+</ApplicationManagementConfiguration>

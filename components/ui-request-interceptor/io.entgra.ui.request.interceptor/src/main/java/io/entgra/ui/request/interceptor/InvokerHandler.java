@@ -18,6 +18,9 @@
 
 package io.entgra.ui.request.interceptor;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.entgra.ui.request.interceptor.beans.AuthData;
 import io.entgra.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.ui.request.interceptor.util.HandlerUtil;
@@ -40,6 +43,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.cookie.SM;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.InputStreamBody;
@@ -69,6 +73,7 @@ public class InvokerHandler extends HttpServlet {
     private static final long serialVersionUID = -6508020875358160165L;
     private static AuthData authData;
     private static String apiEndpoint;
+    private static String kmManagerUrl;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -80,7 +85,7 @@ public class InvokerHandler extends HttpServlet {
                 ProxyResponse proxyResponse = HandlerUtil.execute(postRequest);
 
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, postRequest, apiEndpoint);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, postRequest, kmManagerUrl);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -108,14 +113,14 @@ public class InvokerHandler extends HttpServlet {
                 getRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(getRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, getRequest, apiEndpoint);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, getRequest, kmManagerUrl);
                     if (proxyResponse == null) {
                         return;
                     }
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                     if (proxyResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-                        proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, getRequest, apiEndpoint);
+                        proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, getRequest, kmManagerUrl);
                     } else {
                         log.error("Error occurred while invoking the GET API endpoint.");
                         HandlerUtil.handleError(resp, proxyResponse);
@@ -138,7 +143,7 @@ public class InvokerHandler extends HttpServlet {
                 headRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(headRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, headRequest, apiEndpoint);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, headRequest, kmManagerUrl);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -165,7 +170,7 @@ public class InvokerHandler extends HttpServlet {
                 ProxyResponse proxyResponse = HandlerUtil.execute(putRequest);
 
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, putRequest, apiEndpoint);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, putRequest, kmManagerUrl);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -193,7 +198,7 @@ public class InvokerHandler extends HttpServlet {
                 deleteRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(deleteRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
-                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, deleteRequest, apiEndpoint);
+                    proxyResponse = HandlerUtil.retryRequestWithRefreshedToken(req, resp, deleteRequest, kmManagerUrl);
                     if (proxyResponse == null) {
                         return;
                     }
@@ -297,8 +302,11 @@ public class InvokerHandler extends HttpServlet {
      */
     private static boolean validateRequest(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        apiEndpoint = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+        apiEndpoint = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
+
+        kmManagerUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
+                + HandlerConstants.COLON + HandlerUtil.getKeymanagerPort(req.getScheme());
 
         if (HandlerConstants.REPORTS.equalsIgnoreCase(req.getHeader(HandlerConstants.APP_NAME))){
             apiEndpoint = System.getProperty("iot.reporting.webapp.host");
@@ -329,5 +337,109 @@ public class InvokerHandler extends HttpServlet {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Retry request again after refreshing the access token
+     *
+     * @param req incoming {@link HttpServletRequest}
+     * @param resp resp {@link HttpServletResponse}
+     * @param httpRequest subclass of {@link HttpRequestBase} related to the current request.
+     * @return {@link ProxyResponse} if successful and <code>null</code> if failed.
+     * @throws IOException If an error occurs when try to retry the request.
+     */
+    private ProxyResponse retryRequestWithRefreshedToken(HttpServletRequest req, HttpServletResponse resp,
+                                                                HttpRequestBase httpRequest) throws IOException {
+        if (refreshToken(req, resp)) {
+            httpRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
+            ProxyResponse proxyResponse = HandlerUtil.execute(httpRequest);
+            if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+                log.error("Error occurred while invoking the API after refreshing the token.");
+                HandlerUtil.handleError(resp, proxyResponse);
+                return null;
+            }
+            return proxyResponse;
+        }
+        return null;
+    }
+
+    /***
+     * This method is responsible to get the refresh token
+     *
+     * @param req {@link HttpServletRequest}
+     * @param resp {@link HttpServletResponse}
+     * @return If successfully renew tokens, returns TRUE otherwise return FALSE
+     * @throws IOException If an error occurs while witting error response to client side or invoke token renewal API
+     */
+    private static boolean refreshToken(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        if (log.isDebugEnabled()) {
+            log.debug("refreshing the token");
+        }
+
+        HttpPost tokenEndpoint = new HttpPost(
+                kmManagerUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpSession session = req.getSession(false);
+        if (session == null) {
+            log.error("Couldn't find a session, hence it is required to login and proceed.");
+            handleError(resp, HttpStatus.SC_UNAUTHORIZED);
+            return false;
+        }
+
+        StringEntity tokenEndpointPayload = new StringEntity(
+                "grant_type=refresh_token&refresh_token=" + authData.getRefreshToken() + "&scope=PRODUCTION",
+                ContentType.APPLICATION_FORM_URLENCODED);
+
+        tokenEndpoint.setEntity(tokenEndpointPayload);
+        String encodedClientApp = authData.getEncodedClientApp();
+        tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +
+                                             encodedClientApp);
+        tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
+
+        ProxyResponse tokenResultResponse = HandlerUtil.execute(tokenEndpoint);
+        if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+            log.error("Error occurred while refreshing access token.");
+            HandlerUtil.handleError(resp, tokenResultResponse);
+            return false;
+        }
+
+        JsonParser jsonParser = new JsonParser();
+        JsonElement jTokenResult = jsonParser.parse(tokenResultResponse.getData());
+
+        if (jTokenResult.isJsonObject()) {
+            JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
+            AuthData newAuthData = new AuthData();
+
+            newAuthData.setAccessToken(jTokenResultAsJsonObject.get("access_token").getAsString());
+            newAuthData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
+            newAuthData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
+            newAuthData.setClientId(authData.getClientId());
+            newAuthData.setClientSecret(authData.getClientSecret());
+            newAuthData.setEncodedClientApp(authData.getEncodedClientApp());
+            newAuthData.setUsername(authData.getUsername());
+            authData = newAuthData;
+            session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, newAuthData);
+            return true;
+        }
+
+        log.error("Error Occurred in token renewal process.");
+        handleError(resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        return false;
+    }
+
+    /**
+     * Handle error requests
+     *
+     * @param resp {@link HttpServletResponse}
+     * @param errorCode HTTP error status code
+     * @throws IOException If error occurred when trying to send the error response.
+     */
+    private static void handleError(HttpServletResponse resp, int errorCode)
+            throws IOException {
+        ProxyResponse proxyResponse = new ProxyResponse();
+        proxyResponse.setCode(errorCode);
+        proxyResponse.setExecutorResponse(
+                HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(errorCode));
+        HandlerUtil.handleError(resp, proxyResponse);
     }
 }

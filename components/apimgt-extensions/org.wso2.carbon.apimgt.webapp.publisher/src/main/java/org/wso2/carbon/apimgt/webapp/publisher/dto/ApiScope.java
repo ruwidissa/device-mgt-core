@@ -23,6 +23,7 @@ public class ApiScope {
     String key;
     String name;
     String roles;
+    String permissions;
     String description;
     int id;
 
@@ -61,4 +62,11 @@ public class ApiScope {
         this.description = description;
     }
 
+    public String getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(String permissions) {
+        this.permissions = permissions;
+    }
 }

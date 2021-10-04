@@ -21,11 +21,15 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants.User;
+import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * Load configuration files to tenant's registry.
@@ -48,10 +52,36 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
             UserStoreManager userStoreManager =
                     DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
                             .getUserStoreManager();
+            AuthorizationManager authorizationManager = DeviceManagementDataHolder.getInstance().getRealmService()
+                    .getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getAuthorizationManager();
+
             String tenantAdminName = userRealm.getRealmConfiguration().getAdminUserName();
-            userStoreManager.addRole(User.DEFAULT_DEVICE_USER, null, User.PERMISSIONS_FOR_DEVICE_USER);
-            userStoreManager.addRole(User.DEFAULT_DEVICE_ADMIN, new String[]{tenantAdminName},
-                                     User.PERMISSIONS_FOR_DEVICE_ADMIN);
+
+            if (!userStoreManager.isExistingRole(DeviceManagementConstants.User.DEFAULT_DEVICE_ADMIN)) {
+                userStoreManager.addRole(
+                        DeviceManagementConstants.User.DEFAULT_DEVICE_ADMIN,
+                        null,
+                        DeviceManagementConstants.User.PERMISSIONS_FOR_DEVICE_ADMIN);
+            } else {
+                for (Permission permission : DeviceManagementConstants.User.PERMISSIONS_FOR_DEVICE_ADMIN) {
+                    authorizationManager.authorizeRole(DeviceManagementConstants.User.DEFAULT_DEVICE_ADMIN,
+                            permission.getResourceId(), permission.getAction());
+                }
+            }
+            if (!userStoreManager.isExistingRole(DeviceManagementConstants.User.DEFAULT_DEVICE_USER)) {
+                userStoreManager.addRole(
+                        DeviceManagementConstants.User.DEFAULT_DEVICE_USER,
+                        null,
+                        DeviceManagementConstants.User.PERMISSIONS_FOR_DEVICE_USER);
+            } else {
+                for (Permission permission : DeviceManagementConstants.User.PERMISSIONS_FOR_DEVICE_USER) {
+                    authorizationManager.authorizeRole(DeviceManagementConstants.User.DEFAULT_DEVICE_USER,
+                            permission.getResourceId(), permission.getAction());
+                }
+            }
+            userStoreManager.updateRoleListOfUser(tenantAdminName, null,
+                    new String[] {DeviceManagementConstants.User.DEFAULT_DEVICE_ADMIN,
+                            DeviceManagementConstants.User.DEFAULT_DEVICE_USER});
             if (log.isDebugEnabled()) {
                 log.debug("Device management roles: " + User.DEFAULT_DEVICE_USER + ", " + User.DEFAULT_DEVICE_ADMIN +
                                   " created for the tenant:" + tenantDomain + "."

@@ -92,18 +92,21 @@ import javax.ws.rs.core.Response;
                         name = "Manage a Device Type",
                         description = "Add, Edit or View a Device Type",
                         key = "perm:admin:device-type",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/device-type"}
                 ),
                 @Scope(
                         name = "Getting Details of a Device Type",
                         description = "Getting Details of a Device Type",
                         key = "perm:admin:device-type:view",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/device-type/view"}
                 ),
                 @Scope(
                         name = "Add Device Type Config",
                         description = "Add Platform Config of a Device Type",
                         key = "perm:admin:device-type:configs",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/device-type/config"}
                 )
         }

@@ -232,18 +232,18 @@ public class JWTClientUtil {
 			}
 			List<String> aud = jwtConfig.getAudiences();
 			//set up the basic claims
-			JWTClaimsSet claimsSet = new JWTClaimsSet();
-			claimsSet.setIssueTime(new Date(iat));
-			claimsSet.setExpirationTime(new Date(exp));
-			claimsSet.setIssuer(iss);
-            claimsSet.setSubject(username);
-            claimsSet.setNotBeforeTime(new Date(nbf));
-			claimsSet.setJWTID(jti);
-			claimsSet.setAudience(aud);
-            claimsSet.setClaim(SIGNED_JWT_AUTH_USERNAME, username);
+			JWTClaimsSet.Builder claimsSet = new JWTClaimsSet.Builder();
+			claimsSet.issueTime(new Date(iat));
+			claimsSet.expirationTime(new Date(exp));
+			claimsSet.issuer(iss);
+            claimsSet.subject(username);
+            claimsSet.notBeforeTime(new Date(nbf));
+			claimsSet.jwtID(jti);
+			claimsSet.audience(aud);
+            claimsSet.claim(SIGNED_JWT_AUTH_USERNAME, username);
             if (customClaims != null && !customClaims.isEmpty()) {
                 for (String key : customClaims.keySet()) {
-                    claimsSet.setClaim(key, customClaims.get(key));
+                    claimsSet.claim(key, customClaims.get(key));
                 }
             }
 
@@ -280,7 +280,7 @@ public class JWTClientUtil {
 				}
 			}
 			JWSSigner signer = new RSASSASigner(rsaPrivateKey);
-			SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet);
+			SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet.build());
 			signedJWT.sign(signer);
 			String assertion = signedJWT.serialize();
 			return assertion;

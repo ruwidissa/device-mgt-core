@@ -49,15 +49,11 @@ public class SsoLoginCallbackHandler extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String code = req.getParameter("code");
         HttpSession session = req.getSession(false);
-        String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
-        if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-            iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
-        }
 
-        String gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
-                + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
         String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
-                + HandlerConstants.COLON + iotsCorePort;
+                + HandlerConstants.COLON + HandlerUtil.getCorePort(req.getScheme());
+        String keyManagerUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
+                + HandlerConstants.COLON + HandlerUtil.getKeymanagerPort(req.getScheme());
 
         if (session == null) {
             String baseContextPath = req.getContextPath();
@@ -72,7 +68,7 @@ public class SsoLoginCallbackHandler extends HttpServlet {
 
         String scope = session.getAttribute("scope").toString();
 
-        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(keyManagerUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + session.getAttribute("encodedClientApp"));
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 

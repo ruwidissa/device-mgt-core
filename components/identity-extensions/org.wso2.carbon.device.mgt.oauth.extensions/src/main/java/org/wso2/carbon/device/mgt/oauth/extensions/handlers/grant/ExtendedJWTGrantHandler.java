@@ -20,14 +20,10 @@ package org.wso2.carbon.device.mgt.oauth.extensions.handlers.grant;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.grant.jwt.JWTBearerGrantHandler;
 import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
  * This sets up user with tenant aware username.
@@ -36,11 +32,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 public class ExtendedJWTGrantHandler extends JWTBearerGrantHandler {
     private static Log log = LogFactory.getLog(ExtendedJWTGrantHandler.class);
     private static final String TENANT_DOMAIN_KEY = "tenantDomain";
-
-    @Override
-    public boolean validateScope(OAuthTokenReqMessageContext tokReqMsgCtx) {
-        return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
-    }
 
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception {

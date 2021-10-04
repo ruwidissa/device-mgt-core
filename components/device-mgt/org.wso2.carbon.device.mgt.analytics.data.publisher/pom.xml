@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>device-mgt</artifactId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -107,8 +107,8 @@
                             org.wso2.carbon.device.mgt.analytics.data.publisher.*;version="${carbon.device.mgt.version}"
                         </Export-Package>
                         <Import-Package>
-                            org.osgi.framework,
-                            org.osgi.service.component,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging.*,
                             org.wso2.carbon.utils.multitenancy,
                             org.wso2.carbon.context;version="${carbon.kernel.version.range}",

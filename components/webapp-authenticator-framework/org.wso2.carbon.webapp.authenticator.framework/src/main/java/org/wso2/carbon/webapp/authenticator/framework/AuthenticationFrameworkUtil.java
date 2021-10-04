@@ -73,7 +73,7 @@ public class AuthenticationFrameworkUtil {
         }
     }
 
-    static boolean isUserAuthorized(int tenantId, String tenantDomain, String username, String
+    public static boolean isUserAuthorized(int tenantId, String tenantDomain, String username, String
             permission) throws
             AuthenticationException {
         boolean tenantFlowStarted = false;

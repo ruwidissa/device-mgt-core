@@ -6,8 +6,8 @@
             <Parameters>
                 <Parameter Name="IsRemote">false</Parameter>
                 <Parameter Name="TokenValidationEndpointUrl">https://${iot.keymanager.host}:${iot.keymanager.https.port}</Parameter>
-                <Parameter Name="Username">admin</Parameter>
-                <Parameter Name="Password">admin</Parameter>
+                <Parameter Name="Username">${admin.username}</Parameter>
+                <Parameter Name="Password">${admin.password}</Parameter>
                 <Parameter Name="MaxTotalConnections">100</Parameter>
                 <Parameter Name="MaxConnectionsPerHost">100</Parameter>
             </Parameters>
@@ -41,8 +41,8 @@
             <Parameters>
                 <Parameter Name="IsRemote">false</Parameter>
                 <Parameter Name="TokenValidationEndpointUrl">https://${iot.keymanager.host}:${iot.keymanager.https.port}</Parameter>
-                <Parameter Name="Username">admin</Parameter>
-                <Parameter Name="Password">admin</Parameter>
+                <Parameter Name="Username">${admin.username}</Parameter>
+                <Parameter Name="Password">${admin.username}</Parameter>
                 <Parameter Name="MaxTotalConnections">100</Parameter>
                 <Parameter Name="MaxConnectionsPerHost">100</Parameter>
             </Parameters>

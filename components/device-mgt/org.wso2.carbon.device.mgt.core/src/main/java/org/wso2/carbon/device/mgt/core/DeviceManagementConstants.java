@@ -42,6 +42,7 @@ public final class DeviceManagementConstants {
 
     public static final String DM_CACHE_MANAGER = "DM_CACHE_MANAGER";
     public static final String DEVICE_CACHE = "DEVICE_CACHE";
+    public static final String API_RESOURCE_PERMISSION_CACHE = "API_RESOURCE_CACHE_CACHE";
     public static final String GEOFENCE_CACHE = "GEOFENCE_CACHE";
     public static final String ENROLLMENT_NOTIFICATION_API_ENDPOINT = "/api/device-mgt/enrollment-notification";
     public static final String URL_SEPERATOR = "/";
@@ -53,6 +54,8 @@ public final class DeviceManagementConstants {
         public static final String SCOPES_FOR_TOKEN = "perm:device:operations perm:device:publish-event perm:windows:enroll";
         public static final String IOT_GATEWAY_HOST = "iot.gateway.host";
         public static final String IOT_GATEWAY_HTTPS_PORT = "iot.gateway.https.port";
+        public static final String IOT_CORE_HOST = "iot.core.host";
+        public static final String IOT_CORE_HTTPS_PORT = "iot.core.https.port";
         public static final String APPLICATION_REGISTRATION_API_ENDPOINT =
                 "/api-application-registration/register";
         public static final String AUTHORIZATION_HEADER = "authorization";
@@ -164,6 +167,7 @@ public final class DeviceManagementConstants {
                 new Permission("/permission/admin/device-mgt/devices/enroll", "ui.execute"),
                 new Permission("/permission/admin/device-mgt/devices/disenroll", "ui.execute"),
                 new Permission("/permission/admin/device-mgt/devices/owning-device/view", "ui.execute"),
+                new Permission("/permission/admin/device-mgt/metadata", "ui.execute"),
                 new Permission("/permission/admin/manage/portal", "ui.execute")
         };
 

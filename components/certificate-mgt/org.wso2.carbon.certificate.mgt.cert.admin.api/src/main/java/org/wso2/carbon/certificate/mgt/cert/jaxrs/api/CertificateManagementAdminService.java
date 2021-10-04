@@ -45,30 +45,35 @@ import javax.ws.rs.core.Response;
                 name = "Adding a new SSL certificate",
                 description = "Adding a new SSL certificate",
                 key = "perm:admin:certificates:add",
+                roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/add"}
         ),
         @Scope(
                 name = "Getting Details of an SSL Certificate",
                 description = "Getting Details of an SSL Certificate",
                 key = "perm:admin:certificates:details",
+                roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/details"}
         ),
         @Scope(
                 name = "Getting Details of Certificates",
                 description = "Getting Details of Certificates",
                 key = "perm:admin:certificates:view",
+                roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/view"}
         ),
         @Scope(
                 name = "Deleting an SSL Certificate",
                 description = "Deleting an SSL Certificate",
                 key = "perm:admin:certificates:delete",
+                roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/delete"}
         ),
         @Scope(
                 name = "Verify SSL certificate",
                 description = "Verify SSL certificate",
                 key = "perm:admin:certificates:verify",
+                roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/verify"}
         )
 }

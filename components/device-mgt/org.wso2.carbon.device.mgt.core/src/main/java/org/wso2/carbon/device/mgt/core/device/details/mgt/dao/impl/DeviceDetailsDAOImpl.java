@@ -286,7 +286,11 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             stmt.setString(8, deviceLocation.getState());
             stmt.setString(9, deviceLocation.getCountry());
             stmt.setString(10, GeoHashGenerator.encodeGeohash(deviceLocation));
-            stmt.setLong(11, System.currentTimeMillis());
+            if (deviceLocation.getUpdatedTime() == null) {
+                stmt.setLong(11, System.currentTimeMillis());
+            } else {
+                stmt.setLong(11, deviceLocation.getUpdatedTime().getTime());
+            }
             stmt.setInt(12, enrollmentId);
             stmt.setDouble(13, deviceLocation.getAltitude());
             stmt.setFloat(14, deviceLocation.getSpeed());
@@ -417,7 +421,11 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             stmt.setDouble(6, deviceLocation.getLongitude());
             stmt.setFloat(7, deviceLocation.getSpeed());
             stmt.setFloat(8, deviceLocation.getBearing());
-            stmt.setLong(9, System.currentTimeMillis());
+            if (deviceLocation.getUpdatedTime() == null) {
+                stmt.setLong(9, System.currentTimeMillis());
+            } else {
+                stmt.setLong(9, deviceLocation.getUpdatedTime().getTime());
+            }
             stmt.setString(10, GeoHashGenerator.encodeGeohash(deviceLocation));
             stmt.setString(11, device.getEnrolmentInfo().getOwner());
             stmt.setDouble(12, deviceLocation.getAltitude());

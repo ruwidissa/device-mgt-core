@@ -22,10 +22,10 @@ public class HandlerConstants {
     public static final String PUBLISHER_APPLICATION_NAME = "application-mgt-publisher";
     public static final String APP_REG_ENDPOINT = "/api-application-registration/register";
     public static final String UI_CONFIG_ENDPOINT = "/api/device-mgt-config/v1.0/configurations/ui-config";
-    public static final String TOKEN_ENDPOINT = "/token";
+    public static final String TOKEN_ENDPOINT = "/oauth2/token";
     public static final String INTROSPECT_ENDPOINT = "/oauth2/introspect";
     public static final String AUTHORIZATION_ENDPOINT = "/oauth2/authorize";
-    public static final String APIM_APPLICATIONS_ENDPOINT = "/api/am/store/v0.12/applications/";
+    public static final String APIM_APPLICATIONS_ENDPOINT = "/api/am/devportal/v2/applications/";
     public static final String IDENTITY_APP_MGT_ENDPOINT = "/services/IdentityApplicationManagementService.IdentityApplicationManagementServiceHttpsSoap11Endpoint";
     public static final String LOGIN_PAGE = "/login";
     public static final String SSO_LOGIN_CALLBACK = "/ssoLoginCallback";
@@ -60,6 +60,7 @@ public class HandlerConstants {
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";
     public static final String HTTP_PROTOCOL = "http";
+    public static final String HTTPS_PROTOCOL = "https";
     public static final String UNDERSCORE = "_";
 
     public static final int INTERNAL_ERROR_CODE = 500;
@@ -67,7 +68,7 @@ public class HandlerConstants {
 
     public static final String OTP_HEADER = "one-time-token";
 
-    public static final String AX_PREFIX = "ax2317:";
+    public static final String AX_PREFIX = "ax2251:";
     public static final String PAYLOADS_DIR = "repository/resources/payloads";
     public static final String SOAP_ACTION_HEADER = "SOAPAction";
 
@@ -77,6 +78,12 @@ public class HandlerConstants {
     public static final String IOT_CORE_HOST_ENV_VAR = "iot.core.host";
     public static final String IOT_CORE_HTTP_PORT_ENV_VAR = "iot.core.http.port";
     public static final String IOT_CORE_HTTPS_PORT_ENV_VAR = "iot.core.https.port";
+    public static final String IOT_APIM_HOST_ENV_VAR = "iot.apim.host";
+    public static final String IOT_APIM_HTTP_PORT_ENV_VAR = "iot.apim.http.port";
+    public static final String IOT_APIM_HTTPS_PORT_ENV_VAR = "iot.apim.https.port";
+    public static final String IOT_KM_HOST_ENV_VAR = "iot.keymanager.host";
+    public static final String IOT_KM_HTTP_PORT_ENV_VAR = "iot.keymanager.http.port";
+    public static final String IOT_KM_HTTPS_PORT_ENV_VAR = "iot.keymanager.https.port";
     public static final String IOT_GW_HOST_ENV_VAR = "iot.gateway.host";
     public static final String IOT_GW_HTTP_PORT_ENV_VAR = "iot.gateway.http.port";
     public static final String IOT_GW_HTTPS_PORT_ENV_VAR = "iot.gateway.https.port";

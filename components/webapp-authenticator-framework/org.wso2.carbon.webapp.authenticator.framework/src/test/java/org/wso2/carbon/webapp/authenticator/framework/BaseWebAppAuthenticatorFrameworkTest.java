@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.webapp.authenticator.framework;
 
+
 import org.testng.annotations.BeforeSuite;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;

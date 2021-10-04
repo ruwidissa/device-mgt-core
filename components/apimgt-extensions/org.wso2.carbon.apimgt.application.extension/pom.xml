@@ -22,12 +22,11 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>4.1.16-SNAPSHOT</version>
     <artifactId>org.wso2.carbon.apimgt.application.extension</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - API Application Management</name>
@@ -51,14 +50,15 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
         </dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.devicemgt</groupId>
-			<artifactId>org.wso2.carbon.apimgt.integration.client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.devicemgt</groupId>
-			<artifactId>org.wso2.carbon.apimgt.integration.generated.client</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
@@ -100,24 +100,32 @@
                         <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
                         <Bundle-Description>API Management Application Bundle</Bundle-Description>
                         <Private-Package>org.wso2.carbon.apimgt.application.extension.internal</Private-Package>
-                        <Import-Package>
-                            org.osgi.framework,
-                            org.osgi.service.component,
-                            org.apache.commons.logging.*,
-                            org.wso2.carbon.user.core.*,
-                            org.wso2.carbon.user.api,
-                            org.wso2.carbon.utils.multitenancy,
+                        <Import-Packages>
+                            org.apache.commons.lang;version="[2.6,3)",
+                            org.apache.commons.logging;version="[1.2,2)",
                             org.json.simple,
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.base,
-                            org.wso2.carbon.registry.core.*;resolution:=optional,
-                            org.wso2.carbon.registry.indexing.*; version="${carbon.registry.imp.pkg.version.range}",
-							org.wso2.carbon.apimgt.integration.client.*,
-							org.wso2.carbon.apimgt.integration.generated.client.store.api,
-							org.wso2.carbon.apimgt.integration.generated.client.store.model,
-                            org.wso2.carbon.identity.jwt.client.extension.*,
-							feign
-                        </Import-Package>
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.wso2.carbon.apimgt.api;version="${carbon.api.mgt.version.range}",
+                            org.wso2.carbon.apimgt.api.dto;version="${carbon.api.mgt.version.range}",
+                            org.wso2.carbon.apimgt.api.model;version="${carbon.api.mgt.version.range}",
+                            org.wso2.carbon.apimgt.application.extension.bean,
+                            org.wso2.carbon.apimgt.application.extension.dto,
+                            org.wso2.carbon.apimgt.application.extension.exception,
+                            org.wso2.carbon.apimgt.impl;version="${carbon.api.mgt.version.range}",
+                            org.wso2.carbon.apimgt.impl.utils;version="${carbon.api.mgt.version.range}",
+                            org.wso2.carbon.context;version="${carbon.kernel.version.range}",
+                            org.wso2.carbon.identity.jwt.client.extension,
+                            org.wso2.carbon.identity.jwt.client.extension.dto,
+                            org.wso2.carbon.identity.jwt.client.extension.exception,
+                            org.wso2.carbon.identity.jwt.client.extension.service,
+                            org.wso2.carbon.registry.core.exceptions;version="[1.0,2)",
+                            org.wso2.carbon.registry.core.service;version="[1.0,2)",
+                            org.wso2.carbon.registry.indexing.service;version="${carbon.registry.imp.pkg.version.range}",
+                            org.wso2.carbon.user.api;version="[1.0,2)",
+                            org.wso2.carbon.user.core.service;version="${carbon.kernel.version.range}",
+                            org.wso2.carbon.user.core.tenant;version="${carbon.kernel.version.range}"
+                        </Import-Packages>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.application.extension.internal,
                             org.wso2.carbon.apimgt.application.extension.*

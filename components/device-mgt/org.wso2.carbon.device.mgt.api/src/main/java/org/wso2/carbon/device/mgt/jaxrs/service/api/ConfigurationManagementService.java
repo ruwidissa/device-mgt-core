@@ -69,12 +69,14 @@ import javax.ws.rs.core.Response;
                 name = "View configurations",
                 description = "",
                 key = "perm:view-configuration",
+                roles = {"Internal/devicemgt-user"},
                 permissions = {"/device-mgt/platform-configurations/view"}
         ),
         @Scope(
                 name = "Manage configurations",
                 description = "",
                 key = "perm:manage-configuration",
+                roles = {"Internal/devicemgt-user"},
                 permissions = {"/device-mgt/platform-configurations/manage"}
         )
 }

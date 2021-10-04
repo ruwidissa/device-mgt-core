@@ -77,30 +77,35 @@ import java.util.Map;
                         name = "Enroll Device",
                         description = "Register a device",
                         key = "perm:device:enroll",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/add"}
                 ),
                 @Scope(
                         name = "Modify Device",
                         description = "Modify a device",
                         key = "perm:device:modify",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/modify"}
                 ),
                 @Scope(
                         name = "Disenroll Device",
                         description = "Disenroll a device",
                         key = "perm:device:disenroll",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/remove"}
                 ),
                 @Scope(
                         name = "Publish Event",
                         description = "publish device event",
                         key = "perm:device:publish-event",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/event"}
                 ),
                 @Scope(
                         name = "Getting Device Operation Details",
                         description = "Getting Device Operation Details",
                         key = "perm:device:operations",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 )
         }

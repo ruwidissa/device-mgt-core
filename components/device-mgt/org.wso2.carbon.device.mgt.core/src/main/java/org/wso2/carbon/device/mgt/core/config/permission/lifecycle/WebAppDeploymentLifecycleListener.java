@@ -62,11 +62,8 @@ public class WebAppDeploymentLifecycleListener implements LifecycleListener {
                             scanStandardContext(io.swagger.annotations.SwaggerDefinition.class.getName());
                     List<Permission> permissions = annotationProcessor.extractPermissions(annotatedAPIClasses);
                     PermissionManagerService permissionManagerService = PermissionManagerServiceImpl.getInstance();
-                    if (permissions != null) {
-                        for (Permission permission : permissions) {
-                            permissionManagerService.addPermission(permission);
-                        }
-                    }
+                    permissionManagerService.addPermission(contextPath, permissions);
+
                 } catch (PermissionManagementException e) {
                     log.error("Exception occurred while adding the permissions from webapp : "
                             + servletContext.getContextPath(), e);

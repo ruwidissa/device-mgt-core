@@ -76,6 +76,7 @@ import javax.ws.rs.core.Response;
                 name = "Get activities",
                 description = "Get activities",
                 key = "perm:get-activity",
+                roles = {"Internal/devicemgt-user"},
                 permissions = {"/device-mgt/devices/owning-device/view"}
                 )
         }

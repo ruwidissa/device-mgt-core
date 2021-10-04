@@ -106,12 +106,9 @@ public class WebappAuthenticationValveTest {
 
     @Test(description = "This method tests the behaviour of the invoke method of WebAuthenticationValve when "
             + "secured endpoints are invoked.")
-    public void testInvokeSecuredEndpoints() throws NoSuchFieldException, IllegalAccessException {
-        String encodedString = new String(Base64.getEncoder().encode((ADMIN_USER + ":" + ADMIN_USER).getBytes()));
+    public void testInvokeSecuredEndpointsUnauthorized() throws NoSuchFieldException, IllegalAccessException {
+        String encodedString = new String(Base64.getEncoder().encode((ADMIN_USER + ":" + ADMIN_USER + "test").getBytes()));
         Request request = createRequest("basic " + encodedString);
-        webappAuthenticationValve.invoke(request, null, compositeValve);
-        encodedString = new String(Base64.getEncoder().encode((ADMIN_USER + ":" + ADMIN_USER + "test").getBytes()));
-        request = createRequest("basic " + encodedString);
         Response response = new Response();
         org.apache.coyote.Response coyoteResponse = new org.apache.coyote.Response();
         Connector connector = new Connector();
@@ -119,6 +116,21 @@ public class WebappAuthenticationValveTest {
         response.setCoyoteResponse(coyoteResponse);
         webappAuthenticationValve.invoke(request, response, compositeValve);
         Assert.assertEquals(response.getStatus(), HttpServletResponse.SC_UNAUTHORIZED,
+                "Response of un-authorized request is not updated");
+    }
+
+    @Test(description = "This method tests the behaviour of the invoke method of WebAuthenticationValve when "
+            + "secured endpoints are invoked.")
+    public void testInvokeSecuredEndpointsAuthorized() throws NoSuchFieldException, IllegalAccessException {
+        String encodedString = new String(Base64.getEncoder().encode((ADMIN_USER + ":" + ADMIN_USER).getBytes()));
+        Request request = createRequest("basic " + encodedString);
+        Response response = new Response();
+        org.apache.coyote.Response coyoteResponse = new org.apache.coyote.Response();
+        Connector connector = new Connector();
+        response.setConnector(connector);
+        response.setCoyoteResponse(coyoteResponse);
+        webappAuthenticationValve.invoke(request, response, compositeValve);
+        Assert.assertEquals(response.getStatus(), HttpServletResponse.SC_ACCEPTED,
                 "Response of un-authorized request is not updated");
     }
 

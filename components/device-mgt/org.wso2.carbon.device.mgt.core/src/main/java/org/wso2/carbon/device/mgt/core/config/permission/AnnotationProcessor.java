@@ -67,6 +67,7 @@ public class AnnotationProcessor {
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_DESCRIPTION = "description";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_KEY = "key";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_PERMISSIONS = "permissions";
+    private static final String SWAGGER_ANNOTATIONS_PROPERTIES_ROLES = "roles";
     private static final String ANNOTATIONS_SCOPES = "scopes";
     private static final String ANNOTATIONS_SCOPE = "scope";
     private static final String DEFAULT_PERM_NAME = "default";
@@ -239,6 +240,7 @@ public class AnnotationProcessor {
                     subCtx = makeContextURLReady(resourceRootContext) + makeContextURLReady(subCtx);
                 }
                 permission.setUrl(replaceDynamicPathVariables(subCtx));
+                permission.setUrlPattern(permission.getUrl().replace("*", "[a-zA-Z0-9-_.]+"));
                 String httpMethod;
                 for (int i = 0; i < annotations.length; i++) {
                     httpMethod = getHTTPMethodAnnotation(annotations[i]);
@@ -398,7 +400,7 @@ public class AnnotationProcessor {
                         if (scope != null) {
                             permission.setName(scope.getName());
                             //TODO: currently permission tree supports only adding one permission per API point.
-                            permission.setPath(scope.getRoles().split(" ")[0]);
+                            permission.setPath(scope.getPermissions().split(" ")[0]);
                         } else {
                             log.warn("No Scope mapping is done for scope key: " + scopeKey);
                             permission.setName(DEFAULT_PERM_NAME);
@@ -420,8 +422,11 @@ public class AnnotationProcessor {
         Scope scope;
         String permissions[];
         StringBuilder aggregatedPermissions;
+        String roles[];
+        StringBuilder aggregatedRoles;
         for(int i=0; i<annotatedScopes.length; i++){
             aggregatedPermissions = new StringBuilder();
+            aggregatedRoles = new StringBuilder();
             methodHandler = Proxy.getInvocationHandler(annotatedScopes[i]);
             scope = new Scope();
             scope.setName(invokeMethod(scopeClass
@@ -437,7 +442,14 @@ public class AnnotationProcessor {
                 aggregatedPermissions.append(permission);
                 aggregatedPermissions.append(" ");
             }
-            scope.setRoles(aggregatedPermissions.toString());
+            scope.setPermissions(aggregatedPermissions.toString().trim());
+            roles = (String[])methodHandler.invoke(annotatedScopes[i], scopeClass
+                    .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_ROLES, null),null);
+            for (String role : roles) {
+                aggregatedRoles.append(role);
+                aggregatedRoles.append(",");
+            }
+            scope.setRoles(aggregatedRoles.toString().substring(0, aggregatedRoles.lastIndexOf(",")));
             scopes.put(scope.getKey(), scope);
         }
         return scopes;

@@ -72,6 +72,8 @@ public class SsoLoginHandler extends HttpServlet {
     private static String adminPassword;
     private static String gatewayUrl;
     private static String iotsCoreUrl;
+    private static String apiMgtUrl;
+    private static String keyManagerUrl;
     private static int sessionTimeOut;
     private static String encodedAdminCredentials;
     private static String encodedClientApp;
@@ -99,14 +101,14 @@ public class SsoLoginHandler extends HttpServlet {
             baseContextPath = req.getContextPath();
             applicationName = baseContextPath.substring(1, baseContextPath.indexOf("-ui-request-handler"));
 
-            String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
-            if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-                iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
-            }
             gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                     + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
             iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
-                    + HandlerConstants.COLON + iotsCorePort;
+                    + HandlerConstants.COLON + HandlerUtil.getCorePort(req.getScheme());
+            apiMgtUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_APIM_HOST_ENV_VAR)
+                    + HandlerConstants.COLON + HandlerUtil.getAPIManagerPort(req.getScheme());
+            keyManagerUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
+                    + HandlerConstants.COLON + HandlerUtil.getKeymanagerPort(req.getScheme());
 
             // Fetch ui config and persists in session
             String uiConfigUrl = iotsCoreUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
@@ -127,7 +129,7 @@ public class SsoLoginHandler extends HttpServlet {
             persistAuthSessionData(req, oAuthApp.getClientId(), oAuthApp.getClientSecret(),
                     oAuthApp.getEncodedClientApp(), scopesSsoString);
 
-            resp.sendRedirect(iotsCoreUrl + HandlerConstants.AUTHORIZATION_ENDPOINT +
+            resp.sendRedirect(keyManagerUrl + HandlerConstants.AUTHORIZATION_ENDPOINT +
                     "?response_type=code" +
                     "&client_id=" + clientId +
                     "&state=" +
@@ -193,7 +195,7 @@ public class SsoLoginHandler extends HttpServlet {
             }
 
             // Get the details of the registered application
-            String getApplicationEndpointUrl = iotsCoreUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT +
+            String getApplicationEndpointUrl = apiMgtUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT +
                     "?query=" + applicationName;
             HttpGet getApplicationEndpoint = new HttpGet(getApplicationEndpointUrl);
             getApplicationEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER +
@@ -224,7 +226,7 @@ public class SsoLoginHandler extends HttpServlet {
             }
 
             // Update the grant types of the application
-            String url = iotsCoreUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT + applicationId + "/keys/" +
+            String url = apiMgtUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT + applicationId + "/keys/" +
                     HandlerConstants.PRODUCTION_KEY;
             HttpPut updateApplicationGrantTypesEndpoint = new HttpPut(url);
             updateApplicationGrantTypesEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER +
@@ -235,7 +237,7 @@ public class SsoLoginHandler extends HttpServlet {
             ProxyResponse updateApplicationGrantTypesEndpointResponse = HandlerUtil.execute(updateApplicationGrantTypesEndpoint);
 
             // Update app as a SaaS app
-            this.updateSaasApp(applicationName);
+            this.updateSaasApp(applicationId);
 
             if (updateApplicationGrantTypesEndpointResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
                 HandlerUtil.handleError(resp, updateApplicationGrantTypesEndpointResponse);
@@ -265,7 +267,7 @@ public class SsoLoginHandler extends HttpServlet {
      * @throws SAXException                 - Throws when error occur during document parsing
      */
     private void initializeAdminCredentials() throws ParserConfigurationException, IOException, SAXException {
-        File userMgtConf = new File("conf/user-mgt.xml");
+        File userMgtConf = new File("repository/conf/user-mgt.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(userMgtConf);
@@ -323,7 +325,7 @@ public class SsoLoginHandler extends HttpServlet {
      * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
     private ProxyResponse getTokenResult(String encodedClientApp) throws IOException {
-        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(keyManagerUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 
@@ -372,7 +374,7 @@ public class SsoLoginHandler extends HttpServlet {
      */
     private void updateSaasApp(String appName) throws ParserConfigurationException, IOException, SAXException {
         File getAppRequestXmlFile = new File(HandlerConstants.PAYLOADS_DIR + "/get-app-request.xml");
-        String identityAppMgtUrl = iotsCoreUrl + HandlerConstants.IDENTITY_APP_MGT_ENDPOINT;
+        String identityAppMgtUrl = apiMgtUrl + HandlerConstants.IDENTITY_APP_MGT_ENDPOINT;
 
         HttpPost getApplicationEndpoint = new HttpPost(identityAppMgtUrl);
         getApplicationEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +

@@ -57,6 +57,7 @@ import javax.ws.rs.core.Response;
                         name = "Devicetype deployment",
                         description = "Deploy devicetype",
                         key = "perm:devicetype:deployment",
+                        roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/devicetype/deploy"}
                 )
         }

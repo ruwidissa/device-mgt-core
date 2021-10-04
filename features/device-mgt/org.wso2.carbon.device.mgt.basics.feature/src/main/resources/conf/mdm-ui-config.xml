@@ -183,6 +183,7 @@
         <Scope>perm:metadata:update</Scope>
         <Scope>perm:android:google-account</Scope>
         <Scope>perm:android:update-default-sim</Scope>
+        <Scope>perm:android:info</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

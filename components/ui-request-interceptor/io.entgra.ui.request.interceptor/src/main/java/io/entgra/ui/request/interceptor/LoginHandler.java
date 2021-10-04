@@ -59,6 +59,8 @@ public class LoginHandler extends HttpServlet {
     private static String password;
     private static String gatewayUrl;
     private static String uiConfigUrl;
+    private static String iotCoreUrl;
+    private static String kmManagerUrl;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -200,16 +202,16 @@ public class LoginHandler extends HttpServlet {
      * Define username and password static parameters.
      */
     private static void validateLoginRequest(HttpServletRequest req) throws LoginException {
-        String iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTPS_PORT_ENV_VAR);
-        if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
-            iotsCorePort = System.getProperty(HandlerConstants.IOT_CORE_HTTP_PORT_ENV_VAR);
-        }
         username = req.getParameter("username");
         password = req.getParameter("password");
         gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-        uiConfigUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
-                + HandlerConstants.COLON + iotsCorePort + HandlerConstants.UI_CONFIG_ENDPOINT;
+        iotCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
+                + HandlerConstants.COLON + HandlerUtil.getCorePort(req.getScheme());
+        uiConfigUrl = iotCoreUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
+        kmManagerUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
+                + HandlerConstants.COLON + HandlerUtil.getKeymanagerPort(req.getScheme());
+
         if (username == null || password == null) {
             String msg = "Invalid login request. Username or Password is not received for login request.";
             log.error(msg);
@@ -226,7 +228,7 @@ public class LoginHandler extends HttpServlet {
      * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
     private ProxyResponse getTokenResult(String encodedClientApp, JsonArray scopes) throws IOException {
-        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(kmManagerUrl+ HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
         String scopeString = HandlerUtil.getScopeString(scopes);

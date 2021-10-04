@@ -3,14 +3,13 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>policy-mgt</artifactId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.devicemgt</groupId>
     <artifactId>org.wso2.carbon.policy.decision.point</artifactId>
-    <version>4.1.16-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Policy Decision Point</name>
     <description>WSO2 Carbon - Policy Decision Point</description>
@@ -35,9 +34,9 @@
                         <Bundle-Description>Policy Decision Point Bundle</Bundle-Description>
                         <Private-Package>org.wso2.carbon.policy.decision.point.internal</Private-Package>
                         <Import-Package>
-                            org.wso2.carbon.context.*;
-                            org.osgi.framework,
-                            org.osgi.service.component,
+                            org.wso2.carbon.context;version="${carbon.kernel.version.range}",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging,
                             org.wso2.carbon.policy.mgt.common.*,
                             org.wso2.carbon.policy.mgt.core.*,

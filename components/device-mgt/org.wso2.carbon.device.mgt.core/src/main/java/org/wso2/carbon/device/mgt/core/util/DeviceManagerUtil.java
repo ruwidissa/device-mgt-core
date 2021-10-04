@@ -50,7 +50,6 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.caching.impl.CacheImpl;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 import org.wso2.carbon.device.mgt.common.AppRegistrationCredentials;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistration;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistrationException;
@@ -67,12 +66,12 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
-import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
@@ -97,10 +96,12 @@ import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
+import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.NetworkUtils;
@@ -136,6 +137,7 @@ public final class DeviceManagerUtil {
     public static final String GENERAL_CONFIG_RESOURCE_PATH = "general";
 
     private  static boolean isDeviceCacheInitialized = false;
+    private  static boolean isAPIResourcePermissionCacheInitialized = false;
     private static boolean isGeoFenceCacheInitialized = false;
 
     public static Document convertToDocument(File file) throws DeviceManagementException {
@@ -594,18 +596,6 @@ public final class DeviceManagerUtil {
 
     private static CacheManager getCacheManager() {
         return Caching.getCacheManagerFactory().getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER);
-    }
-
-    public static EventsPublisherService getEventPublisherService() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        EventsPublisherService eventsPublisherService =
-                (EventsPublisherService) ctx.getOSGiService(EventsPublisherService.class, null);
-        if (eventsPublisherService == null) {
-            String msg = "Event Publisher service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return eventsPublisherService;
     }
 
     /**
@@ -1162,6 +1152,57 @@ public final class DeviceManagerUtil {
         UserStoreManager userStoreManager = CarbonContext.getThreadLocalCarbonContext().getUserRealm()
                 .getUserStoreManager();
         return userStoreManager.getUserClaimValue(username, claimUri, null);
+    }
+
+    public static String replaceSystemProperty(String text) {
+
+        int indexOfStartingChars = -1;
+        int indexOfClosingBrace;
+
+        // The following condition deals with properties.
+        // Properties are specified as ${system.property},
+        // and are assumed to be System properties
+        while (indexOfStartingChars < text.indexOf("${")
+                && (indexOfStartingChars = text.indexOf("${")) != -1
+                && (indexOfClosingBrace = text.indexOf('}')) != -1) { // Is a
+            // property
+            // used?
+            String sysProp = text.substring(indexOfStartingChars + 2,
+                    indexOfClosingBrace);
+            String propValue = System.getProperty(sysProp);
+
+            if (propValue == null) {
+                if ("carbon.context".equals(sysProp)) {
+                    propValue = DeviceManagementDataHolder.getInstance().getConfigurationContextService()
+                            .getServerConfigContext().getContextRoot();
+                } else if ("admin.username".equals(sysProp) || "admin.password".equals(sysProp)) {
+                    try {
+                        RealmConfiguration realmConfig =
+                                new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
+                        if ("admin.username".equals(sysProp)) {
+                            propValue = realmConfig.getAdminUserName();
+                        } else {
+                            propValue = realmConfig.getAdminPassword();
+                        }
+                    } catch (UserStoreException e) {
+                        // Can't throw an exception because the server is
+                        // starting and can't be halted.
+                        log.error("Unable to build the Realm Configuration", e);
+                        return null;
+                    }
+                }
+            }
+            //Derive original text value with resolved system property value
+            if (propValue != null) {
+                text = text.substring(0, indexOfStartingChars) + propValue
+                        + text.substring(indexOfClosingBrace + 1);
+            }
+            if ("carbon.home".equals(sysProp) && propValue != null
+                    && ".".equals(propValue)) {
+                text = new File(".").getAbsolutePath() + File.separator + text;
+            }
+        }
+        return text;
     }
 
     /**

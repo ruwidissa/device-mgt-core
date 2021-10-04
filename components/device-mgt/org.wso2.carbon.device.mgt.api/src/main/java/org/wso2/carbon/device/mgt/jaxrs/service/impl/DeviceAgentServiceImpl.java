@@ -26,7 +26,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -36,7 +35,6 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -52,7 +50,6 @@ import org.wso2.carbon.event.stream.stub.types.EventStreamAttributeDto;
 import org.wso2.carbon.event.stream.stub.types.EventStreamDefinitionDto;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.policy.mgt.common.PolicyAdministratorPoint;
-import org.wso2.carbon.policy.mgt.common.PolicyEvaluationException;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -280,19 +277,20 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                 i++;
             }
 
-            if (DeviceMgtAPIUtils.getEventPublisherService().publishEvent(DeviceMgtAPIUtils.getStreamDefinition(type
-                    , PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())
-                    , Constants.DEFAULT_STREAM_VERSION, metaData
-                    , null, payloadData)) {
+            // todo: amalka: commented data publishing
+//            if (DeviceMgtAPIUtils.getEventPublisherService().publishEvent(DeviceMgtAPIUtils.getStreamDefinition(type
+//                    , PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())
+//                    , Constants.DEFAULT_STREAM_VERSION, metaData
+//                    , null, payloadData)) {
                 return Response.status(Response.Status.OK).build();
-            } else {
-                String msg = "Error occurred while publishing the event.";
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            }
-        } catch (DataPublisherConfigurationException e) {
-            String msg = "Error occurred while publishing the event.";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+//            } else {
+//                String msg = "Error occurred while publishing the event.";
+//                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+//            }
+//        } catch (DataPublisherConfigurationException e) {
+//            String msg = "Error occurred while publishing the event.";
+//            log.error(msg, e);
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (DeviceAccessAuthorizationException e) {
             String msg = "Error occurred when checking for authorization";
             log.error(msg, e);
@@ -380,19 +378,20 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                 i++;
             }
 
-            if (DeviceMgtAPIUtils.getEventPublisherService().publishEvent(DeviceMgtAPIUtils.getStreamDefinition(type
-                    , PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())
-                    , Constants.DEFAULT_STREAM_VERSION, metaData
-                    , null, payloadData)) {
+            // todo: amalka: commented data publishing
+//            if (DeviceMgtAPIUtils.getEventPublisherService().publishEvent(DeviceMgtAPIUtils.getStreamDefinition(type
+//                    , PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())
+//                    , Constants.DEFAULT_STREAM_VERSION, metaData
+//                    , null, payloadData)) {
                 return Response.status(Response.Status.OK).build();
-            } else {
-                String msg = "Error occurred while publishing the event.";
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            }
-        } catch (DataPublisherConfigurationException e) {
-            String msg = "Error occurred while publishing the event.";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+//            } else {
+//                String msg = "Error occurred while publishing the event.";
+//                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+//            }
+//        } catch (DataPublisherConfigurationException e) {
+//            String msg = "Error occurred while publishing the event.";
+//            log.error(msg, e);
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (DeviceAccessAuthorizationException e) {
             String msg = "Error occurred when checking for authorization";
             log.error(msg, e);

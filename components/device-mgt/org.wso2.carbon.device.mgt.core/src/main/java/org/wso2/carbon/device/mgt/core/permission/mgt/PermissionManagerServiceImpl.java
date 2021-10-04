@@ -22,9 +22,7 @@ import org.wso2.carbon.device.mgt.common.permission.mgt.Permission;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
 
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.List;
 
 /**
  * This class will add, update custom permissions defined in permission.xml in webapps and it will
@@ -32,11 +30,8 @@ import java.util.Set;
  */
 public class PermissionManagerServiceImpl implements PermissionManagerService {
 
-    public static final String URL_PROPERTY = "URL";
-    public static final String HTTP_METHOD_PROPERTY = "HTTP_METHOD";
     private static PermissionManagerServiceImpl registryBasedPermissionManager;
-    private static PermissionTree permissionTree; // holds the permissions at runtime.
-
+    private static APIResourcePermissions apiResourcePermissions;
     private PermissionManagerServiceImpl() {
     }
 
@@ -45,7 +40,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService {
             synchronized (PermissionManagerServiceImpl.class) {
                 if (registryBasedPermissionManager == null) {
                     registryBasedPermissionManager = new PermissionManagerServiceImpl();
-                    permissionTree = new PermissionTree();
+                    apiResourcePermissions = new APIResourcePermissions();
                 }
             }
         }
@@ -53,21 +48,20 @@ public class PermissionManagerServiceImpl implements PermissionManagerService {
     }
 
     @Override
-    public boolean addPermission(Permission permission) throws PermissionManagementException {
-        // adding a permission to the tree
-        permission.setPath(permission.getPath());
-        permissionTree.addPermission(permission);
-        return PermissionUtils.putPermission(permission);
+    public boolean addPermission(String context, List<Permission> permissions) throws PermissionManagementException {
+        try {
+            for (Permission permission : permissions) {
+                PermissionUtils.putPermission(permission);
+            }
+            apiResourcePermissions.addPermissionList(context, permissions);
+        } catch (PermissionManagementException e) {
+            return false;
+        }
+        return true;
     }
 
     @Override
-    public Permission getPermission(Properties properties) throws PermissionManagementException {
-        String url = (String) properties.get(URL_PROPERTY);
-        String httpMethod = (String) properties.get(HTTP_METHOD_PROPERTY);
-
-        if (url == null || url.isEmpty() || httpMethod == null || httpMethod.isEmpty()) {
-            throw new PermissionManagementException("Resource URI/HTTP method is empty");
-        }
-        return permissionTree.getPermission(url, httpMethod);
+    public List<Permission> getPermission(String context) throws PermissionManagementException {
+        return apiResourcePermissions.getPermissions(context);
     }
 }

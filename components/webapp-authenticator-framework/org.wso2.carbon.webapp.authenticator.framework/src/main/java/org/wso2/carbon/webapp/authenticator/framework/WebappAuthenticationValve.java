@@ -33,6 +33,7 @@ import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.webapp.authenticator.framework.authenticator.WebappAuthenticator;
+import org.wso2.carbon.webapp.authenticator.framework.authorizer.PermissionAuthorizer;
 import org.wso2.carbon.webapp.authenticator.framework.authorizer.WebappTenantAuthorizer;
 
 import javax.servlet.http.HttpServletResponse;
@@ -133,6 +134,22 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
             }
         }
 
+        // This section will allow to validate a given access token is authenticated to access permission defined per API
+        if (request.getCoyoteRequest() != null
+                && isResourcePermissionValidate(request)
+                && (authenticationInfo.getStatus() == WebappAuthenticator.Status.CONTINUE ||
+                authenticationInfo.getStatus() == WebappAuthenticator.Status.SUCCESS)) {
+            boolean isAllowed;
+            WebappAuthenticator.Status authorizeStatus = PermissionAuthorizer.authorize(request, authenticationInfo);
+            isAllowed = WebappAuthenticator.Status.SUCCESS == authorizeStatus;
+            if (!isAllowed) {
+                log.error("Unauthorized message from user " + authenticationInfo.getUsername());
+                AuthenticationFrameworkUtil.handleResponse(request, response,
+                        HttpServletResponse.SC_FORBIDDEN, "Unauthorized to access the API");
+                return;
+            }
+        }
+
         Tenant tenant = null;
         if (authenticationInfo.getTenantId() != -1) {
             try {
@@ -199,6 +216,11 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
         return (param != null && Boolean.parseBoolean(param));
     }
 
+    private boolean isResourcePermissionValidate(Request request) {
+        String param = request.getContext().findParameter("resource-permission-validate");
+        return (param == null) ||  Boolean.parseBoolean(param);
+    }
+
     private boolean isContextSkipped(Request request) {
         Context context = request.getContext();
         String ctx = context == null ? null :context.getPath();
@@ -216,7 +238,8 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
                 ctx = tokenizer.nextToken();
             }
         }
-        return ("carbon".equalsIgnoreCase(ctx) || "services".equalsIgnoreCase(ctx));
+        return ("carbon".equalsIgnoreCase(ctx) || "services".equalsIgnoreCase(ctx)
+                || "oauth2".equalsIgnoreCase(ctx));
     }
 
     private boolean isNonSecuredEndPoint(Request request) {

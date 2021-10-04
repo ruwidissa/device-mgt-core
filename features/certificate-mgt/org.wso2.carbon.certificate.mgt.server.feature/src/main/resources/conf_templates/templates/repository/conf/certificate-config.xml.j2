@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<CertificateConfigurations>
+    <CertificateKeystore>
+        {% if certificate_conf.certificate_keystore is defined %}
+        <!-- Certificate Keystore file location-->
+        <CertificateKeystoreLocation>{{certificate_conf.certificate_keystore.location}}</CertificateKeystoreLocation>
+        <!-- Certificate Keystore type (JKS/PKCS12 etc.)-->
+        <CertificateKeystoreType>{{certificate_conf.certificate_keystore.type}}</CertificateKeystoreType>
+        <!-- Certificate Keystore password-->
+        <CertificateKeystorePassword>{{certificate_conf.certificate_keystore.password}}</CertificateKeystorePassword>
+        <!-- Certificate authority certificate alias -->
+        <CACertAlias>{{certificate_conf.certificate_keystore.cacert_alias}}</CACertAlias>
+        <!-- Certificate authority private key password -->
+        <CAPrivateKeyPassword>{{certificate_conf.certificate_keystore.cacert_password}}</CAPrivateKeyPassword>
+        <!-- Registration authority certificate alias -->
+        <RACertAlias>{{certificate_conf.certificate_keystore.racert_alias}}</RACertAlias>
+        <!-- Registration authority private key password -->
+        <RAPrivateKeyPassword>{{certificate_conf.certificate_keystore.racert_password}}</RAPrivateKeyPassword>
+        {% else %}
+        <!-- Certificate Keystore file location-->
+        <CertificateKeystoreLocation>${carbon.home}/repository/resources/security/wso2certs.jks</CertificateKeystoreLocation>
+        <!-- Certificate Keystore type (JKS/PKCS12 etc.)-->
+        <CertificateKeystoreType>JKS</CertificateKeystoreType>
+        <!-- Certificate Keystore password-->
+        <CertificateKeystorePassword>wso2carbon</CertificateKeystorePassword>
+        <!-- Certificate authority certificate alias -->
+        <CACertAlias>cacert</CACertAlias>
+        <!-- Certificate authority private key password -->
+        <CAPrivateKeyPassword>cacert</CAPrivateKeyPassword>
+        <!-- Registration authority certificate alias -->
+        <RACertAlias>racert</RACertAlias>
+        <!-- Registration authority private key password -->
+        <RAPrivateKeyPassword>racert</RAPrivateKeyPassword>
+        {% endif %}
+
+    </CertificateKeystore>
+    <!-- Certificate Mgt DB schema -->
+    <ManagementRepository>
+        <DataSourceConfiguration>
+            <JndiLookupDefinition>
+                <Name>jdbc/DM_DS</Name>
+            </JndiLookupDefinition>
+        </DataSourceConfiguration>
+    </ManagementRepository>
+    <!-- Default page size of GET certificates API -->
+    <DefaultPageSize>10</DefaultPageSize>
+</CertificateConfigurations>

@@ -22,7 +22,7 @@
     <parent>
         <artifactId>device-mgt-extensions</artifactId>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -56,7 +56,7 @@
 		</dependency>
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>org.wso2.carbon.device.application.mgt.common</artifactId>
+            <artifactId>io.entgra.application.mgt.common</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -82,17 +82,17 @@
                             org.wso2.carbon.device.mgt.extensions.pull.notification.*
                         </Export-Package>
                         <Import-Package>
-							org.osgi.framework,
-                            org.osgi.service.component,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging,
                             org.wso2.carbon.device.mgt.common.*,
                             org.wso2.carbon.device.mgt.core.service
-							org.wso2.carbon.policy.mgt.core.*,
-							org.wso2.carbon.policy.mgt.core,
-							com.google.gson,
-							org.wso2.carbon.device.mgt.core.service.*,
-                            org.wso2.carbon.device.application.mgt.common.*,
-                            org.wso2.carbon.device.application.mgt.common.services.*
+                            org.wso2.carbon.policy.mgt.core.*,
+                            org.wso2.carbon.policy.mgt.core,
+                            com.google.gson,
+                            org.wso2.carbon.device.mgt.core.service.*,
+                            io.entgra.application.mgt.common.*,
+                            io.entgra.application.mgt.common.services.*
                         </Import-Package>
                     </instructions>
                 </configuration>

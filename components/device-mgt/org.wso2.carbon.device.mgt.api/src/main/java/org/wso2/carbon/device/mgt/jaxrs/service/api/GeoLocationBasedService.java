@@ -73,18 +73,21 @@ import java.util.List;
                         name = "View Analytics",
                         description = "",
                         key = "perm:geo-service:analytics-view",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view-analytics"}
                 ),
                 @Scope(
                         name = "Manage Alerts",
                         description = "",
                         key = "perm:geo-service:alerts-manage",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/manage-alerts"}
                 ),
                 @Scope(
                         name = "Manage Geo Fences",
                         description = "",
                         key = "perm:geo-service:geo-fence",
+                        roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/manage-geo-fence"}
                 )
         }
@@ -96,71 +99,72 @@ public interface GeoLocationBasedService {
     /**
      * Retrieve Analytics for the device type
      */
-    @GET
-    @Path("stats/{deviceType}/{deviceId}")
-    @ApiOperation(
-            consumes = "application/json",
-            produces = "application/json",
-            httpMethod = "GET",
-            value = "Getting the Location Details of a Device",
-            notes = "Get the location details of a device during a define time period.",
-            response = Response.class,
-            tags = "Geo Service Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:analytics-view")
-                    })
-            }
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    code = 200,
-                    message = "OK.",
-                    response = Response.class,
-                    responseHeaders = {
-                            @ResponseHeader(
-                                    name = "Content-Type",
-                                    description = "The content type of the body"),
-                            @ResponseHeader(
-                                    name = "Last-Modified",
-                                    description = "Date and time the resource was last modified.\n" +
-                                            "Used by caches, or in conditional requests."),
-                    }),
-            @ApiResponse(
-                    code = 400,
-                    message = "Bad Request. \n Invalid Device Identifiers found.",
-                    response = Response.class),
-            @ApiResponse(
-                    code = 401,
-                    message = "Unauthorized. \n Unauthorized request."),
-            @ApiResponse(
-                    code = 500,
-                    message = "Internal Server Error. \n Error on retrieving stats",
-                    response = Response.class)
-    })
-    Response getGeoDeviceStats(
-            @ApiParam(
-                    name = "deviceId",
-                    value = "The device ID.",
-                    required = true)
-            @PathParam("deviceId") String deviceId,
-            @ApiParam(
-                    name = "device-type",
-                    value = "The device type, such as ios, android, or windows.",
-                    required = true)
-            @PathParam("deviceType")
-            @Size(max = 45)
-                    String deviceType,
-            @ApiParam(
-                    name = "from",
-                    value = "Define the time to start getting the geo location history of the device in the Epoch or UNIX format.",
-                    required = true)
-            @QueryParam("from") long from,
-            @ApiParam(
-                    name = "to",
-                    value = "Define the time to finish getting the geo location history of the device in the Epoch or UNIX format.",
-                    required = true)
-            @QueryParam("to") long to);
+    //todo:amalka
+//    @GET
+//    @Path("stats/{deviceType}/{deviceId}")
+//    @ApiOperation(
+//            consumes = "application/json",
+//            produces = "application/json",
+//            httpMethod = "GET",
+//            value = "Getting the Location Details of a Device",
+//            notes = "Get the location details of a device during a define time period.",
+//            response = Response.class,
+//            tags = "Geo Service Management",
+//            extensions = {
+//                    @Extension(properties = {
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:analytics-view")
+//                    })
+//            }
+//    )
+//    @ApiResponses(value = {
+//            @ApiResponse(
+//                    code = 200,
+//                    message = "OK.",
+//                    response = Response.class,
+//                    responseHeaders = {
+//                            @ResponseHeader(
+//                                    name = "Content-Type",
+//                                    description = "The content type of the body"),
+//                            @ResponseHeader(
+//                                    name = "Last-Modified",
+//                                    description = "Date and time the resource was last modified.\n" +
+//                                            "Used by caches, or in conditional requests."),
+//                    }),
+//            @ApiResponse(
+//                    code = 400,
+//                    message = "Bad Request. \n Invalid Device Identifiers found.",
+//                    response = Response.class),
+//            @ApiResponse(
+//                    code = 401,
+//                    message = "Unauthorized. \n Unauthorized request."),
+//            @ApiResponse(
+//                    code = 500,
+//                    message = "Internal Server Error. \n Error on retrieving stats",
+//                    response = Response.class)
+//    })
+//    Response getGeoDeviceStats(
+//            @ApiParam(
+//                    name = "deviceId",
+//                    value = "The device ID.",
+//                    required = true)
+//            @PathParam("deviceId") String deviceId,
+//            @ApiParam(
+//                    name = "device-type",
+//                    value = "The device type, such as ios, android, or windows.",
+//                    required = true)
+//            @PathParam("deviceType")
+//            @Size(max = 45)
+//                    String deviceType,
+//            @ApiParam(
+//                    name = "from",
+//                    value = "Define the time to start getting the geo location history of the device in the Epoch or UNIX format.",
+//                    required = true)
+//            @QueryParam("from") long from,
+//            @ApiParam(
+//                    name = "to",
+//                    value = "Define the time to finish getting the geo location history of the device in the Epoch or UNIX format.",
+//                    required = true)
+//            @QueryParam("to") long to);
 
     /**
      * Get data to show device locations in a map
@@ -720,128 +724,130 @@ public interface GeoLocationBasedService {
     /**
      * Retrieve Geo alerts history
      */
-    @GET
-    @Path("alerts/history/{deviceType}/{deviceId}")
-    @ApiOperation(
-            consumes = "application/json",
-            produces = "application/json",
-            httpMethod = "GET",
-            value = "Getting the Geo Service Alert History of a Device",
-            notes = "Get the geo alert history of a device during the defined time period.",
-            response = Response.class,
-            tags = "Geo Service Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
-                    })
-            }
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    code = 200,
-                    message = "OK.",
-                    response = Response.class,
-                    responseHeaders = {
-                            @ResponseHeader(
-                                    name = "Content-Type",
-                                    description = "The content type of the body"),
-                            @ResponseHeader(
-                                    name = "Last-Modified",
-                                    description = "Date and time the resource was last modified.\n" +
-                                            "Used by caches, or in conditional requests.")
-                    }),
-            @ApiResponse(
-                    code = 400,
-                    message = "Bad Request. \n Invalid Device Identifiers found.",
-                    response = Response.class),
-            @ApiResponse(
-                    code = 401,
-                    message = "Unauthorized. \n Unauthorized request."),
-            @ApiResponse(
-                    code = 500,
-                    message = "Internal Server Error. \n Error on retrieving stats",
-                    response = Response.class)
-    })
-    Response getGeoAlertsHistory(
-            @ApiParam(
-                    name = "deviceId",
-                    value = "The device ID.",
-                    required = true)
-            @PathParam("deviceId") String deviceId,
-            @ApiParam(
-                    name = "device-type",
-                    value = "The device type, such as ios, android, or windows.",
-                    required = true)
-            @PathParam("deviceType")
-            @Size(max = 45)
-                    String deviceType,
-            @ApiParam(
-                    name = "from",
-                    value = "Define the time to start getting the geo location history of the device in the Epoch or UNIX format.",
-                    required = true)
-            @QueryParam("from") long from,
-            @ApiParam(
-                    name = "to",
-                    value = "Define the time to finish getting the geo location history of the device in the Epoch or UNIX format.",
-                    required = true)
-            @QueryParam("to") long to);
+    //todo:amalka
+//    @GET
+//    @Path("alerts/history/{deviceType}/{deviceId}")
+//    @ApiOperation(
+//            consumes = "application/json",
+//            produces = "application/json",
+//            httpMethod = "GET",
+//            value = "Getting the Geo Service Alert History of a Device",
+//            notes = "Get the geo alert history of a device during the defined time period.",
+//            response = Response.class,
+//            tags = "Geo Service Management",
+//            extensions = {
+//                    @Extension(properties = {
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+//                    })
+//            }
+//    )
+//    @ApiResponses(value = {
+//            @ApiResponse(
+//                    code = 200,
+//                    message = "OK.",
+//                    response = Response.class,
+//                    responseHeaders = {
+//                            @ResponseHeader(
+//                                    name = "Content-Type",
+//                                    description = "The content type of the body"),
+//                            @ResponseHeader(
+//                                    name = "Last-Modified",
+//                                    description = "Date and time the resource was last modified.\n" +
+//                                            "Used by caches, or in conditional requests.")
+//                    }),
+//            @ApiResponse(
+//                    code = 400,
+//                    message = "Bad Request. \n Invalid Device Identifiers found.",
+//                    response = Response.class),
+//            @ApiResponse(
+//                    code = 401,
+//                    message = "Unauthorized. \n Unauthorized request."),
+//            @ApiResponse(
+//                    code = 500,
+//                    message = "Internal Server Error. \n Error on retrieving stats",
+//                    response = Response.class)
+//    })
+//    Response getGeoAlertsHistory(
+//            @ApiParam(
+//                    name = "deviceId",
+//                    value = "The device ID.",
+//                    required = true)
+//            @PathParam("deviceId") String deviceId,
+//            @ApiParam(
+//                    name = "device-type",
+//                    value = "The device type, such as ios, android, or windows.",
+//                    required = true)
+//            @PathParam("deviceType")
+//            @Size(max = 45)
+//                    String deviceType,
+//            @ApiParam(
+//                    name = "from",
+//                    value = "Define the time to start getting the geo location history of the device in the Epoch or UNIX format.",
+//                    required = true)
+//            @QueryParam("from") long from,
+//            @ApiParam(
+//                    name = "to",
+//                    value = "Define the time to finish getting the geo location history of the device in the Epoch or UNIX format.",
+//                    required = true)
+//            @QueryParam("to") long to);
 
     /**
      * Retrieve Geo alerts history for geo clusters
      */
-    @GET
-    @Path("alerts/history")
-    @ApiOperation(
-            consumes = "application/json",
-            produces = "application/json",
-            httpMethod = "GET",
-            value = "Retrieve Geo alerts history for geo clusters",
-            notes = "Retrieving geo alert history of all defined alerts for geo clusters",
-            response = Response.class,
-            tags = "Geo Service Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
-                    })
-            }
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    code = 200,
-                    message = "OK.",
-                    response = Response.class,
-                    responseHeaders = {
-                            @ResponseHeader(
-                                    name = "Content-Type",
-                                    description = "The content type of the body"),
-                            @ResponseHeader(
-                                    name = "Last-Modified",
-                                    description = "Date and time the resource was last modified.\n" +
-                                            "Used by caches, or in conditional requests.")
-                    }),
-            @ApiResponse(
-                    code = 400,
-                    message = "Bad Request. \n Invalid Device Identifiers found.",
-                    response = Response.class),
-            @ApiResponse(
-                    code = 401,
-                    message = "Unauthorized. \n Unauthorized request."),
-            @ApiResponse(
-                    code = 500,
-                    message = "Internal Server Error. \n Error on retrieving stats",
-                    response = Response.class)
-    })
-    Response getGeoAlertsHistoryForGeoClusters(
-            @ApiParam(
-                    name = "from",
-                    value = "Get stats from what time",
-                    required = true)
-            @QueryParam("from") long from,
-            @ApiParam(
-                    name = "to",
-                    value = "Get stats up to what time",
-                    required = true)
-            @QueryParam("to") long to);
+    //todo:amalka
+//    @GET
+//    @Path("alerts/history")
+//    @ApiOperation(
+//            consumes = "application/json",
+//            produces = "application/json",
+//            httpMethod = "GET",
+//            value = "Retrieve Geo alerts history for geo clusters",
+//            notes = "Retrieving geo alert history of all defined alerts for geo clusters",
+//            response = Response.class,
+//            tags = "Geo Service Management",
+//            extensions = {
+//                    @Extension(properties = {
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+//                    })
+//            }
+//    )
+//    @ApiResponses(value = {
+//            @ApiResponse(
+//                    code = 200,
+//                    message = "OK.",
+//                    response = Response.class,
+//                    responseHeaders = {
+//                            @ResponseHeader(
+//                                    name = "Content-Type",
+//                                    description = "The content type of the body"),
+//                            @ResponseHeader(
+//                                    name = "Last-Modified",
+//                                    description = "Date and time the resource was last modified.\n" +
+//                                            "Used by caches, or in conditional requests.")
+//                    }),
+//            @ApiResponse(
+//                    code = 400,
+//                    message = "Bad Request. \n Invalid Device Identifiers found.",
+//                    response = Response.class),
+//            @ApiResponse(
+//                    code = 401,
+//                    message = "Unauthorized. \n Unauthorized request."),
+//            @ApiResponse(
+//                    code = 500,
+//                    message = "Internal Server Error. \n Error on retrieving stats",
+//                    response = Response.class)
+//    })
+//    Response getGeoAlertsHistoryForGeoClusters(
+//            @ApiParam(
+//                    name = "from",
+//                    value = "Get stats from what time",
+//                    required = true)
+//            @QueryParam("from") long from,
+//            @ApiParam(
+//                    name = "to",
+//                    value = "Get stats up to what time",
+//                    required = true)
+//            @QueryParam("to") long to);
 
 
     /**

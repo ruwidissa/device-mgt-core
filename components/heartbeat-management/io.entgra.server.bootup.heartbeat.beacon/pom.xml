@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>heartbeat-management</artifactId>
-        <version>4.1.16-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -53,20 +53,14 @@
                         <Import-Package>
                             org.apache.axis2.*;version="${axis2.osgi.version.range}",
                             org.apache.axiom.*; version="${axiom.osgi.version.range}",
-                            org.osgi.framework,
-                            org.osgi.service.component,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging,
 			                javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
                             org.wso2.carbon.context,
                             org.wso2.carbon.utils.*,
                             org.wso2.carbon.ndatasource.core,
                             org.w3c.dom,
-                            org.apache.velocity;version="${velocity.version}",
-                            org.apache.velocity.app;version="${velocity.version}",
-                            org.apache.velocity.context;version="${velocity.version}",
-                            org.apache.velocity.exception;version="${velocity.version}",
-                            org.apache.velocity.runtime.resource;version="${velocity.version}",
-                            org.apache.velocity.runtime.resource.loader;version="${velocity.version}",
                             org.apache.commons.io,
                             org.apache.axis2.transport.mail,
                             org.apache.commons.collections,
@@ -148,10 +142,6 @@
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io.wso2</groupId>
