@@ -2212,11 +2212,11 @@
     <distributionManagement>
         <snapshotRepository>
             <id>maven-snapshots</id>
-            <url>http://nexus.entgra.io/repository/maven-snapshots/</url>
+            <url>https://nexus.entgra.io/repository/maven-snapshots/</url>
     	</snapshotRepository>
     	<repository>
             <id>maven-release</id>
-            <url>http://nexus.entgra.io/repository/maven-releases/</url>
+            <url>https://nexus.entgra.io/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
 
