@@ -35,6 +35,7 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.util;
 
+import io.entgra.application.mgt.common.services.ApplicationManager;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.java.security.SSLProtocolSocketFactory;
@@ -172,6 +173,7 @@ public class DeviceMgtAPIUtils {
     private static OTPManagementService otpManagementService;
 
     private static volatile SubscriptionManager subscriptionManager;
+    private static volatile ApplicationManager applicationManager;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -233,6 +235,23 @@ public class DeviceMgtAPIUtils {
         return subscriptionManager;
     }
 
+    public static ApplicationManager getApplicationManager() {
+        if (applicationManager == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (applicationManager == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    applicationManager =
+                            (ApplicationManager) ctx.getOSGiService(ApplicationManager.class, null);
+                    if (applicationManager == null) {
+                        String msg = "Application Manager service has not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+        return applicationManager;
+    }
 
     public static void scheduleTaskService(int notifierFrequency) {
         TaskScheduleService taskScheduleService;

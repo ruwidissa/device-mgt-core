@@ -37,6 +37,7 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import com.google.gson.Gson;
+import io.entgra.application.mgt.common.services.ApplicationManager;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -1417,9 +1418,15 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             Operation operation = DeviceMgtAPIUtils.validateOperationStatusBean(operationStatusBean);
             operation.setId(operationStatusBean.getOperationId());
             DeviceMgtAPIUtils.getDeviceManagementService().updateOperation(device, operation);
+
+            if (MDMAppConstants.AndroidConstants.OPCODE_INSTALL_APPLICATION.equals(operation.getCode()) ||
+                    MDMAppConstants.AndroidConstants.OPCODE_UNINSTALL_APPLICATION.equals(operation.getCode())) {
+                ApplicationManager applicationManager = DeviceMgtAPIUtils.getApplicationManager();
+                applicationManager.updateSubsStatus(device.getId(), operation.getId(),operation.getStatus().toString());
+            }
             return Response.status(Response.Status.OK).entity("OperationStatus updated successfully.").build();
         } catch (BadRequestException e) {
-            String msg = "Error occured due to invalid request";
+            String msg = "Error occurred due to invalid request";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (DeviceManagementException e) {
@@ -1430,7 +1437,11 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             String msg = "Error occurred when updating operation of device " + deviceIdentifier;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
+        } catch (io.entgra.application.mgt.common.exception.ApplicationManagementException e) {
+            String msg = "Error occurred when updating the application subscription status of the operation. " +
+                    "The device identifier is: " + deviceIdentifier;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();        }
     }
 
     @GET
