@@ -127,8 +127,8 @@ public class DefaultTokenHandler extends HttpServlet {
 
         URIBuilder ub = new URIBuilder();
         ub.setScheme(HandlerConstants.WSS_PROTOCOL);
-        ub.setHost(System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR));
-        ub.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_GW_HTTPS_PORT_ENV_VAR)));
+        ub.setHost(System.getProperty(HandlerConstants.IOT_REMOTE_SESSION_HOST_ENV_VAR));
+        ub.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_REMOTE_SESSION_HTTPS_PORT_ENV_VAR)));
         ub.setPath(HandlerConstants.REMOTE_SESSION_CONTEXT);
 
         JsonObject responseJsonObj = new JsonObject();
