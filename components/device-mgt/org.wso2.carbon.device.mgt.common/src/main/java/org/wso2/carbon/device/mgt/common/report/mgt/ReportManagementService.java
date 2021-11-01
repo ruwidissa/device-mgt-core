@@ -99,4 +99,20 @@ public interface ReportManagementService {
     PaginationResult getDeviceNotAssignedToGroups(PaginationRequest paginationRequest,
                                                   List<String> groupNames)
             throws ReportManagementException, DeviceTypeNotFoundException;
+
+    /**
+     * This method is used to get device operators for UI filters.
+     *
+     * @return returns list of device operators.
+     * @throws ReportManagementException
+     */
+    List<String> getDeviceOperators() throws ReportManagementException;
+
+    /**
+     * This method is used to get agent versions for UI filters.
+     *
+     * @return returns list of all agent versions.
+     * @throws ReportManagementException
+     */
+    List<String> getAgentVersions() throws ReportManagementException;
 }

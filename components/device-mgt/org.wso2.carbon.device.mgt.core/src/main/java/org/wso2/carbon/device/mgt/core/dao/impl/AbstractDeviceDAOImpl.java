@@ -3172,4 +3172,68 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throw new DeviceManagementDAOException(msg, e);
         }
     }
+
+    @Override
+    public List<String> getOperators(int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<String> deviceOperators = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT DISTINCT(VALUE_FIELD) AS OPERATOR " +
+                    "FROM DM_DEVICE_INFO i " +
+                    "INNER JOIN DM_ENROLMENT e ON " +
+                    "e.DEVICE_ID " +
+                    "WHERE e.DEVICE_ID = i.DEVICE_ID " +
+                    "AND KEY_FIELD = 'operator' " +
+                    "AND TENANT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String operator = rs.getString("OPERATOR");
+                deviceOperators.add(operator);
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while listing device operators.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return deviceOperators;
+    }
+
+    @Override
+    public List<String> getAgentVersions(int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<String> agentVersions = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT DISTINCT(VALUE_FIELD) AS AGENT_VERSION " +
+                    "FROM DM_DEVICE_INFO i " +
+                    "INNER JOIN DM_ENROLMENT e ON " +
+                    "e.DEVICE_ID " +
+                    "WHERE e.DEVICE_ID = i.DEVICE_ID " +
+                    "AND KEY_FIELD = 'AGENT_VERSION' " +
+                    "AND TENANT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String agentVersion = rs.getString("AGENT_VERSION");
+                agentVersions.add(agentVersion);
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while listing agent versions.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return agentVersions;
+    }
 }

@@ -781,4 +781,20 @@ public interface DeviceDAO {
      */
     int getGroupedDevicesCount(PaginationRequest request, List<Integer> deviceIds, String groupName, int tenantId)
             throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to retrieve all device operators for a tenant.
+     *
+     * @return returns list of device operators.
+     * @throws DeviceManagementDAOException
+     */
+    List<String> getOperators(int tenantId) throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to retrieve all agent versions for a tenant.
+     *
+     * @return returns list of agent versions.
+     * @throws DeviceManagementDAOException
+     */
+    List<String> getAgentVersions(int tenantId) throws DeviceManagementDAOException;
 }

@@ -30,6 +30,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
+import org.wso2.carbon.device.mgt.common.ReportFiltersList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.ReportManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -302,6 +303,30 @@ public class ReportManagementServiceImpl implements ReportManagementService {
                          "is not valid";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Path("/filters")
+    @Override
+    public Response getReportFilters() {
+        try {
+            List<String> operators = DeviceMgtAPIUtils.getReportManagementService().getDeviceOperators();
+            List<String> agentVersions = DeviceMgtAPIUtils.getReportManagementService().getAgentVersions();
+            if(operators.isEmpty() && agentVersions.isEmpty()) {
+                String msg = "There are no report filters found";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+            else {
+                ReportFiltersList reportFiltersList = new ReportFiltersList();
+                reportFiltersList.setDeviceOperators(operators);
+                reportFiltersList.setAgentVersions(agentVersions);
+                return Response.status(Response.Status.OK).entity(reportFiltersList).build();
+            }
+        } catch (ReportManagementException e) {
+            String msg = "Error occurred while retrieving device operators.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 }
