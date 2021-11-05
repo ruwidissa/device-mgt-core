@@ -66,7 +66,7 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                                 @HeaderParam("If-Modified-Since") String ifModifiedSince) {
         Activity activity;
         DeviceManagementProviderService dmService;
-        Response response = validateAdminUser();
+        Response response = validateAdminPermission();
         if (response == null) {
             try {
                 RequestValidationUtil.validateActivityId(id);
@@ -103,7 +103,7 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
             return Response.status(400).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
-        Response validationFailedResponse = validateAdminUser();
+        Response validationFailedResponse = validateAdminPermission();
         if (validationFailedResponse == null) {
             List<Activity> activities;
             ActivityList activityList = new ActivityList();
@@ -184,7 +184,7 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
             log.debug("getActivities -> Operation Code : " +operationCode+ "offset " + offset + " limit: " + limit );
         }
         RequestValidationUtil.validatePaginationParameters(offset, limit);
-        Response response = validateAdminUser();
+        Response response = validateAdminPermission();
         if(response == null){
             List<Activity> activities;
             ActivityList activityList = new ActivityList();
@@ -272,7 +272,7 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
         if (log.isDebugEnabled()) {
             log.debug("getActivities final timestamp " + timestamp);
         }
-        Response response = validateAdminUser();
+        Response response = validateAdminPermission();
         if (response == null) {
             ActivityList activityList = new ActivityList();
             DeviceManagementProviderService dmService;
@@ -330,19 +330,21 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
         }
     }
 
-    private Response validateAdminUser(){
+    private Response validateAdminPermission() {
+        //TODO: also check initiated by field to check current user has added the operation, if so allow access.
         try {
-            if (!DeviceMgtAPIUtils.isAdmin()) {
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Unauthorized operation! Only admin role can perform " +
-                        "this operation.").build();
+            if (!DeviceMgtAPIUtils.isAdminUser()) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity("Unauthorized operation! Only users with CDM ADMIN PERMISSION " +
+                                "can perform this operation.").build();
             }
             return null;
         } catch (UserStoreException e) {
-            String msg
-                    = "Error occurred while validating the user have admin role!";
+            String msg = "Error occurred while validating the user have admin permission!";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
     }
+
 }

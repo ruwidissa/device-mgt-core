@@ -36,6 +36,7 @@
 package org.wso2.carbon.device.mgt.jaxrs.util;
 
 import io.entgra.application.mgt.common.services.ApplicationManager;
+import io.entgra.application.mgt.common.services.SubscriptionManager;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.java.security.SSLProtocolSocketFactory;
@@ -46,13 +47,13 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
 import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.Utils;
-import io.entgra.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -81,6 +82,7 @@ import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
+import org.wso2.carbon.device.mgt.core.permission.mgt.PermissionUtils;
 import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -141,6 +143,7 @@ import java.util.Queue;
  */
 public class DeviceMgtAPIUtils {
 
+    private final static String CDM_ADMIN_PERMISSION = "/device-mgt/devices/any-device/permitted-actions-under-owning-device";
     private static final String NOTIFIER_FREQUENCY = "notifierFrequency";
     private static final String STREAM_DEFINITION_PREFIX = "iot.per.device.stream.";
     private static final String DEFAULT_HTTP_PROTOCOL = "https";
@@ -871,6 +874,27 @@ public class DeviceMgtAPIUtils {
             }
         }
         return false;
+    }
+
+    public static boolean isAdminUser() throws UserStoreException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        UserRealm userRealm = DeviceMgtAPIUtils.getRealmService().getTenantUserRealm(tenantId);
+        if (userRealm != null && userRealm.getAuthorizationManager() != null) {
+            return userRealm.getAuthorizationManager()
+                    .isUserAuthorized(removeTenantDomain(userName),
+                            PermissionUtils.getAbsolutePermissionPath(CDM_ADMIN_PERMISSION),
+                            CarbonConstants.UI_PERMISSION_ACTION);
+        }
+        return false;
+    }
+
+    private static String removeTenantDomain(String username) {
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        if (username.endsWith(tenantDomain)) {
+            return username.substring(0, username.lastIndexOf("@"));
+        }
+        return username;
     }
 
     public static DeviceTypeVersion convertDeviceTypeVersionWrapper(String deviceTypeName, int deviceTypeId,
