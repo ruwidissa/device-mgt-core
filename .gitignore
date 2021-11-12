@@ -9,6 +9,7 @@ target
 .idea
 *.ids
 .editorconfig
+.factorypath
 # Mac crap
 .DS_Store
 
