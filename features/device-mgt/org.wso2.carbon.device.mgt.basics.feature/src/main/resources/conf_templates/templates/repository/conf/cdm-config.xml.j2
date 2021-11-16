@@ -44,7 +44,7 @@
             <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider</Provider>
         {% if device_mgt_conf.push_notification_conf.push_notification_providers is defined %}
             {%- for push_notification_provider in device_mgt_conf.push_notification_conf.push_notification_providers -%}
-            <Provider>{{push_notification_provider}}</Provider>
+            <Provider>{{push_notification_provider.name}}</Provider>
             {% endfor %}
         {% endif %}
         </PushNotificationProviders>
