@@ -116,7 +116,9 @@ public class CertificateAuthenticator implements WebappAuthenticator {
                         deviceIdentifier.setType(DeviceManagementConstants.MobileDeviceTypes.MOBILE_DEVICE_TYPE_IOS);
                         TenantedDeviceWrapper tenantedDeviceWrapper = scepManager.getValidatedDevice(deviceIdentifier);
                         authenticationInfo.setTenantDomain(tenantedDeviceWrapper.getTenantDomain());
-                        authenticationInfo.setTenantId(tenantedDeviceWrapper.getTenantId());
+                        // To make sure the tenant flow is not initiated in the valve as the
+                        // tenant flows are initiated at the API level on iOS
+                        authenticationInfo.setTenantId(-1);
 
                         if (tenantedDeviceWrapper.getDevice() != null &&
                             tenantedDeviceWrapper.getDevice().getEnrolmentInfo() != null) {
