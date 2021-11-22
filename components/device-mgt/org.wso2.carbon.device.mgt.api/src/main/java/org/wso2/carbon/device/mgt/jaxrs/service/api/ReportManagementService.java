@@ -562,4 +562,49 @@ public interface ReportManagementService {
                     defaultValue = "10")
             @QueryParam("limit")
                     int limit);
+
+    @GET
+    @Path("/filters")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Retrieving filters of devices for analytics.",
+            notes = "Provides filters in devices of Entgra IoT Server which can be used in UI for filtering." +
+                    "Filters include device operators and agent versions for all devices.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the list of filters.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n There are no device filters.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. " +
+                                    "\n Server error occurred while fetching the device filters list.",
+                            response = ErrorResponse.class)
+            })
+    Response getReportFilters();
 }

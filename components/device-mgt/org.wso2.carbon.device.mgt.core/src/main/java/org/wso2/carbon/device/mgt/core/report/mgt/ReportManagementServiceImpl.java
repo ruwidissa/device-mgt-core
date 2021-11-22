@@ -429,4 +429,60 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             throw new ReportManagementException(msg, e);
         }
     }
+
+    @Override
+    public List<String> getDeviceOperators() throws ReportManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Get device operators");
+        }
+        try {
+            int tenantId = DeviceManagementDAOUtil.getTenantId();
+            try {
+                DeviceManagementDAOFactory.openConnection();
+                return deviceDAO.getOperators(tenantId);
+            } catch (DeviceManagementDAOException e) {
+                String msg = "Error occurred while obtaining the device operators.";
+                log.error(msg, e);
+                throw new ReportManagementException(msg, e);
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection to the data source.";
+                log.error(msg, e);
+                throw new ReportManagementException(msg, e);
+            } finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving Tenant ID.";
+            log.error(msg, e);
+            throw new ReportManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public List<String> getAgentVersions() throws ReportManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Get agent versions");
+        }
+        try {
+            int tenantId = DeviceManagementDAOUtil.getTenantId();
+            try {
+                DeviceManagementDAOFactory.openConnection();
+                return deviceDAO.getAgentVersions(tenantId);
+            } catch (DeviceManagementDAOException e) {
+                String msg = "Error occurred while obtaining the agent versions.";
+                log.error(msg, e);
+                throw new ReportManagementException(msg, e);
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection to the data source.";
+                log.error(msg, e);
+                throw new ReportManagementException(msg, e);
+            } finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving Tenant ID.";
+            log.error(msg, e);
+            throw new ReportManagementException(msg, e);
+        }
+    }
 }
