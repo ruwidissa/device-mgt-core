@@ -97,9 +97,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -434,7 +436,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
                 .getDeviceManagementProviderService();
         GroupManagementProviderService groupManagementProviderService = HelperUtil.getGroupManagementProviderService();
-        List<Device> devices = new ArrayList<>();
+        Set<Device> devices = new HashSet<>();
         List<String> subscribers = new ArrayList<>();
         List<DeviceIdentifier> errorDeviceIdentifiers = new ArrayList<>();
         String deviceTypeName = null;
@@ -511,8 +513,10 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 devices.removeIf(device -> !tmpDeviceTypeName.equals(device.getType()));
             }
 
+            List<Device> deviceList = new ArrayList<>();
+            deviceList.addAll(devices);
             ApplicationSubscriptionInfo applicationSubscriptionInfo = new ApplicationSubscriptionInfo();
-            applicationSubscriptionInfo.setDevices(devices);
+            applicationSubscriptionInfo.setDevices(deviceList);
             applicationSubscriptionInfo.setSubscribers(subscribers);
             applicationSubscriptionInfo.setErrorDeviceIdentifiers(errorDeviceIdentifiers);
             applicationSubscriptionInfo.setAppSupportingDeviceTypeName(deviceTypeName);
