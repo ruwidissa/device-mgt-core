@@ -44,6 +44,12 @@ public class OperationStatusBean {
     )
     private String status;
 
+    @ApiModelProperty(
+            name = "operationCode",
+            value = "Operation Code."
+    )
+    private String operationCode;
+
     public int getOperationId() {
         return operationId;
     }
@@ -58,5 +64,13 @@ public class OperationStatusBean {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getOperationCode() {
+        return operationCode;
+    }
+
+    public void setOperationCode(String operationCode) {
+        this.operationCode = operationCode;
     }
 }

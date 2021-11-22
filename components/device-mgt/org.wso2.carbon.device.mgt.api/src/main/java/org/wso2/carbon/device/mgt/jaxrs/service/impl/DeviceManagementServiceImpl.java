@@ -1417,6 +1417,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             }
             Operation operation = DeviceMgtAPIUtils.validateOperationStatusBean(operationStatusBean);
             operation.setId(operationStatusBean.getOperationId());
+            operation.setCode(operationStatusBean.getOperationCode());
             DeviceMgtAPIUtils.getDeviceManagementService().updateOperation(device, operation);
 
             if (MDMAppConstants.AndroidConstants.OPCODE_INSTALL_APPLICATION.equals(operation.getCode()) ||
