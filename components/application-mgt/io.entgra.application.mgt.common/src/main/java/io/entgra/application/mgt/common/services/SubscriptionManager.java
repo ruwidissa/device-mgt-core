@@ -33,24 +33,43 @@ import java.util.Properties;
  * This interface manages all the operations related with ApplicationDTO Subscription.
  */
 public interface SubscriptionManager {
+
     /**
      * Performs bulk subscription operation for a given application and a subscriber list.
-     *  @param applicationUUID UUID of the application to subscribe/unsubscribe
-     * @param params          list of subscribers. This list can be of either
-     *                        {@link DeviceIdentifier} if {@param subType} is equal
-     *                        to DEVICE or
-     *                        {@link String} if {@param subType} is USER, ROLE or GROUP
-     * @param subType         subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code> {@see {
- * @param action          subscription action. E.g. <code>INSTALL/UNINSTALL</code> {@see {
- * @param <T>             generic type of the method.
- * @return {@link ApplicationInstallResponse}
- * @throws ApplicationManagementException if error occurs when subscribing to the given application
- * @link io.entgra.application.mgt.common.SubscriptionType}}
- * @link io.entgra.application.mgt.common.SubAction}}
-     * @param properties
+     * @param applicationUUID UUID of the application to subscribe/unsubscribe
+     * @param params          list of subscribers.
+     *                        This list can be of either {@link DeviceIdentifier} if {@param subType} is equal to
+     *                        DEVICE or {@link String} if {@param subType} is USER, ROLE or GROUP
+     * @param subType         subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code>
+     * @param action          subscription action. E.g. <code>INSTALL/UNINSTALL</code>
+     * @param <T>             generic type of the method.
+     * @param properties      Application properties that need to be sent with operation payload to the device
+     * @return {@link ApplicationInstallResponse}
+     * @throws ApplicationManagementException if error occurs when subscribing to the given application
      */
     <T> ApplicationInstallResponse performBulkAppOperation(String applicationUUID, List<T> params, String subType,
-                                                           String action, Properties properties) throws ApplicationManagementException;
+                                                           String action, Properties properties)
+            throws ApplicationManagementException;
+
+    /**
+     * Performs bulk subscription operation for a given application and a subscriber list.
+     * @param applicationUUID UUID of the application to subscribe/unsubscribe
+     * @param params          list of subscribers.
+     *                        This list can be of either {@link DeviceIdentifier} if {@param subType} is equal to
+     *                        DEVICE or {@link String} if {@param subType} is USER, ROLE or GROUP
+     * @param subType         subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code>
+     * @param action          subscription action. E.g. <code>INSTALL/UNINSTALL</code>
+     * @param <T>             generic type of the method.
+     * @param properties      Application properties that need to be sent with operation payload to the device
+     * @param isOperationReExecutingDisabled To prevent adding the application subscribing operation to devices that are
+     *                                      already subscribed application successfully.
+     * @return {@link ApplicationInstallResponse}
+     * @throws ApplicationManagementException if error occurs when subscribing to the given application
+     */
+    <T> ApplicationInstallResponse performBulkAppOperation(String applicationUUID, List<T> params, String subType,
+                                                           String action, Properties properties,
+                                                           boolean isOperationReExecutingDisabled)
+            throws ApplicationManagementException;
 
     /**
      * Create an entry related to the scheduled task in the database.
@@ -119,7 +138,7 @@ public interface SubscriptionManager {
      * This is used in enterprise app installing policy.
      *
      * @param deviceIdentifier Device identifiers
-     * @param releaseUUID UUIs of applicatios
+     * @param apps Applications
      * @throws ApplicationManagementException if error occurred while installing given applications into the given
      * device
      */

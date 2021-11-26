@@ -60,6 +60,7 @@ public class Constants {
     public static final String APP_UUID = "APP_UUID";
     public static final String APP_PROPERTIES = "APP_PROPERTIES";
     public static final String SUBSCRIBER = "SUBSCRIBER";
+    public static final String OPERATION_RE_EXECUtING = "OPERATION_RE_EXECUtING";
     public static final String TENANT_DOMAIN = "TENANT_DOMAIN";
     public static final String TENANT_ID = "__TENANT_ID_PROP__";
     public static final String TASK_NAME = "TASK_NAME";
