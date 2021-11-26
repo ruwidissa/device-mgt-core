@@ -123,22 +123,24 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @PathParam("action") String action,
             @Valid List<String> subscribers,
             @QueryParam("timestamp") long timestamp,
-            @QueryParam("block-uninstall") Boolean isUninstallBlocked
+            @QueryParam("block-uninstall") Boolean isUninstallBlocked,
+            @QueryParam("disable-operation-re-executing") boolean isOperationReExecutingDisabled
     ) {
         Properties properties = new Properties();
-        if(isUninstallBlocked != null) {
+        if (isUninstallBlocked != null) {
             properties.put(MDMAppConstants.AndroidConstants.IS_BLOCK_UNINSTALL, isUninstallBlocked);
         }
         try {
             if (0 == timestamp) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-                ApplicationInstallResponse response = subscriptionManager
-                        .performBulkAppOperation(uuid, subscribers, subType, action, properties);
+                ApplicationInstallResponse response =
+                        subscriptionManager.performBulkAppOperation(uuid, subscribers, subType, action, properties,
+                                isOperationReExecutingDisabled);
                 return Response.status(Response.Status.OK).entity(response).build();
             } else {
                 return scheduleApplicationOperationTask(uuid, subscribers,
                         SubscriptionType.valueOf(subType.toUpperCase()), SubAction.valueOf(action.toUpperCase()),
-                        timestamp, properties);
+                        timestamp, properties, isOperationReExecutingDisabled);
             }
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application release for UUID: " + uuid + ". Hence, verify the payload";
@@ -263,15 +265,41 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
      *                        {@see {@link io.entgra.application.mgt.common.SubscriptionType}}
      * @param subAction       action subscription action. E.g. <code>INSTALL/UNINSTALL</code>
      *                        {@see {@link io.entgra.application.mgt.common.SubAction}}
+     * @param payload         Properties sending to the device via operation
      * @param timestamp       timestamp to schedule the application subscription
      * @return {@link Response} of the operation
      */
     private Response scheduleApplicationOperationTask(String applicationUUID, List<?> subscribers,
-            SubscriptionType subType, SubAction subAction, long timestamp, Properties payload) {
+                                                      SubscriptionType subType, SubAction subAction, long timestamp,
+                                                      Properties payload) {
+        return scheduleApplicationOperationTask(applicationUUID, subscribers, subType, subAction, timestamp, payload,
+                false);
+    }
+
+    /**
+     * Schedule the application subscription for the given timestamp
+     *
+     * @param applicationUUID UUID of the application to install
+     * @param subscribers     list of subscribers. This list can be of
+     *                        either {@link org.wso2.carbon.device.mgt.common.DeviceIdentifier} if {@param subType} is
+     *                        equal to DEVICE or {@link String} if {@param subType} is USER, ROLE or GROUP
+     * @param subType         subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code>
+     *                        {@see {@link io.entgra.application.mgt.common.SubscriptionType}}
+     * @param subAction       action subscription action. E.g. <code>INSTALL/UNINSTALL</code>
+     *                        {@see {@link io.entgra.application.mgt.common.SubAction}}
+     * @param timestamp       timestamp to schedule the application subscription
+     * @param payload         Properties sending to the device via operation
+     * @param isOperationReExecutingDisabled To prevent adding the application subscribing operation to devices that are
+     *                                      already subscribed application successfully.
+     * @return {@link Response} of the operation
+     */
+    private Response scheduleApplicationOperationTask(String applicationUUID, List<?> subscribers,
+                                                      SubscriptionType subType, SubAction subAction, long timestamp,
+                                                      Properties payload, boolean isOperationReExecutingDisabled) {
         try {
             ScheduledAppSubscriptionTaskManager subscriptionTaskManager = new ScheduledAppSubscriptionTaskManager();
             subscriptionTaskManager.scheduleAppSubscriptionTask(applicationUUID, subscribers, subType, subAction,
-                    timestamp, payload);
+                    timestamp, payload, isOperationReExecutingDisabled);
         } catch (ApplicationOperationTaskException e) {
             String msg = "Error occurred while scheduling the application install operation";
             log.error(msg, e);

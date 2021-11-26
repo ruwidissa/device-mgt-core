@@ -123,7 +123,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
     @Override
     public <T> ApplicationInstallResponse performBulkAppOperation(String applicationUUID, List<T> params,
-                                                                  String subType, String action, Properties properties) throws ApplicationManagementException {
+                                                                  String subType, String action, Properties properties)
+            throws ApplicationManagementException {
+        return performBulkAppOperation(applicationUUID, params, subType, action, properties, false);
+    }
+
+    @Override
+    public <T> ApplicationInstallResponse performBulkAppOperation(String applicationUUID, List<T> params,
+                                                                  String subType, String action, Properties properties,
+                                                                  boolean isOperationReExecutingDisabled)
+            throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Install application release which has UUID " + applicationUUID + " to " + params.size()
                     + " users.");
@@ -136,7 +145,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 params);
         ApplicationInstallResponse applicationInstallResponse = performActionOnDevices(
                 applicationSubscriptionInfo.getAppSupportingDeviceTypeName(), applicationSubscriptionInfo.getDevices(),
-                applicationDTO, subType, applicationSubscriptionInfo.getSubscribers(), action, properties);
+                applicationDTO, subType, applicationSubscriptionInfo.getSubscribers(), action, properties, isOperationReExecutingDisabled);
 
         applicationInstallResponse.setErrorDeviceIdentifiers(applicationSubscriptionInfo.getErrorDeviceIdentifiers());
         return applicationInstallResponse;
@@ -621,12 +630,17 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
      * @param subType        Subscription type (i.e USER, ROLE, GROUP or DEVICE)
      * @param subscribers    Subscribers
      * @param action         Performing action. (i.e INSTALL or UNINSTALL)
+     * @param isOperationReExecutingDisabled To prevent adding the application subscribing operation to devices that are
+     *                                      already subscribed application successfully.
      * @return {@link ApplicationInstallResponse}
-     * @throws ApplicationManagementException if error occured when adding operation on device or updating subscription
+     * @throws ApplicationManagementException if error occurred when adding operation on device or updating subscription
      *                                        data.
      */
     private ApplicationInstallResponse performActionOnDevices(String deviceType, List<Device> devices,
-            ApplicationDTO applicationDTO, String subType, List<String> subscribers, String action, Properties properties)
+                                                              ApplicationDTO applicationDTO, String subType,
+                                                              List<String> subscribers, String action,
+                                                              Properties properties,
+                                                              boolean isOperationReExecutingDisabled)
             throws ApplicationManagementException {
 
         //Get app subscribing info of each device
@@ -641,15 +655,19 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
             deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstallableDevices().keySet()));
             deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppReInstallableDevices().keySet()));
-            deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstalledDevices().keySet()));
-        } else {
-            if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+            if (!isOperationReExecutingDisabled) {
                 deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstalledDevices().keySet()));
-                deviceIdentifiers
-                        .addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppReUnInstallableDevices().keySet()));
-                ignoredDeviceIdentifiers
-                        .addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstallableDevices().keySet()));
             }
+        } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+            deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstalledDevices().keySet()));
+            deviceIdentifiers
+                    .addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppReUnInstallableDevices().keySet()));
+            ignoredDeviceIdentifiers
+                    .addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstallableDevices().keySet()));
+        } else {
+            String msg = "Found invalid Action: " + action + ". Hence, terminating the application subscribing.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
         }
 
         if (deviceIdentifiers.isEmpty()) {
@@ -721,15 +739,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 } else {
                     if (deviceSubscriptionDTO.isUnsubscribed()) {
                         if (!Operation.Status.COMPLETED.toString().equals(deviceSubscriptionDTO.getStatus())) {
-                        /*We can't ensure whether app is uninstalled successfully or not hence allow to perform both
-                        install and uninstall operations*/
+                        /*If the uninstalling operation has failed, we can't ensure whether the app is uninstalled
+                        successfully or not. Therefore, allowing to perform both install and uninstall operations*/
                             subscribingDeviceIdHolder.getAppReUnInstallableDevices()
                                     .put(deviceIdentifier, device.getId());
                         }
                         subscribingDeviceIdHolder.getAppReInstallableDevices().put(deviceIdentifier, device.getId());
                     } else {
-                        if (!deviceSubscriptionDTO.isUnsubscribed() && Operation.Status.COMPLETED.toString()
-                                .equals(deviceSubscriptionDTO.getStatus())) {
+                        if (Operation.Status.COMPLETED.toString().equals(deviceSubscriptionDTO.getStatus())) {
                             subscribingDeviceIdHolder.getAppInstalledDevices().put(deviceIdentifier, device.getId());
                         } else {
                             subscribingDeviceIdHolder.getAppReInstallableDevices()
@@ -964,11 +981,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.openDBConnection();
             return this.subscriptionDAO.getDeviceSubscriptions(deviceIds, appReleaseId, tenantId);
         } catch (ApplicationManagementDAOException e) {
-            String msg = "Error occured when getting device subscriptions for given device IDs";
+            String msg = "Error occurred when getting device subscriptions for given device IDs";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg = "Error occured while getting database connection for getting device subscriptions.";
+            String msg = "Error occurred while getting database connection for getting device subscriptions.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {

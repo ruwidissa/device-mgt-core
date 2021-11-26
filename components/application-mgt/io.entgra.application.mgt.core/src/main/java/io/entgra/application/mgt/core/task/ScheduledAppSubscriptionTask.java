@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
-    private static Log log = LogFactory.getLog(ScheduledAppSubscriptionTask.class);
+    private static final Log log = LogFactory.getLog(ScheduledAppSubscriptionTask.class);
     private static final String TASK_NAME = "SCHEDULE_APP_SUBSCRIPTION";
 
     private SubscriptionManager subscriptionManager;
@@ -55,6 +55,7 @@ public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
     private String tenantDomain;
     private String taskName;
     private int tenantId;
+    private boolean isOperationReExecutingDisabled;
 
     @Override
     public void setProperties(Map<String, String> map) {
@@ -67,6 +68,7 @@ public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
         this.tenantDomain = map.get(Constants.TENANT_DOMAIN);
         this.tenantId = Integer.parseInt(map.get(Constants.TENANT_ID));
         this.taskName = map.get(Constants.TASK_NAME);
+        this.isOperationReExecutingDisabled = Boolean.parseBoolean(map.get(Constants.OPERATION_RE_EXECUtING));
     }
 
     @Override
@@ -108,7 +110,7 @@ public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
                         try {
                             Properties properties = new Gson().fromJson(payload, Properties.class);
                             subscriptionManager.performBulkAppOperation(this.application, subscriberList,
-                                                                        this.subscriptionType, this.action, properties);
+                                    this.subscriptionType, this.action, properties, isOperationReExecutingDisabled);
                             subscriptionDTO.setStatus(ExecutionStatus.EXECUTED);
                         } catch (ApplicationManagementException e) {
                             log.error(

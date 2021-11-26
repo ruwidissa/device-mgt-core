@@ -69,10 +69,14 @@ public class ScheduledAppSubscriptionTaskManager {
      * @param action           action subscription action. E.g. {@code INSTALL/UNINSTALL}
      *                         {@see {@link SubAction}}
      * @param timestamp        timestamp to schedule the application subscription
+     * @param properties         Properties sending to the device via operation
+     * @param isOperationReExecutingDisabled To prevent adding the application subscribing
+     *                                      already subscribed application successfully.
      * @throws ApplicationOperationTaskException if error occurred while scheduling the subscription
      */
     public void scheduleAppSubscriptionTask(String applicationUUID, List<?> subscribers,
-                                            SubscriptionType subscriptionType, SubAction action, long timestamp, Properties properties)
+                                            SubscriptionType subscriptionType, SubAction action, long timestamp,
+                                            Properties properties, boolean isOperationReExecutingDisabled)
             throws ApplicationOperationTaskException {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(timestamp * 1000));
@@ -105,14 +109,15 @@ public class ScheduledAppSubscriptionTaskManager {
             taskProperties.put(Constants.APP_UUID, applicationUUID);
             taskProperties.put(Constants.TENANT_DOMAIN, carbonContext.getTenantDomain(true));
             taskProperties.put(Constants.SUBSCRIBER, carbonContext.getUsername());
+            taskProperties.put(Constants.OPERATION_RE_EXECUtING, String.valueOf(isOperationReExecutingDisabled));
             String subscribersString;
             if (SubscriptionType.DEVICE.equals(subscriptionType)) {
                 subscribersString = new Gson().toJson(subscribers);
-                taskProperties.put(Constants.SUBSCRIBERS, subscribersString);
             } else {
                 subscribersString = subscribers.stream().map(String.class::cast).collect(Collectors.joining(","));
-                taskProperties.put(Constants.SUBSCRIBERS, subscribersString);
             }
+            taskProperties.put(Constants.SUBSCRIBERS, subscribersString);
+
             if(properties != null) {
                 String payload = new Gson().toJson(properties);
                 taskProperties.put(Constants.PAYLOAD, payload);

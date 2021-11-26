@@ -196,7 +196,12 @@ public interface SubscriptionManagementAPI {
                     name = "block-uninstall",
                     value = "App removal status of the install operation"
             )
-            @QueryParam("block-uninstall") Boolean isUninstallBlocked
+            @QueryParam("block-uninstall") Boolean isUninstallBlocked,
+            @ApiParam(
+                    name = "disable-operation-re-executing",
+                    value = "Disable Operation re-executing"
+            )
+            @QueryParam("disable-operation-re-executing") boolean isOperationReExecutingDisabled
     );
 
     @POST
