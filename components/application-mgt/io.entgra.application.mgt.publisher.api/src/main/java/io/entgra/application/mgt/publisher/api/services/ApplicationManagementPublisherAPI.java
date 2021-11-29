@@ -683,7 +683,7 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @GET
-    @Path("/device-type/{deviceType}/app-name/{appName}")
+    @Path("/device-type/{deviceType}/app-name")
     @ApiOperation(
             httpMethod = "GET",
             value = "Check the application existence",
@@ -723,7 +723,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "appName",
                     value = "Application name",
                     required = true)
-            @PathParam("appName") String appName
+            @QueryParam("appName") String appName
     );
 
     @PUT
