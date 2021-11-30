@@ -202,6 +202,19 @@
         <Scope>perm:metadata:view</Scope>
         <Scope>perm:metadata:create</Scope>
         <Scope>perm:metadata:update</Scope>
+        <Scope>perm:ios:lock</Scope>
+        <Scope>perm:ios:location</Scope>
+        <Scope>perm:ios:ring</Scope>
+        <Scope>perm:ios:clear-passcode</Scope>
+        <Scope>perm:ios:enterprise-wipe</Scope>
+        <Scope>perm:ios:notification</Scope>
+        <Scope>perm:ios:wipe-data</Scope>
+        <Scope>perm:ios:boolean-setting</Scope>
+        <Scope>perm:ios:wallpaper</Scope>
+        <Scope>perm:ios:app-attributes</Scope>
+        <Scope>perm:ios:app-configurations</Scope>
+        <Scope>perm:mac-os:shut-down</Scope>
+        <Scope>perm:mac-os:restart</Scope>
     {% if mdm_ui_conf.scopes is defined %}
         {%- for scope in mdm_ui_conf.scopes -%}
         <Scope>{{scope}}</Scope>
