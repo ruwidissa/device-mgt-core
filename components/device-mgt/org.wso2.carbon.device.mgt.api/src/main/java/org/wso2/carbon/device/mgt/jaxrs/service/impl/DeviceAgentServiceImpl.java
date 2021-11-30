@@ -277,7 +277,6 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                 i++;
             }
 
-            // todo: amalka: commented data publishing
 //            if (DeviceMgtAPIUtils.getEventPublisherService().publishEvent(DeviceMgtAPIUtils.getStreamDefinition(type
 //                    , PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())
 //                    , Constants.DEFAULT_STREAM_VERSION, metaData
@@ -378,7 +377,7 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                 i++;
             }
 
-            // todo: amalka: commented data publishing
+
 //            if (DeviceMgtAPIUtils.getEventPublisherService().publishEvent(DeviceMgtAPIUtils.getStreamDefinition(type
 //                    , PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())
 //                    , Constants.DEFAULT_STREAM_VERSION, metaData

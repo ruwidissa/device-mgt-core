@@ -58,7 +58,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     private static final String MQTT_CONTENT_VALIDATOR = "default";
     private static final String TIMESTAMP_FIELD_NAME = "_timestamp";
 
-    //todo:amalka
+
 //    private static AnalyticsDataAPI getAnalyticsDataAPI() {
 //        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
 //        AnalyticsDataAPI analyticsDataAPI =
@@ -173,7 +173,6 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     /**
      * Deploy Event Stream, Receiver, Publisher and Store Configuration.
      */
-    //todo:amalka
 //    @POST
 //    @Path("/{type}")
 //    @Override
@@ -328,7 +327,6 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     /**
      * Returns device specific data for the give period of time.
      */
-    //todo:amalka
 //    @GET
 //    @Path("/{type}/{deviceId}")
 //    @Override
@@ -383,7 +381,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
      * Returns last known data points up to the limit if limit is specified. Otherwise returns last known data point.
      * Limit parameter needs to be zero or positive.
      */
-    //todo:amalka
+
 //    @GET
 //    @Path("/last-known/{type}/{deviceId}")
 //    @Override
@@ -595,7 +593,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
         }
     }
 
-    //todo:amalka
+
 //    private void publishEventStore(String streamName, String version, EventAttributeList eventAttributes)
 //            throws RemoteException, UserStoreException, JWTClientException,
 //            EventStreamPersistenceAdminServiceEventStreamPersistenceAdminServiceExceptionException {

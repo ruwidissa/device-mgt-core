@@ -148,7 +148,6 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         for (API apiInfo : apisWithTag) {
                             String id = apiInfo.getId().getProviderName().replace("@", "-AT-")
                                     + "-" + apiInfo.getId().getName() + "-" + apiInfo.getId().getVersion();
-                            // todo: amalka will this break old apis?
                             boolean subscriptionExist = false;
                             if (subscribedAPIs.size() > 0) {
                                 for (SubscribedAPI subscribedAPI : subscribedAPIs) {

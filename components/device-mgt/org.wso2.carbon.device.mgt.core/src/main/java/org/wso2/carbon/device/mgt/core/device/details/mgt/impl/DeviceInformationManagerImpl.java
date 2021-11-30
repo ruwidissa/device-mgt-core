@@ -169,7 +169,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                         deviceInfo.getAvailableRAMMemory(),
                         deviceInfo.isPluggedIn()
                 };
-                //todo:amalka
+
 //                DeviceManagerUtil.getEventPublisherService().publishEvent(
 //                        DEVICE_INFO_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
 //                );
@@ -185,7 +185,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while updating the last update timestamp of the " +
                     "device", e);
-            //todo:amalka
 //        } catch (DataPublisherConfigurationException e) {
 //            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
         } finally {
@@ -382,7 +381,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                         deviceLocation.getBearing(),
                         deviceLocation.getDistance()
                 };
-                //todo:amalka
 //                DeviceManagerUtil.getEventPublisherService().publishEvent(
 //                        LOCATION_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
 //                );
@@ -397,7 +395,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         } catch (DeviceManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while getting the device information.", e);
-            //todo:amalka
 //        } catch (DataPublisherConfigurationException e) {
 //            DeviceManagementDAOFactory.rollbackTransaction();
 //            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
