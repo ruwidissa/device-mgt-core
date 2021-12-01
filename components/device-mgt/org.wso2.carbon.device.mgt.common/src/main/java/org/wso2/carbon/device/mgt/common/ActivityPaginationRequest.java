@@ -34,6 +34,8 @@ public class ActivityPaginationRequest {
     private long since;
     private Operation.Type type;
     private Operation.Status status;
+    private long startTimestamp;
+    private long endTimestamp;
 
     public ActivityPaginationRequest(int offset, int limit) {
         this.offset = offset;
@@ -113,4 +115,19 @@ public class ActivityPaginationRequest {
         this.status = status;
     }
 
+    public long getStartTimestamp() {
+        return startTimestamp;
+    }
+
+    public void setStartTimestamp(long startTimestamp) {
+        this.startTimestamp = startTimestamp;
+    }
+
+    public long getEndTimestamp() {
+        return endTimestamp;
+    }
+
+    public void setEndTimestamp(long endTimestamp) {
+        this.endTimestamp = endTimestamp;
+    }
 }

@@ -478,6 +478,16 @@ public interface ActivityInfoProviderService {
                             "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z\n." +
                             "Example: Mon, 05 Jan 2014 15:10:00 +0200"
             )
-            @HeaderParam("If-Modified-Since") String ifModifiedSince);
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @ApiParam(
+                    name = "startTimestamp",
+                    value = "Starting unix timestamp value for filtering activities"
+            )
+            @QueryParam("startTimestamp") long startTimestamp,
+            @ApiParam(
+                    name = "endTimestamp",
+                    value = "Ending unix timestamp value for filtering activities"
+            )
+            @QueryParam("endTimestamp") long endTimestamp);
 
 }

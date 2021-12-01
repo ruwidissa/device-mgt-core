@@ -228,11 +228,14 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                                   @QueryParam("deviceId") String deviceId,
                                   @QueryParam("type") String type,
                                   @QueryParam("status") String status,
-                                  @HeaderParam("If-Modified-Since") String ifModifiedSince) {
+                                  @HeaderParam("If-Modified-Since") String ifModifiedSince,
+                                  @QueryParam("startTimestamp") long startTimestamp,
+                                  @QueryParam("endTimestamp") long endTimestamp) {
 
         long ifModifiedSinceTimestamp;
         long sinceTimestamp;
         long timestamp = 0;
+        boolean isTimeDurationProvided = false;
         if (log.isDebugEnabled()) {
             log.debug("getActivities since: " + since + " , offset: " + offset + " ,limit: " + limit + " ," +
                     "ifModifiedSince: " + ifModifiedSince);
@@ -262,9 +265,12 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
             }
             sinceTimestamp = sinceDate.getTime();
             timestamp = sinceTimestamp / 1000;
+        } else if (startTimestamp > 0 && endTimestamp > 0) {
+            RequestValidationUtil.validateTimeDuration(startTimestamp, endTimestamp);
+            isTimeDurationProvided = true;
         }
 
-        if (timestamp == 0) {
+        if (timestamp == 0 && !isTimeDurationProvided) {
             //If timestamp is not sent by the user, a default value is set, that is equal to current time-12 hours.
             long time = System.currentTimeMillis() / 1000;
             timestamp = time - 42300;
@@ -300,7 +306,12 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                 if (status != null && !status.isEmpty()) {
                     activityPaginationRequest.setStatus(Operation.Status.valueOf(status.toUpperCase()));
                 }
-                activityPaginationRequest.setSince(timestamp);
+                if (timestamp > 0) {
+                    activityPaginationRequest.setSince(timestamp);
+                } else {
+                    activityPaginationRequest.setStartTimestamp(startTimestamp);
+                    activityPaginationRequest.setEndTimestamp(endTimestamp);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("Activity request: " + new Gson().toJson(activityPaginationRequest));
                 }
