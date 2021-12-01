@@ -1767,6 +1767,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getSince() != 0) {
                 sql += "AND UPDATED_TIMESTAMP > ? ";
             }
+            if (activityPaginationRequest.getStartTimestamp() > 0 && activityPaginationRequest.getEndTimestamp() > 0) {
+                isTimeDurationFilteringProvided = true;
+                sql += "AND CREATED_TIMESTAMP BETWEEN  ? AND ? ";
+            }
             if (activityPaginationRequest.getType() != null) {
                 sql += "AND TYPE = ? ";
             }
@@ -1792,9 +1796,8 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getSince() != 0) {
                 sql += "AND eom.UPDATED_TIMESTAMP > ? ";
             }
-            if (activityPaginationRequest.getStartTimestamp() > 0 && activityPaginationRequest.getEndTimestamp() > 0) {
-                isTimeDurationFilteringProvided = true;
-                sql += "AND eom.UPDATED_TIMESTAMP BETWEEN  ? AND ? ";
+            if (isTimeDurationFilteringProvided) {
+                sql += "AND eom.CREATED_TIMESTAMP BETWEEN  ? AND ? ";
             }
             if (activityPaginationRequest.getType() != null) {
                 sql += "AND eom.TYPE = ? ";
@@ -1853,6 +1856,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (activityPaginationRequest.getSince() != 0) {
                     stmt.setLong(index++, activityPaginationRequest.getSince());
                 }
+                if (isTimeDurationFilteringProvided) {
+                    stmt.setLong(index++, activityPaginationRequest.getStartTimestamp());
+                    stmt.setLong(index++, activityPaginationRequest.getEndTimestamp());
+                }
                 if (activityPaginationRequest.getType() != null) {
                     stmt.setString(index++, activityPaginationRequest.getType().name());
                 }
@@ -1910,7 +1917,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
             }
             if (activityPaginationRequest.getStartTimestamp() > 0 && activityPaginationRequest.getEndTimestamp() > 0) {
                 isTimeDurationFilteringProvided = true;
-                sql += "AND UPDATED_TIMESTAMP BETWEEN ? AND ? ";
+                sql += "AND CREATED_TIMESTAMP BETWEEN ? AND ? ";
             }
 
             int index = 1;

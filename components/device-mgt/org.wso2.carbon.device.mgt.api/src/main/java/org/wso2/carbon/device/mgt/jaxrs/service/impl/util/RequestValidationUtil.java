@@ -773,8 +773,9 @@ public class RequestValidationUtil {
     public static void validateTimeDuration(long startTimestamp, long endTimestamp) {
         if (startTimestamp > endTimestamp) {
             throw new InputValidationException(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request parameter startTimestamp" +
-                            " should not be higher values than endTimestamp").build());
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l)
+                            .setMessage("Request parameter startTimestamp should not be " +
+                                    "a higher value than endTimestamp").build());
         }
     }
 }
