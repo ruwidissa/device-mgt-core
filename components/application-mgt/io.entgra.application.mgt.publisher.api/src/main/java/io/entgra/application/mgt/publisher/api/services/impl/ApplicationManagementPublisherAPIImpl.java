@@ -390,11 +390,16 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @Override
     @GET
-    @Path("/device-type/{deviceType}/app-name/{appName}")
+    @Path("/device-type/{deviceType}/app-name")
     public Response isExistingApplication(
             @PathParam("deviceType") String deviceType,
-            @PathParam("appName") String appName ){
+            @QueryParam("appName") String appName){
         try {
+            if (appName == null) {
+                String msg = "Invalid app name, appName query param cannot be empty/null.";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             if (applicationManager.isExistingAppName(appName, deviceType)) {
                 return Response.status(Response.Status.CONFLICT).build();
