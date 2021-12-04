@@ -1721,6 +1721,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
     public List<Activity> getActivities(ActivityPaginationRequest activityPaginationRequest)
             throws OperationManagementDAOException {
         try {
+            boolean isTimeDurationFilteringProvided = false;
             Connection conn = OperationManagementDAOFactory.getConnection();
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             String sql = "SELECT " +
@@ -1761,6 +1762,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getSince() != 0) {
                 sql += "AND UPDATED_TIMESTAMP > ? ";
             }
+            if (activityPaginationRequest.getStartTimestamp() > 0 && activityPaginationRequest.getEndTimestamp() > 0) {
+                isTimeDurationFilteringProvided = true;
+                sql += "AND CREATED_TIMESTAMP BETWEEN  ? AND ? ";
+            }
             if (activityPaginationRequest.getType() != null) {
                 sql += "AND TYPE = ? ";
             }
@@ -1785,6 +1790,9 @@ public class GenericOperationDAOImpl implements OperationDAO {
             }
             if (activityPaginationRequest.getSince() != 0) {
                 sql += "AND eom.UPDATED_TIMESTAMP > ? ";
+            }
+            if (isTimeDurationFilteringProvided) {
+                sql += "AND eom.CREATED_TIMESTAMP BETWEEN  ? AND ? ";
             }
             if (activityPaginationRequest.getType() != null) {
                 sql += "AND eom.TYPE = ? ";
@@ -1813,6 +1821,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (activityPaginationRequest.getSince() != 0) {
                     stmt.setLong(index++, activityPaginationRequest.getSince());
                 }
+                if (isTimeDurationFilteringProvided) {
+                    stmt.setLong(index++, activityPaginationRequest.getStartTimestamp());
+                    stmt.setLong(index++, activityPaginationRequest.getEndTimestamp());
+                }
                 if (activityPaginationRequest.getType() != null) {
                     stmt.setString(index++, activityPaginationRequest.getType().name());
                 }
@@ -1838,6 +1850,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 }
                 if (activityPaginationRequest.getSince() != 0) {
                     stmt.setLong(index++, activityPaginationRequest.getSince());
+                }
+                if (isTimeDurationFilteringProvided) {
+                    stmt.setLong(index++, activityPaginationRequest.getStartTimestamp());
+                    stmt.setLong(index++, activityPaginationRequest.getEndTimestamp());
                 }
                 if (activityPaginationRequest.getType() != null) {
                     stmt.setString(index++, activityPaginationRequest.getType().name());
@@ -1867,6 +1883,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
     public int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
             throws OperationManagementDAOException {
         try {
+            boolean isTimeDurationFilteringProvided = false;
             Connection conn = OperationManagementDAOFactory.getConnection();
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             String sql = "SELECT count(DISTINCT OPERATION_ID) AS ACTIVITY_COUNT FROM DM_ENROLMENT_OP_MAPPING " +
@@ -1893,6 +1910,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getStatus() != null) {
                 sql += "AND STATUS = ? ";
             }
+            if (activityPaginationRequest.getStartTimestamp() > 0 && activityPaginationRequest.getEndTimestamp() > 0) {
+                isTimeDurationFilteringProvided = true;
+                sql += "AND CREATED_TIMESTAMP BETWEEN ? AND ? ";
+            }
 
             int index = 1;
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -1916,7 +1937,11 @@ public class GenericOperationDAOImpl implements OperationDAO {
                     stmt.setString(index++, activityPaginationRequest.getType().name());
                 }
                 if (activityPaginationRequest.getStatus() != null) {
-                    stmt.setString(index, activityPaginationRequest.getStatus().name());
+                    stmt.setString(index++, activityPaginationRequest.getStatus().name());
+                }
+                if (isTimeDurationFilteringProvided) {
+                    stmt.setLong(index++, activityPaginationRequest.getStartTimestamp());
+                    stmt.setLong(index, activityPaginationRequest.getEndTimestamp());
                 }
 
                 try (ResultSet rs = stmt.executeQuery()) {
