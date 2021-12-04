@@ -36,7 +36,12 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -226,8 +231,8 @@ public class DAOUtil {
             ReviewDTO reviewDTO = new ReviewDTO();
             reviewDTO.setId(rs.getInt("ID"));
             reviewDTO.setContent(rs.getString("COMMENT"));
-            reviewDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-            reviewDTO.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
+            reviewDTO.setCreatedAt(new Timestamp(rs.getLong("CREATED_AT") * 1000L));
+            reviewDTO.setModifiedAt(new Timestamp(rs.getLong("MODIFIED_AT") * 1000L));
             reviewDTO.setRootParentId(rs.getInt("ROOT_PARENT_ID"));
             reviewDTO.setImmediateParentId(rs.getInt("IMMEDIATE_PARENT_ID"));
             reviewDTO.setUsername(rs.getString("USERNAME"));
@@ -303,5 +308,9 @@ public class DAOUtil {
                 log.warn("Error occurred while closing prepared statement", e);
             }
         }
+    }
+
+    public static long getCurrentUTCTime() {
+        return Instant.now().getEpochSecond();
     }
 }

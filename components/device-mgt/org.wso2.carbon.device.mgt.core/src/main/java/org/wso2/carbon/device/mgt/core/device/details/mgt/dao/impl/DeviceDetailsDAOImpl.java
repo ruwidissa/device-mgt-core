@@ -74,7 +74,7 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             stmt.setDouble(14, deviceInfo.getTotalRAMMemory());
             stmt.setDouble(15, deviceInfo.getAvailableRAMMemory());
             stmt.setBoolean(16, deviceInfo.isPluggedIn());
-            stmt.setLong(17, System.currentTimeMillis());
+            stmt.setLong(17, DeviceManagementDAOUtil.getCurrentUTCTime());
             stmt.setInt(18, enrolmentId);
 
             stmt.execute();
@@ -287,9 +287,9 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             stmt.setString(9, deviceLocation.getCountry());
             stmt.setString(10, GeoHashGenerator.encodeGeohash(deviceLocation));
             if (deviceLocation.getUpdatedTime() == null) {
-                stmt.setLong(11, System.currentTimeMillis());
+                stmt.setLong(11, DeviceManagementDAOUtil.getCurrentUTCTime() * 1000L);
             } else {
-                stmt.setLong(11, deviceLocation.getUpdatedTime().getTime());
+                stmt.setLong(11, DeviceManagementDAOUtil.convertLocalTimeIntoUTC(deviceLocation.getUpdatedTime()) * 1000L);
             }
             stmt.setInt(12, enrollmentId);
             stmt.setDouble(13, deviceLocation.getAltitude());
@@ -330,7 +330,7 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             stmt.setString(7, deviceLocation.getState());
             stmt.setString(8, deviceLocation.getCountry());
             stmt.setString(9, GeoHashGenerator.encodeGeohash(deviceLocation));
-            stmt.setLong(10, System.currentTimeMillis());
+            stmt.setLong(10, DeviceManagementDAOUtil.getCurrentUTCTime() * 1000L);
             stmt.setInt(11, deviceLocation.getDeviceId());
             stmt.setInt(12, enrollmentId);
             stmt.execute();

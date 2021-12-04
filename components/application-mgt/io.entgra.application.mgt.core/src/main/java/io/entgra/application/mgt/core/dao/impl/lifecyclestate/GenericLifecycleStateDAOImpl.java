@@ -161,14 +161,13 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conn = this.getDBConnection();
-            Calendar calendar = Calendar.getInstance();
-            Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+            long timestamp = DAOUtil.getCurrentUTCTime();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, state.getCurrentState().toUpperCase());
                 stmt.setString(2, state.getPreviousState().toUpperCase());
                 stmt.setInt(3, tenantId);
                 stmt.setString(4, state.getUpdatedBy());
-                stmt.setTimestamp(5, timestamp);
+                stmt.setLong(5, timestamp);
                 stmt.setString(6, state.getReasonForChange());
                 stmt.setInt(7, appReleaseId);
                 stmt.executeUpdate();
@@ -254,7 +253,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
-                lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
+                lifecycleState.setUpdatedAt(new Timestamp(rs.getLong("UPDATED_AT")));
                 lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
             }
         } catch (SQLException e) {
@@ -280,7 +279,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
-                lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
+                lifecycleState.setUpdatedAt(new Timestamp(rs.getLong("UPDATED_AT") * 1000L));
                 lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
                 lifecycleStates.add(lifecycleState);
             }

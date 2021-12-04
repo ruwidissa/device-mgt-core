@@ -46,6 +46,7 @@ import io.entgra.application.mgt.core.exception.ReviewManagementDAOException;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
 import io.entgra.application.mgt.core.util.Constants;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

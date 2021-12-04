@@ -431,7 +431,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
      *
      * @param applicationDTO Application DTO
      * @param params         list of subscribers. This list can be of either
-     *                       {@link org.wso2.carbon.device.mgt.common.DeviceIdentifier} if {@param subType} is equal
+     *                       {@link DeviceIdentifier} if {@param subType} is equal
      *                       to DEVICE or
      *                       {@link String} if {@param subType} is USER, ROLE or GROUP
      * @param subType        subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code> {@see {
