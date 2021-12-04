@@ -202,7 +202,8 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         keyManagerId = keyManagerConfigurationDTO.getUuid();
                     }
                 }
-                String jsonString = "{\"grant_types\":\"refresh_token,urn:ietf:params:oauth:grant-type:saml2-bearer," +
+                String jsonString = "{\"grant_types\":\"refresh_token,access_token," +
+                        "urn:ietf:params:oauth:grant-type:saml2-bearer," +
                         "password,client_credentials,iwa:ntlm,urn:ietf:params:oauth:grant-type:jwt-bearer\"," +
                         "\"additionalProperties\":\"{\\\"application_access_token_expiry_time\\\":\\\"N\\/A\\\"," +
                         "\\\"user_access_token_expiry_time\\\":\\\"N\\/A\\\"," +
