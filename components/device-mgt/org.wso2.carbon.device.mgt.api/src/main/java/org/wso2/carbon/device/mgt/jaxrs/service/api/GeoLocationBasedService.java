@@ -99,7 +99,6 @@ public interface GeoLocationBasedService {
     /**
      * Retrieve Analytics for the device type
      */
-    //todo:amalka
 //    @GET
 //    @Path("stats/{deviceType}/{deviceId}")
 //    @ApiOperation(
@@ -724,7 +723,6 @@ public interface GeoLocationBasedService {
     /**
      * Retrieve Geo alerts history
      */
-    //todo:amalka
 //    @GET
 //    @Path("alerts/history/{deviceType}/{deviceId}")
 //    @ApiOperation(
@@ -794,7 +792,6 @@ public interface GeoLocationBasedService {
     /**
      * Retrieve Geo alerts history for geo clusters
      */
-    //todo:amalka
 //    @GET
 //    @Path("alerts/history")
 //    @ApiOperation(

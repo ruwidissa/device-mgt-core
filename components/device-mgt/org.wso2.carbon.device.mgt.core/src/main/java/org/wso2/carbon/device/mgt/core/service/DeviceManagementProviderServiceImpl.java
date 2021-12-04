@@ -1966,7 +1966,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             operation.getStatus() != null ? operation.getStatus().toString() : null,
                             operation.getOperationResponse()
                     };
-                    //todo:amalka
+
 //                    DeviceManagerUtil.getEventPublisherService().publishEvent(
 //                            OPERATION_RESPONSE_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
 //                    );
@@ -1976,7 +1976,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred while reading configs.";
             log.error(msg, e);
             throw new OperationManagementException(msg, e);
-            //todo:amalka
+
         } //catch (DataPublisherConfigurationException e) {
 //            String msg = "Error occurred while publishing event.";
 //            log.error(msg, e);
@@ -2010,7 +2010,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             operation.getStatus() != null ? operation.getStatus().toString() : null,
                             operation.getOperationResponse()
                     };
-                    //todo:amalka
 //                    DeviceManagerUtil.getEventPublisherService().publishEvent(
 //                            OPERATION_RESPONSE_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
 //                    );
@@ -2020,7 +2019,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred while reading configs.";
             log.error(msg, e);
             throw new OperationManagementException(msg, e);
-            //todo:amalka
         } //catch (DataPublisherConfigurationException e) {
 //            String msg = "Error occurred while publishing event.";
 //            log.error(msg, e);

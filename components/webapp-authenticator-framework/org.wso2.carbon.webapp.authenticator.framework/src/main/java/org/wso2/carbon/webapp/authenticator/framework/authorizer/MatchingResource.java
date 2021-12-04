@@ -1,8 +1,5 @@
 package org.wso2.carbon.webapp.authenticator.framework.authorizer;
 
-/**
- * Created by amalka on 6/26/21.
- */
 public class MatchingResource {
     private String urlPattern;
     private String permission;

@@ -63,7 +63,7 @@ public class CredentialManagementResponseBuilder {
             username = CarbonContext.getThreadLocalCarbonContext().getUsername();
             userStoreManager.updateCredential(username, credentials.getNewPassword(),
                     credentials.getOldPassword());
-            //todo:amalka
+
 //            DeviceMgtAPIUtils.getIntegrationClientService().resetUserInfo(username,
 //                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             return Response.status(Response.Status.OK).entity("UserImpl password by username: " +
@@ -108,7 +108,7 @@ public class CredentialManagementResponseBuilder {
                         new ErrorResponse.ErrorResponseBuilder().setMessage(errorMsg).build()).build();
             }
             userStoreManager.updateCredentialByAdmin(username, credentials.getNewPassword());
-            //todo:amalka
+
 //            DeviceMgtAPIUtils.getIntegrationClientService().resetUserInfo(username,
 //                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             return Response.status(Response.Status.OK).entity("UserImpl password by username: " +

@@ -616,7 +616,6 @@ public class DeviceMgtAPIUtils {
         return username;
     }
 
-    // todo: amalka: commented
 //    public static EventsPublisherService getEventPublisherService() {
 //        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
 //        EventsPublisherService eventsPublisherService =

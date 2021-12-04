@@ -69,7 +69,6 @@ import javax.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public interface DeviceEventManagementService {
 
-    //todo:amalka
 //    @POST
 //    @Path("/{type}")
 //    @ApiOperation(
@@ -181,7 +180,6 @@ public interface DeviceEventManagementService {
             "ios, and windows.", required = false)
                                               @PathParam("type")String deviceType);
 
-    //todo:amalka
 //    @GET
 //    @Path("/{type}/{deviceId}")
 //    @ApiOperation(
@@ -244,7 +242,6 @@ public interface DeviceEventManagementService {
 //                     @ApiParam(name = "limit", value = "limit of the records that needs to be picked up", required = false)
 //                     @QueryParam("limit") int limit);
 
-    //todo:amalka
 //    @GET
 //    @Path("last-known/{type}/{deviceId}")
 //    @ApiOperation(
@@ -301,7 +298,6 @@ public interface DeviceEventManagementService {
 //                              @ApiParam(name = "limit", value = "limit of the records that needs to be picked up", required = false)
 //                              @QueryParam("limit") int limit);
 
-    //todo:amalka
 //    @GET
 //    @Path("filter/{type}/{parameter}")
 //    @ApiOperation(
