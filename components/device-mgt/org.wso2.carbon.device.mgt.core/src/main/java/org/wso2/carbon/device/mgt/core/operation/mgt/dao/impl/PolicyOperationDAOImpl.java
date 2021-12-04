@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.core.operation.mgt.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.PolicyOperation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
@@ -45,15 +46,15 @@ public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
         int operationId = -1;
         try {
 
-            operation.setCreatedTimeStamp(new Timestamp(new java.util.Date().getTime()).toString());
+            operation.setCreatedTimeStamp(new Timestamp(new Date().getTime()).toString());
             operation.setEnabled(true);
             Connection connection = OperationManagementDAOFactory.getConnection();
             String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
                          "INITIATED_BY, OPERATION_DETAILS, ENABLED) VALUES (?, ?, ?, ?, ?, ?, ?)";
             stmt = connection.prepareStatement(sql, new String[]{"id"});
             stmt.setString(1, operation.getType().toString());
-            stmt.setTimestamp(2, new Timestamp(new Date().getTime()));
-            stmt.setTimestamp(3, null);
+            stmt.setLong(2, DeviceManagementDAOUtil.getCurrentUTCTime());
+            stmt.setLong(3, 0);
             stmt.setString(4, operation.getCode());
             stmt.setString(5, operation.getInitiatedBy());
 
