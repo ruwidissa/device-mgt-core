@@ -32,6 +32,7 @@ public class Column {
     private Input input;
     private Upload upload;
     private Checkbox checkbox;
+    private boolean isRequired;
 
     @XmlAttribute(name = "name", required = true)
     public String getName() { return name; }
@@ -95,5 +96,14 @@ public class Column {
 
     public void setCheckbox(Checkbox checkbox) {
         this.checkbox = checkbox;
+    }
+
+    @XmlElement(name = "RequiredItem")
+    public boolean isRequired() {
+        return isRequired;
+    }
+
+    public void setRequired(boolean required) {
+        isRequired = required;
     }
 }
