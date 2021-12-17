@@ -48,6 +48,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Activity related REST-API implementation.
@@ -461,7 +462,7 @@ public interface ActivityInfoProviderService {
                     name = "deviceId",
                     value = "Device Id to filter"
             )
-            @QueryParam("deviceId") String deviceId,
+            @QueryParam("deviceId") List<String> deviceIds,
             @ApiParam(
                     name = "type",
                     value = "Operation type to filter"
