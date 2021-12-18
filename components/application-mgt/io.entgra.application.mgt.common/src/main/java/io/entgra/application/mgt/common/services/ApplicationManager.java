@@ -16,6 +16,10 @@
  */
 package io.entgra.application.mgt.common.services;
 
+import io.entgra.application.mgt.common.ApplicationType;
+import io.entgra.application.mgt.common.Base64File;
+import io.entgra.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.application.mgt.common.exception.ResourceManagementException;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import io.entgra.application.mgt.common.ApplicationArtifact;
 import io.entgra.application.mgt.common.LifecycleChanger;
@@ -46,6 +50,10 @@ import java.util.List;
  */
 public interface ApplicationManager {
 
+
+    ApplicationReleaseDTO uploadEntAppReleaseArtifacts(EntAppReleaseWrapper releaseWrapper, ApplicationArtifact artifact,
+                                                       String deviceType) throws ApplicationManagementException;
+
     /***
      * The method is responsible to add new application into entgra App Manager.
      *
@@ -54,17 +62,41 @@ public interface ApplicationManager {
      * @return {@link Application}
      * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
      */
-    Application createEntApp(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
+    ApplicationDTO uploadEntAppReleaseArtifacts(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException;
 
-    Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
+    ApplicationReleaseDTO uploadWebAppReleaseArtifacts(WebAppReleaseWrapper releaseWrapper, ApplicationArtifact artifact)
+            throws ApplicationManagementException, ResourceManagementException;
+
+    ApplicationDTO uploadWebAppReleaseArtifacts(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException;
 
-    Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact)
+    ApplicationReleaseDTO uploadPubAppReleaseArtifacts(PublicAppReleaseWrapper releaseWrapper, ApplicationArtifact artifact,
+                                                       String deviceType) throws ResourceManagementException;
+
+    ApplicationDTO uploadPublicAppReleaseArtifacts(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException;
 
-    Application createCustomApp(CustomAppWrapper customAppWrapper, ApplicationArtifact applicationArtifact)
+    ApplicationReleaseDTO uploadCustomAppReleaseArtifacts(CustomAppReleaseWrapper releaseWrapper, ApplicationArtifact artifact,
+                                                          String deviceType) throws ResourceManagementException, ApplicationManagementException;
+
+    ApplicationDTO uploadCustomAppReleaseArtifactsAndConstructAppDTO(CustomAppWrapper customAppWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException;
+
+    /***
+     * This method is responsible to add application data into APPM database. However, before call this method it is
+     * required to do the validation of request and check the existence of application releaseDTO.
+     *
+     * @param applicationDTO Application DTO object.
+     * @return {@link Application}
+     * @throws ApplicationManagementException which throws if error occurs while during application management.
+     */
+    Application executeApplicationPersistenceTransaction(ApplicationDTO applicationDTO) throws
+            ApplicationManagementException;
+
+
+   Application persistApplication(ApplicationDTO applicationDTO) throws ApplicationManagementException;
+
 
     /**
      * Check the existence of an application for given application name and the device type.
@@ -76,6 +108,7 @@ public interface ApplicationManager {
      * application name and device type or request with invalid device type data.
      */
     boolean isExistingAppName(String appName, String deviceTypeName) throws ApplicationManagementException;
+
 
     /**
      * Updates an already existing application.
@@ -121,6 +154,12 @@ public interface ApplicationManager {
      */
     ApplicationList getApplications(Filter filter) throws ApplicationManagementException;
 
+    boolean isHideableApp(List<ApplicationReleaseDTO> applicationReleaseDTOs)
+            throws ApplicationManagementException;
+
+    boolean isDeletableApp(List<ApplicationReleaseDTO> applicationReleaseDTOs)
+            throws ApplicationManagementException;
+
     /**
      * To get list of applications that application releases has given package names.
      *
@@ -130,6 +169,21 @@ public interface ApplicationManager {
      * occurred while accessing user store.
      */
     List<Application> getApplications(List<String> packageNames) throws ApplicationManagementException;
+
+
+    /**
+     * To create an application release for an ApplicationDTO.
+     *
+     * @param applicationDTO     ApplicationDTO of the release
+     * @param applicationReleaseDTO ApplicatonRelease that need to be be created.
+     * @param type {@link ApplicationType}
+     * @return the unique id of the application release, if the application release succeeded else -1
+     */
+    <T> ApplicationRelease createRelease(ApplicationDTO applicationDTO, ApplicationReleaseDTO applicationReleaseDTO,
+                                         ApplicationType type)
+            throws ApplicationManagementException;
+
+    ApplicationDTO getApplication(int applicationId) throws ApplicationManagementException;
 
     /**
      * To get the Application for given Id.
@@ -202,16 +256,6 @@ public interface ApplicationManager {
     void updateApplicationArtifact(String deviceType, String uuid,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
-    /**
-     * To create an application release for an ApplicationDTO.
-     *
-     * @param applicationId     ID of the ApplicationDTO
-     * @param entAppReleaseWrapper ApplicatonRelease that need to be be created.
-     * @return the unique id of the application release, if the application release succeeded else -1
-     */
-    ApplicationRelease createEntAppRelease(int applicationId, EntAppReleaseWrapper entAppReleaseWrapper,
-            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
-
     /***
      *
      * @param releaseUuid UUID of the application release.
@@ -220,30 +264,34 @@ public interface ApplicationManager {
      * @return If the application release is updated correctly True returns, otherwise retuen False
      */
     ApplicationRelease updateEntAppRelease(String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
-            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
+                                           ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     ApplicationRelease updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
-            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
+                                           ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     ApplicationRelease updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
-            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
+                                           ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     ApplicationRelease updateCustomAppRelease(String releaseUuid, CustomAppReleaseWrapper customAppReleaseWrapper,
-            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
+                                              ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /***
      * To validate the application creating request
      *
      */
-    <T> void validateAppCreatingRequest(T param) throws ApplicationManagementException;
+    <T> void validateAppCreatingRequest(T param, boolean isReleaseRequired) throws ApplicationManagementException;
 
     /***
      *
      * @throws ApplicationManagementException throws if payload does not satisfy requirements.
      */
-    <T> void validateReleaseCreatingRequest(T param, String deviceType) throws ApplicationManagementException;
+    <T> void validateReleaseCreatingRequest(T releases, String deviceType) throws ApplicationManagementException;
 
-    /***
+    void validateImageArtifacts(Base64File iconFile, List<Base64File> screenshots) throws RequestValidatingException;
+
+    void validateBase64File(Base64File file) throws RequestValidatingException;
+
+ /***
      *
      * @param iconFile Icon file for the application.
      * @param bannerFile Banner file for the application.
@@ -252,6 +300,8 @@ public interface ApplicationManager {
      */
     void validateImageArtifacts(Attachment iconFile, Attachment bannerFile, List<Attachment> attachmentList)
             throws RequestValidatingException;
+
+    void validateBinaryArtifact(Base64File binaryFile) throws RequestValidatingException;
 
     void validateBinaryArtifact(Attachment binaryFile) throws RequestValidatingException;
 
@@ -294,13 +344,13 @@ public interface ApplicationManager {
     void updateSubsStatus (int deviceId, int operationId, String status) throws ApplicationManagementException;
 
 
-        /**
-         * Get plist content to download and install the application.
-         *
-         * @param uuid Release UUID of the application.
-         * @return plist string
-         * @throws ApplicationManagementException Application management exception
-         */
+    /**
+     * Get plist content to download and install the application.
+     *
+     * @param uuid Release UUID of the application.
+     * @return plist string
+     * @throws ApplicationManagementException Application management exception
+     */
     String getPlistArtifact(String uuid) throws ApplicationManagementException;
 
     List<ApplicationReleaseDTO> getReleaseByPackageNames(List<String> packageIds) throws ApplicationManagementException;

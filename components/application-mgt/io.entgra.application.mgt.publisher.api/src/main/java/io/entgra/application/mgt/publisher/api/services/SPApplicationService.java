@@ -1,0 +1,280 @@
+/*
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package io.entgra.application.mgt.publisher.api.services;
+
+import io.entgra.application.mgt.common.wrapper.ApplicationWrapper;
+import io.entgra.application.mgt.common.wrapper.CustomAppWrapper;
+import io.entgra.application.mgt.common.wrapper.PublicAppWrapper;
+import io.entgra.application.mgt.common.wrapper.WebAppWrapper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Extension;
+import io.swagger.annotations.ExtensionProperty;
+import io.swagger.annotations.Info;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
+import org.wso2.carbon.apimgt.annotations.api.Scope;
+import org.wso2.carbon.apimgt.annotations.api.Scopes;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.util.List;
+
+/**
+ * This is the application registration service that exposed for apimApplicationRegistration
+ */
+
+@SwaggerDefinition(
+        info = @Info(
+                version = "1.0.0",
+                title = "Service Provider Application Management Publisher Service",
+                extensions = {
+                        @Extension(properties = {
+                                @ExtensionProperty(name = "name", value = "SPApplicationService"),
+                                @ExtensionProperty(name = "context", value = "/api/application-mgt-publisher/v1.0/identity-server-applications"),
+                        })
+                }
+        ),
+        tags = {
+                @Tag(name = "application_management, device_management", description = "App publisher related APIs")
+        }
+)
+@Scopes(
+        scopes = {
+                @Scope(
+                        name = "view a service provider applications",
+                        description = "Get application details",
+                        key = "perm:app:publisher:service-provider:view",
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/app-mgt/publisher/service-provider/application/view"}
+                ),
+                @Scope(
+                        name = "Create a service provider application",
+                        description = "Update an application",
+                        key = "perm:app:publisher:service-provider:create",
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/app-mgt/publisher/service-provider/application/create"}
+                ),
+                @Scope(
+                        name = "Attach a service provider application",
+                        description = "Update an application",
+                        key = "perm:app:publisher:service-provider:attach",
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/app-mgt/publisher/service-provider/application/attach"}
+                ),
+                @Scope(
+                        name = "Detach a service provider application",
+                        description = "Update an application",
+                        key = "perm:app:publisher:service-provider:detach",
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/app-mgt/publisher/service-provider/application/detach"}
+                )
+        }
+)
+@Path("/identity-server-applications")
+@Api(value = "SPApplication Management")
+@Produces(MediaType.APPLICATION_JSON)
+public interface SPApplicationService {
+
+    String SCOPE = "scope";
+
+    /**
+     * This method is used to register an APIM application for tenant domain.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/identity-servers")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get the application of requesting application id and  state",
+            notes = "This will get the application identified by the application id and state, if exists",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:view")
+                    })
+            }
+    )
+    Response getIdentityServers();
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/identity-servers/{id}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get the application of requesting application id and  state",
+            notes = "This will get the application identified by the application id and state, if exists",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:view")
+                    })
+            }
+    )
+    Response getIdentityServer(@PathParam("id") int id);
+
+    /**
+     * This method is used to register an APIM application for tenant domain.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{identity-server-id}/service-providers")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get the application of requesting application id and  state",
+            notes = "This will get the application identified by the application id and state, if exists",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:view")
+                    })
+            }
+    )
+    Response getServiceProviders(@QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset,
+                                 @PathParam("identity-server-id") int identityServerId);
+
+    @Path("/{identity-server-id}/{service-provider-id}/attach")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "get the application of requesting application id and  state",
+            notes = "This will get the application identified by the application id and state, if exists",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:attach")
+                    })
+            }
+    )
+    Response attachApps(@PathParam("identity-server-id") int identityServerId,
+                        @PathParam("service-provider-id") String serviceProviderId, List<Integer> appIds);
+
+    /**
+     * This method is used to register an APIM application for tenant domain.
+     */
+    @Path("/{identity-server-id}/{service-provider-id}/detach")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "get the application of requesting application id and  state",
+            notes = "This will get the application identified by the application id and state, if exists",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:detach")
+                    })
+            }
+    )
+    Response detachApps(@PathParam("identity-server-id") int identityServerId,
+                        @PathParam("service-provider-id") String serviceProviderId, List<Integer> appIds);
+
+    /**
+     * This method is used to register an APIM application for tenant domain.
+     */
+    @Path("/{identity-server-id}/{service-provider-id}/create/ent-app")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "get the application of requesting application id and  state",
+            notes = "This will get the application identified by the application id and state, if exists",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:create")
+                    })
+            }
+    )
+    Response createEntApp(@PathParam("identity-server-id") int identityServerId,
+                          @PathParam("service-provider-id") String serviceProviderId, ApplicationWrapper app);
+
+
+    /**
+     * This method is used to register an APIM application for tenant domain.
+     */
+    @Path("/{identity-server-id}/{service-provider-id}/create/public-app")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "get the application of requesting application id and  state",
+            notes = "This will get the application identified by the application id and state, if exists",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:create")
+                    })
+            }
+    )
+    Response createPubApp(@PathParam("identity-server-id") int identityServerId,
+                          @PathParam("service-provider-id") String serviceProviderId, PublicAppWrapper app);
+
+    @Path("/{identity-server-id}/{service-provider-id}/create/web-app")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "get the application of requesting application id and  state",
+            notes = "This will get the application identified by the application id and state, if exists",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:create")
+                    })
+            }
+    )
+    Response createWebApp(@PathParam("identity-server-id") int identityServerId,
+                          @PathParam("service-provider-id") String serviceProviderId, WebAppWrapper app);
+
+    @Path("/{identity-server-id}/{service-provider-id}/create/custom-app")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "get the application of requesting application id and  state",
+            notes = "This will get the application identified by the application id and state, if exists",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:create")
+                    })
+            }
+    )
+    Response createCustomApp(@PathParam("identity-server-id") int identityServerId,
+                          @PathParam("service-provider-id") String serviceProviderId, CustomAppWrapper app);
+}

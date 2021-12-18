@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @ApiModel(value = "PublicAppWrapper", description = "PublicAppWrapper represents an Application in App Store")
@@ -77,8 +78,7 @@ public class PublicAppWrapper {
     @ApiModelProperty(name = "applicationReleaseWrappers",
             value = "List of public app releases",
             required = true)
-    @NotNull
-    private List<PublicAppReleaseWrapper> publicAppReleaseWrappers;
+    private List<PublicAppReleaseWrapper> publicAppReleaseWrappers = new ArrayList<>();
 
     public String getName() {
         return name;

@@ -17,6 +17,11 @@
  */
 package io.entgra.application.mgt.core.dao.common;
 
+import io.entgra.application.mgt.core.dao.SPApplicationDAO;
+import io.entgra.application.mgt.core.dao.impl.application.spapplication.GenericSPApplicationDAOImpl;
+import io.entgra.application.mgt.core.dao.impl.application.spapplication.OracleSPApplicationDAOImpl;
+import io.entgra.application.mgt.core.dao.impl.application.spapplication.PostgreSQLSPApplicationDAOImpl;
+import io.entgra.application.mgt.core.dao.impl.application.spapplication.SQLServerSPApplicationDAOImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.application.mgt.common.exception.UnsupportedDatabaseEngineException;
@@ -94,6 +99,25 @@ public class ApplicationManagementDAOFactory {
                     return new SQLServerApplicationDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_ORACLE:
                     return new OracleApplicationDAOImpl();
+                default:
+                    throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
+            }
+        }
+        throw new IllegalStateException("Database engine has not initialized properly.");
+    }
+
+    public static SPApplicationDAO getSPApplicationDAO() {
+        if (databaseEngine != null) {
+            switch (databaseEngine) {
+                case Constants.DataBaseTypes.DB_TYPE_H2:
+                case Constants.DataBaseTypes.DB_TYPE_MYSQL:
+                    return new GenericSPApplicationDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                    return new PostgreSQLSPApplicationDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerSPApplicationDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_ORACLE:
+                    return new OracleSPApplicationDAOImpl();
                 default:
                     throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
             }

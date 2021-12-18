@@ -17,6 +17,7 @@
  */
 package io.entgra.application.mgt.core.internal;
 
+import io.entgra.application.mgt.common.services.SPApplicationManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -87,6 +88,10 @@ public class ApplicationManagementServiceComponent {
             lifecycleStateManager.init(lifecycleStates);
             DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManager);
             bundleContext.registerService(LifecycleStateManager.class.getName(), lifecycleStateManager, null);
+
+            SPApplicationManager SPApplicationManager = ApplicationManagementUtil.getSPApplicationManagerInstance();
+            DataHolder.getInstance().setISApplicationManager(SPApplicationManager);
+            bundleContext.registerService(SPApplicationManager.class.getName(), SPApplicationManager, null);
 
             ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
             applicationManager

@@ -19,6 +19,7 @@ package io.entgra.application.mgt.core.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.entgra.application.mgt.common.IdentityServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -38,10 +39,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -86,10 +84,16 @@ public class DAOUtil {
                 application.setAppRating(rs.getDouble("APP_RATING"));
                 application.setDeviceTypeId(rs.getInt("APP_DEVICE_TYPE_ID"));
                 application.setPackageName(rs.getString("PACKAGE_NAME"));
-                application.getApplicationReleaseDTOs().add(constructAppReleaseDTO(rs));
+                ApplicationReleaseDTO releaseDTO = constructAppReleaseDTO(rs);
+                if (releaseDTO != null) {
+                    application.getApplicationReleaseDTOs().add(constructAppReleaseDTO(rs));
+                }
             } else {
                 if (application != null && application.getApplicationReleaseDTOs() != null) {
-                    application.getApplicationReleaseDTOs().add(constructAppReleaseDTO(rs));
+                    ApplicationReleaseDTO releaseDTO = constructAppReleaseDTO(rs);
+                    if (releaseDTO != null) {
+                        application.getApplicationReleaseDTOs().add(constructAppReleaseDTO(rs));
+                    }
                 }
             }
             hasNext = rs.next();
@@ -139,26 +143,76 @@ public class DAOUtil {
      */
     public static ApplicationReleaseDTO constructAppReleaseDTO(ResultSet rs) throws SQLException {
         ApplicationReleaseDTO appRelease = new ApplicationReleaseDTO();
-        appRelease.setId(rs.getInt("RELEASE_ID"));
-        appRelease.setDescription(rs.getString("RELEASE_DESCRIPTION"));
-        appRelease.setUuid(rs.getString("RELEASE_UUID"));
-        appRelease.setReleaseType(rs.getString("RELEASE_TYPE"));
-        appRelease.setVersion(rs.getString("RELEASE_VERSION"));
-        appRelease.setInstallerName(rs.getString("AP_RELEASE_STORED_LOC"));
-        appRelease.setIconName(rs.getString("AP_RELEASE_ICON_LOC"));
-        appRelease.setBannerName(rs.getString("AP_RELEASE_BANNER_LOC"));
-        appRelease.setScreenshotName1(rs.getString("AP_RELEASE_SC1"));
-        appRelease.setScreenshotName2(rs.getString("AP_RELEASE_SC2"));
-        appRelease.setScreenshotName3(rs.getString("AP_RELEASE_SC3"));
-        appRelease.setAppHashValue(rs.getString("RELEASE_HASH_VALUE"));
-        appRelease.setPrice(rs.getDouble("RELEASE_PRICE"));
-        appRelease.setMetaData(rs.getString("RELEASE_META_INFO"));
-        appRelease.setPackageName(rs.getString("PACKAGE_NAME"));
-        appRelease.setSupportedOsVersions(rs.getString("RELEASE_SUP_OS_VERSIONS"));
-        appRelease.setRating(rs.getDouble("RELEASE_RATING"));
-        appRelease.setCurrentState(rs.getString("RELEASE_CURRENT_STATE"));
-        appRelease.setRatedUsers(rs.getInt("RATED_USER_COUNT"));
-        return appRelease;
+        if (rs.getString("RELEASE_UUID") != null) {
+            appRelease.setId(rs.getInt("RELEASE_ID"));
+            appRelease.setDescription(rs.getString("RELEASE_DESCRIPTION"));
+            appRelease.setUuid(rs.getString("RELEASE_UUID"));
+            appRelease.setReleaseType(rs.getString("RELEASE_TYPE"));
+            appRelease.setVersion(rs.getString("RELEASE_VERSION"));
+            appRelease.setInstallerName(rs.getString("AP_RELEASE_STORED_LOC"));
+            appRelease.setIconName(rs.getString("AP_RELEASE_ICON_LOC"));
+            appRelease.setBannerName(rs.getString("AP_RELEASE_BANNER_LOC"));
+            appRelease.setScreenshotName1(rs.getString("AP_RELEASE_SC1"));
+            appRelease.setScreenshotName2(rs.getString("AP_RELEASE_SC2"));
+            appRelease.setScreenshotName3(rs.getString("AP_RELEASE_SC3"));
+            appRelease.setAppHashValue(rs.getString("RELEASE_HASH_VALUE"));
+            appRelease.setPrice(rs.getDouble("RELEASE_PRICE"));
+            appRelease.setMetaData(rs.getString("RELEASE_META_INFO"));
+            appRelease.setPackageName(rs.getString("PACKAGE_NAME"));
+            appRelease.setSupportedOsVersions(rs.getString("RELEASE_SUP_OS_VERSIONS"));
+            appRelease.setRating(rs.getDouble("RELEASE_RATING"));
+            appRelease.setCurrentState(rs.getString("RELEASE_CURRENT_STATE"));
+            appRelease.setRatedUsers(rs.getInt("RATED_USER_COUNT"));
+            return appRelease;
+        }
+        return null;
+    }
+
+    /**
+     * To create application object from the result set retrieved from the Database.
+     *
+     * @param rs ResultSet
+     * @return IdentityServer that is retrieved from the Database.
+     * @throws SQLException  SQL Exception
+     * @throws JSONException JSONException.
+     */
+    public static IdentityServer loadIdentityServer(ResultSet rs)
+            throws SQLException, JSONException, UnexpectedServerErrorException {
+        List<IdentityServer> identityServers = loadIdentityServers(rs);
+        if (identityServers.isEmpty()) {
+            return null;
+        }
+        if (identityServers.size() > 1) {
+            String msg = "Internal server error. Found more than one identity server for requested ID";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+        return identityServers.get(0);
+    }
+
+    /**
+     * To create application object from the result set retrieved from the Database.
+     *
+     * @param rs ResultSet
+     * @return List of Applications that is retrieved from the Database.
+     * @throws SQLException  SQL Exception
+     * @throws JSONException JSONException.
+     */
+    public static List<IdentityServer> loadIdentityServers(ResultSet rs) throws SQLException, JSONException {
+        List<IdentityServer> identityServers = new ArrayList<>();
+        while (rs.next()) {
+            IdentityServer identityServer = new IdentityServer();
+            identityServer.setId(rs.getInt("ID"));
+            identityServer.setName(rs.getString("NAME"));
+            identityServer.setDescription(rs.getString("DESCRIPTION"));
+            identityServer.setUrl(rs.getString("URL"));
+            identityServer.setSpAppsURI(rs.getString("SP_APPS_URI"));
+            identityServer.setSpAppsApi(rs.getString("SP_APPS_API"));
+            identityServer.setUserName(rs.getString("USERNAME"));
+            identityServer.setPassword(rs.getString("PASSWORD"));
+            identityServers.add(identityServer);
+        }
+        return identityServers;
     }
 
 

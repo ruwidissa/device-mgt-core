@@ -16,10 +16,12 @@
  */
 package io.entgra.application.mgt.common.wrapper;
 
+import io.entgra.application.mgt.common.Base64File;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @ApiModel(value = "Public App Release Wrapper", description = "This class holds the details when releasing an Public App"
         + " Release to application store")
@@ -72,6 +74,14 @@ public class PublicAppReleaseWrapper {
     @NotNull
     private String supportedOsVersions;
 
+    @ApiModelProperty(name = "screenshots",
+            value = "screenshots of the application")
+    private List<Base64File> screenshots;
+
+    @ApiModelProperty(name = "icon",
+            value = "icon of the application")
+    private Base64File icon;
+
     public String getReleaseType() {
         return releaseType;
     }
@@ -123,4 +133,20 @@ public class PublicAppReleaseWrapper {
     public String getSupportedOsVersions() { return supportedOsVersions; }
 
     public void setSupportedOsVersions(String supportedOsVersions) { this.supportedOsVersions = supportedOsVersions; }
+
+    public Base64File getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Base64File icon) {
+        this.icon = icon;
+    }
+
+    public List<Base64File> getScreenshots() {
+        return screenshots;
+    }
+
+    public void setScreenshots(List<Base64File> screenshots) {
+        this.screenshots = screenshots;
+    }
 }

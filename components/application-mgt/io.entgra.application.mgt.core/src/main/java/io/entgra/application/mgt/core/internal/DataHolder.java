@@ -20,6 +20,7 @@ package io.entgra.application.mgt.core.internal;
 import io.entgra.application.mgt.common.services.ApplicationManager;
 import io.entgra.application.mgt.common.services.ApplicationStorageManager;
 import io.entgra.application.mgt.common.services.AppmDataHandler;
+import io.entgra.application.mgt.common.services.SPApplicationManager;
 import io.entgra.application.mgt.common.services.ReviewManager;
 import io.entgra.application.mgt.common.services.SubscriptionManager;
 import io.entgra.application.mgt.core.lifecycle.LifecycleStateManager;
@@ -35,6 +36,8 @@ public class DataHolder {
     private DeviceManagementProviderService deviceManagementService;
 
     private RealmService realmService;
+
+    private SPApplicationManager SPApplicationManager;
 
     private ApplicationManager applicationManager;
 
@@ -130,5 +133,13 @@ public class DataHolder {
 
     public void setTaskService(TaskService taskService) {
         this.taskService = taskService;
+    }
+
+    public SPApplicationManager getISApplicationManager() {
+        return SPApplicationManager;
+    }
+
+    public void setISApplicationManager(SPApplicationManager SPApplicationManager) {
+        this.SPApplicationManager = SPApplicationManager;
     }
 }

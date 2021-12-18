@@ -17,6 +17,23 @@
  */
 package io.entgra.application.mgt.core.util;
 
+import io.entgra.application.mgt.common.ApplicationArtifact;
+import io.entgra.application.mgt.common.ApplicationSubscriptionType;
+import io.entgra.application.mgt.common.ApplicationType;
+import io.entgra.application.mgt.common.Base64File;
+import io.entgra.application.mgt.common.FileDataHolder;
+import io.entgra.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.application.mgt.common.exception.RequestValidatingException;
+import io.entgra.application.mgt.common.services.SPApplicationManager;
+import io.entgra.application.mgt.common.wrapper.ApplicationWrapper;
+import io.entgra.application.mgt.common.wrapper.CustomAppReleaseWrapper;
+import io.entgra.application.mgt.common.wrapper.CustomAppWrapper;
+import io.entgra.application.mgt.common.wrapper.EntAppReleaseWrapper;
+import io.entgra.application.mgt.common.wrapper.PublicAppReleaseWrapper;
+import io.entgra.application.mgt.common.wrapper.PublicAppWrapper;
+import io.entgra.application.mgt.common.wrapper.WebAppReleaseWrapper;
+import io.entgra.application.mgt.common.wrapper.WebAppWrapper;
+import io.entgra.application.mgt.core.exception.BadRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.application.mgt.common.exception.InvalidConfigurationException;
@@ -27,8 +44,16 @@ import io.entgra.application.mgt.common.services.SubscriptionManager;
 import io.entgra.application.mgt.core.config.ConfigurationManager;
 import io.entgra.application.mgt.core.config.Extension;
 import io.entgra.application.mgt.core.lifecycle.LifecycleStateManager;
+import org.wso2.carbon.device.mgt.core.common.util.FileUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * This DAOUtil class is responsible for making sure single instance of each Extension Manager is used throughout for
@@ -37,6 +62,77 @@ import java.lang.reflect.Constructor;
 public class ApplicationManagementUtil {
 
     private static Log log = LogFactory.getLog(ApplicationManagementUtil.class);
+
+    public static ApplicationArtifact constructApplicationArtifact(Base64File iconBase64, List<Base64File> screenshotsBase64,
+                                                                   Base64File binaryFileBase64, Base64File bannerFileBase64)
+            throws BadRequestException {
+        ApplicationArtifact applicationArtifact = new ApplicationArtifact();
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        if (binaryFileBase64 != null) {
+            try {
+                applicationManager.validateBase64File(binaryFileBase64);
+            } catch (RequestValidatingException e) {
+                String msg = "Invalid base64 binary file payload found";
+                log.error(msg, e);
+                throw new BadRequestException(msg, e);
+            }
+            FileDataHolder binaryFile = base64FileToFileDataHolder(binaryFileBase64);
+            applicationArtifact.setInstallerName(binaryFile.getName());
+            applicationArtifact.setInstallerStream(binaryFile.getFile());
+        }
+        if (iconBase64 != null) {
+            try {
+                applicationManager.validateBase64File(iconBase64);
+            } catch (RequestValidatingException e) {
+                String msg = "Invalid base64 icon file payload found";
+                log.error(msg, e);
+                throw new BadRequestException(msg, e);
+            }
+            FileDataHolder iconFile = base64FileToFileDataHolder(iconBase64);
+            applicationArtifact.setIconName(iconFile.getName());
+            applicationArtifact.setIconStream(iconFile.getFile());
+        }
+        if (bannerFileBase64 != null) {
+            try {
+                applicationManager.validateBase64File(bannerFileBase64);
+            } catch (RequestValidatingException e) {
+                String msg = "Invalid base64 banner file payload found";
+                log.error(msg, e);
+                throw new BadRequestException(msg, e);
+            }
+            FileDataHolder bannerFile = base64FileToFileDataHolder(bannerFileBase64);
+            applicationArtifact.setBannerName(bannerFile.getName());
+            applicationArtifact.setBannerStream(bannerFile.getFile());
+        }
+
+        if (screenshotsBase64 != null) {
+            Map<String, InputStream> screenshotData = new TreeMap<>();
+            for (Base64File screenshot : screenshotsBase64) {
+                try {
+                    applicationManager.validateBase64File(screenshot);
+                } catch (RequestValidatingException e) {
+                    String msg = "Invalid base64 screenshot file payload found";
+                    log.error(msg, e);
+                    throw new BadRequestException(msg, e);
+                }
+                FileDataHolder screenshotFile = base64FileToFileDataHolder(screenshot);
+                screenshotData.put(screenshotFile.getName(), screenshotFile.getFile());
+            }
+            applicationArtifact.setScreenshots(screenshotData);
+        }
+        return applicationArtifact;
+    }
+
+    public static FileDataHolder base64FileToFileDataHolder(Base64File base64File) {
+        InputStream stream = FileUtil.base64ToInputStream(base64File.getBase64String());
+        return new FileDataHolder(base64File.getName(), stream);
+    }
+
+    public static SPApplicationManager getSPApplicationManagerInstance() throws InvalidConfigurationException {
+        ConfigurationManager configurationManager = ConfigurationManager.getInstance();
+        Extension extension = configurationManager.getExtension(Extension.Name.SPApplicationManager);
+        return getInstance(extension, SPApplicationManager.class);
+    }
 
     public static ApplicationManager getApplicationManagerInstance() throws InvalidConfigurationException {
         ConfigurationManager configurationManager = ConfigurationManager.getInstance();
@@ -69,7 +165,27 @@ public class ApplicationManagementUtil {
         return getInstance(extension, LifecycleStateManager.class);
     }
 
-    private static <T> T getInstance(Extension extension, Class<T> cls) throws InvalidConfigurationException {
+    public static <T> boolean isReleaseAvailable(T appWrapper) {
+        if (appWrapper instanceof ApplicationWrapper) {
+            List<EntAppReleaseWrapper> entAppReleaseWrappers = ((ApplicationWrapper) appWrapper).getEntAppReleaseWrappers();
+            return entAppReleaseWrappers != null && !entAppReleaseWrappers.isEmpty();
+        }
+        if (appWrapper instanceof PublicAppWrapper) {
+            List<PublicAppReleaseWrapper> publicAppReleaseWrappers = ((PublicAppWrapper) appWrapper).getPublicAppReleaseWrappers();
+            return publicAppReleaseWrappers != null && !publicAppReleaseWrappers.isEmpty();
+        }
+        if (appWrapper instanceof WebAppWrapper) {
+            List<WebAppReleaseWrapper> webAppReleaseWrappers = ((WebAppWrapper) appWrapper).getWebAppReleaseWrappers();
+            return webAppReleaseWrappers != null && !webAppReleaseWrappers.isEmpty();
+        }
+        if (appWrapper instanceof CustomAppWrapper) {
+            List<CustomAppReleaseWrapper> customAppReleaseWrappers = ((CustomAppWrapper) appWrapper).getCustomAppReleaseWrappers();
+            return customAppReleaseWrappers != null && !((CustomAppWrapper) appWrapper).getCustomAppReleaseWrappers().isEmpty();
+        }
+        throw new IllegalArgumentException("Provided bean does not belong to an Application Wrapper");
+    }
+
+    public static <T> T getInstance(Extension extension, Class<T> cls) throws InvalidConfigurationException {
         try {
             Class theClass = Class.forName(extension.getClassName());
             if (extension.getParameters() != null && extension.getParameters().size() > 0) {

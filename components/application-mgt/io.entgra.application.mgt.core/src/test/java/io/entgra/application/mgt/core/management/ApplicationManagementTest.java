@@ -41,7 +41,6 @@ import io.entgra.application.mgt.core.dto.ApplicationsDTO;
 import io.entgra.application.mgt.core.impl.ApplicationManagerImpl;
 import io.entgra.application.mgt.core.internal.DataHolder;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
@@ -123,7 +122,8 @@ public class ApplicationManagementTest extends BaseTestCase {
         applicationArtifact.setScreenshots(screenshots);
 
         ApplicationManager manager = new ApplicationManagerImpl();
-        manager.createEntApp(applicationWrapper, applicationArtifact);
+        ApplicationDTO applicationDTO = manager.uploadEntAppReleaseArtifacts(applicationWrapper, applicationArtifact);
+        manager.persistApplication(applicationDTO);
     }
 
     @DataProvider(name = "applicationIdDataProvider")
