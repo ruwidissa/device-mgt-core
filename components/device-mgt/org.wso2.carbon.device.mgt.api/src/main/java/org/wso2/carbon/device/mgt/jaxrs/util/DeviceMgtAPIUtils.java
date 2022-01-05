@@ -959,9 +959,15 @@ public class DeviceMgtAPIUtils {
                 case Constants.OperationStatus.REPEATED:
                     operation.setStatus(Operation.Status.REPEATED);
                     break;
+                case Constants.OperationStatus.REQUIRE_CONFIRMATION:
+                    operation.setStatus(Operation.Status.REQUIRE_CONFIRMATION);
+                    break;
+                case Constants.OperationStatus.CONFIRMED:
+                    operation.setStatus(Operation.Status.CONFIRMED);
+                    break;
                 default:
                     String msg = "Invalid operation status. Valid operations: " +
-                            "[IN_PROGRESS, PENDING, COMPLETED, ERROR, REPEATED, NOTNOW]";
+                            "[IN_PROGRESS, PENDING, COMPLETED, ERROR, REPEATED, NOTNOW, REQUIRE_CONFIRMATION, CONFIRMED]";
                     log.error(msg);
                     throw new BadRequestException(msg);
             }
