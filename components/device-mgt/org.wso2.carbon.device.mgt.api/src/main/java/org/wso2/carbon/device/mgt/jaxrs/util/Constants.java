@@ -68,7 +68,7 @@ public class Constants {
 		public static final String PENDING = "pending";
 		public static final String NOTNOW = "notnow";
 		public static final String REPEATED = "repeated";
-		public static final String REQUIRE_CONFIRMATION = "require_confirmation";
+		public static final String REQUIRED_CONFIRMATION = "required_confirmation";
 		public static final String CONFIRMED = "confirmed";
 	}
 	public static final String DEVICES = "devices";
