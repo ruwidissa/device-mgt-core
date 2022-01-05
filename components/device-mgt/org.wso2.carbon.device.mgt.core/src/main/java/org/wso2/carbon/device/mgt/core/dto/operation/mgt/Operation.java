@@ -30,7 +30,7 @@ public class Operation implements Serializable {
 	}
 
     public enum Status {
-        IN_PROGRESS, PENDING, COMPLETED, ERROR, REPEATED, NOTNOW
+        IN_PROGRESS, PENDING, COMPLETED, ERROR, REPEATED, NOTNOW, REQUIRED_CONFIRMATION, CONFIRMED
     }
 
     public enum Control {
