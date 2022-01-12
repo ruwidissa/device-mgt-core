@@ -2199,7 +2199,7 @@
 
         <!--websocket related lib versions-->
         <tomcat.websocket.version>7.0.85</tomcat.websocket.version>
-        <javax.websocket.version>1.0</javax.websocket.version>
+        <javax.websocket.version>1.1</javax.websocket.version>
         <glassfish.tyrus.version>1.13.1</glassfish.tyrus.version>
 
         <spring-web.version>5.1.13.RELEASE</spring-web.version>
