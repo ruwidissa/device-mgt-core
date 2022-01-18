@@ -158,6 +158,7 @@ public abstract class BaseDeviceManagementTest {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME);
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername("admin");
     }
 
     protected DataSourceConfig readDataSourceConfig(String configLocation) throws DeviceManagementException {

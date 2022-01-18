@@ -72,6 +72,7 @@ import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationExecutionFailedException;
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceStatus;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
@@ -689,6 +690,14 @@ public interface DeviceManagementProviderService {
     boolean setStatus(Device device, EnrolmentInfo.Status status) throws DeviceManagementException;
 
     boolean setStatus(String currentOwner, EnrolmentInfo.Status status) throws DeviceManagementException;
+
+    List<DeviceStatus> getDeviceStatusHistory(Device device) throws DeviceManagementException;
+
+    List<DeviceStatus> getDeviceStatusHistory(Device device, Date fromDate, Date toDate) throws DeviceManagementException;
+
+    List<DeviceStatus> getDeviceCurrentEnrolmentStatusHistory(Device device) throws DeviceManagementException;
+
+    List<DeviceStatus> getDeviceCurrentEnrolmentStatusHistory(Device device, Date fromDate, Date toDate) throws DeviceManagementException;
 
     void notifyOperationToDevices(Operation operation,
                                   List<DeviceIdentifier> deviceIds) throws DeviceManagementException;
