@@ -108,6 +108,7 @@ import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationExecu
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceStatus;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformVersion;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
@@ -116,12 +117,7 @@ import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.impl.DeviceCacheManagerImpl;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
-import org.wso2.carbon.device.mgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
-import org.wso2.carbon.device.mgt.core.dao.EnrollmentDAO;
+import org.wso2.carbon.device.mgt.core.dao.*;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
@@ -176,6 +172,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private final DeviceTypeDAO deviceTypeDAO;
     private final EnrollmentDAO enrollmentDAO;
     private final ApplicationDAO applicationDAO;
+    private final DeviceStatusDAO deviceStatusDAO;
 
     public DeviceManagementProviderServiceImpl() {
         this.pluginRepository = new DeviceManagementPluginRepository();
@@ -183,6 +180,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         this.applicationDAO = DeviceManagementDAOFactory.getApplicationDAO();
         this.deviceTypeDAO = DeviceManagementDAOFactory.getDeviceTypeDAO();
         this.enrollmentDAO = DeviceManagementDAOFactory.getEnrollmentDAO();
+        this.deviceStatusDAO = DeviceManagementDAOFactory.getDeviceStatusDAO();
 
         /* Registering a listener to retrieve events when some device management service plugin is installed after
          * the component is done getting initialized */
@@ -1769,6 +1767,64 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
+    }
+    @Override
+    public List<DeviceStatus> getDeviceStatusHistory(Device device, Date fromDate, Date toDate) throws DeviceManagementException{
+        if (log.isDebugEnabled()) {
+            log.debug("get status history of device: " + device.getDeviceIdentifier());
+        }
+        try {
+            int tenantId = this.getTenantId();
+            return deviceStatusDAO.getStatus(device.getId(), tenantId, fromDate, toDate);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while retrieving status history";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in retrieving status history for device :" + device.getDeviceIdentifier();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public List<DeviceStatus> getDeviceCurrentEnrolmentStatusHistory(Device device, Date fromDate, Date toDate) throws DeviceManagementException{
+        if (log.isDebugEnabled()) {
+            log.debug("get status history of device: " + device.getDeviceIdentifier());
+        }
+        try {
+            int tenantId = this.getTenantId();
+            EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
+            if (enrolmentInfo == null) {
+                enrolmentInfo = enrollmentDAO.getEnrollment(device.getId(), tenantId);
+                if (enrolmentInfo == null) {
+                    String msg = "Error occurred in getting enrollment for device :" + device.getDeviceIdentifier();
+                    log.error(msg);
+                    throw new DeviceManagementException(msg);
+                }
+            }
+            return deviceStatusDAO.getStatus(enrolmentInfo.getId(), fromDate, toDate);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while retrieving status history";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in retrieving status history for current enrolment of device : " + device.getDeviceIdentifier();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public List<DeviceStatus> getDeviceStatusHistory(Device device) throws DeviceManagementException{
+        return getDeviceStatusHistory(device, null, null);
+    }
+
+    @Override
+    public List<DeviceStatus> getDeviceCurrentEnrolmentStatusHistory(Device device) throws DeviceManagementException{
+        return getDeviceCurrentEnrolmentStatusHistory(device, null, null);
     }
 
     @Override
