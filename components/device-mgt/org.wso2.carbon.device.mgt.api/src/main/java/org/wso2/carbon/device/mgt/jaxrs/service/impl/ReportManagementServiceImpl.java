@@ -26,25 +26,38 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
+import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.GrafanaManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
+import org.wso2.carbon.device.mgt.core.grafana.mgt.bean.GrafanaPanelIdentifier;
+import org.wso2.carbon.device.mgt.core.grafana.mgt.exception.MaliciousQueryAttempt;
+import org.wso2.carbon.device.mgt.core.grafana.mgt.util.GrafanaUtil;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.common.ReportFiltersList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.exception.RefererNotValid;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.ReportManagementService;
+import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.GrafanaRequestHandlerUtil;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -56,6 +69,85 @@ import java.util.List;
 public class ReportManagementServiceImpl implements ReportManagementService {
 
     private static final Log log = LogFactory.getLog(ReportManagementServiceImpl.class);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/grafana/api/ds/query")
+    @Override
+    public Response queryDatasource(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        try {
+            GrafanaPanelIdentifier panelIdentifier = GrafanaRequestHandlerUtil.getPanelIdentifier(headers);
+            GrafanaUtil.getGrafanaQueryService().buildSafeQuery(body,  panelIdentifier.getDashboardId(), panelIdentifier.getPanelId(), requestUriInfo.getRequestUri());
+            return GrafanaRequestHandlerUtil.proxyPassPostRequest(body, requestUriInfo, panelIdentifier.getOrgId());
+        } catch (MaliciousQueryAttempt e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(e.getMessage()).build()).build();
+        } catch (GrafanaManagementException e) {
+            return GrafanaRequestHandlerUtil.constructInternalServerError(e, e.getMessage());
+        } catch (RefererNotValid e) {
+            return GrafanaRequestHandlerUtil.constructInvalidReferer();
+        } catch (SQLException | IOException | DBConnectionException e) {
+            log.error(e);
+            return GrafanaRequestHandlerUtil.constructInternalServerError(e, e.getMessage());
+        }
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/grafana/api/frontend-metrics")
+    @Override
+    public Response frontendMetrics(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassPostRequest(body, headers, requestUriInfo);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/grafana/api/dashboards/uid/{uid}")
+    @Override
+    public Response getDashboard(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassGetRequest(headers, requestUriInfo);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/grafana/api/annotations")
+    @Override
+    public Response getAnnotations(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassGetRequest(headers, requestUriInfo);
+    }
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/grafana/api/alerts/states-for-dashboard")
+    @Override
+    public Response getAlertStateForDashboards(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
+        return proxyPassGetRequest(headers, requestUriInfo);
+    }
+
+    public Response proxyPassGetRequest(HttpHeaders headers, UriInfo requestUriInfo) {
+        try {
+            GrafanaPanelIdentifier panelIdentifier = GrafanaRequestHandlerUtil.getPanelIdentifier(headers);
+            return GrafanaRequestHandlerUtil.proxyPassGetRequest(requestUriInfo, panelIdentifier.getOrgId());
+        } catch (RefererNotValid e) {
+            return GrafanaRequestHandlerUtil.constructInvalidReferer();
+        } catch (GrafanaManagementException e) {
+            return GrafanaRequestHandlerUtil.constructInternalServerError(e, e.getMessage());
+        }
+    }
+
+    public Response proxyPassPostRequest(JsonObject body, HttpHeaders headers, UriInfo requestUriInfo) {
+        try {
+            GrafanaPanelIdentifier panelIdentifier = GrafanaRequestHandlerUtil.getPanelIdentifier(headers);
+            return GrafanaRequestHandlerUtil.proxyPassPostRequest(body, requestUriInfo, panelIdentifier.getOrgId());
+        } catch (RefererNotValid e) {
+            return GrafanaRequestHandlerUtil.constructInvalidReferer();
+        } catch (GrafanaManagementException e) {
+            return GrafanaRequestHandlerUtil.constructInternalServerError(e, e.getMessage());
+        }
+    }
+
 
     @GET
     @Path("/devices")

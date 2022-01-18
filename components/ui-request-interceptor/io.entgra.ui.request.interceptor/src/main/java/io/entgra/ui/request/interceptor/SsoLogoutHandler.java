@@ -45,6 +45,7 @@ public class SsoLogoutHandler extends HttpServlet {
         }
         removeCookie(HandlerConstants.COMMON_AUTH_ID_KEY, "/", resp);
         ProxyResponse proxyResponse = new ProxyResponse();
+        proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
         proxyResponse.setCode(HttpStatus.SC_OK);
 
         HttpSession session = req.getSession(false);

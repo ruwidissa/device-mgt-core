@@ -314,6 +314,16 @@
                 <artifactId>io.entgra.transport.mgt.sms.handler.common</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.analytics.mgt.grafana.proxy.core</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.analytics.mgt.grafana.proxy.common</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
             <!-- Device Management dependencies -->
 
             <!-- Governance dependencies -->
@@ -1260,6 +1270,11 @@
                 <version>${google.gson.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${google.guava.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
                 <version>${squareup.okhttp3.version}</version>
@@ -2085,6 +2100,7 @@
         <commons-json.version>3.0.0.wso2v1</commons-json.version>
         <json.smart.version>1.3</json.smart.version>
         <google.gson.version>2.8.5</google.gson.version>
+        <google.guava.version>31.0.1-jre</google.guava.version>
         <squareup.okhttp3.version>4.6.0</squareup.okhttp3.version>
         <okio.version>1.13.0</okio.version>
         <github.openfeign.version>9.3.1</github.openfeign.version>

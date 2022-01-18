@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.api;
 
+import com.google.gson.JsonObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -37,12 +38,16 @@ import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.util.List;
 
 @SwaggerDefinition(
@@ -77,6 +82,89 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public interface ReportManagementService {
+
+    @POST
+    @Path("/grafana/api/ds/query")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Grafana query API proxy",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    Response queryDatasource(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/grafana/api/frontend-metrics")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Grafana frontend-metric API proxy",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    Response frontendMetrics(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/grafana/api/dashboards/uid/{uid}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Grafana dashboard details API proxy",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    Response getDashboard(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/grafana/api/annotations")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Grafana annotations API proxy",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    Response getAnnotations(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/grafana/api/alerts/states-for-dashboard")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Get Grafana alert states for dashboard details API proxy",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    Response getAlertStateForDashboards(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
 
     @GET
     @Path("/devices")

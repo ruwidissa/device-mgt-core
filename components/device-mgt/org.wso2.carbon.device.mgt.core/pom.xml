@@ -338,6 +338,10 @@
             <groupId>org.wso2.carbon.devicemgt</groupId>
             <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

@@ -57,6 +57,7 @@ public class PermissionScopeHandler extends HttpServlet {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(HandlerConstants.USER_SCOPES, authData.getScope());
             proxyResponse.setCode(HttpStatus.SC_OK);
+            proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
             proxyResponse.setData(jsonObject.toString());
             HandlerUtil.handleSuccess(resp, proxyResponse);
             return;
