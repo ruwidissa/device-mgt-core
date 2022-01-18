@@ -88,6 +88,15 @@
             <param-value>Cache-Control: no-store, no-cache, must-revalidate, private</param-value>
         </init-param>
     </filter>
+    <filter>
+        <filter-name>GrafanaLiveSecurityFilter</filter-name>
+        <filter-class>io.entgra.ui.request.interceptor.websocket.GrafanaLiveSecurityFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>GrafanaLiveSecurityFilter</filter-name>
+        <url-pattern>/grafana/api/live/ws</url-pattern>
+    </filter-mapping>
 
     <filter-mapping>
         <filter-name>HttpHeaderSecurityFilter</filter-name>

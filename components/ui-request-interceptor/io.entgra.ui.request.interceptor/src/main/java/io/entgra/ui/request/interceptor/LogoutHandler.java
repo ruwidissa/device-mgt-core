@@ -45,6 +45,7 @@ public class LogoutHandler extends HttpServlet {
         }
 
         ProxyResponse proxyResponse = new ProxyResponse();
+        proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
         proxyResponse.setCode(HttpStatus.SC_OK);
         try {
             HandlerUtil.handleSuccess(resp, proxyResponse);

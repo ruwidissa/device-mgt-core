@@ -108,7 +108,7 @@ public class SsoLoginHandler extends HttpServlet {
             apiMgtUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_APIM_HOST_ENV_VAR)
                     + HandlerConstants.COLON + HandlerUtil.getAPIManagerPort(req.getScheme());
             keyManagerUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
-                    + HandlerConstants.COLON + HandlerUtil.getKeymanagerPort(req.getScheme());
+                    + HandlerConstants.COLON + HandlerUtil.getKeyManagerPort(req.getScheme());
 
             // Fetch ui config and persists in session
             String uiConfigUrl = iotsCoreUrl + HandlerConstants.UI_CONFIG_ENDPOINT;

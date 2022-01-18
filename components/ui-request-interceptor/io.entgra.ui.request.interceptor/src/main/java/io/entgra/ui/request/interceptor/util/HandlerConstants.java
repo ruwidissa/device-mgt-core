@@ -31,6 +31,11 @@ public class HandlerConstants {
     public static final String SSO_LOGIN_CALLBACK = "/ssoLoginCallback";
     public static final String BASIC = "Basic ";
     public static final String BEARER = "Bearer ";
+    public static final String X_FRAME_OPTIONS = "X-Frame-Options";
+    public static final String X_FRAME_OPTIONS_SAMEORIGIN = "SAMEORIGIN";
+    public static final String UPGRADE = "Upgrade";
+    public static final String WEB_SOCKET = "websocket";
+    public static final String HTTP_UPGRADE = "HTTP/1.1";
     public static final String TAGS_KEY = "tags";
     public static final String APP_NAME_KEY = "applicationName";
     public static final String SESSION_AUTH_DATA_KEY = "authInfo";
@@ -58,10 +63,13 @@ public class HandlerConstants {
     public static final String LOGIN_CACHE_CAPACITY_KEY = "loginCacheCapacity";
 
     public static final String SCHEME_SEPARATOR = "://";
+    public static final String URI_SEPARATOR = "/";
+    public static final String QUERY_PARAM_KEY_VALUE_SEP = "=";
     public static final String COLON = ":";
     public static final String HTTP_PROTOCOL = "http";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String UNDERSCORE = "_";
+    public static final String URI_QUERY_SEPARATOR = "?";
 
     public static final int INTERNAL_ERROR_CODE = 500;
     public static final long TIMEOUT = 1200;
@@ -71,9 +79,12 @@ public class HandlerConstants {
     public static final String AX_PREFIX = "ax2251:";
     public static final String PAYLOADS_DIR = "repository/resources/payloads";
     public static final String SOAP_ACTION_HEADER = "SOAPAction";
+    public static final String REFERER_HEADER = "Referer";
 
     public static final String WSS_PROTOCOL = "wss";
+    public static final String WS_PROTOCOL = "ws";
     public static final String REMOTE_SESSION_CONTEXT = "/remote/session/clients";
+    public static final String GRAFANA_API = "/api/device-mgt/v1.0/reports/grafana";
 
     public static final String IOT_CORE_HOST_ENV_VAR = "iot.core.host";
     public static final String IOT_CORE_HTTP_PORT_ENV_VAR = "iot.core.http.port";
@@ -89,5 +100,6 @@ public class HandlerConstants {
     public static final String IOT_REMOTE_SESSION_HOST_ENV_VAR = "iot.remotesession.server.host";
     public static final String IOT_REMOTE_SESSION_HTTPS_PORT_ENV_VAR = "iot.remotesession.server.https.port";
     public static final String IOT_GW_HTTPS_PORT_ENV_VAR = "iot.gateway.https.port";
+    public static final String IOT_REPORTING_WEBAPP_HOST_ENV_VAR = "iot.reporting.webapp.host";
     public static final String USER_SCOPES = "userScopes";
 }
