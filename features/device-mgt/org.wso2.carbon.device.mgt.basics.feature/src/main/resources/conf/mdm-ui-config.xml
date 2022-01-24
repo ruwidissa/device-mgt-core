@@ -26,6 +26,7 @@
     <LoginCacheCapacity>10000</LoginCacheCapacity>
     <AppRegistration>
         <Tags>
+            <Tag>analytics_management</Tag>
             <Tag>application_management</Tag>
             <Tag>device_management</Tag>
             <Tag>subscription_management</Tag>
@@ -34,6 +35,7 @@
         <AllowToAllDomains>true</AllowToAllDomains>
     </AppRegistration>
     <Scopes>
+        <Scope>perm:grafana:api:view</Scope>
         <Scope>perm:app:review:view</Scope>
         <Scope>perm:app:review:update</Scope>
         <Scope>perm:app:publisher:view</Scope>

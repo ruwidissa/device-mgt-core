@@ -44,6 +44,7 @@
         <module>components/certificate-mgt</module>
         <module>components/ui-request-interceptor</module>
         <module>components/transport-mgt</module>
+        <module>components/analytics-mgt</module>
         <module>components/webapp-authenticator-framework</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
@@ -55,6 +56,7 @@
         <module>features/jwt-client</module>
 	    <module>features/device-mgt-extensions</module>
         <module>features/transport-mgt</module>
+        <module>features/analytics-mgt</module>
         <module>features/webapp-authenticator-framework</module>
     </modules>
 
@@ -289,6 +291,18 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.analytics.mgt.grafana.proxy.api.feature</artifactId>
+                <type>zip</type>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.analytics.mgt.grafana.proxy.server.feature</artifactId>
+                <type>zip</type>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
                 <artifactId>io.entgra.application.mgt.server.feature</artifactId>
                 <type>zip</type>
                 <version>${carbon.device.mgt.version}</version>
@@ -312,6 +326,11 @@
             <dependency>
                 <groupId>org.wso2.carbon.devicemgt</groupId>
                 <artifactId>io.entgra.transport.mgt.sms.handler.common</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.analytics.mgt.grafana.proxy.api</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
