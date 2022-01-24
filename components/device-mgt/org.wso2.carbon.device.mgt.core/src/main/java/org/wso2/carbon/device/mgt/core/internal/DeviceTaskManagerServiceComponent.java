@@ -26,7 +26,12 @@ import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
+import org.wso2.carbon.device.mgt.core.config.operation.timeout.OperationTimeout;
+import org.wso2.carbon.device.mgt.core.config.operation.timeout.OperationTimeoutConfiguration;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import org.wso2.carbon.device.mgt.core.operation.timeout.task.OperationTimeoutTaskException;
+import org.wso2.carbon.device.mgt.core.operation.timeout.task.OperationTimeoutTaskManagerService;
+import org.wso2.carbon.device.mgt.core.operation.timeout.task.impl.OperationTimeoutTaskManagerServiceImpl;
 import org.wso2.carbon.device.mgt.core.status.task.DeviceStatusTaskException;
 import org.wso2.carbon.device.mgt.core.status.task.DeviceStatusTaskManagerService;
 import org.wso2.carbon.device.mgt.core.status.task.impl.DeviceStatusTaskManagerServiceImpl;
@@ -66,6 +71,10 @@ public class DeviceTaskManagerServiceComponent {
             if (deviceManagementConfig != null && deviceManagementConfig.getDeviceStatusTaskConfig().isEnabled()) {
                 startDeviceStatusMonitoringTask(componentContext.getBundleContext());
             }
+
+            if (deviceManagementConfig != null && deviceManagementConfig.getOperationTimeoutConfiguration() != null) {
+                startOperationTimeoutTask(componentContext.getBundleContext());
+            }
         } catch (Throwable e) {
             log.error("Error occurred while initializing device task manager service.", e);
         }
@@ -102,12 +111,36 @@ public class DeviceTaskManagerServiceComponent {
         }
     }
 
+    private void startOperationTimeoutTask(BundleContext bundleContext) {
+        OperationTimeoutTaskManagerService operationTimeoutTaskManagerService =
+                new OperationTimeoutTaskManagerServiceImpl();
+        DeviceManagementDataHolder.getInstance().setOperationTimeoutTaskManagerService(
+                operationTimeoutTaskManagerService);
+        bundleContext.registerService(OperationTimeoutTaskManagerService.class,
+                operationTimeoutTaskManagerService, null);
+
+        OperationTimeoutConfiguration configuration = deviceManagementConfig.getOperationTimeoutConfiguration();
+
+        for (OperationTimeout operationTimeout : configuration.getOperationTimeoutList()) {
+                try {
+                    operationTimeoutTaskManagerService.startTask(operationTimeout);
+                } catch (OperationTimeoutTaskException e) {
+                    log.error("Error while starting the operation timeout task for device type (s) : "
+                            + operationTimeout.getDeviceTypes() + ", operation code : "
+                            +  operationTimeout.getInitialStatus());
+                }
+        }
+    }
+
     @SuppressWarnings("unused")
     protected void deactivate(ComponentContext componentContext) {
         try {
             stopOperationMonitoringTask();
             if (deviceManagementConfig != null && deviceManagementConfig.getDeviceStatusTaskConfig().isEnabled()) {
                 stopDeviceStatusMonitoringTask();
+            }
+            if (deviceManagementConfig != null && deviceManagementConfig.getOperationTimeoutConfiguration() != null) {
+                stopOperationTimeoutTask();
             }
         } catch (Throwable e) {
             log.error("Error occurred while shutting down device task manager service.", e);
@@ -139,6 +172,22 @@ public class DeviceTaskManagerServiceComponent {
             } catch (DeviceStatusTaskException e) {
                 log.error("Exception occurred while stopping the DeviceStatusMonitoring Task for deviceType '" +
                         deviceType + "'", e);
+            }
+        }
+    }
+
+    private void stopOperationTimeoutTask() {
+        OperationTimeoutTaskManagerService operationTimeoutTaskManagerService =
+                DeviceManagementDataHolder.getInstance().getOperationTimeoutTaskManagerService();
+        OperationTimeoutConfiguration configuration = deviceManagementConfig.getOperationTimeoutConfiguration();
+
+        for (OperationTimeout operationTimeout : configuration.getOperationTimeoutList()) {
+            try {
+                operationTimeoutTaskManagerService.stopTask(operationTimeout);
+            } catch (OperationTimeoutTaskException e) {
+                log.error("Error while stopping the operation timeout task for device type (s) : "
+                        + operationTimeout.getDeviceTypes() + ", operation code : "
+                        +  operationTimeout.getInitialStatus());
             }
         }
     }

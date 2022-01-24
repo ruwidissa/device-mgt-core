@@ -154,4 +154,6 @@ public interface OperationManager {
      */
     boolean isOperationExist(DeviceIdentifier deviceId, int operationId) throws OperationManagementException;
 
+    List<Activity> getActivities(List<String> deviceTypes, String operationCode, long updatedSince, String operationStatus)
+            throws OperationManagementException;
 }
