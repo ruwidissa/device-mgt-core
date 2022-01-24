@@ -311,5 +311,34 @@
             </Role>
         </Roles>
     </DefaultRoles>
+     <OperationTimeoutConfigurations>
+            <OperationTimeouts>
+            <!--<OperationTimeout>-->
+                <!--<DeviceTypes>-->
+                    <!--<DeviceType>ALL</DeviceType>-->
+                <!--</DeviceTypes>-->
+                <!--<Code>DOUBLE_COMMAND</Code>-->
+                <!--<InitialStatus>REQUIRED_CONFIRMATION</InitialStatus>-->
+                <!--<Timeout>30</Timeout>-->
+                <!--<NextStatus>ERROR</NextStatus>-->
+            <!--</OperationTimeout>-->
+                {% if device_mgt_conf.operation_timeout_conf is defined %}
+                {% for timeout_conf in device_mgt_conf.operation_timeout_conf %}
+                <OperationTimeout>
+                    <DeviceTypes>
+                        {% for device_type in timeout_conf.device_types %}
+                        <DeviceType>{{device_type}}</DeviceType>
+                        {% endfor %}
+
+                    </DeviceTypes>
+                    <Code>{{timeout_conf.code}}</Code>
+                    <InitialStatus>{{timeout_conf.initial_status}}</InitialStatus>
+                    <Timeout>{{timeout_conf.timeout}}</Timeout>
+                    <NextStatus>{{timeout_conf.next_status}}</NextStatus>
+                </OperationTimeout>
+                {% endfor %}
+                {% endif%}
+            </OperationTimeouts>
+        </OperationTimeoutConfigurations>
 </DeviceMgtConfiguration>
 
