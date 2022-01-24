@@ -18,6 +18,9 @@
 
 package io.entgra.ui.request.interceptor;
 
+import io.entgra.analytics.mgt.grafana.proxy.common.exception.GrafanaManagementException;
+import io.entgra.analytics.mgt.grafana.proxy.core.exception.GrafanaEnvVariablesNotDefined;
+import io.entgra.analytics.mgt.grafana.proxy.core.util.GrafanaUtil;
 import io.entgra.ui.request.interceptor.beans.AuthData;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.ui.request.interceptor.util.GrafanaHandlerUtil;
@@ -32,10 +35,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.wso2.carbon.device.mgt.common.exceptions.GrafanaManagementException;
 import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
-import org.wso2.carbon.device.mgt.core.grafana.mgt.exception.GrafanaEnvVariablesNotDefined;
-import org.wso2.carbon.device.mgt.core.grafana.mgt.util.GrafanaUtil;
+
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;

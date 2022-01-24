@@ -56,10 +56,6 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManag
 import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.event.config.EventConfigurationProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.geo.service.GeoLocationProviderServiceImpl;
-import org.wso2.carbon.device.mgt.core.grafana.mgt.service.GrafanaAPIService;
-import org.wso2.carbon.device.mgt.core.grafana.mgt.service.GrafanaQueryService;
-import org.wso2.carbon.device.mgt.core.grafana.mgt.service.impl.GrafanaAPIServiceImpl;
-import org.wso2.carbon.device.mgt.core.grafana.mgt.service.impl.GrafanaQueryServiceImpl;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.notification.mgt.NotificationManagementServiceImpl;
@@ -333,13 +329,6 @@ public class DeviceManagementServiceComponent {
         NotificationManagementService notificationManagementService
                 = new NotificationManagementServiceImpl();
         bundleContext.registerService(NotificationManagementService.class.getName(), notificationManagementService, null);
-
-        /* Registering Grafana Services */
-        GrafanaAPIService grafanaAPIService = new GrafanaAPIServiceImpl();
-        GrafanaQueryService grafanaQueryService = new GrafanaQueryServiceImpl(grafanaAPIService);
-        bundleContext.registerService(GrafanaAPIService.class.getName(), grafanaAPIService, null);
-        bundleContext.registerService(GrafanaQueryService.class.getName(), grafanaQueryService, null);
-
 
         /* Registering Report Service */
         ReportManagementService reportManagementService = new ReportManagementServiceImpl();

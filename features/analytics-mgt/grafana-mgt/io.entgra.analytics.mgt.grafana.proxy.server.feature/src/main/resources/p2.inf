@@ -1,0 +1,4 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.analytics.mgt.grafana.proxy.server_${feature.version}/conf/grafana-config.xml,target:${installFolder}/../../conf/grafana-config.xml,overwrite:true);\
+
+instructions.unconfigure = \
