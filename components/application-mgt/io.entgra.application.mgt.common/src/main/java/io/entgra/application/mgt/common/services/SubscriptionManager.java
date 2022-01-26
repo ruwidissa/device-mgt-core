@@ -175,12 +175,13 @@ public interface SubscriptionManager {
      * @param actionStatus status of the operation.
      * @param action action related to the device.
      * @param appUUID application release UUID
+     * @param  installedVersion installed version
      * @return {@link PaginationResult}
      * @throws ApplicationManagementException if offset or limit contains incorrect values, if it couldn't find an
      * application release for given UUID, if an error occurred while getting device details of subscribed device ids,
      * if an error occurred while getting subscription details of given application release UUID.
      */
-    PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus, String action)
+    PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus, String action, String installedVersion)
             throws ApplicationManagementException;
 
     /***

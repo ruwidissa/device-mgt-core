@@ -140,6 +140,10 @@ public interface SubscriptionManagementAdminAPI {
             value = "Provide the device status details, such as active or inactive.")
             @QueryParam("status") List<String> status,
             @ApiParam(
+                    name = "installedVersion",
+                    value = "Provide the installed version of the application.")
+            @QueryParam("installedVersion") String installedVersion,
+            @ApiParam(
                     name = "uuid",
                     value = "uuid of the application release.",
                     required = true)

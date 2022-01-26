@@ -1361,7 +1361,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
     @Override
     public PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus,
-                                                      String action) throws ApplicationManagementException {
+                                                      String action, String installedVersion) throws ApplicationManagementException {
         int limitValue = request.getRowCount();
         int offsetValue = request.getStartIndex();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -1395,6 +1395,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             }
             List<Integer> deviceIdList = deviceSubscriptionDTOS.stream().map(DeviceSubscriptionDTO::getDeviceId)
                     .collect(Collectors.toList());
+            Map<Integer,String> currentVersionsMap = subscriptionDAO.getCurrentInstalledAppVersion(applicationDTO.getId(),deviceIdList, installedVersion);
             try {
                 //pass the device id list to device manager service method
                 PaginationResult paginationResult = deviceManagementProviderService.getAppSubscribedDevices
@@ -1404,7 +1405,15 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 if (!paginationResult.getData().isEmpty()) {
                     List<Device> devices = (List<Device>) paginationResult.getData();
                     for (Device device : devices) {
+                        if(installedVersion != null && !installedVersion.isEmpty() && !currentVersionsMap.containsKey(device.getId())){
+                            continue;
+                        }
                         DeviceSubscriptionData deviceSubscriptionData = new DeviceSubscriptionData();
+                        if(currentVersionsMap.containsKey(device.getId())){
+                            deviceSubscriptionData.setCurrentInstalledVersion(currentVersionsMap.get(device.getId()));
+                        }else{
+                            deviceSubscriptionData.setCurrentInstalledVersion("-");
+                        }
                         for (DeviceSubscriptionDTO subscription : deviceSubscriptionDTOS) {
                             if (subscription.getDeviceId() == device.getId()) {
                                 deviceSubscriptionData.setDevice(device);
