@@ -150,7 +150,7 @@ public interface GrafanaAPIProxyService {
             tags = "Analytics",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:grafana::api:view")
+                            @ExtensionProperty(name = SCOPE, value = "perm:grafana:api:view")
                     })
             }
     )
