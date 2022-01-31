@@ -112,7 +112,7 @@ public interface GrafanaAPIProxyService {
     @Path("/dashboards/uid/{uid}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
-            httpMethod = "POST",
+            httpMethod = "GET",
             value = "Grafana dashboard details API proxy",
             tags = "Analytics",
             extensions = {
@@ -145,7 +145,7 @@ public interface GrafanaAPIProxyService {
     @Path("/alerts/states-for-dashboard")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
-            httpMethod = "POST",
+            httpMethod = "GET",
             value = "Get Grafana alert states for dashboard details API proxy",
             tags = "Analytics",
             extensions = {
