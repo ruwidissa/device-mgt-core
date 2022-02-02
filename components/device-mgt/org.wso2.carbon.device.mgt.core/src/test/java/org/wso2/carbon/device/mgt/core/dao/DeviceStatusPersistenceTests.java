@@ -157,6 +157,40 @@ public class DeviceStatusPersistenceTests extends BaseDeviceManagementTest {
 //            DeviceManagementDAOFactory.closeConnection();
         }
     }
+
+    @Test
+    public void testSettingAllDeviceStatusOfSingleUser(){
+        try {
+            this.initDataSource();
+            Device device1 = TestDataHolder.generateDummyDeviceData(TestDataHolder.TEST_DEVICE_TYPE);
+            addDevice(device1);
+
+            Device device2 = TestDataHolder.generateDummyDeviceData(TestDataHolder.TEST_DEVICE_TYPE);
+            addDevice(device2);
+
+            EnrolmentInfo.Status[] statuses1 = {ACTIVE, ASSIGNED, CONFIGURED, READY_TO_CONNECT};
+            int enrolmentId1 = createNewEnrolmentAddStatuses(device1, "admin1", statuses1);
+
+            EnrolmentInfo.Status[] statuses2 = {CREATED, SUSPENDED, BLOCKED, DEFECTIVE, REMOVED, WARRANTY_REPLACED, BLOCKED};
+            int enrolmentId2 = createNewEnrolmentAddStatuses(device1, "admin2", statuses2);
+
+            EnrolmentInfo.Status[] statuses3 = {READY_TO_CONNECT, ASSIGNED};
+            int enrolmentId3 = createNewEnrolmentAddStatuses(device2, "admin1", statuses3);
+
+            enrollmentDAO.setStatusAllDevices("admin1", REMOVED, TestDataHolder.SUPER_TENANT_ID);
+
+            EnrolmentInfo.Status[] statuses1_ = Stream.concat(Arrays.stream(statuses1), Arrays.stream(new EnrolmentInfo.Status[] {REMOVED})).toArray(EnrolmentInfo.Status[]::new);
+            EnrolmentInfo.Status[] statuses3_ = Stream.concat(Arrays.stream(statuses3), Arrays.stream(new EnrolmentInfo.Status[] {REMOVED})).toArray(EnrolmentInfo.Status[]::new);
+
+            validateDeviceStatus(device1, deviceStatusDAO.getStatus(enrolmentId1), statuses1_);
+            validateDeviceStatus(device2, deviceStatusDAO.getStatus(enrolmentId3), statuses3_);
+
+        } catch (DeviceManagementDAOException | SQLException e) {
+            log.error("Error occurred while getting enrolment status", e);
+        } catch (Exception e) {
+            log.error("Error occurred while initializing data source", e);
+        }
+    }
     private int addDevice(Device device) throws DeviceManagementDAOException {
         try {
             DeviceManagementDAOFactory.openConnection();

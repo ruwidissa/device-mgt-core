@@ -1836,7 +1836,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             boolean success;
             int tenantId = this.getTenantId();
             DeviceManagementDAOFactory.beginTransaction();
-            success = enrollmentDAO.setStatus(currentOwner, status, tenantId);
+            success = enrollmentDAO.setStatusAllDevices(currentOwner, status, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
             return success;
         } catch (DeviceManagementDAOException e) {

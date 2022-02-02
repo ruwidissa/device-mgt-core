@@ -34,7 +34,10 @@ public interface EnrollmentDAO {
 
     int removeEnrollment(int deviceId, String currentOwner, int tenantId) throws DeviceManagementDAOException;
 
+    @Deprecated
     boolean setStatus(String currentOwner, Status status, int tenantId) throws DeviceManagementDAOException;
+
+    boolean setStatusAllDevices(String currentOwner, Status status, int tenantId) throws DeviceManagementDAOException;
 
     boolean setStatus(int enrolmentId, Status status, int tenantId) throws DeviceManagementDAOException;
 
