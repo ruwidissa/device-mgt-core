@@ -51,19 +51,20 @@ public interface ApplicationManager {
      *
      * @param applicationWrapper Application that need to be created.
      * @param applicationArtifact contains artifact data. i.e image name and stream,  icon name and stream etc.
+     * @param isPublished checks if application should be published
      * @return {@link Application}
      * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
      */
-    Application createEntApp(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
+    Application createEntApp(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact, boolean isPublished)
             throws ApplicationManagementException;
 
-    Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
+    Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact, boolean isPublished)
             throws ApplicationManagementException;
 
-    Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact)
+    Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact, boolean isPublished)
             throws ApplicationManagementException;
 
-    Application createCustomApp(CustomAppWrapper customAppWrapper, ApplicationArtifact applicationArtifact)
+    Application createCustomApp(CustomAppWrapper customAppWrapper, ApplicationArtifact applicationArtifact, boolean isPublished)
             throws ApplicationManagementException;
 
     /**

@@ -135,7 +135,7 @@ ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public Application createEntApp(ApplicationWrapper applicationWrapper,
-            ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
+            ApplicationArtifact applicationArtifact, boolean isPublished) throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Ent. Application create request is received. Application name: " + applicationWrapper.getName()
                     + " Device type: " + applicationWrapper.getDeviceType());
@@ -149,11 +149,11 @@ ApplicationManagerImpl implements ApplicationManager {
                 applicationWrapper.getDeviceType(), tenantId, false);
         applicationDTO.getApplicationReleaseDTOs().clear();
         applicationDTO.getApplicationReleaseDTOs().add(applicationReleaseDTO);
-        return addAppDataIntoDB(applicationDTO, tenantId);
+        return addAppDataIntoDB(applicationDTO, tenantId, isPublished);
     }
 
     @Override
-    public Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
+    public Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact, boolean isPublished)
             throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Web clip create request is received. App name: " + webAppWrapper.getName() + " Device type: "
@@ -175,11 +175,11 @@ ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         }
         //insert application data into database
-        return addAppDataIntoDB(applicationDTO, tenantId);
+        return addAppDataIntoDB(applicationDTO, tenantId, isPublished);
     }
 
     @Override
-    public Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact)
+    public Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact, boolean isPublished)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
 
@@ -231,11 +231,11 @@ ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         }
         //insert application data into database
-        return addAppDataIntoDB(applicationDTO, tenantId);
+        return addAppDataIntoDB(applicationDTO, tenantId, isPublished);
     }
 
     @Override
-    public Application createCustomApp(CustomAppWrapper customAppWrapper, ApplicationArtifact applicationArtifact)
+    public Application createCustomApp(CustomAppWrapper customAppWrapper, ApplicationArtifact applicationArtifact, boolean isPublished)
             throws ApplicationManagementException {
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -282,7 +282,7 @@ ApplicationManagerImpl implements ApplicationManager {
             applicationReleaseDTO = addImageArtifacts(applicationReleaseDTO, applicationArtifact, tenantId);
             applicationDTO.getApplicationReleaseDTOs().clear();
             applicationDTO.getApplicationReleaseDTOs().add(applicationReleaseDTO);
-            return addAppDataIntoDB(applicationDTO, tenantId);
+            return addAppDataIntoDB(applicationDTO, tenantId, isPublished);
         } catch (ResourceManagementException e) {
             String msg = "Error occurred while uploading application artifact into the server. Application name: "
                     + customAppWrapper.getName() + " Device type: " + customAppWrapper.getDeviceType();
@@ -872,7 +872,7 @@ ApplicationManagerImpl implements ApplicationManager {
      * @return {@link Application}
      * @throws ApplicationManagementException which throws if error occurs while during application management.
      */
-    private Application addAppDataIntoDB(ApplicationDTO applicationDTO, int tenantId) throws ApplicationManagementException {
+    private Application addAppDataIntoDB(ApplicationDTO applicationDTO, int tenantId, boolean isPublished) throws ApplicationManagementException {
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         List<String> unrestrictedRoles = applicationDTO.getUnrestrictedRoles();
         ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
@@ -939,11 +939,18 @@ ApplicationManagerImpl implements ApplicationManager {
                 if (log.isDebugEnabled()) {
                     log.debug("Creating a new release. App Id:" + appId);
                 }
-                String initialLifecycleState = lifecycleStateManager.getInitialState();
-                applicationReleaseDTO.setCurrentState(initialLifecycleState);
+                
+                String lifeCycleState;
+                if(isPublished){
+                    lifeCycleState = lifecycleStateManager.getInstallableState();
+                } else {
+                    lifeCycleState = lifecycleStateManager.getInitialState();
+                }
+                
+                applicationReleaseDTO.setCurrentState(lifeCycleState);
                 applicationReleaseDTO = this.applicationReleaseDAO
                         .createRelease(applicationReleaseDTO, appId, tenantId);
-                LifecycleState lifecycleState = getLifecycleStateInstance(initialLifecycleState, initialLifecycleState);
+                LifecycleState lifecycleState = getLifecycleStateInstance(lifeCycleState, lifeCycleState);
                 this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
                 applicationReleaseEntities.add(applicationReleaseDTO);
                 applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
