@@ -20,10 +20,10 @@ package org.wso2.carbon.device.mgt.core.dao.impl;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.dao.DeviceStatusDAO;
 import org.wso2.carbon.device.mgt.core.dao.EnrollmentDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 
@@ -200,29 +200,34 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     @Override
     public boolean setStatus(String currentOwner, EnrolmentInfo.Status status,
                              int tenantId) throws DeviceManagementDAOException {
+        return setStatusAllDevices(currentOwner, status, tenantId);
+    }
+
+    @Override
+    public boolean setStatusAllDevices(String currentOwner, EnrolmentInfo.Status status, int tenantId)
+            throws DeviceManagementDAOException{
         Connection conn;
         PreparedStatement stmt = null;
+        Timestamp updateTime = new Timestamp(new Date().getTime());
         if(getCountOfDevicesOfOwner(currentOwner, tenantId) > 0){
             try {
                 conn = this.getConnection();
-                // TODO add DATE_OF_LAST_UPDATE
-                String sql = "UPDATE DM_ENROLMENT SET STATUS = ? WHERE OWNER = ? AND TENANT_ID = ?";
+                String sql = "UPDATE DM_ENROLMENT SET STATUS = ?, DATE_OF_LAST_UPDATE = ? WHERE OWNER = ? AND TENANT_ID = ?";
                 stmt = conn.prepareStatement(sql);
                 stmt.setString(1, status.toString());
-                stmt.setString(2, currentOwner);
-                stmt.setInt(3, tenantId);
+                stmt.setTimestamp(2, updateTime);
+                stmt.setString(3, currentOwner);
+                stmt.setInt(4, tenantId);
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 throw new DeviceManagementDAOException("Error occurred while setting the status of device enrolment", e);
             } finally {
                 DeviceManagementDAOUtil.cleanupResources(stmt, null);
             }
-            return true;
+            return addDeviceStatus(currentOwner, status, tenantId);
         } else {
             return false;
         }
-        // TODO: Needs device Id since having owner id doesn't necessary make it unique?
-        //getDeviceStatusDAO().updateStatus(deviceId, status);
     }
 
     @Override
@@ -257,9 +262,75 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         return addDeviceStatus(config.getId(), config.getStatus());
     }
 
+    private boolean addDeviceStatus(String currentOwner, EnrolmentInfo.Status status, int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
+        String changedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        if (changedBy == null){
+            changedBy = DeviceManagementConstants.MaintenanceProperties.MAINTENANCE_USER;
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<int[]> enrolmentInfoList = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT ID, DEVICE_ID, OWNER, OWNERSHIP, STATUS, IS_TRANSFERRED, DATE_OF_ENROLMENT, " +
+                    "DATE_OF_LAST_UPDATE, TENANT_ID FROM DM_ENROLMENT WHERE OWNER = ? AND TENANT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, currentOwner);
+            stmt.setInt(2, tenantId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                int enrolmentId = rs.getInt("ID");
+                int deviceId = rs.getInt("DEVICE_ID");
+                enrolmentInfoList.add(new int[]{enrolmentId, deviceId});
+            }
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            Timestamp updateTime = new Timestamp(new Date().getTime());
+            sql = "INSERT INTO DM_DEVICE_STATUS (ENROLMENT_ID, DEVICE_ID, STATUS, UPDATE_TIME, CHANGED_BY) VALUES(?, ?, ?, ?, ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                if (conn.getMetaData().supportsBatchUpdates()) {
+                    for(int[] info: enrolmentInfoList){
+                        ps.setInt(1, info[0]);
+                        ps.setInt(2, info[1]);
+                        ps.setString(3, status.toString());
+                        ps.setTimestamp(4, updateTime);
+                        ps.setString(5, changedBy);
+                        ps.addBatch();
+                    }
+                    int[] batchResult = ps.executeBatch();
+                    for (int i : batchResult) {
+                        if (i == 0 || i == Statement.SUCCESS_NO_INFO || i == Statement.EXECUTE_FAILED) {
+                            return false;
+                        }
+                    }
+                } else {
+                    for(int[] info: enrolmentInfoList){
+                        ps.setInt(1, info[0]);
+                        ps.setInt(2, info[1]);
+                        ps.setString(3, status.toString());
+                        ps.setTimestamp(4, updateTime);
+                        ps.setString(5, changedBy);
+                        ps.execute();
+                    }
+
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the enrolments " +
+                    "information of owner '" + currentOwner + "'", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return true;
+    }
+
     private boolean addDeviceStatus(int enrolmentId, EnrolmentInfo.Status status) throws DeviceManagementDAOException {
         Connection conn;
         String changedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        if (changedBy == null){
+            changedBy = DeviceManagementConstants.MaintenanceProperties.MAINTENANCE_USER;
+        }
         PreparedStatement stmt = null;
         try {
             conn = this.getConnection();
@@ -297,7 +368,6 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
 
                 sql = "INSERT INTO DM_DEVICE_STATUS (ENROLMENT_ID, DEVICE_ID, STATUS, UPDATE_TIME, CHANGED_BY) VALUES(?, ?, ?, ?, ?)";
                 stmt = conn.prepareStatement(sql);
-                // TODO: add changed_by
                 Timestamp updateTime = new Timestamp(new Date().getTime());
                 stmt.setInt(1, enrolmentId);
                 stmt.setInt(2, deviceId);
