@@ -215,6 +215,7 @@
         <Scope>perm:ios:app-configurations</Scope>
         <Scope>perm:mac-os:shut-down</Scope>
         <Scope>perm:mac-os:restart</Scope>
+        <Scope>perm:android:info</Scope>
     {% if mdm_ui_conf.scopes is defined %}
         {%- for scope in mdm_ui_conf.scopes -%}
         <Scope>{{scope}}</Scope>
