@@ -355,6 +355,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @PathParam("deviceType") String deviceType,
             @PathParam("appId") int appId,
             @Multipart("applicationRelease") EntAppReleaseWrapper entAppReleaseWrapper,
+            @QueryParam("is-published") boolean isPublished,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
@@ -370,7 +371,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
             // Created new Ent App release
             ApplicationRelease release = applicationManager.createEntAppRelease(appId, entAppReleaseWrapper,
-                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
+                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList), isPublished);
             if (release != null) {
                 return Response.status(Response.Status.CREATED).entity(release).build();
             } else {

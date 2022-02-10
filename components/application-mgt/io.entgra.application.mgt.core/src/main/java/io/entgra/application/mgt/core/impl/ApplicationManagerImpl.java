@@ -940,18 +940,23 @@ ApplicationManagerImpl implements ApplicationManager {
                     log.debug("Creating a new release. App Id:" + appId);
                 }
                 
-                String lifeCycleState;
-                if(isPublished){
-                    lifeCycleState = lifecycleStateManager.getInstallableState();
-                } else {
-                    lifeCycleState = lifecycleStateManager.getInitialState();
-                }
+                String lifeCycleState = lifecycleStateManager.getInitialState();
+                String[] publishStates= {"IN-REVIEW", "APPROVED", "PUBLISHED"};
                 
                 applicationReleaseDTO.setCurrentState(lifeCycleState);
-                applicationReleaseDTO = this.applicationReleaseDAO
-                        .createRelease(applicationReleaseDTO, appId, tenantId);
+                applicationReleaseDTO = this.applicationReleaseDAO.createRelease(applicationReleaseDTO, appId, tenantId);
                 LifecycleState lifecycleState = getLifecycleStateInstance(lifeCycleState, lifeCycleState);
                 this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
+    
+                if(isPublished){
+                    for (String state: publishStates) {
+                        LifecycleChanger lifecycleChanger = new LifecycleChanger();
+                        lifecycleChanger.setAction(state);
+                        lifecycleChanger.setReason("Updated to " + state);
+                        this.changeLifecycleState(applicationReleaseDTO, lifecycleChanger);
+                    }
+                }
+                
                 applicationReleaseEntities.add(applicationReleaseDTO);
                 applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
                 Application application = APIUtil.appDtoToAppResponse(applicationDTO);
@@ -1011,7 +1016,7 @@ ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public ApplicationRelease createEntAppRelease(int applicationId, EntAppReleaseWrapper entAppReleaseWrapper,
-            ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
+            ApplicationArtifact applicationArtifact, boolean isPublished) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         if (log.isDebugEnabled()) {
             log.debug("Application release creating request is received for the application id: " + applicationId);
@@ -1037,15 +1042,28 @@ ApplicationManagerImpl implements ApplicationManager {
         ApplicationReleaseDTO applicationReleaseDTO = uploadEntAppReleaseArtifacts(
                 APIUtil.releaseWrapperToReleaseDTO(entAppReleaseWrapper), applicationArtifact, deviceType.getName(),
                 tenantId, true);
+
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            String initialstate = lifecycleStateManager.getInitialState();
-            applicationReleaseDTO.setCurrentState(initialstate);
-            LifecycleState lifecycleState = getLifecycleStateInstance(initialstate, initialstate);
+            String lifeCycleState = lifecycleStateManager.getInitialState();
+            String[] publishStates= {"IN-REVIEW", "APPROVED", "PUBLISHED"};
+    
+            applicationReleaseDTO.setCurrentState(lifeCycleState);
+            LifecycleState lifecycleState = getLifecycleStateInstance(lifeCycleState, lifeCycleState);
             applicationReleaseDTO = this.applicationReleaseDAO
                     .createRelease(applicationReleaseDTO, applicationDTO.getId(), tenantId);
             this.lifecycleStateDAO
                     .addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
+    
+            if(isPublished){
+                for (String state: publishStates) {
+                    LifecycleChanger lifecycleChanger = new LifecycleChanger();
+                    lifecycleChanger.setAction(state);
+                    lifecycleChanger.setReason("Updated to " + state);
+                    this.changeLifecycleState(applicationReleaseDTO, lifecycleChanger);
+                }
+            }
+            
             ApplicationRelease applicationRelease = APIUtil.releaseDtoToRelease(applicationReleaseDTO);
             ConnectionManagerUtil.commitDBTransaction();
             return applicationRelease;
@@ -1890,6 +1908,61 @@ ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
+    
+    public ApplicationRelease changeLifecycleState(ApplicationReleaseDTO applicationReleaseDTO, LifecycleChanger lifecycleChanger) throws ApplicationManagementException {
+    
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        if (lifecycleChanger == null || StringUtils.isEmpty(lifecycleChanger.getAction())) {
+            String msg = "The Action is null or empty. Please verify the request.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        
+        try{
+            if (lifecycleStateManager
+                    .isValidStateChange(applicationReleaseDTO.getCurrentState(), lifecycleChanger.getAction(), userName,
+                            tenantId)) {
+                if (lifecycleStateManager.isInstallableState(lifecycleChanger.getAction()) && applicationReleaseDAO
+                        .hasExistInstallableAppRelease(applicationReleaseDTO.getUuid(),
+                                lifecycleStateManager.getInstallableState(), tenantId)) {
+                    String msg = "Installable application release is already registered for the application. "
+                            + "Therefore it is not permitted to change the lifecycle state from "
+                            + applicationReleaseDTO.getCurrentState() + " to " + lifecycleChanger.getAction();
+                    log.error(msg);
+                    throw new ForbiddenException(msg);
+                }
+                LifecycleState lifecycleState = new LifecycleState();
+                lifecycleState.setCurrentState(lifecycleChanger.getAction());
+                lifecycleState.setPreviousState(applicationReleaseDTO.getCurrentState());
+                lifecycleState.setUpdatedBy(userName);
+                lifecycleState.setReasonForChange(lifecycleChanger.getReason());
+                applicationReleaseDTO.setCurrentState(lifecycleChanger.getAction());
+                if (this.applicationReleaseDAO.updateRelease(applicationReleaseDTO, tenantId) == null) {
+                    String msg = "Application release updating is failed/.";
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
+                this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
+                return APIUtil.releaseDtoToRelease(applicationReleaseDTO);
+            } else {
+                String msg = "Invalid lifecycle state transition from '" + applicationReleaseDTO.getCurrentState() + "'"
+                        + " to '" + lifecycleChanger.getAction() + "'";
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
+            }
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when accessing application release data of application release which has the "
+                    + "application release UUID: " + applicationReleaseDTO.getUuid();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (LifeCycleManagementDAOException e) {
+            String msg = "Failed to add lifecycle state for Application release UUID: " + applicationReleaseDTO.getUuid();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
 
     @Override
     public void addApplicationCategories(List<String> categories) throws ApplicationManagementException {

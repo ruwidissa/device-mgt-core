@@ -180,7 +180,18 @@ public interface ApplicationManager {
      */
     ApplicationRelease changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
             throws ApplicationManagementException;
-
+    
+    /**
+     * To get all the releases of a particular ApplicationDTO.
+     *
+     * @param applicationReleaseDTO  of the ApplicationDTO Release.
+     * @param lifecycleChanger Lifecycle changer that contains the action and the reason for the change.
+     * @throws ApplicationManagementException ApplicationDTO Management Exception.
+     * @return
+     */
+    ApplicationRelease changeLifecycleState(ApplicationReleaseDTO applicationReleaseDTO, LifecycleChanger lifecycleChanger)
+            throws ApplicationManagementException;
+    
     /**
      * To update release images such as icons, banner and screenshots.
      *
@@ -208,10 +219,11 @@ public interface ApplicationManager {
      *
      * @param applicationId     ID of the ApplicationDTO
      * @param entAppReleaseWrapper ApplicatonRelease that need to be be created.
+     * @param isPublished checks if application should be published
      * @return the unique id of the application release, if the application release succeeded else -1
      */
     ApplicationRelease createEntAppRelease(int applicationId, EntAppReleaseWrapper entAppReleaseWrapper,
-            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
+            ApplicationArtifact applicationArtifact, boolean isPublished) throws ApplicationManagementException;
 
     /***
      *
@@ -305,5 +317,4 @@ public interface ApplicationManager {
     String getPlistArtifact(String uuid) throws ApplicationManagementException;
 
     List<ApplicationReleaseDTO> getReleaseByPackageNames(List<String> packageIds) throws ApplicationManagementException;
-
 }

@@ -614,6 +614,11 @@ public interface ApplicationManagementPublisherAPI {
                     required = true)
             @Multipart("applicationRelease") EntAppReleaseWrapper entAppReleaseWrapper,
             @ApiParam(
+                    name = "isPublished",
+                    value = "Published state of the application"
+            )
+            @QueryParam("is-Published") boolean isPublished,
+            @ApiParam(
                     name = "binaryFile",
                     value = "Binary file of uploading application",
                     required = true)
