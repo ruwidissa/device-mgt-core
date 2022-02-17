@@ -26,11 +26,8 @@ import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementExcepti
 import org.wso2.carbon.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
 import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
 import org.wso2.carbon.device.mgt.core.config.datasource.JNDILookupDefinition;
-import org.wso2.carbon.device.mgt.core.dao.impl.ApplicationDAOImpl;
-import org.wso2.carbon.device.mgt.core.dao.impl.DeviceTypeDAOImpl;
-import org.wso2.carbon.device.mgt.core.dao.impl.EnrollmentDAOImpl;
+import org.wso2.carbon.device.mgt.core.dao.impl.*;
 import org.wso2.carbon.device.mgt.core.dao.impl.event.GenericEventConfigDAOImpl;
-import org.wso2.carbon.device.mgt.core.dao.impl.GeofenceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.GenericDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.OracleDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.PostgreSQLDeviceDAOImpl;
@@ -127,7 +124,9 @@ public class DeviceManagementDAOFactory {
     public static EnrollmentDAO getEnrollmentDAO() {
         return new EnrollmentDAOImpl();
     }
-
+    public static DeviceStatusDAO getDeviceStatusDAO() {
+        return new DeviceStatusDAOImpl();
+    }
     public static ApplicationDAO getApplicationDAO() {
         if (databaseEngine != null) {
             switch (databaseEngine) {

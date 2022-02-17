@@ -123,6 +123,7 @@ public class LoginHandler extends HttpServlet {
 
                     if (getTokenAndPersistInSession(req, resp, clientId, clientSecret, encodedClientApp, scopes)) {
                         ProxyResponse proxyResponse = new ProxyResponse();
+                        proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
                         proxyResponse.setCode(HttpStatus.SC_OK);
                         HandlerUtil.handleSuccess(resp, proxyResponse);
                         return;
@@ -210,7 +211,7 @@ public class LoginHandler extends HttpServlet {
                 + HandlerConstants.COLON + HandlerUtil.getCorePort(req.getScheme());
         uiConfigUrl = iotCoreUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
         kmManagerUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
-                + HandlerConstants.COLON + HandlerUtil.getKeymanagerPort(req.getScheme());
+                + HandlerConstants.COLON + HandlerUtil.getKeyManagerPort(req.getScheme());
 
         if (username == null || password == null) {
             String msg = "Invalid login request. Username or Password is not received for login request.";

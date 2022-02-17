@@ -178,5 +178,9 @@
             </Role>
         </Roles>
     </DefaultRoles>
+    <OperationTimeoutConfigurations>
+        <OperationTimeouts>
+        </OperationTimeouts>
+    </OperationTimeoutConfigurations>
 </DeviceMgtConfiguration>
 

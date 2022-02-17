@@ -17,11 +17,20 @@
  */
 package io.entgra.ui.request.interceptor.beans;
 
+import org.apache.http.Header;
+
 public class ProxyResponse {
+
+    public static class Status {
+        public static int SUCCESS = 1;
+        public static int ERROR = 0;
+    }
 
     private int code;
     private String data;
     private String executorResponse;
+    private int status;
+    private Header[] headers;
 
     public int getCode() { return code; }
 
@@ -34,4 +43,21 @@ public class ProxyResponse {
     public String getExecutorResponse() { return executorResponse; }
 
     public void setExecutorResponse(String executorResponse) { this.executorResponse = executorResponse; }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public Header[] getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(Header[] headers) {
+        this.headers = headers;
+    }
+
 }

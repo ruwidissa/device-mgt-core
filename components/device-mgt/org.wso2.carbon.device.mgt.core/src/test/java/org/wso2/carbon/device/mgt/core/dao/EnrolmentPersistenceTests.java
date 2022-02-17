@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.core.common.BaseDeviceManagementTest;
 import org.wso2.carbon.device.mgt.core.common.TestDataHolder;
@@ -36,7 +37,7 @@ public class EnrolmentPersistenceTests extends BaseDeviceManagementTest {
 
     @Test
     public void testAddEnrolment() {
-        int deviceId = TestDataHolder.initialTestDevice.getId();
+        int deviceId = -1;
         String owner = "admin";
 
         /* Initializing source enrolment configuration bean to be tested */
@@ -47,6 +48,10 @@ public class EnrolmentPersistenceTests extends BaseDeviceManagementTest {
         /* Adding dummy enrolment configuration to the device management metadata store */
         try {
             DeviceManagementDAOFactory.openConnection();
+            Device device = TestDataHolder.generateDummyDeviceData(TestDataHolder.TEST_DEVICE_TYPE);
+            DeviceDAO deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
+            deviceId = deviceDAO.addDevice(TestDataHolder.initialTestDeviceType.getId(), device, TestDataHolder.SUPER_TENANT_ID);
+            device.setId(deviceId);
             enrollmentDAO.addEnrollment(deviceId, source, TestDataHolder.SUPER_TENANT_ID);
         } catch (DeviceManagementDAOException | SQLException e) {
             log.error("Error occurred while adding enrollment", e);
@@ -54,16 +59,18 @@ public class EnrolmentPersistenceTests extends BaseDeviceManagementTest {
             DeviceManagementDAOFactory.closeConnection();
         }
         /* Retrieving the enrolment associated with the given deviceId and owner */
-        EnrolmentInfo target = null;
-        try {
-            target = this.getEnrolmentConfig(deviceId, owner, TestDataHolder.SUPER_TENANT_ID);
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while retrieving application info";
-            log.error(msg, e);
-            Assert.fail(msg, e);
-        }
+        if (deviceId != -1) {
+            EnrolmentInfo target = null;
+            try {
+                target = this.getEnrolmentConfig(deviceId, owner, TestDataHolder.SUPER_TENANT_ID);
+            } catch (DeviceManagementDAOException e) {
+                String msg = "Error occurred while retrieving application info";
+                log.error(msg, e);
+                Assert.fail(msg, e);
+            }
 
-        Assert.assertEquals(target, source, "Enrolment configuration added is not as same as what's retrieved");
+            Assert.assertEquals(target, source, "Enrolment configuration added is not as same as what's retrieved");
+        }
     }
 
     private EnrolmentInfo getEnrolmentConfig(int deviceId, String currentOwner,

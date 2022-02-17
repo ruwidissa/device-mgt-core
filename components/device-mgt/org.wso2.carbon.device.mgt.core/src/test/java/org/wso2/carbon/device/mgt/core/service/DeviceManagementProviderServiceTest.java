@@ -74,6 +74,8 @@ import org.wso2.carbon.device.mgt.core.authorization.DeviceAccessAuthorizationSe
 import org.wso2.carbon.device.mgt.core.common.BaseDeviceManagementTest;
 import org.wso2.carbon.device.mgt.core.common.TestDataHolder;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
+import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
+import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDAOException;
@@ -885,6 +887,28 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
     public void testUpdateDevicesStatusWithDeviceID() throws DeviceManagementException {
         if (!isMock()) {
             Device device = TestDataHolder.generateDummyDeviceData("abc");
+            try {
+                int tenantId = TestDataHolder.SUPER_TENANT_ID;
+                DeviceManagementDAOFactory.beginTransaction();
+                DeviceDAO deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
+                int deviceId = deviceDAO.addDevice(TestDataHolder.initialTestDeviceType.getId(), device, tenantId);
+                device.setId(deviceId);
+                int enrolmentId = deviceDAO.addEnrollment(device, tenantId);
+                device.getEnrolmentInfo().setId(enrolmentId);
+                DeviceManagementDAOFactory.commitTransaction();
+            } catch (DeviceManagementDAOException e) {
+                DeviceManagementDAOFactory.rollbackTransaction();
+                String msg = "Error occurred while adding '" + device.getType() + "' device with the identifier '" +
+                        device.getDeviceIdentifier() + "'";
+                log.error(msg, e);
+                Assert.fail(msg, e);
+            } catch (TransactionManagementException e) {
+                String msg = "Error occurred while initiating transaction";
+                log.error(msg, e);
+                Assert.fail(msg, e);
+            } finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
             boolean status = deviceMgtService.setStatus(device, EnrolmentInfo.Status.ACTIVE);
             Assert.assertTrue(status);
         }

@@ -18,7 +18,14 @@
 
 package org.wso2.carbon.device.mgt.core.report.mgt;
 
+import org.wso2.carbon.utils.CarbonUtils;
+
+import java.io.File;
+
 public class Constants {
+    public static final String DEFAULT_CONFIG_FILE_LOCATION = CarbonUtils.getCarbonConfigDirPath() + File.separator +
+            Constants.REPORT_MGT_CONFIG_XML_FILE;
+    public static final String REPORT_MGT_CONFIG_XML_FILE = "reporting-mgt.xml";
     // device types
     public static final String ANDROID = "android";
     public static final String IOS = "ios";
@@ -29,5 +36,14 @@ public class Constants {
     // OS version value generating properties
     public static final int NUM_OF_OS_VERSION_DIGITS= 5;
     public static final int NUM_OF_OS_VERSION_POSITIONS = 3;
+    public static final String BASIC_AUTH_HEADER_PREFIX = "Basic ";
+    public static final String HTTP_PROTOCOL = "http";
+    public static final String HTTPS_PROTOCOL = "https";
+    public static final String WSS_PROTOCOL = "wss";
+    public static final String WS_PROTOCOL = "ws";
+    public static final String SCHEME_SEPARATOR = "://";
+    public static final String URI_SEPARATOR = "/";
+    public static final String URI_QUERY_SEPARATOR = "?";
+    public static final String COLON = ":";
 }
 

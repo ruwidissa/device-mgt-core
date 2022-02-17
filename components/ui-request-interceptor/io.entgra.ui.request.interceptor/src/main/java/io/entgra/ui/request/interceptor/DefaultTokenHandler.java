@@ -140,6 +140,7 @@ public class DefaultTokenHandler extends HttpServlet {
 
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(HttpStatus.SC_OK);
+        proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
         proxyResponse.setData(payload);
         return proxyResponse;
     }
