@@ -18,13 +18,9 @@
 
 package org.wso2.carbon.device.mgt.core.dao.impl.device;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.Count;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -185,6 +181,62 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
+    }
+
+    @Override
+    public List<DeviceBilling> getDeviceBillList(PaginationRequest request, int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        List<DeviceBilling> devices = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            String sql ="select DEVICE_IDENTIFICATION, DESCRIPTION, NAME AS DEVICE_NAME, DATE_OF_ENROLMENT, STATUS,\n" +
+                    "TIMESTAMPDIFF('DAY', CURDATE(), DATE_OF_ENROLMENT) as DAYS_SINCE_ENROLLED from DM_DEVICE d, DM_ENROLMENT e\n" +
+                    "where e.TENANT_ID= ? and  d.ID=e.DEVICE_ID and STATUS !='REMOVED' LIMIT 10";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                DeviceBilling device = DeviceManagementDAOUtil.loadDeviceBilling(rs, false);
+                devices.add(device);
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while fetching the list of devices belongs to '" +
+                    request.getOwner() + "'", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        return devices;
+    }
+
+    @Override
+    public List<DeviceBilling> getRemovedDeviceBillList(PaginationRequest request, int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        List<DeviceBilling> devices = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            String sql = "select DEVICE_IDENTIFICATION, DESCRIPTION, NAME AS DEVICE_NAME, DATE_OF_ENROLMENT, DATE_OF_LAST_UPDATE, STATUS, " +
+                    "TIMESTAMPDIFF('DAY', DATE_OF_ENROLMENT, DATE_OF_LAST_UPDATE) AS DAYS_USED from DM_DEVICE d, DM_ENROLMENT e" +
+                    " where e.TENANT_ID=? and d.ID=e.DEVICE_ID and STATUS ='REMOVED'\n";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                DeviceBilling device = DeviceManagementDAOUtil.loadDeviceBilling(rs, true);
+                devices.add(device);
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while fetching the list of devices belongs to '" +
+                    request.getOwner() + "'", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        return devices;
     }
 
     @Override

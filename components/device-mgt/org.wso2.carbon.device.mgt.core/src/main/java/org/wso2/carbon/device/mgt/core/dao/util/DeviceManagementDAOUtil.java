@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceBilling;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
@@ -152,6 +153,16 @@ public final class DeviceManagementDAOUtil {
         return enrolmentInfo;
     }
 
+    public static EnrolmentInfo loadEnrolmentBilling(ResultSet rs, Boolean removedDevices) throws SQLException {
+        EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
+        enrolmentInfo.setDateOfEnrolment(rs.getTimestamp("DATE_OF_ENROLMENT").getTime());
+        enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
+        if (removedDevices) {
+            enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
+        }
+        return enrolmentInfo;
+    }
+
     public static EnrolmentInfo loadMatchingEnrolment(ResultSet rs) throws SQLException {
         Map<EnrolmentInfo.Status, EnrolmentInfo> enrolmentInfos = new HashMap<>();
         EnrolmentInfo enrolmentInfo = loadEnrolment(rs);
@@ -194,6 +205,20 @@ public final class DeviceManagementDAOUtil {
         device.setType(rs.getString("DEVICE_TYPE"));
         device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
         device.setEnrolmentInfo(loadEnrolment(rs));
+        return device;
+    }
+
+    public static DeviceBilling loadDeviceBilling(ResultSet rs, Boolean removedDevices) throws SQLException {
+        DeviceBilling device = new DeviceBilling();
+        device.setName(rs.getString("DEVICE_NAME"));
+        device.setDescription(rs.getString("DESCRIPTION"));
+        device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
+        if (removedDevices) {
+            device.setDaysUsed((int) rs.getLong("DAYS_USED"));
+        } else {
+            device.setDaysSinceEnrolled((int) rs.getLong("DAYS_SINCE_ENROLLED"));
+        }
+        device.setEnrolmentInfo(loadEnrolmentBilling(rs, removedDevices));
         return device;
     }
 

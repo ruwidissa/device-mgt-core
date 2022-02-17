@@ -35,8 +35,19 @@ public class DeviceList extends BasePaginatedResult {
         return devices;
     }
 
+    @ApiModelProperty(name = "totalCost", value = "Total cost of all devices per tenant", required = false)
+    private double totalCost;
+
     public void setList(List<Device> devices) {
         this.devices = devices;
+    }
+
+    public double getTotalCost() {
+        return totalCost;
+    }
+
+    public void setTotalCost(double totalCost) {
+        this.totalCost = totalCost;
     }
 
     @Override

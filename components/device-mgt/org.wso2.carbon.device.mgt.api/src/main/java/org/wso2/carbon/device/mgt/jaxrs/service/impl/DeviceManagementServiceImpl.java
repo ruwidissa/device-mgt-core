@@ -342,6 +342,51 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     @GET
     @Override
+    @Path("/billing")
+    public Response getDevicesBilling(
+            @DefaultValue("nita")
+            @QueryParam ("tenantDomain") String tenantDomain,
+            @QueryParam("offset") int offset,
+            @DefaultValue("10")
+            @QueryParam("limit") int limit) {
+        try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+//            DeviceAccessAuthorizationService deviceAccessAuthorizationService =
+//                    DeviceMgtAPIUtils.getDeviceAccessAuthorizationService();
+            PaginationRequest request = new PaginationRequest(offset, limit);
+            PaginationResult result;
+            DeviceList devices = new DeviceList();
+
+            try {
+                result = dms.getAllDevicesBillings(request, true, tenantDomain);
+            } catch (Exception exception) {
+                String msg = "------------------TEST ERROR-----------------------";
+                log.error(msg, exception);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+
+            int resultCount = result.getRecordsTotal();
+            if (resultCount == 0) {
+                Response.status(Response.Status.OK).entity(devices).build();
+            }
+
+            devices.setList((List<Device>) result.getData());
+            devices.setCount(result.getRecordsTotal());
+            devices.setTotalCost(result.getTotalCost());
+            return Response.status(Response.Status.OK).entity(devices).build();
+        }
+        catch (Exception e) {
+            String msg = "Error occurred while fetching all enrolled devices";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    @GET
+    @Override
     @Path("/user-devices")
     public Response getDeviceByUser(@QueryParam("requireDeviceInfo") boolean requireDeviceInfo,
                                     @QueryParam("offset") int offset,

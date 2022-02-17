@@ -34,6 +34,7 @@
  */
 package org.wso2.carbon.device.mgt.core.service;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.lang.StringUtils;
@@ -49,23 +50,7 @@ import org.apache.http.protocol.HTTP;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceEnrollmentInfoNotification;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManager;
-import org.wso2.carbon.device.mgt.common.DeviceNotification;
-import org.wso2.carbon.device.mgt.common.DevicePropertyNotification;
-import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
-import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.FeatureManager;
-import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
-import org.wso2.carbon.device.mgt.common.MonitoringOperation;
-import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
+import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
@@ -76,6 +61,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.cost.mgt.Costdata;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
@@ -99,6 +85,7 @@ import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
@@ -133,6 +120,8 @@ import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementServiceComponent;
 import org.wso2.carbon.device.mgt.core.internal.PluginInitializationListener;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.email.sender.core.ContentProviderInfo;
@@ -150,17 +139,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.Type;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 //import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
@@ -176,6 +157,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private final DeviceTypeDAO deviceTypeDAO;
     private final EnrollmentDAO enrollmentDAO;
     private final ApplicationDAO applicationDAO;
+    private MetadataDAO metadataDAO;
 
     public DeviceManagementProviderServiceImpl() {
         this.pluginRepository = new DeviceManagementPluginRepository();
@@ -183,6 +165,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         this.applicationDAO = DeviceManagementDAOFactory.getApplicationDAO();
         this.deviceTypeDAO = DeviceManagementDAOFactory.getDeviceTypeDAO();
         this.enrollmentDAO = DeviceManagementDAOFactory.getEnrollmentDAO();
+        this.metadataDAO = MetadataManagementDAOFactory.getMetadataDAO();
 
         /* Registering a listener to retrieve events when some device management service plugin is installed after
          * the component is done getting initialized */
@@ -952,6 +935,106 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     @Override
     public PaginationResult getAllDevices(PaginationRequest request) throws DeviceManagementException {
         return this.getAllDevices(request, true);
+    }
+
+    @Override
+    public List<DeviceBilling> getRemovedDeviceListWithCost(PaginationResult paginationResult, PaginationRequest request, Collection<Costdata> costdata, String tenantDomain, Double totalCost) throws DeviceManagementException {
+        List<DeviceBilling> allRemovedDevices;
+        int tenantId = this.getTenantId();
+        try {
+            allRemovedDevices =  deviceDAO.getRemovedDeviceBillList(request,tenantId);
+            for (Costdata test: costdata) {
+                if (test.getTenantDomain().equals(tenantDomain)) {
+                    for (DeviceBilling device: allRemovedDevices) {
+                        long dateDiff = device.getEnrolmentInfo().getDateOfLastUpdate()-device.getEnrolmentInfo().getDateOfEnrolment();
+                        long dateInDays = dateDiff / (1000*60*60*24);
+                        double cost = (test.getCost()/365)*dateInDays;
+                        totalCost = cost + totalCost;
+                        device.setCost(cost);
+                    }
+                }
+            }
+            paginationResult.setTotalCost(totalCost);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving device list pertaining to the current tenant";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
+        catch (Exception e) {
+            String msg = "Error occurred get devices";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
+
+        return allRemovedDevices;
+    }
+
+    @Override
+    public PaginationResult getAllDevicesBillings(PaginationRequest request, boolean requireDeviceInfo, String tenantDomain) throws DeviceManagementException {
+        if (request == null) {
+            String msg = "Received incomplete pagination request for method getAllDeviceBillings";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get devices with pagination " + request.toString() + " and requiredDeviceInfo: " + requireDeviceInfo);
+        }
+
+        PaginationResult paginationResult = new PaginationResult();
+        Double totalCost = 0.0;
+        List<DeviceBilling> allDevices;
+        List<DeviceBilling> allRemovedDevices;
+        int count = 0;
+        int tenantId = this.getTenantId();
+        DeviceManagerUtil.validateDeviceListPageSize(request);
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            allDevices = deviceDAO.getDeviceBillList(request, tenantId);
+            count = deviceDAO.getDeviceCount(request, tenantId);
+
+            String metaKey = "PER_DEVICE_COST";
+            MetadataManagementDAOFactory.openConnection();
+            Metadata metadata = metadataDAO.getMetadata(tenantId, metaKey);
+
+            Gson g = new Gson();
+
+            Type collectionType = new TypeToken<Collection<Costdata>>(){}.getType();
+            Collection<Costdata> costdata = g.fromJson(metadata.getMetaValue(), collectionType);
+
+            for (Costdata test: costdata) {
+                if (test.getTenantDomain().equals(tenantDomain)) {
+                    for (DeviceBilling device: allDevices) {
+                        long dateDiff = test.getSubscriptionEnd().getTime()-device.getEnrolmentInfo().getDateOfEnrolment();
+                        long dateInDays = dateDiff / (1000*60*60*24);
+                        double cost = (test.getCost()/365)*dateInDays;
+                        totalCost = cost + totalCost;
+                        device.setCost(cost);
+                    }
+                }
+            }
+
+            allRemovedDevices = this.getRemovedDeviceListWithCost(paginationResult, request, costdata, tenantDomain, totalCost);
+            allDevices.addAll(allRemovedDevices);
+
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving device list pertaining to the current tenant";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getAllDevices";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        paginationResult.setData(allDevices);
+        paginationResult.setRecordsFiltered(count);
+        paginationResult.setRecordsTotal(count);
+        return paginationResult;
     }
 
     @Override
@@ -4344,7 +4427,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.debug("Triggering Corrective action. Device Identifier: " + deviceIdentifier);
         }
 
-        if (StringUtils.isBlank(featureCode)){
+        if (StringUtils.isBlank(featureCode)) {
             String msg = "Found a Blan feature code: " + featureCode;
             log.error(msg);
             throw new BadRequestException(msg);

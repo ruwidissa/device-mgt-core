@@ -36,23 +36,13 @@
 package org.wso2.carbon.device.mgt.core.service;
 
 import org.apache.commons.collections.map.SingletonMap;
-import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
-import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.FeatureManager;
-import org.wso2.carbon.device.mgt.common.MonitoringOperation;
-import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
+import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.cost.mgt.Costdata;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
@@ -79,6 +69,7 @@ import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -206,6 +197,27 @@ public interface DeviceManagementProviderService {
      *                                   devices.
      */
     PaginationResult getAllDevices(PaginationRequest request, boolean requireDeviceInfo) throws DeviceManagementException;
+
+    /**
+     * Method to retrieve all the devices with pagination support.
+     *
+     * @param request PaginationRequest object holding the data for pagination
+     * @return List<DeviceBilling> - Result includes the cost of removed device list.
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching the
+     *                                   devices.
+     */
+    List<DeviceBilling> getRemovedDeviceListWithCost(PaginationResult paginationResult, PaginationRequest request, Collection<Costdata> costdata, String tenantDomain, Double totalCost) throws DeviceManagementException;
+    /**
+     * Method to retrieve all the devices with pagination support.
+     *
+     * @param request PaginationRequest object holding the data for pagination
+     * @param requireDeviceInfo - A boolean indicating whether the device-info (location, app-info etc) is also required
+     *                          along with the device data.
+     * @return PaginationResult - Result including the required parameters necessary to do pagination.
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching the
+     *                                   devices.
+     */
+    PaginationResult getAllDevicesBillings(PaginationRequest request, boolean requireDeviceInfo, String tenantDomain) throws DeviceManagementException;
 
     /**
      * Returns the device of specified id.

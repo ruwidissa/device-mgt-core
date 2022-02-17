@@ -44,6 +44,17 @@ public class PaginationResult implements Serializable {
     @ApiModelProperty(name = "data", value = "This holds the database records that matches given criteria", required = true)
     private List<?> data;
 
+    @ApiModelProperty(name = "totalCost", value = "Total cost of all devices per tenant", required = false)
+    private double totalCost;
+
+    public double getTotalCost() {
+        return totalCost;
+    }
+
+    public void setTotalCost(double totalCost) {
+        this.totalCost = totalCost;
+    }
+
     public int getRecordsTotal() {
         return recordsTotal;
     }
