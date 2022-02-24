@@ -112,13 +112,14 @@ import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
-import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementServiceComponent;
 import org.wso2.carbon.device.mgt.core.internal.PluginInitializationListener;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDeviceInfo;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.email.sender.core.ContentProviderInfo;
 import org.wso2.carbon.email.sender.core.EmailContext;
@@ -145,7 +146,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-//import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
         PluginInitializationListener {
@@ -213,7 +213,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public boolean enrollDevice(Device device) throws DeviceManagementException {
+    public boolean enrollDevice(Device device) throws DeviceManagementException, IOException {
         if (device == null) {
             String msg = "Received empty device for device enrollment";
             log.error(msg);
@@ -393,6 +393,18 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             }
             status = true;
         }
+
+        //Traccar update Latitude Longitude
+        String lastUpdatedTime = String.valueOf((new Date().getTime()));
+        TraccarDeviceInfo traccarDeviceInfo = new TraccarDeviceInfo(device.getName(), device.getDeviceIdentifier(),
+                "online", "false", lastUpdatedTime, "", "", "", "",
+                "", "");
+        DeviceAPIClientServiceImpl dac= new DeviceAPIClientServiceImpl();
+        String deviceAPIClientResponse=dac.addDevice(traccarDeviceInfo);
+        if (log.isDebugEnabled()) {
+            log.debug("Location Update "+ new Gson().toJson(deviceAPIClientResponse));
+        }
+        //Traccar update Latitude Longitude
 
         if (status) {
             addDeviceToGroups(deviceIdentifier, device.getEnrolmentInfo().getOwnership());

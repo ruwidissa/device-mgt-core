@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.device.details.mgt.impl;
 
+import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,10 +44,13 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDA
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDeviceInfo;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -385,6 +389,18 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 //                        LOCATION_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
 //                );
             }
+
+            //Traccar update lat lon
+            TraccarDeviceInfo trackerinfo = new TraccarDeviceInfo(device.getDeviceIdentifier(),
+                    deviceLocation.getUpdatedTime().getTime(),
+                    deviceLocation.getLatitude(), deviceLocation.getLongitude(),
+                    deviceLocation.getBearing(), deviceLocation.getSpeed());
+
+            DeviceAPIClientServiceImpl dac= new DeviceAPIClientServiceImpl();
+            String deviceAPIClientResponse=dac.updateLocation(trackerinfo);
+            log.info("Location Update "+ new Gson().toJson(deviceAPIClientResponse));
+            //Traccar update lat lon
+
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
             throw new DeviceDetailsMgtException("Transactional error occurred while adding the device location " +
@@ -398,6 +414,9 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 //        } catch (DataPublisherConfigurationException e) {
 //            DeviceManagementDAOFactory.rollbackTransaction();
 //            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
+        } catch (IOException e) {
+            log.error("Error on Traccar" + e);
+            //e.printStackTrace();
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
