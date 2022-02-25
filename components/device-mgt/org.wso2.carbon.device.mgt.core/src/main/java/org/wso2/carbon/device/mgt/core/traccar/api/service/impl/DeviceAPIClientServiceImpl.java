@@ -21,24 +21,25 @@ package org.wso2.carbon.device.mgt.core.traccar.api.service.impl;
 
 import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.addons.TrackerClient;
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDeviceInfo;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
 
 import java.io.IOException;
 
 public class DeviceAPIClientServiceImpl implements DeviceAPIClientService {
 
-    public String updateLocation(TraccarDeviceInfo deviceInfo) throws IOException {
+    public String updateLocation(TraccarPosition deviceInfo) throws IOException {
         TrackerClient client = new TrackerClient();
         return (client.updateLocation(deviceInfo));
     }
 
-    public String addDevice(TraccarDeviceInfo deviceInfo) throws IOException {
+    public String addDevice(TraccarDevice deviceInfo) throws IOException {
         TrackerClient client = new TrackerClient();
         return (client.addDevice(deviceInfo));
     }
 
-    public String deleteDevice(TraccarDeviceInfo deviceInfo) throws IOException {
+    public String disDevice(TraccarDevice deviceInfo) throws IOException {
         TrackerClient client = new TrackerClient();
-        return (client.deleteDevice(deviceInfo));
+        return (client.disDevice(deviceInfo));
     }
 }

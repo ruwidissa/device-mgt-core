@@ -119,7 +119,8 @@ import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDeviceInfo;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.email.sender.core.ContentProviderInfo;
 import org.wso2.carbon.email.sender.core.EmailContext;
@@ -396,7 +397,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
         //Traccar update Latitude Longitude
         String lastUpdatedTime = String.valueOf((new Date().getTime()));
-        TraccarDeviceInfo traccarDeviceInfo = new TraccarDeviceInfo(device.getName(), device.getDeviceIdentifier(),
+        TraccarDevice traccarDeviceInfo = new TraccarDevice(device.getName(), device.getDeviceIdentifier(),
                 "online", "false", lastUpdatedTime, "", "", "", "",
                 "", "");
         DeviceAPIClientServiceImpl dac= new DeviceAPIClientServiceImpl();
@@ -566,6 +567,15 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             deviceDAO.updateDevice(device, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
             this.removeDeviceFromCache(deviceId);
+
+            //Traccar update Latitude Longitude
+            TraccarDevice traccarDeviceInfo = new TraccarDevice(device.getDeviceIdentifier());
+            DeviceAPIClientServiceImpl dac= new DeviceAPIClientServiceImpl();
+            String deviceAPIClientResponse=dac.disDevice(traccarDeviceInfo);
+            if (log.isDebugEnabled()) {
+                log.debug("Disenroll Device "+ new Gson().toJson(deviceAPIClientResponse));
+            }
+            //Traccar update Latitude Longitude
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while dis-enrolling '" + deviceId.getType() +

@@ -45,7 +45,7 @@ import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDeviceInfo;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -391,7 +391,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             }
 
             //Traccar update lat lon
-            TraccarDeviceInfo trackerinfo = new TraccarDeviceInfo(device.getDeviceIdentifier(),
+            TraccarPosition trackerinfo = new TraccarPosition(device.getDeviceIdentifier(),
                     deviceLocation.getUpdatedTime().getTime(),
                     deviceLocation.getLatitude(), deviceLocation.getLongitude(),
                     deviceLocation.getBearing(), deviceLocation.getSpeed());

@@ -19,15 +19,19 @@
 
 package org.wso2.carbon.device.mgt.core.traccar.common;
 
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDeviceInfo;
+import okhttp3.Request;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
 
 import java.io.IOException;
 
 public interface TraccarClient {
 
-    String updateLocation(TraccarDeviceInfo deviceInfo) throws IOException;
+    String updateLocation(TraccarPosition deviceInfo) throws IOException;
 
-    String addDevice(TraccarDeviceInfo deviceInfo) throws IOException;
+    String addDevice(TraccarDevice deviceInfo) throws IOException;
 
-    String deleteDevice(TraccarDeviceInfo deviceInfo) throws IOException;
+    Request getDeviceByDeviceIdentifier(String deviceInfo) throws IOException;
+
+    String disDevice(TraccarDevice deviceInfo) throws IOException;
 }

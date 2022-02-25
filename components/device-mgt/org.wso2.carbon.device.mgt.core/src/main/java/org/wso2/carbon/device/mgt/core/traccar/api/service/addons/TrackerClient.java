@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.device.mgt.core.traccar.api.service.addons;
 
+import com.google.gson.Gson;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,10 +27,13 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarClient;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants;
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDeviceInfo;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarGateway;
 import org.wso2.carbon.device.mgt.core.traccar.core.config.TraccarConfigurationManager;
 
@@ -45,7 +49,26 @@ import static org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConst
 public class TrackerClient implements TraccarClient {
     private static final Log log = LogFactory.getLog(TrackerClient.class);
 
-    public String updateLocation(TraccarDeviceInfo deviceInfo) throws IOException{
+    public Request getDeviceByDeviceIdentifier(String deviceId) {
+        //device identifier matches with traccar uniqueId
+        //Retrieve the traccar Gateway by passing the Gateway name
+        TraccarGateway traccarGateway = getTraccarGateway();
+
+        //Retrieve the properties in the Traccar Gateway by passing the property name
+        String endpoint = traccarGateway.getPropertyByName(MAIN_ENDPOINT).getValue();
+        String authorization = traccarGateway.getPropertyByName(AUTHORIZATION).getValue();
+        String authorizationKey = traccarGateway.getPropertyByName(AUTHORIZATION_KEY).getValue();
+
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
+        Request request = new Request.Builder()
+                .url(endpoint+"/devices?uniqueId="+deviceId)
+                .method("GET", null)
+                .addHeader(authorization, authorizationKey)
+                .build();
+        return request;
+    }
+
+    public String updateLocation(TraccarPosition deviceInfo) throws IOException {
         //Retrieve the traccar Gateway by passing the Gateway name
         TraccarGateway traccarGateway = getTraccarGateway();
 
@@ -65,8 +88,7 @@ public class TrackerClient implements TraccarClient {
         return String.valueOf(response);
     }
 
-    public String addDevice(TraccarDeviceInfo deviceInfo) throws IOException{
-
+    public String addDevice(TraccarDevice deviceInfo) throws IOException{
         //Retrieve the traccar Gateway by passing the Gateway name
         TraccarGateway traccarGateway = getTraccarGateway();
 
@@ -95,7 +117,6 @@ public class TrackerClient implements TraccarClient {
         data.put("attributes", new JSONObject());
 
         RequestBody body = RequestBody.create(mediaType, data.toString());
-
         Request request = new Request.Builder()
                 .url(endpoint+"/devices")
                 .method("POST", body)
@@ -107,8 +128,7 @@ public class TrackerClient implements TraccarClient {
         return String.valueOf(response);
     }
 
-    // /TODO FIX THIS WITH GET REQUEST
-    public String deleteDevice(TraccarDeviceInfo deviceInfo){
+    public String disDevice(TraccarDevice deviceInfo) throws IOException {
 
         //Retrieve the traccar Gateway by passing the Gateway name
         TraccarGateway traccarGateway = getTraccarGateway();
@@ -118,22 +138,33 @@ public class TrackerClient implements TraccarClient {
         String authorization = traccarGateway.getPropertyByName(AUTHORIZATION).getValue();
         String authorizationKey = traccarGateway.getPropertyByName(AUTHORIZATION_KEY).getValue();
 
-        /*
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
-        MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "");
-        Request request = new Request.Builder()
-          .url("endpoint+"/devices/"+deviceInfo)
-          .method("DELETE", body)
-          .addHeader(authorization, authorizationKey)
-          .build();
-        Response response = client.newCall(request).execute();
-        */
+        OkHttpClient client = new OkHttpClient();
+        Request deviceDetails = getDeviceByDeviceIdentifier(deviceInfo.getDeviceIdentifier());
+        Response response = client.newCall(deviceDetails).execute();
 
-        return "";
+        String result = response.body().string();
+        String jsonData ="{"+ "\"geodata\": "+ result+ "}";
+
+        try {
+            JSONObject obj = new JSONObject(jsonData);
+            JSONArray geodata = obj.getJSONArray("geodata");
+            JSONObject jsonResponse = geodata.getJSONObject(0);
+
+            OkHttpClient client1 = new OkHttpClient();
+            Request request1 = new Request.Builder()
+                    .url(endpoint+"/devices/"+jsonResponse.getInt("id")).delete()
+                    .addHeader(authorization, authorizationKey).build();
+            Response response1 = client1.newCall(request1).execute();
+            log.info(String.valueOf(response1));
+            return String.valueOf(response1);
+        } catch (JSONException e) {
+            log.info("Delete Error "+e);
+            return String.valueOf(e);
+        }
     }
     
     private TraccarGateway getTraccarGateway(){
-        return TraccarConfigurationManager.getInstance().getTraccarConfig().getTraccarGateway(TraccarHandlerConstants.GATEWAY_NAME);
+        return TraccarConfigurationManager.getInstance().getTraccarConfig().getTraccarGateway(
+                TraccarHandlerConstants.GATEWAY_NAME);
     }
 }
