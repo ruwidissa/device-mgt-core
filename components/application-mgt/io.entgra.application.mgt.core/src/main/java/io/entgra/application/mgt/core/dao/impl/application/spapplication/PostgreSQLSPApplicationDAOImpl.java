@@ -28,7 +28,6 @@ import io.entgra.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.application.mgt.core.util.DAOUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,7 +64,6 @@ public class PostgreSQLSPApplicationDAOImpl extends AbstractDAOImpl implements S
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
-
     }
 
     @Override
@@ -99,7 +97,6 @@ public class PostgreSQLSPApplicationDAOImpl extends AbstractDAOImpl implements S
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
-
     }
 
     @Override
@@ -199,7 +196,6 @@ public class PostgreSQLSPApplicationDAOImpl extends AbstractDAOImpl implements S
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
-
     }
 
     @Override
@@ -214,7 +210,6 @@ public class PostgreSQLSPApplicationDAOImpl extends AbstractDAOImpl implements S
                 + "AND AP_APP_ID = ? "
                 + "AND IS_ID = ? "
                 + "AND TENANT_ID = ? ";
-
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {

@@ -29,7 +29,6 @@ import io.entgra.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.application.mgt.core.util.DAOUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,7 +64,6 @@ public class GenericSPApplicationDAOImpl extends AbstractDAOImpl implements SPAp
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
-
     }
 
     @Override
@@ -99,7 +97,6 @@ public class GenericSPApplicationDAOImpl extends AbstractDAOImpl implements SPAp
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
-
     }
 
     @Override
