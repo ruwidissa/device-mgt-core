@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.entgra.application.mgt.publisher.api.services.util;
 
 import com.google.gson.Gson;
@@ -27,19 +45,26 @@ public class SPAppRequestHandlerUtil {
 
     private static final Log log = LogFactory.getLog(SPAppRequestHandlerUtil.class);
 
+    /**
+     * Check if service provider application exists
+     *
+     * @param identityServerId id of the identity server
+     * @param spAppId uid of the service provider
+     * @return if service provider exist
+     * @throws ApplicationManagementException
+     */
     public static boolean isSPApplicationExist(int identityServerId, String spAppId) throws ApplicationManagementException {
         SPApplication application = retrieveSPApplication(identityServerId, spAppId);
-        if (application == null) {
-            return false;
-        }
-        return true;
+        return application != null;
     }
 
-    public static SPApplicationListResponse getServiceProvidersFromIdentityServer(int identityServerId, Integer limit, Integer offSet)
-            throws ApplicationManagementException {
-        return retrieveSPApplications(identityServerId, limit, offSet);
-    }
-
+    /**
+     *  Get service provider by identity server id and service provider uid
+     * @param identityServerId  id of the identity server
+     * @param spAppId uid of service provider to be retrieved
+     * @return {@link SPApplication}
+     * @throws ApplicationManagementException
+     */
     public static SPApplication retrieveSPApplication(int identityServerId, String spAppId)
             throws ApplicationManagementException {
         IdentityServer identityServer = getIdentityServer(identityServerId);
@@ -74,7 +99,13 @@ public class SPAppRequestHandlerUtil {
         }
     }
 
-
+    /**
+     * Retrieve service provider apps from identity server
+     *
+     * @param identityServerId id of the identity server
+     * @return {@link SPApplicationListResponse}
+     * @throws ApplicationManagementException
+     */
     public static SPApplicationListResponse retrieveSPApplications(int identityServerId, Integer limit, Integer offset)
             throws ApplicationManagementException {
         IdentityServer identityServer = getIdentityServer(identityServerId);
@@ -113,17 +144,23 @@ public class SPAppRequestHandlerUtil {
         }
     }
 
+    /**
+     *
+     * @param identityServerId id of the identity server
+     * @return {@link IdentityServer}
+     * @throws ApplicationManagementException
+     */
     public static IdentityServer getIdentityServer(int identityServerId) throws ApplicationManagementException {
         SPApplicationManager spApplicationManager = APIUtil.getSPApplicationManager();
         return spApplicationManager.getIdentityServer(identityServerId);
     }
 
-    public static HttpResponse invokeISAPI(IdentityServer identityServer, HttpClient client, HttpRequestBase request) throws IOException {
+    private static HttpResponse invokeISAPI(IdentityServer identityServer, HttpClient client, HttpRequestBase request) throws IOException {
         setBasicAuthHeader(identityServer, request);
         return client.execute(request);
     }
 
-    public static void setBasicAuthHeader(IdentityServer identityServer, HttpRequestBase request) {
+    private static void setBasicAuthHeader(IdentityServer identityServer, HttpRequestBase request) {
         String basicAuthHeader = HttpUtil.getBasicAuthBase64Header(identityServer.getUserName(),
                 identityServer.getPassword());
         request.setHeader(HttpHeaders.AUTHORIZATION, basicAuthHeader);

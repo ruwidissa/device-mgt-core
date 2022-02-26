@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -35,7 +35,6 @@ import io.entgra.application.mgt.publisher.api.services.SPApplicationService;
 import io.entgra.application.mgt.publisher.api.services.util.SPAppRequestHandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -45,7 +44,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
-
 
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/identity-server-applications")
@@ -90,7 +88,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         try {
             SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
             SPApplicationListResponse applications = SPAppRequestHandlerUtil.
-                    getServiceProvidersFromIdentityServer(identityServerId, limit, offset);
+                    retrieveSPApplications(identityServerId, limit, offset);
             spAppManager.addExistingApps(identityServerId, applications.getApplications());
             return Response.status(Response.Status.OK).entity(applications).build();
         } catch (ApplicationManagementException e) {
@@ -100,7 +98,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         }
     }
 
-    @Path("/{identity-server-id}/{service-provider-id}/attach")
+    @Path("/{identity-server-id}/service-provider/{service-provider-id}/applications")
     @POST
     @Override
     public Response attachApps(@PathParam("identity-server-id") int identityServerId,
@@ -118,7 +116,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         return Response.status(Response.Status.OK).build();
     }
 
-    @Path("/{identity-server-id}/{service-provider-id}/detach")
+    @Path("/{identity-server-id}/service-provider/{service-provider-id}/delete/applications")
     @POST
     @Override
     public Response detachApps(@PathParam("identity-server-id") int identityServerId,
@@ -136,7 +134,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         return Response.status(Response.Status.OK).build();
     }
 
-    @Path("/{identity-server-id}/{service-provider-id}/create/ent-app")
+    @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/ent-app")
     @POST
     @Override
     public Response createEntApp(@PathParam("identity-server-id") int identityServerId,
@@ -144,7 +142,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         return createSPApplication(identityServerId, serviceProviderId, app);
     }
 
-    @Path("/{identity-server-id}/{service-provider-id}/create/public-app")
+    @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/public-app")
     @POST
     @Override
     public Response createPubApp(@PathParam("identity-server-id") int identityServerId,
@@ -152,7 +150,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         return createSPApplication(identityServerId, serviceProviderId, app);
     }
 
-    @Path("/{identity-server-id}/{service-provider-id}/create/web-app")
+    @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/web-app")
     @POST
     @Override
     public Response createWebApp(@PathParam("identity-server-id") int identityServerId,
@@ -160,7 +158,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         return createSPApplication(identityServerId, serviceProviderId, app);
     }
 
-    @Path("/{identity-server-id}/{service-provider-id}/create/custom-app")
+    @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/custom-app")
     @POST
     @Override
     public Response createCustomApp(@PathParam("identity-server-id") int identityServerId,
@@ -168,11 +166,20 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         return createSPApplication(identityServerId, serviceProviderId, app);
     }
 
-    private <T> Response createSPApplication(int identityServerId, String serviceProviderId, T appWrapper) {
+    /**
+     * Validates and creates service provider application
+     *
+     * @param identityServerId id of the identity server
+     * @param spUID uid of the service provider
+     * @param appWrapper application wrapper
+     * @param <T> application wrapper class
+     * @return Response
+     */
+    private <T> Response createSPApplication(int identityServerId, String spUID, T appWrapper) {
         try {
-            validateServiceProviderUID(identityServerId, serviceProviderId);
+            validateServiceProviderUID(identityServerId, spUID);
             SPApplicationManager spApplicationManager = APIUtil.getSPApplicationManager();
-            Application createdApp = spApplicationManager.createSPApplication(appWrapper, identityServerId, serviceProviderId);
+            Application createdApp = spApplicationManager.createSPApplication(appWrapper, identityServerId, spUID);
             return Response.status(Response.Status.CREATED).entity(createdApp).build();
         } catch (BadRequestException e) {
             String msg = "Found incompatible payload with create service provider app request.";
@@ -190,6 +197,13 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         }
     }
 
+    /**
+     * Responsible for validating service provider in requests
+     *
+     * @param identityServerId identity server id of the service provider
+     * @param spUID uid of the service provider
+     * @throws ApplicationManagementException
+     */
     private void validateServiceProviderUID(int identityServerId, String spUID) throws
             ApplicationManagementException {
         try {
@@ -206,6 +220,5 @@ public class SPApplicationServiceImpl implements SPApplicationService {
             throw new ApplicationManagementException(errMsg, e);
         }
     }
-
 
 }

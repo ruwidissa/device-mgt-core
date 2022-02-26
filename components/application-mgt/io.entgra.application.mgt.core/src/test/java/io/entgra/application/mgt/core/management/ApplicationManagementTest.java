@@ -122,8 +122,7 @@ public class ApplicationManagementTest extends BaseTestCase {
         applicationArtifact.setScreenshots(screenshots);
 
         ApplicationManager manager = new ApplicationManagerImpl();
-        ApplicationDTO applicationDTO = manager.uploadEntAppReleaseArtifacts(applicationWrapper, applicationArtifact);
-        manager.persistApplication(applicationDTO);
+         manager.createApplication(applicationWrapper);
     }
 
     @DataProvider(name = "applicationIdDataProvider")

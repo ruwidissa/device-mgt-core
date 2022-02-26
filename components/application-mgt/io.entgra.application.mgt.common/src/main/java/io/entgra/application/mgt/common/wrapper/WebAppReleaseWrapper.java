@@ -73,6 +73,10 @@ public class WebAppReleaseWrapper {
             value = "icon of the application")
     private Base64File icon;
 
+    @ApiModelProperty(name = "icon",
+            value = "banner of the application")
+    private Base64File banner;
+
     public String getReleaseType() {
         return releaseType;
     }
@@ -139,5 +143,13 @@ public class WebAppReleaseWrapper {
 
     public void setIcon(Base64File icon) {
         this.icon = icon;
+    }
+
+    public Base64File getBanner() {
+        return banner;
+    }
+
+    public void setBanner(Base64File banner) {
+        this.banner = banner;
     }
 }

@@ -1,25 +1,33 @@
+/*
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.entgra.application.mgt.core.impl;
 
-import io.entgra.application.mgt.common.ApplicationArtifact;
 import io.entgra.application.mgt.common.IdentityServer;
 import io.entgra.application.mgt.common.IdentityServerList;
 import io.entgra.application.mgt.common.SPApplication;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.application.mgt.common.exception.DBConnectionException;
-import io.entgra.application.mgt.common.exception.RequestValidatingException;
 import io.entgra.application.mgt.common.exception.TransactionManagementException;
 import io.entgra.application.mgt.common.response.Application;
 import io.entgra.application.mgt.common.services.ApplicationManager;
 import io.entgra.application.mgt.common.services.SPApplicationManager;
-import io.entgra.application.mgt.common.wrapper.ApplicationWrapper;
-import io.entgra.application.mgt.common.wrapper.CustomAppReleaseWrapper;
-import io.entgra.application.mgt.common.wrapper.CustomAppWrapper;
-import io.entgra.application.mgt.common.wrapper.EntAppReleaseWrapper;
-import io.entgra.application.mgt.common.wrapper.PublicAppReleaseWrapper;
-import io.entgra.application.mgt.common.wrapper.PublicAppWrapper;
-import io.entgra.application.mgt.common.wrapper.WebAppReleaseWrapper;
-import io.entgra.application.mgt.common.wrapper.WebAppWrapper;
 import io.entgra.application.mgt.core.dao.ApplicationDAO;
 import io.entgra.application.mgt.core.dao.SPApplicationDAO;
 import io.entgra.application.mgt.core.dao.VisibilityDAO;
@@ -31,12 +39,9 @@ import io.entgra.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.application.mgt.core.util.APIUtil;
 import io.entgra.application.mgt.core.util.ApplicationManagementUtil;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
-import io.entgra.application.mgt.core.util.Constants;
-import io.entgra.application.mgt.core.util.SPApplicationManagementUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -218,7 +223,6 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         }
     }
 
-
     public void detachSPApplications(int identityServerId, String spUID, List<Integer> appIds)  throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
@@ -239,53 +243,39 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
     }
 
     @Override
-    public <T> Application createSPApplication(T app, int identityServerId, String spId) throws ApplicationManagementException,
-            RequestValidatingException {
+    public <T> Application createSPApplication(T app, int identityServerId, String spId) throws ApplicationManagementException {
         ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
-        applicationManager.validateAppCreatingRequest(app, false);
-        ApplicationDTO applicationDTO = constructApplicationDTO(app);
+        ApplicationDTO applicationDTO = applicationManager.uploadReleaseArtifactIfExist(app);
+        if (log.isDebugEnabled()) {
+            log.debug("Application release create request is received. Application name: " + applicationDTO.getName()
+                    + " Device type ID: " + applicationDTO.getDeviceTypeId());
+        }
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            Application createdApp = createSPApplication(applicationDTO);
+            Application createdApp = applicationManager.addAppDataIntoDB(applicationDTO);
             attachCreatedSPApplication(createdApp, identityServerId,  spId);
             ConnectionManagerUtil.commitDBTransaction();
             return createdApp;
         } catch (DBConnectionException e) {
             String msg = "Error occurred while getting database connection.";
             log.error(msg, e);
+            ApplicationManagementUtil.deleteArtifactIfExist(applicationDTO);
             throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while disabling AutoCommit.";
             log.error(msg, e);
+            ApplicationManagementUtil.deleteArtifactIfExist(applicationDTO);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while creating and attaching application with the name " + applicationDTO.getName() ;
             log.error(msg, e);
+            ApplicationManagementUtil.deleteArtifactIfExist(applicationDTO);
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
-
-    private <T> ApplicationDTO constructApplicationDTO(T app) throws ApplicationManagementException,
-            RequestValidatingException {
-        if (ApplicationManagementUtil.isReleaseAvailable(app)) {
-            return uploadReleaseArtifactAndConstructApplicationDTO(app);
-        }
-        return APIUtil.convertToAppDTO(app);
-    }
-
-    public Application createSPApplication(ApplicationDTO applicationDTO) throws ApplicationManagementException {
-        if (log.isDebugEnabled()) {
-            log.debug("Application release create request is received. Application name: " + applicationDTO.getName()
-                    + " Device type ID: " + applicationDTO.getDeviceTypeId());
-        }
-        ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
-        return applicationManager.executeApplicationPersistenceTransaction(applicationDTO);
-    }
-
-
 
     public void attachCreatedSPApplication(Application createdApp, int identityServerId, String spUID) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -298,50 +288,4 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         }
     }
 
-    public <T> ApplicationDTO uploadReleaseArtifactAndConstructApplicationDTO(T app) throws ApplicationManagementException,
-            RequestValidatingException {
-        ApplicationArtifact artifact;
-        ApplicationDTO applicationDTO;
-        ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
-        if (app instanceof ApplicationWrapper) {
-            ApplicationWrapper wrapper = (ApplicationWrapper) app;
-            EntAppReleaseWrapper releaseWrapper = wrapper.getEntAppReleaseWrappers().get(0);
-            applicationManager.validateReleaseCreatingRequest(releaseWrapper, wrapper.getDeviceType());
-            applicationManager.validateBinaryArtifact(releaseWrapper.getBinaryFile());
-            applicationManager.validateImageArtifacts(releaseWrapper.getIcon(), releaseWrapper.getScreenshots());
-            artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                    releaseWrapper.getScreenshots(), releaseWrapper.getBinaryFile(), null);
-            applicationDTO = applicationManager.uploadEntAppReleaseArtifacts(wrapper, artifact);
-        } else if (app instanceof PublicAppWrapper) {
-            PublicAppWrapper wrapper = (PublicAppWrapper) app;
-            PublicAppReleaseWrapper releaseWrapper = wrapper.getPublicAppReleaseWrappers().get(0);
-            applicationManager.validateReleaseCreatingRequest(releaseWrapper, wrapper.getDeviceType());
-            applicationManager.validateImageArtifacts(releaseWrapper.getIcon(), releaseWrapper.getScreenshots());
-            artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                    releaseWrapper.getScreenshots(), null, null);
-            applicationDTO = applicationManager.uploadPublicAppReleaseArtifacts(wrapper, artifact);
-        } else if (app instanceof WebAppWrapper) {
-            WebAppWrapper wrapper = (WebAppWrapper) app;
-            WebAppReleaseWrapper releaseWrapper = wrapper.getWebAppReleaseWrappers().get(0);
-            applicationManager.validateReleaseCreatingRequest(releaseWrapper, Constants.ANY);
-            applicationManager.validateImageArtifacts(releaseWrapper.getIcon(), releaseWrapper.getScreenshots());
-            artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                    releaseWrapper.getScreenshots(), null, null);
-            applicationDTO = applicationManager.uploadWebAppReleaseArtifacts(wrapper, artifact);
-        } else if (app instanceof CustomAppWrapper) {
-            CustomAppWrapper wrapper = (CustomAppWrapper) app;
-            CustomAppReleaseWrapper releaseWrapper = wrapper.getCustomAppReleaseWrappers().get(0);
-            applicationManager.validateReleaseCreatingRequest(releaseWrapper, wrapper.getDeviceType());
-            applicationManager.validateBinaryArtifact(releaseWrapper.getBinaryFile());
-            applicationManager.validateImageArtifacts(releaseWrapper.getIcon(), releaseWrapper.getScreenshots());
-            artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                    releaseWrapper.getScreenshots(), releaseWrapper.getBinaryFile(), null);
-            applicationDTO = applicationManager.uploadCustomAppReleaseArtifactsAndConstructAppDTO(wrapper, artifact);
-        } else {
-            String msg = "Invalid payload found with the request. Hence verify the request payload object.";
-            log.error(msg);
-            throw new ApplicationManagementException(msg);
-        }
-        return applicationDTO;
-    }
 }

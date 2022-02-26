@@ -79,6 +79,10 @@ public class CustomAppReleaseWrapper {
             value = "binary file of the application")
     private Base64File binaryFile;
 
+    @ApiModelProperty(name = "icon",
+            value = "banner of the application")
+    private Base64File banner;
+
     public String getReleaseType() {
         return releaseType;
     }
@@ -159,5 +163,13 @@ public class CustomAppReleaseWrapper {
 
     public void setBinaryFile(Base64File binaryFile) {
         this.binaryFile = binaryFile;
+    }
+
+    public Base64File getBanner() {
+        return banner;
+    }
+
+    public void setBanner(Base64File banner) {
+        this.banner = banner;
     }
 }

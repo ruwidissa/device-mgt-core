@@ -17,6 +17,7 @@
  */
 package io.entgra.application.mgt.publisher.api.services;
 
+import io.entgra.application.mgt.common.Base64File;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -27,8 +28,6 @@ import io.swagger.annotations.ExtensionProperty;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import io.entgra.application.mgt.common.ApplicationList;
@@ -284,7 +283,7 @@ public interface ApplicationManagementPublisherAPI {
     @POST
     @Path("/ent-app")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -318,42 +317,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "application",
                     value = "The application that need to be created.",
                     required = true)
-            @Multipart("application") ApplicationWrapper application,
-            @ApiParam(
-                    name = "binaryFile",
-                    value = "Binary file of uploading application",
-                    required = true)
-            @Multipart(value = "binaryFile") Attachment binaryFile,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon of the uploading application",
-                    required = true)
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "Banner of the uploading application")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "Screen Shots of the uploading application",
-                    required = true)
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot3") Attachment screenshot3
-    );
+            ApplicationWrapper application);
 
     @POST
     @Path("/web-app")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -387,37 +356,13 @@ public interface ApplicationManagementPublisherAPI {
                     name = "webapp",
                     value = "The web app that need to be created.",
                     required = true)
-            @Multipart("webapp") WebAppWrapper webAppWrapper,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon of the uploading web app",
-                    required = true)
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "Banner of the uploading web app")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "Screen Shots of the uploading web app",
-                    required = true)
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Screen Shots of the uploading web app",
-                    required = false)
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Screen Shots of the uploading web app",
-                    required = false)
-            @Multipart(value = "screenshot3") Attachment screenshot3
+            WebAppWrapper webAppWrapper
     );
 
     @POST
     @Path("/public-app")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -451,35 +396,13 @@ public interface ApplicationManagementPublisherAPI {
                     name = "public-app",
                     value = "The public app that need to be created.",
                     required = true)
-            @Multipart("public-app") PublicAppWrapper publicAppWrapper,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon of the uploading public app",
-                    required = true)
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "Banner of the uploading public app")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "Screen Shots of the uploading public app",
-                    required = true)
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Screen Shots of the uploading public app")
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Screen Shots of the uploading public app")
-            @Multipart(value = "screenshot3") Attachment screenshot3
+            PublicAppWrapper publicAppWrapper
     );
 
     @POST
     @Path("/custom-app")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -513,41 +436,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "application",
                     value = "The application that need to be created.",
                     required = true)
-            @Multipart("application") CustomAppWrapper customAppWrapper,
-            @ApiParam(
-                    name = "binaryFile",
-                    value = "Binary file of uploading application",
-                    required = true)
-            @Multipart(value = "binaryFile") Attachment binaryFile,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon of the uploading application",
-                    required = true)
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "Banner of the uploading application")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "Screen Shots of the uploading application",
-                    required = true)
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot3") Attachment screenshot3
+            CustomAppWrapper customAppWrapper
     );
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{deviceType}/ent-app/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
@@ -592,41 +486,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "applicationRelease",
                     value = "The application release that need to be created.",
                     required = true)
-            @Multipart("applicationRelease") EntAppReleaseWrapper entAppReleaseWrapper,
-            @ApiParam(
-                    name = "binaryFile",
-                    value = "Binary file of uploading application",
-                    required = true)
-            @Multipart(value = "binaryFile") Attachment binaryFile,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon of the uploading application",
-                    required = true)
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "Banner of the uploading application")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "Screen Shots of the uploading application",
-                    required = true)
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot3") Attachment screenshot3
+            EntAppReleaseWrapper entAppReleaseWrapper
     );
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{deviceType}/public-app/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
@@ -671,36 +536,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "applicationRelease",
                     value = "The application release that need to be created.",
                     required = true)
-            @Multipart("applicationRelease") PublicAppReleaseWrapper publicAppReleaseWrapper,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon of the uploading application",
-                    required = true)
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "Banner of the uploading application")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "Screen Shots of the uploading application",
-                    required = true)
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot3") Attachment screenshot3
+            PublicAppReleaseWrapper publicAppReleaseWrapper
     );
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/web-app/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
@@ -740,36 +581,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "applicationRelease",
                     value = "The application release that need to be created.",
                     required = true)
-            @Multipart("applicationRelease") WebAppReleaseWrapper webAppReleaseWrapper,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon of the uploading application",
-                    required = true)
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "Banner of the uploading application")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "Screen Shots of the uploading application",
-                    required = true)
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot3") Attachment screenshot3
+            WebAppReleaseWrapper webAppReleaseWrapper
     );
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{deviceType}/custom-app/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
@@ -814,42 +631,13 @@ public interface ApplicationManagementPublisherAPI {
                     name = "applicationRelease",
                     value = "The application release that need to be created.",
                     required = true)
-            @Multipart("applicationRelease") CustomAppReleaseWrapper customAppReleaseWrapper,
-            @ApiParam(
-                    name = "binaryFile",
-                    value = "Binary file of uploading application",
-                    required = true)
-            @Multipart(value = "binaryFile") Attachment binaryFile,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon of the uploading application",
-                    required = true)
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "Banner of the uploading application")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "Screen Shots of the uploading application",
-                    required = true)
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot3") Attachment screenshot3
+            CustomAppReleaseWrapper customAppReleaseWrapper
     );
 
     @PUT
     @Path("/image-artifacts/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.MULTIPART_FORM_DATA,
             produces = MediaType.APPLICATION_JSON,
@@ -885,23 +673,15 @@ public interface ApplicationManagementPublisherAPI {
             @ApiParam(
                     name = "icon",
                     value = "Icon of the uploading application")
-            @Multipart(value = "icon") Attachment iconFile,
+                    Base64File iconFile,
             @ApiParam(
                     name = "banner",
                     value = "Banner of the uploading application")
-            @Multipart(value = "banner") Attachment bannerFile,
+                    Base64File bannerFile,
             @ApiParam(
                     name = "screenshot1",
                     value = "Screen Shots of the uploading application")
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Screen Shots of the uploading application")
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Screen Shots of the uploading application")
-            @Multipart(value = "screenshot3") Attachment screenshot3
+                    List<Base64File> screenshots
     );
 
     @GET
@@ -951,7 +731,7 @@ public interface ApplicationManagementPublisherAPI {
     @PUT
     @Path("/ent-app-artifacts/{deviceType}/{appId}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.MULTIPART_FORM_DATA,
             produces = MediaType.APPLICATION_JSON,
@@ -994,13 +774,13 @@ public interface ApplicationManagementPublisherAPI {
                     value = "UUID of the application",
                     required = true)
             @PathParam("uuid") String applicationUUID,
-            @Multipart("binaryFile") Attachment binaryFile
+            Base64File binaryFile
     );
 
     @PUT
     @Path("/ent-app-release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.MULTIPART_FORM_DATA,
             produces = MediaType.APPLICATION_JSON,
@@ -1039,39 +819,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "entAppReleaseWrapper",
                     value = "Application release wrapper which is going to update.",
                     required = true)
-            @Multipart(
-                    value = "entAppReleaseWrapper",
-                    type = "application/json") EntAppReleaseWrapper entAppReleaseWrapper,
-            @ApiParam(
-                    name = "binaryFile",
-                    value = "Application installer file.",
-                    required = true)
-            @Multipart(value = "binaryFile") Attachment binaryFile,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon file of the application release.")
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "banner file of the application release.")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "First screenshot of the uploading application")
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Second screenshot 2 of the uploading application")
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Third screenshot of the uploading application")
-            @Multipart(value = "screenshot3") Attachment screenshot3);
+                    EntAppReleaseWrapper entAppReleaseWrapper);
 
     @PUT
     @Path("/public-app-release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.MULTIPART_FORM_DATA,
             produces = MediaType.APPLICATION_JSON,
@@ -1110,34 +863,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "pubAppReleaseWrapper",
                     value = "Application release wrapper which is going to update.",
                     required = true)
-            @Multipart(
-                    value = "pubAppReleaseWrapper",
-                    type = "application/json") PublicAppReleaseWrapper publicAppReleaseWrapper,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon file of the application release.")
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "banner file of the application release.")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "First screenshot of the uploading application")
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Second screenshot 2 of the uploading application")
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Third screenshot of the uploading application")
-            @Multipart(value = "screenshot3") Attachment screenshot3);
+                    PublicAppReleaseWrapper publicAppReleaseWrapper);
 
     @PUT
     @Path("/web-app-release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.MULTIPART_FORM_DATA,
             produces = MediaType.APPLICATION_JSON,
@@ -1176,34 +907,13 @@ public interface ApplicationManagementPublisherAPI {
                     name = "pubAppReleaseWrapper",
                     value = "Application release wrapper which is going to update.",
                     required = true)
-            @Multipart(
-                    value = "pubAppReleaseWrapper",
-                    type = "application/json") WebAppReleaseWrapper webAppReleaseWrapper,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon file of the application release.")
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "banner file of the application release.")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "First screenshot of the uploading application")
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Second screenshot 2 of the uploading application")
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Third screenshot of the uploading application")
-            @Multipart(value = "screenshot3") Attachment screenshot3);
+                    WebAppReleaseWrapper webAppReleaseWrapper
+    );
 
     @PUT
     @Path("/custom-app-release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.MULTIPART_FORM_DATA,
             produces = MediaType.APPLICATION_JSON,
@@ -1242,34 +952,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "entAppReleaseWrapper",
                     value = "Application release wrapper which is going to update.",
                     required = true)
-            @Multipart(
-                    value = "entAppReleaseWrapper",
-                    type = "application/json") CustomAppReleaseWrapper customAppReleaseWrapper,
-            @ApiParam(
-                    name = "binaryFile",
-                    value = "Application installer file.",
-                    required = true)
-            @Multipart(value = "binaryFile") Attachment binaryFile,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon file of the application release.")
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "banner file of the application release.")
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "First screenshot of the uploading application")
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Second screenshot 2 of the uploading application")
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Third screenshot of the uploading application")
-            @Multipart(value = "screenshot3") Attachment screenshot3);
+                    CustomAppReleaseWrapper customAppReleaseWrapper);
 
     @GET
     @Path("/life-cycle/state-changes/{uuid}")
@@ -1634,7 +1317,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "appId",
                     value = "application Id",
                     required = true)
-            List<String> tagNames
+                    List<String> tagNames
     );
 
     @GET

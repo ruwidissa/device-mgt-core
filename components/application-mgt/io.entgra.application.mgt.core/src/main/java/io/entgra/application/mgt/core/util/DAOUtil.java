@@ -194,7 +194,7 @@ public class DAOUtil {
      * To create application object from the result set retrieved from the Database.
      *
      * @param rs ResultSet
-     * @return List of Applications that is retrieved from the Database.
+     * @return List of Identity Servers that is retrieved from the Database.
      * @throws SQLException  SQL Exception
      * @throws JSONException JSONException.
      */
@@ -214,7 +214,6 @@ public class DAOUtil {
         }
         return identityServers;
     }
-
 
     /**
      * To create application object from the result set retrieved from the Database.

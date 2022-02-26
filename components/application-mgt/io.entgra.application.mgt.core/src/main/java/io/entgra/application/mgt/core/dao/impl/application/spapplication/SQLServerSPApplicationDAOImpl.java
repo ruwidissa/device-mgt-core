@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.entgra.application.mgt.core.dao.impl.application.spapplication;
 
 import io.entgra.application.mgt.common.IdentityServer;
@@ -24,7 +42,7 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
 
     @Override
     public List<IdentityServer> getIdentityServers(int tenantId) throws ApplicationManagementDAOException {
-        String sql = "SELECT * "
+        String sql = "SELECT ID, NAME, DESCRIPTION, URL, SP_APPS_URI, SP_APPS_API, TENANT_ID, USERNAME, PASSWORD "
                 + "FROM AP_IDENTITY_SERVER "
                 + "WHERE TENANT_ID = ?";
         try {
@@ -52,7 +70,7 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
 
     @Override
     public IdentityServer getIdentityServerById(int id, int tenantId) throws ApplicationManagementDAOException {
-        String sql = "SELECT * "
+        String sql = "SELECT ID, NAME, DESCRIPTION, URL, SP_APPS_URI, SP_APPS_API, TENANT_ID, USERNAME, PASSWORD "
                 + "FROM AP_IDENTITY_SERVER "
                 + "WHERE TENANT_ID = ? AND "
                 + "ID = ?";
@@ -231,7 +249,6 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
                 + "AP_APP_ID, "
                 + "IS_ID, TENANT_ID) "
                 + "VALUES (?, ?, ?, ?)";
-        int mappingId = -1;
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -242,9 +259,9 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
                 stmt.executeUpdate();
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        mappingId = rs.getInt(1);
+                        return rs.getInt(1);
                     }
-                    return mappingId;
+                    return -1;
                 }
             }
         } catch (DBConnectionException e) {

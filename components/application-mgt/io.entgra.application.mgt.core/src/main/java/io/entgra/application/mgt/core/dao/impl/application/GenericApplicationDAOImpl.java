@@ -262,9 +262,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         ResultSet rs = null;
         String sql = "SELECT count(AP_APP.ID) AS APP_COUNT "
                 + "FROM AP_APP "
-                + "INNER JOIN AP_APP_RELEASE ON "
-                + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
-                + "INNER JOIN (SELECT ID FROM AP_APP) AS app_data ON app_data.ID = AP_APP.ID "
                 + "WHERE AP_APP.TENANT_ID = ?";
 
         if (filter == null) {
