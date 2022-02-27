@@ -49,6 +49,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
@@ -263,10 +264,18 @@ public class HandlerUtil {
 
         if (!StringUtils.isEmpty(responseData)) {
             try {
-                JSONObject responseDataJsonObj = new JSONObject(responseData);
-                response.put("data", responseDataJsonObj);
+                if (responseData.startsWith("{")) {
+                    JSONObject responseDataJsonObj = new JSONObject(responseData);
+                    response.put("data", responseDataJsonObj);
+                } else if (responseData.startsWith("[")) {
+                    JSONArray responseDataJsonArr = new JSONArray(responseData);
+                    response.put("data", responseDataJsonArr);
+                } else {
+                    log.warn("Response data is not valid json string >> " + responseData);
+                    response.put("data", responseData);
+                }
             } catch (JSONException e) {
-                log.debug("Response data is not valid json string");
+                log.error("Response data is not passable");
                 response.put("data", responseData);
             }
         }
