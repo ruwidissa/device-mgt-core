@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 @MultipartConfig
 @WebServlet(
@@ -150,6 +151,7 @@ public class GrafanaHandler extends HttpServlet {
         resp.setContentType(contentType);
         resp.setStatus(grafanaAPIResponse.getCode());
         addXFrameOptionsHeaders(resp);
+        resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
         resp.getWriter().print(grafanaAPIResponse.getData());
     }
 
