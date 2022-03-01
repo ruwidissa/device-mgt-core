@@ -98,7 +98,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         }
     }
 
-    @Path("/{identity-server-id}/service-provider/{service-provider-id}/applications")
+    @Path("/{identity-server-id}/service-provider/{service-provider-id}/attach")
     @POST
     @Override
     public Response attachApps(@PathParam("identity-server-id") int identityServerId,
@@ -116,7 +116,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         return Response.status(Response.Status.OK).build();
     }
 
-    @Path("/{identity-server-id}/service-provider/{service-provider-id}/delete/applications")
+    @Path("/{identity-server-id}/service-provider/{service-provider-id}/detach")
     @POST
     @Override
     public Response detachApps(@PathParam("identity-server-id") int identityServerId,

@@ -149,7 +149,7 @@ public interface SPApplicationService {
     Response getServiceProviders(@QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset,
                                  @PathParam("identity-server-id") int identityServerId);
 
-    @Path("/{identity-server-id}/service-provider/{service-provider-id}/applications")
+    @Path("/{identity-server-id}/service-provider/{service-provider-id}/attach")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -170,7 +170,7 @@ public interface SPApplicationService {
     /**
      * This method is used to register an APIM application for tenant domain.
      */
-    @Path("/{identity-server-id}/service-provider/{service-provider-id}/delete/applications")
+    @Path("/{identity-server-id}/service-provider/{service-provider-id}/detach")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
