@@ -994,16 +994,19 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         if (log.isDebugEnabled()) {
             log.debug("Group devices to the group: " + groupId);
         }
-        Device device;
+
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            List<String> deviceIdentifierList = deviceIdentifiers.stream()
+                    .map(DeviceIdentifier::getId)
+                    .collect(Collectors.toCollection(ArrayList::new));
+            List<Device> devicesList = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider()
+                    .getDeviceByIdList(deviceIdentifierList);
+            if (devicesList == null || devicesList.isEmpty()) {
+                throw new DeviceNotFoundException("Couldn't find any devices for the given deviceIdentifiers '" + deviceIdentifiers + "'");
+            }
             GroupManagementDAOFactory.beginTransaction();
-            for (DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
-                device = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider().
-                        getDevice(deviceIdentifier, false);
-                if (device == null) {
-                    throw new DeviceNotFoundException("Device not found for id '" + deviceIdentifier.getId() + "'");
-                }
+            for (Device device : devicesList) {
                 if (!this.groupDAO.isDeviceMappedToGroup(groupId, device.getId(), tenantId)) {
                     this.groupDAO.addDevice(groupId, device.getId(), tenantId);
                 }
