@@ -310,8 +310,6 @@ public interface CertificateManagementAdminService {
             @HeaderParam("If-Modified-Since") String ifModifiedSince);
 
     @DELETE
-    @Path("/{serialNumber}")
-    @Consumes(MediaType.WILDCARD)
     @ApiOperation(
             consumes = MediaType.WILDCARD,
             produces = MediaType.APPLICATION_JSON,
@@ -348,7 +346,7 @@ public interface CertificateManagementAdminService {
                             "NOTE: Make sure that a certificate with the serial number you provide exists in the server. If not, first add a certificate.",
                     required = true,
                     defaultValue = "12438035315552875930")
-            @PathParam("serialNumber") String serialNumber);
+            @QueryParam("serialNumber") String serialNumber);
 
     /**
      * Verify Certificate for the API security filter
