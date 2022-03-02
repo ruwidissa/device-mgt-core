@@ -994,17 +994,29 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         if (log.isDebugEnabled()) {
             log.debug("Group devices to the group: " + groupId);
         }
-
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        List<Device> devicesList = null;
         try {
-            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
             List<String> deviceIdentifierList = deviceIdentifiers.stream()
                     .map(DeviceIdentifier::getId)
                     .collect(Collectors.toCollection(ArrayList::new));
-            List<Device> devicesList = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider()
+            devicesList = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider()
                     .getDeviceByIdList(deviceIdentifierList);
             if (devicesList == null || devicesList.isEmpty()) {
                 throw new DeviceNotFoundException("Couldn't find any devices for the given deviceIdentifiers '" + deviceIdentifiers + "'");
             }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retrieving devices using device identifiers";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in addDevices for groupId " + groupId;
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        }
+
+        try {
             GroupManagementDAOFactory.beginTransaction();
             for (Device device : devicesList) {
                 if (!this.groupDAO.isDeviceMappedToGroup(groupId, device.getId(), tenantId)) {
@@ -1013,10 +1025,6 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             }
             GroupManagementDAOFactory.commitTransaction();
             createEventTask(OperationMgtConstants.OperationCodes.EVENT_CONFIG, groupId, deviceIdentifiers, tenantId);
-        } catch (DeviceManagementException e) {
-            String msg = "Error occurred while retrieving device.";
-            log.error(msg, e);
-            throw new GroupManagementException(msg, e);
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while adding device to group.";
