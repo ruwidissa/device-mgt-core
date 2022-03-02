@@ -24,6 +24,7 @@ import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventConfigDAO;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
+import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -342,6 +343,6 @@ public abstract class AbstractEventConfigDAO implements EventConfigDAO {
     }
 
     private Connection getConnection() throws SQLException {
-        return DeviceManagementDAOFactory.getConnection();
+        return EventManagementDAOFactory.getConnection();
     }
 }
