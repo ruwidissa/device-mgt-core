@@ -978,6 +978,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.debug("Get devices with pagination " + request.toString() + " and requiredDeviceInfo: " + requireDeviceInfo);
         }
 
+        System.out.println("--------------------COREEEE LAYERR-------------------");
         PaginationResult paginationResult = new PaginationResult();
         Double totalCost = 0.0;
         List<DeviceBilling> allDevices;
@@ -988,7 +989,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         try {
             DeviceManagementDAOFactory.openConnection();
             allDevices = deviceDAO.getDeviceBillList(request, tenantId);
+            allRemovedDevices =  deviceDAO.getRemovedDeviceBillList(request,tenantId);
             count = deviceDAO.getDeviceCount(request, tenantId);
+
+            System.out.println("-----------------HERE------------------------------");
 
             String metaKey = "PER_DEVICE_COST";
             MetadataManagementDAOFactory.openConnection();
@@ -997,12 +1001,18 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             Gson g = new Gson();
 
             Type collectionType = new TypeToken<Collection<Costdata>>(){}.getType();
-            Collection<Costdata> costdata = g.fromJson(metadata.getMetaValue(), collectionType);
+            Collection<Costdata> costdata = g.fromJson(metadata.getMetaValue(), collectionType); // change name
 
             for (Costdata test: costdata) {
                 if (test.getTenantDomain().equals(tenantDomain)) {
                     for (DeviceBilling device: allDevices) {
-                        long dateDiff = test.getSubscriptionEnd().getTime()-device.getEnrolmentInfo().getDateOfEnrolment();
+                        long dateDiff;
+                        if (device.getEnrolmentInfo().getLastBilledDate() == 0) {
+                            dateDiff = test.getSubscriptionEnd()-device.getEnrolmentInfo().getDateOfEnrolment();
+                        } else {
+                            dateDiff = test.getSubscriptionEnd()-device.getEnrolmentInfo().getLastBilledDate();
+                        }
+//                        dateDiff = test.getSubscriptionEnd().getTime()-device.getEnrolmentInfo().getDateOfEnrolment();
                         long dateInDays = dateDiff / (1000*60*60*24);
                         double cost = (test.getCost()/365)*dateInDays;
                         totalCost = cost + totalCost;
@@ -1011,7 +1021,25 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 }
             }
 
-            allRemovedDevices = this.getRemovedDeviceListWithCost(paginationResult, request, costdata, tenantDomain, totalCost);
+            for (Costdata test: costdata) {
+                if (test.getTenantDomain().equals(tenantDomain)) {
+                    for (DeviceBilling device: allRemovedDevices) {
+                        long dateDiff;
+//                        long dateDiff = device.getEnrolmentInfo().getDateOfLastUpdate()-device.getEnrolmentInfo().getDateOfEnrolment();
+                        if (device.getEnrolmentInfo().getLastBilledDate() == 0) {
+                            dateDiff = test.getSubscriptionEnd()-device.getEnrolmentInfo().getDateOfEnrolment();
+                        } else {
+                            dateDiff = test.getSubscriptionEnd()-device.getEnrolmentInfo().getLastBilledDate();
+                        }
+                        long dateInDays = dateDiff / (1000*60*60*24);
+                        double cost = (test.getCost()/365)*dateInDays;
+                        totalCost = cost + totalCost;
+                        device.setCost(cost);
+                    }
+                }
+            }
+
+//            allRemovedDevices = this.getRemovedDeviceListWithCost(paginationResult, request, costdata, tenantDomain, totalCost);
             allDevices.addAll(allRemovedDevices);
 
         } catch (DeviceManagementDAOException e) {
@@ -1030,6 +1058,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.closeConnection();
         }
         paginationResult.setData(allDevices);
+        paginationResult.setTotalCost(totalCost);
         paginationResult.setRecordsFiltered(count);
         paginationResult.setRecordsTotal(count);
         return paginationResult;

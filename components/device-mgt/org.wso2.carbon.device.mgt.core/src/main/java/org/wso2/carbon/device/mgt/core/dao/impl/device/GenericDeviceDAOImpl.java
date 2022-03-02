@@ -191,8 +191,11 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         List<DeviceBilling> devices = new ArrayList<>();
         try {
             conn = this.getConnection();
-            String sql ="select DEVICE_IDENTIFICATION, DESCRIPTION, NAME AS DEVICE_NAME, DATE_OF_ENROLMENT, STATUS,\n" +
-                    "TIMESTAMPDIFF('DAY', CURDATE(), DATE_OF_ENROLMENT) as DAYS_SINCE_ENROLLED from DM_DEVICE d, DM_ENROLMENT e\n" +
+//            String sql ="select DEVICE_IDENTIFICATION, DESCRIPTION, NAME AS DEVICE_NAME, DATE_OF_ENROLMENT, LAST_BILLED_DATE AS BILLED_DATE,STATUS,\n" +
+//                    "TIMESTAMPDIFF('DAY', CURDATE(), DATE_OF_ENROLMENT) as DAYS_SINCE_ENROLLED from DM_DEVICE d, DM_ENROLMENT e\n" +
+//                    "where e.TENANT_ID= ? and  d.ID=e.DEVICE_ID and STATUS !='REMOVED' LIMIT 10";
+            String sql ="select DEVICE_IDENTIFICATION, DESCRIPTION, NAME AS DEVICE_NAME, DATE_OF_ENROLMENT, LAST_BILLED_DATE,STATUS,\n" +
+                    "TIMESTAMPDIFF('DAY', DATE_OF_ENROLMENT, CURDATE()) as DAYS_SINCE_ENROLLED from DM_DEVICE d, DM_ENROLMENT e\n" +
                     "where e.TENANT_ID= ? and  d.ID=e.DEVICE_ID and STATUS !='REMOVED' LIMIT 10";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
@@ -219,7 +222,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         List<DeviceBilling> devices = new ArrayList<>();
         try {
             conn = this.getConnection();
-            String sql = "select DEVICE_IDENTIFICATION, DESCRIPTION, NAME AS DEVICE_NAME, DATE_OF_ENROLMENT, DATE_OF_LAST_UPDATE, STATUS, " +
+            String sql = "select DEVICE_IDENTIFICATION, DESCRIPTION, NAME AS DEVICE_NAME, DATE_OF_ENROLMENT, LAST_BILLED_DATE, DATE_OF_LAST_UPDATE, STATUS, " +
                     "TIMESTAMPDIFF('DAY', DATE_OF_ENROLMENT, DATE_OF_LAST_UPDATE) AS DAYS_USED from DM_DEVICE d, DM_ENROLMENT e" +
                     " where e.TENANT_ID=? and d.ID=e.DEVICE_ID and STATUS ='REMOVED'\n";
             stmt = conn.prepareStatement(sql);

@@ -30,8 +30,8 @@ public class Costdata {
 
     private String tenantDomain;
     private Double cost;
-    private Timestamp subscriptionBeginning;
-    private Timestamp subscriptionEnd;
+    private long subscriptionBeginning;
+    private long subscriptionEnd;
 
     @XmlElement(name = "tenantDomain", required = true)
     public String getTenantDomain() {
@@ -52,20 +52,20 @@ public class Costdata {
     }
 
     @XmlElement(name = "subscriptionBeginning", required = true)
-    public Timestamp getSubscriptionBeginning() {
+    public long getSubscriptionBeginning() {
         return subscriptionBeginning;
     }
 
-    public void setSubscriptionBeginning(Timestamp subscriptionBeginning) {
+    public void setSubscriptionBeginning(long subscriptionBeginning) {
         this.subscriptionBeginning = subscriptionBeginning;
     }
 
     @XmlElement(name = "subscriptionEnd", required = true)
-    public Timestamp getSubscriptionEnd() {
+    public long getSubscriptionEnd() {
         return subscriptionEnd;
     }
 
-    public void setSubscriptionEnd(Timestamp subscriptionEnd) {
+    public void setSubscriptionEnd(long subscriptionEnd) {
         this.subscriptionEnd = subscriptionEnd;
     }
 

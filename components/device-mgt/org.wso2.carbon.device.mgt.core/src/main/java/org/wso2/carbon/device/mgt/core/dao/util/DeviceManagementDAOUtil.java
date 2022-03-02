@@ -154,8 +154,10 @@ public final class DeviceManagementDAOUtil {
     }
 
     public static EnrolmentInfo loadEnrolmentBilling(ResultSet rs, Boolean removedDevices) throws SQLException {
+        System.out.println("-----------------DAOO 222------------------------------");
         EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
         enrolmentInfo.setDateOfEnrolment(rs.getTimestamp("DATE_OF_ENROLMENT").getTime());
+        enrolmentInfo.setLastBilledDate(rs.getLong("LAST_BILLED_DATE"));
         enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
         if (removedDevices) {
             enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
@@ -209,6 +211,7 @@ public final class DeviceManagementDAOUtil {
     }
 
     public static DeviceBilling loadDeviceBilling(ResultSet rs, Boolean removedDevices) throws SQLException {
+        System.out.println("-----------------DAOO 111------------------------------");
         DeviceBilling device = new DeviceBilling();
         device.setName(rs.getString("DEVICE_NAME"));
         device.setDescription(rs.getString("DESCRIPTION"));
