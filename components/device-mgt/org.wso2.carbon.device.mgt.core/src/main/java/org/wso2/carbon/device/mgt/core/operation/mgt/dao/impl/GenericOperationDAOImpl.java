@@ -425,7 +425,8 @@ public class GenericOperationDAOImpl implements OperationDAO {
                     "        LEFT JOIN " +
                     "    DM_DEVICE_OPERATION_RESPONSE opr ON opr.EN_OP_MAP_ID = eom.ID " +
                     "WHERE " +
-                    "    eom.OPERATION_ID = ? AND eom.TENANT_ID = ?";
+                    "    eom.OPERATION_ID = ? AND eom.TENANT_ID = ? " +
+                    "ORDER BY eom.UPDATED_TIMESTAMP DESC";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, operationId);
