@@ -26,6 +26,7 @@ import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GeofenceDAO;
 import org.wso2.carbon.device.mgt.core.dto.event.config.GeoFenceGroupMap;
 
@@ -308,7 +309,7 @@ public class GeofenceDAOImpl implements GeofenceDAO {
     }
 
     private Connection getConnection() throws SQLException {
-        return DeviceManagementDAOFactory.getConnection();
+        return EventManagementDAOFactory.getConnection();
     }
 
     private List<GeofenceData> extractGeofenceData(ResultSet rst) throws SQLException {
