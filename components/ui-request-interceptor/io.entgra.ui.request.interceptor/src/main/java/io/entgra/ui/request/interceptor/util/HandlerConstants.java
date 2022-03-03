@@ -84,7 +84,7 @@ public class HandlerConstants {
     public static final String WSS_PROTOCOL = "wss";
     public static final String WS_PROTOCOL = "ws";
     public static final String REMOTE_SESSION_CONTEXT = "/remote/session/clients";
-    public static final String GRAFANA_API = "/api/device-mgt/v1.0/reports/grafana";
+    public static final String GRAFANA_API = "/api/grafana-mgt/v1.0";
 
     public static final String IOT_CORE_HOST_ENV_VAR = "iot.core.host";
     public static final String IOT_CORE_HTTP_PORT_ENV_VAR = "iot.core.http.port";
