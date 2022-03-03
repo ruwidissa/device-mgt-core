@@ -74,7 +74,7 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             stmt.setDouble(14, deviceInfo.getTotalRAMMemory());
             stmt.setDouble(15, deviceInfo.getAvailableRAMMemory());
             stmt.setBoolean(16, deviceInfo.isPluggedIn());
-            stmt.setLong(17, DeviceManagementDAOUtil.getCurrentUTCTime());
+            stmt.setLong(17, DeviceManagementDAOUtil.getCurrentUTCTime() * 1000L);
             stmt.setInt(18, enrolmentId);
 
             stmt.execute();
@@ -508,7 +508,7 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             stmt.setDouble(13, newDeviceInfo.getTotalRAMMemory());
             stmt.setDouble(14, newDeviceInfo.getAvailableRAMMemory());
             stmt.setBoolean(15, newDeviceInfo.isPluggedIn());
-            stmt.setLong(16, System.currentTimeMillis());
+            stmt.setLong(16, DeviceManagementDAOUtil.getCurrentUTCTime() * 1000L);
             stmt.setInt(17, deviceId);
             stmt.setInt(18, enrollmentId);
 
