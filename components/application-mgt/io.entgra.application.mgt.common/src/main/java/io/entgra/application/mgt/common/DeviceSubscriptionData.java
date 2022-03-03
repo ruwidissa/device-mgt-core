@@ -29,6 +29,7 @@ public class DeviceSubscriptionData {
     private String actionType;
     private String status;
     private Device device;
+    private String currentInstalledVersion;
 
     public String getAction() {
         return action;
@@ -77,4 +78,8 @@ public class DeviceSubscriptionData {
     public void setDevice(Device device) {
         this.device = device;
     }
+
+    public String getCurrentInstalledVersion() { return currentInstalledVersion; }
+
+    public void setCurrentInstalledVersion(String currentInstalledVersion) { this.currentInstalledVersion = currentInstalledVersion; }
 }

@@ -60,6 +60,7 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             @QueryParam("action") String action,
             @QueryParam("actionStatus") String actionStatus,
             @QueryParam("status") List<String> status,
+            @QueryParam("installedVersion") String installedVersion,
             @PathParam("uuid") String uuid,
             @DefaultValue("0")
             @QueryParam("offset") int offset,
@@ -97,7 +98,7 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             }
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
             PaginationResult subscriptionData = subscriptionManager.getAppSubscriptionDetails
-                    (request, uuid, actionStatus, action);
+                    (request, uuid, actionStatus, action, installedVersion);
             return Response.status(Response.Status.OK).entity(subscriptionData).build();
         } catch (NotFoundException e) {
             String msg = "Application with application release UUID: " + uuid + " is not found";
