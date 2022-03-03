@@ -45,7 +45,9 @@ import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
+import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -390,16 +392,14 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 //                );
             }
 
-            //Traccar update lat lon
+            //Traccar update GPS Location
             TraccarPosition trackerinfo = new TraccarPosition(device.getDeviceIdentifier(),
                     deviceLocation.getUpdatedTime().getTime(),
                     deviceLocation.getLatitude(), deviceLocation.getLongitude(),
                     deviceLocation.getBearing(), deviceLocation.getSpeed());
-
             DeviceAPIClientServiceImpl dac= new DeviceAPIClientServiceImpl();
-            String deviceAPIClientResponse=dac.updateLocation(trackerinfo);
-            log.info("Location Update "+ new Gson().toJson(deviceAPIClientResponse));
-            //Traccar update lat lon
+            dac.updateLocation(trackerinfo);
+            //Traccar update GPS Location
 
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
@@ -414,7 +414,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 //        } catch (DataPublisherConfigurationException e) {
 //            DeviceManagementDAOFactory.rollbackTransaction();
 //            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
-        } catch (IOException e) {
+        } catch (TraccarConfigurationException e) {
             log.error("Error on Traccar" + e);
             //e.printStackTrace();
         } finally {

@@ -19,7 +19,7 @@
 
 package org.wso2.carbon.device.mgt.core.traccar.api.service.addons;
 
-import com.google.gson.Gson;
+import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -30,139 +30,195 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarClient;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
+import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarGateway;
 import org.wso2.carbon.device.mgt.core.traccar.core.config.TraccarConfigurationManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants.ENDPOINT;
 import static org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants.AUTHORIZATION;
 import static org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants.AUTHORIZATION_KEY;
-import static org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants.MAIN_ENDPOINT;
 
 public class TrackerClient implements TraccarClient {
     private static final Log log = LogFactory.getLog(TrackerClient.class);
+    private static final int THREAD_POOL_SIZE = 50;
+    private final OkHttpClient client;
+    private final ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
-    public Request getDeviceByDeviceIdentifier(String deviceId) {
-        //device identifier matches with traccar uniqueId
-        //Retrieve the traccar Gateway by passing the Gateway name
-        TraccarGateway traccarGateway = getTraccarGateway();
+    final TraccarGateway traccarGateway = getTraccarGateway();
+    final String endpoint = traccarGateway.getPropertyByName(ENDPOINT).getValue();
+    final String authorization = traccarGateway.getPropertyByName(AUTHORIZATION).getValue();
+    final String authorizationKey = traccarGateway.getPropertyByName(AUTHORIZATION_KEY).getValue();
 
-        //Retrieve the properties in the Traccar Gateway by passing the property name
-        String endpoint = traccarGateway.getPropertyByName(MAIN_ENDPOINT).getValue();
-        String authorization = traccarGateway.getPropertyByName(AUTHORIZATION).getValue();
-        String authorizationKey = traccarGateway.getPropertyByName(AUTHORIZATION_KEY).getValue();
-
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
-        Request request = new Request.Builder()
-                .url(endpoint+"/devices?uniqueId="+deviceId)
-                .method("GET", null)
-                .addHeader(authorization, authorizationKey)
+    public TrackerClient() {
+        client = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(45, TimeUnit.SECONDS)
+                .connectionPool(new ConnectionPool(50,30,TimeUnit.SECONDS))
                 .build();
-        return request;
     }
 
-    public String updateLocation(TraccarPosition deviceInfo) throws IOException {
-        //Retrieve the traccar Gateway by passing the Gateway name
-        TraccarGateway traccarGateway = getTraccarGateway();
+    private class TrackerExecutor implements Runnable {
+        final JSONObject payload;
+        final String context;
+        final String publisherUrl;
+        private final String method;
 
-        //Retrieve the properties in the Traccar Gateway by passing the property name
-        String endpoint = traccarGateway.getPropertyByName(ENDPOINT).getValue();
+        private TrackerExecutor(String publisherUrl, String context, JSONObject payload, String method) {
+            this.payload = payload;
+            this.context = context;
+            this.publisherUrl = publisherUrl;
+            this.method = method;
+        }
 
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
-        Request request = new Request.Builder()
-                .url(endpoint+"id="+deviceInfo.getDeviceIdentifier()+
-                        "&timestamp="+deviceInfo.getTimestamp()+
-                        "&lat="+deviceInfo.getLat()+"&lon="+deviceInfo.getLon()+
-                        "&bearing="+deviceInfo.getBearing()+"&speed="+deviceInfo.getSpeed()+"&ignition=true")
-                .method("GET", null)
-                .build();
-        Response response = client.newCall(request).execute();
-        log.info(String.valueOf(response));
-        return String.valueOf(response);
+        public void run() {
+            RequestBody requestBody;
+            Request.Builder builder = new Request.Builder();
+            Request request;
+
+            if(method=="post"){
+                requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), payload.toString());
+                builder = builder.post(requestBody);
+            }else if(method=="delete"){
+                builder = builder.delete();
+            }
+
+            request = builder.url(publisherUrl + context)
+                    .addHeader(authorization, authorizationKey)
+                    .build();
+
+            try {
+                client.newCall(request).execute();
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully the request is proceed and communicated with Traccar");
+                }
+            } catch (IOException e) {
+                log.error("Error occurred", e);
+
+            }
+        }
     }
 
-    public String addDevice(TraccarDevice deviceInfo) throws IOException{
-        //Retrieve the traccar Gateway by passing the Gateway name
-        TraccarGateway traccarGateway = getTraccarGateway();
-
-        //Retrieve the properties in the Traccar Gateway by passing the property name
-        String endpoint = traccarGateway.getPropertyByName(MAIN_ENDPOINT).getValue();
-        String authorization = traccarGateway.getPropertyByName(AUTHORIZATION).getValue();
-        String authorizationKey = traccarGateway.getPropertyByName(AUTHORIZATION_KEY).getValue();
-
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
-        MediaType mediaType = MediaType.parse("application/json");
-
-        JSONObject data = new JSONObject();
-        data.put("name", deviceInfo.getDeviceName());
-        data.put("uniqueId", deviceInfo.getUniqueId());
-        data.put("status", deviceInfo.getStatus());
-        data.put("disabled", deviceInfo.getDisabled());
-        data.put("lastUpdate", deviceInfo.getLastUpdate());
-        data.put("positionId", deviceInfo.getPositionId());
-        data.put("groupId", deviceInfo.getGroupId());
-        data.put("phone", deviceInfo.getPhone());
-        data.put("model", deviceInfo.getModel());
-        data.put("contact", deviceInfo.getContact());
-        data.put("category", deviceInfo.getCategory());
-        List<String> geofenceIds = new ArrayList<>();
-        data.put("geofenceIds", geofenceIds);
-        data.put("attributes", new JSONObject());
-
-        RequestBody body = RequestBody.create(mediaType, data.toString());
-        Request request = new Request.Builder()
-                .url(endpoint+"/devices")
-                .method("POST", body)
-                .addHeader("Content-Type", "application/json")
-                .addHeader(authorization, authorizationKey)
-                .build();
-        Response response = client.newCall(request).execute();
-
-        return String.valueOf(response);
+    /**
+     * Add Traccar Device operation.
+     * @param deviceInfo  with DeviceName UniqueId, Status, Disabled LastUpdate, PositionId, GroupId
+     *                    Model, Contact, Category, fenceIds
+     * @throws TraccarConfigurationException Failed while add Traccar Device the operation
+     */
+    public void addDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException {
+        try{
+             JSONObject payload = new JSONObject();
+            payload.put("name", deviceInfo.getDeviceName());
+            payload.put("uniqueId", deviceInfo.getUniqueId());
+            payload.put("status", deviceInfo.getStatus());
+            payload.put("disabled", deviceInfo.getDisabled());
+            payload.put("lastUpdate", deviceInfo.getLastUpdate());
+            payload.put("positionId", deviceInfo.getPositionId());
+            payload.put("groupId", deviceInfo.getGroupId());
+            payload.put("phone", deviceInfo.getPhone());
+            payload.put("model", deviceInfo.getModel());
+            payload.put("contact", deviceInfo.getContact());
+            payload.put("category", deviceInfo.getCategory());
+            List<String> geoFenceIds = new ArrayList<>();
+            payload.put("geofenceIds", geoFenceIds);
+            payload.put("attributes", new JSONObject());
+            String context = "8082/api/devices";
+            Runnable trackerExecutor = new TrackerExecutor(endpoint, context, payload, "post");
+            executor.execute(trackerExecutor);
+            log.info("Device successfully enorolled on traccar");
+         }catch (Exception e){
+             String msg="Could not enroll traccar device";
+             log.error(msg, e);
+             throw new TraccarConfigurationException(msg, e);
+         }
     }
 
-    public String disDevice(TraccarDevice deviceInfo) throws IOException {
+    /**
+     * Add Device GPS Location operation.
+     * @param deviceInfo  with DeviceIdentifier, Timestamp, Lat, Lon, Bearing, Speed, ignition
+     */
+    public void updateLocation(TraccarPosition deviceInfo) throws TraccarConfigurationException {
+         try{
+             String context = "5055/?id="+deviceInfo.getDeviceIdentifier()+"&timestamp="+deviceInfo.getTimestamp()+
+                     "&lat="+deviceInfo.getLat()+"&lon="+deviceInfo.getLon()+"&bearing="+deviceInfo.getBearing()+
+                     "&speed="+deviceInfo.getSpeed()+"&ignition=true";
+             Runnable trackerExecutor = new TrackerExecutor(endpoint, context, null, "get");
+             executor.execute(trackerExecutor);
+             log.info("Device GPS location added on traccar");
+         }catch (Exception e){
+             String msg="Could not add GPS location";
+             log.error(msg, e);
+             throw new TraccarConfigurationException(msg, e);
+         }
+    }
 
-        //Retrieve the traccar Gateway by passing the Gateway name
-        TraccarGateway traccarGateway = getTraccarGateway();
-
-        //Retrieve the properties in the Traccar Gateway by passing the property name
-        String endpoint = traccarGateway.getPropertyByName(MAIN_ENDPOINT).getValue();
-        String authorization = traccarGateway.getPropertyByName(AUTHORIZATION).getValue();
-        String authorizationKey = traccarGateway.getPropertyByName(AUTHORIZATION_KEY).getValue();
-
-        OkHttpClient client = new OkHttpClient();
-        Request deviceDetails = getDeviceByDeviceIdentifier(deviceInfo.getDeviceIdentifier());
-        Response response = client.newCall(deviceDetails).execute();
-
-        String result = response.body().string();
-        String jsonData ="{"+ "\"geodata\": "+ result+ "}";
-
+    /**
+     * Add Device GPS Location operation.
+     * @param deviceIdentifier
+     * @return device info
+     * @throws TraccarConfigurationException Failed while add Traccar Device location operation
+     */
+    public String getDeviceByDeviceIdentifier(String deviceIdentifier) throws TraccarConfigurationException {
         try {
+            String context = "8082/api/devices?uniqueId="+deviceIdentifier;
+            Runnable trackerExecutor = new TrackerExecutor(endpoint, context, null, "get");
+            executor.execute(trackerExecutor);
+            Request request = new Request.Builder()
+                    .url(endpoint+context)
+                    .addHeader(authorization, authorizationKey)
+                    .build();
+            Response response = client.newCall(request).execute();
+            String result = response.body().string();
+            log.info("Device info found");
+            return result;
+        } catch (IOException e) {
+            String msg="Could not find device information";
+            log.error(msg, e);
+            throw new TraccarConfigurationException(msg, e);
+        }
+    }
+
+    /**
+     * Dis-enroll a Device operation.
+     * @param deviceInfo  identified via deviceIdentifier
+     * @throws TraccarConfigurationException Failed while dis-enroll a Traccar Device operation
+     */
+    public void disDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException {
+        try{
+            String result = getDeviceByDeviceIdentifier(deviceInfo.getDeviceIdentifier());
+            String jsonData ="{"+ "\"geodata\": "+ result+ "}";
+
             JSONObject obj = new JSONObject(jsonData);
             JSONArray geodata = obj.getJSONArray("geodata");
             JSONObject jsonResponse = geodata.getJSONObject(0);
 
-            OkHttpClient client1 = new OkHttpClient();
-            Request request1 = new Request.Builder()
-                    .url(endpoint+"/devices/"+jsonResponse.getInt("id")).delete()
-                    .addHeader(authorization, authorizationKey).build();
-            Response response1 = client1.newCall(request1).execute();
-            log.info(String.valueOf(response1));
-            return String.valueOf(response1);
-        } catch (JSONException e) {
-            log.info("Delete Error "+e);
-            return String.valueOf(e);
+            String context = "8082/api/devices/"+jsonResponse.getInt("id");
+            Runnable trackerExecutor = new TrackerExecutor(endpoint, context, null, "delete");
+            executor.execute(trackerExecutor);
+            log.info("Device successfully dis-enrolled");
+        }catch (JSONException e){
+            String msg = "Could not find the device infomation to dis-enroll the device";
+            log.error(msg, e);
+            throw new TraccarConfigurationException(msg);
+        }catch (TraccarConfigurationException ex){
+            String msg = "Could not find the device infomation to dis-enroll the device";
+            log.error(msg, ex);
+            throw new TraccarConfigurationException(msg, ex);
         }
     }
-    
+
     private TraccarGateway getTraccarGateway(){
         return TraccarConfigurationManager.getInstance().getTraccarConfig().getTraccarGateway(
                 TraccarHandlerConstants.GATEWAY_NAME);

@@ -20,15 +20,36 @@
 package org.wso2.carbon.device.mgt.core.traccar.api.service;
 
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
+import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 
-import java.io.IOException;
 
 public interface DeviceAPIClientService {
 
-    String updateLocation(TraccarPosition deviceInfo) throws IOException;
+    /**
+     * Create device Traccar configuration records
+     *
+     * @param deviceInfo to be added
+     * @throws TraccarConfigurationException errors thrown while creating a device traccar configuration
+     */
+    void addDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException;
 
-    String addDevice(TraccarDevice deviceInfo) throws IOException;
+    /**
+     * Add GPS location of a device Traccar configuration records
+     *
+     * @param deviceInfo to be added to update location of the device
+     * @throws TraccarConfigurationException errors thrown while inserting location of a device traccar configuration
+     */
+    void updateLocation(TraccarPosition deviceInfo) throws TraccarConfigurationException;
 
-    String disDevice(TraccarDevice deviceInfo) throws IOException;
+    /**
+     * Delete a device Traccar configuration records
+     *
+     * @param deviceInfo to be delete a device
+     * @throws TraccarConfigurationException errors thrown while deleting a device traccar configuration
+     */
+    void disDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException;
+
+    //String addGroup(TraccarGroups groupInfo) throws IOException;
 }

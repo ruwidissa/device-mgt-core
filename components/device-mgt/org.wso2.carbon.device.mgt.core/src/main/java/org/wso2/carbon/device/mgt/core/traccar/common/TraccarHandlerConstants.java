@@ -22,8 +22,7 @@ package org.wso2.carbon.device.mgt.core.traccar.common;
 public class TraccarHandlerConstants {
     public static final String TRACCAR_CONFIG_XML_NAME = "traccar-config.xml";
     public static final String GATEWAY_NAME = "sample";
-    public static final String MAIN_ENDPOINT = "api-endpoint";
-    public static final String ENDPOINT = "add-location-api-endpoint";
+    public static final String ENDPOINT = "api-endpoint";
     public static final String AUTHORIZATION = "authorization";
     public static final String AUTHORIZATION_KEY = "authorization-key";
 }
