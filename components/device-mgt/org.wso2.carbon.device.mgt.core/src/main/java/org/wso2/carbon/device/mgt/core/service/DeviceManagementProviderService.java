@@ -677,7 +677,7 @@ public interface DeviceManagementProviderService {
 
     boolean modifyEnrollment(Device device) throws DeviceManagementException;
 
-    boolean enrollDevice(Device device) throws DeviceManagementException, IOException;
+    boolean enrollDevice(Device device) throws DeviceManagementException;
 
     boolean saveConfiguration(PlatformConfiguration configuration) throws DeviceManagementException;
 

@@ -118,9 +118,7 @@ import org.wso2.carbon.device.mgt.core.internal.PluginInitializationListener;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
-import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.email.sender.core.ContentProviderInfo;
@@ -397,13 +395,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
 
         //enroll Traccar device
-        String lastUpdatedTime = String.valueOf((new Date().getTime()));
-        TraccarDevice traccarDeviceInfo = new TraccarDevice(device.getName(), device.getDeviceIdentifier(),
-                "online", "false", lastUpdatedTime, "", "", "", "",
-                "", "");
-        DeviceAPIClientServiceImpl dac= new DeviceAPIClientServiceImpl();
         try {
-            dac.addDevice(traccarDeviceInfo);
+            DeviceAPIClientService dac= DeviceManagementDataHolder.getInstance().getDeviceAPIClientService();
+            dac.addDevice(device);
         } catch (TraccarConfigurationException e) {
             log.error("Error on Traccar add device" + e);
             //e.printStackTrace();
@@ -572,10 +566,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             this.removeDeviceFromCache(deviceId);
 
             //disenroll Traccar device
-            TraccarDevice traccarDeviceInfo = new TraccarDevice(device.getDeviceIdentifier());
-            DeviceAPIClientServiceImpl dac= new DeviceAPIClientServiceImpl();
             try {
-                dac.disDevice(traccarDeviceInfo);
+                DeviceAPIClientService dac= DeviceManagementDataHolder.getInstance().getDeviceAPIClientService();
+                dac.disDevice(device.getDeviceIdentifier());
             } catch (TraccarConfigurationException e) {
                 log.error("Error on Traccar disenroll a device" + e);
                 //e.printStackTrace();

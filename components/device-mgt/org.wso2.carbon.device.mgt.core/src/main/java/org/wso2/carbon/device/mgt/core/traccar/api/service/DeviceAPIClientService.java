@@ -19,37 +19,48 @@
 
 package org.wso2.carbon.device.mgt.core.traccar.api.service;
 
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
+import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
+
+import java.io.IOException;
 
 
 public interface DeviceAPIClientService {
 
     /**
-     * Create device Traccar configuration records
-     *
-     * @param deviceInfo to be added
-     * @throws TraccarConfigurationException errors thrown while creating a device traccar configuration
-     */
-    void addDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException;
-
-    /**
      * Add GPS location of a device Traccar configuration records
      *
-     * @param deviceInfo to be added to update location of the device
+     * @param device to be added to update location of the device
+     * @param deviceLocation to be added to update location of the device
      * @throws TraccarConfigurationException errors thrown while inserting location of a device traccar configuration
      */
-    void updateLocation(TraccarPosition deviceInfo) throws TraccarConfigurationException;
+    void updateLocation(Device device, DeviceLocation deviceLocation) throws TraccarConfigurationException;
+
+    /**
+     * Create device Traccar configuration records
+     *
+     * @param device to be added
+     * @throws TraccarConfigurationException errors thrown while creating a device traccar configuration
+     */
+    void addDevice(Device device) throws TraccarConfigurationException;
 
     /**
      * Delete a device Traccar configuration records
      *
-     * @param deviceInfo to be delete a device
+     * @param deviceIdentifier to be delete a device
      * @throws TraccarConfigurationException errors thrown while deleting a device traccar configuration
      */
-    void disDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException;
+    void disDevice(String deviceIdentifier) throws TraccarConfigurationException;
 
-    //String addGroup(TraccarGroups groupInfo) throws IOException;
+    /**
+     * Delete a device Traccar configuration records
+     *
+     * @param group to be add a group
+     * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
+     */
+    void addGroup(DeviceGroup group) throws TraccarConfigurationException;
 }

@@ -20,20 +20,19 @@
 package org.wso2.carbon.device.mgt.core.traccar.common;
 
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 
-import java.io.IOException;
-
 public interface TraccarClient {
 
-    void addDevice(TraccarDevice deviceInfo) throws IOException, TraccarConfigurationException;
+    void addDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException;
 
-    void updateLocation(TraccarPosition deviceInfo) throws IOException, TraccarConfigurationException;
+    void updateLocation(TraccarPosition deviceInfo) throws TraccarConfigurationException;
 
-    String getDeviceByDeviceIdentifier(String deviceInfo) throws IOException, TraccarConfigurationException;
+    String getDeviceByDeviceIdentifier(String deviceId) throws TraccarConfigurationException;
 
-    void disDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException, IOException;
+    void disDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException;
 
-    //String addGroup(TraccarGroups groupInfo) throws IOException;
+    void addGroup(TraccarGroups groupInfo) throws TraccarConfigurationException;
 }

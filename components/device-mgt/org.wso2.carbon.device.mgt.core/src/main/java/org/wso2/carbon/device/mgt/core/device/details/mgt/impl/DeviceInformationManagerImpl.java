@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.device.mgt.core.device.details.mgt.impl;
 
-import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,15 +43,13 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDA
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
-import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.TraccarAPIClientServiceImpl;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -393,12 +390,8 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             }
 
             //Traccar update GPS Location
-            TraccarPosition trackerinfo = new TraccarPosition(device.getDeviceIdentifier(),
-                    deviceLocation.getUpdatedTime().getTime(),
-                    deviceLocation.getLatitude(), deviceLocation.getLongitude(),
-                    deviceLocation.getBearing(), deviceLocation.getSpeed());
-            DeviceAPIClientServiceImpl dac= new DeviceAPIClientServiceImpl();
-            dac.updateLocation(trackerinfo);
+            DeviceAPIClientService dac= DeviceManagementDataHolder.getInstance().getDeviceAPIClientService();
+            dac.updateLocation(device, deviceLocation);
             //Traccar update GPS Location
 
             DeviceManagementDAOFactory.commitTransaction();

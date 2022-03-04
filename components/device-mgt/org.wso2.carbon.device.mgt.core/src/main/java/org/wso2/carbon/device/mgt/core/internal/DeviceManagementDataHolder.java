@@ -41,6 +41,7 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.status.task.DeviceStatusTaskManagerService;
 import org.wso2.carbon.device.mgt.core.task.DeviceTaskManagerService;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
 import org.wso2.carbon.email.sender.core.service.EmailSenderService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -83,6 +84,7 @@ public class DeviceManagementDataHolder {
     private GeoFenceEventOperationManager geoFenceEventOperationManager;
     private ExecutorService eventConfigExecutors;
     private OperationTimeoutTaskManagerService operationTimeoutTaskManagerService;
+    private DeviceAPIClientService deviceAPIClientService;
 
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
@@ -348,5 +350,13 @@ public class DeviceManagementDataHolder {
     public void setOperationTimeoutTaskManagerService(
             OperationTimeoutTaskManagerService operationTimeoutTaskManagerService) {
         this.operationTimeoutTaskManagerService = operationTimeoutTaskManagerService;
+    }
+
+    public DeviceAPIClientService getDeviceAPIClientService() {
+        return deviceAPIClientService;
+    }
+
+    public void setDeviceAPIClientService(DeviceAPIClientService deviceAPIClientService) {
+        this.deviceAPIClientService = deviceAPIClientService;
     }
 }

@@ -30,10 +30,10 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarClient;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarGateway;
@@ -166,13 +166,14 @@ public class TrackerClient implements TraccarClient {
 
     /**
      * Add Device GPS Location operation.
-     * @param deviceIdentifier
+     * @param deviceId
      * @return device info
      * @throws TraccarConfigurationException Failed while add Traccar Device location operation
      */
-    public String getDeviceByDeviceIdentifier(String deviceIdentifier) throws TraccarConfigurationException {
+    @Override
+    public String getDeviceByDeviceIdentifier(String deviceId) throws TraccarConfigurationException {
         try {
-            String context = "8082/api/devices?uniqueId="+deviceIdentifier;
+            String context = "8082/api/devices?uniqueId="+ deviceId;
             Runnable trackerExecutor = new TrackerExecutor(endpoint, context, null, "get");
             executor.execute(trackerExecutor);
             Request request = new Request.Builder()
@@ -200,6 +201,11 @@ public class TrackerClient implements TraccarClient {
             String result = getDeviceByDeviceIdentifier(deviceInfo.getDeviceIdentifier());
             String jsonData ="{"+ "\"geodata\": "+ result+ "}";
 
+            log.info("======================");
+            log.info("result");
+            log.info(result);
+            log.info(deviceInfo.getDeviceIdentifier());
+            log.info("===========================");
             JSONObject obj = new JSONObject(jsonData);
             JSONArray geodata = obj.getJSONArray("geodata");
             JSONObject jsonResponse = geodata.getJSONObject(0);
@@ -216,6 +222,28 @@ public class TrackerClient implements TraccarClient {
             String msg = "Could not find the device infomation to dis-enroll the device";
             log.error(msg, ex);
             throw new TraccarConfigurationException(msg, ex);
+        }
+    }
+
+    /**
+     * Add Traccar Device operation.
+     * @param groupInfo  with groupName
+     * @throws TraccarConfigurationException Failed while add Traccar Device the operation
+     */
+    public void addGroup(TraccarGroups groupInfo) throws TraccarConfigurationException {
+        try{
+            JSONObject payload = new JSONObject();
+            payload.put("name", groupInfo.getName());
+            payload.put("attributes", new JSONObject());
+
+            String context = "8082/api/groups";
+            Runnable trackerExecutor = new TrackerExecutor(endpoint, context, payload, "post");
+            executor.execute(trackerExecutor);
+            log.info("Group successfully on traccar");
+        }catch (Exception e){
+            String msg="Could not add a traccar group";
+            log.error(msg, e);
+            throw new TraccarConfigurationException(msg, e);
         }
     }
 
