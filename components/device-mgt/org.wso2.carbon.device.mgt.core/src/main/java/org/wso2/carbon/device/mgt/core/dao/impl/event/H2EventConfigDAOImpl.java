@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOException;
+import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.impl.AbstractEventConfigDAO;
 
 import java.sql.Connection;
@@ -75,6 +76,6 @@ public class H2EventConfigDAOImpl extends AbstractEventConfigDAO {
     }
 
     private Connection getConnection() throws SQLException {
-        return DeviceManagementDAOFactory.getConnection();
+        return EventManagementDAOFactory.getConnection();
     }
 }
