@@ -1507,7 +1507,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
                 geofenceDAO.deleteGeofenceGroupMapping(groupIdsOfGeoFence, fenceId);
             }
             geofenceDAO.deleteGeofenceById(fenceId);
-            DeviceManagementDAOFactory.commitTransaction();
+            EventManagementDAOFactory.commitTransaction();
             GeoCacheManagerImpl.getInstance().removeFenceFromCache(fenceId, tenantId);
         } catch (DeviceManagementDAOException e) {
             EventManagementDAOFactory.rollbackTransaction();
@@ -1571,7 +1571,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             log.error(msg, e);
             throw new GeoLocationBasedServiceException(msg, e);
         } finally {
-            DeviceManagementDAOFactory.closeConnection();
+            EventManagementDAOFactory.closeConnection();
         }
         return true;
     }
@@ -1772,12 +1772,9 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
                     DeviceManagementConstants.EventServices.GEOFENCE, new GeoFenceEventMeta(geofenceData),
                     tenantId, geofenceData.getGroupIds());
         } catch (EventConfigurationException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Failed to delete Geofence event configurations";
             log.error(msg, e);
             throw new GeoLocationBasedServiceException(msg, e);
-        } finally {
-            DeviceManagementDAOFactory.closeConnection();
         }
     }
 }

@@ -132,7 +132,10 @@ public class EventOperationExecutor implements Runnable {
         EventRevokeOperation eventRevokeOperation = new EventRevokeOperation();
         eventRevokeOperation.setEventSource(eventSource);
         eventRevokeOperation.setId(geoFenceMeta.getId());
-        operation.setPayLoad(new Gson().toJson(eventRevokeOperation));
+
+        List<EventRevokeOperation> eventOperationsRevoke = new ArrayList<>();
+        eventOperationsRevoke.add(eventRevokeOperation);
+        operation.setPayLoad(new Gson().toJson(eventOperationsRevoke));
     }
 
     @Override
