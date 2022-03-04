@@ -46,6 +46,7 @@ import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -138,7 +139,7 @@ public class GrafanaRequestHandlerUtil {
     }
 
     public static  void setRequestEntity(HttpPost postRequest, JsonObject body) throws UnsupportedEncodingException {
-        StringEntity bodyEntity = new StringEntity(body.toString());
+        StringEntity bodyEntity = new StringEntity(body.toString(), StandardCharsets.UTF_8);
         bodyEntity.setContentType(MediaType.APPLICATION_JSON);
         postRequest.setEntity(bodyEntity);
     }
