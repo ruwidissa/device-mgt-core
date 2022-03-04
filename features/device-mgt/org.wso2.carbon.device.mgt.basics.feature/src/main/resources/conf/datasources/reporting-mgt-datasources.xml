@@ -31,7 +31,7 @@
             </jndiConfig>
             <definition type="RDBMS">
                 <configuration>
-                    <url>jdbc:mysql://localhost:3306/DM_DB?autoReconnect=true&amp;relaxAutoCommit=true&amp;useSSL=false</url>
+                    <url>jdbc:mysql://localhost:3306/MDM_REPORTS?autoReconnect=true&amp;relaxAutoCommit=true&amp;useSSL=false</url>
                     <username>root</username>
                     <password>root</password>
                     <driverClassName>com.mysql.cj.jdbc.Driver</driverClassName>
