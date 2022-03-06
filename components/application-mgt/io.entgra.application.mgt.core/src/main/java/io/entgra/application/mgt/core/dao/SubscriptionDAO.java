@@ -239,4 +239,13 @@ public interface SubscriptionDAO {
      */
     List<Integer> getAppSubscribedDevicesForGroups(int appReleaseId, String subtype, int tenantId)
             throws ApplicationManagementDAOException;
+
+    /**
+     * This method is used to get the currently installed version for given app release id
+     * @param appId id of the application
+     * @param deviceIdList id list of devices
+     * @return Map with device id as a key and currently installed version as value
+     * @throws {@link ApplicationManagementDAOException} if connections establishment fails.
+     */
+    Map<Integer,String> getCurrentInstalledAppVersion(int appId, List<Integer> deviceIdList, String installedVersion) throws ApplicationManagementDAOException;
 }

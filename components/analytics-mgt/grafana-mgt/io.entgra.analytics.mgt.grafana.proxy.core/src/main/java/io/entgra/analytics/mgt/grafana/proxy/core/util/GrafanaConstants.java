@@ -60,7 +60,7 @@ public class GrafanaConstants {
     public static final String DASHBOARD_PANEL_DETAIL_QUERIES_KEY = "targets";
     public static final String QUERY_REF_ID_KEY = "refId";
     public static final String PANEL_ID_QUERY_PARAM = "panelId";
-    public static final String ORG_ID_QUERY_PARAM = "panelId";
+    public static final String ORG_ID_QUERY_PARAM = "orgId";
     public static final String ID_KEY = "id";
 
     public static final String WS_LIVE_API = "/api/live/ws";

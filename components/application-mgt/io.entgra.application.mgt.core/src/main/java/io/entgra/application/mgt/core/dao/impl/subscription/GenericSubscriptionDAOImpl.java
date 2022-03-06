@@ -1311,4 +1311,66 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
+
+    @Override
+    public Map<Integer,String> getCurrentInstalledAppVersion(int appId, List<Integer> deviceIdList, String installedVersion ) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get current installed version of the app for " +
+                    "given app release id.");
+        }
+        try {
+
+            Map<Integer,String> installedVersionsMap = new HashMap<>();
+            Connection conn = this.getDBConnection();
+            int index = 1;
+            boolean isInstalledVersionAvailable = false;
+            StringJoiner joiner = new StringJoiner(",",
+                    " SELECT DM_DEVICE_ID AS DEVICE,VERSION FROM " +
+                            " (SELECT AP_APP.ID, VERSION FROM AP_APP_RELEASE AP_APP " +
+                            "   WHERE ID IN (SELECT ID FROM AP_APP_RELEASE " +
+                            "       WHERE AP_APP_ID = ?) " +
+                            " ) AP_APP_V" +
+                            " INNER JOIN " +
+                            " (SELECT AP_APP_RELEASE_ID, DM_DEVICE_ID FROM AP_DEVICE_SUBSCRIPTION AP_DEV_1 " +
+                            "   INNER JOIN (" +
+                            "       SELECT  MAX(ID) AS ID FROM AP_DEVICE_SUBSCRIPTION " +
+                            "           WHERE STATUS = 'COMPLETED' AND DM_DEVICE_ID IN (",
+                      ") GROUP BY DM_DEVICE_ID " +
+                            ") AP_DEV_2 " +
+                            "ON AP_DEV_2.ID = AP_DEV_1.ID ) AP_APP_R " +
+                            "ON AP_APP_R.AP_APP_RELEASE_ID = AP_APP_V.ID");
+            deviceIdList.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+            if(installedVersion != null && !installedVersion.isEmpty()){
+                query += " WHERE VERSION = ? ";
+                isInstalledVersionAvailable = true;
+            }
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setInt(index++, appId);
+                for (int deviceId : deviceIdList) {
+                    ps.setInt(index++, deviceId);
+                }
+                if(isInstalledVersionAvailable){
+                    ps.setString(index++, installedVersion);
+                }
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        installedVersionsMap.put(rs.getInt("DEVICE"),rs.getString("VERSION"));
+                    }
+                }
+                return installedVersionsMap;
+            }
+
+        }catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get current installed version of the app for " +
+                    "given app id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while getting current installed version of the app for given " +
+                    "app id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
 }

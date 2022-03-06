@@ -41,7 +41,6 @@ import io.entgra.application.mgt.core.dto.ApplicationsDTO;
 import io.entgra.application.mgt.core.impl.ApplicationManagerImpl;
 import io.entgra.application.mgt.core.internal.DataHolder;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
@@ -121,9 +120,8 @@ public class ApplicationManagementTest extends BaseTestCase {
         screenshots.put("shot3", new FileInputStream(new File("src/test/resources/samples/app1/shot3.png")));
 
         applicationArtifact.setScreenshots(screenshots);
-
         ApplicationManager manager = new ApplicationManagerImpl();
-        manager.createEntApp(applicationWrapper, applicationArtifact);
+        manager.createEntApp(applicationWrapper, applicationArtifact, false);
     }
 
     @DataProvider(name = "applicationIdDataProvider")
@@ -140,7 +138,12 @@ public class ApplicationManagementTest extends BaseTestCase {
     public static Object[][] uuidDataProvider() {
         return new Object[][] {{"TEST_APP_UUID"}};
     }
-
+    
+    @Test(enabled = false)
+    public void createApplicationAndPublish(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact, boolean isPublish) throws ApplicationManagementException {
+    
+    }
+    
     @Test(enabled = false)
     public void updateApplication(int applicationId, ApplicationUpdateWrapper applicationUpdateWrapper) throws ApplicationManagementException {
 

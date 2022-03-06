@@ -656,7 +656,7 @@ public class HandlerUtil {
     public static ProxyResponse getTokenResult(AuthData authData, String keymanagerUrl) throws IOException {
         HttpPost tokenEndpoint = new HttpPost(keymanagerUrl + HandlerConstants.TOKEN_ENDPOINT);
         StringEntity tokenEndpointPayload = new StringEntity(
-                "grant_type=refresh_token&refresh_token=" + authData.getRefreshToken() + "&scope=PRODUCTION",
+                "grant_type=refresh_token&refresh_token=" + authData.getRefreshToken(),
                 ContentType.APPLICATION_FORM_URLENCODED);
 
         tokenEndpoint.setEntity(tokenEndpointPayload);

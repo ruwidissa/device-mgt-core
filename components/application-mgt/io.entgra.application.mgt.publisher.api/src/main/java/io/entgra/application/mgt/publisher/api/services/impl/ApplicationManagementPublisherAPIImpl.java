@@ -173,6 +173,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Path("/ent-app")
     public Response createEntApp(
             @Multipart("application") ApplicationWrapper applicationWrapper,
+            @QueryParam("is-published") boolean isPublished,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
@@ -190,7 +191,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
             // Created new Ent App
             Application application = applicationManager.createEntApp(applicationWrapper,
-                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
+                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList), isPublished);
             if (application != null) {
                 return Response.status(Response.Status.CREATED).entity(application).build();
             } else {
@@ -218,6 +219,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Path("/web-app")
     public Response createWebApp(
             @Multipart("webapp") WebAppWrapper webAppWrapper,
+            @QueryParam("is-published") boolean isPublished,
             @Multipart("icon") Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
             @Multipart("screenshot1") Attachment screenshot1,
@@ -233,7 +235,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
             // Created new Web App
             Application application = applicationManager.createWebClip(webAppWrapper,
-                    constructApplicationArtifact(null, iconFile, bannerFile, attachmentList));
+                    constructApplicationArtifact(null, iconFile, bannerFile, attachmentList), isPublished);
             if (application != null) {
                 return Response.status(Response.Status.CREATED).entity(application).build();
             } else {
@@ -255,12 +257,13 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
-
+    
     @POST
     @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @Path("/public-app")
     public Response createPubApp(
             @Multipart("public-app") PublicAppWrapper publicAppWrapper,
+            @QueryParam("is-published") boolean isPublished,
             @Multipart("icon") Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
             @Multipart("screenshot1") Attachment screenshot1,
@@ -276,11 +279,11 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
             // Created new Public App
             Application application = applicationManager.createPublicApp(publicAppWrapper,
-                    constructApplicationArtifact(null, iconFile, bannerFile, attachmentList));
+                    constructApplicationArtifact(null, iconFile, bannerFile, attachmentList), isPublished);
             if (application != null) {
                 return Response.status(Response.Status.CREATED).entity(application).build();
             } else {
-                String msg = "Web app creation is failed";
+                String msg = "Public app creation is failed";
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
@@ -304,6 +307,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Path("/custom-app")
     public Response createCustomApp(
             @Multipart("application") CustomAppWrapper customAppWrapper,
+            @QueryParam("is-published") boolean isPublished,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
@@ -321,7 +325,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
             // Created new Custom App
             Application application = applicationManager.createCustomApp(customAppWrapper,
-                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
+                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList), isPublished);
             if (application != null) {
                 return Response.status(Response.Status.CREATED).entity(application).build();
             } else {
@@ -351,6 +355,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @PathParam("deviceType") String deviceType,
             @PathParam("appId") int appId,
             @Multipart("applicationRelease") EntAppReleaseWrapper entAppReleaseWrapper,
+            @QueryParam("is-published") boolean isPublished,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
@@ -366,7 +371,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
             // Created new Ent App release
             ApplicationRelease release = applicationManager.createEntAppRelease(appId, entAppReleaseWrapper,
-                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
+                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList), isPublished);
             if (release != null) {
                 return Response.status(Response.Status.CREATED).entity(release).build();
             } else {
