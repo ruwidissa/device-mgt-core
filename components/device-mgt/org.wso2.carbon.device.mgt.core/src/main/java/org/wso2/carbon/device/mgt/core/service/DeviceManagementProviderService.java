@@ -42,7 +42,6 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfiguratio
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
-import org.wso2.carbon.device.mgt.common.cost.mgt.Costdata;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
@@ -70,6 +69,7 @@ import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -203,22 +203,11 @@ public interface DeviceManagementProviderService {
      * Method to retrieve all the devices with pagination support.
      *
      * @param request PaginationRequest object holding the data for pagination
-     * @return List<DeviceBilling> - Result includes the cost of removed device list.
-     * @throws DeviceManagementException If some unusual behaviour is observed while fetching the
-     *                                   devices.
-     */
-    List<DeviceBilling> getRemovedDeviceListWithCost(PaginationResult paginationResult, PaginationRequest request, Collection<Costdata> costdata, String tenantDomain, Double totalCost) throws DeviceManagementException;
-    /**
-     * Method to retrieve all the devices with pagination support.
-     *
-     * @param request PaginationRequest object holding the data for pagination
-     * @param requireDeviceInfo - A boolean indicating whether the device-info (location, app-info etc) is also required
-     *                          along with the device data.
      * @return PaginationResult - Result including the required parameters necessary to do pagination.
-     * @throws DeviceManagementException If some unusual behaviour is observed while fetching the
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching billing of
      *                                   devices.
      */
-    PaginationResult getAllDevicesBillings(PaginationRequest request, boolean requireDeviceInfo, String tenantDomain) throws DeviceManagementException;
+    PaginationResult getAllDevicesBillings(PaginationRequest request, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
 
     /**
      * Returns the device of specified id.
@@ -705,7 +694,7 @@ public interface DeviceManagementProviderService {
 
     List<DeviceStatus> getDeviceStatusHistory(Device device) throws DeviceManagementException;
 
-    List<DeviceStatus> getDeviceStatusHistory(Device device, Date fromDate, Date toDate) throws DeviceManagementException;
+    List<DeviceStatus> getDeviceStatusHistory(Device device, Date fromDate, Date toDate, boolean billingStatus) throws DeviceManagementException;
 
     List<DeviceStatus> getDeviceCurrentEnrolmentStatusHistory(Device device) throws DeviceManagementException;
 

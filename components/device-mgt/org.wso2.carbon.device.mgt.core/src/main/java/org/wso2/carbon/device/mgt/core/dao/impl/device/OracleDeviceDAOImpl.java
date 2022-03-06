@@ -194,7 +194,7 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
     }
 
     @Override
-    public List<DeviceBilling> getDeviceBillList(PaginationRequest request, int tenantId) throws DeviceManagementDAOException {
+    public List<DeviceBilling> getDeviceBillList(PaginationRequest request, int tenantId , Timestamp startDate, Timestamp endDate) throws DeviceManagementDAOException {
         return null;
     }
 

@@ -81,6 +81,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -399,9 +400,23 @@ public interface DeviceManagementService {
             @ApiParam(
                     name = "tenantDomain",
                     value = "The tenant domain.",
-                    required = false,
-                    defaultValue = "nita")
+                    required = false)
                     String tenantDomain,
+            @ApiParam(
+                    name = "startDate",
+                    value = "The start date.",
+                    required = false)
+                    Timestamp startDate,
+            @ApiParam(
+                    name = "endDate",
+                    value = "The end date.",
+                    required = false)
+                    Timestamp endDate,
+            @ApiParam(
+                    name = "generateBill",
+                    value = "The generate bill boolean.",
+                    required = false)
+                    boolean generateBill,
             @ApiParam(
                     name = "offset",
                     value = "The starting pagination index for the complete list of qualified items.",

@@ -133,6 +133,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.Response;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -345,24 +346,24 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     @Override
     @Path("/billing")
     public Response getDevicesBilling(
-            @DefaultValue("nita")
             @QueryParam ("tenantDomain") String tenantDomain,
+            @QueryParam ("startDate") Timestamp startDate,
+            @QueryParam ("endDate") Timestamp endDate,
+            @QueryParam ("generateBill") boolean generateBill,
             @QueryParam("offset") int offset,
             @DefaultValue("10")
             @QueryParam("limit") int limit) {
         try {
             RequestValidationUtil.validatePaginationParameters(offset, limit);
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
-//            DeviceAccessAuthorizationService deviceAccessAuthorizationService =
-//                    DeviceMgtAPIUtils.getDeviceAccessAuthorizationService();
             PaginationRequest request = new PaginationRequest(offset, limit);
             PaginationResult result;
             DeviceList devices = new DeviceList();
 
             try {
-                result = dms.getAllDevicesBillings(request, true, tenantDomain);
+                result = dms.getAllDevicesBillings(request, tenantDomain, startDate, endDate, generateBill);
             } catch (Exception exception) {
-                String msg = "------------------TEST ERROR-----------------------";
+                String msg = "Error occurred when trying to retrieve billing data";
                 log.error(msg, exception);
                 return Response.serverError().entity(
                         new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -379,7 +380,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.status(Response.Status.OK).entity(devices).build();
         }
         catch (Exception e) {
-            String msg = "Error occurred while fetching all enrolled devices";
+            String msg = "Error occurred while retrieving billing data";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();

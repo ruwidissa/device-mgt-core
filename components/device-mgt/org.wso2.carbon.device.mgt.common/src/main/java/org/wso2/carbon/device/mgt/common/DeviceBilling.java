@@ -17,18 +17,17 @@
  */
 package org.wso2.carbon.device.mgt.common;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshotWrapper;
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceStatus;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-@ApiModel(value = "DeviceBilling", description = "This class carries all information related to a managed device.")
+@ApiModel(value = "DeviceBilling", description = "This class carries all information related to a device billing.")
 public class DeviceBilling implements Serializable {
 
     private static final long serialVersionUID = 1998101711L;
@@ -40,9 +39,6 @@ public class DeviceBilling implements Serializable {
     @ApiModelProperty(name = "name", value = "The device name that can be set on the device by the device user.",
             required = true)
     private String name;
-//
-//    @ApiModelProperty(name = "type", value = "The OS type of the device.", required = true)
-//    private String type;
 
     @ApiModelProperty(name = "description", value = "Additional information on the device.", required = false)
     private String description;
@@ -58,7 +54,7 @@ public class DeviceBilling implements Serializable {
             required = false)
     private String deviceIdentifier;
 
-    @ApiModelProperty(name = "daysSinceEnrolled", value = "Number of days gone since device enrollment date to current date.",
+    @ApiModelProperty(name = "daysSinceEnrolled", value = "Number of days gone since device enrollment.",
             required = false)
     private int daysSinceEnrolled;
 
@@ -70,39 +66,23 @@ public class DeviceBilling implements Serializable {
             "It is mandatory to define this information.", required = false)
     private EnrolmentInfo enrolmentInfo;
 
-//    @ApiModelProperty(name = "features", value = "List of features.", required = false)
-//    private List<Feature> features;
-
-//    private List<DeviceBilling.Property> properties;
+    @ApiModelProperty(name = "deviceStatusInfo", value = "This defines the device status details. " +
+            "It is mandatory to define this information.", required = false)
+    private List<DeviceStatus> deviceStatusInfo = new ArrayList<>();
 
     @ApiModelProperty(name = "advanceInfo", value = "This defines the device registration related information. " +
             "It is mandatory to define this information.", required = false)
     private DeviceInfo deviceInfo;
 
-//    @ApiModelProperty(name = "applications", value = "This represents the application list installed into the device",
-//    required = false)
-//    private List<Application> applications;
-
-//    @ApiModelProperty(
-//            name = "historySnapshot",
-//            value = "device history snapshots")
-//    @JsonProperty(value = "historySnapshot")
-//    private DeviceLocationHistorySnapshotWrapper historySnapshot;
-
     public DeviceBilling() {
     }
 
-    public DeviceBilling(String name, String description, EnrolmentInfo enrolmentInfo) {
-        this.name = name;
-        this.description = description;
-        this.enrolmentInfo = enrolmentInfo;
+    public List<DeviceStatus> getDeviceStatusInfo() {
+        return deviceStatusInfo;
     }
 
-    public DeviceBilling(String name, String description, String deviceId, EnrolmentInfo enrolmentInfo) {
-        this.name = name;
-        this.description = description;
-        this.deviceIdentifier = deviceId;
-        this.enrolmentInfo = enrolmentInfo;
+    public void setDeviceStatusInfo(List<DeviceStatus> deviceStatusInfo) {
+        this.deviceStatusInfo = deviceStatusInfo;
     }
 
     public int getDaysUsed() {
@@ -177,44 +157,9 @@ public class DeviceBilling implements Serializable {
         this.deviceInfo = deviceInfo;
     }
 
-    public static class Property {
-
-        private String name;
-        private String value;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-    }
-
     @Override
     public String toString() {
         return new Gson().toJson(this);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof DeviceBilling))
-            return false;
-
-        DeviceBilling device = (DeviceBilling) o;
-
-        return getDeviceIdentifier().equals(device.getDeviceIdentifier());
-
     }
 
     @Override

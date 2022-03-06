@@ -22,11 +22,9 @@ import com.google.gson.Gson;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.sql.Timestamp;
-import java.util.Date;
 
 @XmlRootElement(name = "Cost")
-public class Costdata {
+public class Cost {
 
     private String tenantDomain;
     private Double cost;

@@ -47,6 +47,7 @@ import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -300,7 +301,7 @@ public interface DeviceDAO {
      * @return returns paginated list of not removed devices of tenant.
      * @throws DeviceManagementDAOException
      */
-    List<DeviceBilling> getDeviceBillList(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
+    List<DeviceBilling> getDeviceBillList(PaginationRequest request, int tenantId, Timestamp startDate, Timestamp endDate) throws DeviceManagementDAOException;
 
     /**
      * This method is used to retrieve the removed devices of a given tenant as a paginated result.
