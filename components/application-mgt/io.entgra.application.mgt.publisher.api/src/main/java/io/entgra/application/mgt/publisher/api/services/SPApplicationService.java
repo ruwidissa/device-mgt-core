@@ -18,6 +18,7 @@
 
 package io.entgra.application.mgt.publisher.api.services;
 
+import io.entgra.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.application.mgt.common.wrapper.ApplicationWrapper;
 import io.entgra.application.mgt.common.wrapper.CustomAppWrapper;
 import io.entgra.application.mgt.common.wrapper.PublicAppWrapper;
@@ -65,6 +66,13 @@ import java.util.List;
                         key = "perm:app:publisher:service-provider:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/app-mgt/publisher/service-provider/application/view"}
+                ),
+                @Scope(
+                        name = "Create new identity server",
+                        description = "Connect to new identity server",
+                        key = "perm:app:publisher:service-provider:connect",
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/app-mgt/publisher/service-provider/application/connect"}
                 ),
                 @Scope(
                         name = "Create a service provider application",
@@ -127,6 +135,22 @@ public interface SPApplicationService {
             }
     )
     Response getIdentityServer(@PathParam("id") int id);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/identity-servers")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "create new identity server",
+            tags = "Identity Server Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:connect")
+                    })
+            }
+    )
+    Response createIdentityServer(IdentityServerDTO identityServerDTO);
 
     /**
      * This method is used to register an APIM application for tenant domain.

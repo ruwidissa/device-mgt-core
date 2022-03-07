@@ -18,6 +18,9 @@
 
 package io.entgra.application.mgt.core.util;
 
+import io.entgra.application.mgt.common.IdentityServer;
+import io.entgra.application.mgt.common.dto.IdentityServerDTO;
+import io.entgra.application.mgt.core.config.IdentityServerDetail;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -361,6 +364,23 @@ public class APIUtil {
             applicationReleaseDTO.setMetaData(customAppReleaseWrapper.getMetaData());
         }
         return applicationReleaseDTO;
+    }
+
+    public static IdentityServer identityServerDtoToIdentityServerResponse(IdentityServerDTO identityServerDTO) {
+        IdentityServer identityServer = new IdentityServer();
+        identityServer.setId(identityServerDTO.getId());
+        identityServer.setProviderName(identityServerDTO.getProviderName());
+        identityServer.setName(identityServerDTO.getName());
+        identityServer.setDescription(identityServerDTO.getDescription());
+        identityServer.setUrl(identityServerDTO.getUrl());
+        identityServer.setApiUrl(identityServerDTO.getApiUrl());
+        identityServer.setUserName(identityServerDTO.getUserName());
+        identityServer.setPassword(identityServerDTO.getPassword());
+        IdentityServerDetail identityServerDetail = ConfigurationManager.getInstance().getIdentityServerConfiguration()
+                .getIdentityServerDetailByProviderName(identityServerDTO.getProviderName());
+        String serviceProviderAppsUrl = identityServerDTO.getUrl() + Constants.FORWARD_SLASH + identityServerDetail.getServiceProvidersPageUri();
+        identityServer.setServiceProviderAppsUrl(serviceProviderAppsUrl);
+        return identityServer;
     }
 
     public static Application appDtoToAppResponse(ApplicationDTO applicationDTO) throws ApplicationManagementException {

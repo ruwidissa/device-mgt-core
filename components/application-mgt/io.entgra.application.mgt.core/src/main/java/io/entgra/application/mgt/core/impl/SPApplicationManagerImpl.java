@@ -19,7 +19,7 @@
 package io.entgra.application.mgt.core.impl;
 
 import io.entgra.application.mgt.common.IdentityServer;
-import io.entgra.application.mgt.common.IdentityServerList;
+import io.entgra.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.application.mgt.common.SPApplication;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.application.mgt.common.exception.ApplicationManagementException;
@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SPApplicationManagerImpl implements SPApplicationManager {
 
@@ -76,7 +77,8 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             ConnectionManagerUtil.openDBConnection();
-            return spApplicationDAO.getIdentityServerById(identityServerId, tenantId);
+            IdentityServerDTO identityServerDTO = spApplicationDAO.getIdentityServerById(identityServerId, tenantId);
+            return APIUtil.identityServerDtoToIdentityServerResponse(identityServerDTO);
         } catch (DBConnectionException e) {
             String msg = "Error occurred when getting database connection to get identity server with the id: " + identityServerId;
             log.error(msg, e);
@@ -92,13 +94,12 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
     }
 
     @Override
-    public IdentityServerList getIdentityServers() throws ApplicationManagementException {
+    public List<IdentityServer> getIdentityServers() throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             ConnectionManagerUtil.openDBConnection();
-            IdentityServerList identityServerList = new IdentityServerList();
-            identityServerList.setIdentityServers(spApplicationDAO.getIdentityServers(tenantId));
-            return identityServerList;
+            return spApplicationDAO.getIdentityServers(tenantId).stream().
+                    map(APIUtil::identityServerDtoToIdentityServerResponse).collect(Collectors.toList());
         } catch (DBConnectionException e) {
             String msg = "Error occurred when getting database connection to get identity servers";
             log.error(msg, e);
@@ -110,6 +111,20 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public IdentityServer createIdentityServer(IdentityServerDTO identityServerDTO) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            int id = spApplicationDAO.createIdentityServer(identityServerDTO, tenantId);
+            identityServerDTO.setId(id);
+            return APIUtil.identityServerDtoToIdentityServerResponse(identityServerDTO);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while creating identity server " + identityServerDTO.getName();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         }
     }
 

@@ -18,16 +18,18 @@
 
 package io.entgra.application.mgt.common;
 
+import io.entgra.application.mgt.common.dto.IdentityServerDTO;
+
 import java.util.List;
 
 public class IdentityServerList {
-    private List<IdentityServer> identityServers;
+    private List<IdentityServerDTO> identityServers;
 
-    public List<IdentityServer> getIdentityServers() {
+    public List<IdentityServerDTO> getIdentityServers() {
         return identityServers;
     }
 
-    public void setIdentityServers(List<IdentityServer> identityServers) {
+    public void setIdentityServers(List<IdentityServerDTO> identityServers) {
         this.identityServers = identityServers;
     }
 }

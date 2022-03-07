@@ -16,16 +16,15 @@
  * under the License.
  */
 
-package io.entgra.application.mgt.common;
+package io.entgra.application.mgt.common.dto;
 
-public class IdentityServer {
+public class IdentityServerDTO {
     private int id;
     private String providerName;
     private String name;
     private String description;
     private String url;
     private String apiUrl;
-    private String serviceProviderAppsUrl;
     private String userName;
     private String password;
 
@@ -91,13 +90,5 @@ public class IdentityServer {
 
     public void setApiUrl(String apiUrl) {
         this.apiUrl = apiUrl;
-    }
-
-    public String getServiceProviderAppsUrl() {
-        return serviceProviderAppsUrl;
-    }
-
-    public void setServiceProviderAppsUrl(String serviceProviderAppsUrl) {
-        this.serviceProviderAppsUrl = serviceProviderAppsUrl;
     }
 }

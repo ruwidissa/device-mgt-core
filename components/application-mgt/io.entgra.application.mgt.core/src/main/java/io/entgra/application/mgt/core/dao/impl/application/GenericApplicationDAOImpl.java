@@ -17,9 +17,6 @@
  */
 package io.entgra.application.mgt.core.dao.impl.application;
 
-import io.entgra.application.mgt.common.ApplicationType;
-import io.entgra.application.mgt.common.IdentityServer;
-import io.entgra.application.mgt.core.util.Constants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +24,6 @@ import io.entgra.application.mgt.common.AppLifecycleState;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.application.mgt.common.dto.CategoryDTO;
 import io.entgra.application.mgt.common.Filter;
-import io.entgra.application.mgt.common.dto.ReviewDTO;
 import io.entgra.application.mgt.common.dto.TagDTO;
 import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.dao.ApplicationDAO;

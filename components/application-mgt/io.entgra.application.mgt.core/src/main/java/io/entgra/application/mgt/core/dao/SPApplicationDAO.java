@@ -18,13 +18,15 @@
 
 package io.entgra.application.mgt.core.dao;
 
-import io.entgra.application.mgt.common.IdentityServer;
+import io.entgra.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.application.mgt.core.exception.ApplicationManagementDAOException;
 
 import java.util.List;
 
 public interface SPApplicationDAO {
+
+    int createIdentityServer(IdentityServerDTO identityServer, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      *
@@ -59,7 +61,7 @@ public interface SPApplicationDAO {
      * @return All available identity servers
      * @throws ApplicationManagementDAOException if any db error occurred
      */
-    List<IdentityServer> getIdentityServers(int tenantId) throws ApplicationManagementDAOException;
+    List<IdentityServerDTO> getIdentityServers(int tenantId) throws ApplicationManagementDAOException;
 
     /**
      *
@@ -67,7 +69,7 @@ public interface SPApplicationDAO {
      * @return Identity Server of the given id
      * @throws ApplicationManagementDAOException if any db error occurred
      */
-    IdentityServer getIdentityServerById(int id, int tenantId) throws ApplicationManagementDAOException;
+    IdentityServerDTO getIdentityServerById(int id, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * Verify whether application exist for given identity server id, service provider id and application id.

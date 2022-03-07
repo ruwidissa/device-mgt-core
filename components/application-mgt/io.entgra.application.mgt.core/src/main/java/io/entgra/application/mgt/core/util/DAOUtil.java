@@ -19,7 +19,7 @@ package io.entgra.application.mgt.core.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.entgra.application.mgt.common.IdentityServer;
+import io.entgra.application.mgt.common.dto.IdentityServerDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -172,22 +172,22 @@ public class DAOUtil {
      * To create application object from the result set retrieved from the Database.
      *
      * @param rs ResultSet
-     * @return IdentityServer that is retrieved from the Database.
+     * @return IdentityServerDTO that is retrieved from the Database.
      * @throws SQLException  SQL Exception
      * @throws JSONException JSONException.
      */
-    public static IdentityServer loadIdentityServer(ResultSet rs)
+    public static IdentityServerDTO loadIdentityServer(ResultSet rs)
             throws SQLException, JSONException, UnexpectedServerErrorException {
-        List<IdentityServer> identityServers = loadIdentityServers(rs);
-        if (identityServers.isEmpty()) {
+        List<IdentityServerDTO> identityServerDTOS = loadIdentityServers(rs);
+        if (identityServerDTOS.isEmpty()) {
             return null;
         }
-        if (identityServers.size() > 1) {
+        if (identityServerDTOS.size() > 1) {
             String msg = "Internal server error. Found more than one identity server for requested ID";
             log.error(msg);
             throw new UnexpectedServerErrorException(msg);
         }
-        return identityServers.get(0);
+        return identityServerDTOS.get(0);
     }
 
     /**
@@ -198,21 +198,21 @@ public class DAOUtil {
      * @throws SQLException  SQL Exception
      * @throws JSONException JSONException.
      */
-    public static List<IdentityServer> loadIdentityServers(ResultSet rs) throws SQLException, JSONException {
-        List<IdentityServer> identityServers = new ArrayList<>();
+    public static List<IdentityServerDTO> loadIdentityServers(ResultSet rs) throws SQLException, JSONException {
+        List<IdentityServerDTO> identityServerDTOS = new ArrayList<>();
         while (rs.next()) {
-            IdentityServer identityServer = new IdentityServer();
-            identityServer.setId(rs.getInt("ID"));
-            identityServer.setName(rs.getString("NAME"));
-            identityServer.setDescription(rs.getString("DESCRIPTION"));
-            identityServer.setUrl(rs.getString("URL"));
-            identityServer.setSpAppsURI(rs.getString("SP_APPS_URI"));
-            identityServer.setSpAppsApi(rs.getString("SP_APPS_API"));
-            identityServer.setUserName(rs.getString("USERNAME"));
-            identityServer.setPassword(rs.getString("PASSWORD"));
-            identityServers.add(identityServer);
+            IdentityServerDTO identityServerDTO = new IdentityServerDTO();
+            identityServerDTO.setId(rs.getInt("ID"));
+            identityServerDTO.setProviderName(rs.getString("PROVIDER_NAME"));
+            identityServerDTO.setName(rs.getString("NAME"));
+            identityServerDTO.setDescription(rs.getString("DESCRIPTION"));
+            identityServerDTO.setUrl(rs.getString("URL"));
+            identityServerDTO.setApiUrl(rs.getString("API_URI"));
+            identityServerDTO.setUserName(rs.getString("USERNAME"));
+            identityServerDTO.setPassword(rs.getString("PASSWORD"));
+            identityServerDTOS.add(identityServerDTO);
         }
-        return identityServers;
+        return identityServerDTOS;
     }
 
     /**

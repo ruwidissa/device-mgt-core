@@ -18,7 +18,7 @@
 
 package io.entgra.application.mgt.core.dao.impl.application.spapplication;
 
-import io.entgra.application.mgt.common.IdentityServer;
+import io.entgra.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.dao.SPApplicationDAO;
@@ -40,7 +40,7 @@ public class OracleSPApplicationDAOImpl  extends AbstractDAOImpl implements SPAp
     private static final Log log = LogFactory.getLog(OracleSPApplicationDAOImpl.class);
 
     @Override
-    public List<IdentityServer> getIdentityServers(int tenantId) throws ApplicationManagementDAOException {
+    public List<IdentityServerDTO> getIdentityServers(int tenantId) throws ApplicationManagementDAOException {
         String sql = "SELECT ID, NAME, DESCRIPTION, URL, SP_APPS_URI, SP_APPS_API, TENANT_ID, USERNAME, PASSWORD "
                 + "FROM AP_IDENTITY_SERVER "
                 + "WHERE TENANT_ID = ?";
@@ -67,7 +67,7 @@ public class OracleSPApplicationDAOImpl  extends AbstractDAOImpl implements SPAp
     }
 
     @Override
-    public IdentityServer getIdentityServerById(int id, int tenantId) throws ApplicationManagementDAOException {
+    public IdentityServerDTO getIdentityServerById(int id, int tenantId) throws ApplicationManagementDAOException {
         String sql = "SELECT ID, NAME, DESCRIPTION, URL, SP_APPS_URI, SP_APPS_API, TENANT_ID, USERNAME, PASSWORD "
                 + "FROM AP_IDENTITY_SERVER "
                 + "WHERE TENANT_ID = ? AND "

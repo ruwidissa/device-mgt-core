@@ -36,7 +36,11 @@ public class ConfigurationManager {
 
     private Configuration configuration;
 
+    private IdentityServerConfiguration identityServerConfiguration;
+
     private static String configPath;
+
+    private static String identityServerConfigPath;
 
     private static volatile ConfigurationManager configurationManager;
 
@@ -60,6 +64,14 @@ public class ConfigurationManager {
         return configurationManager;
     }
 
+    public static synchronized void setIdentityServerConfigPathConfigLocation(String configPath) throws InvalidConfigurationException {
+        if (identityServerConfigPath == null) {
+            identityServerConfigPath = configPath;
+        } else {
+            throw new InvalidConfigurationException("Configuration path " + configPath + " is already defined");
+        }
+    }
+
     public static synchronized void setConfigLocation(String configPath) throws InvalidConfigurationException {
         if (ConfigurationManager.configPath == null) {
             ConfigurationManager.configPath = configPath;
@@ -74,9 +86,11 @@ public class ConfigurationManager {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             if (configPath == null) {
                 configPath = Constants.DEFAULT_CONFIG_FILE_LOCATION;
+                identityServerConfigPath = Constants.DEFAULT_IDENTITY_SERVERS_CONFIG_FILE_LOCATION;
             }
             //TODO: Add validation for the configurations
             this.configuration = (Configuration) unmarshaller.unmarshal(new File(configPath));
+            this.identityServerConfiguration = (IdentityServerConfiguration) unmarshaller.unmarshal(new File(identityServerConfigPath));
         } catch (Exception e) {
             log.error(e);
             throw new InvalidConfigurationException("Error occurred while initializing application config: "
@@ -86,6 +100,10 @@ public class ConfigurationManager {
 
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    public IdentityServerConfiguration getIdentityServerConfiguration() {
+        return identityServerConfiguration;
     }
 
     public Extension getExtension(Extension.Name extName) throws InvalidConfigurationException {

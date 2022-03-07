@@ -19,6 +19,7 @@
 package io.entgra.application.mgt.publisher.api.services.impl;
 
 import io.entgra.application.mgt.common.IdentityServer;
+import io.entgra.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.application.mgt.common.IdentityServerList;
 import io.entgra.application.mgt.common.SPApplicationListResponse;
 import io.entgra.application.mgt.common.exception.ApplicationManagementException;
@@ -56,7 +57,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
     public Response getIdentityServers() {
         try {
             SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
-            IdentityServerList identityServers = spAppManager.getIdentityServers();
+            List<IdentityServer> identityServers = spAppManager.getIdentityServers();
             return Response.status(Response.Status.OK).entity(identityServers).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
@@ -73,6 +74,21 @@ public class SPApplicationServiceImpl implements SPApplicationService {
             SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
             IdentityServer identityServer = spAppManager.getIdentityServer(id);
             return Response.status(Response.Status.OK).entity(identityServer).build();
+        } catch (ApplicationManagementException e) {
+            String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+        }
+    }
+
+    @Path("/identity-servers")
+    @POST
+    @Override
+    public Response createIdentityServer(IdentityServerDTO identityServerDTO) {
+        try {
+            SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
+            IdentityServer identityServer = spAppManager.createIdentityServer(identityServerDTO);
+            return Response.status(Response.Status.CREATED).entity(identityServer).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
             log.error(errMsg, e);

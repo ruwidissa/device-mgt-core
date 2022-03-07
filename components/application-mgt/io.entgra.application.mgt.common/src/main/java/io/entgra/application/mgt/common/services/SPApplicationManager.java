@@ -19,7 +19,7 @@
 package io.entgra.application.mgt.common.services;
 
 import io.entgra.application.mgt.common.IdentityServer;
-import io.entgra.application.mgt.common.IdentityServerList;
+import io.entgra.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.application.mgt.common.SPApplication;
 import io.entgra.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.application.mgt.common.exception.RequestValidatingException;
@@ -70,7 +70,9 @@ public interface SPApplicationManager {
      * @return Available identity servers
      * @throws ApplicationManagementException if error occurred while getting identity servers
      */
-    IdentityServerList getIdentityServers() throws ApplicationManagementException;
+    List<IdentityServer> getIdentityServers() throws ApplicationManagementException;
+
+    IdentityServer createIdentityServer(IdentityServerDTO identityServerDTO) throws ApplicationManagementException;
 
     /**
      *

@@ -24,6 +24,8 @@ import io.entgra.application.mgt.common.SPApplication;
 import io.entgra.application.mgt.common.SPApplicationListResponse;
 import io.entgra.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.application.mgt.common.services.SPApplicationManager;
+import io.entgra.application.mgt.core.config.ConfigurationManager;
+import io.entgra.application.mgt.core.config.IdentityServerDetail;
 import io.entgra.application.mgt.core.util.APIUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -167,8 +169,9 @@ public class SPAppRequestHandlerUtil {
     }
 
     private static String getSPApplicationsAPI(IdentityServer identityServer) {
-        String api = identityServer.getSpAppsApi();
-        return api;
+        IdentityServerDetail identityServerDetail = ConfigurationManager.getInstance().getIdentityServerConfiguration().
+                getIdentityServerDetailByProviderName(identityServer.getProviderName());
+        return identityServer.getApiUrl() + identityServerDetail.getServiceProvidersAPIContextPath();
     }
 
 }
