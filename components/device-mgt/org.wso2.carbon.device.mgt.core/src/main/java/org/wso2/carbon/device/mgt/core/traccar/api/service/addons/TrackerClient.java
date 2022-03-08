@@ -49,6 +49,8 @@ import java.util.concurrent.TimeUnit;
 import static org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants.ENDPOINT;
 import static org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants.AUTHORIZATION;
 import static org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants.AUTHORIZATION_KEY;
+import static org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants.DEFAULT_PORT;
+import static org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants.LOCATION_UPDATE_PORT;
 
 public class TrackerClient implements TraccarClient {
     private static final Log log = LogFactory.getLog(TrackerClient.class);
@@ -60,6 +62,8 @@ public class TrackerClient implements TraccarClient {
     final String endpoint = traccarGateway.getPropertyByName(ENDPOINT).getValue();
     final String authorization = traccarGateway.getPropertyByName(AUTHORIZATION).getValue();
     final String authorizationKey = traccarGateway.getPropertyByName(AUTHORIZATION_KEY).getValue();
+    final String defaultPort = traccarGateway.getPropertyByName(DEFAULT_PORT).getValue();
+    final String locationUpdatePort = traccarGateway.getPropertyByName(LOCATION_UPDATE_PORT).getValue();
 
     public TrackerClient() {
         client = new OkHttpClient.Builder()
@@ -89,7 +93,7 @@ public class TrackerClient implements TraccarClient {
             Request request;
 
             if(method=="post"){
-                requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), payload.toString());
+                requestBody = RequestBody.create(payload.toString(), MediaType.parse("application/json; charset=utf-8"));
                 builder = builder.post(requestBody);
             }else if(method=="delete"){
                 builder = builder.delete();
@@ -134,7 +138,7 @@ public class TrackerClient implements TraccarClient {
             List<String> geoFenceIds = new ArrayList<>();
             payload.put("geofenceIds", geoFenceIds);
             payload.put("attributes", new JSONObject());
-            String context = "8082/api/devices";
+            String context = defaultPort+"/api/devices";
             Runnable trackerExecutor = new TrackerExecutor(endpoint, context, payload, "post");
             executor.execute(trackerExecutor);
             log.info("Device successfully enorolled on traccar");
@@ -151,7 +155,7 @@ public class TrackerClient implements TraccarClient {
      */
     public void updateLocation(TraccarPosition deviceInfo) throws TraccarConfigurationException {
          try{
-             String context = "5055/?id="+deviceInfo.getDeviceIdentifier()+"&timestamp="+deviceInfo.getTimestamp()+
+             String context = locationUpdatePort+"/?id="+deviceInfo.getDeviceIdentifier()+"&timestamp="+deviceInfo.getTimestamp()+
                      "&lat="+deviceInfo.getLat()+"&lon="+deviceInfo.getLon()+"&bearing="+deviceInfo.getBearing()+
                      "&speed="+deviceInfo.getSpeed()+"&ignition=true";
              Runnable trackerExecutor = new TrackerExecutor(endpoint, context, null, "get");
@@ -173,7 +177,7 @@ public class TrackerClient implements TraccarClient {
     @Override
     public String getDeviceByDeviceIdentifier(String deviceId) throws TraccarConfigurationException {
         try {
-            String context = "8082/api/devices?uniqueId="+ deviceId;
+            String context = defaultPort+"/api/devices?uniqueId="+ deviceId;
             Runnable trackerExecutor = new TrackerExecutor(endpoint, context, null, "get");
             executor.execute(trackerExecutor);
             Request request = new Request.Builder()
@@ -210,7 +214,7 @@ public class TrackerClient implements TraccarClient {
             JSONArray geodata = obj.getJSONArray("geodata");
             JSONObject jsonResponse = geodata.getJSONObject(0);
 
-            String context = "8082/api/devices/"+jsonResponse.getInt("id");
+            String context = defaultPort+"/api/devices/"+jsonResponse.getInt("id");
             Runnable trackerExecutor = new TrackerExecutor(endpoint, context, null, "delete");
             executor.execute(trackerExecutor);
             log.info("Device successfully dis-enrolled");
@@ -236,7 +240,7 @@ public class TrackerClient implements TraccarClient {
             payload.put("name", groupInfo.getName());
             payload.put("attributes", new JSONObject());
 
-            String context = "8082/api/groups";
+            String context = defaultPort+"/api/groups";
             Runnable trackerExecutor = new TrackerExecutor(endpoint, context, payload, "post");
             executor.execute(trackerExecutor);
             log.info("Group successfully on traccar");

@@ -43,8 +43,6 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDA
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
-import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
-import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.TraccarAPIClientServiceImpl;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
@@ -390,8 +388,12 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             }
 
             //Traccar update GPS Location
-            DeviceAPIClientService dac= DeviceManagementDataHolder.getInstance().getDeviceAPIClientService();
-            dac.updateLocation(device, deviceLocation);
+            try {
+                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                        .updateLocation(device, deviceLocation);
+            } catch (TraccarConfigurationException e) {
+                log.error("Error on Traccar while adding GEO Location" + e);
+            }
             //Traccar update GPS Location
 
             DeviceManagementDAOFactory.commitTransaction();
@@ -407,9 +409,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 //        } catch (DataPublisherConfigurationException e) {
 //            DeviceManagementDAOFactory.rollbackTransaction();
 //            throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
-        } catch (TraccarConfigurationException e) {
-            log.error("Error on Traccar" + e);
-            //e.printStackTrace();
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }

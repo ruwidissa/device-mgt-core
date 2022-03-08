@@ -396,11 +396,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
         //enroll Traccar device
         try {
-            DeviceAPIClientService dac= DeviceManagementDataHolder.getInstance().getDeviceAPIClientService();
-            dac.addDevice(device);
+            DeviceManagementDataHolder.getInstance().getDeviceAPIClientService().addDevice(device);
         } catch (TraccarConfigurationException e) {
-            log.error("Error on Traccar add device" + e);
-            //e.printStackTrace();
+                log.error("Error while adding a device to traccar " + e);
         }
         //enroll Traccar device
 
@@ -567,11 +565,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
             //disenroll Traccar device
             try {
-                DeviceAPIClientService dac= DeviceManagementDataHolder.getInstance().getDeviceAPIClientService();
-                dac.disDevice(device.getDeviceIdentifier());
+                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                        .disDevice(device.getDeviceIdentifier());
             } catch (TraccarConfigurationException e) {
-                log.error("Error on Traccar disenroll a device" + e);
-                //e.printStackTrace();
+                log.error("Error while disenrolling a device from Traccar " + e);
             }
             //disenroll Traccar device
 

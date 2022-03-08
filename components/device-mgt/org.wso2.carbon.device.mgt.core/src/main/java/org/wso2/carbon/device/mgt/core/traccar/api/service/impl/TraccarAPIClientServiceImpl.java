@@ -20,7 +20,6 @@
 package org.wso2.carbon.device.mgt.core.traccar.api.service.impl;
 
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
@@ -33,7 +32,6 @@ import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfiguratio
 import java.util.Date;
 
 public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
-
 
     public void addDevice(Device device) throws TraccarConfigurationException {
         TrackerClient client = new TrackerClient();

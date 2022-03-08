@@ -17,14 +17,23 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.core.traccar.common;
+package org.wso2.carbon.device.mgt.core.traccar.common.beans;
 
-public class TraccarHandlerConstants {
-    public static final String TRACCAR_CONFIG_XML_NAME = "traccar-config.xml";
-    public static final String GATEWAY_NAME = "sample";
-    public static final String ENDPOINT = "api-endpoint";
-    public static final String AUTHORIZATION = "authorization";
-    public static final String AUTHORIZATION_KEY = "authorization-key";
-    public static final String DEFAULT_PORT = "default-port";
-    public static final String LOCATION_UPDATE_PORT = "location-update-port";
+public class TraccarGroups {
+    private String name;
+
+    public TraccarGroups(String name){
+        this.name =name;
+    }
+
+    public TraccarGroups(){ }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
