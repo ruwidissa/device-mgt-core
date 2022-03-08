@@ -41,7 +41,7 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
 
     @Override
     public List<IdentityServerDTO> getIdentityServers(int tenantId) throws ApplicationManagementDAOException {
-        String sql = "SELECT ID, NAME, DESCRIPTION, URL, SP_APPS_URI, SP_APPS_API, TENANT_ID, USERNAME, PASSWORD "
+        String sql = "SELECT ID, PROVIDER_NAME, NAME, DESCRIPTION, URL, API_URL, USERNAME, PASSWORD, TENANT_ID "
                 + "FROM AP_IDENTITY_SERVER "
                 + "WHERE TENANT_ID = ?";
         try {
@@ -68,7 +68,7 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
 
     @Override
     public IdentityServerDTO getIdentityServerById(int id, int tenantId) throws ApplicationManagementDAOException {
-        String sql = "SELECT ID, NAME, DESCRIPTION, URL, SP_APPS_URI, SP_APPS_API, TENANT_ID, USERNAME, PASSWORD "
+        String sql = "SELECT ID, PROVIDER_NAME, NAME, DESCRIPTION, URL, API_URL, USERNAME, PASSWORD, TENANT_ID "
                 + "FROM AP_IDENTITY_SERVER "
                 + "WHERE TENANT_ID = ? AND "
                 + "ID = ?";
@@ -94,6 +94,46 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
             throw new ApplicationManagementDAOException(msg, e);
         } catch (UnexpectedServerErrorException e) {
             String msg = "Found more than one identity server for id: " + id;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int createIdentityServer(IdentityServerDTO identityServerDTO, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to create an identity server");
+        }
+        String sql = "INSERT INTO AP_IDENTITY_SERVER "
+                + "(PROVIDER_NAME, "
+                + "NAME, "
+                + "DESCRIPTION, URL, API_URL, USERNAME, PASSWORD, TENANT_ID) "
+                + "VALUES (?, ?, ?, ?)";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setString(1, identityServerDTO.getProviderName());
+                stmt.setString(2, identityServerDTO.getName());
+                stmt.setString(3, identityServerDTO.getDescription());
+                stmt.setString(4, identityServerDTO.getUrl());
+                stmt.setString(5, identityServerDTO.getApiUrl());
+                stmt.setString(6, identityServerDTO.getUserName());
+                stmt.setString(7, identityServerDTO.getPassword());
+                stmt.setInt(8, tenantId);
+                stmt.executeUpdate();
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                    return -1;
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while creating identity server ";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to create an identity server ";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }

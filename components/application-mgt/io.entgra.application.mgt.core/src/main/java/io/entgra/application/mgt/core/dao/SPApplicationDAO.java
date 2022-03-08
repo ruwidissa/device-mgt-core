@@ -26,7 +26,7 @@ import java.util.List;
 
 public interface SPApplicationDAO {
 
-    int createIdentityServer(IdentityServerDTO identityServer, int tenantId) throws ApplicationManagementDAOException;
+    int createIdentityServer(IdentityServerDTO identityServerDTO, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      *

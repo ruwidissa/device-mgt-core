@@ -41,7 +41,7 @@ public class GenericSPApplicationDAOImpl extends AbstractDAOImpl implements SPAp
     private static final Log log = LogFactory.getLog(GenericApplicationDAOImpl.class);
     @Override
     public List<IdentityServerDTO> getIdentityServers(int tenantId) throws ApplicationManagementDAOException {
-        String sql = "SELECT ID, NAME, DESCRIPTION, URL, SP_APPS_URI, SP_APPS_API, TENANT_ID, USERNAME, PASSWORD "
+        String sql = "SELECT ID, PROVIDER_NAME, NAME, DESCRIPTION, URL, API_URL, USERNAME, PASSWORD, TENANT_ID "
                 + "FROM AP_IDENTITY_SERVER "
                 + "WHERE TENANT_ID = ?";
         try {
@@ -68,7 +68,7 @@ public class GenericSPApplicationDAOImpl extends AbstractDAOImpl implements SPAp
 
     @Override
     public IdentityServerDTO getIdentityServerById(int id, int tenantId) throws ApplicationManagementDAOException {
-        String sql = "SELECT ID, NAME, DESCRIPTION, URL, SP_APPS_URI, SP_APPS_API,  TENANT_ID, USERNAME, PASSWORD "
+        String sql = "SELECT ID, PROVIDER_NAME, NAME, DESCRIPTION, URL, API_URL, USERNAME, PASSWORD, TENANT_ID "
                 + "FROM AP_IDENTITY_SERVER "
                 + "WHERE TENANT_ID = ? AND "
                 + "ID = ?";
