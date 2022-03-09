@@ -63,4 +63,12 @@ public interface DeviceAPIClientService {
      * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
      */
     void addGroup(DeviceGroup group) throws TraccarConfigurationException;
+
+    /**
+     * Delete a device Traccar configuration records
+     *
+     * @param group to be add a group
+     * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
+     */
+    void deleteGroup(DeviceGroup group) throws TraccarConfigurationException;
 }

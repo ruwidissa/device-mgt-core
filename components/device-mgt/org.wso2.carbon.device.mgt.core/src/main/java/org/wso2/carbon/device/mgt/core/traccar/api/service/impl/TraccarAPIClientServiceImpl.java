@@ -63,4 +63,10 @@ public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
         client.addGroup(traccarGroups);
     }
 
+    public void deleteGroup(DeviceGroup group) throws TraccarConfigurationException {
+        TrackerClient client = new TrackerClient();
+        TraccarGroups traccarGroups = new TraccarGroups(group.getName());
+        client.deleteGroup(traccarGroups);
+    }
+
 }

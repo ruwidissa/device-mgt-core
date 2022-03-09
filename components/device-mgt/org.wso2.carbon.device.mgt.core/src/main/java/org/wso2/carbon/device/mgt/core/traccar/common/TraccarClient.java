@@ -35,4 +35,8 @@ public interface TraccarClient {
     void disDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException;
 
     void addGroup(TraccarGroups groupInfo) throws TraccarConfigurationException;
+
+    void deleteGroup(TraccarGroups groupInfo) throws TraccarConfigurationException;
+
+    String getAllGroups() throws TraccarConfigurationException;
 }

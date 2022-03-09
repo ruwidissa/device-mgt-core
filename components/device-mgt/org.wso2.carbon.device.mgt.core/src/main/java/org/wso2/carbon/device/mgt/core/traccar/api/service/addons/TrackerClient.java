@@ -42,6 +42,7 @@ import org.wso2.carbon.device.mgt.core.traccar.core.config.TraccarConfigurationM
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -123,7 +124,7 @@ public class TrackerClient implements TraccarClient {
      */
     public void addDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException {
         try{
-             JSONObject payload = new JSONObject();
+            JSONObject payload = new JSONObject();
             payload.put("name", deviceInfo.getDeviceName());
             payload.put("uniqueId", deviceInfo.getUniqueId());
             payload.put("status", deviceInfo.getStatus());
@@ -205,11 +206,6 @@ public class TrackerClient implements TraccarClient {
             String result = getDeviceByDeviceIdentifier(deviceInfo.getDeviceIdentifier());
             String jsonData ="{"+ "\"geodata\": "+ result+ "}";
 
-            log.info("======================");
-            log.info("result");
-            log.info(result);
-            log.info(deviceInfo.getDeviceIdentifier());
-            log.info("===========================");
             JSONObject obj = new JSONObject(jsonData);
             JSONArray geodata = obj.getJSONArray("geodata");
             JSONObject jsonResponse = geodata.getJSONObject(0);
@@ -219,11 +215,11 @@ public class TrackerClient implements TraccarClient {
             executor.execute(trackerExecutor);
             log.info("Device successfully dis-enrolled");
         }catch (JSONException e){
-            String msg = "Could not find the device infomation to dis-enroll the device";
+            String msg = "Could not find the device information to dis-enroll the device";
             log.error(msg, e);
             throw new TraccarConfigurationException(msg);
         }catch (TraccarConfigurationException ex){
-            String msg = "Could not find the device infomation to dis-enroll the device";
+            String msg = "Could not find the device information to dis-enroll the device";
             log.error(msg, ex);
             throw new TraccarConfigurationException(msg, ex);
         }
@@ -243,11 +239,72 @@ public class TrackerClient implements TraccarClient {
             String context = defaultPort+"/api/groups";
             Runnable trackerExecutor = new TrackerExecutor(endpoint, context, payload, "post");
             executor.execute(trackerExecutor);
-            log.info("Group successfully on traccar");
+            log.info("Group successfully added on traccar");
         }catch (Exception e){
             String msg="Could not add a traccar group";
             log.error(msg, e);
             throw new TraccarConfigurationException(msg, e);
+        }
+    }
+
+    /**
+     * Add Device GPS Location operation.
+     * @return all groups
+     * @throws TraccarConfigurationException Failed while add Traccar Device location operation
+     */
+    @Override
+    public String getAllGroups() throws TraccarConfigurationException {
+        try {
+            String context = defaultPort+"/api/groups?all=true";
+            Runnable trackerExecutor = new TrackerExecutor(endpoint, context, null, "get");
+            executor.execute(trackerExecutor);
+            Request request = new Request.Builder()
+                    .url(endpoint+context)
+                    .addHeader(authorization, authorizationKey)
+                    .build();
+            Response response = client.newCall(request).execute();
+            String result = response.body().string();
+            return result;
+        } catch (IOException e) {
+            String msg="Could not find device information";
+            log.error(msg, e);
+            throw new TraccarConfigurationException(msg, e);
+        }
+    }
+
+    /**
+     * Add Traccar Device operation.
+     * @param groupInfo  with groupName
+     * @throws TraccarConfigurationException Failed while add Traccar Device the operation
+     */
+    public void deleteGroup(TraccarGroups groupInfo) throws TraccarConfigurationException {
+        try{
+            String result = getAllGroups();
+            String jsonData ="{"+ "\"groupdata\": "+ result+ "}";
+
+            JSONObject obj = new JSONObject(jsonData);
+            JSONArray geodata = obj.getJSONArray("groupdata");
+
+            for(int i=0; i<geodata.length();i++){
+                JSONObject jsonResponse = geodata.getJSONObject(i);
+                log.info(jsonResponse.getString("name"));
+                log.info(jsonResponse.getInt("id"));
+                if(Objects.equals(jsonResponse.getString("name"), groupInfo.getName())){
+                    String context = defaultPort+"/api/groups/"+jsonResponse.getInt("id");
+                    Runnable trackerExecutor = new TrackerExecutor(endpoint, context, null, "delete");
+                    executor.execute(trackerExecutor);
+                    log.info("Traccar group successfully deleted");
+                    break;
+                }
+            }
+        }catch (JSONException e){
+            String msg = "Could not find the device information to dis-enroll the device";
+            log.error(msg, e);
+            throw new TraccarConfigurationException(msg);
+        }catch (TraccarConfigurationException ex){
+            String msg = "Could not find the device information to dis-enroll the device";
+            log.error(msg, ex);
+            throw new TraccarConfigurationException(msg, ex);
         }
     }
 

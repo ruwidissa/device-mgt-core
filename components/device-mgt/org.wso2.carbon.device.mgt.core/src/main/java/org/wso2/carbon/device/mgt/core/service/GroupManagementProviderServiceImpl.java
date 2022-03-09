@@ -35,6 +35,7 @@
 
 package org.wso2.carbon.device.mgt.core.service;
 
+import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,6 +65,7 @@ import org.wso2.carbon.device.mgt.core.event.config.GroupAssignmentEventOperatio
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
+import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -131,7 +133,24 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                     this.groupDAO.addGroupProperties(deviceGroup, updatedGroupID, tenantId);
                 }
                 GroupManagementDAOFactory.commitTransaction();
+
+                //add new group in traccar
+                try {
+                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                            .addGroup(deviceGroup);
+                } catch (TraccarConfigurationException e) {
+                    log.error("Error while disenrolling a device from Traccar " + e);
+                }
+                //add new group in traccar
             } else {
+                //check if a group exist or not in traccar if not existing then add
+                /*try {
+                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                            .addGroup(deviceGroup);
+                } catch (TraccarConfigurationException e) {
+                    log.error("Error while disenrolling a device from Traccar " + e);
+                }*/
+                //check if a group exist or not in traccar
                 throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
             }
         } catch (GroupManagementDAOException e) {
@@ -283,6 +302,14 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             if (log.isDebugEnabled()) {
                 log.debug("DeviceGroup " + deviceGroup.getName() + " removed.");
             }
+            //add new group in traccar
+            try {
+                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                        .deleteGroup(deviceGroup);
+            } catch (TraccarConfigurationException e) {
+                log.error("Error while disenrolling a device from Traccar " + e);
+            }
+            //add new group in traccar
             return true;
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();
