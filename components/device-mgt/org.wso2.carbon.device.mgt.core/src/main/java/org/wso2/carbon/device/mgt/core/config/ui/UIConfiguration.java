@@ -33,6 +33,7 @@ public class UIConfiguration {
     private boolean isSsoEnable;
     private int sessionTimeOut;
     private int loginCacheCapacity;
+    private Billing billing;
 
     @XmlElement(name = "AppRegistration", required=true)
     public AppRegistration getAppRegistration() {
@@ -60,6 +61,15 @@ public class UIConfiguration {
 
     public void setSsoEnable(boolean ssoEnable) {
         isSsoEnable = ssoEnable;
+    }
+
+    @XmlElement(name = "Billing", required=true)
+    public Billing getBilling() {
+        return billing;
+    }
+
+    public void setBilling(Billing billing) {
+        this.billing = billing;
     }
 
     @XmlElement(name = "SessionTimeOut")

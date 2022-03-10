@@ -119,6 +119,7 @@ import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerSer
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
@@ -134,6 +135,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.Response;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -359,9 +361,17 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             PaginationRequest request = new PaginationRequest(offset, limit);
             PaginationResult result;
             DeviceList devices = new DeviceList();
+            int tenantId = 0;
+            RealmService realmService = DeviceMgtAPIUtils.getRealmService();
+
+            if (!tenantDomain.isEmpty()) {
+                tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+            } else {
+                tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            }
 
             try {
-                result = dms.getAllDevicesBillings(request, tenantDomain, startDate, endDate, generateBill);
+                result = dms.getAllDevicesBillings(request, tenantId, tenantDomain, startDate, endDate, generateBill);
             } catch (Exception exception) {
                 String msg = "Error occurred when trying to retrieve billing data";
                 log.error(msg, exception);

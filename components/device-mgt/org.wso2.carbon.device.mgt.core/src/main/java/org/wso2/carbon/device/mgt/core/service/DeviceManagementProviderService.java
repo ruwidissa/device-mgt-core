@@ -207,7 +207,7 @@ public interface DeviceManagementProviderService {
      * @throws DeviceManagementException If some unusual behaviour is observed while fetching billing of
      *                                   devices.
      */
-    PaginationResult getAllDevicesBillings(PaginationRequest request, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
+    PaginationResult getAllDevicesBillings(PaginationRequest request, int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
 
     /**
      * Returns the device of specified id.

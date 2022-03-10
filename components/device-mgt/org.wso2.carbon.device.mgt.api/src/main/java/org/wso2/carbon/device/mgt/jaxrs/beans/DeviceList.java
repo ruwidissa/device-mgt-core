@@ -29,14 +29,14 @@ public class DeviceList extends BasePaginatedResult {
 
     private List<Device> devices = new ArrayList<>();
 
+    @ApiModelProperty(name = "totalCost", value = "Total cost of all devices per tenant", required = false)
+    private double totalCost;
+
     @ApiModelProperty(value = "List of devices returned")
     @JsonProperty("devices")
     public List<Device> getList() {
         return devices;
     }
-
-    @ApiModelProperty(name = "totalCost", value = "Total cost of all devices per tenant", required = false)
-    private double totalCost;
 
     public void setList(List<Device> devices) {
         this.devices = devices;

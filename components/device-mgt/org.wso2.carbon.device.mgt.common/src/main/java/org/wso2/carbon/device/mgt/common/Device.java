@@ -75,7 +75,7 @@ public class Device implements Serializable {
     private List<Application> applications;
 
     @ApiModelProperty(name = "cost", value = "Cost charged per device.", required = false)
-    private Double cost;
+    private double cost;
 
     @ApiModelProperty(name = "daysUsed", value = "Number of days gone since device enrollment.",
             required = false)
@@ -105,11 +105,11 @@ public class Device implements Serializable {
         this.properties = properties;
     }
 
-    public Double getCost() {
+    public double getCost() {
         return cost;
     }
 
-    public void setCost(Double cost) {
+    public void setCost(double cost) {
         this.cost = cost;
     }
 

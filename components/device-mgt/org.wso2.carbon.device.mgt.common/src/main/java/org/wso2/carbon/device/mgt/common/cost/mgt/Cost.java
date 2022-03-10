@@ -28,8 +28,6 @@ public class Cost {
 
     private String tenantDomain;
     private Double cost;
-    private long subscriptionBeginning;
-    private long subscriptionEnd;
 
     @XmlElement(name = "tenantDomain", required = true)
     public String getTenantDomain() {
@@ -47,24 +45,6 @@ public class Cost {
 
     public void setCost(Double cost) {
         this.cost = cost;
-    }
-
-    @XmlElement(name = "subscriptionBeginning", required = true)
-    public long getSubscriptionBeginning() {
-        return subscriptionBeginning;
-    }
-
-    public void setSubscriptionBeginning(long subscriptionBeginning) {
-        this.subscriptionBeginning = subscriptionBeginning;
-    }
-
-    @XmlElement(name = "subscriptionEnd", required = true)
-    public long getSubscriptionEnd() {
-        return subscriptionEnd;
-    }
-
-    public void setSubscriptionEnd(long subscriptionEnd) {
-        this.subscriptionEnd = subscriptionEnd;
     }
 
     @Override

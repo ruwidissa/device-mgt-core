@@ -143,6 +143,14 @@ public final class DeviceManagementDAOUtil {
 
     public static EnrolmentInfo loadEnrolment(ResultSet rs) throws SQLException {
         EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
+        String columnName = "LAST_BILLED_DATE";
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columns = rsmd.getColumnCount();
+        for (int x = 1; x <= columns; x++) {
+            if (columnName.equals(rsmd.getColumnName(x))) {
+                enrolmentInfo.setLastBilledDate(rs.getLong("LAST_BILLED_DATE"));
+            }
+        }
         enrolmentInfo.setId(rs.getInt("ENROLMENT_ID"));
         enrolmentInfo.setOwner(rs.getString("OWNER"));
         enrolmentInfo.setOwnership(EnrolmentInfo.OwnerShip.valueOf(rs.getString("OWNERSHIP")));
@@ -150,7 +158,6 @@ public final class DeviceManagementDAOUtil {
         enrolmentInfo.setDateOfEnrolment(rs.getTimestamp("DATE_OF_ENROLMENT").getTime());
         enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
         enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
-        enrolmentInfo.setLastBilledDate(rs.getLong("LAST_BILLED_DATE"));
         return enrolmentInfo;
     }
 
@@ -218,13 +225,14 @@ public final class DeviceManagementDAOUtil {
         device.setDescription(rs.getString("DESCRIPTION"));
         device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
         device.setDaysUsed((int) rs.getLong("DAYS_SINCE_ENROLLED"));
+        device.setEnrolmentInfo(loadEnrolmentBilling(rs));
+        return device;
 //        if (removedDevices) {
 //            device.setDaysUsed((int) rs.getLong("DAYS_USED"));
 //        } else {
 //            device.setDaysSinceEnrolled((int) rs.getLong("DAYS_SINCE_ENROLLED"));
 //        }
-        device.setEnrolmentInfo(loadEnrolmentBilling(rs));
-        return device;
+
     }
 
     public static DeviceMonitoringData loadDevice(ResultSet rs, String deviceTypeName) throws SQLException {

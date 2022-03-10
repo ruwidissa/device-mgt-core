@@ -205,8 +205,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 devices.add(device);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while fetching the list of devices '" +
-                    request.getOwner() + "'", e);
+            throw new DeviceManagementDAOException("Error occurred while fetching the list of device billing ", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
