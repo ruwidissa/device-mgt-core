@@ -1204,7 +1204,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             Connection conn = this.getDBConnection();
             List<String> subscribedGroups = new ArrayList<>();
             String sql = "SELECT "
-                         + "GS.GROUP_NAME AS GROUPS "
+                         + "GS.GROUP_NAME AS APP_GROUPS "
                          + "FROM AP_GROUP_SUBSCRIPTION GS "
                          + "WHERE "
                          + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ? OFFSET ?";
@@ -1215,7 +1215,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 ps.setInt(4, offsetValue);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        subscribedGroups.add(rs.getString("GROUPS"));
+                        subscribedGroups.add(rs.getString("APP_GROUPS"));
                     }
                 }
                 return subscribedGroups;
@@ -1244,7 +1244,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         try {
             Connection conn = this.getDBConnection();
             String sql = "SELECT "
-                         + "COUNT(GS.GROUP_NAME) AS GROUPS "
+                         + "COUNT(GS.GROUP_NAME) AS APP_GROUPS_COUNT "
                          + "FROM AP_GROUP_SUBSCRIPTION GS "
                          + "WHERE "
                          + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ?";
@@ -1254,7 +1254,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getInt("GROUPS");
+                        return rs.getInt("APP_GROUPS_COUNT");
                     }
                 }
                 return 0;
