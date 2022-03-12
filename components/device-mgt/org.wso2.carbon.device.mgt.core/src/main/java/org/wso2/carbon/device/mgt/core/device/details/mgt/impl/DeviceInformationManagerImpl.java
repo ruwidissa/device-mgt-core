@@ -389,8 +389,10 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
             //Traccar update GPS Location
             try {
-                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                        .updateLocation(device, deviceLocation);
+                if (HttpReportingUtil.isLocationPublishing()) {
+                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                            .updateLocation(device, deviceLocation);
+                }
             } catch (TraccarConfigurationException e) {
                 log.error("Error on Traccar while adding GEO Location" + e);
             }

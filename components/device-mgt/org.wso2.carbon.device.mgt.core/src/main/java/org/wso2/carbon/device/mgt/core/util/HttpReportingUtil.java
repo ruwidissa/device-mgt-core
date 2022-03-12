@@ -34,6 +34,7 @@ public class HttpReportingUtil {
 
     private static final Log log = LogFactory.getLog(HttpReportingUtil.class);
     private static final String IS_EVENT_PUBLISHING_ENABLED = "isEventPublishingEnabled";
+    private static final String IS_LOCATION_PUBLISHING_ENABLED = "isLocationPublishingEnabled";
 
     public static String getReportingHost() {
         return System.getProperty(DeviceManagementConstants.Report.REPORTING_EVENT_HOST);
@@ -57,6 +58,14 @@ public class HttpReportingUtil {
 
     public static boolean isPublishingEnabledForTenant() {
         Object configuration = DeviceManagerUtil.getConfiguration(IS_EVENT_PUBLISHING_ENABLED);
+        if (configuration != null) {
+            return Boolean.valueOf(configuration.toString());
+        }
+        return false;
+    }
+
+    public static boolean isLocationPublishing() {
+        Object configuration = DeviceManagerUtil.getConfiguration(IS_LOCATION_PUBLISHING_ENABLED);
         if (configuration != null) {
             return Boolean.valueOf(configuration.toString());
         }
