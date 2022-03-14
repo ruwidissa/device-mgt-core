@@ -61,6 +61,27 @@ public interface ApplicationManager {
     Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact, boolean isPublished)
             throws ApplicationManagementException;
 
+    /**
+     * Add an application to favourites
+     * @param appId id of the application
+     * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
+     */
+    void addAppToFavourites(int appId) throws ApplicationManagementException;
+
+    /**
+     * Remove an application from favourites
+     * @param appId id of the application
+     * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
+     */
+    void removeAppFromFavourites(int appId) throws ApplicationManagementException;
+
+    /**
+     * Check if an application is a favourite app
+     * @param appId id of the application
+     * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
+     */
+    boolean isFavouriteApp(int appId) throws ApplicationManagementException;
+
     Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact, boolean isPublished)
             throws ApplicationManagementException;
 
@@ -112,6 +133,8 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
     void deleteApplicationRelease(String releaseUuid) throws ApplicationManagementException;
+
+    ApplicationList getFavouriteApplications(Filter filter) throws ApplicationManagementException;
 
     /**
      * To get the applications based on the search filter.

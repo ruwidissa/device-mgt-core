@@ -362,6 +362,7 @@ public class APIUtil {
         application.setTags(applicationDTO.getTags());
         application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
         application.setRating(applicationDTO.getAppRating());
+        application.setFavourite(applicationDTO.isFavourite());
         application.setInstallerName(applicationDTO.getApplicationReleaseDTOs().get(0).getInstallerName());
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         if (ApplicationType.PUBLIC.toString().equals(applicationDTO.getType()) && application.getCategories()
