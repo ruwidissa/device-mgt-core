@@ -179,6 +179,116 @@ ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
+    public void addAppToFavourites(int appId) throws ApplicationManagementException {
+        validateAddAppToFavouritesRequest(appId);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            applicationDAO.addAppToFavourite(appId, userName, tenantId);
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while staring transaction to add applicationId: "
+                    + appId + " to favourites";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while adding application id " + appId + " to favourites ";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while adding application with the id: " + appId + " to favourites ";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void removeAppFromFavourites(int appId) throws ApplicationManagementException {
+        validateRemoveAppFromFavouritesRequest(appId);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            applicationDAO.removeAppFromFavourite(appId, userName, tenantId);
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while staring transaction to remove applicationId: "
+                    + appId + " from favourites";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while removing application id " + appId + " from favourites ";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while removing application with the id: " + appId + " from favourites ";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public boolean isFavouriteApp(int appId) throws ApplicationManagementException{
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return applicationDAO.isFavouriteApp(appId, userName, tenantId);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting DB connection to check is app with the id " + appId
+                    + " is a favourite app";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while checking app with the id " + appId + " is a favourite app.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+
+    }
+
+    /**
+     * Use to check if the requested application id is valid before removing from favourites
+     *
+     * @param appId ID of the application
+     * @throws ApplicationManagementException if ID is not valid or errors while validating
+     */
+    private void validateRemoveAppFromFavouritesRequest(int appId) throws ApplicationManagementException {
+        if (!isFavouriteApp(appId)) {
+            String msg = "Provided appId " + appId + " is not a favourite app in order remove from favourites";
+            throw new BadRequestException(msg);
+        }
+    }
+
+    /**
+     * Use to check if the requested application id is valid before adding to favourites
+     *
+     * @param appId ID of the application
+     * @throws ApplicationManagementException if ID is not valid or errors while validating
+     */
+    private void validateAddAppToFavouritesRequest(int appId) throws ApplicationManagementException {
+        try {
+            getApplication(appId);
+        } catch (NotFoundException e) {
+            String msg = " No application exists for the provided appId " + appId;
+            throw new BadRequestException(msg);
+        }
+        if (isFavouriteApp(appId)) {
+            String msg = "Provided appId " + appId + " is already a favourite app";
+            throw new BadRequestException(msg);
+        }
+    }
+
+    @Override
     public Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact, boolean isPublished)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -609,8 +719,16 @@ ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
+    public ApplicationList getFavouriteApplications(Filter filter) throws ApplicationManagementException {
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        filter.setFavouredBy(userName);
+        return getApplications(filter);
+    }
+
+    @Override
     public ApplicationList getApplications(Filter filter) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationList applicationList = new ApplicationList();
         List<Application> applications = new ArrayList<>();
         DeviceType deviceType;
@@ -636,6 +754,7 @@ ApplicationManagerImpl implements ApplicationManager {
                         .setUnrestrictedRoles(visibilityDAO.getUnrestrictedRoles(applicationDTO.getId(), tenantId));
                 applicationDTO.setAppCategories(applicationDAO.getAppCategories(applicationDTO.getId(), tenantId));
                 applicationDTO.setTags(applicationDAO.getAppTags(applicationDTO.getId(), tenantId));
+                applicationDTO.setFavourite(applicationDAO.isFavouriteApp(applicationDTO.getId(), userName, tenantId));
 
                 if (isFilteringApp(applicationDTO, filter)) {
                     boolean isHideableApp = isHideableApp(applicationDTO.getApplicationReleaseDTOs());
