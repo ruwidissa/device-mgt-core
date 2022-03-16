@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Count;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
@@ -936,7 +937,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                             + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
                             + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID "
                             + "WHERE DM_DEVICE.ID IN (",
-                    ") AND DM_DEVICE.TENANT_ID = ?");
+                    ") AND DM_DEVICE.TENANT_ID = ? AND e.STATUS != " + EnrolmentInfo.Status.REMOVED);
 
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
