@@ -327,7 +327,9 @@ public interface ApplicationManager {
      */
     boolean checkSubDeviceIdsForOperations(int operationId, int deviceId) throws ApplicationManagementException;
 
-    void updateSubsStatus (int deviceId, int operationId, String status) throws ApplicationManagementException;
+    void updateSubStatus(int deviceId, List<Integer> operationId, String status) throws ApplicationManagementException;
+
+    void updateSubsStatus(int deviceId, int operationId, String status) throws ApplicationManagementException;
 
 
         /**

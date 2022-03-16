@@ -3668,7 +3668,40 @@ ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void updateSubsStatus (int deviceId, int operationId, String status) throws ApplicationManagementException {
+    public void updateSubStatus(int deviceId, List<Integer> operationIds, String status) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            for (int operationId : operationIds) {
+                List<Integer> deviceSubIds = subscriptionDAO.getDeviceSubIdsForOperation(operationId, deviceId, tenantId);
+                if (!subscriptionDAO.updateDeviceSubStatus(deviceId, deviceSubIds, status, tenantId)){
+                    ConnectionManagerUtil.rollbackDBTransaction();
+                    String msg = "Didn't update an any app subscription of device for operation Id: " + operationId;
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
+            }
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occured while updating app subscription status of the device.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obersving the database connection to update aoo subscription status of "
+                    + "device.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while executing database transaction";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void updateSubsStatus(int deviceId, int operationId, String status) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             ConnectionManagerUtil.beginDBTransaction();

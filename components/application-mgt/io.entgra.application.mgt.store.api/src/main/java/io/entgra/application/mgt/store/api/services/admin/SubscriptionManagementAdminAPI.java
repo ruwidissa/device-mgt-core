@@ -17,6 +17,7 @@
  */
 package io.entgra.application.mgt.store.api.services.admin;
 
+import io.entgra.application.mgt.store.api.beans.SubscriptionStatusBean;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -34,6 +35,7 @@ import io.entgra.application.mgt.common.ErrorResponse;
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -69,6 +71,13 @@ import java.util.List;
                         key = "perm:admin:app:subscription:view",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/app-mgt/store/admin/subscription/view"}
+                ),
+                @Scope(
+                        name = "View Application Subscriptions",
+                        description = "View Application Subscriptions.",
+                        key = "perm:admin:app:subscription:modify",
+                        roles = {"Internal/devicemgt-admin"},
+                        permissions = {"/app-mgt/store/admin/subscription/modify"}
                 )
         }
 )
@@ -78,6 +87,51 @@ import java.util.List;
 public interface SubscriptionManagementAdminAPI {
 
     String SCOPE = "scope";
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/device/{deviceId}/status")
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "Update subscription status",
+            notes = "This will update the subscription status that belongs to the given device id",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:admin:app:subscription:modify")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully updated subscription status.",
+                            response = List.class,
+                            responseContainer = "List"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n No Application found which has application release of UUID.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while updating subscription status",
+                            response = ErrorResponse.class)
+            })
+    Response updateSubscription(
+            @ApiParam(
+                    name = "deviceId",
+                    value = "Id of the device",
+                    required = true)
+            @PathParam("deviceId") int deviceId,
+            @ApiParam(
+                    name = "subscription status change bean",
+                    value = "this bean contains the information related to status change",
+                    required = true)
+            SubscriptionStatusBean subscriptionStatusBean
+    );
 
     @GET
     @Path("/{uuid}")

@@ -44,7 +44,11 @@ public class Constants {
     public static final String IOT_CORE_HTTPS_PORT = "iot.core.https.port";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String HTTP_PROTOCOL = "http";
+    public static final String SCHEME_SEPARATOR = "://";
+    public static final String OPERATION_STATUS_UPDATE_API_BASE = "/api/device-mgt/v1.0/devices";
+    public static final String OPERATION_STATUS_UPDATE_API_URI = "/operation";
 
+    public static final String COLON = ":";
     public static final String FORWARD_SLASH = "/";
     public static final String ANY = "ANY";
     public static final String DEFAULT_PCK_NAME = "default.app.com";

@@ -101,6 +101,10 @@ public interface SubscriptionDAO {
     List<Integer> getDeviceSubIds(List<Integer> deviceIds, int applicationReleaseId, int tenantId)
             throws ApplicationManagementDAOException;
 
+    int getDeviceIdForSubId(int subId, int tenantId) throws ApplicationManagementDAOException;
+
+    List<Integer> getOperationIdsForSubId(int subId, int tenantId) throws ApplicationManagementDAOException;
+
     List<Integer> getDeviceSubIdsForOperation(int operationId, int deviceID, int tenantId)
             throws ApplicationManagementDAOException;
 

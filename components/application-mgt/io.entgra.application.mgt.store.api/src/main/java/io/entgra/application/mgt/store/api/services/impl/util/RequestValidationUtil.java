@@ -18,12 +18,16 @@
  */
 package io.entgra.application.mgt.store.api.services.impl.util;
 
+import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.application.mgt.core.exception.BadRequestException;
 import io.entgra.application.mgt.store.api.util.Constants;
+import org.wso2.carbon.device.mgt.common.operation.mgt.ActivityStatus;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 public class RequestValidationUtil {
 
@@ -109,6 +113,20 @@ public class RequestValidationUtil {
         } else {
             String msg = "Invalid status type: " + status + ". \nValid status types are COMPLETED | ERROR | " +
                     "IN_PROGRESS | NOTNOW | PENDING | REPEATED";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+    }
+
+    /**
+     * Checks if user requested subscription status is valid.
+     *
+     */
+    public static void validateSubscriptionStatus(String status) throws BadRequestException{
+        if (!EnumUtils.isValidEnum(ActivityStatus.Status.class, status)) {
+            List<ActivityStatus.Status> validStatuses = EnumUtils.getEnumList(ActivityStatus.Status.class);
+            String validStatusesString = StringUtils.join(validStatuses, " | ");
+            String msg = "Invalid status type: " + status + ". \nValid status types are " + validStatusesString;
             log.error(msg);
             throw new BadRequestException(msg);
         }
