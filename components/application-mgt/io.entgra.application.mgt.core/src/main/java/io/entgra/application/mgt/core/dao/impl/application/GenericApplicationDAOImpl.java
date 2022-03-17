@@ -823,7 +823,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "Error occurred while obtaining the DB connection to check whether the application with the id "
+            String msg = "SQL Error occurred while checking whether the application with the id "
                     + appId + " is a favourite app. executed query " + sql;
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
