@@ -62,11 +62,13 @@ public interface APIManagementProviderService {
      * @param applicationName Application Name
      * @param tokenType Token Type
      * @param validityPeriod Validity Period
+     * @param username Name of the user to create the token. If null, set as carbon context user
      * @return {@link String} Access Token
      * @throws APIManagerException if error occurred while getting the access token for given scopes,
      * validity period etc.
      */
-    AccessTokenInfo getAccessToken(String scopes, String[] tags, String applicationName, String tokenType, String validityPeriod)
+    AccessTokenInfo getAccessToken(String scopes, String[] tags, String applicationName, String
+            tokenType, String validityPeriod, String username)
             throws APIManagerException;
 
 }
