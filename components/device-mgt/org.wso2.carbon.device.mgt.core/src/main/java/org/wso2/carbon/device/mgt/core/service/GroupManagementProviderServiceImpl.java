@@ -35,15 +35,16 @@
 
 package org.wso2.carbon.device.mgt.core.service;
 
-import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.TrackerGroupInfo;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
@@ -61,12 +62,14 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupDAO;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.dao.TrackerDAO;
 import org.wso2.carbon.device.mgt.core.event.config.GroupAssignmentEventOperationExecutor;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -86,6 +89,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
     private final GroupDAO groupDAO;
     private final DeviceDAO deviceDAO;
+    private final TrackerDAO trackerDAO;
 
     /**
      * Set groupDAO from GroupManagementDAOFactory when class instantiate.
@@ -93,6 +97,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
     public GroupManagementProviderServiceImpl() {
         this.groupDAO = GroupManagementDAOFactory.getGroupDAO();
         this.deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
+        this.trackerDAO = DeviceManagementDAOFactory.getTrackerDAO();
     }
 
     /**
@@ -136,21 +141,29 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
                 //add new group in traccar
                 try {
-                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                            .addGroup(deviceGroup);
+                    if (HttpReportingUtil.isTrackerEnabled()) {
+                        DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                                .addGroup(deviceGroup, updatedGroupID, tenantId);
+                    }
                 } catch (TraccarConfigurationException e) {
-                    log.error("Error while disenrolling a device from Traccar " + e);
+                    log.error("Error while adding a group to Traccar " + e);
                 }
                 //add new group in traccar
             } else {
-                //check if a group exist or not in traccar if not existing then add
-                /*try {
-                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                            .addGroup(deviceGroup);
-                } catch (TraccarConfigurationException e) {
-                    log.error("Error while disenrolling a device from Traccar " + e);
-                }*/
-                //check if a group exist or not in traccar
+                // add a group if not exist in traccar starts
+                existingGroup = this.groupDAO.getGroup(deviceGroup.getName(), tenantId);
+                int groupId = existingGroup.getGroupId();
+                TrackerGroupInfo res = trackerDAO.getTraccarGroup(groupId, tenantId);
+                if(res==null){
+                    try {
+                        DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                                .addGroup(deviceGroup, groupId, tenantId);
+                    } catch (TraccarConfigurationException e) {
+                        log.error("Error while adding a existing group to Traccar " + e);
+                    }
+                }
+                // add a group if not exist in traccar starts
+
                 throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
             }
         } catch (GroupManagementDAOException e) {
@@ -228,6 +241,20 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 if (deviceGroup.getGroupProperties() != null && deviceGroup.getGroupProperties().size() > 0) {
                     this.groupDAO.updateGroupProperties(deviceGroup, groupId, tenantId);
                 }
+
+                //procees to update a group in traccar starts
+                if (HttpReportingUtil.isTrackerEnabled()) {
+                    TrackerGroupInfo res = trackerDAO.getTraccarGroup(groupId, tenantId);
+                    JSONObject obj = new JSONObject(res);
+                    try {
+                        DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                                .updateGroup(deviceGroup, obj.getInt("traccarGroupId"), groupId, tenantId);
+                    } catch (TraccarConfigurationException e) {
+                        log.error("Error while updating the group in Traccar " + e);
+                    }
+                }
+                //procees to update a group in traccar starts
+
                 GroupManagementDAOFactory.commitTransaction();
             } else {
                 throw new GroupNotExistException("Group with ID - '" + groupId + "' doesn't exists!");
@@ -286,6 +313,21 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                     }
                 }
             }
+
+            //procees to delete a group from traccar starts
+            if (HttpReportingUtil.isTrackerEnabled()) {
+                TrackerGroupInfo res = trackerDAO.getTraccarGroup(groupId, tenantId);
+                JSONObject obj = new JSONObject(res);
+                trackerDAO.removeTraccarGroup(obj.getInt("id"));
+                try {
+                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                            .deleteGroup(obj.getInt("traccarGroupId"), tenantId);
+                } catch (TraccarConfigurationException e) {
+                    log.error("Error while disenrolling a device from Traccar " + e);
+                }
+            }
+            //procees to delete a group from traccar ends
+
             if (isDeleteChildren) {
                 groupIdsToDelete.add(groupId);
                 groupDAO.deleteGroupsMapping(groupIdsToDelete, tenantId);
@@ -302,14 +344,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             if (log.isDebugEnabled()) {
                 log.debug("DeviceGroup " + deviceGroup.getName() + " removed.");
             }
-            //add new group in traccar
-            try {
-                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                        .deleteGroup(deviceGroup);
-            } catch (TraccarConfigurationException e) {
-                log.error("Error while disenrolling a device from Traccar " + e);
-            }
-            //add new group in traccar
+
             return true;
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();

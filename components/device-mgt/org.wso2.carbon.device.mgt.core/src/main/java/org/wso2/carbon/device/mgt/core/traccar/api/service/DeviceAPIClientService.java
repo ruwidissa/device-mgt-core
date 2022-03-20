@@ -46,15 +46,23 @@ public interface DeviceAPIClientService {
      * @param device to be added
      * @throws TraccarConfigurationException errors thrown while creating a device traccar configuration
      */
-    void addDevice(Device device) throws TraccarConfigurationException;
+    void addDevice(Device device, int tenantId) throws TraccarConfigurationException;
+
+    /**
+     * Create device Traccar configuration records
+     *
+     * @param device to modify
+     * @throws TraccarConfigurationException errors thrown while creating a device traccar configuration
+     */
+    void updateDevice(Device device, int tenantId) throws TraccarConfigurationException;
 
     /**
      * Delete a device Traccar configuration records
      *
-     * @param deviceIdentifier to be delete a device
+     * @param deviceId to be delete a device
      * @throws TraccarConfigurationException errors thrown while deleting a device traccar configuration
      */
-    void disDevice(String deviceIdentifier) throws TraccarConfigurationException;
+    void disEndrollDevice(int deviceId, int tenantId) throws TraccarConfigurationException;
 
     /**
      * Delete a device Traccar configuration records
@@ -62,7 +70,7 @@ public interface DeviceAPIClientService {
      * @param group to be add a group
      * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
      */
-    void addGroup(DeviceGroup group) throws TraccarConfigurationException;
+    void addGroup(DeviceGroup group, int groupID, int tenantId) throws TraccarConfigurationException;
 
     /**
      * Delete a device Traccar configuration records
@@ -70,5 +78,14 @@ public interface DeviceAPIClientService {
      * @param group to be add a group
      * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
      */
-    void deleteGroup(DeviceGroup group) throws TraccarConfigurationException;
+    void updateGroup(DeviceGroup group, int traccarGroupId, int groupID, int tenantId) throws TraccarConfigurationException;
+
+    /**
+     * Delete a device Traccar configuration records
+     *
+     * @param traccarGroupId to delete a group
+     * @param tenantId to delete a group
+     * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
+     */
+    void deleteGroup(int traccarGroupId, int tenantId) throws TraccarConfigurationException;
 }

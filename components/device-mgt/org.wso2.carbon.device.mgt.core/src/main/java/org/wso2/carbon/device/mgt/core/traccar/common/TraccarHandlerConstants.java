@@ -27,4 +27,27 @@ public class TraccarHandlerConstants {
     public static final String AUTHORIZATION_KEY = "authorization-key";
     public static final String DEFAULT_PORT = "default-port";
     public static final String LOCATION_UPDATE_PORT = "location-update-port";
+
+    public static class Methods {
+        public static final String POST = "POST";
+        public static final String GET = "GET";
+        public static final String PUT = "PUT";
+        public static final String DELETE = "DELETE";
+    }
+
+    public static class Types {
+        public static final String DEVICE = "DEVICE";
+        public static final String GROUP = "GROUP";
+    }
+
+
+    public static class TraccarConfig {
+        public static final String TRACCAR_CONFIG_XML_NAME = "traccar-config.xml";
+        public static final String GATEWAY_NAME = "sample";
+        public static final String ENDPOINT = "api-endpoint";
+        public static final String AUTHORIZATION = "authorization";
+        public static final String AUTHORIZATION_KEY = "authorization-key";
+        public static final String DEFAULT_PORT = "default-port";
+        public static final String LOCATION_UPDATE_PORT = "location-update-port";
+    }
 }

@@ -21,19 +21,30 @@ package org.wso2.carbon.device.mgt.core.traccar.common.beans;
 
 public class TraccarGroups {
     private String name;
+    private int groupId;
 
     public TraccarGroups(String name){
         this.name =name;
     }
 
+    public TraccarGroups(String name, int groupId){
+        this.name =name;
+        this.groupId =groupId;
+    }
+
     public TraccarGroups(){ }
 
-
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
     }
 }

@@ -33,13 +33,22 @@ import java.util.Date;
 
 public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
 
-    public void addDevice(Device device) throws TraccarConfigurationException {
+    public void addDevice(Device device, int tenantId) throws TraccarConfigurationException {
         TrackerClient client = new TrackerClient();
         String lastUpdatedTime = String.valueOf((new Date().getTime()));
-        TraccarDevice traccarDeviceInfo = new TraccarDevice(device.getName(), device.getDeviceIdentifier(),
+        TraccarDevice traccarDeviceInfo = new TraccarDevice(device.getId(), device.getName(), device.getDeviceIdentifier(),
                 "online", "false", lastUpdatedTime, "", "", "", "",
                 "", "");
-        client.addDevice(traccarDeviceInfo);
+        client.addDevice(traccarDeviceInfo, tenantId);
+    }
+
+    public void updateDevice(Device device, int tenantId) throws TraccarConfigurationException {
+        TrackerClient client = new TrackerClient();
+        String lastUpdatedTime = String.valueOf((new Date().getTime()));
+        TraccarDevice traccarDeviceInfo = new TraccarDevice(device.getId(), device.getName(), device.getDeviceIdentifier(),
+                "online", "false", lastUpdatedTime, "", "", "", "",
+                "", "");
+        client.updateDevice(traccarDeviceInfo, tenantId);
     }
 
     public void updateLocation(Device device, DeviceLocation deviceLocation) throws TraccarConfigurationException {
@@ -51,22 +60,26 @@ public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
         client.updateLocation(traccarPosition);
     }
 
-    public void disDevice(String deviceIdentifier) throws TraccarConfigurationException {
+    public void disEndrollDevice(int deviceId, int tenantId) throws TraccarConfigurationException {
         TrackerClient client = new TrackerClient();
-        TraccarDevice traccarDeviceInfo = new TraccarDevice(deviceIdentifier);
-        client.disDevice(traccarDeviceInfo);
+        client.disEndrollDevice(deviceId, tenantId);
     }
 
-    public void addGroup(DeviceGroup group) throws TraccarConfigurationException {
+    public void addGroup(DeviceGroup group, int groupId, int tenantId) throws TraccarConfigurationException {
         TrackerClient client = new TrackerClient();
         TraccarGroups traccarGroups = new TraccarGroups(group.getName());
-        client.addGroup(traccarGroups);
+        client.addGroup(traccarGroups, groupId, tenantId);
     }
 
-    public void deleteGroup(DeviceGroup group) throws TraccarConfigurationException {
+    public void updateGroup(DeviceGroup group, int traccarGroupId, int groupId, int tenantId) throws TraccarConfigurationException {
         TrackerClient client = new TrackerClient();
         TraccarGroups traccarGroups = new TraccarGroups(group.getName());
-        client.deleteGroup(traccarGroups);
+        client.updateGroup(traccarGroups, traccarGroupId, groupId, tenantId);
+    }
+
+    public void deleteGroup(int traccarGroupId, int tenantId) throws TraccarConfigurationException {
+        TrackerClient client = new TrackerClient();
+        client.deleteGroup(traccarGroupId, tenantId);
     }
 
 }

@@ -20,12 +20,24 @@
 package org.wso2.carbon.device.mgt.core.traccar.common.beans;
 
 public class TraccarPosition {
+    private int id;
     private String deviceIdentifier;
     private Long timestamp;
     private Double lat;
     private Double lon;
     private Float bearing;
     private Float speed;
+
+    public TraccarPosition(int id, String deviceIdentifier, long timestamp, Double lat, Double lon,
+                           float bearing, float speed){
+        this.id =id;
+        this.deviceIdentifier =deviceIdentifier;
+        this.timestamp=timestamp;
+        this.lat=lat;
+        this.lon =lon;
+        this.bearing =bearing;
+        this.speed =speed;
+    }
 
     public TraccarPosition(String deviceIdentifier, long timestamp, Double lat, Double lon,
                            float bearing, float speed){
@@ -38,6 +50,14 @@ public class TraccarPosition {
     }
 
     public TraccarPosition(){ }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getDeviceIdentifier() {
         return deviceIdentifier;
@@ -86,5 +106,4 @@ public class TraccarPosition {
     public void setSpeed(Float speed) {
         this.speed = speed;
     }
-
 }

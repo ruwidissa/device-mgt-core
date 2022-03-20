@@ -26,17 +26,16 @@ import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfiguratio
 
 public interface TraccarClient {
 
-    void addDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException;
+    void addDevice(TraccarDevice deviceInfo, int tenantId) throws TraccarConfigurationException;
 
     void updateLocation(TraccarPosition deviceInfo) throws TraccarConfigurationException;
 
-    String getDeviceByDeviceIdentifier(String deviceId) throws TraccarConfigurationException;
+    void disEndrollDevice(int traccarDeviceId, int tenantId) throws TraccarConfigurationException;
 
-    void disDevice(TraccarDevice deviceInfo) throws TraccarConfigurationException;
+    void addGroup(TraccarGroups groupInfo, int groupId, int tenantId) throws TraccarConfigurationException;
 
-    void addGroup(TraccarGroups groupInfo) throws TraccarConfigurationException;
+    void updateGroup(TraccarGroups groupInfo, int traccarGroupId, int groupId, int tenantId) throws TraccarConfigurationException;
 
-    void deleteGroup(TraccarGroups groupInfo) throws TraccarConfigurationException;
+    void deleteGroup(int traccarGroupId, int tenantId) throws TraccarConfigurationException;
 
-    String getAllGroups() throws TraccarConfigurationException;
 }

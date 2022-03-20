@@ -389,7 +389,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
             //Traccar update GPS Location
             try {
-                if (HttpReportingUtil.isLocationPublishing()) {
+                if (HttpReportingUtil.isLocationPublishing() && HttpReportingUtil.isTrackerEnabled()) {
                     DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
                             .updateLocation(device, deviceLocation);
                 }

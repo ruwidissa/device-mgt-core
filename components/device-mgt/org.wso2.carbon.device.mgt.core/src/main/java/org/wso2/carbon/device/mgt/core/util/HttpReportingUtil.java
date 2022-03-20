@@ -34,6 +34,7 @@ public class HttpReportingUtil {
 
     private static final Log log = LogFactory.getLog(HttpReportingUtil.class);
     private static final String IS_EVENT_PUBLISHING_ENABLED = "isEventPublishingEnabled";
+    private static final String IS_TRACKER_ENABLED = "isTrackerEnabled";
     private static final String IS_LOCATION_PUBLISHING_ENABLED = "isLocationPublishingEnabled";
 
     public static String getReportingHost() {
@@ -66,6 +67,14 @@ public class HttpReportingUtil {
 
     public static boolean isLocationPublishing() {
         Object configuration = DeviceManagerUtil.getConfiguration(IS_LOCATION_PUBLISHING_ENABLED);
+        if (configuration != null) {
+            return Boolean.valueOf(configuration.toString());
+        }
+        return false;
+    }
+
+    public static boolean isTrackerEnabled() {
+        Object configuration = DeviceManagerUtil.getConfiguration(IS_TRACKER_ENABLED);
         if (configuration != null) {
             return Boolean.valueOf(configuration.toString());
         }

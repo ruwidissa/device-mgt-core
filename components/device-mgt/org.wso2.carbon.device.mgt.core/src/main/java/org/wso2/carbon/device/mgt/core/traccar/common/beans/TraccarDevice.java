@@ -22,6 +22,7 @@ package org.wso2.carbon.device.mgt.core.traccar.common.beans;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 
 public class TraccarDevice {
+    private int id;
     private String deviceIdentifier;
     private String deviceName;
     private String uniqueId;
@@ -39,9 +40,10 @@ public class TraccarDevice {
         this.deviceIdentifier =deviceIdentifier;
     }
 
-    public TraccarDevice(String deviceName, String uniqueId, String status, String disabled, String lastUpdate,
+    public TraccarDevice(int id, String deviceName, String uniqueId, String status, String disabled, String lastUpdate,
                          String positionId, String groupId, String phone, String model, String contact,
                          String category){
+        this.id =id;
         this.deviceName =deviceName;
         this.uniqueId=uniqueId;
         this.status=status;
@@ -56,6 +58,10 @@ public class TraccarDevice {
     }
 
     public TraccarDevice(){ }
+
+    public int getId() { return id; }
+
+    public void setId(int id) { this.id = id; }
 
     public String getDeviceIdentifier() {return deviceIdentifier;}
 
