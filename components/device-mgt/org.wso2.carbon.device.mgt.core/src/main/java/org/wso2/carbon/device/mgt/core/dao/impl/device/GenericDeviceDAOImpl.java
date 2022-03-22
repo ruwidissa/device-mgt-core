@@ -902,6 +902,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         String name = request.getDeviceName();
         String user = request.getOwner();
         String ownership = request.getOwnership();
+        String query = null;
         try {
             List<Device> devices = new ArrayList<>();
             if (deviceIds.isEmpty()) {
@@ -937,10 +938,10 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                             + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
                             + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID "
                             + "WHERE DM_DEVICE.ID IN (",
-                    ") AND DM_DEVICE.TENANT_ID = ? AND e.STATUS != " + EnrolmentInfo.Status.REMOVED);
+                    ") AND DM_DEVICE.TENANT_ID = ? AND e.STATUS != ?");
 
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
-            String query = joiner.toString();
+            query = joiner.toString();
 
             if (name != null && !name.isEmpty()) {
                 query += " AND DM_DEVICE.NAME LIKE ?";
@@ -967,6 +968,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     ps.setObject(index++, deviceId);
                 }
                 ps.setInt(index++, tenantId);
+                ps.setString(index++, EnrolmentInfo.Status.REMOVED.toString());
                 if (isDeviceNameProvided) {
                     ps.setString(index++, name + "%");
                 }
@@ -993,7 +995,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             }
         } catch (SQLException e) {
             String msg = "Error occurred while retrieving information of all registered devices " +
-                    "according to device ids and the limit area.";
+                    "according to device ids and the limit area. Executed query " + query;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
