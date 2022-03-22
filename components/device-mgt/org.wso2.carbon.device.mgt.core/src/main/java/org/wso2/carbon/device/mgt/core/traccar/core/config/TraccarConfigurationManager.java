@@ -39,7 +39,7 @@ public class TraccarConfigurationManager {
     private static TraccarConfigurationManager traccarConfigurationManager;
     private TraccarConfiguration traccarConfiguration;
     private static final String CarbonUtilsFile = CarbonUtils.getCarbonConfigDirPath() + File.separator;
-    private static final String TRACCAR_CONFIG_PATH = CarbonUtilsFile + TraccarHandlerConstants.TRACCAR_CONFIG_XML_NAME;
+    private static final String TRACCAR_CONFIG_PATH = CarbonUtilsFile + TraccarHandlerConstants.TraccarConfig.TRACCAR_CONFIG_XML_NAME;
 
     /**
      * Retrieve an instance of {@link TraccarConfigurationManager}

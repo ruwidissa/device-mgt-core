@@ -19,9 +19,12 @@
 
 package org.wso2.carbon.device.mgt.core.traccar.api.service.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
+import org.wso2.carbon.device.mgt.common.group.mgt.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.addons.TrackerClient;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
@@ -33,53 +36,110 @@ import java.util.Date;
 
 public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
 
-    public void addDevice(Device device, int tenantId) throws TraccarConfigurationException {
+    private static final Log log = LogFactory.getLog(TraccarAPIClientServiceImpl.class);
+
+    public void addDevice(Device device, int tenantId) {
+        TrackerClient client = new TrackerClient();
+        String lastUpdatedTime = String.valueOf((new Date().getTime()));
+        TraccarDevice traccarDevice = new TraccarDevice(device.getId(), device.getName(), device.getDeviceIdentifier(),
+                "online", "false", lastUpdatedTime, "", "", "", "",
+                "", "");
+        try {
+            client.addDevice(traccarDevice, tenantId);
+        } catch (TraccarConfigurationException e) {
+            String msg = "Error occurred while mapping with deviceId";
+            log.error(msg, e);
+        } catch (TrackerAlreadyExistException e) {
+            String msg = "The device already exist";
+            log.error(msg, e);
+        }
+    }
+
+    public void updateDevice(Device device, int tenantId) {
         TrackerClient client = new TrackerClient();
         String lastUpdatedTime = String.valueOf((new Date().getTime()));
         TraccarDevice traccarDeviceInfo = new TraccarDevice(device.getId(), device.getName(), device.getDeviceIdentifier(),
                 "online", "false", lastUpdatedTime, "", "", "", "",
                 "", "");
-        client.addDevice(traccarDeviceInfo, tenantId);
+        try {
+            client.updateDevice(traccarDeviceInfo, tenantId);
+        } catch (TraccarConfigurationException e) {
+            String msg = "Error occurred while mapping with deviceId";
+            log.error(msg, e);
+        } catch (TrackerAlreadyExistException e) {
+            String msg = "The device already exist";
+            log.error(msg, e);
+        }
     }
 
-    public void updateDevice(Device device, int tenantId) throws TraccarConfigurationException {
-        TrackerClient client = new TrackerClient();
-        String lastUpdatedTime = String.valueOf((new Date().getTime()));
-        TraccarDevice traccarDeviceInfo = new TraccarDevice(device.getId(), device.getName(), device.getDeviceIdentifier(),
-                "online", "false", lastUpdatedTime, "", "", "", "",
-                "", "");
-        client.updateDevice(traccarDeviceInfo, tenantId);
-    }
-
-    public void updateLocation(Device device, DeviceLocation deviceLocation) throws TraccarConfigurationException {
+    public void updateLocation(Device device, DeviceLocation deviceLocation, int tenantId) {
         TrackerClient client = new TrackerClient();
         TraccarPosition traccarPosition = new TraccarPosition(device.getDeviceIdentifier(),
                 deviceLocation.getUpdatedTime().getTime(),
                 deviceLocation.getLatitude(), deviceLocation.getLongitude(),
                 deviceLocation.getBearing(), deviceLocation.getSpeed());
-        client.updateLocation(traccarPosition);
+
+        String lastUpdatedTime = String.valueOf((new Date().getTime()));
+        TraccarDevice traccarDevice = new TraccarDevice(device.getId(), device.getName(), device.getDeviceIdentifier(),
+                "online", "false", lastUpdatedTime, "", "", "", "",
+                "", "");
+        try {
+            client.updateLocation(traccarDevice, traccarPosition, tenantId);
+        } catch (TraccarConfigurationException e) {
+            String msg = "Error occurred while mapping with deviceId";
+            log.error(msg, e);
+        }catch (TrackerAlreadyExistException e) {
+            String msg = "The device already exist";
+            log.error(msg, e);
+        }
     }
 
-    public void disEndrollDevice(int deviceId, int tenantId) throws TraccarConfigurationException {
+    public void disEndrollDevice(int deviceId, int tenantId) {
         TrackerClient client = new TrackerClient();
-        client.disEndrollDevice(deviceId, tenantId);
+        try {
+            client.disEndrollDevice(deviceId, tenantId);
+        } catch (TraccarConfigurationException e) {
+            String msg = "Error occurred while mapping with deviceId";
+            log.error(msg, e);
+        }
     }
 
-    public void addGroup(DeviceGroup group, int groupId, int tenantId) throws TraccarConfigurationException {
+    public void addGroup(DeviceGroup group, int groupId, int tenantId) {
         TrackerClient client = new TrackerClient();
         TraccarGroups traccarGroups = new TraccarGroups(group.getName());
-        client.addGroup(traccarGroups, groupId, tenantId);
+        try {
+            client.addGroup(traccarGroups, groupId, tenantId);
+        } catch (TraccarConfigurationException e) {
+            String msg = "Error occurred while mapping with groupId";
+            log.error(msg, e);
+        } catch (TrackerAlreadyExistException e) {
+            String msg = "The group already exist";
+            log.error(msg, e);
+        }
     }
 
-    public void updateGroup(DeviceGroup group, int traccarGroupId, int groupId, int tenantId) throws TraccarConfigurationException {
+    public void updateGroup(DeviceGroup group, int groupId, int tenantId) {
         TrackerClient client = new TrackerClient();
         TraccarGroups traccarGroups = new TraccarGroups(group.getName());
-        client.updateGroup(traccarGroups, traccarGroupId, groupId, tenantId);
+        try {
+            client.updateGroup(traccarGroups, groupId, tenantId);
+        } catch (TraccarConfigurationException e) {
+            String msg = "Error occurred while mapping with groupId";
+            log.error(msg, e);
+        } catch (TrackerAlreadyExistException e) {
+            String msg = "The group already exist";
+            log.error(msg, e);
+        }
     }
 
-    public void deleteGroup(int traccarGroupId, int tenantId) throws TraccarConfigurationException {
+    public void deleteGroup(int groupId, int tenantId) {
         TrackerClient client = new TrackerClient();
-        client.deleteGroup(traccarGroupId, tenantId);
+        try {
+            client.deleteGroup(groupId, tenantId);
+        } catch (TraccarConfigurationException e) {
+            String msg = "Error occurred while mapping with groupId";
+            log.error(msg, e);
+        }
     }
 
 }

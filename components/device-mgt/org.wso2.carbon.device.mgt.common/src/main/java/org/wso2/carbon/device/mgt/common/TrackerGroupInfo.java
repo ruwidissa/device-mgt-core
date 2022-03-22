@@ -18,36 +18,24 @@
  */
 package org.wso2.carbon.device.mgt.common;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 import java.io.Serializable;
 
-@ApiModel(value = "TrackerGroupInfo", description = "This class carries all information related to a add groups.")
-public class TrackerInfo implements Serializable {
+public class TrackerGroupInfo implements Serializable {
 
     private static final long serialVersionUID = 1998101712L;
 
-    @ApiModelProperty(name = "id", value = "ID of the device in the WSO2 EMM device information database.",
-            required = true)
     private int id;
     private int traccarGroupId;
-    private int traccarDeviceId;
     private int groupId;
     private int tenantId;
 
-    public TrackerInfo() {
+    public TrackerGroupInfo() {
     }
 
-    public TrackerInfo(int traccarGroupId, int groupId, int tenantId) {
+    public TrackerGroupInfo(int traccarGroupId, int groupId, int tenantId) {
         this.traccarGroupId = traccarGroupId;
         this.groupId = groupId;
         this.tenantId = tenantId;
-    }
-
-    public TrackerInfo(int traccarDeviceId, int groupId) {
-        this.traccarDeviceId = traccarDeviceId;
-        this.groupId = groupId;
     }
 
     public int getId() {
@@ -80,13 +68,5 @@ public class TrackerInfo implements Serializable {
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
-    }
-
-    public int getTraccarDeviceId() {
-        return traccarDeviceId;
-    }
-
-    public void setTraccarDeviceId(int traccarDeviceId) {
-        this.traccarDeviceId = traccarDeviceId;
     }
 }

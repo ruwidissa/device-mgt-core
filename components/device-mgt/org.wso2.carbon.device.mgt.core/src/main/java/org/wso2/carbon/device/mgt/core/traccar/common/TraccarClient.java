@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.device.mgt.core.traccar.common;
 
+import org.wso2.carbon.device.mgt.common.group.mgt.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
@@ -26,16 +27,22 @@ import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfiguratio
 
 public interface TraccarClient {
 
-    void addDevice(TraccarDevice deviceInfo, int tenantId) throws TraccarConfigurationException;
+    void addDevice(TraccarDevice deviceInfo, int tenantId) throws
+            TraccarConfigurationException, TrackerAlreadyExistException;
 
-    void updateLocation(TraccarPosition deviceInfo) throws TraccarConfigurationException;
+    void updateDevice(TraccarDevice deviceInfo, int tenantId) throws
+            TraccarConfigurationException, TrackerAlreadyExistException;
+
+    void updateLocation(TraccarDevice device, TraccarPosition deviceInfo, int tenantId) throws
+            TraccarConfigurationException, TrackerAlreadyExistException;
 
     void disEndrollDevice(int traccarDeviceId, int tenantId) throws TraccarConfigurationException;
 
-    void addGroup(TraccarGroups groupInfo, int groupId, int tenantId) throws TraccarConfigurationException;
+    void addGroup(TraccarGroups groupInfo, int groupId, int tenantId) throws
+            TraccarConfigurationException, TrackerAlreadyExistException;
 
-    void updateGroup(TraccarGroups groupInfo, int traccarGroupId, int groupId, int tenantId) throws TraccarConfigurationException;
+    void updateGroup(TraccarGroups groupInfo, int groupId, int tenantId)
+            throws TraccarConfigurationException, TrackerAlreadyExistException;
 
     void deleteGroup(int traccarGroupId, int tenantId) throws TraccarConfigurationException;
-
 }

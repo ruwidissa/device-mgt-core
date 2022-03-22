@@ -20,12 +20,10 @@ package org.wso2.carbon.device.mgt.core.dao.impl;
 
 import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
 import org.wso2.carbon.device.mgt.common.TrackerGroupInfo;
-import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.TrackerDAO;
-import org.wso2.carbon.device.mgt.core.dao.util.GroupManagementDAOUtil;
-import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import org.wso2.carbon.device.mgt.core.dao.util.TrackerManagementDAOUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,8 +36,8 @@ public class TrackerDAOImpl implements TrackerDAO {
     public Boolean addTraccarDevice(int traccarDeviceId, int deviceId, int tenantId) throws TrackerManagementDAOException {
         PreparedStatement stmt = null;
         try {
-            Connection conn = DeviceManagementDAOFactory.getConnection();
-            String sql = "INSERT INTO DM_TRACCAR_DEVICE_MAPPING(TRACCAR_DEVICE_ID, DEVICE_ID, TENANT_ID) VALUES(?, ?, ?)";
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "INSERT INTO DM_EXT_DEVICE_MAPPING(TRACCAR_DEVICE_ID, DEVICE_ID, TENANT_ID) VALUES(?, ?, ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, traccarDeviceId);
             stmt.setInt(2, deviceId);
@@ -50,7 +48,7 @@ public class TrackerDAOImpl implements TrackerDAO {
         } catch (SQLException e) {
             throw new TrackerManagementDAOException("Error occurred while adding traccar device mapping", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+            TrackerManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -60,8 +58,8 @@ public class TrackerDAOImpl implements TrackerDAO {
         ResultSet rs = null;
         int status = -1;
         try {
-            Connection conn = DeviceManagementDAOFactory.getConnection();
-            String sql = "DELETE FROM DM_TRACCAR_DEVICE_MAPPING WHERE DEVICE_ID = ? AND TENANT_ID = ? ";
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "DELETE FROM DM_EXT_DEVICE_MAPPING WHERE DEVICE_ID = ? AND TENANT_ID = ? ";
             stmt = conn.prepareStatement(sql, new String[] {"id"});
             stmt.setInt(1, deviceId);
             stmt.setInt(2, tenantId);
@@ -74,7 +72,7 @@ public class TrackerDAOImpl implements TrackerDAO {
         } catch (SQLException e) {
             throw new TrackerManagementDAOException("Error occurred while removing traccar device", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+            TrackerManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -84,8 +82,8 @@ public class TrackerDAOImpl implements TrackerDAO {
         ResultSet rs = null;
         TrackerDeviceInfo trackerDeviceInfo = null;
         try {
-            Connection conn = DeviceManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, TRACCAR_DEVICE_ID, DEVICE_ID, TENANT_ID FROM DM_TRACCAR_DEVICE_MAPPING WHERE " +
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "SELECT ID, TRACCAR_DEVICE_ID, DEVICE_ID, TENANT_ID FROM DM_EXT_DEVICE_MAPPING WHERE " +
                     "DEVICE_ID = ? AND TENANT_ID = ? ORDER BY ID DESC LIMIT 1";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, deviceId);
@@ -98,7 +96,7 @@ public class TrackerDAOImpl implements TrackerDAO {
         } catch (SQLException e) {
             throw new TrackerManagementDAOException("Error occurred while retrieving the traccar device information ", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            TrackerManagementDAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -107,8 +105,8 @@ public class TrackerDAOImpl implements TrackerDAO {
         PreparedStatement stmt = null;
 
         try {
-            Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "INSERT INTO DM_TRACCAR_GROUP_MAPPING(TRACCAR_GROUP_ID, GROUP_ID, TENANT_ID) VALUES(?, ?, ?)";
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "INSERT INTO DM_EXT_GROUP_MAPPING(TRACCAR_GROUP_ID, GROUP_ID, TENANT_ID) VALUES(?, ?, ?)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, traccarGroupId);
             stmt.setInt(2, groupId);
@@ -120,7 +118,7 @@ public class TrackerDAOImpl implements TrackerDAO {
             String msg = "Error occurred while adding traccar group mapping";
             throw new TrackerManagementDAOException(msg, e);
         } finally {
-            GroupManagementDAOUtil.cleanupResources(stmt, null);
+            TrackerManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -130,8 +128,8 @@ public class TrackerDAOImpl implements TrackerDAO {
         ResultSet rs = null;
         int status = -1;
         try {
-            Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "DELETE FROM DM_TRACCAR_GROUP_MAPPING WHERE ID = ? ";
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "DELETE FROM DM_EXT_GROUP_MAPPING WHERE ID = ? ";
             stmt = conn.prepareStatement(sql, new String[] {"id"});
             stmt.setInt(1, id);
             stmt.executeUpdate();
@@ -143,7 +141,7 @@ public class TrackerDAOImpl implements TrackerDAO {
         } catch (SQLException e) {
             throw new TrackerManagementDAOException("Error occurred while removing traccar group", e);
         } finally {
-            GroupManagementDAOUtil.cleanupResources(stmt, null);
+            TrackerManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -153,8 +151,8 @@ public class TrackerDAOImpl implements TrackerDAO {
         ResultSet rs = null;
         TrackerGroupInfo trackerGroupInfo = null;
         try {
-            Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, TRACCAR_GROUP_ID, GROUP_ID, TENANT_ID FROM DM_TRACCAR_GROUP_MAPPING WHERE " +
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "SELECT ID, TRACCAR_GROUP_ID, GROUP_ID, TENANT_ID FROM DM_EXT_GROUP_MAPPING WHERE " +
                     "GROUP_ID = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, groupId);
@@ -167,7 +165,7 @@ public class TrackerDAOImpl implements TrackerDAO {
         } catch (SQLException e) {
             throw new TrackerManagementDAOException("Error occurred while retrieving the traccar group information ", e);
         } finally {
-            GroupManagementDAOUtil.cleanupResources(stmt, rs);
+            TrackerManagementDAOUtil.cleanupResources(stmt, rs);
         }
     }
 

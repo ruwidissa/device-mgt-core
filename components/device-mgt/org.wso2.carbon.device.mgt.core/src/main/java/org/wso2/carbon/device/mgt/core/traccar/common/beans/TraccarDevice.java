@@ -19,8 +19,6 @@
 
 package org.wso2.carbon.device.mgt.core.traccar.common.beans;
 
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-
 public class TraccarDevice {
     private int id;
     private String deviceIdentifier;

@@ -47,7 +47,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HTTP;
-import org.json.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -69,8 +68,6 @@ import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
-import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
-import org.wso2.carbon.device.mgt.common.TrackerGroupInfo;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
@@ -138,7 +135,6 @@ import org.wso2.carbon.device.mgt.core.internal.PluginInitializationListener;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
-import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.email.sender.core.ContentProviderInfo;
@@ -181,7 +177,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private MetadataDAO metadataDAO;
     private final BillingDAO billingDAO;
     private final DeviceStatusDAO deviceStatusDAO;
-    private final TrackerDAO trackerDAO;
 
     public DeviceManagementProviderServiceImpl() {
         this.pluginRepository = new DeviceManagementPluginRepository();
@@ -192,7 +187,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         this.metadataDAO = MetadataManagementDAOFactory.getMetadataDAO();
         this.billingDAO = DeviceManagementDAOFactory.getBillingDAO();
         this.deviceStatusDAO = DeviceManagementDAOFactory.getDeviceStatusDAO();
-        this.trackerDAO = DeviceManagementDAOFactory.getTrackerDAO();
 
         /* Registering a listener to retrieve events when some device management service plugin is installed after
          * the component is done getting initialized */
@@ -417,12 +411,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
 
         //enroll Traccar device
-        try {
-            if (HttpReportingUtil.isTrackerEnabled()) {
-                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService().addDevice(device, tenantId);
-            }
-        } catch (TraccarConfigurationException e) {
-            log.error("Error while adding a group to Traccar " + e);
+        if (HttpReportingUtil.isTrackerEnabled()) {
+            DeviceManagementDataHolder.getInstance().getDeviceAPIClientService().addDevice(device, tenantId);
         }
         //enroll Traccar device
 
@@ -487,18 +477,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             }
             deviceDAO.updateDevice(device, tenantId);
             enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
-
-            //modify Traccar device
-            if (HttpReportingUtil.isTrackerEnabled()) {
-                try {
-                    //trackerDAO.removeTraccarDevice(device.getId(), tenantId);
-                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                            .updateDevice(device, tenantId);
-                } catch (TraccarConfigurationException e) {
-                    log.error("Error while disenrolling a device from Traccar " + e);
-                }
-            }
-            //modify Traccar device
 
             DeviceManagementDAOFactory.commitTransaction();
             this.removeDeviceFromCache(deviceIdentifier);
@@ -600,21 +578,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.commitTransaction();
             this.removeDeviceFromCache(deviceId);
 
-            //disenroll Traccar device
+            //procees to dis-enroll a device from traccar starts
             if (HttpReportingUtil.isTrackerEnabled()) {
-                try {
-                    TrackerDeviceInfo res = trackerDAO.getTraccarDevice(device.getId(), tenantId);
-                    JSONObject obj = new JSONObject(res);
-                    //Need to verify this removal
-                    //trackerDAO.removeTraccarDevice(device.getId(), tenantId);
-                    //Need to verify this removal
-                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                            .disEndrollDevice(obj.getInt("traccarDeviceId"), tenantId);
-                } catch (TraccarConfigurationException e) {
-                    log.error("Error while disenrolling a device from Traccar " + e);
-                }
+                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                        .disEndrollDevice(device.getId(), tenantId);
             }
-            //procees to dis-enroll a device from traccar ends*/
+            //procees to dis-enroll a device from traccar ends
 
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();

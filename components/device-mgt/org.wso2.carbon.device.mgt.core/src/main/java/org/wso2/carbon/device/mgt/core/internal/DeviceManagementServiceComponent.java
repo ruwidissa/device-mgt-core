@@ -53,6 +53,7 @@ import org.wso2.carbon.device.mgt.core.config.ui.UIConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.event.config.EventConfigurationProviderServiceImpl;
@@ -192,6 +193,7 @@ public class DeviceManagementServiceComponent {
 
             DeviceManagementDAOFactory.init(dsConfig);
             GroupManagementDAOFactory.init(dsConfig);
+            TrackerManagementDAOFactory.init(dsConfig);
             NotificationManagementDAOFactory.init(dsConfig);
             OperationManagementDAOFactory.init(dsConfig);
             MetadataManagementDAOFactory.init(dsConfig);

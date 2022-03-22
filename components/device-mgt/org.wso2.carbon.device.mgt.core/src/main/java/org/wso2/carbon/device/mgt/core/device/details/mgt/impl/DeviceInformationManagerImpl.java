@@ -43,7 +43,6 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDA
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
-import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -388,13 +387,9 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             }
 
             //Traccar update GPS Location
-            try {
-                if (HttpReportingUtil.isLocationPublishing() && HttpReportingUtil.isTrackerEnabled()) {
-                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                            .updateLocation(device, deviceLocation);
-                }
-            } catch (TraccarConfigurationException e) {
-                log.error("Error on Traccar while adding GEO Location" + e);
+            if (HttpReportingUtil.isLocationPublishing() && HttpReportingUtil.isTrackerEnabled()) {
+                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                        .updateLocation(device, deviceLocation, CarbonContext.getThreadLocalCarbonContext().getTenantId());
             }
             //Traccar update GPS Location
 

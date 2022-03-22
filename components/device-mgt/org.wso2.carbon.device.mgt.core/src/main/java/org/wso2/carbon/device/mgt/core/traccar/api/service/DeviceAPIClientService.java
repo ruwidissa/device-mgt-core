@@ -20,14 +20,9 @@
 package org.wso2.carbon.device.mgt.core.traccar.api.service;
 
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
-import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
-
-import java.io.IOException;
-
 
 public interface DeviceAPIClientService {
 
@@ -38,7 +33,7 @@ public interface DeviceAPIClientService {
      * @param deviceLocation to be added to update location of the device
      * @throws TraccarConfigurationException errors thrown while inserting location of a device traccar configuration
      */
-    void updateLocation(Device device, DeviceLocation deviceLocation) throws TraccarConfigurationException;
+    void updateLocation(Device device, DeviceLocation deviceLocation, int tenantId);
 
     /**
      * Create device Traccar configuration records
@@ -46,7 +41,7 @@ public interface DeviceAPIClientService {
      * @param device to be added
      * @throws TraccarConfigurationException errors thrown while creating a device traccar configuration
      */
-    void addDevice(Device device, int tenantId) throws TraccarConfigurationException;
+    void addDevice(Device device, int tenantId);
 
     /**
      * Create device Traccar configuration records
@@ -54,7 +49,7 @@ public interface DeviceAPIClientService {
      * @param device to modify
      * @throws TraccarConfigurationException errors thrown while creating a device traccar configuration
      */
-    void updateDevice(Device device, int tenantId) throws TraccarConfigurationException;
+    void updateDevice(Device device, int tenantId);
 
     /**
      * Delete a device Traccar configuration records
@@ -62,7 +57,7 @@ public interface DeviceAPIClientService {
      * @param deviceId to be delete a device
      * @throws TraccarConfigurationException errors thrown while deleting a device traccar configuration
      */
-    void disEndrollDevice(int deviceId, int tenantId) throws TraccarConfigurationException;
+    void disEndrollDevice(int deviceId, int tenantId);
 
     /**
      * Delete a device Traccar configuration records
@@ -70,22 +65,22 @@ public interface DeviceAPIClientService {
      * @param group to be add a group
      * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
      */
-    void addGroup(DeviceGroup group, int groupID, int tenantId) throws TraccarConfigurationException;
+    void addGroup(DeviceGroup group, int groupID, int tenantId);
 
     /**
      * Delete a device Traccar configuration records
      *
-     * @param group to be add a group
+     * @param group to be update the group
      * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
      */
-    void updateGroup(DeviceGroup group, int traccarGroupId, int groupID, int tenantId) throws TraccarConfigurationException;
+    void updateGroup(DeviceGroup group, int groupID, int tenantId);
 
     /**
      * Delete a device Traccar configuration records
      *
-     * @param traccarGroupId to delete a group
+     * @param groupId to delete a group
      * @param tenantId to delete a group
      * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
      */
-    void deleteGroup(int traccarGroupId, int tenantId) throws TraccarConfigurationException;
+    void deleteGroup(int groupId, int tenantId);
 }
