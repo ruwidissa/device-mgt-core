@@ -26,7 +26,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementExcepti
 import org.wso2.carbon.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
 import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
 import org.wso2.carbon.device.mgt.core.config.datasource.JNDILookupDefinition;
-import org.wso2.carbon.device.mgt.core.dao.impl.TrackerDAOImpl;
+import org.wso2.carbon.device.mgt.core.dao.impl.tracker.TrackerDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 
 import javax.sql.DataSource;

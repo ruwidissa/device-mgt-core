@@ -28,6 +28,7 @@ public class TrackerGroupInfo implements Serializable {
     private int traccarGroupId;
     private int groupId;
     private int tenantId;
+    private int status;
 
     public TrackerGroupInfo() {
     }
@@ -68,5 +69,13 @@ public class TrackerGroupInfo implements Serializable {
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.core.traccar.common;
+package org.wso2.carbon.device.mgt.core.traccar.api.service;
 
-import org.wso2.carbon.device.mgt.common.group.mgt.TrackerAlreadyExistException;
+import org.wso2.carbon.device.mgt.common.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;

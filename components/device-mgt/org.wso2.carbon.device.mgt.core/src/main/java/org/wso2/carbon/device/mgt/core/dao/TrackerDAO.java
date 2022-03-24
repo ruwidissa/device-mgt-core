@@ -23,16 +23,80 @@ import org.wso2.carbon.device.mgt.common.TrackerGroupInfo;
 
 public interface TrackerDAO {
 
-    Boolean addTraccarDevice(int traccarDeviceId, int deviceId, int tenantId) throws TrackerManagementDAOException;
+    /**
+     * Add new Device.
+     * @param traccarDeviceId to be added.
+     * @param deviceId of the device.
+     * @param tenantId of the group.
+     * @return boolean value.
+     * @throws TrackerManagementDAOException
+     */
+    Boolean addTrackerDevice(int traccarDeviceId, int deviceId, int tenantId) throws TrackerManagementDAOException;
 
-    int removeTraccarDevice(int deviceId, int tenantId) throws TrackerManagementDAOException;
+    /**
+     * get trackerDevice info.
+     * @param groupId of the device.
+     * @param tenantId of the group.
+     * @return Tracker Device Info.
+     * @throws TrackerManagementDAOException
+     */
+    TrackerDeviceInfo getTrackerDevice(int groupId, int tenantId) throws TrackerManagementDAOException;
 
-    TrackerDeviceInfo getTraccarDevice(int groupId, int tenantId) throws TrackerManagementDAOException;
+    /**
+     * update trackerDevice status and traccarDeviceId.
+     * @param traccarDeviceId of the Device.
+     * @param deviceId of the device.
+     * @param tenantId of the group.
+     * @param status of the device.
+     * @return Tracker Device Info.
+     * @throws TrackerManagementDAOException
+     */
+    Boolean updateTrackerDeviceIdANDStatus(int traccarDeviceId, int deviceId, int tenantId, int status) throws TrackerManagementDAOException;
 
-    Boolean addTraccarGroup(int traccarGroupId, int groupId, int tenantId) throws TrackerManagementDAOException;
+    /**
+     * Remove a Device.
+     * @param deviceId of the device.
+     * @param tenantId of the group.
+     * @return sql execution result.
+     * @throws TrackerManagementDAOException
+     */
+    int removeTrackerDevice(int deviceId, int tenantId) throws TrackerManagementDAOException;
 
-    int removeTraccarGroup(int id) throws TrackerManagementDAOException;
+    /**
+     * Add new Group.
+     * @param traccarGroupId to be added.
+     * @param groupId of the group.
+     * @param tenantId of the group.
+     * @return boolean value.
+     * @throws TrackerManagementDAOException
+     */
+    Boolean addTrackerGroup(int traccarGroupId, int groupId, int tenantId) throws TrackerManagementDAOException;
 
-    TrackerGroupInfo getTraccarGroup(int groupId, int tenantId) throws TrackerManagementDAOException;
+    /**
+     * Update status and traccarGroupId of a Group.
+     * @param traccarGroupId to be added.
+     * @param groupId of the group.
+     * @param tenantId of the group.
+     * @param status of the group.
+     * @return boolean value.
+     * @throws TrackerManagementDAOException
+     */
+    Boolean updateTrackerGroupIdANDStatus(int traccarGroupId, int groupId, int tenantId, int status) throws TrackerManagementDAOException;
+
+    /**
+     * Remove a Group.
+     * @param id mapping table.
+     * @throws TrackerManagementDAOException
+     */
+    int removeTrackerGroup(int id) throws TrackerManagementDAOException;
+
+    /**
+     * get trackerGroup info.
+     * @param groupId of the device.
+     * @param tenantId of the group.
+     * @return Tracker Device Info.
+     * @throws TrackerManagementDAOException
+     */
+    TrackerGroupInfo getTrackerGroup(int groupId, int tenantId) throws TrackerManagementDAOException;
 
 }

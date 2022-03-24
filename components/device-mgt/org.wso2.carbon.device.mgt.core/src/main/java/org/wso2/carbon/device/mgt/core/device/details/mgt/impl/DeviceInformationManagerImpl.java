@@ -386,12 +386,12 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 //                );
             }
 
-            //Traccar update GPS Location
+            //Tracker update GPS Location
             if (HttpReportingUtil.isLocationPublishing() && HttpReportingUtil.isTrackerEnabled()) {
                 DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
                         .updateLocation(device, deviceLocation, CarbonContext.getThreadLocalCarbonContext().getTenantId());
             }
-            //Traccar update GPS Location
+            //Tracker update GPS Location
 
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {

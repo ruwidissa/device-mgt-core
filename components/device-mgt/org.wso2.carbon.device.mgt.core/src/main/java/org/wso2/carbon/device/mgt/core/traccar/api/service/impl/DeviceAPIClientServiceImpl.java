@@ -24,9 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
-import org.wso2.carbon.device.mgt.common.group.mgt.TrackerAlreadyExistException;
+import org.wso2.carbon.device.mgt.common.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
-import org.wso2.carbon.device.mgt.core.traccar.api.service.addons.TrackerClient;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.addons.TraccarClient;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
@@ -34,12 +34,12 @@ import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfiguratio
 
 import java.util.Date;
 
-public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
+public class DeviceAPIClientServiceImpl implements DeviceAPIClientService {
 
-    private static final Log log = LogFactory.getLog(TraccarAPIClientServiceImpl.class);
+    private static final Log log = LogFactory.getLog(DeviceAPIClientServiceImpl.class);
 
     public void addDevice(Device device, int tenantId) {
-        TrackerClient client = new TrackerClient();
+        TraccarClient client = new TraccarClient();
         String lastUpdatedTime = String.valueOf((new Date().getTime()));
         TraccarDevice traccarDevice = new TraccarDevice(device.getId(), device.getName(), device.getDeviceIdentifier(),
                 "online", "false", lastUpdatedTime, "", "", "", "",
@@ -56,7 +56,7 @@ public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
     }
 
     public void updateDevice(Device device, int tenantId) {
-        TrackerClient client = new TrackerClient();
+        TraccarClient client = new TraccarClient();
         String lastUpdatedTime = String.valueOf((new Date().getTime()));
         TraccarDevice traccarDeviceInfo = new TraccarDevice(device.getId(), device.getName(), device.getDeviceIdentifier(),
                 "online", "false", lastUpdatedTime, "", "", "", "",
@@ -73,7 +73,7 @@ public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
     }
 
     public void updateLocation(Device device, DeviceLocation deviceLocation, int tenantId) {
-        TrackerClient client = new TrackerClient();
+        TraccarClient client = new TraccarClient();
         TraccarPosition traccarPosition = new TraccarPosition(device.getDeviceIdentifier(),
                 deviceLocation.getUpdatedTime().getTime(),
                 deviceLocation.getLatitude(), deviceLocation.getLongitude(),
@@ -95,7 +95,7 @@ public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
     }
 
     public void disEndrollDevice(int deviceId, int tenantId) {
-        TrackerClient client = new TrackerClient();
+        TraccarClient client = new TraccarClient();
         try {
             client.disEndrollDevice(deviceId, tenantId);
         } catch (TraccarConfigurationException e) {
@@ -105,7 +105,7 @@ public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
     }
 
     public void addGroup(DeviceGroup group, int groupId, int tenantId) {
-        TrackerClient client = new TrackerClient();
+        TraccarClient client = new TraccarClient();
         TraccarGroups traccarGroups = new TraccarGroups(group.getName());
         try {
             client.addGroup(traccarGroups, groupId, tenantId);
@@ -119,7 +119,7 @@ public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
     }
 
     public void updateGroup(DeviceGroup group, int groupId, int tenantId) {
-        TrackerClient client = new TrackerClient();
+        TraccarClient client = new TraccarClient();
         TraccarGroups traccarGroups = new TraccarGroups(group.getName());
         try {
             client.updateGroup(traccarGroups, groupId, tenantId);
@@ -133,7 +133,7 @@ public class TraccarAPIClientServiceImpl implements DeviceAPIClientService {
     }
 
     public void deleteGroup(int groupId, int tenantId) {
-        TrackerClient client = new TrackerClient();
+        TraccarClient client = new TraccarClient();
         try {
             client.deleteGroup(groupId, tenantId);
         } catch (TraccarConfigurationException e) {

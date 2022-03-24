@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.common.group.mgt;
+package org.wso2.carbon.device.mgt.common;
 
 /**
  * This class represents a custom exception specified for group management

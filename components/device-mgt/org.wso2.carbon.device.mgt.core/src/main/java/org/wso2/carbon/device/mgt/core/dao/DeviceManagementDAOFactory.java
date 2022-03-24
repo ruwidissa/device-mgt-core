@@ -27,12 +27,10 @@ import org.wso2.carbon.device.mgt.common.exceptions.UnsupportedDatabaseEngineExc
 import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
 import org.wso2.carbon.device.mgt.core.config.datasource.JNDILookupDefinition;
 import org.wso2.carbon.device.mgt.core.dao.impl.*;
-import org.wso2.carbon.device.mgt.core.dao.impl.event.GenericEventConfigDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.GenericDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.OracleDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.PostgreSQLDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.SQLServerDeviceDAOImpl;
-import org.wso2.carbon.device.mgt.core.dao.impl.event.H2EventConfigDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.impl.DeviceDetailsDAOImpl;

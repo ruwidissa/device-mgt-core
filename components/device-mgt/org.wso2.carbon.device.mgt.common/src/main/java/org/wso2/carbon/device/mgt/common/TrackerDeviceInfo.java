@@ -28,6 +28,7 @@ public class TrackerDeviceInfo implements Serializable {
     private int traccarDeviceId;
     private int deviceId;
     private int tenantId;
+    private int status;
 
     public TrackerDeviceInfo() {
     }
@@ -68,5 +69,13 @@ public class TrackerDeviceInfo implements Serializable {
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

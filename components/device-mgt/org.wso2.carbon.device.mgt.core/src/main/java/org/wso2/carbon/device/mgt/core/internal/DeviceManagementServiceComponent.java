@@ -80,7 +80,7 @@ import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.task.DeviceTaskManagerService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
-import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.TraccarAPIClientServiceImpl;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagementSchemaInitializer;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.DeviceMgtTenantMgtListener;
@@ -307,7 +307,7 @@ public class DeviceManagementServiceComponent {
         bundleContext.registerService(DeviceManagementProviderService.class.getName(), deviceManagementProvider, null);
 
         /* Registering Device API Client Service */
-        DeviceAPIClientService deviceAPIClientService = new TraccarAPIClientServiceImpl();
+        DeviceAPIClientService deviceAPIClientService = new DeviceAPIClientServiceImpl();
         DeviceManagementDataHolder.getInstance().setDeviceAPIClientService(deviceAPIClientService);
         bundleContext.registerService(DeviceAPIClientService.class.getName(), deviceAPIClientService, null);
 
