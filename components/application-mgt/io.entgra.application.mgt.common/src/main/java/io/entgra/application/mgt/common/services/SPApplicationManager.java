@@ -18,24 +18,16 @@
 
 package io.entgra.application.mgt.common.services;
 
-import io.entgra.application.mgt.common.IdentityServer;
+import io.entgra.application.mgt.common.IdentityServerResponse;
+import io.entgra.application.mgt.common.SPApplicationListResponse;
 import io.entgra.application.mgt.common.dto.IdentityServerDTO;
-import io.entgra.application.mgt.common.SPApplication;
+import io.entgra.application.mgt.common.dto.IdentityServiceProviderDTO;
 import io.entgra.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.application.mgt.common.exception.RequestValidatingException;
 import io.entgra.application.mgt.common.response.Application;
 import java.util.List;
 
 public interface SPApplicationManager {
-
-    /**
-     * This method adds existing consumer applications of service providers to the SPApplication bean
-     *
-     * @param identityServerId identity  server id of the service provider
-     * @param applications Service providers list to which the existing applications should be added
-     * @throws ApplicationManagementException if error occurred while adding existing applications
-     */
-    void addExistingApps(int identityServerId, List<SPApplication> applications) throws ApplicationManagementException;
 
     /**
      * Removes consumer application from service provider
@@ -63,16 +55,65 @@ public interface SPApplicationManager {
      * @return Identity server for the given ID
      * @throws ApplicationManagementException if error occurred while getting identity server
      */
-    IdentityServer getIdentityServer(int identityServerId) throws ApplicationManagementException;
+    IdentityServerResponse getIdentityServerResponse(int identityServerId) throws ApplicationManagementException;
 
     /**
      *
      * @return Available identity servers
      * @throws ApplicationManagementException if error occurred while getting identity servers
      */
-    List<IdentityServer> getIdentityServers() throws ApplicationManagementException;
+    List<IdentityServerResponse> getIdentityServers() throws ApplicationManagementException;
 
-    IdentityServer createIdentityServer(IdentityServerDTO identityServerDTO) throws ApplicationManagementException;
+    /**
+     * Create a new Identity Server
+     *
+     * @return {@link IdentityServerResponse}
+     * @throws ApplicationManagementException if error occurred while getting identity servers
+     */
+    IdentityServerResponse createIdentityServer(IdentityServerDTO identityServerDTO) throws ApplicationManagementException;
+
+    /**
+     * Update existing Identity Server
+     *
+     * @param id of the identity server to be updated
+     * @param updateIdentityServerDTO identity server dto bean with updated fields
+     * @throws ApplicationManagementException if error occurred while getting identity servers
+     */
+    IdentityServerResponse updateIdentityServer(IdentityServerDTO updateIdentityServerDTO, int id) throws ApplicationManagementException;
+
+    /**
+     * Delete Identity Server
+     *
+     * @param id of the identity server to be deleted
+     * @throws ApplicationManagementException if error occurred while getting identity servers
+     */
+    void deleteIdentityServer(int id) throws ApplicationManagementException;
+
+    /**
+     * Check if Identity Server exists with the same name
+     *
+     * @param name of the identity server
+     * @return if name already exists for identity server
+     */
+    boolean isIdentityServerNameExist(String name) throws ApplicationManagementException;
+
+    /**
+     * Check if Identity Server exists with the same url
+     *
+     * @param url of the identity server
+     * @return if url already exists for identity server
+     */
+    boolean isIdentityServerUrlExist(String url) throws ApplicationManagementException;
+
+    /**
+     * Retrieve service provider apps from identity server
+     *
+     * @param identityServerId Id of the identity server
+     * @return {@link SPApplicationListResponse}
+     * @throws ApplicationManagementException if error while retrieving sp applications
+     */
+    SPApplicationListResponse retrieveSPApplicationFromIdentityServer(int identityServerId, Integer offset, Integer limit)
+            throws ApplicationManagementException;
 
     /**
      *
@@ -101,9 +142,9 @@ public interface SPApplicationManager {
      * Validates application ids of the applications that should be attached
      *
      * @param appIds application ids to be validated
-     * @throws ApplicationManagementException
+     * @throws ApplicationManagementException if invalid service provider, identity server Id or app Ids provided
      */
-    void validateAttachAppsRequest(int identityServerId, List<Integer> appIds) throws ApplicationManagementException;
+    void validateAttachAppsRequest(int identityServerId, String serviceProviderId, List<Integer> appIds) throws ApplicationManagementException;
 
     /**
      * Validates application ids of the applications that should be detached
@@ -115,4 +156,10 @@ public interface SPApplicationManager {
      */
     void validateDetachAppsRequest(int identityServerId, String spId, List<Integer> appIds) throws ApplicationManagementException;
 
+    /**
+     * Get available identity service providers
+     *
+     * @return list of available service providers' names
+     */
+    List<IdentityServiceProviderDTO> getIdentityServiceProviders() throws ApplicationManagementException;
 }

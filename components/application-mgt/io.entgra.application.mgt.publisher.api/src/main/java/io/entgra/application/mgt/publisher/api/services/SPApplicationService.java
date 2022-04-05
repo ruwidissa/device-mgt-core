@@ -33,8 +33,10 @@ import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -106,6 +108,22 @@ public interface SPApplicationService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/identity-servers/identity-service-providers")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get available identity service providers",
+            tags = "Identity Server Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:view")
+                    })
+            }
+    )
+    Response getIdentityServiceProviders();
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/identity-servers")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -119,6 +137,21 @@ public interface SPApplicationService {
             }
     )
     Response getIdentityServers();
+
+    @Path("/identity-servers/{id}")
+    @DELETE
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "DELETE",
+            value = "get identity server by id",
+            tags = "Identity Server Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:connect")
+                    })
+            }
+    )
+    Response deleteIdentityServer(@PathParam("id") int id);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -151,6 +184,54 @@ public interface SPApplicationService {
             }
     )
     Response createIdentityServer(IdentityServerDTO identityServerDTO);
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/identity-servers/{id}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "edit existing identity server",
+            tags = "Identity Server Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:connect")
+                    })
+            }
+    )
+    Response updateIdentityServer(IdentityServerDTO identityServerDTO, @PathParam("id") int id);
+
+    @GET
+    @Path("/identity-servers/identity-server-name")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Check if identity server name is already exists",
+            tags = "Identity Server Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:view")
+                    })
+            }
+    )
+    Response isIdentityServerNameExists(
+            @QueryParam("identityServerName") String identityServerName);
+
+    @GET
+    @Path("/identity-servers/identity-server-url")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Check if identity server url is already exists",
+            tags = "Identity Server Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:view")
+                    })
+            }
+    )
+    Response isIdentityServerUrlExists(
+            @QueryParam("identityServerUrl") String identityServerUrl);
 
     /**
      * This method is used to register an APIM application for tenant domain.

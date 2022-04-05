@@ -26,6 +26,36 @@ import java.util.List;
 
 public interface SPApplicationDAO {
 
+    /**
+     * Use to check if an identity server exists with the same name
+     *
+     * @param name name of the identity server
+     * @return if identity server with the given name exists
+     */
+    boolean isExistingIdentityServerName(String name, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Use to check if an identity server exists with the same url
+     *
+     * @param url name of the identity server
+     * @return if identity server with the given url exists
+     */
+    boolean isExistingIdentityServerUrl(String url, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Update existing identity server in the database
+     *
+     * @param updatedIdentityServerDTO bean with the updated fields of the identity server
+     */
+    void updateIdentityServer(IdentityServerDTO updatedIdentityServerDTO, int tenantId, int identityServerId)
+            throws ApplicationManagementDAOException;
+
+    /**
+     * Create new identity server in the database
+     *
+     * @param identityServerDTO DTO bean with the details of identity server to be created
+     * @return id of the newly created identity server
+     */
     int createIdentityServer(IdentityServerDTO identityServerDTO, int tenantId) throws ApplicationManagementDAOException;
 
     /**
@@ -91,4 +121,11 @@ public interface SPApplicationDAO {
      */
     void deleteApplicationFromServiceProviders(int applicationId, int tenantId) throws ApplicationManagementDAOException;
 
+    /**
+     * Delete identity server from db
+     *
+     * @param id of the identity server to be deleted
+     * @throws ApplicationManagementDAOException if any db error occurred
+     */
+    void deleteIdentityServer(int id, int tenantId) throws ApplicationManagementDAOException;
 }

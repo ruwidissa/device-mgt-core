@@ -41,7 +41,7 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
 
     @Override
     public List<IdentityServerDTO> getIdentityServers(int tenantId) throws ApplicationManagementDAOException {
-        String sql = "SELECT ID, PROVIDER_NAME, NAME, DESCRIPTION, URL, API_URL, USERNAME, PASSWORD, TENANT_ID "
+        String sql = "SELECT ID, PROVIDER_NAME, NAME, DESCRIPTION, URL, API_PARAMS, USERNAME, PASSWORD, TENANT_ID "
                 + "FROM AP_IDENTITY_SERVER "
                 + "WHERE TENANT_ID = ?";
         try {
@@ -68,7 +68,7 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
 
     @Override
     public IdentityServerDTO getIdentityServerById(int id, int tenantId) throws ApplicationManagementDAOException {
-        String sql = "SELECT ID, PROVIDER_NAME, NAME, DESCRIPTION, URL, API_URL, USERNAME, PASSWORD, TENANT_ID "
+        String sql = "SELECT ID, PROVIDER_NAME, NAME, DESCRIPTION, URL, API_PARAMS, USERNAME, PASSWORD, TENANT_ID "
                 + "FROM AP_IDENTITY_SERVER "
                 + "WHERE TENANT_ID = ? AND "
                 + "ID = ?";
@@ -100,6 +100,128 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
     }
 
     @Override
+    public boolean isExistingIdentityServerUrl(String url, int tenantId) throws ApplicationManagementDAOException {
+        String sql = "SELECT AP_APP.ID AS ID "
+                + "FROM AP_IDENTITY_SERVER "
+                + "WHERE "
+                + "LOWER(URL) = LOWER(?) AND "
+                + "AP_APP.TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                stmt.setString(1, url);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()){
+                    return rs.next();
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to check if identity server url: " + url +
+                    " already exist";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing query to check if identity server with the url " + url +
+                    " already exists.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public boolean isExistingIdentityServerName(String name, int tenantId) throws ApplicationManagementDAOException {
+        String sql = "SELECT AP_APP.ID AS ID "
+                + "FROM AP_IDENTITY_SERVER "
+                + "WHERE "
+                + "LOWER(NAME) = LOWER(?) AND "
+                + "AP_APP.TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                stmt.setString(1, name);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()){
+                    return rs.next();
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to check if identity server name: " + name +
+                    " already exist";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing query to check if identity server with the name " + name +
+                    " already exists.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void updateIdentityServer(IdentityServerDTO updatedIdentityServerDTO, int tenantId, int identityServerId)
+            throws ApplicationManagementDAOException {
+        String sql = "UPDATE AP_IDENTITY_SERVER " +
+                "SET ";
+        if (updatedIdentityServerDTO.getName() != null) {
+            sql += "NAME = ?, ";
+        }
+        if (updatedIdentityServerDTO.getUrl() != null) {
+            sql += "URL = ?, ";
+        }
+        if (updatedIdentityServerDTO.getProviderName() != null) {
+            sql += "PROVIDER_NAME = ?, ";
+        }
+        if (updatedIdentityServerDTO.getUsername() != null) {
+            sql += "USERNAME = ?, ";
+        }
+        if (updatedIdentityServerDTO.getPassword() != null) {
+            sql += "PASSWORD = ?, ";
+        }
+        if (updatedIdentityServerDTO.getDescription() != null) {
+            sql += "DESCRIPTION = ?, ";
+        }
+        sql += "API_PARAMS = ? " +
+                "WHERE ID = ? AND TENANT_ID = ?";
+
+        try {
+            int index = 1;
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                if (updatedIdentityServerDTO.getName() != null) {
+                    stmt.setString(index++, updatedIdentityServerDTO.getName());
+                }
+                if (updatedIdentityServerDTO.getUrl() != null) {
+                    stmt.setString(index++, updatedIdentityServerDTO.getUrl());
+                }
+                if (updatedIdentityServerDTO.getProviderName() != null) {
+                    stmt.setString(index++, updatedIdentityServerDTO.getProviderName());
+                }
+                if (updatedIdentityServerDTO.getUsername() != null) {
+                    stmt.setString(index++, updatedIdentityServerDTO.getUsername());
+                }
+                if (updatedIdentityServerDTO.getPassword() != null) {
+                    stmt.setString(index++, updatedIdentityServerDTO.getPassword());
+                }
+                if (updatedIdentityServerDTO.getDescription() != null) {
+                    stmt.setString(index++, updatedIdentityServerDTO.getDescription());
+                }
+                stmt.setString(index++, updatedIdentityServerDTO.constructApiParamsJsonString());
+                stmt.setInt(index++, identityServerId);
+                stmt.setInt(index, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to update identity server.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when executing SQL to update identity server. Executed query: " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
     public int createIdentityServer(IdentityServerDTO identityServerDTO, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to create an identity server");
@@ -107,8 +229,8 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
         String sql = "INSERT INTO AP_IDENTITY_SERVER "
                 + "(PROVIDER_NAME, "
                 + "NAME, "
-                + "DESCRIPTION, URL, API_URL, USERNAME, PASSWORD, TENANT_ID) "
-                + "VALUES (?, ?, ?, ?)";
+                + "DESCRIPTION, URL, API_PARAMS, USERNAME, PASSWORD, TENANT_ID) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -116,8 +238,8 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
                 stmt.setString(2, identityServerDTO.getName());
                 stmt.setString(3, identityServerDTO.getDescription());
                 stmt.setString(4, identityServerDTO.getUrl());
-                stmt.setString(5, identityServerDTO.getApiUrl());
-                stmt.setString(6, identityServerDTO.getUserName());
+                stmt.setString(5, identityServerDTO.constructApiParamsJsonString());
+                stmt.setString(6, identityServerDTO.getUsername());
                 stmt.setString(7, identityServerDTO.getPassword());
                 stmt.setInt(8, tenantId);
                 stmt.executeUpdate();
@@ -326,13 +448,38 @@ public class SQLServerSPApplicationDAOImpl  extends AbstractDAOImpl implements S
                 stmt.executeUpdate();
             }
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while obtaining the DB connection to create an sp application mapping which has "
+            String msg = "Error occurred while obtaining the DB connection to delete an sp application mapping which has "
                     + "application id " + applicationId;
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "Error occurred while executing SQL to create an application which has application id "
+            String msg = "Error occurred while executing SQL to delete an application which has application id "
                     + applicationId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteIdentityServer(int id, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete identity server with the id: " + id);
+        }
+        String sql = "DELETE FROM AP_IDENTITY_SERVER WHERE ID = ? AND TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setInt(1, id);
+                stmt.setInt(2, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to delete an identity server with the id " + id;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to delete an identity server which has the id "
+                    + id;
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }

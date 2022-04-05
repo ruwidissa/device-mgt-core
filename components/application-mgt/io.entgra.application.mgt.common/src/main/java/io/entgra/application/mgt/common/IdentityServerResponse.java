@@ -18,16 +18,20 @@
 
 package io.entgra.application.mgt.common;
 
-public class IdentityServer {
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class IdentityServerResponse {
     private int id;
     private String providerName;
     private String name;
     private String description;
     private String url;
-    private String apiUrl;
     private String serviceProviderAppsUrl;
-    private String userName;
-    private String password;
+    private String username;
+    private List<Map<String, String>> apiParamList;
 
     public int getId() {
         return id;
@@ -61,20 +65,12 @@ public class IdentityServer {
         this.url = url;
     }
 
-    public String getPassword() {
-        return password;
+    public String getUsername() {
+        return username;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getProviderName() {
@@ -85,19 +81,23 @@ public class IdentityServer {
         this.providerName = providerName;
     }
 
-    public String getApiUrl() {
-        return apiUrl;
-    }
-
-    public void setApiUrl(String apiUrl) {
-        this.apiUrl = apiUrl;
-    }
-
     public String getServiceProviderAppsUrl() {
         return serviceProviderAppsUrl;
     }
 
     public void setServiceProviderAppsUrl(String serviceProviderAppsUrl) {
         this.serviceProviderAppsUrl = serviceProviderAppsUrl;
+    }
+
+    public List<Map<String, String>> getApiParamList() {
+        return apiParamList;
+    }
+
+    public void setApiParamList(Map<String, String> apiParams) {
+        this.apiParamList = apiParams.entrySet().stream().map(param -> {
+            Map<String, String> paramMap = new HashMap<>();
+            paramMap.put(param.getKey(), param.getValue());
+            return paramMap;
+        }).collect(Collectors.toList());
     }
 }

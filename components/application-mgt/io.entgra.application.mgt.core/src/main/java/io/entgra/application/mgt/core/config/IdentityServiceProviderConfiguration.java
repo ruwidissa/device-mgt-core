@@ -25,28 +25,28 @@ import java.util.List;
 /**
  * Represents the Application Management Configuration.
  */
-@XmlRootElement(name = "IdentityServerConfiguration")
-public class IdentityServerConfiguration {
+@XmlRootElement(name = "IdentityServiceProviderConfiguration")
+public class IdentityServiceProviderConfiguration {
 
-    private List<IdentityServerDetail> identityServers;
+    private List<IdentityServiceProvider> identityServiceProviders;
 
-    @XmlElementWrapper(name = "IdentityServers")
-    @XmlElement(name = "IdentityServerDTO")
-    public List<IdentityServerDetail> getIdentityServers() {
-        return identityServers;
+    @XmlElementWrapper(name = "IdentityServiceProviders")
+    @XmlElement(name = "IdentityServiceProvider")
+    public List<IdentityServiceProvider> getIdentityServiceProviders() {
+        return identityServiceProviders;
     }
 
-    public IdentityServerDetail getIdentityServerDetailByProviderName(String identityServerProviderName) {
-        for (IdentityServerDetail identityServerDetail : identityServers) {
-            if (identityServerDetail.getProviderName().equals(identityServerProviderName)) {
-                return identityServerDetail;
+    public IdentityServiceProvider getIdentityServerDetailByProviderName(String identityServiceProviderName) {
+        for (IdentityServiceProvider identityServiceProvider : identityServiceProviders) {
+            if (identityServiceProvider.getProviderName().equals(identityServiceProviderName)) {
+                return identityServiceProvider;
             }
         }
         return null;
     }
 
-    public void setIdentityServers(List<IdentityServerDetail> identityServers) {
-        this.identityServers = identityServers;
+    public void setIdentityServiceProviders(List<IdentityServiceProvider> identityServiceProviders) {
+        this.identityServiceProviders = identityServiceProviders;
     }
 }
 

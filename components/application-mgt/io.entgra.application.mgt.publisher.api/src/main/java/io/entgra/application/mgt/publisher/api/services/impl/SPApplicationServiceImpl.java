@@ -18,10 +18,10 @@
 
 package io.entgra.application.mgt.publisher.api.services.impl;
 
-import io.entgra.application.mgt.common.IdentityServer;
+import io.entgra.application.mgt.common.IdentityServerResponse;
 import io.entgra.application.mgt.common.dto.IdentityServerDTO;
-import io.entgra.application.mgt.common.IdentityServerList;
 import io.entgra.application.mgt.common.SPApplicationListResponse;
+import io.entgra.application.mgt.common.dto.IdentityServiceProviderDTO;
 import io.entgra.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.application.mgt.common.exception.RequestValidatingException;
 import io.entgra.application.mgt.common.response.Application;
@@ -31,13 +31,17 @@ import io.entgra.application.mgt.common.wrapper.CustomAppWrapper;
 import io.entgra.application.mgt.common.wrapper.PublicAppWrapper;
 import io.entgra.application.mgt.common.wrapper.WebAppWrapper;
 import io.entgra.application.mgt.core.exception.BadRequestException;
+import io.entgra.application.mgt.core.exception.NotFoundException;
 import io.entgra.application.mgt.core.util.APIUtil;
 import io.entgra.application.mgt.publisher.api.services.SPApplicationService;
-import io.entgra.application.mgt.publisher.api.services.util.SPAppRequestHandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -49,7 +53,23 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/identity-server-applications")
 public class SPApplicationServiceImpl implements SPApplicationService {
+
     private static final Log log = LogFactory.getLog(SPApplicationServiceImpl.class);
+
+    @Path("/identity-servers/identity-service-providers")
+    @GET
+    @Override
+    public Response getIdentityServiceProviders() {
+        SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
+        try {
+            List<IdentityServiceProviderDTO> identityServiceProviders = spAppManager.getIdentityServiceProviders();
+            return Response.status(Response.Status.OK).entity(identityServiceProviders).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting identity service providers";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
 
     @Path("/identity-servers")
     @GET
@@ -57,8 +77,27 @@ public class SPApplicationServiceImpl implements SPApplicationService {
     public Response getIdentityServers() {
         try {
             SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
-            List<IdentityServer> identityServers = spAppManager.getIdentityServers();
+            List<IdentityServerResponse> identityServers = spAppManager.getIdentityServers();
             return Response.status(Response.Status.OK).entity(identityServers).build();
+        } catch (ApplicationManagementException e) {
+            String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+        }
+    }
+
+    @Path("/identity-servers/{id}")
+    @DELETE
+    @Override
+    public Response deleteIdentityServer(@PathParam("id") int id) {
+        try {
+            SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
+            spAppManager.deleteIdentityServer(id);
+            return Response.status(Response.Status.OK).entity("Successfully deleted identity server").build();
+        } catch (NotFoundException e) {
+            String msg = "Identity server with the id " + id + " does not exist.";
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
             log.error(errMsg, e);
@@ -72,8 +111,12 @@ public class SPApplicationServiceImpl implements SPApplicationService {
     public Response getIdentityServer(@PathParam("id") int id) {
         try {
             SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
-            IdentityServer identityServer = spAppManager.getIdentityServer(id);
+            IdentityServerResponse identityServer = spAppManager.getIdentityServerResponse(id);
             return Response.status(Response.Status.OK).entity(identityServer).build();
+        } catch (NotFoundException e) {
+            String msg = "Identity server with the id " + id + " does not exist.";
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
             log.error(errMsg, e);
@@ -81,14 +124,96 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         }
     }
 
+    @Path("/identity-servers/{id}")
+    @PUT
+    @Override
+    public Response updateIdentityServer(IdentityServerDTO identityServerDTO, @PathParam("id") int id) {
+        try {
+            SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
+            IdentityServerResponse identityServerResponse = spAppManager.updateIdentityServer(identityServerDTO, id);
+            return Response.status(Response.Status.OK).entity(identityServerResponse).build();
+        } catch (NotFoundException e) {
+            String msg = "Identity server with the id " + id + " does not exist.";
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (BadRequestException e) {
+            String errMsg = "Identity server request payload is invalid";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
+        } catch (ApplicationManagementException e) {
+            String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+        }
+    }
+
+
     @Path("/identity-servers")
     @POST
     @Override
     public Response createIdentityServer(IdentityServerDTO identityServerDTO) {
         try {
             SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
-            IdentityServer identityServer = spAppManager.createIdentityServer(identityServerDTO);
+            IdentityServerResponse identityServer = spAppManager.createIdentityServer(identityServerDTO);
             return Response.status(Response.Status.CREATED).entity(identityServer).build();
+        } catch (BadRequestException e) {
+            String errMsg = "Identity server request payload is invalid";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
+        } catch (ApplicationManagementException e) {
+            String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+        }
+    }
+
+    @GET
+    @Path("/identity-servers/identity-server-name")
+    @Override
+    public Response isIdentityServerNameExists(
+            @QueryParam("identityServerName") String identityServerName) {
+        try {
+            if (identityServerName == null) {
+                String msg = "Invalid identity server name, identityServerName query param cannot be empty/null.";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+            SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
+            if (spAppManager.isIdentityServerNameExist(identityServerName)) {
+                return Response.status(Response.Status.CONFLICT).build();
+            }
+            return Response.status(Response.Status.OK).build();
+        } catch (BadRequestException e) {
+            String errMsg = "Identity server request payload is invalid";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
+        } catch (ApplicationManagementException e) {
+            String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+        }
+    }
+
+    @GET
+    @Path("/identity-servers/identity-server-url")
+    @Override
+    public Response isIdentityServerUrlExists(
+            @QueryParam("identityServerUrl") String identityServerUrl) {
+        try {
+            if (identityServerUrl == null) {
+                String msg = "Invalid identity server url, identityServerName query param cannot be empty/null.";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+            SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
+            if (spAppManager.isIdentityServerUrlExist(identityServerUrl)) {
+                return Response.status(Response.Status.CONFLICT).build();
+            }
+            return Response.status(Response.Status.OK).build();
+        } catch (BadRequestException e) {
+            String errMsg = "Identity server request payload is invalid";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
             log.error(errMsg, e);
@@ -99,14 +224,16 @@ public class SPApplicationServiceImpl implements SPApplicationService {
     @Path("/{identity-server-id}/service-providers")
     @GET
     @Override
-    public Response getServiceProviders(@QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset,
+    public Response getServiceProviders(@DefaultValue("30") @QueryParam("limit") Integer limit,@DefaultValue("0") @QueryParam("offset") Integer offset,
                                         @PathParam("identity-server-id") int identityServerId) {
         try {
             SPApplicationManager spAppManager = APIUtil.getSPApplicationManager();
-            SPApplicationListResponse applications = SPAppRequestHandlerUtil.
-                    retrieveSPApplications(identityServerId, limit, offset);
-            spAppManager.addExistingApps(identityServerId, applications.getApplications());
+            SPApplicationListResponse applications = spAppManager.retrieveSPApplicationFromIdentityServer(identityServerId, limit, offset);
             return Response.status(Response.Status.OK).entity(applications).build();
+        } catch (NotFoundException e) {
+            String errMsg = "No Identity server exist with the id: " + identityServerId;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
             log.error(errMsg, e);
@@ -121,9 +248,16 @@ public class SPApplicationServiceImpl implements SPApplicationService {
                                @PathParam("service-provider-id") String serviceProviderId, List<Integer> appIds) {
         SPApplicationManager spApplicationManager = APIUtil.getSPApplicationManager();
         try {
-            validateServiceProviderUID(identityServerId, serviceProviderId);
-            spApplicationManager.validateAttachAppsRequest(identityServerId, appIds);
+            spApplicationManager.validateAttachAppsRequest(identityServerId, serviceProviderId, appIds);
             spApplicationManager.attachSPApplications(identityServerId, serviceProviderId, appIds);
+        } catch (NotFoundException e) {
+            String msg = "No identity server exist with the id " + identityServerId;
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Invalid appIds provided";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while attaching apps to service provider with the id" + serviceProviderId;
             log.error(msg, e);
@@ -139,9 +273,16 @@ public class SPApplicationServiceImpl implements SPApplicationService {
                                @PathParam("service-provider-id") String serviceProviderId, List<Integer> appIds) {
         SPApplicationManager spApplicationManager = APIUtil.getSPApplicationManager();
         try {
-            validateServiceProviderUID(identityServerId, serviceProviderId);
             spApplicationManager.validateDetachAppsRequest(identityServerId, serviceProviderId, appIds);
             spApplicationManager.detachSPApplications(identityServerId, serviceProviderId, appIds);
+        } catch (NotFoundException e) {
+            String msg = "No identity server exist with the id " + identityServerId;
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Invalid appIds provided";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while attaching apps to service provider with the id" + serviceProviderId;
             log.error(msg, e);
@@ -193,10 +334,13 @@ public class SPApplicationServiceImpl implements SPApplicationService {
      */
     private <T> Response createSPApplication(int identityServerId, String spUID, T appWrapper) {
         try {
-            validateServiceProviderUID(identityServerId, spUID);
             SPApplicationManager spApplicationManager = APIUtil.getSPApplicationManager();
             Application createdApp = spApplicationManager.createSPApplication(appWrapper, identityServerId, spUID);
             return Response.status(Response.Status.CREATED).entity(createdApp).build();
+        } catch (NotFoundException e) {
+            String msg = "No identity server exist with the id " + identityServerId;
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (BadRequestException e) {
             String msg = "Found incompatible payload with create service provider app request.";
             log.error(msg, e);
@@ -210,30 +354,6 @@ public class SPApplicationServiceImpl implements SPApplicationService {
             String msg = "Error occurred while creating service provider app";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
-    }
-
-    /**
-     * Responsible for validating service provider in requests
-     *
-     * @param identityServerId identity server id of the service provider
-     * @param spUID uid of the service provider
-     * @throws ApplicationManagementException
-     */
-    private void validateServiceProviderUID(int identityServerId, String spUID) throws
-            ApplicationManagementException {
-        try {
-            boolean isSPAppExists = SPAppRequestHandlerUtil.
-                    isSPApplicationExist(identityServerId, spUID);
-            if (!isSPAppExists) {
-                String errMsg = "Service provider with the uid " + spUID + " does not exist.";
-                log.error(errMsg);
-                throw new BadRequestException(errMsg);
-            }
-        } catch (ApplicationManagementException e) {
-            String errMsg = "Error occurred while trying to validate service provider uid";
-            log.error(errMsg, e);
-            throw new ApplicationManagementException(errMsg, e);
         }
     }
 

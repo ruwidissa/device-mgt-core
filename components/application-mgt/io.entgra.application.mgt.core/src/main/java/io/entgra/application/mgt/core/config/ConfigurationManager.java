@@ -36,7 +36,7 @@ public class ConfigurationManager {
 
     private Configuration configuration;
 
-    private IdentityServerConfiguration identityServerConfiguration;
+    private IdentityServiceProviderConfiguration identityServiceProviderConfiguration;
 
     private static String configPath;
 
@@ -53,6 +53,12 @@ public class ConfigurationManager {
             synchronized (ConfigurationManager.class) {
                 if (configurationManager == null) {
                     configurationManager = new ConfigurationManager();
+                    try {
+                        configurationManager.initConfig();
+                    } catch (ApplicationManagementException e) {
+                        log.error(e);
+                    }
+                } else {
                     try {
                         configurationManager.initConfig();
                     } catch (ApplicationManagementException e) {
@@ -83,14 +89,18 @@ public class ConfigurationManager {
     private void initConfig() throws ApplicationManagementException {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Configuration.class);
+            JAXBContext jaxbISConfigContext = JAXBContext.newInstance(IdentityServiceProviderConfiguration.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            Unmarshaller identityServerConfigUnmarshaller = jaxbISConfigContext.createUnmarshaller();
             if (configPath == null) {
                 configPath = Constants.DEFAULT_CONFIG_FILE_LOCATION;
+            }
+            if (identityServerConfigPath == null) {
                 identityServerConfigPath = Constants.DEFAULT_IDENTITY_SERVERS_CONFIG_FILE_LOCATION;
             }
             //TODO: Add validation for the configurations
             this.configuration = (Configuration) unmarshaller.unmarshal(new File(configPath));
-            this.identityServerConfiguration = (IdentityServerConfiguration) unmarshaller.unmarshal(new File(identityServerConfigPath));
+            this.identityServiceProviderConfiguration = (IdentityServiceProviderConfiguration) identityServerConfigUnmarshaller.unmarshal(new File(identityServerConfigPath));
         } catch (Exception e) {
             log.error(e);
             throw new InvalidConfigurationException("Error occurred while initializing application config: "
@@ -102,8 +112,8 @@ public class ConfigurationManager {
         return configuration;
     }
 
-    public IdentityServerConfiguration getIdentityServerConfiguration() {
-        return identityServerConfiguration;
+    public IdentityServiceProviderConfiguration getIdentityServerConfiguration() {
+        return identityServiceProviderConfiguration;
     }
 
     public Extension getExtension(Extension.Name extName) throws InvalidConfigurationException {

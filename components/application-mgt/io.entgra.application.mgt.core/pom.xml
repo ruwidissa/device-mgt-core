@@ -90,6 +90,7 @@
                             !io.entgra.application.mgt.core.internal.*,
                             io.entgra.application.mgt.core.*
                         </Export-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

@@ -40,7 +40,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -207,8 +209,10 @@ public class DAOUtil {
             identityServerDTO.setName(rs.getString("NAME"));
             identityServerDTO.setDescription(rs.getString("DESCRIPTION"));
             identityServerDTO.setUrl(rs.getString("URL"));
-            identityServerDTO.setApiUrl(rs.getString("API_URI"));
-            identityServerDTO.setUserName(rs.getString("USERNAME"));
+            String apiParamsJson = rs.getString("API_PARAMS");
+            Map<String, String> apiParams = new Gson().fromJson(apiParamsJson, new TypeToken<HashMap<String, String>>() {}.getType());
+            identityServerDTO.setApiParams(apiParams);
+            identityServerDTO.setUsername(rs.getString("USERNAME"));
             identityServerDTO.setPassword(rs.getString("PASSWORD"));
             identityServerDTOS.add(identityServerDTO);
         }

@@ -60,6 +60,9 @@ public class Constants {
     public static final String IS_APP_DEFAULT_PAYMENT_CURRENCY = "$";
     public static final String IS_APP_DEFAULT_VERSION = "1.0";
     public static final String FORWARD_SLASH = "/";
+    public static final String URI_QUERY_SEPARATOR = "?";
+    public static final String QUERY_STRING_SEPARATOR = "&";
+    public static final String QUERY_KEY_VALUE_SEPARATOR = "=";
     public static final String ANY = "ANY";
     public static final String DEFAULT_PCK_NAME = "default.app.com";
     public static final String ALL = "ALL";

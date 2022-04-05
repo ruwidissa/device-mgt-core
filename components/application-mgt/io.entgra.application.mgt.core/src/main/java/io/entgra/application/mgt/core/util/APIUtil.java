@@ -18,9 +18,12 @@
 
 package io.entgra.application.mgt.core.util;
 
-import io.entgra.application.mgt.common.IdentityServer;
+import io.entgra.application.mgt.common.IdentityServerResponse;
 import io.entgra.application.mgt.common.dto.IdentityServerDTO;
-import io.entgra.application.mgt.core.config.IdentityServerDetail;
+import io.entgra.application.mgt.common.dto.IdentityServiceProviderDTO;
+import io.entgra.application.mgt.common.exception.InvalidConfigurationException;
+import io.entgra.application.mgt.core.config.IdentityServiceProvider;
+import io.entgra.application.mgt.core.identityserver.serviceprovider.ISServiceProviderApplicationService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -366,19 +369,28 @@ public class APIUtil {
         return applicationReleaseDTO;
     }
 
-    public static IdentityServer identityServerDtoToIdentityServerResponse(IdentityServerDTO identityServerDTO) {
-        IdentityServer identityServer = new IdentityServer();
+    public static IdentityServiceProviderDTO identityServiceProviderToDTO(IdentityServiceProvider identityServiceProvider)
+            throws InvalidConfigurationException {
+        ISServiceProviderApplicationService serviceProviderApplicationService =
+                ISServiceProviderApplicationService.of(identityServiceProvider.getProviderName());
+        IdentityServiceProviderDTO identityServiceProviderDTO = new IdentityServiceProviderDTO();
+        identityServiceProviderDTO.setName(identityServiceProvider.getProviderName());
+        identityServiceProviderDTO.setRequiredApiParams(serviceProviderApplicationService.getRequiredApiParams());
+        return identityServiceProviderDTO;
+    }
+
+    public static IdentityServerResponse identityServerDtoToIdentityServerResponse(IdentityServerDTO identityServerDTO) {
+        IdentityServerResponse identityServer = new IdentityServerResponse();
         identityServer.setId(identityServerDTO.getId());
         identityServer.setProviderName(identityServerDTO.getProviderName());
         identityServer.setName(identityServerDTO.getName());
         identityServer.setDescription(identityServerDTO.getDescription());
         identityServer.setUrl(identityServerDTO.getUrl());
-        identityServer.setApiUrl(identityServerDTO.getApiUrl());
-        identityServer.setUserName(identityServerDTO.getUserName());
-        identityServer.setPassword(identityServerDTO.getPassword());
-        IdentityServerDetail identityServerDetail = ConfigurationManager.getInstance().getIdentityServerConfiguration()
+        identityServer.setApiParamList(identityServerDTO.getApiParams());
+        identityServer.setUsername(identityServerDTO.getUsername());
+        IdentityServiceProvider identityServiceProvider = ConfigurationManager.getInstance().getIdentityServerConfiguration()
                 .getIdentityServerDetailByProviderName(identityServerDTO.getProviderName());
-        String serviceProviderAppsUrl = identityServerDTO.getUrl() + Constants.FORWARD_SLASH + identityServerDetail.getServiceProvidersPageUri();
+        String serviceProviderAppsUrl = identityServerDTO.getUrl() + identityServiceProvider.getServiceProvidersPageUri();
         identityServer.setServiceProviderAppsUrl(serviceProviderAppsUrl);
         return identityServer;
     }

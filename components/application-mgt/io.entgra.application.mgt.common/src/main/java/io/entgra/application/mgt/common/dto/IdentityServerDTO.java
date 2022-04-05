@@ -18,15 +18,26 @@
 
 package io.entgra.application.mgt.common.dto;
 
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 public class IdentityServerDTO {
+
     private int id;
     private String providerName;
     private String name;
     private String description;
     private String url;
-    private String apiUrl;
-    private String userName;
+    private String username;
     private String password;
+    private Map<String, String> apiParams;
+
+    public IdentityServerDTO() {
+        this.apiParams = new HashMap<>();
+    }
 
     public int getId() {
         return id;
@@ -68,12 +79,12 @@ public class IdentityServerDTO {
         this.password = password;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getProviderName() {
@@ -84,11 +95,19 @@ public class IdentityServerDTO {
         this.providerName = providerName;
     }
 
-    public String getApiUrl() {
-        return apiUrl;
+    public String constructApiParamsJsonString() {
+        return new Gson().toJson(apiParams);
     }
 
-    public void setApiUrl(String apiUrl) {
-        this.apiUrl = apiUrl;
+    public Set<String> getApiParamKeys() {
+        return apiParams.keySet();
+    }
+
+    public Map<String, String> getApiParams() {
+        return apiParams;
+    }
+
+    public void setApiParams(Map<String, String> apiParams) {
+        this.apiParams = apiParams;
     }
 }
