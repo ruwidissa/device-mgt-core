@@ -35,6 +35,16 @@ import java.util.Properties;
 public interface SubscriptionManager {
 
     /**
+     * Use to update status of a subscription
+     *
+     * @param deviceId Id of the device
+     * @param subId subscription id
+     * @param status status to be changed
+     */
+    void updateSubscriptionStatus(int deviceId, int subId, String status)
+            throws SubscriptionManagementException;
+
+    /**
      * Performs bulk subscription operation for a given application and a subscriber list.
      * @param applicationUUID UUID of the application to subscribe/unsubscribe
      * @param params          list of subscribers.

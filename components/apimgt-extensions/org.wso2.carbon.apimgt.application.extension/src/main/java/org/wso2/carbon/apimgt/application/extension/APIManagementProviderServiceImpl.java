@@ -233,7 +233,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
     @Override
     public AccessTokenInfo getAccessToken(String scopes, String[] tags, String applicationName, String tokenType,
-            String validityPeriod) throws APIManagerException {
+            String validityPeriod, String username) throws APIManagerException {
         try {
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
             ApiApplicationKey clientCredentials = getClientCredentials(tenantDomain, tags, applicationName, tokenType,
@@ -245,15 +245,22 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 throw new APIManagerException(msg);
             }
 
-            String user =
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + "@" + PrivilegedCarbonContext
+            if (username == null || username.isEmpty()) {
+                username =
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + "@" + PrivilegedCarbonContext
+                                .getThreadLocalCarbonContext().getTenantDomain(true);
+            } else {
+                if (!username.contains("@")) {
+                    username += "@" + PrivilegedCarbonContext
                             .getThreadLocalCarbonContext().getTenantDomain(true);
+                }
+            }
 
             JWTClientManagerService jwtClientManagerService = APIApplicationManagerExtensionDataHolder.getInstance()
                     .getJwtClientManagerService();
             JWTClient jwtClient = jwtClientManagerService.getJWTClient();
             AccessTokenInfo accessTokenForAdmin = jwtClient
-                    .getAccessToken(clientCredentials.getConsumerKey(), clientCredentials.getConsumerSecret(), user,
+                    .getAccessToken(clientCredentials.getConsumerKey(), clientCredentials.getConsumerSecret(), username,
                             scopes);
 
             return accessTokenForAdmin;

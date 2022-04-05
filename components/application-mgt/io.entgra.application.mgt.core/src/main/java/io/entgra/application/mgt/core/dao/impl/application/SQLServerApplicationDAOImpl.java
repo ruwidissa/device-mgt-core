@@ -81,8 +81,12 @@ public class SQLServerApplicationDAOImpl extends GenericApplicationDAOImpl {
                 + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
                 + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT, "
                 + "NEW_AP_APP_LIFECYCLE_STATE.UPDATED_AT AS LATEST_UPDATE "
-                + "FROM AP_APP "
-                + "INNER JOIN AP_APP_RELEASE ON "
+                + "FROM AP_APP ";
+        if (StringUtils.isNotEmpty(filter.getFavouredBy())) {
+            sql += "INNER JOIN AP_APP_FAVOURITES ON "
+                    + "AP_APP.ID = AP_APP_FAVOURITES.AP_APP_ID ";
+        }
+        sql += "INNER JOIN AP_APP_RELEASE ON "
                 + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
                 + "INNER JOIN (SELECT AP_APP.ID FROM AP_APP ";
         if (StringUtils.isNotEmpty(filter.getVersion()) || StringUtils.isNotEmpty(filter.getAppReleaseState())

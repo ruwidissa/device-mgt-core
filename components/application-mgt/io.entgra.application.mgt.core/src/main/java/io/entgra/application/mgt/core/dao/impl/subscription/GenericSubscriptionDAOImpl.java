@@ -692,6 +692,68 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
+    public int getDeviceIdForSubId(int subId, int tenantId) throws ApplicationManagementDAOException {
+        try {
+            Connection conn = this.getDBConnection();
+            String sql = "SELECT DM_DEVICE_ID "
+                    + "FROM AP_DEVICE_SUBSCRIPTION "
+                    + "WHERE ID = ? AND "
+                    + "TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, subId);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("DM_DEVICE_ID");
+                    }
+                }
+                return -1;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get app operation ids for given "
+                    + "subscription id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when processing SQL to get operation ids for given subscription id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<Integer> getOperationIdsForSubId(int subId, int tenantId) throws ApplicationManagementDAOException {
+        try {
+            Connection conn = this.getDBConnection();
+            List<Integer> operationIds = new ArrayList<>();
+            String sql = "SELECT OPERATION_ID "
+                    + "FROM AP_APP_SUB_OP_MAPPING "
+                    + "WHERE AP_DEVICE_SUBSCRIPTION_ID = ? AND "
+                    + "TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, subId);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        operationIds.add(rs.getInt("OPERATION_ID"));
+                    }
+                }
+                return operationIds;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get app operation ids for given "
+                    + "subscription id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when processing SQL to get operation ids for given subscription id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+
+    @Override
     public List<Integer> getDeviceSubIdsForOperation(int operationId, int deviceId, int tenantId)
             throws ApplicationManagementDAOException {
         try {
@@ -1204,7 +1266,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             Connection conn = this.getDBConnection();
             List<String> subscribedGroups = new ArrayList<>();
             String sql = "SELECT "
-                         + "GS.GROUP_NAME AS GROUPS "
+                         + "GS.GROUP_NAME AS APP_GROUPS "
                          + "FROM AP_GROUP_SUBSCRIPTION GS "
                          + "WHERE "
                          + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ? OFFSET ?";
@@ -1215,7 +1277,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 ps.setInt(4, offsetValue);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        subscribedGroups.add(rs.getString("GROUPS"));
+                        subscribedGroups.add(rs.getString("APP_GROUPS"));
                     }
                 }
                 return subscribedGroups;
@@ -1244,7 +1306,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         try {
             Connection conn = this.getDBConnection();
             String sql = "SELECT "
-                         + "COUNT(GS.GROUP_NAME) AS GROUPS "
+                         + "COUNT(GS.GROUP_NAME) AS APP_GROUPS_COUNT "
                          + "FROM AP_GROUP_SUBSCRIPTION GS "
                          + "WHERE "
                          + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ?";
@@ -1254,7 +1316,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getInt("GROUPS");
+                        return rs.getInt("APP_GROUPS_COUNT");
                     }
                 }
                 return 0;

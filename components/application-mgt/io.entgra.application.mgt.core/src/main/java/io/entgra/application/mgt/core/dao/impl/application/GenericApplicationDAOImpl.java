@@ -24,7 +24,6 @@ import io.entgra.application.mgt.common.AppLifecycleState;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.application.mgt.common.dto.CategoryDTO;
 import io.entgra.application.mgt.common.Filter;
-import io.entgra.application.mgt.common.dto.ReviewDTO;
 import io.entgra.application.mgt.common.dto.TagDTO;
 import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.dao.ApplicationDAO;
@@ -136,10 +135,14 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
                 + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT, "
                 + "NEW_AP_APP_LIFECYCLE_STATE.UPDATED_AT AS LATEST_UPDATE "
-                + "FROM AP_APP "
-                + "INNER JOIN AP_APP_RELEASE ON "
-                + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
-                + "INNER JOIN (SELECT AP_APP.ID FROM AP_APP ";
+                + "FROM AP_APP ";
+        if (StringUtils.isNotEmpty(filter.getFavouredBy())) {
+            sql += "INNER JOIN AP_APP_FAVOURITES ON "
+                    + "AP_APP.ID = AP_APP_FAVOURITES.AP_APP_ID ";
+        }
+        sql += "INNER JOIN AP_APP_RELEASE ON "
+        + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
+        + "INNER JOIN (SELECT AP_APP.ID FROM AP_APP ";
         if (StringUtils.isNotEmpty(filter.getVersion()) || StringUtils.isNotEmpty(filter.getAppReleaseState())
                 || StringUtils.isNotEmpty(filter.getAppReleaseType())) {
             sql += "INNER JOIN AP_APP_RELEASE ON AP_APP.ID = AP_APP_RELEASE.AP_APP_ID ";
@@ -190,8 +193,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "FROM AP_APP_LIFECYCLE_STATE "
                 + "GROUP BY AP_APP_LIFECYCLE_STATE.AP_APP_RELEASE_ID)) AS NEW_AP_APP_LIFECYCLE_STATE "
                 + "ON AP_APP_RELEASE.ID = NEW_AP_APP_LIFECYCLE_STATE.AP_APP_RELEASE_ID "
-                + "WHERE AP_APP.TENANT_ID = ? "
-                + "ORDER BY AP_APP.ID, LATEST_UPDATE DESC";
+                + "WHERE AP_APP.TENANT_ID = ? ";
+        if (StringUtils.isNotEmpty(filter.getFavouredBy())) {
+            sql += "AND AP_APP_FAVOURITES.USER_NAME = ? ";
+        }
+        sql += "ORDER BY AP_APP.ID, LATEST_UPDATE DESC";
 
         try {
             Connection conn = this.getDBConnection();
@@ -230,7 +236,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     stmt.setInt(paramIndex++, filter.getLimit());
                     stmt.setInt(paramIndex++, filter.getOffset());
                 }
-                stmt.setInt(paramIndex, tenantId);
+                stmt.setInt(paramIndex++, tenantId);
+                if (StringUtils.isNotEmpty(filter.getFavouredBy())) {
+                    stmt.setString(paramIndex, filter.getFavouredBy());
+                }
                 try (ResultSet rs = stmt.executeQuery()) {
                     return DAOUtil.loadApplications(rs);
                 }
@@ -727,6 +736,95 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             String msg = "Error occurred while executing SQL to retire an application which has application ID "
                     + appId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void addAppToFavourite(int appId, String userName, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to add app with the id " + appId + " favourites");
+        }
+        String sql = "INSERT INTO AP_APP_FAVOURITES "
+                + "(AP_APP_ID, USER_NAME, "
+                + " TENANT_ID) "
+                + "VALUES (?, ?, ?)";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, appId);
+                stmt.setString(2, userName);
+                stmt.setInt(3, tenantId);
+                    stmt.addBatch();
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection when adding app to favourites";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while adding app with the id " + appId + " to favourites. Executed Query: " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void removeAppFromFavourite(int appId, String userName, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to add app with the id " + appId + " favourites");
+        }
+        String sql = "DELETE FROM AP_APP_FAVOURITES "
+                + "WHERE AP_APP_ID = ? "
+                + "AND USER_NAME = ?  "
+                + "AND TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, appId);
+                stmt.setString(2, userName);
+                stmt.setInt(3, tenantId);
+                stmt.addBatch();
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection when removing app from favourites";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while removing app with the id " + appId + " from favourites. Executed Query: " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public boolean isFavouriteApp(int appId, String userName, int tenantId) throws ApplicationManagementDAOException {
+        String sql = "SELECT AP_APP_ID "
+                + "FROM AP_APP_FAVOURITES "
+                + "WHERE "
+                + "AP_APP_ID = ? AND "
+                + "USER_NAME = ? AND "
+                + "TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                stmt.setInt(1, appId);
+                stmt.setString(2, userName);
+                stmt.setInt(3, tenantId);
+                try (ResultSet rs = stmt.executeQuery()){
+                    return rs.next();
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to check whether the application with the id "
+                    + appId + " is a favourite app";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while checking whether the application with the id "
+                    + appId + " is a favourite app. executed query " + sql;
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
