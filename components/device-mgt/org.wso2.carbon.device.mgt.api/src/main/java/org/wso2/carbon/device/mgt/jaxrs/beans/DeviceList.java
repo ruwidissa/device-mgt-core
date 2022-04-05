@@ -32,6 +32,12 @@ public class DeviceList extends BasePaginatedResult {
     @ApiModelProperty(name = "totalCost", value = "Total cost of all devices per tenant", required = false)
     private double totalCost;
 
+    @ApiModelProperty(name = "message", value = "Send information text to the billing UI", required = false)
+    private String message;
+
+    @ApiModelProperty(name = "billedDateIsValid", value = "Check if user entered date is valid", required = false)
+    private boolean billedDateIsValid;
+
     @ApiModelProperty(value = "List of devices returned")
     @JsonProperty("devices")
     public List<Device> getList() {
@@ -40,6 +46,22 @@ public class DeviceList extends BasePaginatedResult {
 
     public void setList(List<Device> devices) {
         this.devices = devices;
+    }
+
+    public boolean isBilledDateIsValid() {
+        return billedDateIsValid;
+    }
+
+    public void setBilledDateIsValid(boolean billedDateIsValid) {
+        this.billedDateIsValid = billedDateIsValid;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public double getTotalCost() {

@@ -185,56 +185,27 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
     }
 
     @Override
-    public List<DeviceBilling> getDeviceBillList(PaginationRequest request, int tenantId, Timestamp startDate, Timestamp endDate)
+    public List<Device> getDeviceListWithoutPagination(int tenantId)
             throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
-        List<DeviceBilling> devices = new ArrayList<>();
+        List<Device> devices = new ArrayList<>();
         try {
             conn = this.getConnection();
-            String sql = "SELECT DM_DEVICE.ID, DEVICE_IDENTIFICATION, DESCRIPTION, NAME AS DEVICE_NAME, DM_ENROLMENT.ID AS ENROLMENT_ID,\n" +
-                    "    DATE_OF_ENROLMENT,STATUS, LAST_BILLED_DATE, TIMESTAMPDIFF('DAY', DATE_OF_ENROLMENT, CURDATE()) as DAYS_SINCE_ENROLLED\n" +
-                    "    FROM DM_DEVICE JOIN DM_ENROLMENT ON (DM_DEVICE.ID = DM_ENROLMENT.DEVICE_ID)\n" +
-                    "    WHERE DM_ENROLMENT.TENANT_ID=?";
+            String sql = "SELECT DM_DEVICE.ID AS DEVICE_ID, DEVICE_IDENTIFICATION, DESCRIPTION, DM_DEVICE.NAME AS DEVICE_NAME, DM_DEVICE_TYPE.NAME AS DEVICE_TYPE,\n" +
+                    "DM_ENROLMENT.ID AS ENROLMENT_ID, DATE_OF_ENROLMENT,OWNER, OWNERSHIP,IS_TRANSFERRED, STATUS, DATE_OF_LAST_UPDATE, LAST_BILLED_DATE,\n" +
+                    "TIMESTAMPDIFF('DAY', DATE_OF_ENROLMENT, CURDATE()) as DAYS_SINCE_ENROLLED FROM DM_DEVICE JOIN DM_ENROLMENT\n" +
+                    "ON (DM_DEVICE.ID = DM_ENROLMENT.DEVICE_ID) JOIN DM_DEVICE_TYPE ON (DM_DEVICE.DEVICE_TYPE_ID = DM_DEVICE_TYPE.ID) WHERE DM_ENROLMENT.TENANT_ID=?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                DeviceBilling device = DeviceManagementDAOUtil.loadDeviceBilling(rs);
+                Device device = DeviceManagementDAOUtil.loadDevice(rs);
                 devices.add(device);
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while fetching the list of device billing ", e);
-        } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, null);
-        }
-        return devices;
-    }
-
-    @Override
-    public List<DeviceBilling> getRemovedDeviceBillList(PaginationRequest request, int tenantId)
-            throws DeviceManagementDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        List<DeviceBilling> devices = new ArrayList<>();
-        try {
-            conn = this.getConnection();
-            String sql = "select DEVICE_IDENTIFICATION, DESCRIPTION, NAME AS DEVICE_NAME, DATE_OF_ENROLMENT, LAST_BILLED_DATE, DATE_OF_LAST_UPDATE, STATUS, " +
-                    "TIMESTAMPDIFF('DAY', DATE_OF_ENROLMENT, DATE_OF_LAST_UPDATE) AS DAYS_USED from DM_DEVICE d, DM_ENROLMENT e" +
-                    " where e.TENANT_ID=? and d.ID=e.DEVICE_ID and STATUS ='REMOVED'\n";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, tenantId);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-//                DeviceBilling device = DeviceManagementDAOUtil.loadDeviceBilling(rs, true);
-                DeviceBilling device = DeviceManagementDAOUtil.loadDeviceBilling(rs);
-                devices.add(device);
-            }
-        } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while fetching the list of devices belongs to '" +
-                    request.getOwner() + "'", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }

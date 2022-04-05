@@ -42,6 +42,7 @@ import org.wso2.carbon.device.mgt.core.privacy.dao.impl.PrivacyComplianceDAOImpl
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -124,6 +125,11 @@ public class DeviceManagementDAOFactory {
     public static EnrollmentDAO getEnrollmentDAO() {
         return new EnrollmentDAOImpl();
     }
+
+    public static BillingDAO getBillingDAO() {
+        return new BillingDAOImpl();
+    }
+
     public static DeviceStatusDAO getDeviceStatusDAO() {
         return new DeviceStatusDAOImpl();
     }

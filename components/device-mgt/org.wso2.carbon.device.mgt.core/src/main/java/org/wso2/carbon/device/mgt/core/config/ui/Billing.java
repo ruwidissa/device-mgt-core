@@ -7,6 +7,26 @@ public class Billing {
     private boolean isHideBillGenerationInSubTenant;
     private boolean isHideTotalCalculationInSuperTenant;
     private boolean isHideTotalCalculationInSubTenant;
+    private boolean isHideDomainSelectionInSuperTenant;
+    private boolean isHideDomainSelectionInSubTenant;
+
+    @XmlElement(name = "HideDomainSelectionInSuperTenant")
+    public boolean isHideDomainSelectionInSuperTenant() {
+        return isHideDomainSelectionInSuperTenant;
+    }
+
+    public void setHideDomainSelectionInSuperTenant(boolean hideDomainSelectionInSuperTenant) {
+        isHideDomainSelectionInSuperTenant = hideDomainSelectionInSuperTenant;
+    }
+
+    @XmlElement(name = "HideDomainSelectionInSubTenant")
+    public boolean isHideDomainSelectionInSubTenant() {
+        return isHideDomainSelectionInSubTenant;
+    }
+
+    public void setHideDomainSelectionInSubTenant(boolean hideDomainSelectionInSubTenant) {
+        isHideDomainSelectionInSubTenant = hideDomainSelectionInSubTenant;
+    }
 
     @XmlElement(name = "HideBillGenerationInSuperTenant")
     public boolean isHideBillGenerationInSuperTenant() {

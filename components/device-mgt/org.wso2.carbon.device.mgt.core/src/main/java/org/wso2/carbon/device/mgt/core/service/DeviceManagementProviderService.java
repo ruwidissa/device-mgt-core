@@ -210,6 +210,17 @@ public interface DeviceManagementProviderService {
     PaginationResult getAllDevicesBillings(PaginationRequest request, int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
 
     /**
+     * Method to retrieve all the devices with pagination support.
+     *
+     * @return PaginationResult - Result including the device bill list without pagination.
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching billing of
+     *                                   devices.
+     */
+    PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
+
+
+
+    /**
      * Returns the device of specified id.
      *
      * @param deviceId device Id

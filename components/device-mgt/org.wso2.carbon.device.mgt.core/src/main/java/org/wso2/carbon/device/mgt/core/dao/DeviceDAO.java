@@ -294,24 +294,12 @@ public interface DeviceDAO {
     List<Device> getDevices(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
 
     /**
-     * This method is used to retrieve the not removed devices of a given tenant as a paginated result.
-     *
-     * @param request  PaginationRequest object holding the data for pagination
+     * This method is used to retrieve the devices of a given tenant without pagination.
      * @param tenantId tenant id.
-     * @return returns paginated list of not removed devices of tenant.
+     * @return returns a list of devices of the tenant.
      * @throws DeviceManagementDAOException
      */
-    List<DeviceBilling> getDeviceBillList(PaginationRequest request, int tenantId, Timestamp startDate, Timestamp endDate) throws DeviceManagementDAOException;
-
-    /**
-     * This method is used to retrieve the removed devices of a given tenant as a paginated result.
-     *
-     * @param request  PaginationRequest object holding the data for pagination
-     * @param tenantId tenant id.
-     * @return rreturns paginated list of removed devices of tenant.
-     * @throws DeviceManagementDAOException
-     */
-    List<DeviceBilling> getRemovedDeviceBillList(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
+    List<Device> getDeviceListWithoutPagination(int tenantId) throws DeviceManagementDAOException;
 
     /**
      * This method is used to retrieve the devices of a given tenant as a paginated result, along the lines of

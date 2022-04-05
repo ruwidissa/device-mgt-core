@@ -47,6 +47,28 @@ public class PaginationResult implements Serializable {
     @ApiModelProperty(name = "totalCost", value = "Total cost of all devices per tenant", required = false)
     private double totalCost;
 
+    @ApiModelProperty(name = "billedDateIsValid", value = "Check if user entered date is valid", required = false)
+    private boolean billedDateIsValid;
+
+    @ApiModelProperty(name = "message", value = "Send information text to the billing UI", required = false)
+    private String message;
+
+    public boolean isBilledDateIsValid() {
+        return billedDateIsValid;
+    }
+
+    public void setBilledDateIsValid(boolean billedDateIsValid) {
+        this.billedDateIsValid = billedDateIsValid;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public double getTotalCost() {
         return totalCost;
     }
