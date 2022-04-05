@@ -31,7 +31,7 @@ import java.util.Map;
 public class Constants {
 
     public static final String APPLICATION_CONFIG_XML_FILE = "application-mgt.xml";
-    public static final String IDENTITY_SERVERS_CONFIG_XML_FILE = "identity-servers-config.xml";
+    public static final String IDENTITY_SERVERS_CONFIG_XML_FILE = "identity-service-provider-config.xml";
 
     public static final String DEFAULT_CONFIG_FILE_LOCATION = CarbonUtils.getCarbonConfigDirPath() + File.separator +
             Constants.APPLICATION_CONFIG_XML_FILE;
