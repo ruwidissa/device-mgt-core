@@ -25,10 +25,12 @@
     <!--  maximum number of login cache entries  -->
     <LoginCacheCapacity>10000</LoginCacheCapacity>
     <Billing>
-        <HideBillGenerationInSuperTenant>true</HideBillGenerationInSuperTenant>
-        <HideBillGenerationInSubTenant>true</HideBillGenerationInSubTenant>
-        <HideTotalCalculationInSuperTenant>true</HideTotalCalculationInSuperTenant>
-        <HideTotalCalculationInSubTenant>true</HideTotalCalculationInSubTenant>
+        <HideBillGenerationInSuperTenant>false</HideBillGenerationInSuperTenant>
+        <HideBillGenerationInSubTenant>false</HideBillGenerationInSubTenant>
+        <HideTotalCalculationInSuperTenant>false</HideTotalCalculationInSuperTenant>
+        <HideTotalCalculationInSubTenant>false</HideTotalCalculationInSubTenant>
+        <HideDomainSelectionInSuperTenant>false</HideDomainSelectionInSuperTenant>
+        <HideDomainSelectionInSubTenant>true</HideDomainSelectionInSubTenant>
     </Billing>
     <AppRegistration>
         <Tags>

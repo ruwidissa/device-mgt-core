@@ -129,6 +129,7 @@ import org.wso2.carbon.email.sender.core.service.EmailSenderService;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -946,7 +947,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         PaginationResult paginationResult = new PaginationResult();
         double totalCost = 0.0;
         boolean allDevicesBilledDateIsValid = true;
-        String lastBilledDates = "";
         ArrayList<String> lastBilledDatesList =  new ArrayList<>();
         List<Billing> invalidDevices =  new ArrayList<>();
         List<Device> removeBillingPeriodInvalidDevices =  new ArrayList<>() ;
@@ -954,7 +954,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
         try {
             MetadataManagementDAOFactory.beginTransaction();
-            Metadata metadata = metadataDAO.getMetadata(-1234, DeviceManagementConstants.META_KEY);
+            Metadata metadata = metadataDAO.getMetadata(MultitenantConstants.SUPER_TENANT_ID, DeviceManagementConstants.META_KEY);
 
             Gson g = new Gson();
             Collection<Cost> costData = null;
@@ -970,7 +970,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             long dateDiff = 0;
 
                             List<DeviceStatus> deviceStatus = device.getDeviceStatusInfo();
-                            boolean lastBilledDate = false;
+                            boolean firstDateBilled = false;
                             boolean deviceStatusIsValid = false;
 
                             List<Billing> deviceBilling = billingDAO.getBilling(device.getId(), startDate, endDate);
@@ -992,10 +992,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
                             if (!billDateIsInvalid) {
                                 for (int i = 0; i < deviceStatus.size(); i++) {
-                                    if (deviceStatus.get(i).getStatus().toString().equals("ACTIVE")) {
+                                    if (DeviceManagementConstants.ACTIVE_STATUS.equals(deviceStatus.get(i).getStatus().toString())) {
                                         if (deviceStatus.size() > i + 1) {
-                                            if (!lastBilledDate) {
-                                                lastBilledDate = true;
+                                            if (!firstDateBilled) {
+                                                firstDateBilled = true;
                                                 if (device.getEnrolmentInfo().getLastBilledDate() == 0) {
                                                     deviceStatusIsValid = true;
                                                     dateDiff = dateDiff + (deviceStatus.get(i + 1).getUpdateTime().getTime() - deviceStatus.get(i).getUpdateTime().getTime());
@@ -1011,11 +1011,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                                     dateDiff = dateDiff + (deviceStatus.get(i + 1).getUpdateTime().getTime() - deviceStatus.get(i).getUpdateTime().getTime());
                                                 }
                                             }
-                                        } else {   // The last status update calculation is done in this block
+                                        } else {
+
                                             // If only one status row is retrieved this block is executed
-                                            if (!lastBilledDate) {
-                                                lastBilledDate = true;
-                                                // Is executed if there is no lastBilled date and if the updates time is before the enddate
+                                            if (!firstDateBilled) {
+                                                firstDateBilled = true;
+
+                                                // Is executed if there is no lastBilled date and if the updates time is before the end date
                                                 if (device.getEnrolmentInfo().getLastBilledDate() == 0) {
                                                     if (endDate.getTime() >= deviceStatus.get(i).getUpdateTime().getTime()) {
                                                         deviceStatusIsValid = true;
@@ -1066,11 +1068,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                 if (device.getEnrolmentInfo().getLastBilledDate() != 0) {
                                     Date date = new Date(device.getEnrolmentInfo().getLastBilledDate());
                                     Format format = new SimpleDateFormat("yyyy MM dd");
-                                    if (!lastBilledDatesList.contains(lastBilledDatesList.add(format.format(date)))) {
-                                        lastBilledDatesList.add(format.format(date));
-                                    }
 
-                                    lastBilledDates =  lastBilledDates + ' ' + lastBilledDatesList;
+                                    for (String lastBillDate : lastBilledDatesList) {
+                                        if (!lastBillDate.equals(format.format(date))) {
+                                            lastBilledDatesList.add(format.format(date));
+                                        }
+                                    }
                                 }
                                 removeBillingPeriodInvalidDevices.add(device);
                             }
@@ -1098,14 +1101,15 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
         if(!removeBillingPeriodInvalidDevices.isEmpty() && removeBillingPeriodInvalidDevices.size() == allDevices.size()) {
             allDevicesBilledDateIsValid = false;
-            paginationResult.setMessage("Invalid bill period last billed dates of devices are " +lastBilledDates);
+            paginationResult.setMessage("Invalid bill period.");
         }
         if(!removeStatusUpdateInvalidDevices.isEmpty() && removeStatusUpdateInvalidDevices.size() == allDevices.size()) {
             allDevicesBilledDateIsValid = false;
             if (paginationResult.getMessage() != null){
                 paginationResult.setMessage(paginationResult.getMessage() + " and no device updates within entered bill period.");
             } else {
-                paginationResult.setMessage("Devices have not been updated within the given period or entered end date comes before the last billed date");
+                paginationResult.setMessage("Devices have not been updated within the given period or entered end date comes before the " +
+                        "last billed date.");
             }
 
         }
