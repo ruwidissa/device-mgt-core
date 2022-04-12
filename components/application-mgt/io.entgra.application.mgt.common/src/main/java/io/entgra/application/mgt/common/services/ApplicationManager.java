@@ -100,6 +100,12 @@ public interface ApplicationManager {
      */
     <T> ApplicationDTO uploadReleaseArtifactIfExist(T app) throws ApplicationManagementException;
 
+    /**
+     * Check if public app release packageName is valid (I.E invalid if packageName already exists)
+     *
+     * @param packageName name of the application release package
+     * @throws ApplicationManagementException if package name is invalid
+     */
     void validatePublicAppReleasePackageName(String packageName) throws ApplicationManagementException;
 
     /**
@@ -169,6 +175,13 @@ public interface ApplicationManager {
      */
     void deleteApplicationRelease(String releaseUuid) throws ApplicationManagementException;
 
+    /**
+     * Use to delete application artifact files (For example this is useful to delete application release artifacts
+     * (I.E screenshots) when an application is deleted)
+     *
+     * @param directoryPaths directory paths that contains release artifacts (I.E screenshots)
+     * @throws ApplicationManagementException if error occurred while deleting artifacts
+     */
     void deleteApplicationArtifacts(List<String> directoryPaths) throws ApplicationManagementException;
 
     /**
@@ -220,6 +233,13 @@ public interface ApplicationManager {
                                          ApplicationType type)
             throws ApplicationManagementException;
 
+    /**
+     * Get application and all application releases associated to the application for the given application Id
+     *
+     * @param applicationId Application Id
+     * @return {@link ApplicationDTO}
+     * @throws ApplicationManagementException if error occurred application data from the database.
+     */
     ApplicationDTO getApplication(int applicationId) throws ApplicationManagementException;
 
     /**
@@ -292,7 +312,8 @@ public interface ApplicationManager {
     void updateApplicationArtifact(String deviceType, String uuid,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
-    /***
+    /**
+     * Use to update existing enterprise app release
      *
      * @param releaseUuid UUID of the application release.
      * @param entAppReleaseWrapper {@link ApplicationReleaseDTO}
@@ -302,22 +323,47 @@ public interface ApplicationManager {
     ApplicationRelease updateEntAppRelease(String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
                                            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
+
+    /**
+     * Use to update existing public app release
+     *
+     * @param releaseUuid UUID of the application release.
+     * @param publicAppReleaseWrapper {@link ApplicationReleaseDTO}
+     * @param applicationArtifact {@link ApplicationArtifact}
+     * @return If the application release is updated correctly True returns, otherwise retuen False
+     */
     ApplicationRelease updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
                                            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
+    /**
+     * Use to update existing web app release
+     *
+     * @param releaseUuid UUID of the application release.
+     * @param webAppReleaseWrapper {@link ApplicationReleaseDTO}
+     * @param applicationArtifact {@link ApplicationArtifact}
+     * @return If the application release is updated correctly True returns, otherwise retuen False
+     */
     ApplicationRelease updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
                                            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
+    /**
+     * Use to update existing custom app release
+     *
+     * @param releaseUuid UUID of the application release.
+     * @param customAppReleaseWrapper {@link ApplicationReleaseDTO}
+     * @param applicationArtifact {@link ApplicationArtifact}
+     * @return If the application release is updated correctly True returns, otherwise retuen False
+     */
     ApplicationRelease updateCustomAppRelease(String releaseUuid, CustomAppReleaseWrapper customAppReleaseWrapper,
                                               ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
-    /***
+    /**
      * To validate the application creating request
      *
      */
     <T> void validateAppCreatingRequest(T param) throws ApplicationManagementException, RequestValidatingException;
 
-    /***
+    /**
      *
      * @throws ApplicationManagementException throws if payload does not satisfy requirements.
      */

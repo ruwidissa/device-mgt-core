@@ -24,6 +24,12 @@ import java.util.Base64;
 
 public class FileUtil {
 
+    /**
+     * Useful to remove path separator string "," from base64 string
+     *
+     * @param base64String base64 string
+     * @return base64 string without path separator
+     */
     public static String removePathSeparatorFromBase64String(String base64String) {
         String partSeparator = ",";
         if (base64String.contains(partSeparator)) {
@@ -32,6 +38,12 @@ public class FileUtil {
         return base64String;
     }
 
+    /**
+     * Useful to convert base64 string to input stream
+     *
+     * @param base64 base64 string to be converted
+     * @return {@link InputStream} of the provided base64 string
+     */
     public static InputStream base64ToInputStream(String base64) {
         base64 = FileUtil.removePathSeparatorFromBase64String(base64);
         byte[] base64Bytes = Base64.getDecoder().decode(base64);
@@ -72,13 +84,24 @@ public class FileUtil {
         return suffix;
     }
 
+    /**
+     * Use to extract file extension from file name
+     *
+     * @param fileName name of the file
+     * @return extension of the file
+     */
     private static String extractFileExtension(String fileName) {
         return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
 
+    /**
+     * Use to extract the file name without the extension
+     * For example if you provide "main.java" as the fileName this will return main
+     *
+     * @param fileName name of the file
+     * @return file name without file extension
+     */
     private static String extractFileNameWithoutExtension(String fileName) {
         return fileName.substring(0, fileName.lastIndexOf('.'));
     }
-
-
 }

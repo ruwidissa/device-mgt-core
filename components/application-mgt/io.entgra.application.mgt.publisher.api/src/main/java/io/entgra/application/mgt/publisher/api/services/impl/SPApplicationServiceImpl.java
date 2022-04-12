@@ -95,7 +95,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
             return Response.status(Response.Status.OK).entity("Successfully deleted identity server").build();
         } catch (NotFoundException e) {
             String msg = "Identity server with the id " + id + " does not exist.";
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
@@ -114,7 +114,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
             return Response.status(Response.Status.OK).entity(identityServer).build();
         } catch (NotFoundException e) {
             String msg = "Identity server with the id " + id + " does not exist.";
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
@@ -133,7 +133,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
             return Response.status(Response.Status.OK).entity(identityServerResponse).build();
         } catch (NotFoundException e) {
             String msg = "Identity server with the id " + id + " does not exist.";
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (BadRequestException e) {
             String errMsg = "Identity server request payload is invalid";

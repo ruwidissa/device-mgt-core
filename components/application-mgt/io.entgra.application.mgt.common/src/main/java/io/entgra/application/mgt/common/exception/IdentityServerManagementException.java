@@ -21,6 +21,12 @@ package io.entgra.application.mgt.common.exception;
  * Exception that will be thrown if any error occurs while calling identity server services .
  */
 public class IdentityServerManagementException extends ApplicationManagementException {
+
+    public IdentityServerManagementException(String message, Throwable throwable) {
+        super(message, throwable);
+        setMessage(message);
+    }
+
     public IdentityServerManagementException(String message) {
         super(message);
         setMessage(message);

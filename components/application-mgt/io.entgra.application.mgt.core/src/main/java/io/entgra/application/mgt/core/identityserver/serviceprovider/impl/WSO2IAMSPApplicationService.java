@@ -65,8 +65,7 @@ public class WSO2IAMSPApplicationService implements ISServiceProviderApplication
         String uriString = constructAPIUrl(identityServer);
         uriString += Constants.FORWARD_SLASH + spAppId;
         req.setURI(HttpUtil.createURI(uriString));
-        CloseableHttpClient client = HttpClients.createDefault();
-        try {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpResponse response = invokeISAPI(identityServer, client, req);
             String responseBody = HttpUtil.getResponseString(response);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -82,16 +81,17 @@ public class WSO2IAMSPApplicationService implements ISServiceProviderApplication
         } catch (IOException e) {
             String msg = "Error occurred while calling SP Applications API. Make sure identity server is up and running";
             log.error(msg, e);
-            throw new IdentityServerManagementException(msg);
-        } finally {
-            try {
-                client.close();
-            } catch (IOException e) {
-                log.error("Error occurred while closing http connection");
-            }
+            throw new IdentityServerManagementException(msg, e);
         }
     }
 
+    /**
+     * Construct error message string depending on service providers api response
+     * (I.E If unauthorized a different message will be returned)
+     *
+     * @param response of the service provider api call
+     * @return constructed error message
+     */
     private String constructErrorMessage(HttpResponse response) {
         String msg = "Error occurred while calling SP Applications API";
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
@@ -109,8 +109,7 @@ public class WSO2IAMSPApplicationService implements ISServiceProviderApplication
         uriString += Constants.QUERY_STRING_SEPARATOR + Constants.OFFSET_QUERY_PARAM + Constants.QUERY_KEY_VALUE_SEPARATOR
                 + offset;
         req.setURI(HttpUtil.createURI(uriString));
-        CloseableHttpClient client = HttpClients.createDefault();
-        try {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpResponse response = invokeISAPI(identityServer, client, req);
             String responseBody = HttpUtil.getResponseString(response);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -123,27 +122,43 @@ public class WSO2IAMSPApplicationService implements ISServiceProviderApplication
         } catch (IOException e) {
             String msg = "Error occurred while calling SP Applications API. Make sure identity server is up and running";
             log.error(msg, e);
-            throw new IdentityServerManagementException(msg);
-        } finally {
-            try {
-                client.close();
-            } catch (IOException e) {
-                log.error("Error occurred while closing http connection");
-            }
+            throw new IdentityServerManagementException(msg, e);
         }
     }
 
+    /**
+     * Takes essential prerequisite steps (I.E setting authorization header),
+     * invokes provided GET request and returns the response
+     *
+     * @param identityServer {@link IdentityServerDTO}
+     * @param client httpClient that should be used to invoke
+     * @param request GET request to be invoked
+     * @return response of the invoked api
+     */
     private HttpResponse invokeISAPI(IdentityServerDTO identityServer, HttpClient client, HttpGet request) throws IOException {
         setBasicAuthHeader(identityServer, request);
         return client.execute(request);
     }
 
+    /**
+     * Add basic auth header to provided service provider api request by getting the username and password
+     * from identity server bean
+     *
+     * @param identityServer {@link IdentityServerDTO}
+     * @param request service provider api request
+     */
     private void setBasicAuthHeader(IdentityServerDTO identityServer, HttpRequestBase request) {
         String basicAuthHeader = HttpUtil.getBasicAuthBase64Header(identityServer.getUsername(),
                 identityServer.getPassword());
         request.setHeader(HttpHeaders.AUTHORIZATION, basicAuthHeader);
     }
 
+    /**
+     * Helps to construct service provider api base url
+     *
+     * @param identityServer {@link IdentityServerDTO}
+     * @return constructed service providers api url
+     */
     private String constructAPIUrl(IdentityServerDTO identityServer) {
         String identityServerUrl = identityServer.getUrl();
         // add "/" at the end, if the server url doesn't contain "/" at the end

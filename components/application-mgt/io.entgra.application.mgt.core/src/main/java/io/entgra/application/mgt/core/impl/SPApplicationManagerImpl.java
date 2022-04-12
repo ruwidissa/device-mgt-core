@@ -80,6 +80,13 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         return APIUtil.identityServerDtoToIdentityServerResponse(identityServerDTO);
     }
 
+    /**
+     * This is similar to getIdentityServerFromDB method except throws {@link NotFoundException} if identity server
+     * does not exist for the given id
+     *
+     * @param identityServerId id of identity server
+     * @return {@link IdentityServerDTO}
+     */
     private IdentityServerDTO getIdentityServer(int identityServerId) throws ApplicationManagementException {
         IdentityServerDTO identityServerDTO = getIdentityServerFromDB(identityServerId);
         if (identityServerDTO == null) {
@@ -90,6 +97,12 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         return identityServerDTO;
     }
 
+    /**
+     * Use to get {@link IdentityServerDTO} bean from database. Returns null if does not exist
+     *
+     * @param identityServerId id of identity server
+     * @return {@link IdentityServerDTO}
+     */
     private IdentityServerDTO getIdentityServerFromDB(int identityServerId) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
@@ -191,6 +204,12 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         }
     }
 
+    /**
+     * Validate the identity server delete request
+     *
+     * @param identityServerId identity server id
+     * @throws BadRequestException if provided identity server id is invalid
+     */
     private void validateIdentityServerDeleteRequest(int identityServerId) throws ApplicationManagementException {
         IdentityServerDTO identityServerDTO = getIdentityServerFromDB(identityServerId);
         if (identityServerDTO == null) {
@@ -200,6 +219,15 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         }
     }
 
+    /**
+     * This method is useful to re-construct the api params Map using updated identity server bean {@link IdentityServerDTO}
+     * For example updated identity server bean may contain only updated api param, in which case the existing api param values
+     * should be re-added to updated identity server bean
+     *
+     * @param updatedIdentityServerDTO updated identity server request payload
+     * @param existingIdentityServerDTO corresponding existing identity server of updated identity server
+     * @return Constructed api param map
+     */
     private Map<String, String> constructUpdatedApiParams(IdentityServerDTO updatedIdentityServerDTO,
                                                           IdentityServerDTO existingIdentityServerDTO) {
         Map<String, String> updatedApiParams = updatedIdentityServerDTO.getApiParams();
@@ -292,6 +320,12 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         validateIdentityServerUrl(identityServerDTO.getUrl());
     }
 
+    /**
+     * Validate provided identity server url (For example make sure it uses http/https protocol)
+     *
+     * @param url url of the identity server
+     * @throws BadRequestException if url is invalid
+     */
     private void validateIdentityServerUrl(String url) throws BadRequestException {
         String[] schemes = {"http","https"};
         UrlValidator urlValidator = new UrlValidator(schemes, UrlValidator.ALLOW_LOCAL_URLS);
@@ -302,17 +336,32 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         }
     }
 
-    private void validateUpdateIdentityServerRequestApiParam(IdentityServerDTO identityServerUpdateDTO,
+    /**
+     * Validate provided api params map in a identity server updated request
+     * For example the updated api param map may not contain all the required api params
+     *
+     * @param updatedIdentityServerDto  Identity server update request payload bean
+     * @param existingIdentityServerDTO Corresponding existing identity server bean of the updated identity server
+     * @throws ApplicationManagementException if any api param is invalid
+     */
+    private void validateUpdateIdentityServerRequestApiParam(IdentityServerDTO updatedIdentityServerDto,
                                                              IdentityServerDTO existingIdentityServerDTO) throws ApplicationManagementException {
         ISServiceProviderApplicationService serviceProviderApplicationService =
                 ISServiceProviderApplicationService.of(existingIdentityServerDTO.getProviderName());
         List<String> requiredApiParams = serviceProviderApplicationService.getRequiredApiParams();
-        if (!identityServerUpdateDTO.getProviderName().equals(existingIdentityServerDTO.getProviderName())) {
-            validateAllRequiredParamsExists(identityServerUpdateDTO, requiredApiParams);
+        if (!updatedIdentityServerDto.getProviderName().equals(existingIdentityServerDTO.getProviderName())) {
+            validateAllRequiredParamsExists(updatedIdentityServerDto, requiredApiParams);
         }
-        validateIfAnyInvalidParamExists(identityServerUpdateDTO, requiredApiParams);
+        validateIfAnyInvalidParamExists(updatedIdentityServerDto, requiredApiParams);
     }
 
+    /**
+     * Validate api params map of identity server create request payload
+     * For example the api param map may not contain all the required api params
+     *
+     * @param identityServerDTO {@link IdentityServerDTO}
+     * @throws ApplicationManagementException if any api param is invalid
+     */
     private void validateCreateIdentityServerRequestApiParams(IdentityServerDTO identityServerDTO) throws ApplicationManagementException {
         ISServiceProviderApplicationService serviceProviderApplicationService =
                 ISServiceProviderApplicationService.of(identityServerDTO.getProviderName());
@@ -321,6 +370,13 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         validateIfAnyInvalidParamExists(identityServerDTO, requiredApiParams);
     }
 
+    /**
+     * Make sure if all required api params exists for the given identity server bean
+     *
+     * @param identityServerDTO {@link IdentityServerDTO}
+     * @param requiredApiParams all mandatory api params
+     * @throws BadRequestException if a required api param does not exist
+     */
     private void validateAllRequiredParamsExists(IdentityServerDTO identityServerDTO, List<String> requiredApiParams)
             throws BadRequestException {
         for (String param : requiredApiParams) {
@@ -333,6 +389,14 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         }
     }
 
+    /**
+     * Make sure if all api params are valid
+     * For example it may contain an unwanted api param
+     *
+     * @param identityServerDTO {@link IdentityServerDTO}
+     * @param requiredApiParams all required api params
+     * @throws BadRequestException if an unwanted api param exist
+     */
     private void validateIfAnyInvalidParamExists(IdentityServerDTO identityServerDTO, List<String> requiredApiParams)
             throws BadRequestException {
         for (String param : identityServerDTO.getApiParamKeys()) {
@@ -344,6 +408,12 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         }
     }
 
+    /**
+     * If the given providerName does not exist in the identity server config file
+     *
+     * @param providerName Name of the identity service provider
+     * @return if provider name exist in identity server config
+     */
     private boolean isIdentityServiceProviderNotConfigured(String providerName) {
         List<IdentityServiceProvider> identityServiceProviders = ConfigurationManager.getInstance().getIdentityServerConfiguration().
                 getIdentityServiceProviders();
@@ -508,7 +578,7 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
             } catch (ApplicationManagementException e) {
                 String msg = "Identity service provider configuration file is invalid. Hence failed to proceed.";
                 log.error(msg);
-                throw new ApplicationManagementException(msg);
+                throw new ApplicationManagementException(msg, e);
             }
         }
         return identityServiceProviderDTOS;

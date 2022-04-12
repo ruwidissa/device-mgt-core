@@ -341,6 +341,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
+    /**
+     * Use to upload/save web app release artifacts (I.E icon)
+     *
+     * @param releaseDTO {@link ApplicationReleaseDTO}
+     * @param applicationArtifact {@link ApplicationArtifact}
+     * @return constructed {@link ApplicationReleaseDTO} with upload details
+     * @throws ResourceManagementException if error occurred while uploading
+     */
     private ApplicationReleaseDTO uploadWebAppReleaseArtifacts(ApplicationReleaseDTO releaseDTO, ApplicationArtifact applicationArtifact)
             throws ResourceManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -350,6 +358,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return addImageArtifacts(releaseDTO, applicationArtifact, tenantId);
     }
 
+    /**
+     * Use to upload/save public app release artifacts (I.E icon)
+     *
+     * @param releaseDTO {@link ApplicationReleaseDTO}
+     * @param applicationArtifact {@link ApplicationArtifact}
+     * @param deviceType Device Type name
+     * @return constructed {@link ApplicationReleaseDTO} with upload details
+     * @throws ResourceManagementException if error occurred while uploading
+     */
     private ApplicationReleaseDTO uploadPubAppReleaseArtifacts(ApplicationReleaseDTO releaseDTO, ApplicationArtifact applicationArtifact,
                                                               String deviceType)
             throws ResourceManagementException {
@@ -384,6 +401,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
+    /**
+     * Use to upload/save public app release artifacts (I.E icon)
+     *
+     * @param releaseDTO {@link ApplicationReleaseDTO}
+     * @param applicationArtifact {@link ApplicationArtifact}
+     * @param deviceType Device Type name
+     * @return constructed {@link ApplicationReleaseDTO} with upload details
+     * @throws ResourceManagementException if error occurred while uploading
+     */
     private ApplicationReleaseDTO uploadCustomAppReleaseArtifacts(ApplicationReleaseDTO releaseDTO, ApplicationArtifact applicationArtifact,
                                                                  String deviceType)
             throws ResourceManagementException, ApplicationManagementException {
@@ -402,7 +428,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (IOException e) {
             String msg = "Error occurred when uploading release artifact into the server";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         }
         return addImageArtifacts(releaseDTO, applicationArtifact, tenantId);
     }
@@ -436,16 +462,32 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
+    /**
+     * Helps to byte content of release binary file of application artifact
+     * This method can be useful when uploading application release binary file or when generating md5hex of release binary
+     *
+     * @param artifact {@link ApplicationArtifact}
+     * @return byte content of application release binary file
+     * @throws ApplicationManagementException if error occurred while getting byte content
+     */
     private byte[] getByteContentOfApp(ApplicationArtifact artifact) throws ApplicationManagementException{
         try {
             return IOUtils.toByteArray(artifact.getInstallerStream());
         } catch (IOException e) {
             String msg = "Error occurred while getting byte content of app binary artifact";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         }
     }
 
+    /**
+     * Useful to generate md5hex string of application release
+     *
+     * @param applicationArtifact {@link ApplicationArtifact}
+     * @param content byte array content of application release binary file
+     * @return Generated md5hex string
+     * @throws ApplicationManagementException if any error occurred while generating md5hex string
+     */
     private String generateMD5OfApp(ApplicationArtifact applicationArtifact, byte[] content) throws ApplicationManagementException {
         try {
             String md5OfApp = StorageManagementUtil.getMD5(new ByteArrayInputStream(content));
@@ -458,7 +500,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch( ApplicationStorageManagementException e) {
             String msg = "Error occurred while generating md5sum value of " + applicationArtifact.getInstallerName();
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         }
     }
 
@@ -1197,13 +1239,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    /**
-     * Get Application and all application releases associated to the application that has given application Id
-     *
-     * @param applicationId Application Id
-     * @return {@link ApplicationDTO}
-     * @throws ApplicationManagementException if error occurred application data from the databse.
-     */
     @Override
     public ApplicationDTO getApplication(int applicationId) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
