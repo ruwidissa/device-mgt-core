@@ -27,6 +27,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
 import org.wso2.carbon.device.mgt.common.TrackerGroupInfo;
@@ -120,9 +121,9 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
             try {
                 response = client.newCall(request).execute();
                 if(method==TraccarHandlerConstants.Methods.POST){
-                    JSONObject obj = new JSONObject(response.body().string());
-                    response.close();
-                    if (obj != null){
+                    String result = response.body().string();
+                    JSONObject obj = new JSONObject(result);
+                    if (obj.has("id")){
                         int traccarId = obj.getInt("id");
                         try {
                             TrackerManagementDAOFactory.beginTransaction();
@@ -140,6 +141,10 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
                                 }
                             }
                             TrackerManagementDAOFactory.commitTransaction();
+                        } catch (JSONException e) {
+                            TrackerManagementDAOFactory.rollbackTransaction();
+                            String msg = "Error occurred on JSON object .";
+                            log.error(msg, e);
                         } catch (TransactionManagementException e) {
                             TrackerManagementDAOFactory.rollbackTransaction();
                             String msg = "Error occurred establishing the DB connection .";
@@ -157,6 +162,7 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
                             TrackerManagementDAOFactory.closeConnection();
                         }
                     }
+                    response.close();
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully the request is proceed and communicated with Traccar");
