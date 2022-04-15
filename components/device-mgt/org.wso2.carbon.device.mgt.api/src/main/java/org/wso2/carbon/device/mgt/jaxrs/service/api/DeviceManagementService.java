@@ -1825,6 +1825,141 @@ public interface DeviceManagementService {
             @Size(max = 45)
                     String id);
 
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("/{type}/{id}/getstatushistory")
+  @ApiOperation(
+          produces = MediaType.APPLICATION_JSON,
+          httpMethod = "GET",
+          value = "Get Device status history",
+          notes = "Get a list of status history associated with the device type and id",
+          tags = "Device Management",
+          extensions = {
+                  @Extension(properties = {
+                          @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                  })
+          }
+  )
+  @ApiResponses(
+          value = {
+                  @ApiResponse(
+                          code = 200,
+                          message = "OK. \n Successfully fetched the status history of matching devices.",
+                          response = List.class,
+                          responseHeaders = {
+                                  @ResponseHeader(
+                                          name = "Content-Type",
+                                          description = "The content type of the body"),
+                                  @ResponseHeader(
+                                          name = "ETag",
+                                          description = "Entity Tag of the response resource.\n" +
+                                                  "Used by caches, or in conditional requests."),
+                                  @ResponseHeader(
+                                          name = "Last-Modified",
+                                          description = "Date and time the resource was last modified.\n" +
+                                                  "Used by caches, or in conditional requests."),
+                          }),
+                  @ApiResponse(
+                          code = 304,
+                          message = "Not Modified. Empty body because the client already has the latest version" +
+                                  " of the requested resource.\n"),
+                  @ApiResponse(
+                          code = 400,
+                          message = "Bad Request. \n Invalid request or validation error.",
+                          response = ErrorResponse.class),
+                  @ApiResponse(
+                          code = 404,
+                          message = "Not Found. \n A device with the specified device type and id was not found.",
+                          response = ErrorResponse.class),
+                  @ApiResponse(
+                          code = 500,
+                          message = "Internal Server Error. \n " +
+                                  "Server error occurred while retrieving the device details.",
+                          response = ErrorResponse.class)
+          })
+    Response getDeviceStatusHistory(
+          @ApiParam(
+                  name = "type",
+                  value = "The device type, such as ios, android, or windows.",
+                  required = true)
+          @PathParam("type")
+          @Size(max = 45)
+                  String type,
+          @ApiParam(
+                  name = "id",
+                  value = "Device ID.",
+                  required = true)
+          @PathParam("id")
+          @Size(max = 45)
+                  String id);
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("/{type}/{id}/getenrolmentstatushistory")
+  @ApiOperation(
+          produces = MediaType.APPLICATION_JSON,
+          httpMethod = "GET",
+          value = "Get Device Current Enrolment status history",
+          notes = "Get a list of status history associated with the device type and id for the current enrolment",
+          tags = "Device Management",
+          extensions = {
+                  @Extension(properties = {
+                          @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                  })
+          }
+  )
+  @ApiResponses(
+          value = {
+                  @ApiResponse(
+                          code = 200,
+                          message = "OK. \n Successfully fetched the status history of matching devices.",
+                          response = List.class,
+                          responseHeaders = {
+                                  @ResponseHeader(
+                                          name = "Content-Type",
+                                          description = "The content type of the body"),
+                                  @ResponseHeader(
+                                          name = "ETag",
+                                          description = "Entity Tag of the response resource.\n" +
+                                                  "Used by caches, or in conditional requests."),
+                                  @ResponseHeader(
+                                          name = "Last-Modified",
+                                          description = "Date and time the resource was last modified.\n" +
+                                                  "Used by caches, or in conditional requests."),
+                          }),
+                  @ApiResponse(
+                          code = 304,
+                          message = "Not Modified. Empty body because the client already has the latest version" +
+                                  " of the requested resource.\n"),
+                  @ApiResponse(
+                          code = 400,
+                          message = "Bad Request. \n Invalid request or validation error.",
+                          response = ErrorResponse.class),
+                  @ApiResponse(
+                          code = 404,
+                          message = "Not Found. \n A device with the specified device type and id was not found.",
+                          response = ErrorResponse.class),
+                  @ApiResponse(
+                          code = 500,
+                          message = "Internal Server Error. \n " +
+                                  "Server error occurred while retrieving the device details.",
+                          response = ErrorResponse.class)
+          })
+    Response getCurrentEnrolmentDeviceStatusHistory(
+          @ApiParam(
+                  name = "type",
+                  value = "The device type, such as ios, android, or windows.",
+                  required = true)
+          @PathParam("type")
+          @Size(max = 45)
+                  String type,
+          @ApiParam(
+                  name = "id",
+                  value = "Device ID.",
+                  required = true)
+          @PathParam("id")
+          @Size(max = 45)
+                  String id);
+
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

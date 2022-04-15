@@ -142,4 +142,9 @@ public final class DeviceManagementConstants {
         public static final String GEOFENCE = "GEOFENCE";
     }
 
+    public static final class MaintenanceProperties {
+        private MaintenanceProperties() {throw new AssertionError();}
+        public static final String MAINTENANCE_USER = "system";
+    }
+
 }

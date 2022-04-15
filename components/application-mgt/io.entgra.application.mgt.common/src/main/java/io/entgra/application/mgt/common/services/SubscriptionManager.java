@@ -35,6 +35,16 @@ import java.util.Properties;
 public interface SubscriptionManager {
 
     /**
+     * Use to update status of a subscription
+     *
+     * @param deviceId Id of the device
+     * @param subId subscription id
+     * @param status status to be changed
+     */
+    void updateSubscriptionStatus(int deviceId, int subId, String status)
+            throws SubscriptionManagementException;
+
+    /**
      * Performs bulk subscription operation for a given application and a subscriber list.
      * @param applicationUUID UUID of the application to subscribe/unsubscribe
      * @param params          list of subscribers.
@@ -175,12 +185,13 @@ public interface SubscriptionManager {
      * @param actionStatus status of the operation.
      * @param action action related to the device.
      * @param appUUID application release UUID
+     * @param  installedVersion installed version
      * @return {@link PaginationResult}
      * @throws ApplicationManagementException if offset or limit contains incorrect values, if it couldn't find an
      * application release for given UUID, if an error occurred while getting device details of subscribed device ids,
      * if an error occurred while getting subscription details of given application release UUID.
      */
-    PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus, String action)
+    PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus, String action, String installedVersion)
             throws ApplicationManagementException;
 
     /***

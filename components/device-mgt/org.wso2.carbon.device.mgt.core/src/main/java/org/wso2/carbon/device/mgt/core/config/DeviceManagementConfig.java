@@ -24,6 +24,7 @@ import org.wso2.carbon.device.mgt.core.config.archival.ArchivalConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.CertificateCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.DeviceCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.GeoFenceCacheConfiguration;
+import org.wso2.carbon.device.mgt.core.config.operation.timeout.OperationTimeoutConfiguration;
 import org.wso2.carbon.device.mgt.core.event.config.EventOperationTaskConfiguration;
 import org.wso2.carbon.device.mgt.core.config.geo.location.GeoLocationConfiguration;
 import org.wso2.carbon.device.mgt.core.config.identity.IdentityConfigurations;
@@ -66,6 +67,7 @@ public final class DeviceManagementConfig {
     private ArchivalConfiguration archivalConfiguration;
     private EnrollmentNotificationConfiguration enrollmentNotificationConfiguration;
     private DefaultRoles defaultRoles;
+    private OperationTimeoutConfiguration operationTimeoutConfiguration;
 
     @XmlElement(name = "ManagementRepository", required = true)
     public DeviceManagementConfigRepository getDeviceManagementConfigRepository() {
@@ -243,5 +245,14 @@ public final class DeviceManagementConfig {
     public DefaultRoles getDefaultRoles() { return defaultRoles; }
 
     public void setDefaultRoles(DefaultRoles defaultRoles) { this.defaultRoles = defaultRoles; }
+
+    @XmlElement(name = "OperationTimeoutConfigurations", required = true)
+    public OperationTimeoutConfiguration getOperationTimeoutConfiguration() {
+        return operationTimeoutConfiguration;
+    }
+
+    public void setOperationTimeoutConfiguration(OperationTimeoutConfiguration operationTimeoutConfiguration) {
+        this.operationTimeoutConfiguration = operationTimeoutConfiguration;
+    }
 }
 

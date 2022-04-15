@@ -103,6 +103,10 @@ public class Application {
             value = "package name of the application")
     private String packageName;
 
+    @ApiModelProperty(name = "isFavourite",
+            value = "if the app is favoured by the user")
+    private boolean isFavourite;
+
     public String getPackageName() {
         return packageName;
     }
@@ -181,4 +185,12 @@ public class Application {
     public String getInstallerName() { return installerName; }
 
     public void setInstallerName(String installerName) { this.installerName = installerName; }
+
+    public boolean isFavourite() {
+        return isFavourite;
+    }
+
+    public void setFavourite(boolean favourite) {
+        isFavourite = favourite;
+    }
 }

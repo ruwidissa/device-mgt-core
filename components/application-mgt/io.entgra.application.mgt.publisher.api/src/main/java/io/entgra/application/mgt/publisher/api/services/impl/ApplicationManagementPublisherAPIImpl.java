@@ -208,7 +208,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
-
+    
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/public-app")

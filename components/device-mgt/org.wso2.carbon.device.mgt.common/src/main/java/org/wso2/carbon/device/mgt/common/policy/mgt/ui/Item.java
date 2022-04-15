@@ -31,6 +31,7 @@ public class Item {
     private String key;
     private String value;
     private boolean isRequired;
+    private boolean isNoneEmptyTable;
     private String subTitle;
     private List<Condition> conditions;
     private Checkbox checkbox;
@@ -101,6 +102,15 @@ public class Item {
 
     public void setRequired(boolean required) {
         isRequired = required;
+    }
+
+    @XmlElement(name = "NoneEmptyTable")
+    public boolean isNoneEmptyTable() {
+        return isNoneEmptyTable;
+    }
+
+    public void setNoneEmptyTable(boolean noneEmptyTable) {
+        isNoneEmptyTable = noneEmptyTable;
     }
 
     @XmlElement(name = "SubTitle")

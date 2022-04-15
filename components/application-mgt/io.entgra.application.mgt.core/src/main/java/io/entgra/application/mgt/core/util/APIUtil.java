@@ -414,6 +414,7 @@ public class APIUtil {
         application.setTags(applicationDTO.getTags());
         application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
         application.setRating(applicationDTO.getAppRating());
+        application.setFavourite(applicationDTO.isFavourite());
         if (applicationDTO.getApplicationReleaseDTOs() != null && !applicationDTO.getApplicationReleaseDTOs().isEmpty()) {
             application.setInstallerName(applicationDTO.getApplicationReleaseDTOs().get(0).getInstallerName());
         }

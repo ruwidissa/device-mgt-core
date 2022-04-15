@@ -40,6 +40,33 @@ public interface ApplicationDAO {
     int createApplication(ApplicationDTO applicationDTO, int tenantId) throws ApplicationManagementDAOException;
 
     /**
+     * Use to add an application to favourites for given appId, username and tenantId
+     *
+     * @param appId id of the application
+     * @param userName currently logged-in user
+     * @throws ApplicationManagementDAOException if error occurred wile executing query to insert data into database.
+     */
+    void addAppToFavourite(int appId, String userName, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Use to remove an application from favourites for given appId, username and tenantId
+     *
+     * @param appId id of the application
+     * @param userName currently logged-in username
+     * @throws ApplicationManagementDAOException if error occurred wile executing query to delete data from database.
+     */
+    void removeAppFromFavourite(int appId, String userName, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Use to check if an app is favourite for given username and tenantId
+     * @param appId id of the application
+     * @param userName currently logged-in username
+     * @return If application is favourite
+     * @throws ApplicationManagementDAOException if error occurred wile executing query to check if application is a favourite
+     */
+    boolean isFavouriteApp(int appId, String userName, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
      * To add tags for a particular application.
      *
      * @param tags tags that need to be added for a application.

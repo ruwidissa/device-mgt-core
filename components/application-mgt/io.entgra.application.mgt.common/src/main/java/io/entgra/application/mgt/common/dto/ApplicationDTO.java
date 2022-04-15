@@ -96,6 +96,10 @@ public class ApplicationDTO {
             value = "package name of the application")
     private String packageName;
 
+    @ApiModelProperty(name = "isFavourite",
+            value = "if the app is favoured by the user")
+    private boolean isFavourite;
+
     public String getPackageName() {
         return packageName;
     }
@@ -189,4 +193,12 @@ public class ApplicationDTO {
     public double getAppRating() { return appRating; }
 
     public void setAppRating(double appRating) { this.appRating = appRating; }
+
+    public boolean isFavourite() {
+        return isFavourite;
+    }
+
+    public void setFavourite(boolean favourite) {
+        isFavourite = favourite;
+    }
 }

@@ -120,7 +120,6 @@ public class ApplicationManagementTest extends BaseTestCase {
         screenshots.put("shot3", new FileInputStream(new File("src/test/resources/samples/app1/shot3.png")));
 
         applicationArtifact.setScreenshots(screenshots);
-
         ApplicationManager manager = new ApplicationManagerImpl();
          manager.createApplication(applicationWrapper);
     }
@@ -139,7 +138,12 @@ public class ApplicationManagementTest extends BaseTestCase {
     public static Object[][] uuidDataProvider() {
         return new Object[][] {{"TEST_APP_UUID"}};
     }
-
+    
+    @Test(enabled = false)
+    public void createApplicationAndPublish(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact, boolean isPublish) throws ApplicationManagementException {
+    
+    }
+    
     @Test(enabled = false)
     public void updateApplication(int applicationId, ApplicationUpdateWrapper applicationUpdateWrapper) throws ApplicationManagementException {
 

@@ -20,6 +20,8 @@ package org.wso2.carbon.device.mgt.common;
 
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 
+import java.util.List;
+
 /**
  * This class holds required parameters for a querying a paginated activity response.
  */
@@ -28,7 +30,7 @@ public class ActivityPaginationRequest {
     private int offset;
     private int limit;
     private String deviceType;
-    private String deviceId;
+    private List<String> deviceIds;
     private String operationCode;
     private String initiatedBy;
     private long since;
@@ -66,12 +68,12 @@ public class ActivityPaginationRequest {
         this.deviceType = deviceType;
     }
 
-    public String getDeviceId() {
-        return deviceId;
+    public List<String> getDeviceIds() {
+        return deviceIds;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setDeviceIds(List<String> deviceIds) {
+        this.deviceIds = deviceIds;
     }
 
     public String getOperationCode() {

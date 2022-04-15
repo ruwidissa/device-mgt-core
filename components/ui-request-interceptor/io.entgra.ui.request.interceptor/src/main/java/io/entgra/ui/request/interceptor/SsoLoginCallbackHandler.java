@@ -53,7 +53,7 @@ public class SsoLoginCallbackHandler extends HttpServlet {
         String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getCorePort(req.getScheme());
         String keyManagerUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
-                + HandlerConstants.COLON + HandlerUtil.getKeymanagerPort(req.getScheme());
+                + HandlerConstants.COLON + HandlerUtil.getKeyManagerPort(req.getScheme());
 
         if (session == null) {
             String baseContextPath = req.getContextPath();

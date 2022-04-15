@@ -316,6 +316,116 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return applicationDTO;
     }
 
+    @Override
+    public void addAppToFavourites(int appId) throws ApplicationManagementException {
+        validateAddAppToFavouritesRequest(appId);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            applicationDAO.addAppToFavourite(appId, userName, tenantId);
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while staring transaction to add applicationId: "
+                    + appId + " to favourites";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while adding application id " + appId + " to favourites ";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while adding application with the id: " + appId + " to favourites ";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void removeAppFromFavourites(int appId) throws ApplicationManagementException {
+        validateRemoveAppFromFavouritesRequest(appId);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            applicationDAO.removeAppFromFavourite(appId, userName, tenantId);
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while staring transaction to remove applicationId: "
+                    + appId + " from favourites";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while removing application id " + appId + " from favourites ";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while removing application with the id: " + appId + " from favourites ";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public boolean isFavouriteApp(int appId) throws ApplicationManagementException{
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return applicationDAO.isFavouriteApp(appId, userName, tenantId);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting DB connection to check is app with the id " + appId
+                    + " is a favourite app";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while checking app with the id " + appId + " is a favourite app.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+
+    }
+
+    /**
+     * Use to check if the requested application id is valid before removing from favourites
+     *
+     * @param appId ID of the application
+     * @throws ApplicationManagementException if ID is not valid or errors while validating
+     */
+    private void validateRemoveAppFromFavouritesRequest(int appId) throws ApplicationManagementException {
+        if (!isFavouriteApp(appId)) {
+            String msg = "Provided appId " + appId + " is not a favourite app in order remove from favourites";
+            throw new BadRequestException(msg);
+        }
+    }
+
+    /**
+     * Use to check if the requested application id is valid before adding to favourites
+     *
+     * @param appId ID of the application
+     * @throws ApplicationManagementException if ID is not valid or errors while validating
+     */
+    private void validateAddAppToFavouritesRequest(int appId) throws ApplicationManagementException {
+        try {
+            getApplication(appId);
+        } catch (NotFoundException e) {
+            String msg = " No application exists for the provided appId " + appId;
+            throw new BadRequestException(msg);
+        }
+        if (isFavouriteApp(appId)) {
+            String msg = "Provided appId " + appId + " is already a favourite app";
+            throw new BadRequestException(msg);
+        }
+    }
+
     /**
      * Upload enterprise application release artifact into file system.
      *
@@ -818,8 +928,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
+    public ApplicationList getFavouriteApplications(Filter filter) throws ApplicationManagementException {
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        filter.setFavouredBy(userName);
+        return getApplications(filter);
+    }
+
+    @Override
     public ApplicationList getApplications(Filter filter) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationList applicationList = new ApplicationList();
         List<Application> applications = new ArrayList<>();
         DeviceType deviceType;
@@ -845,6 +963,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         .setUnrestrictedRoles(visibilityDAO.getUnrestrictedRoles(applicationDTO.getId(), tenantId));
                 applicationDTO.setAppCategories(applicationDAO.getAppCategories(applicationDTO.getId(), tenantId));
                 applicationDTO.setTags(applicationDAO.getAppTags(applicationDTO.getId(), tenantId));
+                applicationDTO.setFavourite(applicationDAO.isFavouriteApp(applicationDTO.getId(), userName, tenantId));
 
                 if (isFilteringApp(applicationDTO, filter)) {
                     boolean isHideableApp = isHideableApp(applicationDTO.getApplicationReleaseDTOs());
@@ -2019,6 +2138,61 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
+    
+    public ApplicationRelease changeLifecycleState(ApplicationReleaseDTO applicationReleaseDTO, LifecycleChanger lifecycleChanger) throws ApplicationManagementException {
+    
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        if (lifecycleChanger == null || StringUtils.isEmpty(lifecycleChanger.getAction())) {
+            String msg = "The Action is null or empty. Please verify the request.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        
+        try{
+            if (lifecycleStateManager
+                    .isValidStateChange(applicationReleaseDTO.getCurrentState(), lifecycleChanger.getAction(), userName,
+                            tenantId)) {
+                if (lifecycleStateManager.isInstallableState(lifecycleChanger.getAction()) && applicationReleaseDAO
+                        .hasExistInstallableAppRelease(applicationReleaseDTO.getUuid(),
+                                lifecycleStateManager.getInstallableState(), tenantId)) {
+                    String msg = "Installable application release is already registered for the application. "
+                            + "Therefore it is not permitted to change the lifecycle state from "
+                            + applicationReleaseDTO.getCurrentState() + " to " + lifecycleChanger.getAction();
+                    log.error(msg);
+                    throw new ForbiddenException(msg);
+                }
+                LifecycleState lifecycleState = new LifecycleState();
+                lifecycleState.setCurrentState(lifecycleChanger.getAction());
+                lifecycleState.setPreviousState(applicationReleaseDTO.getCurrentState());
+                lifecycleState.setUpdatedBy(userName);
+                lifecycleState.setReasonForChange(lifecycleChanger.getReason());
+                applicationReleaseDTO.setCurrentState(lifecycleChanger.getAction());
+                if (this.applicationReleaseDAO.updateRelease(applicationReleaseDTO, tenantId) == null) {
+                    String msg = "Application release updating is failed/.";
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
+                this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
+                return APIUtil.releaseDtoToRelease(applicationReleaseDTO);
+            } else {
+                String msg = "Invalid lifecycle state transition from '" + applicationReleaseDTO.getCurrentState() + "'"
+                        + " to '" + lifecycleChanger.getAction() + "'";
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
+            }
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when accessing application release data of application release which has the "
+                    + "application release UUID: " + applicationReleaseDTO.getUuid();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (LifeCycleManagementDAOException e) {
+            String msg = "Failed to add lifecycle state for Application release UUID: " + applicationReleaseDTO.getUuid();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
 
     @Override
     public void addApplicationCategories(List<String> categories) throws ApplicationManagementException {
@@ -3651,7 +3825,40 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void updateSubsStatus (int deviceId, int operationId, String status) throws ApplicationManagementException {
+    public void updateSubStatus(int deviceId, List<Integer> operationIds, String status) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            for (int operationId : operationIds) {
+                List<Integer> deviceSubIds = subscriptionDAO.getDeviceSubIdsForOperation(operationId, deviceId, tenantId);
+                if (!subscriptionDAO.updateDeviceSubStatus(deviceId, deviceSubIds, status, tenantId)){
+                    ConnectionManagerUtil.rollbackDBTransaction();
+                    String msg = "Didn't update an any app subscription of device for operation Id: " + operationId;
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
+            }
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occured while updating app subscription status of the device.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obersving the database connection to update aoo subscription status of "
+                    + "device.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while executing database transaction";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void updateSubsStatus(int deviceId, int operationId, String status) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             ConnectionManagerUtil.beginDBTransaction();

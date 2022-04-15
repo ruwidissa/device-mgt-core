@@ -162,6 +162,8 @@ public abstract class BasePolicyManagementDAOTest {
                                                                                       .SUPER_TENANT_DOMAIN_NAME);
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
 
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername("admin");
+
     }
 
     private DataSource getDataSource(DataSourceConfig config) {

@@ -20,6 +20,7 @@ package io.entgra.application.mgt.core.impl;
 import com.google.gson.Gson;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.lang.StringUtils;
@@ -1189,18 +1190,62 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    @Override
+    public void updateSubscriptionStatus(int deviceId, int subId, String status)
+            throws SubscriptionManagementException {
+        try {
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+            List<Integer> operationIds =  getOperationIdsForSubId(subId, tenantId);
+            APIUtil.getApplicationManager().updateSubStatus(deviceId, operationIds, status);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while observing the database connection to get operation Ids for " + subId;
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while updating subscription status with the id: "
+                    + subId;
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        }
+    }
+
+    private List<Integer> getOperationIdsForSubId(int subId, int tenantId) throws SubscriptionManagementException {
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return subscriptionDAO.getOperationIdsForSubId(subId, tenantId);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting operation Ids for subId" + subId;
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while observing the database connection to get operation Ids for " + subId;
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    private int invokeIOTCoreAPI(HttpMethodBase request) throws UserStoreException, APIManagerException, IOException {
+        HttpClient httpClient;
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        ApiApplicationKey apiApplicationKey = OAuthUtils.getClientCredentials(tenantDomain);
+        String username =
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration()
+                        .getAdminUserName() + Constants.ApplicationInstall.AT + tenantDomain;
+        AccessTokenInfo tokenInfo = OAuthUtils.getOAuthCredentials(apiApplicationKey, username);
+        request.addRequestHeader(Constants.ApplicationInstall.AUTHORIZATION,
+                Constants.ApplicationInstall.AUTHORIZATION_HEADER_VALUE + tokenInfo.getAccessToken());
+        httpClient = new HttpClient();
+        httpClient.executeMethod(request);
+        return request.getStatusCode();
+    }
+
     public int installEnrollmentApplications(ApplicationPolicyDTO applicationPolicyDTO)
             throws ApplicationManagementException {
 
-        HttpClient httpClient;
         PostMethod request;
         try {
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            ApiApplicationKey apiApplicationKey = OAuthUtils.getClientCredentials(tenantDomain);
-            String username =
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration()
-                            .getAdminUserName() + Constants.ApplicationInstall.AT + tenantDomain;
-            AccessTokenInfo tokenInfo = OAuthUtils.getOAuthCredentials(apiApplicationKey, username);
             String requestUrl = Constants.ApplicationInstall.ENROLLMENT_APP_INSTALL_PROTOCOL + System
                     .getProperty(Constants.ApplicationInstall.IOT_CORE_HOST) + Constants.ApplicationInstall.COLON
                     + System.getProperty(Constants.ApplicationInstall.IOT_CORE_PORT)
@@ -1210,14 +1255,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             StringRequestEntity requestEntity = new StringRequestEntity(payload, MediaType.APPLICATION_JSON,
                     Constants.ApplicationInstall.ENCODING);
-            httpClient = new HttpClient();
             request = new PostMethod(requestUrl);
-            request.addRequestHeader(Constants.ApplicationInstall.AUTHORIZATION,
-                    Constants.ApplicationInstall.AUTHORIZATION_HEADER_VALUE + tokenInfo.getAccessToken());
             request.setRequestEntity(requestEntity);
-            httpClient.executeMethod(request);
-            return request.getStatusCode();
-
+            return invokeIOTCoreAPI(request);
         } catch (UserStoreException e) {
             String msg = "Error while accessing user store for user with Android device.";
             log.error(msg, e);
@@ -1239,6 +1279,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             throw new ApplicationManagementException(msg, e);
         }
     }
+
+    private String getIOTCoreBaseUrl() {
+        return Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + System
+                .getProperty(Constants.IOT_CORE_HOST) + Constants.COLON
+                + System.getProperty(Constants.IOT_CORE_HTTPS_PORT);
+    }
+
 
     @Override
     public PaginationResult getAppInstalledDevices(PaginationRequest request, String appUUID)
@@ -1361,7 +1408,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
     @Override
     public PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus,
-                                                      String action) throws ApplicationManagementException {
+                                                      String action, String installedVersion) throws ApplicationManagementException {
         int limitValue = request.getRowCount();
         int offsetValue = request.getStartIndex();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -1395,6 +1442,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             }
             List<Integer> deviceIdList = deviceSubscriptionDTOS.stream().map(DeviceSubscriptionDTO::getDeviceId)
                     .collect(Collectors.toList());
+            Map<Integer,String> currentVersionsMap = subscriptionDAO.getCurrentInstalledAppVersion(applicationDTO.getId(),deviceIdList, installedVersion);
             try {
                 //pass the device id list to device manager service method
                 PaginationResult paginationResult = deviceManagementProviderService.getAppSubscribedDevices
@@ -1404,7 +1452,15 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 if (!paginationResult.getData().isEmpty()) {
                     List<Device> devices = (List<Device>) paginationResult.getData();
                     for (Device device : devices) {
+                        if(installedVersion != null && !installedVersion.isEmpty() && !currentVersionsMap.containsKey(device.getId())){
+                            continue;
+                        }
                         DeviceSubscriptionData deviceSubscriptionData = new DeviceSubscriptionData();
+                        if(currentVersionsMap.containsKey(device.getId())){
+                            deviceSubscriptionData.setCurrentInstalledVersion(currentVersionsMap.get(device.getId()));
+                        }else{
+                            deviceSubscriptionData.setCurrentInstalledVersion("-");
+                        }
                         for (DeviceSubscriptionDTO subscription : deviceSubscriptionDTOS) {
                             if (subscription.getDeviceId() == device.getId()) {
                                 deviceSubscriptionData.setDevice(device);
@@ -1421,6 +1477,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                 }
                                 deviceSubscriptionData.setActionType(subscription.getActionTriggeredFrom());
                                 deviceSubscriptionData.setStatus(subscription.getStatus());
+                                deviceSubscriptionData.setSubId(subscription.getId());
                                 deviceSubscriptionDataList.add(deviceSubscriptionData);
                                 break;
                             }

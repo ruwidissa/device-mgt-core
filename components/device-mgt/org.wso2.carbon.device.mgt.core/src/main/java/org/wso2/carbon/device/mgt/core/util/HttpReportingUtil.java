@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.device.mgt.core.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -26,11 +28,11 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HTTP;
 import org.wso2.carbon.device.mgt.common.exceptions.EventPublishingException;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
-
 import java.io.IOException;
 
 public class HttpReportingUtil {
 
+    private static final Log log = LogFactory.getLog(HttpReportingUtil.class);
     private static final String IS_EVENT_PUBLISHING_ENABLED = "isEventPublishingEnabled";
 
     public static String getReportingHost() {
@@ -51,6 +53,7 @@ public class HttpReportingUtil {
                     "invoking API. API endpoint: " + endpoint, e);
         }
     }
+
 
     public static boolean isPublishingEnabledForTenant() {
         Object configuration = DeviceManagerUtil.getConfiguration(IS_EVENT_PUBLISHING_ENABLED);

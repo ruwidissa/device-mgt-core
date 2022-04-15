@@ -49,6 +49,9 @@ public class Constants {
     public static final String IOT_CORE_HTTPS_PORT = "iot.core.https.port";
     public static final String HTTPS_PROTOCOL = "https";
     public static final String HTTP_PROTOCOL = "http";
+    public static final String SCHEME_SEPARATOR = "://";
+    public static final String OPERATION_STATUS_UPDATE_API_BASE = "/api/device-mgt/v1.0/devices";
+    public static final String OPERATION_STATUS_UPDATE_API_URI = "/operation";
 
     public static final String LIMIT_QUERY_PARAM = "limit";
     public static final String OFFSET_QUERY_PARAM = "offset";
@@ -59,6 +62,7 @@ public class Constants {
     public static final String IS_APP_RELEASE_TYPE = "stable";
     public static final String IS_APP_DEFAULT_PAYMENT_CURRENCY = "$";
     public static final String IS_APP_DEFAULT_VERSION = "1.0";
+    public static final String COLON = ":";
     public static final String FORWARD_SLASH = "/";
     public static final String URI_QUERY_SEPARATOR = "?";
     public static final String QUERY_STRING_SEPARATOR = "&";

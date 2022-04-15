@@ -108,6 +108,11 @@ public class Filter {
      */
     private String appReleaseState;
 
+    /**
+     * Username of whose favourite apps to be retrieved
+     */
+    private String favouredBy;
+
     public int getLimit() {
         return limit;
     }
@@ -195,4 +200,12 @@ public class Filter {
     public String getAppReleaseType() { return appReleaseType; }
 
     public void setAppReleaseType(String appReleaseType) { this.appReleaseType = appReleaseType; }
+
+    public String getFavouredBy() {
+        return favouredBy;
+    }
+
+    public void setFavouredBy(String favouredBy) {
+        this.favouredBy = favouredBy;
+    }
 }

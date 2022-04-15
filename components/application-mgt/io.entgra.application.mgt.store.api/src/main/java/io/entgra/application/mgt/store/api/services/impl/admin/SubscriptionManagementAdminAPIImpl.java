@@ -18,6 +18,8 @@
 
 package io.entgra.application.mgt.store.api.services.impl.admin;
 
+import io.entgra.application.mgt.common.exception.SubscriptionManagementException;
+import io.entgra.application.mgt.store.api.beans.SubscriptionStatusBean;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,10 +36,12 @@ import org.wso2.carbon.device.mgt.common.PaginationResult;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -50,6 +54,30 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
 
     private static final Log log = LogFactory.getLog(SubscriptionManagementAdminAPIImpl.class);
 
+    @Override
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/device/{deviceId}/status")
+    public Response updateSubscription(
+            @PathParam("deviceId") int deviceId,
+            SubscriptionStatusBean subscriptionStatusBean
+    ) {
+        try {
+            RequestValidationUtil.validateSubscriptionStatus(subscriptionStatusBean.getStatus());
+            SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
+            subscriptionManager.updateSubscriptionStatus(deviceId, subscriptionStatusBean.getSubId(),
+                    subscriptionStatusBean.getStatus());
+            return Response.status(Response.Status.OK).entity("Subscription status updated successfully").build();
+        } catch (BadRequestException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (SubscriptionManagementException e) {
+            String msg = "Error occurred while changing subscription status of the subscription with the id "
+                    + subscriptionStatusBean.getSubId();
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
     @GET
     @Consumes("application/json")
     @Produces("application/json")
@@ -60,6 +88,7 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             @QueryParam("action") String action,
             @QueryParam("actionStatus") String actionStatus,
             @QueryParam("status") List<String> status,
+            @QueryParam("installedVersion") String installedVersion,
             @PathParam("uuid") String uuid,
             @DefaultValue("0")
             @QueryParam("offset") int offset,
@@ -97,7 +126,7 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             }
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
             PaginationResult subscriptionData = subscriptionManager.getAppSubscriptionDetails
-                    (request, uuid, actionStatus, action);
+                    (request, uuid, actionStatus, action, installedVersion);
             return Response.status(Response.Status.OK).entity(subscriptionData).build();
         } catch (NotFoundException e) {
             String msg = "Application with application release UUID: " + uuid + " is not found";

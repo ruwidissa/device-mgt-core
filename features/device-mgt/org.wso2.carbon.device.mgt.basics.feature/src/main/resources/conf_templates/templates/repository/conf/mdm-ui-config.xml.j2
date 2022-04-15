@@ -71,6 +71,7 @@
         <Scope>perm:admin:app:publisher:update</Scope>
         <Scope>perm:admin:app:review:update</Scope>
         <Scope>perm:admin:app:subscription:view</Scope>
+        <Scope>perm:admin:app:subscription:modify</Scope>
         <Scope>perm:device-types:types</Scope>
         <Scope>perm:enterprise:modify</Scope>
         <Scope>perm:enterprise:view</Scope>
@@ -187,6 +188,8 @@
         <Scope>perm:android:location</Scope>
         <Scope>perm:android:clear-password</Scope>
         <Scope>perm:android:control-camera</Scope>
+        <Scope>perm:android:update-default-sim</Scope>
+        <Scope>perm:android:google-account</Scope>
         <Scope>perm:android:enterprise-wipe</Scope>
         <Scope>perm:android:wipe</Scope>
         <Scope>perm:android:ring</Scope>
@@ -219,6 +222,7 @@
         <Scope>perm:ios:app-configurations</Scope>
         <Scope>perm:mac-os:shut-down</Scope>
         <Scope>perm:mac-os:restart</Scope>
+        <Scope>perm:android:info</Scope>
     {% if mdm_ui_conf.scopes is defined %}
         {%- for scope in mdm_ui_conf.scopes -%}
         <Scope>{{scope}}</Scope>

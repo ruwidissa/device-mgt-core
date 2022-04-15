@@ -23,12 +23,14 @@ import java.sql.Timestamp;
 
 public class DeviceSubscriptionData {
 
+    private int subId;
     private String action;
     private long actionTriggeredTimestamp;
     private String actionTriggeredBy;
     private String actionType;
     private String status;
     private Device device;
+    private String currentInstalledVersion;
 
     public String getAction() {
         return action;
@@ -76,5 +78,17 @@ public class DeviceSubscriptionData {
 
     public void setDevice(Device device) {
         this.device = device;
+    }
+
+    public String getCurrentInstalledVersion() { return currentInstalledVersion; }
+
+    public void setCurrentInstalledVersion(String currentInstalledVersion) { this.currentInstalledVersion = currentInstalledVersion; }
+
+    public int getSubId() {
+        return subId;
+    }
+
+    public void setSubId(int subId) {
+        this.subId = subId;
     }
 }

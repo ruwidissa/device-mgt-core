@@ -225,7 +225,7 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                                   @QueryParam("initiatedBy") String initiatedBy,
                                   @QueryParam("operationCode") String operationCode,
                                   @QueryParam("deviceType") String deviceType,
-                                  @QueryParam("deviceId") String deviceId,
+                                  @QueryParam("deviceId") List<String> deviceIds,
                                   @QueryParam("type") String type,
                                   @QueryParam("status") String status,
                                   @HeaderParam("If-Modified-Since") String ifModifiedSince,
@@ -297,8 +297,8 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                 if (deviceType != null && !deviceType.isEmpty()) {
                     activityPaginationRequest.setDeviceType(deviceType);
                 }
-                if (deviceId != null && !deviceId.isEmpty()) {
-                    activityPaginationRequest.setDeviceId(deviceId);
+                if (deviceIds != null && !deviceIds.isEmpty()) {
+                    activityPaginationRequest.setDeviceIds(deviceIds);
                 }
                 if (type != null && !type.isEmpty()) {
                     activityPaginationRequest.setType(Operation.Type.valueOf(type.toUpperCase()));

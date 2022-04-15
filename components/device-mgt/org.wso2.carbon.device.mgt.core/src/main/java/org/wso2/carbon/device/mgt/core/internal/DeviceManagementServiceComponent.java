@@ -51,6 +51,7 @@ import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
 import org.wso2.carbon.device.mgt.core.config.tenant.PlatformConfigurationManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.config.ui.UIConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
@@ -192,6 +193,7 @@ public class DeviceManagementServiceComponent {
             NotificationManagementDAOFactory.init(dsConfig);
             OperationManagementDAOFactory.init(dsConfig);
             MetadataManagementDAOFactory.init(dsConfig);
+            EventManagementDAOFactory.init(dsConfig);
             OTPManagementDAOFactory.init(dsConfig.getJndiLookupDefinition().getJndiName());
             /*Initialize the device cache*/
             DeviceManagerUtil.initializeDeviceCache();

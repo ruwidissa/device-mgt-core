@@ -610,10 +610,12 @@ public class RequestValidationUtil {
                     || Constants.OperationStatus.NOTNOW.toUpperCase().equals(status.get(i))
                     || Constants.OperationStatus.REPEATED.toUpperCase().equals(status.get(i))
                     || Constants.OperationStatus.PENDING.toUpperCase().equals(status.get(i))
-                    || Constants.OperationStatus.IN_PROGRESS.toUpperCase().equals(status.get(i))) {
+                    || Constants.OperationStatus.IN_PROGRESS.toUpperCase().equals(status.get(i))
+                    || Constants.OperationStatus.REQUIRED_CONFIRMATION.toUpperCase().equals(status.get(i))
+                    || Constants.OperationStatus.CONFIRMED.toUpperCase().equals(status.get(i))) {
             } else {
                 String msg = "Invalid status type: " + status + ". \nValid status types are COMPLETED | ERROR | " +
-                        "IN_PROGRESS | NOTNOW | PENDING | REPEATED";
+                        "IN_PROGRESS | NOTNOW | PENDING | REPEATED | REQUIRED_CONFIRMATION | CONFIRMED";
                 log.error(msg);
                 throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
                         .setCode(HttpStatus.SC_BAD_REQUEST)

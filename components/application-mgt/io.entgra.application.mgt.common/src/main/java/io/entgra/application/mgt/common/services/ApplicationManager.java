@@ -128,6 +128,26 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException if any error occurred while creating the application
      */
    <T> Application createApplication(T app) throws ApplicationManagementException;
+    /**
+     * Add an application to favourites
+     * @param appId id of the application
+     * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
+     */
+    void addAppToFavourites(int appId) throws ApplicationManagementException;
+
+    /**
+     * Remove an application from favourites
+     * @param appId id of the application
+     * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
+     */
+    void removeAppFromFavourites(int appId) throws ApplicationManagementException;
+
+    /**
+     * Check if an application is a favourite app
+     * @param appId id of the application
+     * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
+     */
+    boolean isFavouriteApp(int appId) throws ApplicationManagementException;
 
     /**
      * Check the existence of an application for given application name and the device type.
@@ -174,6 +194,8 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
     void deleteApplicationRelease(String releaseUuid) throws ApplicationManagementException;
+
+    ApplicationList getFavouriteApplications(Filter filter) throws ApplicationManagementException;
 
     /**
      * Use to delete application artifact files (For example this is useful to delete application release artifacts
@@ -290,7 +312,18 @@ public interface ApplicationManager {
      */
     ApplicationRelease changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
             throws ApplicationManagementException;
-
+    
+    /**
+     * To get all the releases of a particular ApplicationDTO.
+     *
+     * @param applicationReleaseDTO  of the ApplicationDTO Release.
+     * @param lifecycleChanger Lifecycle changer that contains the action and the reason for the change.
+     * @throws ApplicationManagementException ApplicationDTO Management Exception.
+     * @return
+     */
+    ApplicationRelease changeLifecycleState(ApplicationReleaseDTO applicationReleaseDTO, LifecycleChanger lifecycleChanger)
+            throws ApplicationManagementException;
+    
     /**
      * To update release images such as icons, banner and screenshots.
      *
@@ -470,7 +503,9 @@ public interface ApplicationManager {
      */
     boolean checkSubDeviceIdsForOperations(int operationId, int deviceId) throws ApplicationManagementException;
 
-    void updateSubsStatus (int deviceId, int operationId, String status) throws ApplicationManagementException;
+    void updateSubStatus(int deviceId, List<Integer> operationId, String status) throws ApplicationManagementException;
+
+    void updateSubsStatus(int deviceId, int operationId, String status) throws ApplicationManagementException;
 
     /**
      * Get plist content to download and install the application.
@@ -482,5 +517,4 @@ public interface ApplicationManager {
     String getPlistArtifact(String uuid) throws ApplicationManagementException;
 
     List<ApplicationReleaseDTO> getReleaseByPackageNames(List<String> packageIds) throws ApplicationManagementException;
-
 }

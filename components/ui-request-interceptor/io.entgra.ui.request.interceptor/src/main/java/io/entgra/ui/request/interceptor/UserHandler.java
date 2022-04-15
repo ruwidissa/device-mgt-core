@@ -57,7 +57,7 @@ public class UserHandler extends HttpServlet {
             String keymanagerUrl =
                     req.getScheme() + HandlerConstants.SCHEME_SEPARATOR +
                             System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
-                            + HandlerConstants.COLON + HandlerUtil.getKeymanagerPort(req.getScheme());
+                            + HandlerConstants.COLON + HandlerUtil.getKeyManagerPort(req.getScheme());
             HttpSession httpSession = req.getSession(false);
             if (httpSession == null) {
                 HandlerUtil.sendUnAuthorizeResponse(resp);
@@ -86,7 +86,11 @@ public class UserHandler extends HttpServlet {
 
             if (tokenStatus.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                 if (tokenStatus.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-                    tokenStatus = HandlerUtil.retryRequestWithRefreshedToken(req, resp, tokenEndpoint, keymanagerUrl);
+                    tokenStatus = HandlerUtil.retryRequestWithRefreshedToken(req, tokenEndpoint, keymanagerUrl);
+                    if(!HandlerUtil.isResponseSuccessful(tokenStatus)) {
+                        HandlerUtil.handleError(resp, tokenStatus);
+                        return;
+                    }
                 } else {
                     log.error("Error occurred while invoking the API to get token status.");
                     HandlerUtil.handleError(resp, tokenStatus);
@@ -108,6 +112,7 @@ public class UserHandler extends HttpServlet {
                     return;
                 }
                 ProxyResponse proxyResponse = new ProxyResponse();
+                proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
                 proxyResponse.setCode(HttpStatus.SC_OK);
                 proxyResponse.setData(
                         jTokenResultAsJsonObject.get("username").getAsString().replaceAll("@carbon.super", ""));

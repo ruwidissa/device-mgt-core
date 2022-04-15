@@ -85,6 +85,7 @@ import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import org.wso2.carbon.device.mgt.common.search.PropertyMap;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceStatus;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
@@ -1134,6 +1135,70 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while changing device status of type : " + type + " and " +
+                    "device id : " + id;
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    /**
+     * List device status history
+     *
+     * @param type       Device type
+     * @param id         Device id
+     * @return {@link Response} object
+     */
+    @GET
+    @Path("/{type}/{id}/getstatushistory")
+    public Response getDeviceStatusHistory(@PathParam("type") @Size(max = 45) String type,
+                                       @PathParam("id") @Size(max = 45) String id) {
+        //TODO check authorization for this
+        RequestValidationUtil.validateDeviceIdentifier(type, id);
+        DeviceManagementProviderService deviceManagementProviderService =
+                DeviceMgtAPIUtils.getDeviceManagementService();
+        try {
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier(id, type);
+            Device persistedDevice = deviceManagementProviderService.getDevice(deviceIdentifier, false);
+            if (persistedDevice == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            List<DeviceStatus> deviceStatusHistory = deviceManagementProviderService.getDeviceStatusHistory(persistedDevice);
+            return Response.status(Response.Status.OK).entity(deviceStatusHistory).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retreiving device status history for device of type : " + type + " and " +
+                    "device id : " + id;
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    /**
+     * List device status history for the current enrolment
+     *
+     * @param type       Device type
+     * @param id         Device id
+     * @return {@link Response} object
+     */
+    @GET
+    @Path("/{type}/{id}/getenrolmentstatushistory")
+    public Response getCurrentEnrolmentDeviceStatusHistory(@PathParam("type") @Size(max = 45) String type,
+                                           @PathParam("id") @Size(max = 45) String id) {
+        //TODO check authorization for this or current enrolment should be based on for the enrolment associated with the user
+        RequestValidationUtil.validateDeviceIdentifier(type, id);
+        DeviceManagementProviderService deviceManagementProviderService =
+                DeviceMgtAPIUtils.getDeviceManagementService();
+        try {
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier(id, type);
+            Device persistedDevice = deviceManagementProviderService.getDevice(deviceIdentifier, false);
+            if (persistedDevice == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            List<DeviceStatus> deviceStatusHistory = deviceManagementProviderService.getDeviceCurrentEnrolmentStatusHistory(persistedDevice);
+            return Response.status(Response.Status.OK).entity(deviceStatusHistory).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retreiving device status history for device of type : " + type + " and " +
                     "device id : " + id;
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).entity(

@@ -151,9 +151,7 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
     }
 
     @DELETE
-    @Path("/{serialNumber}")
-    @Consumes(MediaType.WILDCARD)
-    public Response removeCertificate(@PathParam("serialNumber") String serialNumber) {
+    public Response removeCertificate(@QueryParam("serialNumber") String serialNumber) {
         RequestValidationUtil.validateSerialNumber(serialNumber);
 
         CertificateManagementService certificateService = CertificateMgtAPIUtils.getCertificateManagementService();

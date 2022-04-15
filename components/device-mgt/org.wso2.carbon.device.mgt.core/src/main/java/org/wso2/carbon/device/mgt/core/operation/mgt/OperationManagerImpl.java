@@ -1587,4 +1587,19 @@ public class OperationManagerImpl implements OperationManager {
             OperationManagementDAOFactory.closeConnection();
         }
     }
+
+    @Override
+    public List<Activity> getActivities(List<String> deviceTypes, String operationCode, long updatedSince, String operationStatus)
+            throws OperationManagementException {
+        try {
+            OperationManagementDAOFactory.openConnection();
+            return operationDAO.getActivities(deviceTypes, operationCode, updatedSince, operationStatus);
+        } catch (SQLException e) {
+            throw new OperationManagementException("Error occurred while opening a connection to the data source.", e);
+        } catch (OperationManagementDAOException e) {
+            throw new OperationManagementException("Error occurred while getting the activity list.", e);
+        } finally {
+            OperationManagementDAOFactory.closeConnection();
+        }
+    }
 }
