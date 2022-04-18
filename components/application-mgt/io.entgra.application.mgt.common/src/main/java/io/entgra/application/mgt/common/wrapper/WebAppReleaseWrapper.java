@@ -16,10 +16,12 @@
  */
 package io.entgra.application.mgt.common.wrapper;
 
+import io.entgra.application.mgt.common.Base64File;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @ApiModel(value = "ApplicationReleaseDTO", description = "This class holds the details when releasing an ApplicationDTO to application store")
 public class WebAppReleaseWrapper {
@@ -62,6 +64,18 @@ public class WebAppReleaseWrapper {
             value = "URL which is used for WEB-CLIP")
     @NotNull
     private String url;
+
+    @ApiModelProperty(name = "screenshots",
+            value = "screenshots of the application")
+    private List<Base64File> screenshots;
+
+    @ApiModelProperty(name = "icon",
+            value = "icon of the application")
+    private Base64File icon;
+
+    @ApiModelProperty(name = "icon",
+            value = "banner of the application")
+    private Base64File banner;
 
     public String getReleaseType() {
         return releaseType;
@@ -114,4 +128,28 @@ public class WebAppReleaseWrapper {
     public String getVersion() { return version; }
 
     public void setVersion(String version) { this.version = version; }
+
+    public List<Base64File> getScreenshots() {
+        return screenshots;
+    }
+
+    public void setScreenshots(List<Base64File> screenshots) {
+        this.screenshots = screenshots;
+    }
+
+    public Base64File getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Base64File icon) {
+        this.icon = icon;
+    }
+
+    public Base64File getBanner() {
+        return banner;
+    }
+
+    public void setBanner(Base64File banner) {
+        this.banner = banner;
+    }
 }

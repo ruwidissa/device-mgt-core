@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @ApiModel(value = "ApplicationWrapper", description = "ApplicationWrapper represents the an ApplicationDTO in ApplicationDTO Store")
@@ -80,7 +81,7 @@ public class ApplicationWrapper {
             value = "List of application releases",
             required = true)
     @NotNull
-    private List<EntAppReleaseWrapper> entAppReleaseWrappers;
+    private List<EntAppReleaseWrapper> entAppReleaseWrappers = new ArrayList<>();
 
 
     public String getName() {

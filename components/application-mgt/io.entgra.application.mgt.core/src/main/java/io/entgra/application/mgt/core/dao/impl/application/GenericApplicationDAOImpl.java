@@ -140,12 +140,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             sql += "INNER JOIN AP_APP_FAVOURITES ON "
                     + "AP_APP.ID = AP_APP_FAVOURITES.AP_APP_ID ";
         }
-        sql += "INNER JOIN AP_APP_RELEASE ON "
+        sql += "LEFT JOIN AP_APP_RELEASE ON "
         + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
         + "INNER JOIN (SELECT AP_APP.ID FROM AP_APP ";
         if (StringUtils.isNotEmpty(filter.getVersion()) || StringUtils.isNotEmpty(filter.getAppReleaseState())
                 || StringUtils.isNotEmpty(filter.getAppReleaseType())) {
-            sql += "INNER JOIN AP_APP_RELEASE ON AP_APP.ID = AP_APP_RELEASE.AP_APP_ID ";
+            sql += "LEFT JOIN AP_APP_RELEASE ON AP_APP.ID = AP_APP_RELEASE.AP_APP_ID ";
         }
         sql += "WHERE AP_APP.TENANT_ID = ? ";
 
@@ -186,7 +186,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             sql += "LIMIT ? OFFSET ? ";
         }
         sql += ") AS app_data ON app_data.ID = AP_APP.ID "
-                + "INNER JOIN ("
+                + "LEFT JOIN ("
                 + "SELECT AP_APP_LIFECYCLE_STATE.UPDATED_AT, AP_APP_LIFECYCLE_STATE.AP_APP_RELEASE_ID "
                 + "FROM AP_APP_LIFECYCLE_STATE WHERE AP_APP_LIFECYCLE_STATE.ID "
                 + "IN(SELECT MAX(AP_APP_LIFECYCLE_STATE.ID) "
@@ -266,9 +266,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String sql = "SELECT count(AP_APP.ID) AS APP_COUNT "
+        String sql = "SELECT count(DISTINCT AP_APP.ID) AS APP_COUNT "
                 + "FROM AP_APP "
-                + "INNER JOIN AP_APP_RELEASE ON "
+                + "LEFT JOIN AP_APP_RELEASE ON "
                 + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
                 + "INNER JOIN (SELECT ID FROM AP_APP) AS app_data ON app_data.ID = AP_APP.ID "
                 + "WHERE AP_APP.TENANT_ID = ?";
@@ -359,6 +359,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             DAOUtil.cleanupResources(stmt, rs);
         }
     }
+
 
     @Override
     public ApplicationDTO getApplication(String releaseUuid, int tenantId) throws ApplicationManagementDAOException {
@@ -618,7 +619,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
                 + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT "
                 + "FROM AP_APP "
-                + "INNER JOIN AP_APP_RELEASE ON "
+                + "LEFT JOIN AP_APP_RELEASE ON "
                 + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID AND "
                 + "AP_APP.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
                 + "WHERE "

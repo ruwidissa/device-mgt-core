@@ -77,6 +77,7 @@ public class Extension {
      * ApplicationManagement Extensions.
      */
     public enum Name {
+        SPApplicationManager,
         ApplicationManager,
         ApplicationReleaseManager,
         CategoryManager,

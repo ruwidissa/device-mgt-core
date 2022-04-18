@@ -36,7 +36,11 @@ public class ConfigurationManager {
 
     private Configuration configuration;
 
+    private IdentityServiceProviderConfiguration identityServiceProviderConfiguration;
+
     private static String configPath;
+
+    private static String identityServerConfigPath;
 
     private static volatile ConfigurationManager configurationManager;
 
@@ -54,10 +58,24 @@ public class ConfigurationManager {
                     } catch (ApplicationManagementException e) {
                         log.error(e);
                     }
+                } else {
+                    try {
+                        configurationManager.initConfig();
+                    } catch (ApplicationManagementException e) {
+                        log.error(e);
+                    }
                 }
             }
         }
         return configurationManager;
+    }
+
+    public static synchronized void setIdentityServerConfigPathConfigLocation(String configPath) throws InvalidConfigurationException {
+        if (identityServerConfigPath == null) {
+            identityServerConfigPath = configPath;
+        } else {
+            throw new InvalidConfigurationException("Configuration path " + configPath + " is already defined");
+        }
     }
 
     public static synchronized void setConfigLocation(String configPath) throws InvalidConfigurationException {
@@ -71,21 +89,30 @@ public class ConfigurationManager {
     private void initConfig() throws ApplicationManagementException {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Configuration.class);
+            JAXBContext jaxbISConfigContext = JAXBContext.newInstance(IdentityServiceProviderConfiguration.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            Unmarshaller identityServerConfigUnmarshaller = jaxbISConfigContext.createUnmarshaller();
             if (configPath == null) {
                 configPath = Constants.DEFAULT_CONFIG_FILE_LOCATION;
             }
+            if (identityServerConfigPath == null) {
+                identityServerConfigPath = Constants.DEFAULT_IDENTITY_SERVERS_CONFIG_FILE_LOCATION;
+            }
             //TODO: Add validation for the configurations
             this.configuration = (Configuration) unmarshaller.unmarshal(new File(configPath));
+            this.identityServiceProviderConfiguration = (IdentityServiceProviderConfiguration) identityServerConfigUnmarshaller.unmarshal(new File(identityServerConfigPath));
         } catch (Exception e) {
             log.error(e);
-            throw new InvalidConfigurationException("Error occurred while initializing application config: "
-                    + configPath, e);
+            throw new InvalidConfigurationException("Error occurred while initializing application managements configs: ", e);
         }
     }
 
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    public IdentityServiceProviderConfiguration getIdentityServerConfiguration() {
+        return identityServiceProviderConfiguration;
     }
 
     public Extension getExtension(Extension.Name extName) throws InvalidConfigurationException {

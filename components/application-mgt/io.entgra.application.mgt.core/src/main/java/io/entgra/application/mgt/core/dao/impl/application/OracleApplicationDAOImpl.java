@@ -87,12 +87,12 @@ public class OracleApplicationDAOImpl extends GenericApplicationDAOImpl {
             sql += "INNER JOIN AP_APP_FAVOURITES ON "
                     + "AP_APP.ID = AP_APP_FAVOURITES.AP_APP_ID ";
         }
-        sql += "INNER JOIN AP_APP_RELEASE ON "
-            + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
-            + "INNER JOIN (SELECT AP_APP.ID FROM AP_APP ORDER BY ID ";
+        sql += "LEFT JOIN AP_APP_RELEASE ON "
+        + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
+        + "INNER JOIN (SELECT AP_APP.ID FROM AP_APP ";
         if (StringUtils.isNotEmpty(filter.getVersion()) || StringUtils.isNotEmpty(filter.getAppReleaseState())
                 || StringUtils.isNotEmpty(filter.getAppReleaseType())) {
-            sql += "INNER JOIN AP_APP_RELEASE ON AP_APP.ID = AP_APP_RELEASE.AP_APP_ID ";
+            sql += "LEFT JOIN AP_APP_RELEASE ON AP_APP.ID = AP_APP_RELEASE.AP_APP_ID ";
         }
         if (StringUtils.isNotEmpty(filter.getAppType())) {
             sql += "AND AP_APP.TYPE = ? ";
@@ -131,7 +131,7 @@ public class OracleApplicationDAOImpl extends GenericApplicationDAOImpl {
             sql += "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
         }
         sql += ") AS app_data ON app_data.ID = AP_APP.ID "
-                + "INNER JOIN ("
+                + "LEFT JOIN ("
                 + "SELECT AP_APP_LIFECYCLE_STATE.UPDATED_AT, AP_APP_LIFECYCLE_STATE.AP_APP_RELEASE_ID "
                 + "FROM AP_APP_LIFECYCLE_STATE WHERE AP_APP_LIFECYCLE_STATE.ID "
                 + "IN(SELECT MAX(AP_APP_LIFECYCLE_STATE.ID) "

@@ -25,6 +25,7 @@
 
     <jaxrs:server id="applicationMgtService" address="/">
         <jaxrs:serviceBeans>
+            <ref bean="identityServerApplicationMgtServiceBean"/>
             <ref bean="applicationMgtServiceBean"/>
             <ref bean="reviewMgtAdminServiceBean"/>
             <ref bean="applicationMgtAdminServiceBean"/>
@@ -54,6 +55,7 @@
     <bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
     <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
 
+    <bean id="identityServerApplicationMgtServiceBean" class="io.entgra.application.mgt.publisher.api.services.impl.SPApplicationServiceImpl"/>
     <bean id="applicationMgtServiceBean" class="io.entgra.application.mgt.publisher.api.services.impl.ApplicationManagementPublisherAPIImpl"/>
     <bean id="applicationMgtAdminServiceBean" class="io.entgra.application.mgt.publisher.api.services.impl.admin.ApplicationManagementPublisherAdminAPIImpl"/>
     <bean id="reviewMgtAdminServiceBean" class="io.entgra.application.mgt.publisher.api.services.impl.admin.ReviewManagementPublisherAdminAPIImpl" />

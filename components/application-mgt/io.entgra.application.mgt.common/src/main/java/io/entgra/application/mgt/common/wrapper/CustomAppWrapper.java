@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @ApiModel(value = "CustomAppWrapper", description = "CustomAppWrapper represents an Application used to install in IoT devices")
@@ -78,7 +79,7 @@ public class CustomAppWrapper {
             value = "List of custom app releases",
             required = true)
     @NotNull
-    private List<CustomAppReleaseWrapper> customAppReleaseWrappers;
+    private List<CustomAppReleaseWrapper> customAppReleaseWrappers = new ArrayList<>();
 
     public String getName() {
         return name;

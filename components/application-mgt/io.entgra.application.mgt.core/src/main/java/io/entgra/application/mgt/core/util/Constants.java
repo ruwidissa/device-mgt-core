@@ -31,10 +31,15 @@ import java.util.Map;
 public class Constants {
 
     public static final String APPLICATION_CONFIG_XML_FILE = "application-mgt.xml";
+    public static final String IDENTITY_SERVERS_CONFIG_XML_FILE = "identity-service-provider-config.xml";
 
     public static final String DEFAULT_CONFIG_FILE_LOCATION = CarbonUtils.getCarbonConfigDirPath() + File.separator +
             Constants.APPLICATION_CONFIG_XML_FILE;
+    public static final String DEFAULT_IDENTITY_SERVERS_CONFIG_FILE_LOCATION = CarbonUtils.getCarbonConfigDirPath() + File.separator +
+            IDENTITY_SERVERS_CONFIG_XML_FILE;
     public static final String DEFAULT_VERSION = "1.0.0";
+    public static final String SCREENSHOT_NAME = "screenshot";
+    public static final String ICON_NAME = "icon";
     public static final String PAYLOAD = "Payload";
     public static final String PLIST_NAME = "Info.plist";
     public static final String CF_BUNDLE_VERSION = "CFBundleVersion";
@@ -48,8 +53,20 @@ public class Constants {
     public static final String OPERATION_STATUS_UPDATE_API_BASE = "/api/device-mgt/v1.0/devices";
     public static final String OPERATION_STATUS_UPDATE_API_URI = "/operation";
 
+    public static final String LIMIT_QUERY_PARAM = "limit";
+    public static final String OFFSET_QUERY_PARAM = "offset";
+    public static final String IS_APPS_API_CONTEXT_PATH = "identity-server-applications";
+    public static final String IS_APPS_API_BASE_PATH = "identity-server-applications";
+    public static final Double IS_APP_DEFAULT_PRICE = 0.0;
+    public static final String SP_APP_CATEGORY = "SPApp";
+    public static final String IS_APP_RELEASE_TYPE = "stable";
+    public static final String IS_APP_DEFAULT_PAYMENT_CURRENCY = "$";
+    public static final String IS_APP_DEFAULT_VERSION = "1.0";
     public static final String COLON = ":";
     public static final String FORWARD_SLASH = "/";
+    public static final String URI_QUERY_SEPARATOR = "?";
+    public static final String QUERY_STRING_SEPARATOR = "&";
+    public static final String QUERY_KEY_VALUE_SEPARATOR = "=";
     public static final String ANY = "ANY";
     public static final String DEFAULT_PCK_NAME = "default.app.com";
     public static final String ALL = "ALL";

@@ -22,6 +22,9 @@
     <DatasourceName>jdbc/APPM_DS</DatasourceName>
 
     <Extensions>
+        <Extension name="SPApplicationManager">
+            <ClassName>io.entgra.application.mgt.core.impl.SPApplicationManagerImpl</ClassName>
+        </Extension>
         <Extension name="ApplicationManager">
             <ClassName>io.entgra.application.mgt.core.impl.ApplicationManagerImpl</ClassName>
         </Extension>
