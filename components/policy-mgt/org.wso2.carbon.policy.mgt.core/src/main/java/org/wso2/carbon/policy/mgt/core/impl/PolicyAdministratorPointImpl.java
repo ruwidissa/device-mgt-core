@@ -332,4 +332,9 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
             return policyManager.getPolicies(policyType);
         }
     }
+
+    @Override
+    public List<Policy> getPolicyList() throws PolicyManagementException {
+        return policyManager.getPolicyList();
+    }
 }

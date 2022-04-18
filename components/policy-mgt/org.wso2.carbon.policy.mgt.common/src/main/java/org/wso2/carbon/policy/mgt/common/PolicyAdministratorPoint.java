@@ -163,4 +163,6 @@ public interface PolicyAdministratorPoint {
      * @throws PolicyManagementException
      */
     List<Policy> getPolicies(String policyType) throws PolicyManagementException;
+
+    List<Policy> getPolicyList() throws PolicyManagementException;
 }
