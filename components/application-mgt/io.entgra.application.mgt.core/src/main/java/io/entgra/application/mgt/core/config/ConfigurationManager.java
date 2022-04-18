@@ -103,8 +103,7 @@ public class ConfigurationManager {
             this.identityServiceProviderConfiguration = (IdentityServiceProviderConfiguration) identityServerConfigUnmarshaller.unmarshal(new File(identityServerConfigPath));
         } catch (Exception e) {
             log.error(e);
-            throw new InvalidConfigurationException("Error occurred while initializing application config: "
-                    + configPath, e);
+            throw new InvalidConfigurationException("Error occurred while initializing application managements configs: ", e);
         }
     }
 
