@@ -169,9 +169,9 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/ent-app")
     public Response createEntApp(
-            ApplicationWrapper applicationWrapper) {
+            ApplicationWrapper applicationWrapper, @QueryParam("is-published") boolean isPublished) {
         try {
-            return createApplication(applicationWrapper);
+            return createApplication(applicationWrapper, isPublished);
         } catch (BadRequestException e) {
             String msg = "Found incompatible payload with ent. app creating request.";
             log.error(msg, e);
@@ -191,9 +191,9 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/web-app")
     public Response createWebApp(
-            WebAppWrapper webAppWrapper) {
+            WebAppWrapper webAppWrapper, @QueryParam("is-published") boolean isPublished) {
         try {
-            return createApplication(webAppWrapper);
+            return createApplication(webAppWrapper, isPublished);
         } catch (BadRequestException e) {
             String msg = "Found incompatible payload with web app creating request.";
             log.error(msg, e);
@@ -213,9 +213,9 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/public-app")
     public Response createPubApp(
-            PublicAppWrapper publicAppWrapper) {
+            PublicAppWrapper publicAppWrapper, @QueryParam("is-published") boolean isPublished) {
         try {
-            return createApplication(publicAppWrapper);
+            return createApplication(publicAppWrapper, isPublished);
         } catch (BadRequestException e) {
             String msg = "Found incompatible payload with pub app creating request.";
             log.error(msg, e);
@@ -235,9 +235,9 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/custom-app")
     public Response createCustomApp(
-            CustomAppWrapper customAppWrapper) {
+            CustomAppWrapper customAppWrapper, @QueryParam("is-published") boolean isPublished) {
         try {
-            return createApplication(customAppWrapper);
+            return createApplication(customAppWrapper, isPublished);
         } catch (BadRequestException e) {
             String msg = "Found incompatible payload with custom app creating request.";
             log.error(msg, e);
@@ -259,11 +259,12 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     public Response createEntAppRelease(
             @PathParam("deviceType") String deviceTypeName,
             @PathParam("appId") int appId,
-            EntAppReleaseWrapper entAppReleaseWrapper) {
+            EntAppReleaseWrapper entAppReleaseWrapper,
+            @QueryParam("isPublished") boolean isPublished) {
         try {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             applicationManager.validateEntAppReleaseCreatingRequest(entAppReleaseWrapper, deviceTypeName);
-            ApplicationRelease release = applicationManager.createEntAppRelease(appId, entAppReleaseWrapper);
+            ApplicationRelease release = applicationManager.createEntAppRelease(appId, entAppReleaseWrapper, isPublished);
             return Response.status(Response.Status.CREATED).entity(release).build();
         } catch (RequestValidatingException e) {
             String msg = "Error occurred while validating binaryArtifact";
@@ -283,12 +284,12 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     public Response createPubAppRelease(
             @PathParam("deviceType") String deviceTypeName,
             @PathParam("appId") int appId,
-            PublicAppReleaseWrapper publicAppReleaseWrapper) {
+            PublicAppReleaseWrapper publicAppReleaseWrapper, @QueryParam("isPublished") boolean isPublished) {
 
         try {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             applicationManager.validatePublicAppReleaseCreatingRequest(publicAppReleaseWrapper, deviceTypeName);
-            ApplicationRelease applicationRelease = applicationManager.createPubAppRelease(appId, publicAppReleaseWrapper);
+            ApplicationRelease applicationRelease = applicationManager.createPubAppRelease(appId, publicAppReleaseWrapper, isPublished);
             return Response.status(Response.Status.CREATED).entity(applicationRelease).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating application release for the application with the id " + appId;
@@ -311,11 +312,11 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Override
     public Response createWebAppRelease(
             @PathParam("appId") int appId,
-            WebAppReleaseWrapper webAppReleaseWrapper) {
+            WebAppReleaseWrapper webAppReleaseWrapper, @QueryParam("isPublished") boolean isPublished) {
         try {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             applicationManager.validateWebAppReleaseCreatingRequest(webAppReleaseWrapper);
-            ApplicationRelease applicationRelease= applicationManager.createWebAppRelease(appId, webAppReleaseWrapper);
+            ApplicationRelease applicationRelease= applicationManager.createWebAppRelease(appId, webAppReleaseWrapper, isPublished);
             return Response.status(Response.Status.CREATED).entity(applicationRelease).build();
         } catch (ResourceManagementException e) {
             String msg = "Error occurred while uploading application release artifacts";
@@ -339,11 +340,11 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     public Response createCustomAppRelease(
             @PathParam("deviceType") String deviceTypeName,
             @PathParam("appId") int appId,
-            CustomAppReleaseWrapper customAppReleaseWrapper) {
+            CustomAppReleaseWrapper customAppReleaseWrapper, @QueryParam("isPublished") boolean isPublished) {
         try {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             applicationManager.validateCustomAppReleaseCreatingRequest(customAppReleaseWrapper, deviceTypeName);
-            ApplicationRelease release = applicationManager.createCustomAppRelease(appId, customAppReleaseWrapper);
+            ApplicationRelease release = applicationManager.createCustomAppRelease(appId, customAppReleaseWrapper, isPublished);
             return Response.status(Response.Status.CREATED).entity(release).build();
         } catch (RequestValidatingException e) {
             String msg = "Error occurred while validating binaryArtifact";
@@ -864,10 +865,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         }
     }
 
-    public <T> Response createApplication(T appWrapper) throws ApplicationManagementException, RequestValidatingException {
+    public <T> Response createApplication(T appWrapper, boolean isPublished) throws ApplicationManagementException, RequestValidatingException {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         applicationManager.validateAppCreatingRequest(appWrapper);
-        Application application = applicationManager.createApplication(appWrapper);
+        Application application = applicationManager.createApplication(appWrapper, isPublished);
         if (application != null) {
             return Response.status(Response.Status.CREATED).entity(application).build();
         } else {

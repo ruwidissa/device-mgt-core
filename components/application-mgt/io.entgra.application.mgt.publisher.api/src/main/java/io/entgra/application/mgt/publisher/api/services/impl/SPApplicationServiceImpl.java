@@ -294,32 +294,36 @@ public class SPApplicationServiceImpl implements SPApplicationService {
     @POST
     @Override
     public Response createEntApp(@PathParam("identity-server-id") int identityServerId,
-                                  @PathParam("service-provider-id") String serviceProviderId, ApplicationWrapper app) {
-        return createSPApplication(identityServerId, serviceProviderId, app);
+                                  @PathParam("service-provider-id") String serviceProviderId, ApplicationWrapper app,
+                                    @QueryParam("isPublished") boolean isPublished) {
+        return createSPApplication(identityServerId, serviceProviderId, app, isPublished);
     }
 
     @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/public-app")
     @POST
     @Override
     public Response createPubApp(@PathParam("identity-server-id") int identityServerId,
-                                 @PathParam("service-provider-id") String serviceProviderId, PublicAppWrapper app) {
-        return createSPApplication(identityServerId, serviceProviderId, app);
+                                 @PathParam("service-provider-id") String serviceProviderId, PublicAppWrapper app,
+                                 @QueryParam("isPublished") boolean isPublished) {
+        return createSPApplication(identityServerId, serviceProviderId, app, isPublished);
     }
 
     @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/web-app")
     @POST
     @Override
     public Response createWebApp(@PathParam("identity-server-id") int identityServerId,
-                                 @PathParam("service-provider-id") String serviceProviderId, WebAppWrapper app) {
-        return createSPApplication(identityServerId, serviceProviderId, app);
+                                 @PathParam("service-provider-id") String serviceProviderId, WebAppWrapper app,
+                                 @QueryParam("isPublished") boolean isPublished) {
+        return createSPApplication(identityServerId, serviceProviderId, app, isPublished);
     }
 
     @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/custom-app")
     @POST
     @Override
     public Response createCustomApp(@PathParam("identity-server-id") int identityServerId,
-                                 @PathParam("service-provider-id") String serviceProviderId, CustomAppWrapper app) {
-        return createSPApplication(identityServerId, serviceProviderId, app);
+                                 @PathParam("service-provider-id") String serviceProviderId, CustomAppWrapper app,
+                                    @QueryParam("isPublished") boolean isPublished) {
+        return createSPApplication(identityServerId, serviceProviderId, app, isPublished);
     }
 
     /**
@@ -331,10 +335,10 @@ public class SPApplicationServiceImpl implements SPApplicationService {
      * @param <T> application wrapper class
      * @return Response
      */
-    private <T> Response createSPApplication(int identityServerId, String spUID, T appWrapper) {
+    private <T> Response createSPApplication(int identityServerId, String spUID, T appWrapper, boolean isPublished) {
         try {
             SPApplicationManager spApplicationManager = APIUtil.getSPApplicationManager();
-            Application createdApp = spApplicationManager.createSPApplication(appWrapper, identityServerId, spUID);
+            Application createdApp = spApplicationManager.createSPApplication(appWrapper, identityServerId, spUID, isPublished);
             return Response.status(Response.Status.CREATED).entity(createdApp).build();
         } catch (NotFoundException e) {
             String msg = "No identity server exist with the id " + identityServerId;

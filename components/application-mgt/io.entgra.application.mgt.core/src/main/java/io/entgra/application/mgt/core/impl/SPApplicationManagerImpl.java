@@ -650,7 +650,7 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
     }
 
     @Override
-    public <T> Application createSPApplication(T app, int identityServerId, String spId) throws ApplicationManagementException {
+    public <T> Application createSPApplication(T app, int identityServerId, String spId, boolean isPublished) throws ApplicationManagementException {
         validateServiceProviderUID(identityServerId, spId);
         ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
         ApplicationDTO applicationDTO = applicationManager.uploadReleaseArtifactIfExist(app);
@@ -660,7 +660,7 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
         }
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            Application createdApp = applicationManager.addAppDataIntoDB(applicationDTO);
+            Application createdApp = applicationManager.addAppDataIntoDB(applicationDTO, isPublished);
             attachCreatedSPApplication(createdApp, identityServerId,  spId);
             ConnectionManagerUtil.commitDBTransaction();
             return createdApp;

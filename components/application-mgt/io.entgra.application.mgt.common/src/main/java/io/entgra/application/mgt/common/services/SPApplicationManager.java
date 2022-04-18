@@ -131,11 +131,12 @@ public interface SPApplicationManager {
      * @param identityServerId id of the identity server to which the created application should be mapped
      * @param spId uid of the service provder to which the created application should be mapped
      * @param <T> Application wrapper class which depends on application type (PUBLIC, ENTERPRISE & etc)
+     * @param isPublished If the app should be added in PUBLISHED state instead of initial state
      * @return Application bean of the created application
      * @throws ApplicationManagementException if errors while creating and mapping the application
      * @throws RequestValidatingException if app contains any invalid payload
      */
-    <T> Application createSPApplication(T app, int identityServerId, String spId) throws ApplicationManagementException, RequestValidatingException;
+    <T> Application createSPApplication(T app, int identityServerId, String spId, boolean isPublished) throws ApplicationManagementException, RequestValidatingException;
 
     /**
      * Validates application ids of the applications that should be attached

@@ -317,7 +317,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "application",
                     value = "The application that need to be created.",
                     required = true)
-            ApplicationWrapper application);
+            ApplicationWrapper application,
+            @ApiParam(
+                    name = "isPublished",
+                    value = "Published state of the application"
+            )
+            @QueryParam("isPublished") boolean isPublished);
 
     @POST
     @Path("/web-app")
@@ -356,7 +361,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "webapp",
                     value = "The web app that need to be created.",
                     required = true)
-            WebAppWrapper webAppWrapper
+            WebAppWrapper webAppWrapper,
+            @ApiParam(
+                    name = "isPublished",
+                    value = "Published state of the application"
+            )
+            @QueryParam("isPublished") boolean isPublished
     );
 
     @POST
@@ -396,7 +406,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "public-app",
                     value = "The public app that need to be created.",
                     required = true)
-            PublicAppWrapper publicAppWrapper
+            PublicAppWrapper publicAppWrapper,
+            @ApiParam(
+                    name = "isPublished",
+                    value = "Published state of the application"
+            )
+            @QueryParam("isPublished") boolean isPublished
     );
 
     @POST
@@ -436,7 +451,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "application",
                     value = "The application that need to be created.",
                     required = true)
-            CustomAppWrapper customAppWrapper
+            CustomAppWrapper customAppWrapper,
+            @ApiParam(
+                    name = "isPublished",
+                    value = "Published state of the application"
+            )
+            @QueryParam("isPublished") boolean isPublished
     );
 
     @POST
@@ -486,7 +506,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "applicationRelease",
                     value = "The application release that need to be created.",
                     required = true)
-            EntAppReleaseWrapper entAppReleaseWrapper
+            EntAppReleaseWrapper entAppReleaseWrapper,
+            @ApiParam(
+                    name = "isPublished",
+                    value = "Published state of the application"
+            )
+            @QueryParam("isPublished") boolean isPublished
     );
 
     @POST
@@ -536,7 +561,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "applicationRelease",
                     value = "The application release that need to be created.",
                     required = true)
-            PublicAppReleaseWrapper publicAppReleaseWrapper
+            PublicAppReleaseWrapper publicAppReleaseWrapper,
+            @ApiParam(
+                    name = "isPublished",
+                    value = "Published state of the application"
+            )
+            @QueryParam("isPublished") boolean isPublished
     );
 
     @POST
@@ -581,7 +611,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "applicationRelease",
                     value = "The application release that need to be created.",
                     required = true)
-            WebAppReleaseWrapper webAppReleaseWrapper
+            WebAppReleaseWrapper webAppReleaseWrapper,
+            @ApiParam(
+                    name = "isPublished",
+                    value = "Published state of the application"
+            )
+            @QueryParam("isPublished") boolean isPublished
     );
 
     @POST
@@ -631,7 +666,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "applicationRelease",
                     value = "The application release that need to be created.",
                     required = true)
-            CustomAppReleaseWrapper customAppReleaseWrapper
+            CustomAppReleaseWrapper customAppReleaseWrapper,
+            @ApiParam(
+                    name = "isPublished",
+                    value = "Published state of the application"
+            )
+            @QueryParam("isPublished") boolean isPublished
     );
 
     @PUT

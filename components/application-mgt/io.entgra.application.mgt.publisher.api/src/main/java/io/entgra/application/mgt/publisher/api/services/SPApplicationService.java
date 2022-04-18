@@ -24,6 +24,7 @@ import io.entgra.application.mgt.common.wrapper.PublicAppWrapper;
 import io.entgra.application.mgt.common.wrapper.WebAppWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Extension;
 import io.swagger.annotations.ExtensionProperty;
 import io.swagger.annotations.Info;
@@ -311,7 +312,12 @@ public interface SPApplicationService {
             }
     )
     Response createEntApp(@PathParam("identity-server-id") int identityServerId,
-                          @PathParam("service-provider-id") String serviceProviderId, ApplicationWrapper app);
+                          @PathParam("service-provider-id") String serviceProviderId, ApplicationWrapper app,
+                          @ApiParam(
+                                  name = "isPublished",
+                                  value = "Published state of the application"
+                          )
+                          @QueryParam("isPublished") boolean isPublished);
 
     /**
      * This method is used to register an APIM application for tenant domain.
@@ -332,7 +338,12 @@ public interface SPApplicationService {
             }
     )
     Response createPubApp(@PathParam("identity-server-id") int identityServerId,
-                          @PathParam("service-provider-id") String serviceProviderId, PublicAppWrapper app);
+                          @PathParam("service-provider-id") String serviceProviderId, PublicAppWrapper app,
+                          @ApiParam(
+                                  name = "isPublished",
+                                  value = "Published state of the application"
+                          )
+                          @QueryParam("isPublished") boolean isPublished);
 
     @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/web-app")
     @POST
@@ -350,7 +361,12 @@ public interface SPApplicationService {
             }
     )
     Response createWebApp(@PathParam("identity-server-id") int identityServerId,
-                          @PathParam("service-provider-id") String serviceProviderId, WebAppWrapper app);
+                          @PathParam("service-provider-id") String serviceProviderId, WebAppWrapper app,
+                          @ApiParam(
+                                  name = "isPublished",
+                                  value = "Published state of the application"
+                          )
+                          @QueryParam("isPublished") boolean isPublished);
 
     @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/custom-app")
     @POST
@@ -368,5 +384,10 @@ public interface SPApplicationService {
             }
     )
     Response createCustomApp(@PathParam("identity-server-id") int identityServerId,
-                          @PathParam("service-provider-id") String serviceProviderId, CustomAppWrapper app);
+                          @PathParam("service-provider-id") String serviceProviderId, CustomAppWrapper app,
+                             @ApiParam(
+                                     name = "isPublished",
+                                     value = "Published state of the application"
+                             )
+                             @QueryParam("isPublished") boolean isPublished);
 }

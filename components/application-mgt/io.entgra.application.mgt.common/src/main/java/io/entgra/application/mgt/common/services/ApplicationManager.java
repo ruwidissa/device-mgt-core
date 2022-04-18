@@ -50,10 +50,11 @@ public interface ApplicationManager {
      *
      * @param appId application id of the application to which the release should be created
      * @param releaseWrapper {@link EntAppReleaseWrapper} of the release to be created
+     * @param isPublished If the app should be added in PUBLISHED state instead of initial state
      * @return Created application release bean
      * @throws ApplicationManagementException if any error occurred while creating the application
      */
-    ApplicationRelease createEntAppRelease(int appId, EntAppReleaseWrapper releaseWrapper)
+    ApplicationRelease createEntAppRelease(int appId, EntAppReleaseWrapper releaseWrapper, boolean isPublished)
             throws ApplicationManagementException;
 
     /**
@@ -61,10 +62,11 @@ public interface ApplicationManager {
      *
      * @param appId application id of the application to which the release should be created
      * @param releaseWrapper {@link WebAppReleaseWrapper} of the release to be created
+     * @param isPublished If the app should be added in PUBLISHED state instead of initial state
      * @return Created application release bean
      * @throws ApplicationManagementException if any error occurred while creating the application
      */
-    ApplicationRelease createWebAppRelease(int appId, WebAppReleaseWrapper releaseWrapper)
+    ApplicationRelease createWebAppRelease(int appId, WebAppReleaseWrapper releaseWrapper, boolean isPublished)
             throws ApplicationManagementException, ResourceManagementException;
 
     /**
@@ -72,10 +74,11 @@ public interface ApplicationManager {
      *
      * @param appId application id of the application to which the release should be created
      * @param releaseWrapper {@link PublicAppReleaseWrapper} of the release to be created
+     * @param isPublished If the app should be added in PUBLISHED state instead of initial state
      * @return Created application release bean
      * @throws ApplicationManagementException if any error occurred while creating the application
      */
-    ApplicationRelease createPubAppRelease(int appId, PublicAppReleaseWrapper releaseWrapper)
+    ApplicationRelease createPubAppRelease(int appId, PublicAppReleaseWrapper releaseWrapper, boolean isPublished)
             throws ApplicationManagementException, ResourceManagementException;
 
     /**
@@ -83,10 +86,11 @@ public interface ApplicationManager {
      *
      * @param appId application id of the application to which the release should be created
      * @param releaseWrapper {@link CustomAppReleaseWrapper} of the release to be created
+     * @param isPublished If the app should be added in PUBLISHED state instead of initial state
      * @return Created application release bean
      * @throws ApplicationManagementException if any error occurred while creating the application
      */
-    ApplicationRelease createCustomAppRelease(int appId, CustomAppReleaseWrapper releaseWrapper)
+    ApplicationRelease createCustomAppRelease(int appId, CustomAppReleaseWrapper releaseWrapper, boolean isPublished)
             throws ResourceManagementException, ApplicationManagementException;
 
     /**
@@ -113,21 +117,23 @@ public interface ApplicationManager {
      * required to do the validation of request and check the existence of application releaseDTO.
      *
      * @param applicationDTO Application DTO object.
+     * @param isPublished Wether the app should be added in PUBLISHED state instead of initial state
      * @return {@link Application}
      * @throws ApplicationManagementException which throws if error occurs while during application management.
      */
-    Application addAppDataIntoDB(ApplicationDTO applicationDTO) throws
+    Application addAppDataIntoDB(ApplicationDTO applicationDTO, boolean isPublished) throws
             ApplicationManagementException;
 
     /**
      * This method is responsible for handling application creation
      *
      * @param app Application wrapper object which depends on the application type
+     * @param isPublished If the app should be created in PUBLISHED state
      * @param <T> Application wrapper class which depends on the application type
      * @return Created application bean
      * @throws ApplicationManagementException if any error occurred while creating the application
      */
-   <T> Application createApplication(T app) throws ApplicationManagementException;
+   <T> Application createApplication(T app, boolean isPublished) throws ApplicationManagementException;
     /**
      * Add an application to favourites
      * @param appId id of the application
@@ -249,10 +255,11 @@ public interface ApplicationManager {
      * @param applicationDTO     ApplicationDTO of the release
      * @param applicationReleaseDTO ApplicatonRelease that need to be be created.
      * @param type {@link ApplicationType}
+     * @param isPublished if the app should be added in PUBLISHED state instead of initial state
      * @return the unique id of the application release, if the application release succeeded else -1
      */
     <T> ApplicationRelease createRelease(ApplicationDTO applicationDTO, ApplicationReleaseDTO applicationReleaseDTO,
-                                         ApplicationType type)
+                                         ApplicationType type, boolean isPublished)
             throws ApplicationManagementException;
 
     /**

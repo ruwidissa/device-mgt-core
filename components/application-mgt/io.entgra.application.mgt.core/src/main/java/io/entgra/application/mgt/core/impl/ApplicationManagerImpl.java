@@ -138,11 +138,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public <T> Application createApplication(T app) throws ApplicationManagementException {
+    public <T> Application createApplication(T app, boolean isPublished) throws ApplicationManagementException {
         ApplicationDTO applicationDTO = uploadReleaseArtifactIfExist(app);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            Application application = addAppDataIntoDB(applicationDTO);
+            Application application = addAppDataIntoDB(applicationDTO, isPublished);
             ConnectionManagerUtil.commitDBTransaction();
             return application;
         } catch (DBConnectionException e) {
@@ -167,7 +167,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease createEntAppRelease(int appId, EntAppReleaseWrapper releaseWrapper)
+    public ApplicationRelease createEntAppRelease(int appId, EntAppReleaseWrapper releaseWrapper, boolean isPublished)
             throws ApplicationManagementException {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationArtifact artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(), releaseWrapper.getScreenshots(),
@@ -177,7 +177,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
         releaseDTO = uploadEntAppReleaseArtifacts(releaseDTO, artifact, deviceType.getName(), true);
         try {
-            return createRelease(applicationDTO, releaseDTO, ApplicationType.ENTERPRISE);
+            return createRelease(applicationDTO, releaseDTO, ApplicationType.ENTERPRISE, isPublished);
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating ent app release for application with the name: " + applicationDTO.getName();
             log.error(msg, e);
@@ -187,7 +187,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease createWebAppRelease(int appId, WebAppReleaseWrapper releaseWrapper)
+    public ApplicationRelease createWebAppRelease(int appId, WebAppReleaseWrapper releaseWrapper, boolean isPublished)
             throws ApplicationManagementException, ResourceManagementException {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
@@ -196,7 +196,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
         releaseDTO = uploadWebAppReleaseArtifacts(releaseDTO, artifact);
         try {
-            return createRelease(applicationDTO, releaseDTO, ApplicationType.WEB_CLIP);
+            return createRelease(applicationDTO, releaseDTO, ApplicationType.WEB_CLIP, isPublished);
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating web app release for application with the name: " + applicationDTO.getName();
             log.error(msg, e);
@@ -206,7 +206,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease createPubAppRelease(int appId, PublicAppReleaseWrapper releaseWrapper) throws
+    public ApplicationRelease createPubAppRelease(int appId, PublicAppReleaseWrapper releaseWrapper, boolean isPublished) throws
             ResourceManagementException, ApplicationManagementException {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
@@ -216,7 +216,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
         releaseDTO = uploadPubAppReleaseArtifacts(releaseDTO, artifact, deviceType.getName());
         try {
-            return createRelease(applicationDTO, releaseDTO, ApplicationType.PUBLIC);
+            return createRelease(applicationDTO, releaseDTO, ApplicationType.PUBLIC, isPublished);
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating ent public release for application with the name: " + applicationDTO.getName();
             log.error(msg, e);
@@ -226,7 +226,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease createCustomAppRelease(int appId, CustomAppReleaseWrapper releaseWrapper)
+    public ApplicationRelease createCustomAppRelease(int appId, CustomAppReleaseWrapper releaseWrapper, boolean isPublished)
             throws ResourceManagementException, ApplicationManagementException {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
@@ -236,7 +236,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
         releaseDTO = uploadCustomAppReleaseArtifacts(releaseDTO, artifact, deviceType.getName());
         try {
-            return createRelease(applicationDTO, releaseDTO, ApplicationType.CUSTOM);
+            return createRelease(applicationDTO, releaseDTO, ApplicationType.CUSTOM, isPublished);
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating custom app release for application with the name: " + applicationDTO.getName();
             log.error(msg, e);
@@ -1192,7 +1192,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public Application addAppDataIntoDB(ApplicationDTO applicationDTO) throws
+    public Application addAppDataIntoDB(ApplicationDTO applicationDTO, boolean isPublished) throws
             ApplicationManagementException  {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationReleaseDTO applicationReleaseDTO = null;
@@ -1258,12 +1258,21 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 List<ApplicationReleaseDTO> applicationReleaseEntities = new ArrayList<>();
                 if (applicationReleaseDTO != null) {
-                    String initialLifecycleState = lifecycleStateManager.getInitialState();
-                    applicationReleaseDTO.setCurrentState(initialLifecycleState);
-                    applicationReleaseDTO = this.applicationReleaseDAO
-                            .createRelease(applicationReleaseDTO, appId, tenantId);
-                    LifecycleState lifecycleState = getLifecycleStateInstance(initialLifecycleState, initialLifecycleState);
+                    String lifeCycleState = lifecycleStateManager.getInitialState();
+                    String[] publishStates= {"IN-REVIEW", "APPROVED", "PUBLISHED"};
+
+                    applicationReleaseDTO.setCurrentState(lifeCycleState);
+                    applicationReleaseDTO = this.applicationReleaseDAO.createRelease(applicationReleaseDTO, appId, tenantId);
+                    LifecycleState lifecycleState = getLifecycleStateInstance(lifeCycleState, lifeCycleState);
                     this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
+                    if(isPublished){
+                        for (String state: publishStates) {
+                            LifecycleChanger lifecycleChanger = new LifecycleChanger();
+                            lifecycleChanger.setAction(state);
+                            lifecycleChanger.setReason("Updated to " + state);
+                            this.changeLifecycleState(applicationReleaseDTO, lifecycleChanger);
+                        }
+                    }
                     applicationReleaseEntities.add(applicationReleaseDTO);
                 }
                 applicationDTO.setId(appId);
@@ -1296,7 +1305,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public <T> ApplicationRelease createRelease(ApplicationDTO applicationDTO, ApplicationReleaseDTO applicationReleaseDTO,
-                                                ApplicationType type)
+                                                ApplicationType type, boolean isPublished)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         if (log.isDebugEnabled()) {
@@ -1322,13 +1331,23 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            String initialState = lifecycleStateManager.getInitialState();
-            applicationReleaseDTO.setCurrentState(initialState);
-            LifecycleState lifecycleState = getLifecycleStateInstance(initialState, initialState);
+            String lifeCycleState = lifecycleStateManager.getInitialState();
+            String[] publishStates = {"IN-REVIEW", "APPROVED", "PUBLISHED"};
+
+            applicationReleaseDTO.setCurrentState(lifeCycleState);
+            LifecycleState lifecycleState = getLifecycleStateInstance(lifeCycleState, lifeCycleState);
             applicationReleaseDTO = this.applicationReleaseDAO
                     .createRelease(applicationReleaseDTO, applicationDTO.getId(), tenantId);
             this.lifecycleStateDAO
                     .addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
+            if(isPublished){
+                for (String state: publishStates) {
+                    LifecycleChanger lifecycleChanger = new LifecycleChanger();
+                    lifecycleChanger.setAction(state);
+                    lifecycleChanger.setReason("Updated to " + state);
+                    this.changeLifecycleState(applicationReleaseDTO, lifecycleChanger);
+                }
+            }
             ApplicationRelease applicationRelease = APIUtil.releaseDtoToRelease(applicationReleaseDTO);
             ConnectionManagerUtil.commitDBTransaction();
             return applicationRelease;
