@@ -85,7 +85,7 @@ public class GrafanaUtil {
     }
 
     public static String getDashboardUID(URI iframeURL) {
-        return HttpUtil.getRequestSubPathFromEnd(iframeURL, GrafanaConstants.IFRAME_URL_DASHBOARD_UID_INDEX);
+        return HttpUtil.extractRequestSubPathFromEnd(iframeURL, GrafanaConstants.IFRAME_URL_DASHBOARD_UID_INDEX);
     }
 
     public static JsonObject getJsonBody(String body) {
