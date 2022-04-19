@@ -248,9 +248,10 @@ CREATE TABLE IF NOT EXISTS AP_IDENTITY_SERVER (
   TENANT_ID INT NOT NULL,
   USERNAME VARCHAR(255) NOT NULL,
   PASSWORD VARCHAR(255) NOT NULL
-) -- -----------------------------------------------------
+);
+-- -----------------------------------------------------
 -- Table AP_IS_SP_APP_MAPPING
--- -----------------------------------------------------;
+-- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS AP_IS_SP_APP_MAPPING (
   ID INT AUTO_INCREMENT PRIMARY KEY,
   SP_UID VARCHAR(255) NOT NULL,
@@ -260,6 +261,7 @@ CREATE TABLE IF NOT EXISTS AP_IS_SP_APP_MAPPING (
   CONSTRAINT AP_IS_SP_APP_MAPPING_AP_APP_ID_fk FOREIGN KEY (AP_APP_ID) REFERENCES AP_APP (ID),
   CONSTRAINT AP_IS_SP_APP_MAPPING_AP_IDENTITY_SERVER_ID_fk FOREIGN KEY (IS_ID) REFERENCES AP_IDENTITY_SERVER (ID)
 );
+-- -----------------------------------------------------
 -- Table AP_APP_FAVOURITES
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS AP_APP_FAVOURITES(
