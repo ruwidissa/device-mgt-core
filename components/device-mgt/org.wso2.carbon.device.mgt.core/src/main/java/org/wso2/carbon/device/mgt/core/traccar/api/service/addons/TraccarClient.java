@@ -122,51 +122,55 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
                 response = client.newCall(request).execute();
                 if(method==TraccarHandlerConstants.Methods.POST){
                     String result = response.body().string();
-                    JSONObject obj = new JSONObject(result);
-                    if (obj.has("id")){
-                        int traccarId = obj.getInt("id");
-                        try {
-                            TrackerManagementDAOFactory.beginTransaction();
-                            if(type==TraccarHandlerConstants.Types.DEVICE){
-                                trackerDAO.addTrackerDevice(traccarId, deviceId, tenantId);
-                                TrackerDeviceInfo res = trackerDAO.getTrackerDevice(deviceId, tenantId);
-                                if(res.getStatus()==0){
-                                    trackerDAO.updateTrackerDeviceIdANDStatus(res.getTraccarDeviceId(), deviceId, tenantId, 1);
+                    log.info(result);
+                    if(result.charAt(0)=='{'){
+                        JSONObject obj = new JSONObject(result);
+                        if (obj.has("id")){
+                            int traccarId = obj.getInt("id");
+                            try {
+                                TrackerManagementDAOFactory.beginTransaction();
+                                if(type==TraccarHandlerConstants.Types.DEVICE){
+                                    trackerDAO.addTrackerDevice(traccarId, deviceId, tenantId);
+                                    TrackerDeviceInfo res = trackerDAO.getTrackerDevice(deviceId, tenantId);
+                                    if(res.getStatus()==0){
+                                        trackerDAO.updateTrackerDeviceIdANDStatus(res.getTraccarDeviceId(), deviceId, tenantId, 1);
+                                    }
+                                }else if(type==TraccarHandlerConstants.Types.GROUP){
+                                    trackerDAO.addTrackerGroup(traccarId, groupId, tenantId);
+                                    TrackerGroupInfo res = trackerDAO.getTrackerGroup(groupId, tenantId);
+                                    if(res.getStatus()==0){
+                                        trackerDAO.updateTrackerGroupIdANDStatus(res.getTraccarGroupId(), groupId, tenantId, 1);
+                                    }
                                 }
-                            }else if(type==TraccarHandlerConstants.Types.GROUP){
-                                trackerDAO.addTrackerGroup(traccarId, groupId, tenantId);
-                                TrackerGroupInfo res = trackerDAO.getTrackerGroup(groupId, tenantId);
-                                if(res.getStatus()==0){
-                                    trackerDAO.updateTrackerGroupIdANDStatus(res.getTraccarGroupId(), groupId, tenantId, 1);
+                                TrackerManagementDAOFactory.commitTransaction();
+                            } catch (JSONException e) {
+                                TrackerManagementDAOFactory.rollbackTransaction();
+                                String msg = "Error occurred on JSON object .";
+                                log.error(msg, e);
+                            } catch (TransactionManagementException e) {
+                                TrackerManagementDAOFactory.rollbackTransaction();
+                                String msg = "Error occurred establishing the DB connection .";
+                                log.error(msg, e);
+                            } catch (TrackerManagementDAOException e) {
+                                TrackerManagementDAOFactory.rollbackTransaction();
+                                String msg = null;
+                                if(type==TraccarHandlerConstants.Types.DEVICE){
+                                    msg = "Error occurred while mapping with deviceId .";
+                                }else if(type==TraccarHandlerConstants.Types.GROUP){
+                                    msg = "Error occurred while mapping with groupId .";
                                 }
+                                log.error(msg, e);
+                            } finally {
+                                TrackerManagementDAOFactory.closeConnection();
                             }
-                            TrackerManagementDAOFactory.commitTransaction();
-                        } catch (JSONException e) {
-                            TrackerManagementDAOFactory.rollbackTransaction();
-                            String msg = "Error occurred on JSON object .";
-                            log.error(msg, e);
-                        } catch (TransactionManagementException e) {
-                            TrackerManagementDAOFactory.rollbackTransaction();
-                            String msg = "Error occurred establishing the DB connection .";
-                            log.error(msg, e);
-                        } catch (TrackerManagementDAOException e) {
-                            TrackerManagementDAOFactory.rollbackTransaction();
-                            String msg = null;
-                            if(type==TraccarHandlerConstants.Types.DEVICE){
-                                msg = "Error occurred while mapping with deviceId .";
-                            }else if(type==TraccarHandlerConstants.Types.GROUP){
-                                msg = "Error occurred while mapping with groupId .";
-                            }
-                            log.error(msg, e);
-                        } finally {
-                            TrackerManagementDAOFactory.closeConnection();
                         }
+                        response.close();
                     }
-                    response.close();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully the request is proceed and communicated with Traccar");
+                    }
                 }
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully the request is proceed and communicated with Traccar");
-                }
+
             } catch (IOException e) {
                 log.error("Couldnt connect to traccar.", e);
             }
@@ -362,10 +366,12 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
             TrackerManagementDAOFactory.closeConnection();
         }
 
-        String context = defaultPort+"/api/devices/"+obj.getInt("traccarDeviceId");
-        Runnable trackerExecutor = new TrackerExecutor(obj.getInt("traccarDeviceId"), tenantId, endpoint, context, null,
-                TraccarHandlerConstants.Methods.DELETE, TraccarHandlerConstants.Types.DEVICE);
-        executor.execute(trackerExecutor);
+        if(obj != null){
+            String context = defaultPort+"/api/devices/"+obj.getInt("traccarDeviceId");
+            Runnable trackerExecutor = new TrackerExecutor(obj.getInt("traccarDeviceId"), tenantId, endpoint, context, null,
+                    TraccarHandlerConstants.Methods.DELETE, TraccarHandlerConstants.Types.DEVICE);
+            executor.execute(trackerExecutor);
+        }
     }
 
     /**
