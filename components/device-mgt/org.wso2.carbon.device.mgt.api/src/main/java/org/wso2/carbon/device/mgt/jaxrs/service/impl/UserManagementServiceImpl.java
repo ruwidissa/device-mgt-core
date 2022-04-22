@@ -64,6 +64,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.PermissionList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.RoleList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.UserInfo;
+import org.wso2.carbon.device.mgt.jaxrs.beans.UserStoreList;
 import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.UserManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -1270,4 +1271,39 @@ public class UserManagementServiceImpl implements UserManagementService {
         return permissionsList;
     }
 
+    /**
+     * Returns a Response with the list of user stores available for a tenant
+     * @return list of user stores
+     * @throws UserStoreException If unable to search for user stores
+     */
+    @GET
+    @Path("/user-stores")
+    @Override
+    public Response getUserStores() {
+        String domain;
+        List<String> userStores = new ArrayList<>();
+        UserStoreList userStoreList = new UserStoreList();
+        try {
+            RealmConfiguration realmConfiguration = DeviceMgtAPIUtils.getUserRealm().getRealmConfiguration();
+            userStores.add(realmConfiguration
+                    .getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME));
+
+            while (realmConfiguration != null) {
+                realmConfiguration = realmConfiguration.getSecondaryRealmConfig();
+                if (realmConfiguration != null) {
+                    domain = realmConfiguration
+                            .getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
+                    userStores.add(domain);
+                } else {
+                    break;
+                }
+            }
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while retrieving user stores.";
+            log.error(msg, e);
+        }
+        userStoreList.setList(userStores);
+        userStoreList.setCount(userStores.size());
+        return Response.status(Response.Status.OK).entity(userStoreList).build();
+    }
 }
