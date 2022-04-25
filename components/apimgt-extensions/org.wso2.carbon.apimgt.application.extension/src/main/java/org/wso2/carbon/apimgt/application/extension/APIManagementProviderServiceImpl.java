@@ -137,13 +137,38 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
             // subscribe to apis.
             Set<String> tempApiIds = new HashSet<>();
+            APIConsumer apiConsumerAPIPublishedTenant = apiConsumer;
             if (tags != null && tags.length > 0) {
                 for (String tag : tags) {
+                    boolean startedTenantFlow = false;
                     Set<API> apisWithTag = apiConsumer.getAPIsWithTag(tag, tenantDomain);
+
+                    /**
+                     * From APIM 4.0.0, APIs published in the super tenant can only be listed by
+                     * APIConsumer, only if the APIConsumer belongs to the super tenant. So we
+                     * are starting tenant flow if we are not already in super tenant(child
+                     * tenant starting to create OAuth app).
+                     */
                     if (apisWithTag == null || apisWithTag.size() == 0) {
-                        apisWithTag = apiConsumer.getAPIsWithTag(tag, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
+                                true);
+
+                        try {
+                            String superAdminUsername = PrivilegedCarbonContext
+                                    .getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName();
+                            apiConsumerAPIPublishedTenant = API_MANAGER_FACTORY.getAPIConsumer(superAdminUsername);
+                        } catch (UserStoreException e) {
+                            throw new APIManagerException("Failed to create api application for " +
+                                    "tenant: " + tenantDomain +
+                                    ". Caused by to inability to get super tenant username", e);
+                        }
+
+                        apisWithTag = apiConsumerAPIPublishedTenant.getAPIsWithTag(tag, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        startedTenantFlow = true;
                     }
 
+                    Set<ApiTypeWrapper>  apiTypeWrapperList = new HashSet<>();
                     if (apisWithTag != null && apisWithTag.size() > 0) {
                         for (API apiInfo : apisWithTag) {
                             String id = apiInfo.getId().getProviderName().replace("@", "-AT-")
@@ -158,13 +183,42 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                                 }
                             }
                             if (!subscriptionExist && !tempApiIds.contains(id)) {
-                                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(
-                                        apiInfo.getUuid(), tenantDomain);
+                                ApiTypeWrapper apiTypeWrapper;
+                                if (startedTenantFlow) {
+                                    /**
+                                     * This mean APIs were not found in the child tenant, so all
+                                     * calls to get info about APIs need to be to super tenant.
+                                     */
+                                    apiTypeWrapper = apiConsumerAPIPublishedTenant.getAPIorAPIProductByUUID(
+                                            apiInfo.getUuid(), MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                                } else {
+                                    /**
+                                     * Ideally, in all usecases of IoT server, tenant domain here
+                                     * will be carbon.super. This block is kept to make sure in
+                                     * the future, if there are some APIs published to a specific
+                                     * tenant only.
+                                     */
+                                    apiTypeWrapper = apiConsumerAPIPublishedTenant.getAPIorAPIProductByUUID(
+                                            apiInfo.getUuid(), tenantDomain);
+                                }
                                 apiTypeWrapper.setTier(ApiApplicationConstants.DEFAULT_TIER);
-
-                                apiConsumer.addSubscription(apiTypeWrapper, username, application);
+                                apiTypeWrapperList.add(apiTypeWrapper);
                                 tempApiIds.add(id);
                             }
+                        }
+                        if (startedTenantFlow) {
+                            PrivilegedCarbonContext.endTenantFlow();
+                        }
+
+                        /** This is done in a redundant loop instead of doing in the same loop
+                         * that populates apiTypeWrapperList because in a tenanted scenario,
+                         * apiConsumerAPIPublishedTenant will belong to super tenant. So super
+                         * tenant flow need to end before starting subscription to avoid adding
+                         * subscriptions inside super tenant when we are trying to create an
+                         * Oauth app for a child tenant.
+                         */
+                        for (ApiTypeWrapper apiTypeWrapper : apiTypeWrapperList) {
+                            apiConsumer.addSubscription(apiTypeWrapper, username, application);
                         }
                     }
                 }
