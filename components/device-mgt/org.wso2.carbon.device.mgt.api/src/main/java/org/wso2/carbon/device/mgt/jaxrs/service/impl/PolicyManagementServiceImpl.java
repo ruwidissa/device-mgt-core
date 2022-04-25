@@ -498,4 +498,35 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
 
     }
 
+    @GET
+    @Path("/list")
+    @Override
+    public Response getPolicyList(
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @QueryParam("offset") int offset,
+            @QueryParam("limit") int limit) {
+        RequestValidationUtil.validatePaginationParameters(offset, limit);
+        PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
+        List<Policy> policies;
+        List<Policy> filteredPolicies;
+        PolicyList targetPolicies = new PolicyList();
+        try {
+            PolicyAdministratorPoint policyAdministratorPoint = policyManagementService.getPAP();
+            policies = policyAdministratorPoint.getPolicyList();
+            targetPolicies.setCount(policies.size());
+            if (offset == 0 && limit == 0) {
+                targetPolicies.setList(policies);
+            } else {
+                filteredPolicies = FilteringUtil.getFilteredList(policies, offset, limit);
+                targetPolicies.setList(filteredPolicies);
+            }
+        } catch (PolicyManagementException e) {
+            String msg = "Error occurred while retrieving all available policies";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+        return Response.status(Response.Status.OK).entity(targetPolicies).build();
+    }
+
 }

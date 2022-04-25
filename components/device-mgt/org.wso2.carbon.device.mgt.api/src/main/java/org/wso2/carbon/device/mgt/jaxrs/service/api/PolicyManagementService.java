@@ -860,4 +860,81 @@ public interface PolicyManagementService {
                          @QueryParam("limit")
                                  int limit
     );
+
+    @GET
+    @Path("/list")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting list of Policies",
+            responseContainer = "List",
+            notes = "Retrieve the details of all the policies in WSO2 EMM.",
+            response = Policy.class,
+            tags = "Device Policy Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:get-details")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched policies.",
+                            response = Policy.class,
+                            responseContainer = "List",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }
+                    ),
+                    @ApiResponse(
+                            code = 304,
+                            message = "Not Modified. \n Empty body because the client already has the latest version " +
+                                    "of the requested resource."),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 406,
+                            message = "Not Acceptable.\n The requested media type is not supported"),
+                    @ApiResponse(
+                            code = 500,
+                            message = ("Internal Server Error. \n Server error occurred while fetching the policies."),
+                            response = ErrorResponse.class)
+            })
+    Response getPolicyList(
+            @ApiParam(
+                    name = "If-Modified-Since",
+                    value = "Checks if the requested variant was modified, since the specified date-time. \n" +
+                            "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
+                    required = false)
+            @HeaderParam("If-Modified-Since")
+            String ifModifiedSince,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items",
+                    required = false,
+                    defaultValue = "0")
+            @QueryParam("offset")
+            int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many policy details you require from the starting pagination index/offset.",
+                    required = false,
+                    defaultValue = "5")
+            @QueryParam("limit")
+            int limit);
 }

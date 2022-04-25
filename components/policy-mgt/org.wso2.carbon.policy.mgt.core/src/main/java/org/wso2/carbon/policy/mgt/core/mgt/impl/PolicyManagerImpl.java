@@ -1502,4 +1502,33 @@ public class PolicyManagerImpl implements PolicyManager {
         correctiveAction.setAssociatedGeneralPolicyId(null); //avoiding send in payload
         correctiveAction.setFeatureId(null); //avoiding send in payload
     }
+
+    @Override
+    public List<Policy> getPolicyList() throws PolicyManagementException {
+
+        List<Policy> policyList;
+        try {
+            PolicyManagementDAOFactory.openConnection();
+            policyList = policyDAO.getAllPolicies();
+            for (Policy policy : policyList) {
+                policy.setRoles(policyDAO.getPolicyAppliedRoles(policy.getId()));
+                policy.setUsers(policyDAO.getPolicyAppliedUsers(policy.getId()));
+                List<DeviceGroupWrapper> deviceGroupWrappers = policyDAO.getDeviceGroupsOfPolicy(policy.getId());
+                if (!deviceGroupWrappers.isEmpty()) {
+                    deviceGroupWrappers = this.getDeviceGroupNames(deviceGroupWrappers);
+                }
+                policy.setDeviceGroups(deviceGroupWrappers);
+            }
+            Collections.sort(policyList);
+        } catch (PolicyManagerDAOException e) {
+            throw new PolicyManagementException("Error occurred while getting all the policies.", e);
+        } catch (SQLException e) {
+            throw new PolicyManagementException("Error occurred while opening a connection to the data source", e);
+        } catch (GroupManagementException e) {
+            throw new PolicyManagementException("Error occurred while getting device groups.", e);
+        } finally {
+            PolicyManagementDAOFactory.closeConnection();
+        }
+        return policyList;
+    }
 }
