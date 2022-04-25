@@ -121,7 +121,8 @@ public class ApplicationManagementTest extends BaseTestCase {
 
         applicationArtifact.setScreenshots(screenshots);
         ApplicationManager manager = new ApplicationManagerImpl();
-         manager.createApplication(applicationWrapper, false);
+        log.error(manager);
+        manager.createApplication(applicationWrapper, false);
     }
 
     @DataProvider(name = "applicationIdDataProvider")
