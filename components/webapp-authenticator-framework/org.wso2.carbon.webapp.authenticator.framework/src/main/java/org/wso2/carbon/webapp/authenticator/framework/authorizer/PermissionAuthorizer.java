@@ -79,6 +79,11 @@ public class PermissionAuthorizer {
                     matchingResources.add(new MatchingResource(permission.getUrlPattern().replace(context, ""), permission.getPath()));
                 }
             }
+            //TODO :: Temporary fix for windows bst api url mismatch error
+            else if ("/api/device-mgt/windows/v1.0/bst/authentication".equals(permission.getUrl())) {
+                requiredPermission = "/permission/admin/device-mgt/devices/enroll/windows";
+                break;
+            }
         }
 
         if (requiredPermission == null) {
