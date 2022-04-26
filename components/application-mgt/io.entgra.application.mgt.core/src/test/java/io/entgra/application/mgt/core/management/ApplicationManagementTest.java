@@ -42,6 +42,7 @@ import io.entgra.application.mgt.core.impl.ApplicationManagerImpl;
 import io.entgra.application.mgt.core.internal.DataHolder;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.core.common.util.FileUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
@@ -50,6 +51,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,28 +102,33 @@ public class ApplicationManagementTest extends BaseTestCase {
         releaseWrapper.setReleaseType("free");
         releaseWrapper.setPrice(5.7);
         releaseWrapper.setSupportedOsVersions("4.0-7.0");
-        entAppReleaseWrappers.add(releaseWrapper);
 
+
+        File banner = new File("src/test/resources/samples/app1/banner1.jpg");
+        File icon =  new File("src/test/resources/samples/app1/icon.png");
+        File ss1 = new File("src/test/resources/samples/app1/shot1.png");
+        File ss2 = new File("src/test/resources/samples/app1/shot2.png");
+        File ss3 = new File("src/test/resources/samples/app1/shot3.png");
+
+        Base64File bannerBase64 = new Base64File("banner", FileUtil.fileToBase64String(banner));
+        Base64File iconBase64 = new Base64File("icon", FileUtil.fileToBase64String(icon));
+        Base64File ss1Base64 = new Base64File("ss1", FileUtil.fileToBase64String(ss1));
+        Base64File ss2Base64 = new Base64File("ss2", FileUtil.fileToBase64String(ss2));
+        Base64File ss3Base64 = new Base64File("ss3", FileUtil.fileToBase64String(ss3));
+
+        File apk = new File("src/test/resources/samples/app1/sample.apk");
+        Base64File apkBase64 = new Base64File("apk", FileUtil.fileToBase64String(apk));
+
+
+        releaseWrapper.setBanner(bannerBase64);
+        releaseWrapper.setIcon(iconBase64);
+        releaseWrapper.setBinaryFile(apkBase64);
+        releaseWrapper.setScreenshots(Arrays.asList(ss1Base64, ss2Base64, ss3Base64));
+
+        entAppReleaseWrappers.add(releaseWrapper);
         applicationWrapper.setEntAppReleaseWrappers(entAppReleaseWrappers);
 
-        ApplicationArtifact applicationArtifact = new ApplicationArtifact();
-        applicationArtifact.setBannerName("My First Banner");
-        File banner = new File("src/test/resources/samples/app1/banner1.jpg");
-        InputStream bannerStream = new FileInputStream(banner);
-        applicationArtifact.setBannerStream(bannerStream);
-        applicationArtifact.setIconName("My First Icon");
-        applicationArtifact.setIconStream(new FileInputStream(new File("src/test/resources/samples/app1/icon.png")));
-        applicationArtifact.setInstallerName("Test Android App");
-        applicationArtifact.setInstallerStream(new FileInputStream(new File("src/test/resources/samples/app1/sample.apk")));
-
-        Map<String, InputStream> screenshots = new HashMap<>();
-        screenshots.put("shot1", new FileInputStream(new File("src/test/resources/samples/app1/shot1.png")));
-        screenshots.put("shot2", new FileInputStream(new File("src/test/resources/samples/app1/shot2.png")));
-        screenshots.put("shot3", new FileInputStream(new File("src/test/resources/samples/app1/shot3.png")));
-
-        applicationArtifact.setScreenshots(screenshots);
         ApplicationManager manager = new ApplicationManagerImpl();
-        log.error(manager);
         manager.createApplication(applicationWrapper, false);
     }
 
