@@ -91,19 +91,23 @@ public class APIUtil {
     }
 
     public static ApplicationManager getApplicationManager() {
-        if (applicationManager == null) {
-            synchronized (APIUtil.class) {
-                if (applicationManager == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    applicationManager =
-                            (ApplicationManager) ctx.getOSGiService(ApplicationManager.class, null);
+        try {
+            if (applicationManager == null) {
+                synchronized (APIUtil.class) {
                     if (applicationManager == null) {
-                        String msg = "ApplicationDTO Manager service has not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
+                        applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
+                        if (applicationManager == null) {
+                            String msg = "ApplicationDTO Manager service has not initialized.";
+                            log.error(msg);
+                            throw new IllegalStateException(msg);
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            String msg = "Error occurred while getting the application manager";
+            log.error(msg);
+            throw new IllegalStateException(msg);
         }
         return applicationManager;
     }

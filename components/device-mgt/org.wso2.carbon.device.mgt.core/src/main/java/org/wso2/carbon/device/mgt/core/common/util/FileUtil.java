@@ -18,7 +18,10 @@
 
 package org.wso2.carbon.device.mgt.core.common.util;
 
+import org.apache.commons.io.FileUtils;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 
@@ -48,6 +51,17 @@ public class FileUtil {
         base64 = FileUtil.removePathSeparatorFromBase64String(base64);
         byte[] base64Bytes = Base64.getDecoder().decode(base64);
         return new ByteArrayInputStream(base64Bytes);
+    }
+
+    /**
+     * Useful to convert input stream to base64 string
+     *
+     * @param file stream to be converted
+     * @return base64 string of the provided input stream
+     */
+    public static String fileToBase64String(File file) throws IOException {
+        byte[] fileContent = FileUtils.readFileToByteArray(file);
+        return Base64.getEncoder().encodeToString(fileContent);
     }
 
     /**
@@ -102,6 +116,10 @@ public class FileUtil {
      * @return file name without file extension
      */
     private static String extractFileNameWithoutExtension(String fileName) {
-        return fileName.substring(0, fileName.lastIndexOf('.'));
+        int lastIndexOfDot = fileName.lastIndexOf('.');
+        if (lastIndexOfDot != -1) {
+            return fileName.substring(0, fileName.lastIndexOf('.'));
+        }
+        return fileName;
     }
 }

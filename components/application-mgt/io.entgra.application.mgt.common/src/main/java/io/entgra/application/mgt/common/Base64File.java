@@ -23,6 +23,15 @@ public class Base64File {
     private String name;
     private String base64String;
 
+    public Base64File() {
+
+    }
+
+    public Base64File(String name, String base64String) {
+        this.name = name;
+        this.base64String = base64String;
+    }
+
     public String getName() {
         return name;
     }
