@@ -19,10 +19,12 @@
 
 package org.wso2.carbon.device.mgt.core.traccar.api.service;
 
-import org.wso2.carbon.device.mgt.common.TrackerAlreadyExistException;
+import org.json.JSONObject;
+import org.wso2.carbon.device.mgt.common.exceptions.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarUser;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 
 public interface TraccarClient {
@@ -45,4 +47,13 @@ public interface TraccarClient {
             throws TraccarConfigurationException, TrackerAlreadyExistException;
 
     void deleteGroup(int traccarGroupId, int tenantId) throws TraccarConfigurationException;
+
+    void fetchAllUsers(String createUser, TraccarUser traccarUser, int deviceId) throws TraccarConfigurationException;
+
+    void createUser(TraccarUser traccarUser, String method, int deviceId) throws TraccarConfigurationException;
+
+    void updateUser(JSONObject traccarUser) throws TraccarConfigurationException;
+
+    void setPermission(int userId, int deviceId) throws TraccarConfigurationException;
+
 }

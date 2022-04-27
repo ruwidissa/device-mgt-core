@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.device.mgt.core.traccar.api.service.addons;
 
+import com.google.gson.Gson;
 import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -27,19 +28,23 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
 import org.wso2.carbon.device.mgt.common.TrackerGroupInfo;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
-import org.wso2.carbon.device.mgt.common.TrackerAlreadyExistException;
+import org.wso2.carbon.device.mgt.common.exceptions.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.TrackerDAO;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.TraccarClient;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
+import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarUser;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarGateway;
 import org.wso2.carbon.device.mgt.core.traccar.core.config.TraccarConfigurationManager;
@@ -49,16 +54,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.api.service.TraccarClient {
-    private static final Log log = LogFactory.getLog(TraccarClient.class);
+public class TraccarClientImpl implements TraccarClient {
+    private static final Log log = LogFactory.getLog(TraccarClientImpl.class);
     private static final int THREAD_POOL_SIZE = 50;
     private final OkHttpClient client;
     private final ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
-
     final TraccarGateway traccarGateway = getTraccarGateway();
     final String endpoint = traccarGateway.getPropertyByName(TraccarHandlerConstants.TraccarConfig.ENDPOINT).getValue();
     final String authorization = traccarGateway.getPropertyByName(TraccarHandlerConstants.TraccarConfig.AUTHORIZATION).getValue();
@@ -66,9 +71,10 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
     final String defaultPort = traccarGateway.getPropertyByName(TraccarHandlerConstants.TraccarConfig.DEFAULT_PORT).getValue();
     final String locationUpdatePort = traccarGateway.getPropertyByName(TraccarHandlerConstants.TraccarConfig.LOCATION_UPDATE_PORT).getValue();
 
+    final String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
     private final TrackerDAO trackerDAO;
 
-    public TraccarClient() {
+    public TraccarClientImpl() {
         client = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
@@ -123,7 +129,15 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
                 if(method==TraccarHandlerConstants.Methods.POST){
                     String result = response.body().string();
                     log.info(result);
-                    if(result.charAt(0)=='{'){
+                    if(type==TraccarHandlerConstants.Types.PERMISSION){
+                        String msg ="";
+                        if(result == ""){
+                            msg ="Successfully the device is assigned to the user";
+                        }else{
+                            msg = "Error occurred while fetching users .";
+                        }
+                        log.info(msg);
+                    }else if(result.charAt(0)=='{'){
                         JSONObject obj = new JSONObject(result);
                         if (obj.has("id")){
                             int traccarId = obj.getInt("id");
@@ -134,6 +148,20 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
                                     TrackerDeviceInfo res = trackerDAO.getTrackerDevice(deviceId, tenantId);
                                     if(res.getStatus()==0){
                                         trackerDAO.updateTrackerDeviceIdANDStatus(res.getTraccarDeviceId(), deviceId, tenantId, 1);
+
+                                        TraccarUser traccarUser = new TraccarUser();
+                                        traccarUser.setName(username);
+                                        traccarUser.setLogin(username);
+                                        traccarUser.setEmail(username);
+                                        traccarUser.setPassword(generateRandomString(10));
+                                        traccarUser.setToken(generateRandomString(32));
+                                        traccarUser.setDeviceLimit(-1);
+
+                                        log.info("=============================");
+                                        log.info(new Gson().toJson(traccarUser));
+                                        log.info("=============================");
+                                        fetchAllUsers(TraccarHandlerConstants.Types.USER_CREATE_WITH_INSERT_DEVICE, traccarUser, traccarId);
+
                                     }
                                 }else if(type==TraccarHandlerConstants.Types.GROUP){
                                     trackerDAO.addTrackerGroup(traccarId, groupId, tenantId);
@@ -141,6 +169,16 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
                                     if(res.getStatus()==0){
                                         trackerDAO.updateTrackerGroupIdANDStatus(res.getTraccarGroupId(), groupId, tenantId, 1);
                                     }
+                                }else if(type==TraccarHandlerConstants.Types.USER_CREATE){
+                                    log.info("=============");
+                                    log.info("User inserted");
+                                    log.info("=============");
+                                }else if(type==TraccarHandlerConstants.Types.USER_CREATE_WITH_INSERT_DEVICE){
+                                    int userId = traccarId;
+                                    log.info("=============");
+                                    log.info("User inserted and setting to create session");
+                                    log.info("=============");
+                                    setPermission(userId, deviceId);
                                 }
                                 TrackerManagementDAOFactory.commitTransaction();
                             } catch (JSONException e) {
@@ -158,6 +196,10 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
                                     msg = "Error occurred while mapping with deviceId .";
                                 }else if(type==TraccarHandlerConstants.Types.GROUP){
                                     msg = "Error occurred while mapping with groupId .";
+                                }else if(type==TraccarHandlerConstants.Types.USER){
+                                    msg = "Error occurred while fetching users .";
+                                }else if(type==TraccarHandlerConstants.Types.PERMISSION){
+                                    msg = "Error occurred while assigning the device to the user .";
                                 }
                                 log.error(msg, e);
                             } finally {
@@ -169,9 +211,55 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully the request is proceed and communicated with Traccar");
                     }
+                }else if(method==TraccarHandlerConstants.Methods.GET){
+                    if(type!=TraccarHandlerConstants.Types.DEVICE){
+                        response = client.newCall(request).execute();
+                        String result = response.body().string();
+
+                        JSONArray fetchAllUsers = new JSONArray(result);
+                        int userAvailability = 0;
+                        for(int i=0; i<fetchAllUsers.length();i++){
+                            if(fetchAllUsers.getJSONObject(i).getString("login").equals(username)){
+
+                                //TODO :: when user is available then assgin the device to the user
+
+                                userAvailability=1;
+                                log.info(fetchAllUsers.getJSONObject(i));
+                                log.info(new Gson().toJson(fetchAllUsers.getJSONObject(i)));
+                                log.info("Username "+ fetchAllUsers.getJSONObject(i).getString("login")+"___"+username);
+                                log.info("Token: "+fetchAllUsers.getJSONObject(i).getString("token"));
+                                break;
+                            }
+                        }
+
+                        if(type==TraccarHandlerConstants.Types.USER_CREATE_WITH_INSERT_DEVICE){
+                            if(userAvailability==0){
+                                log.info("Creating User");
+                                log.info("============");
+                                log.info(payload);
+                                log.info("============");
+                                TraccarUser traccarUser = (TraccarUser) payload.get("data");
+                                log.info("============");
+                                log.info(traccarUser);
+                                log.info("============");
+                                createUser(traccarUser, type, deviceId);
+                                log.info("Creating User");
+
+                            }
+                        }else if(type==TraccarHandlerConstants.Types.USER_CREATE){
+                        /*if(userAvailability==1){
+                            log.info("Update User");
+                            log.info(payload);
+                            log.info(new Gson().toJson(payload));
+                            updateUser(payload);
+                            log.info("Update User");
+                        }*/
+                        }
+                    }
+
                 }
 
-            } catch (IOException e) {
+            } catch (IOException | TraccarConfigurationException e) {
                 log.error("Couldnt connect to traccar.", e);
             }
         }
@@ -306,7 +394,7 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
             String msg = "Error occurred establishing the DB connection .";
             log.error(msg, e);
         } catch (TrackerManagementDAOException e) {
-            String msg="Could not update the traccar group";
+            String msg="Could add new device location";
             log.error(msg, e);
         } finally{
             TrackerManagementDAOFactory.closeConnection();
@@ -316,7 +404,7 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
             try {
                 addDevice(device, tenantId);
             } catch (TraccarConfigurationException e) {
-                String msg = "Error occurred while mapping with groupId";
+                String msg = "Error occurred add the new device";
                 log.error(msg, e);
                 throw new TraccarConfigurationException(msg, e);
             } catch (TrackerAlreadyExistException e) {
@@ -511,6 +599,68 @@ public class TraccarClient implements org.wso2.carbon.device.mgt.core.traccar.ap
                     null, TraccarHandlerConstants.Methods.DELETE, TraccarHandlerConstants.Types.GROUP);
             executor.execute(trackerExecutor);
         }
+    }
+
+    public void fetchAllUsers(String type, TraccarUser traccarUser, int deviceId) throws TraccarConfigurationException {
+        String context = defaultPort+"/api/users/";
+
+        JSONObject payload = new JSONObject();
+        payload.put("data", traccarUser);
+
+        Runnable trackerExecutor = new TrackerExecutor(deviceId, 0, endpoint, context,
+                payload, TraccarHandlerConstants.Methods.GET, type);
+        executor.execute(trackerExecutor);
+    }
+
+    private JSONObject TraccarUserPayload(TraccarUser traccarUser){
+        JSONObject payload = new JSONObject();
+        payload.put("name", traccarUser.getName());
+        payload.put("login", traccarUser.getLogin());
+        payload.put("email", traccarUser.getEmail());
+        payload.put("password", traccarUser.getPassword());
+        payload.put("token", traccarUser.getToken());
+        payload.put("administrator", traccarUser.getAdministrator());
+        payload.put("deviceLimit", traccarUser.getDeviceLimit());
+        payload.put("userLimit", traccarUser.getUserLimit());
+        payload.put("disabled", traccarUser.getDisabled());
+        payload.put("deviceReadonly", traccarUser.getDeviceReadonly());
+        return payload;
+    }
+    public void createUser(TraccarUser traccarUser, String type, int deviceId) throws TraccarConfigurationException {
+        JSONObject payload = TraccarUserPayload(traccarUser);
+        
+        String context = defaultPort+"/api/users";
+        Runnable trackerExecutor = new TrackerExecutor(deviceId, 0, endpoint, context, payload,
+                TraccarHandlerConstants.Methods.POST, type);
+        executor.execute(trackerExecutor);
+    }
+
+    public void updateUser(JSONObject traccarUser) throws TraccarConfigurationException {
+        /*JSONObject payload = traccarUser;
+        String context = defaultPort+"/api/users";
+        Runnable trackerExecutor = new TrackerExecutor(0, 0, endpoint, context, payload,
+                TraccarHandlerConstants.Methods.PUT, TraccarHandlerConstants.Types.USER);
+        executor.execute(trackerExecutor);*/
+    }
+
+    public void setPermission(int userId, int deviceId) throws TraccarConfigurationException {
+        JSONObject payload = new JSONObject();
+        payload.put("userId", userId);
+        payload.put("deviceId", deviceId);
+
+        String context = defaultPort+"/api/permissions";
+        Runnable trackerExecutor = new TrackerExecutor(deviceId, 0, endpoint, context, payload,
+                TraccarHandlerConstants.Methods.POST, TraccarHandlerConstants.Types.PERMISSION);
+        executor.execute(trackerExecutor);
+    }
+
+    public String generateRandomString(int len) {
+        String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        Random rnd = new Random();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++)
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        return sb.toString();
     }
 
     private TraccarGateway getTraccarGateway(){
