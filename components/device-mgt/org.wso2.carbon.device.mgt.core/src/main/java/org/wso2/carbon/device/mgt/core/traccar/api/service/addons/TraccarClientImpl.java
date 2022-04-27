@@ -160,8 +160,11 @@ public class TraccarClientImpl implements TraccarClient {
                                         log.info("=============================");
                                         log.info(new Gson().toJson(traccarUser));
                                         log.info("=============================");
+                                        //device is available
+                                        //device is not available
+                                        //user is available
+                                        //user is not available
                                         fetchAllUsers(TraccarHandlerConstants.Types.USER_CREATE_WITH_INSERT_DEVICE, traccarUser, traccarId);
-
                                     }
                                 }else if(type==TraccarHandlerConstants.Types.GROUP){
                                     trackerDAO.addTrackerGroup(traccarId, groupId, tenantId);
@@ -193,13 +196,13 @@ public class TraccarClientImpl implements TraccarClient {
                                 TrackerManagementDAOFactory.rollbackTransaction();
                                 String msg = null;
                                 if(type==TraccarHandlerConstants.Types.DEVICE){
-                                    msg = "Error occurred while mapping with deviceId .";
+                                    msg = "Already device with deviceId " + deviceId + " exists" ;
                                 }else if(type==TraccarHandlerConstants.Types.GROUP){
-                                    msg = "Error occurred while mapping with groupId .";
+                                    msg = "Already the group with groupId - " + groupId + " exists!";
                                 }else if(type==TraccarHandlerConstants.Types.USER){
-                                    msg = "Error occurred while fetching users .";
+                                    msg = "Error occurred while fetching users.";
                                 }else if(type==TraccarHandlerConstants.Types.PERMISSION){
-                                    msg = "Error occurred while assigning the device to the user .";
+                                    msg = "Error occurred while assigning the device to the user." + traccarId + deviceId;
                                 }
                                 log.error(msg, e);
                             } finally {
@@ -218,6 +221,7 @@ public class TraccarClientImpl implements TraccarClient {
 
                         JSONArray fetchAllUsers = new JSONArray(result);
                         int userAvailability = 0;
+                        int userId = 0;
                         for(int i=0; i<fetchAllUsers.length();i++){
                             if(fetchAllUsers.getJSONObject(i).getString("login").equals(username)){
 
@@ -226,25 +230,29 @@ public class TraccarClientImpl implements TraccarClient {
                                 userAvailability=1;
                                 log.info(fetchAllUsers.getJSONObject(i));
                                 log.info(new Gson().toJson(fetchAllUsers.getJSONObject(i)));
-                                log.info("Username "+ fetchAllUsers.getJSONObject(i).getString("login")+"___"+username);
                                 log.info("Token: "+fetchAllUsers.getJSONObject(i).getString("token"));
+                                userId = fetchAllUsers.getJSONObject(i).getInt("id");
                                 break;
                             }
                         }
 
                         if(type==TraccarHandlerConstants.Types.USER_CREATE_WITH_INSERT_DEVICE){
                             if(userAvailability==0){
+                                log.info("============");
                                 log.info("Creating User");
-                                log.info("============");
-                                log.info(payload);
-                                log.info("============");
                                 TraccarUser traccarUser = (TraccarUser) payload.get("data");
-                                log.info("============");
                                 log.info(traccarUser);
                                 log.info("============");
                                 createUser(traccarUser, type, deviceId);
-                                log.info("Creating User");
-
+                            }else{
+                                if(userId!=0){
+                                    log.info("=============");
+                                    log.info("User inserted and setting to create session");
+                                    log.info("=============");
+                                    setPermission(userId, deviceId);
+                                }else{
+                                    log.info("UserId is null");
+                                }
                             }
                         }else if(type==TraccarHandlerConstants.Types.USER_CREATE){
                         /*if(userAvailability==1){
