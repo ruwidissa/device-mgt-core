@@ -961,9 +961,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 //Set application categories, tags and unrestricted roles to the application DTO.
                 applicationDTO
                         .setUnrestrictedRoles(visibilityDAO.getUnrestrictedRoles(applicationDTO.getId(), tenantId));
-                applicationDTO.setAppCategories(applicationDAO.getAppCategories(applicationDTO.getId(), tenantId));
-                applicationDTO.setTags(applicationDAO.getAppTags(applicationDTO.getId(), tenantId));
-                applicationDTO.setFavourite(applicationDAO.isFavouriteApp(applicationDTO.getId(), userName, tenantId));
+                setApplicationProperties(applicationDTO);
 
                 if (isFilteringApp(applicationDTO, filter)) {
                     boolean isHideableApp = isHideableApp(applicationDTO.getApplicationReleaseDTOs());
@@ -1586,11 +1584,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 return null;
             }
             applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
-
-            List<String> tags = this.applicationDAO.getAppTags(applicationDTO.getId(), tenantId);
-            List<String> categories = this.applicationDAO.getAppCategories(applicationDTO.getId(), tenantId);
-            applicationDTO.setTags(tags);
-            applicationDTO.setAppCategories(categories);
+            setApplicationProperties(applicationDTO);
 
             List<String> unrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(applicationDTO.getId(), tenantId);
             if (!unrestrictedRoles.isEmpty()) {
@@ -1628,6 +1622,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
+    }
+
+    /**
+     * This is useful to set application properties that are mapped in other database tables (I.E: tags and categories)
+     */
+    private void setApplicationProperties(ApplicationDTO applicationDTO) throws ApplicationManagementDAOException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        applicationDTO.setTags(applicationDAO.getAppTags(applicationDTO.getId(), tenantId));
+        applicationDTO.setAppCategories(applicationDAO.getAppCategories(applicationDTO.getId(), tenantId));
+        applicationDTO.setFavourite(applicationDAO.isFavouriteApp(applicationDTO.getId(), userName, tenantId));
     }
 
     /**
