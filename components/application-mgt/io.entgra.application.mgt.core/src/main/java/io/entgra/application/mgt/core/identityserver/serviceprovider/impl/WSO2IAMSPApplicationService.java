@@ -93,7 +93,7 @@ public class WSO2IAMSPApplicationService implements ISServiceProviderApplication
      * @return constructed error message
      */
     private String constructErrorMessage(HttpResponse response) {
-        String msg = "Error occurred while calling SP Applications API";
+        String msg = "Error occurred while calling SP Applications API. Response status: " + response.getStatusLine().getStatusCode();
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
             msg += ". Make sure provided identity Server credentials are valid";
         }
