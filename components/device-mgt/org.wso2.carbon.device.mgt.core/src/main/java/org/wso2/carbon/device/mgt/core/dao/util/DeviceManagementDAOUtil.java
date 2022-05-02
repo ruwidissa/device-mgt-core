@@ -21,16 +21,20 @@ import java.sql.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.*;
 import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceBilling;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceMonitoringData;
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceStatus;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
@@ -40,9 +44,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
 
 public final class DeviceManagementDAOUtil {
 
@@ -142,6 +143,14 @@ public final class DeviceManagementDAOUtil {
 
     public static EnrolmentInfo loadEnrolment(ResultSet rs) throws SQLException {
         EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
+        String columnName = "LAST_BILLED_DATE";
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columns = rsmd.getColumnCount();
+        for (int x = 1; x <= columns; x++) {
+            if (columnName.equals(rsmd.getColumnName(x))) {
+                enrolmentInfo.setLastBilledDate(rs.getLong("LAST_BILLED_DATE"));
+            }
+        }
         enrolmentInfo.setId(rs.getInt("ENROLMENT_ID"));
         enrolmentInfo.setOwner(rs.getString("OWNER"));
         enrolmentInfo.setOwnership(EnrolmentInfo.OwnerShip.valueOf(rs.getString("OWNERSHIP")));
@@ -149,6 +158,18 @@ public final class DeviceManagementDAOUtil {
         enrolmentInfo.setDateOfEnrolment(rs.getTimestamp("DATE_OF_ENROLMENT").getTime());
         enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
         enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
+        return enrolmentInfo;
+    }
+
+    public static EnrolmentInfo loadEnrolmentBilling(ResultSet rs) throws SQLException {
+        EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
+        enrolmentInfo.setId(rs.getInt("ENROLMENT_ID"));
+        enrolmentInfo.setDateOfEnrolment(rs.getTimestamp("DATE_OF_ENROLMENT").getTime());
+        enrolmentInfo.setLastBilledDate(rs.getLong("LAST_BILLED_DATE"));
+        enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
+        if (EnrolmentInfo.Status.valueOf(rs.getString("STATUS")).equals("REMOVED")) {
+            enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
+        }
         return enrolmentInfo;
     }
 
@@ -195,6 +216,23 @@ public final class DeviceManagementDAOUtil {
         device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
         device.setEnrolmentInfo(loadEnrolment(rs));
         return device;
+    }
+
+        public static DeviceBilling loadDeviceBilling(ResultSet rs) throws SQLException {
+        DeviceBilling device = new DeviceBilling();
+        device.setId(rs.getInt("ID"));
+        device.setName(rs.getString("DEVICE_NAME"));
+        device.setDescription(rs.getString("DESCRIPTION"));
+        device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
+        device.setDaysUsed((int) rs.getLong("DAYS_SINCE_ENROLLED"));
+        device.setEnrolmentInfo(loadEnrolmentBilling(rs));
+        return device;
+//        if (removedDevices) {
+//            device.setDaysUsed((int) rs.getLong("DAYS_USED"));
+//        } else {
+//            device.setDaysSinceEnrolled((int) rs.getLong("DAYS_SINCE_ENROLLED"));
+//        }
+
     }
 
     public static DeviceMonitoringData loadDevice(ResultSet rs, String deviceTypeName) throws SQLException {

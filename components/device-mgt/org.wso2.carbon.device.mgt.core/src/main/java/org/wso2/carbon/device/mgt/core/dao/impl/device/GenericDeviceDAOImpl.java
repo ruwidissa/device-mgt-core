@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.device.mgt.core.dao.impl.device;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Count;
@@ -85,6 +84,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "e.IS_TRANSFERRED, " +
                     "e.DATE_OF_LAST_UPDATE, " +
                     "e.DATE_OF_ENROLMENT, " +
+                    "e.LAST_BILLED_DATE, " +
                     "e.ID AS ENROLMENT_ID " +
                     "FROM DM_ENROLMENT e, " +
                     "(SELECT d.ID, " +
@@ -186,6 +186,34 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
+    }
+
+    @Override
+    public List<Device> getDeviceListWithoutPagination(int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        List<Device> devices = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT DM_DEVICE.ID AS DEVICE_ID, DEVICE_IDENTIFICATION, DESCRIPTION, DM_DEVICE.NAME AS DEVICE_NAME, DM_DEVICE_TYPE.NAME AS DEVICE_TYPE,\n" +
+                    "DM_ENROLMENT.ID AS ENROLMENT_ID, DATE_OF_ENROLMENT,OWNER, OWNERSHIP,IS_TRANSFERRED, STATUS, DATE_OF_LAST_UPDATE, LAST_BILLED_DATE,\n" +
+                    "TIMESTAMPDIFF('DAY', DATE_OF_ENROLMENT, CURDATE()) as DAYS_SINCE_ENROLLED FROM DM_DEVICE JOIN DM_ENROLMENT\n" +
+                    "ON (DM_DEVICE.ID = DM_ENROLMENT.DEVICE_ID) JOIN DM_DEVICE_TYPE ON (DM_DEVICE.DEVICE_TYPE_ID = DM_DEVICE_TYPE.ID) WHERE DM_ENROLMENT.TENANT_ID=?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                devices.add(device);
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while fetching the list of device billing ", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        return devices;
     }
 
     @Override

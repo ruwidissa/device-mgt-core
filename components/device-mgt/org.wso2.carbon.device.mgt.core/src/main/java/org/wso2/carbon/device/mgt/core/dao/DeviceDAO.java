@@ -36,12 +36,8 @@
 package org.wso2.carbon.device.mgt.core.dao;
 
 import org.apache.commons.collections.map.SingletonMap;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.Count;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
@@ -49,9 +45,9 @@ import org.wso2.carbon.device.mgt.common.device.details.DeviceMonitoringData;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoQuery;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
-import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -296,6 +292,14 @@ public interface DeviceDAO {
      * @throws DeviceManagementDAOException
      */
     List<Device> getDevices(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to retrieve the devices of a given tenant without pagination.
+     * @param tenantId tenant id.
+     * @return returns a list of devices of the tenant.
+     * @throws DeviceManagementDAOException
+     */
+    List<Device> getDeviceListWithoutPagination(int tenantId) throws DeviceManagementDAOException;
 
     /**
      * This method is used to retrieve the devices of a given tenant as a paginated result, along the lines of

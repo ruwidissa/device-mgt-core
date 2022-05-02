@@ -81,6 +81,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -342,6 +343,171 @@ public interface DeviceManagementService {
                     defaultValue = "5")
             @QueryParam("limit")
                     int limit);
+
+
+    @GET
+    @Path("/billing")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Cost details of devices in a tenant",
+            notes = "Provides individual cost and total cost of all devices per tenant.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of devices.",
+                    response = DeviceList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client already has the latest version of " +
+                            "the requested resource.\n"),
+            @ApiResponse(
+                    code = 400,
+                    message = "The incoming request has more than one selection criteria defined via the query parameters.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "The search criteria did not match any device registered with the server.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    })
+    Response getDevicesBilling(
+            @ApiParam(
+                    name = "tenantDomain",
+                    value = "The tenant domain.",
+                    required = false)
+                    String tenantDomain,
+            @ApiParam(
+                    name = "startDate",
+                    value = "The start date.",
+                    required = false)
+                    Timestamp startDate,
+            @ApiParam(
+                    name = "endDate",
+                    value = "The end date.",
+                    required = false)
+                    Timestamp endDate,
+            @ApiParam(
+                    name = "generateBill",
+                    value = "The generate bill boolean.",
+                    required = false)
+                    boolean generateBill,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    required = false,
+                    defaultValue = "0")
+            @QueryParam("offset")
+                    int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many device details you require from the starting pagination index/offset.",
+                    required = false,
+                    defaultValue = "10")
+            @QueryParam("limit")
+                    int limit);
+
+
+    @GET
+    @Path("/billing/file")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Cost details of devices in a tenant",
+            notes = "Provides individual cost and total cost of all devices per tenant.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of devices.",
+                    response = DeviceList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "Content-Disposition",
+                                    description = "The content disposition of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client already has the latest version of " +
+                            "the requested resource.\n"),
+            @ApiResponse(
+                    code = 400,
+                    message = "The incoming request has more than one selection criteria defined via the query parameters.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "The search criteria did not match any device registered with the server.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    })
+    Response exportBilling(
+            @ApiParam(
+                    name = "tenantDomain",
+                    value = "The tenant domain.",
+                    required = false)
+                    String tenantDomain,
+            @ApiParam(
+                    name = "startDate",
+                    value = "The start date.",
+                    required = false)
+                    Timestamp startDate,
+            @ApiParam(
+                    name = "endDate",
+                    value = "The end date.",
+                    required = false)
+                    Timestamp endDate,
+            @ApiParam(
+                    name = "generateBill",
+                    value = "The generate bill boolean.",
+                    required = false)
+                    boolean generateBill);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

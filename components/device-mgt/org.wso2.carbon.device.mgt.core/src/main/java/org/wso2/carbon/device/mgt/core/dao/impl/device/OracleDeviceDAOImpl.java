@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Count;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceBilling;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
@@ -185,6 +186,11 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
+    }
+
+    @Override
+    public List<Device> getDeviceListWithoutPagination(int tenantId) throws DeviceManagementDAOException {
+        return null;
     }
 
     @Override

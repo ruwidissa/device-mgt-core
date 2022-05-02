@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 
 @ApiModel(value = "EnrolmentInfo", description = "This class carries all information related to a devices enrollment" +
                                                  " status.")
@@ -48,6 +49,8 @@ public class EnrolmentInfo implements Serializable {
     private Long dateOfEnrolment;
     @ApiModelProperty(name = "dateOfLastUpdate", value = "Date of the device's last update. This value is not necessary.", required = false )
     private Long dateOfLastUpdate;
+    @ApiModelProperty(name = "lastBilledDate", value = "Date of the device's last billed date", required = false )
+    private Long lastBilledDate;
     @ApiModelProperty(name = "ownership", value = "Defines the ownership details. The ownership type can be any of the" +
                                                   " following values.\n" +
                                                   "BYOD - Bring your own device (BYOD).\n" +
@@ -90,6 +93,14 @@ public class EnrolmentInfo implements Serializable {
 
     public void setDateOfEnrolment(Long dateOfEnrolment) {
         this.dateOfEnrolment = dateOfEnrolment;
+    }
+
+    public Long getLastBilledDate() {
+        return lastBilledDate;
+    }
+
+    public void setLastBilledDate(Long lastBilledDate) {
+        this.lastBilledDate = lastBilledDate;
     }
 
     public Long getDateOfLastUpdate() {

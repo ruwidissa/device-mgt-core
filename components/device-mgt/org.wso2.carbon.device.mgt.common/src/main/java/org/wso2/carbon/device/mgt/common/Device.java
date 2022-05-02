@@ -24,8 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshotWrapper;
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceStatus;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @ApiModel(value = "Device", description = "This class carries all information related to a managed device.")
@@ -72,6 +74,17 @@ public class Device implements Serializable {
     required = false)
     private List<Application> applications;
 
+    @ApiModelProperty(name = "cost", value = "Cost charged per device.", required = false)
+    private double cost;
+
+    @ApiModelProperty(name = "daysUsed", value = "Number of days gone since device enrollment.",
+            required = false)
+    private int daysUsed;
+
+    @ApiModelProperty(name = "deviceStatusInfo", value = "This defines the device status details. " +
+            "It is mandatory to define this information.", required = false)
+    private List<DeviceStatus> deviceStatusInfo = new ArrayList<>();
+
     @ApiModelProperty(
             name = "historySnapshot",
             value = "device history snapshots")
@@ -90,6 +103,30 @@ public class Device implements Serializable {
         this.enrolmentInfo = enrolmentInfo;
         this.features = features;
         this.properties = properties;
+    }
+
+    public double getCost() {
+        return cost;
+    }
+
+    public void setCost(double cost) {
+        this.cost = cost;
+    }
+
+    public int getDaysUsed() {
+        return daysUsed;
+    }
+
+    public void setDaysUsed(int daysUsed) {
+        this.daysUsed = daysUsed;
+    }
+
+    public List<DeviceStatus> getDeviceStatusInfo() {
+        return deviceStatusInfo;
+    }
+
+    public void setDeviceStatusInfo(List<DeviceStatus> deviceStatusInfo) {
+        this.deviceStatusInfo = deviceStatusInfo;
     }
 
     public int getId() {

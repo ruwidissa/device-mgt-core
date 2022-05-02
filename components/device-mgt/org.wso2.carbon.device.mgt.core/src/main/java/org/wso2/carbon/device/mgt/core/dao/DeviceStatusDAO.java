@@ -34,7 +34,7 @@ public interface DeviceStatusDAO {
 
     List<DeviceStatus> getStatus(int deviceId, int tenantId) throws DeviceManagementDAOException;
 
-    List<DeviceStatus> getStatus(int deviceId, int tenantId, Date fromDate, Date toDate) throws DeviceManagementDAOException;
+    List<DeviceStatus> getStatus(int deviceId, int tenantId, Date fromDate, Date toDate, boolean billingStatus) throws DeviceManagementDAOException;
 
     List<DeviceStatus> getStatus(int enrolmentId) throws DeviceManagementDAOException;
 

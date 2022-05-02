@@ -119,26 +119,17 @@ import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerSer
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.DefaultValue;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Properties;
+import java.util.*;
 
 @Path("/devices")
 public class DeviceManagementServiceImpl implements DeviceManagementService {
@@ -214,8 +205,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             }
             if (status != null && !status.isEmpty()) {
                 boolean isStatusEmpty = true;
-                for (String statusString : status){
-                    if (StringUtils.isNotBlank(statusString)){
+                for (String statusString : status) {
+                    if (StringUtils.isNotBlank(statusString)) {
                         isStatusEmpty = false;
                         break;
                     }
@@ -343,6 +334,105 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     @GET
     @Override
+    @Path("/billing")
+    public Response getDevicesBilling(
+            @QueryParam("tenantDomain") String tenantDomain,
+            @QueryParam("startDate") Timestamp startDate,
+            @QueryParam("endDate") Timestamp endDate,
+            @QueryParam("generateBill") boolean generateBill,
+            @QueryParam("offset") int offset,
+            @DefaultValue("10")
+            @QueryParam("limit") int limit) {
+        try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            PaginationRequest request = new PaginationRequest(offset, limit);
+            PaginationResult result;
+            DeviceList devices = new DeviceList();
+            int tenantId = 0;
+            RealmService realmService = DeviceMgtAPIUtils.getRealmService();
+
+            if (!tenantDomain.isEmpty()) {
+                tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+            } else {
+                tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            }
+
+            try {
+                result = dms.getAllDevicesBillings(request, tenantId, tenantDomain, startDate, endDate, generateBill);
+            } catch (Exception exception) {
+                String msg = "Error occurred when trying to retrieve billing data";
+                log.error(msg, exception);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+
+            int resultCount = result.getRecordsTotal();
+            if (resultCount == 0) {
+                Response.status(Response.Status.OK).entity(devices).build();
+            }
+
+            devices.setList((List<Device>) result.getData());
+            devices.setBilledDateIsValid(result.isBilledDateIsValid());
+            devices.setMessage(result.getMessage());
+            devices.setCount(result.getRecordsTotal());
+            devices.setTotalCost(result.getTotalCost());
+            return Response.status(Response.Status.OK).entity(devices).build();
+        } catch (Exception e) {
+            String msg = "Error occurred while retrieving billing data";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    @GET
+    @Override
+    @Path("/billing/file")
+    public Response exportBilling(
+            @QueryParam("tenantDomain") String tenantDomain,
+            @QueryParam("startDate") Timestamp startDate,
+            @QueryParam("endDate") Timestamp endDate,
+            @QueryParam("generateBill") boolean generateBill) {
+
+        try {
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            PaginationResult result;
+            int tenantId = 0;
+            RealmService realmService = DeviceMgtAPIUtils.getRealmService();
+            DeviceList devices = new DeviceList();
+
+            if (!tenantDomain.isEmpty()) {
+                tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+            } else {
+                tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            }
+
+            try {
+                result = dms.createBillingFile(tenantId, tenantDomain, startDate, endDate, generateBill);
+
+            } catch (Exception exception) {
+                String msg = "Error occurred when trying to retrieve billing data without pagination";
+                log.error(msg, exception);
+                return null;
+            }
+
+            devices.setList((List<Device>) result.getData());
+            devices.setBilledDateIsValid(result.isBilledDateIsValid());
+            devices.setMessage(result.getMessage());
+            devices.setCount(result.getRecordsTotal());
+            devices.setTotalCost(result.getTotalCost());
+            return Response.status(Response.Status.OK).entity(devices).build();
+        } catch (Exception e) {
+            String msg = "Error occurred while retrieving billing data without pagination";
+            log.error(msg, e);
+            return null;
+        }
+
+    }
+
+    @GET
+    @Override
     @Path("/user-devices")
     public Response getDeviceByUser(@QueryParam("requireDeviceInfo") boolean requireDeviceInfo,
                                     @QueryParam("offset") int offset,
@@ -377,8 +467,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
      * Validate group Id and group Id greater than 0 and exist.
      *
      * @param groupId Group ID of the group
-     * @param from time to start getting DeviceLocationHistorySnapshotWrapper in milliseconds
-     * @param to time to end getting DeviceLocationHistorySnapshotWrapper in milliseconds
+     * @param from    time to start getting DeviceLocationHistorySnapshotWrapper in milliseconds
+     * @param to      time to end getting DeviceLocationHistorySnapshotWrapper in milliseconds
      */
     private static void validateGroupId(int groupId, long from, long to) throws GroupManagementException, BadRequestException {
         if (from == 0 || to == 0) {
@@ -407,7 +497,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                                                 @QueryParam("to") long to,
                                                 @QueryParam("type") String type,
                                                 @DefaultValue("0") @QueryParam("offset") int offset,
-                                                @DefaultValue("100") @QueryParam("limit") int limit){
+                                                @DefaultValue("100") @QueryParam("limit") int limit) {
         try {
             RequestValidationUtil.validatePaginationParameters(offset, limit);
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
@@ -416,31 +506,31 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
             // this is the user who initiates the request
             String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-                try {
-                    validateGroupId(groupId, from, to);
-                    boolean isPermitted = DeviceMgtAPIUtils.checkPermission(groupId, authorizedUser);
-                    if (isPermitted) {
-                        request.setGroupId(groupId);
-                    } else {
-                        String msg = "Current user '" + authorizedUser
-                                + "' doesn't have enough privileges to list devices of group '"
-                                + groupId + "'";
-                        log.error(msg);
-                        return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
-                    }
-                } catch (GroupManagementException e) {
-                    String msg = "Error occurred while getting the data using '" + groupId + "'";
+            try {
+                validateGroupId(groupId, from, to);
+                boolean isPermitted = DeviceMgtAPIUtils.checkPermission(groupId, authorizedUser);
+                if (isPermitted) {
+                    request.setGroupId(groupId);
+                } else {
+                    String msg = "Current user '" + authorizedUser
+                            + "' doesn't have enough privileges to list devices of group '"
+                            + groupId + "'";
                     log.error(msg);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-                } catch (UserStoreException e){
-                    String msg = "Error occurred while retrieving role list of user '" + authorizedUser + "'";
-                    log.error(msg);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+                    return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
                 }
+            } catch (GroupManagementException e) {
+                String msg = "Error occurred while getting the data using '" + groupId + "'";
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            } catch (UserStoreException e) {
+                String msg = "Error occurred while retrieving role list of user '" + authorizedUser + "'";
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
 
             PaginationResult result = dms.getAllDevices(request, false);
 
-            if(!result.getData().isEmpty()){
+            if (!result.getData().isEmpty()) {
                 devices.setList((List<Device>) result.getData());
 
                 for (Device device : devices.getList()) {
@@ -548,7 +638,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             DeviceData deviceData = new DeviceData();
             deviceData.setDeviceIdentifier(deviceIdentifier);
 
-            if (!StringUtils.isBlank(ifModifiedSince)){
+            if (!StringUtils.isBlank(ifModifiedSince)) {
                 SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
                 try {
                     sinceDate = format.parse(ifModifiedSince);
@@ -561,10 +651,10 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 }
             }
 
-            if (!StringUtils.isBlank(owner)){
+            if (!StringUtils.isBlank(owner)) {
                 deviceData.setDeviceOwner(owner);
             }
-            if (!StringUtils.isBlank(ownership)){
+            if (!StringUtils.isBlank(ownership)) {
                 deviceData.setDeviceOwnership(ownership);
             }
             device = dms.getDevice(deviceData, true);
@@ -654,7 +744,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     sinceDate = format.parse(ifModifiedSince);
                 } catch (ParseException e) {
                     String message = "Error occurred while parse the since date.Invalid date string is provided in " +
-                                 "'If-Modified-Since' header";
+                            "'If-Modified-Since' header";
                     log.error(message, e);
                     return Response.status(Response.Status.BAD_REQUEST).entity(
                             new ErrorResponse.ErrorResponseBuilder().setMessage("Invalid date " +
@@ -667,7 +757,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     String message = "No device is modified after the timestamp provided in 'If-Modified-Since' header";
                     log.error(message);
                     return Response.status(Response.Status.NOT_MODIFIED).entity("No device is modified " +
-                     "after the timestamp provided in 'If-Modified-Since' header").build();
+                            "after the timestamp provided in 'If-Modified-Since' header").build();
                 }
             } else {
                 device = dms.getDevice(id, requireDeviceInfo);
@@ -682,7 +772,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             // check whether the user is authorized
             if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, authorizedUser)) {
                 String message = "User '" + authorizedUser + "' is not authorized to retrieve the given " +
-                                 "device id '" + id + "'";
+                        "device id '" + id + "'";
                 log.error(message);
                 return Response.status(Response.Status.UNAUTHORIZED).entity(
                         new ErrorResponse.ErrorResponseBuilder().setCode(401l).setMessage(message).build()).build();
@@ -837,7 +927,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         List<Device> devices;
         DeviceList deviceList = new DeviceList();
         try {
-            if(map.getProperties().isEmpty()){
+            if (map.getProperties().isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("No search criteria defined when querying devices.");
                 }
@@ -845,7 +935,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             }
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
             devices = dms.getDevicesBasedOnProperties(map.getProperties());
-            if(devices == null || devices.isEmpty()){
+            if (devices == null || devices.isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("No Devices Found for criteria : " + map);
                 }
@@ -1145,14 +1235,14 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     /**
      * List device status history
      *
-     * @param type       Device type
-     * @param id         Device id
+     * @param type Device type
+     * @param id   Device id
      * @return {@link Response} object
      */
     @GET
     @Path("/{type}/{id}/getstatushistory")
     public Response getDeviceStatusHistory(@PathParam("type") @Size(max = 45) String type,
-                                       @PathParam("id") @Size(max = 45) String id) {
+                                           @PathParam("id") @Size(max = 45) String id) {
         //TODO check authorization for this
         RequestValidationUtil.validateDeviceIdentifier(type, id);
         DeviceManagementProviderService deviceManagementProviderService =
@@ -1177,14 +1267,14 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     /**
      * List device status history for the current enrolment
      *
-     * @param type       Device type
-     * @param id         Device id
+     * @param type Device type
+     * @param id   Device id
      * @return {@link Response} object
      */
     @GET
     @Path("/{type}/{id}/getenrolmentstatushistory")
     public Response getCurrentEnrolmentDeviceStatusHistory(@PathParam("type") @Size(max = 45) String type,
-                                           @PathParam("id") @Size(max = 45) String id) {
+                                                           @PathParam("id") @Size(max = 45) String id) {
         //TODO check authorization for this or current enrolment should be based on for the enrolment associated with the user
         RequestValidationUtil.validateDeviceIdentifier(type, id);
         DeviceManagementProviderService deviceManagementProviderService =
@@ -1488,7 +1578,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             if (MDMAppConstants.AndroidConstants.OPCODE_INSTALL_APPLICATION.equals(operation.getCode()) ||
                     MDMAppConstants.AndroidConstants.OPCODE_UNINSTALL_APPLICATION.equals(operation.getCode())) {
                 ApplicationManager applicationManager = DeviceMgtAPIUtils.getApplicationManager();
-                applicationManager.updateSubsStatus(device.getId(), operation.getId(),operation.getStatus().toString());
+                applicationManager.updateSubsStatus(device.getId(), operation.getId(), operation.getStatus().toString());
             }
             return Response.status(Response.Status.OK).entity("OperationStatus updated successfully.").build();
         } catch (BadRequestException e) {
@@ -1507,7 +1597,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             String msg = "Error occurred when updating the application subscription status of the operation. " +
                     "The device identifier is: " + deviceIdentifier;
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();        }
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
     }
 
     @GET

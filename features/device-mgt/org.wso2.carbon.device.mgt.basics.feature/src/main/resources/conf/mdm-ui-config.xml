@@ -24,6 +24,14 @@
     <SessionTimeOut>3600</SessionTimeOut>
     <!--  maximum number of login cache entries  -->
     <LoginCacheCapacity>10000</LoginCacheCapacity>
+    <Billing>
+        <HideBillGenerationInSuperTenant>false</HideBillGenerationInSuperTenant>
+        <HideBillGenerationInSubTenant>false</HideBillGenerationInSubTenant>
+        <HideTotalCalculationInSuperTenant>false</HideTotalCalculationInSuperTenant>
+        <HideTotalCalculationInSubTenant>false</HideTotalCalculationInSubTenant>
+        <HideDomainSelectionInSuperTenant>false</HideDomainSelectionInSuperTenant>
+        <HideDomainSelectionInSubTenant>true</HideDomainSelectionInSubTenant>
+    </Billing>
     <AppRegistration>
         <Tags>
             <Tag>analytics_management</Tag>

@@ -44,6 +44,8 @@ public final class DeviceManagementConstants {
     public static final String DEVICE_CACHE = "DEVICE_CACHE";
     public static final String API_RESOURCE_PERMISSION_CACHE = "API_RESOURCE_CACHE_CACHE";
     public static final String GEOFENCE_CACHE = "GEOFENCE_CACHE";
+    public static final String META_KEY = "PER_DEVICE_COST";
+    public static final String ACTIVE_STATUS = "ACTIVE";
     public static final String ENROLLMENT_NOTIFICATION_API_ENDPOINT = "/api/device-mgt/enrollment-notification";
     public static final String URL_SEPERATOR = "/";
 

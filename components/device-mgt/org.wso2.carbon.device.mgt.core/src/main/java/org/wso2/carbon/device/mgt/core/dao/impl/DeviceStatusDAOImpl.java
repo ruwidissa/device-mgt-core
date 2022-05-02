@@ -15,7 +15,7 @@ import java.util.List;
 
 public class DeviceStatusDAOImpl implements DeviceStatusDAO {
 
-  private List<DeviceStatus> getStatus(int id, Date fromDate, Date toDate, boolean isDeviceId) throws DeviceManagementDAOException {
+  private List<DeviceStatus> getStatus(int id, Date fromDate, Date toDate, boolean isDeviceId, boolean billingStatus) throws DeviceManagementDAOException {
     List<DeviceStatus> result = new ArrayList<>();
     Connection conn;
     PreparedStatement stmt = null;
@@ -25,7 +25,14 @@ public class DeviceStatusDAOImpl implements DeviceStatusDAO {
       conn = this.getConnection();
       // either we list all status values for the device using the device id or only get status values for the given enrolment id
       String idType = isDeviceId ? "DEVICE_ID" : "ENROLMENT_ID";
-      String sql = "SELECT ENROLMENT_ID, DEVICE_ID, UPDATE_TIME, STATUS, CHANGED_BY FROM DM_DEVICE_STATUS WHERE " + idType + " = ?";
+      String sql;
+
+      if (billingStatus) {
+        sql = "SELECT ENROLMENT_ID, DEVICE_ID, UPDATE_TIME, STATUS, CHANGED_BY FROM DM_DEVICE_STATUS WHERE STATUS IN ('ACTIVE','REMOVED') AND " + idType + " = ?";
+      } else {
+        sql = "SELECT ENROLMENT_ID, DEVICE_ID, UPDATE_TIME, STATUS, CHANGED_BY FROM DM_DEVICE_STATUS WHERE " + idType + " = ?";
+      }
+
       // filter the data based on a date range if specified
       if (fromDate != null){
         sql += " AND UPDATE_TIME >= ?";
@@ -64,17 +71,17 @@ public class DeviceStatusDAOImpl implements DeviceStatusDAO {
 
   @Override
   public List<DeviceStatus> getStatus(int enrolmentId, Date fromDate, Date toDate) throws DeviceManagementDAOException {
-    return getStatus(enrolmentId, fromDate, toDate, false);
+    return getStatus(enrolmentId, fromDate, toDate, false, false);
   }
 
   @Override
   public List<DeviceStatus> getStatus(int deviceId, int tenantId) throws DeviceManagementDAOException {
-    return getStatus(deviceId, tenantId, null, null);
+    return getStatus(deviceId, tenantId, null, null, false);
   }
 
   @Override
-  public List<DeviceStatus> getStatus(int deviceId, int tenantId, Date fromDate, Date toDate) throws DeviceManagementDAOException {
-    return getStatus(deviceId, fromDate, toDate, true);
+  public List<DeviceStatus> getStatus(int deviceId, int tenantId, Date fromDate, Date toDate, boolean billingStatus) throws DeviceManagementDAOException {
+    return getStatus(deviceId, fromDate, toDate, true, billingStatus);
   }
 
   @Override

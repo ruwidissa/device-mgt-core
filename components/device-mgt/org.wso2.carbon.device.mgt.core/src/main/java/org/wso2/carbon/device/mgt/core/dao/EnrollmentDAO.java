@@ -22,6 +22,7 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface EnrollmentDAO {
@@ -31,6 +32,8 @@ public interface EnrollmentDAO {
     int updateEnrollment(EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException;
 
     boolean updateEnrollmentStatus(List<EnrolmentInfo> enrolmentInfos) throws DeviceManagementDAOException;
+
+    boolean updateEnrollmentLastBilledDate(EnrolmentInfo enrolmentInfos, Timestamp lastBilledDate, int tenantId) throws DeviceManagementDAOException;
 
     int removeEnrollment(int deviceId, String currentOwner, int tenantId) throws DeviceManagementDAOException;
 

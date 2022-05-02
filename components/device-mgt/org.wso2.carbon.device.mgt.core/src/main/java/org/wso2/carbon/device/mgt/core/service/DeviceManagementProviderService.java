@@ -36,18 +36,7 @@
 package org.wso2.carbon.device.mgt.core.service;
 
 import org.apache.commons.collections.map.SingletonMap;
-import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
-import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.FeatureManager;
-import org.wso2.carbon.device.mgt.common.MonitoringOperation;
-import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
+import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
@@ -80,6 +69,8 @@ import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -207,6 +198,27 @@ public interface DeviceManagementProviderService {
      *                                   devices.
      */
     PaginationResult getAllDevices(PaginationRequest request, boolean requireDeviceInfo) throws DeviceManagementException;
+
+    /**
+     * Method to retrieve all the devices with pagination support.
+     *
+     * @param request PaginationRequest object holding the data for pagination
+     * @return PaginationResult - Result including the required parameters necessary to do pagination.
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching billing of
+     *                                   devices.
+     */
+    PaginationResult getAllDevicesBillings(PaginationRequest request, int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
+
+    /**
+     * Method to retrieve all the devices with pagination support.
+     *
+     * @return PaginationResult - Result including the device bill list without pagination.
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching billing of
+     *                                   devices.
+     */
+    PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
+
+
 
     /**
      * Returns the device of specified id.
@@ -693,7 +705,7 @@ public interface DeviceManagementProviderService {
 
     List<DeviceStatus> getDeviceStatusHistory(Device device) throws DeviceManagementException;
 
-    List<DeviceStatus> getDeviceStatusHistory(Device device, Date fromDate, Date toDate) throws DeviceManagementException;
+    List<DeviceStatus> getDeviceStatusHistory(Device device, Date fromDate, Date toDate, boolean billingStatus) throws DeviceManagementException;
 
     List<DeviceStatus> getDeviceCurrentEnrolmentStatusHistory(Device device) throws DeviceManagementException;
 

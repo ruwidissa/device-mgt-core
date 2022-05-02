@@ -144,6 +144,27 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         return status;
     }
 
+    @Override
+    public boolean updateEnrollmentLastBilledDate(EnrolmentInfo enrolmentInfo, Timestamp lastBilledDate, int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getConnection();
+            String sql = "UPDATE DM_ENROLMENT SET LAST_BILLED_DATE = ? WHERE ID = ? AND TENANT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setLong(1, lastBilledDate.getTime());
+            stmt.setInt(2, enrolmentInfo.getId());
+            stmt.setInt(3, tenantId);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while updating enrolment last billed date.", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
 
     @Override
     public int removeEnrollment(int deviceId, String currentOwner,
