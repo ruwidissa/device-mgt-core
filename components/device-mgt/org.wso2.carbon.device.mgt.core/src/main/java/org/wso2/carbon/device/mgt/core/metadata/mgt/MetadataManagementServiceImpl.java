@@ -33,7 +33,6 @@ import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOException;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
-
 import java.sql.SQLException;
 import java.util.List;
 
@@ -44,7 +43,7 @@ public class MetadataManagementServiceImpl implements MetadataManagementService 
 
     private static final Log log = LogFactory.getLog(MetadataManagementServiceImpl.class);
 
-    private MetadataDAO metadataDAO;
+    private final MetadataDAO metadataDAO;
 
     public MetadataManagementServiceImpl() {
         this.metadataDAO = MetadataManagementDAOFactory.getMetadataDAO();

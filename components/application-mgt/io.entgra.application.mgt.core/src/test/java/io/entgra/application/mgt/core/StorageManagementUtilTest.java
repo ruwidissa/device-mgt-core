@@ -23,7 +23,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import io.entgra.application.mgt.common.exception.ResourceManagementException;
-import io.entgra.application.mgt.core.util.StorageManagementUtil;
+import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
+import org.wso2.carbon.device.mgt.core.common.util.StorageManagementUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,14 +48,14 @@ public class StorageManagementUtilTest {
     public void testCreateArtifactDirectory() {
         try {
             StorageManagementUtil.createArtifactDirectory(TEMP_FOLDER);
-        } catch (ResourceManagementException e) {
+        } catch (StorageManagementException e) {
             e.printStackTrace();
             Assert.fail("Directory creation failed.");
         }
     }
 
     @Test
-    public void testSaveFile() throws IOException, ResourceManagementException {
+    public void testSaveFile() throws IOException, ResourceManagementException, StorageManagementException {
         StorageManagementUtil.createArtifactDirectory(TEMP_FOLDER);
         InputStream apk = new FileInputStream(APK_FILE);
         StorageManagementUtil.saveFile(apk, TEMP_FOLDER + APK_FILE_NAME);
@@ -65,7 +66,7 @@ public class StorageManagementUtilTest {
     }
 
     @AfterMethod
-    public void deleteFileTest() throws IOException, ResourceManagementException {
+    public void deleteFileTest() throws IOException, StorageManagementException {
         File file = new File(TEMP_FOLDER);
         StorageManagementUtil.delete(file);
         if (file.exists()) {

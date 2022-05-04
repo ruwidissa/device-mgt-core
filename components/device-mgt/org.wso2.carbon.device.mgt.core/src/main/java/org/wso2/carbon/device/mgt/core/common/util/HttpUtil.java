@@ -19,6 +19,7 @@ package org.wso2.carbon.device.mgt.core.common.util;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
@@ -233,5 +234,17 @@ public class HttpUtil {
     public static String getContentType(HttpResponse response) {
         ContentType contentType = ContentType.getOrDefault(response.getEntity());
         return contentType.getMimeType();
+    }
+
+    /**
+     * Validate http url (For example make sure it uses http/https protocol)
+     *
+     * @param url url to be checked if valid
+     * @return if provided http url is valid
+     */
+    public static boolean isHttpUrlValid(String url) {
+        String[] schemes = {"http","https"};
+        UrlValidator urlValidator = new UrlValidator(schemes, UrlValidator.ALLOW_LOCAL_URLS);
+        return urlValidator.isValid(url);
     }
 }

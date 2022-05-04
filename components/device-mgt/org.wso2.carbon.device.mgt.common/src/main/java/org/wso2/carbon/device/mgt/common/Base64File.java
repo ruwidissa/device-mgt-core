@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.entgra.application.mgt.common;
+package org.wso2.carbon.device.mgt.common;
 
 public class Base64File {
 
