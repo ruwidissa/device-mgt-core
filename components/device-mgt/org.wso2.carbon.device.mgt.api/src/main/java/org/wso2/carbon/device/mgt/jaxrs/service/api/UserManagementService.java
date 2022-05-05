@@ -254,7 +254,6 @@ public interface UserManagementService {
                     required = true) UserInfo user);
 
     @GET
-    @Path("/{username}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -310,7 +309,7 @@ public interface UserManagementService {
                     value = "Provide the username of the user.",
                     required = true,
                     defaultValue = "admin")
-            @PathParam("username") String username,
+            @QueryParam("username") String username,
             @ApiParam(
                     name = "domain",
                     value = "The domain name of the user store.",
@@ -325,7 +324,6 @@ public interface UserManagementService {
             @HeaderParam("If-Modified-Since") String ifModifiedSince);
 
     @PUT
-    @Path("/{username}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -380,7 +378,7 @@ public interface UserManagementService {
                     value = "The username of the user.",
                     required = true,
                     defaultValue = "admin")
-            @PathParam("username") String username,
+            @QueryParam("username") String username,
             @ApiParam(
                     name = "domain",
                     value = "The domain name of the user store.",
@@ -393,7 +391,6 @@ public interface UserManagementService {
                     required = true) UserInfo userData);
 
     @DELETE
-    @Path("/{username}")
     @Consumes(MediaType.WILDCARD)
     @ApiOperation(
             httpMethod = "DELETE",
@@ -431,7 +428,7 @@ public interface UserManagementService {
                             "that user. Do not remove the admin user.",
                     required = true,
                     defaultValue = "[Create a new user named Jim, and then try out this API.]")
-            @PathParam("username") String username,
+            @QueryParam("username") String username,
             @ApiParam(
                     name = "domain",
                     value = "The domain name of the user store.",
@@ -439,7 +436,7 @@ public interface UserManagementService {
             @QueryParam("domain") String domain);
 
     @GET
-    @Path("/{username}/roles")
+    @Path("/roles")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -495,7 +492,7 @@ public interface UserManagementService {
                     value = "The username of the user.",
                     required = true,
                     defaultValue = "admin")
-            @PathParam("username") String username,
+            @QueryParam("username") String username,
             @ApiParam(
                     name = "domain",
                     value = "The domain name of the user store.",
@@ -503,6 +500,7 @@ public interface UserManagementService {
             @QueryParam("domain") String domain);
 
     @GET
+    @Path("/list")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -573,7 +571,12 @@ public interface UserManagementService {
                     value = "Provide how many user details you require from the starting pagination index/offset.",
                     required = false,
                     defaultValue = "5")
-            @QueryParam("limit") int limit);
+            @QueryParam("limit") int limit,
+            @ApiParam(
+                    name = "domain",
+                    value = "The domain name of the user store.",
+                    required = false)
+            @QueryParam("domain") String domain);
 
     @GET
     @Path(("/search"))
@@ -1034,7 +1037,7 @@ public interface UserManagementService {
             @HeaderParam("If-Modified-Since") String ifModifiedSince);
 
     @PUT
-    @Path("/claims/{username}")
+    @Path("/claims")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
@@ -1082,14 +1085,19 @@ public interface UserManagementService {
                     value = "Provide the username of the user.",
                     required = true,
                     defaultValue = "admin")
-            @PathParam("username") String username,
+            @QueryParam("username") String username,
             @ApiParam(
                     name = "device list",
                     value = "Array of objects with device details",
-                    required = true) JsonArray deviceList);
+                    required = true) JsonArray deviceList,
+            @ApiParam(
+                    name = "domain",
+                    value = "The domain name of the user store.",
+                    required = false)
+            @QueryParam("domain") String domain);
 
     @GET
-    @Path("/claims/{username}")
+    @Path("/claims")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -1137,10 +1145,15 @@ public interface UserManagementService {
                     value = "Provide the username of the user.",
                     required = true,
                     defaultValue = "admin")
-            @PathParam("username") String username);
+            @QueryParam("username") String username,
+            @ApiParam(
+                name = "domain",
+                value = "The domain name of the user store.",
+                required = false)
+            @QueryParam("domain") String domain);
 
     @DELETE
-    @Path("/claims/{username}")
+    @Path("/claims")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "DELETE",
@@ -1188,7 +1201,12 @@ public interface UserManagementService {
                     value = "Provide the username of the user.",
                     required = true,
                     defaultValue = "admin")
-            @PathParam("username") String username);
+            @QueryParam("username") String username,
+            @ApiParam(
+                    name = "domain",
+                    value = "The domain name of the user store.",
+                    required = false)
+            @QueryParam("domain") String domain);
 
     @GET
     @Path("/current-user/permissions")

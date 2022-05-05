@@ -40,9 +40,9 @@ public class UserManagementAdminServiceImpl implements UserManagementAdminServic
     private static final Log log = LogFactory.getLog(UserManagementAdminServiceImpl.class);
 
     @POST
-    @Path("/{username}/credentials")
+    @Path("/credentials")
     @Override
-    public Response resetUserPassword(@PathParam("username")
+    public Response resetUserPassword(@QueryParam("username")
                                       @Size(max = 45)
                                       String user, @QueryParam("domain") String domain, PasswordResetWrapper credentials) {
         if (domain != null && !domain.isEmpty()) {
@@ -52,9 +52,9 @@ public class UserManagementAdminServiceImpl implements UserManagementAdminServic
     }
 
     @DELETE
-    @Path("/{username}/devices")
+    @Path("/devices")
     @Override
-    public Response deleteDeviceOfUser(@PathParam("username") String username) {
+    public Response deleteDeviceOfUser(@QueryParam("username") String username) {
         try {
             DeviceMgtAPIUtils.getPrivacyComplianceProvider().deleteDevicesOfUser(username);
             return Response.status(Response.Status.OK).build();

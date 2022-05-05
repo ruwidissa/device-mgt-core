@@ -258,7 +258,7 @@ public class UserManagementServiceImplTest {
     public void testGetUsers() {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getUserStoreManager"))
                 .toReturn(userStoreManager);
-        Response response = userManagementService.getUsers(null, "00", 0, 10);
+        Response response = userManagementService.getUsers(null, "00", 0, 10, null);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(), "GetUsers request failed");
     }
 
@@ -383,7 +383,7 @@ public class UserManagementServiceImplTest {
                 .getUserClaimValue(Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.doThrow(new UserStoreException()).when(userStoreManager)
                 .listUsers(Mockito.anyString(), Mockito.anyInt());
-        Response response = userManagementService.getUsers(TEST_USERNAME, "00", 0, 10);
+        Response response = userManagementService.getUsers(TEST_USERNAME, "00", 0, 10, null);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "Response returned successful for a users retrieval request.");
         response = userManagementService.getUserCount();
