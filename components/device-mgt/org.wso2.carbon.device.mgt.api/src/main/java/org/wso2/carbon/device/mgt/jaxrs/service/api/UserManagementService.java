@@ -60,6 +60,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.PermissionList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.RoleList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.UserInfo;
+import org.wso2.carbon.device.mgt.jaxrs.beans.UserStoreList;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import javax.validation.Valid;
@@ -1234,4 +1235,54 @@ public interface UserManagementService {
                     response = ErrorResponse.class)
     })
     Response getPermissionsOfUser();
+
+    @GET
+    @Path("/user-stores")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting list of userstores",
+            notes = "You are able to manage users in WSO2 IoTS by adding, updating and removing users. If you wish to" +
+                    " get the list of users registered with WSO2 IoTS, you can do so "
+                    + "using this REST API",
+            tags = "User Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:user-details")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK. \n Successfully fetched the list of user stores registered with WSO2 IoTS.",
+                    response = UserStoreList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client already has the latest version of " +
+                            "the requested resource.\n"),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the list of WSO2 IoTS " +
+                            "user stores.",
+                    response = ErrorResponse.class)
+    })
+    Response getUserStores();
 }
