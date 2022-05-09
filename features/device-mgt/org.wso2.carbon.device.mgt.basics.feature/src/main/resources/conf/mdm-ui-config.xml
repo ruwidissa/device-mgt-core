@@ -50,6 +50,7 @@
         <Scope>perm:app:publisher:service-provider:create</Scope>
         <Scope>perm:app:publisher:service-provider:attach</Scope>
         <Scope>perm:app:publisher:service-provider:detach</Scope>
+        <Scope>perm:app:publisher:service-provider:connect</Scope>
         <Scope>perm:app:publisher:view</Scope>
         <Scope>perm:app:publisher:update</Scope>
         <Scope>perm:app:store:view</Scope>
