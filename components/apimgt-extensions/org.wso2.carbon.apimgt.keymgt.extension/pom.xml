@@ -6,6 +6,7 @@
         <artifactId>apimgt-extensions</artifactId>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <version>5.0.7-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
