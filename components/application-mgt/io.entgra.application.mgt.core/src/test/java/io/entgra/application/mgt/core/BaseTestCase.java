@@ -38,6 +38,7 @@ import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementServiceComponent;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderServiceImpl;
 import org.wso2.carbon.registry.core.config.RegistryContext;
@@ -98,6 +99,7 @@ public abstract class BaseTestCase {
         ApplicationManagementDAOFactory.init(dataSource);
         ConnectionManagerUtil.init(dataSource);
         DeviceManagementDAOFactory.init(dataSource);
+        MetadataManagementDAOFactory.init(dataSource);
 //        PolicyManagementDAOFactory.init(dataSource);
 //        OperationManagementDAOFactory.init(dataSource);
 //        GroupManagementDAOFactory.init(dataSource);
