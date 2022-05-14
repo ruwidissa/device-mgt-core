@@ -27,33 +27,39 @@ import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarUser;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 
+import java.util.concurrent.ExecutionException;
+
 public interface TraccarClient {
 
-    void addDevice(TraccarDevice deviceInfo, int tenantId) throws
-            TraccarConfigurationException, TrackerAlreadyExistException;
+    String fetchAllDevices() throws TraccarConfigurationException, ExecutionException, InterruptedException;
 
-    void updateDevice(TraccarDevice deviceInfo, int tenantId) throws
-            TraccarConfigurationException, TrackerAlreadyExistException;
+    void addDevice(TraccarDevice deviceInfo, int tenantId) throws
+            TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException;
 
     void updateLocation(TraccarDevice device, TraccarPosition deviceInfo, int tenantId) throws
-            TraccarConfigurationException, TrackerAlreadyExistException;
+            TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException;
 
-    void disEndrollDevice(int traccarDeviceId, int tenantId) throws TraccarConfigurationException;
+    void disEnrollDevice(int traccarDeviceId, int tenantId) throws TraccarConfigurationException;
 
     void addGroup(TraccarGroups groupInfo, int groupId, int tenantId) throws
-            TraccarConfigurationException, TrackerAlreadyExistException;
+            TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException;
 
     void updateGroup(TraccarGroups groupInfo, int groupId, int tenantId)
-            throws TraccarConfigurationException, TrackerAlreadyExistException;
+            throws TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException;
 
-    void deleteGroup(int traccarGroupId, int tenantId) throws TraccarConfigurationException;
+    void deleteGroup(int traccarGroupId, int tenantId) throws TraccarConfigurationException, ExecutionException, InterruptedException;
 
-    void fetchAllUsers(String createUser, TraccarUser traccarUser, int deviceId) throws TraccarConfigurationException;
+    void setPermission(int userId, int deviceId) throws TraccarConfigurationException, ExecutionException, InterruptedException;
 
-    void createUser(TraccarUser traccarUser, String method, int deviceId) throws TraccarConfigurationException;
+    void removePermission(int userId, int deviceId) throws TraccarConfigurationException, ExecutionException, InterruptedException;
 
-    void updateUser(JSONObject traccarUser) throws TraccarConfigurationException;
+    String fetchAllUsers() throws TraccarConfigurationException, ExecutionException, InterruptedException;
 
-    void setPermission(int userId, int deviceId) throws TraccarConfigurationException;
+    String fetchUserInfo(String userName) throws TraccarConfigurationException, ExecutionException, InterruptedException;
 
+    String createUser(TraccarUser traccarUser) throws ExecutionException, InterruptedException;
+
+    String updateUser(TraccarUser traccarUser, int userId) throws ExecutionException, InterruptedException;
+
+    String returnUser(String userName) throws TraccarConfigurationException;
 }

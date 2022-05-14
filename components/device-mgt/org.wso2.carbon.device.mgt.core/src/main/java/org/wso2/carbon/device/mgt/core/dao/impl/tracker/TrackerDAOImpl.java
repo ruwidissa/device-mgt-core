@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.core.dao.impl.tracker;
 
 import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
 import org.wso2.carbon.device.mgt.common.TrackerGroupInfo;
+import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.TrackerDAO;
@@ -214,6 +215,68 @@ public class TrackerDAOImpl implements TrackerDAO {
         }
     }
 
+    @Override
+    public Boolean addTrackerUssrDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException {
+        PreparedStatement stmt = null;
+        try {
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "INSERT INTO DM_EXT_PERMISSION_MAPPING(TRACCAR_USER_ID, TRACCAR_DEVICE_ID) VALUES(?, ?)";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, traccarUserId);
+            stmt.setInt(2, deviceId);
+            stmt.execute();
+
+            return true;
+        } catch (SQLException e) {
+            throw new TrackerManagementDAOException("Error occurred while adding traccar user device mapping", e);
+        } finally {
+            TrackerManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public Boolean removeTrackerUssrDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException {
+        PreparedStatement stmt = null;
+        try {
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "DELETE FROM DM_EXT_PERMISSION_MAPPING WHERE TRACCAR_USER_ID=? AND TRACCAR_DEVICE_ID=?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, traccarUserId);
+            stmt.setInt(2, deviceId);
+            stmt.execute();
+
+            return true;
+        } catch (SQLException e) {
+            throw new TrackerManagementDAOException("Error occurred while removing traccar user device permission mapping", e);
+        } finally {
+            TrackerManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public TrackerPermissionInfo getUserIdofPermissionByDeviceId(int deviceId) throws TrackerManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        TrackerPermissionInfo trackerPermissionInfo = null;
+        try {
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "SELECT TRACCAR_DEVICE_ID, TRACCAR_USER_ID FROM DM_EXT_PERMISSION_MAPPING WHERE " +
+                    "TRACCAR_DEVICE_ID = ? ORDER BY TRACCAR_DEVICE_ID DESC LIMIT 1";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                trackerPermissionInfo = this.loadPermission(rs);
+            }
+            return trackerPermissionInfo;
+        } catch (SQLException e) {
+            throw new TrackerManagementDAOException("Error occurred while retrieving the traccar group information ", e);
+        } finally {
+            TrackerManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+
     private TrackerGroupInfo loadTrackerGroup(ResultSet rs) throws SQLException {
         TrackerGroupInfo trackerGroupInfo = new TrackerGroupInfo();
         trackerGroupInfo.setId(rs.getInt("ID"));
@@ -232,5 +295,12 @@ public class TrackerDAOImpl implements TrackerDAO {
         trackerDeviceInfo.setTenantId(rs.getInt("TENANT_ID"));
         trackerDeviceInfo.setStatus(rs.getInt("STATUS"));
         return trackerDeviceInfo;
+    }
+
+    private TrackerPermissionInfo loadPermission(ResultSet rs) throws SQLException {
+        TrackerPermissionInfo trackerPermissionInfo = new TrackerPermissionInfo();
+        trackerPermissionInfo.setTraccarUserId(rs.getInt("TRACCAR_USER_ID"));
+        trackerPermissionInfo.setTraccarDeviceId(rs.getInt("TRACCAR_DEVICE_ID"));
+        return trackerPermissionInfo;
     }
 }

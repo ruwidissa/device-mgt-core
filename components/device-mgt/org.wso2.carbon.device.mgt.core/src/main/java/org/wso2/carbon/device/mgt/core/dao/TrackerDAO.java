@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.core.dao;
 
 import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
 import org.wso2.carbon.device.mgt.common.TrackerGroupInfo;
+import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
 
 public interface TrackerDAO {
 
@@ -89,6 +90,24 @@ public interface TrackerDAO {
      * @throws TrackerManagementDAOException
      */
     int removeTrackerGroup(int id) throws TrackerManagementDAOException;
+
+    /**
+     * give permission to a user to view traccar device.
+     * @param traccarUserId mapping table.
+     * @param deviceId mapping table.
+     * @throws TrackerManagementDAOException
+     */
+    Boolean addTrackerUssrDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException;
+
+    /**
+     * Remove a permission on viewing a device.
+     * @param traccarUserId mapping table.
+     * @param deviceId mapping table.
+     * @throws TrackerManagementDAOException
+     */
+    Boolean removeTrackerUssrDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException;
+
+    TrackerPermissionInfo getUserIdofPermissionByDeviceId(int deviceId) throws TrackerManagementDAOException;
 
     /**
      * get trackerGroup info.
