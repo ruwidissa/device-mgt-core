@@ -425,12 +425,15 @@ public class TraccarClientImpl implements TraccarClient {
         try {
             TrackerManagementDAOFactory.beginTransaction();
             trackerDeviceInfo = trackerDAO.getTrackerDevice(deviceId, tenantId);
-            trackerPermissionInfo = trackerDAO.getUserIdofPermissionByDeviceId(deviceId);
             if(trackerDeviceInfo!=null){
                 trackerDevice = new JSONObject(trackerDeviceInfo);
                 trackerDAO.removeTrackerDevice(deviceId, tenantId);
                 TrackerManagementDAOFactory.commitTransaction();
 
+                log.error(trackerDevice.getInt("traccarDeviceId"));
+                trackerPermissionInfo = trackerDAO.getUserIdofPermissionByDeviceId(trackerDevice.getInt("traccarDeviceId"));
+                log.error(trackerPermissionInfo);
+                log.error(new Gson().toJson(trackerPermissionInfo));
             }
         } catch (TransactionManagementException e) {
             TrackerManagementDAOFactory.rollbackTransaction();
@@ -456,11 +459,13 @@ public class TraccarClientImpl implements TraccarClient {
 
             if(trackerPermissionInfo!=null){
                 try {
-                    removePermission(trackerPermissionInfo.getTraccarUserId(),deviceId);
+                    removePermission(trackerPermissionInfo.getTraccarUserId(),trackerDevice.getInt("traccarDeviceId"));
                 } catch (ExecutionException e) {
-                    throw new RuntimeException(e);
+                    log.error("ExecutionException : " + e);
+                    //throw new RuntimeException(e);
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    log.error("InterruptedException : " + e);
+                    //throw new RuntimeException(e);
                 }
             }
         }
