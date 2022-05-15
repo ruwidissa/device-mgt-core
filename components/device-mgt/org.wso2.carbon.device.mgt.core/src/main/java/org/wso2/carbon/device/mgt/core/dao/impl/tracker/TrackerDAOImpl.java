@@ -216,7 +216,7 @@ public class TrackerDAOImpl implements TrackerDAO {
     }
 
     @Override
-    public Boolean addTrackerUssrDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException {
+    public Boolean addTrackerUserDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException {
         PreparedStatement stmt = null;
         try {
             Connection conn = TrackerManagementDAOFactory.getConnection();
@@ -235,14 +235,13 @@ public class TrackerDAOImpl implements TrackerDAO {
     }
 
     @Override
-    public Boolean removeTrackerUssrDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException {
+    public Boolean removeTrackerUserDevicePermission(int deviceId) throws TrackerManagementDAOException {
         PreparedStatement stmt = null;
         try {
             Connection conn = TrackerManagementDAOFactory.getConnection();
-            String sql = "DELETE FROM DM_EXT_PERMISSION_MAPPING WHERE TRACCAR_USER_ID=? AND TRACCAR_DEVICE_ID=?";
+            String sql = "DELETE FROM DM_EXT_PERMISSION_MAPPING WHERE TRACCAR_DEVICE_ID=?";
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, traccarUserId);
-            stmt.setInt(2, deviceId);
+            stmt.setInt(1, deviceId);
             stmt.execute();
 
             return true;

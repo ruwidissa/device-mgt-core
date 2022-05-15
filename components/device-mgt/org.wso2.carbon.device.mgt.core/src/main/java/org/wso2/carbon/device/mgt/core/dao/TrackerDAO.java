@@ -97,15 +97,14 @@ public interface TrackerDAO {
      * @param deviceId mapping table.
      * @throws TrackerManagementDAOException
      */
-    Boolean addTrackerUssrDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException;
+    Boolean addTrackerUserDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException;
 
     /**
      * Remove a permission on viewing a device.
-     * @param traccarUserId mapping table.
      * @param deviceId mapping table.
      * @throws TrackerManagementDAOException
      */
-    Boolean removeTrackerUssrDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException;
+    Boolean removeTrackerUserDevicePermission(int deviceId) throws TrackerManagementDAOException;
 
     TrackerPermissionInfo getUserIdofPermissionByDeviceId(int deviceId) throws TrackerManagementDAOException;
 

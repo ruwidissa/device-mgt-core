@@ -236,11 +236,10 @@ public class TraccarClientImpl implements TraccarClient {
         Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method));
         String result = res.get();
         //executor.shutdown();
-
-        if(result!=null){
+        if(result==""){
             try {
                 TrackerManagementDAOFactory.beginTransaction();
-                trackerDAO.addTrackerUssrDevicePermission(userId, deviceId);
+                trackerDAO.addTrackerUserDevicePermission(userId, deviceId);
                 TrackerManagementDAOFactory.commitTransaction();
             } catch (TrackerManagementDAOException e) {
                 TrackerManagementDAOFactory.rollbackTransaction();
@@ -255,6 +254,8 @@ public class TraccarClientImpl implements TraccarClient {
             } finally {
                 TrackerManagementDAOFactory.closeConnection();
             }
+        }else{
+            log.error("Couldnt add the permission record: "+ result);
         }
     }
 
@@ -273,7 +274,7 @@ public class TraccarClientImpl implements TraccarClient {
         if(result!=null){
             try {
                 TrackerManagementDAOFactory.beginTransaction();
-                trackerDAO.removeTrackerUssrDevicePermission(userId, deviceId);
+                trackerDAO.removeTrackerUserDevicePermission(deviceId);
                 TrackerManagementDAOFactory.commitTransaction();
             } catch (TrackerManagementDAOException e) {
                 TrackerManagementDAOFactory.rollbackTransaction();
@@ -316,7 +317,7 @@ public class TraccarClientImpl implements TraccarClient {
             if(trackerDeviceInfo!=null){
                 String msg = "The device already exist";
                 log.error(msg);
-                throw new TrackerAlreadyExistException(msg);
+                //throw new TrackerAlreadyExistException(msg);
             }
         } catch (TrackerManagementDAOException e) {
             String msg = "Error occurred while mapping with deviceId .";
@@ -347,7 +348,6 @@ public class TraccarClientImpl implements TraccarClient {
                         TrackerManagementDAOFactory.beginTransaction();
                         trackerDAO.addTrackerDevice(traccarDeviceId, deviceId, tenantId);
                         trackerDeviceInfo = trackerDAO.getTrackerDevice(deviceId, tenantId);
-
                         if(trackerDeviceInfo.getStatus()==0){
                             trackerDAO.updateTrackerDeviceIdANDStatus(trackerDeviceInfo.getTraccarDeviceId(), deviceId, tenantId, 1);
                         }
@@ -366,13 +366,9 @@ public class TraccarClientImpl implements TraccarClient {
                         TrackerManagementDAOFactory.closeConnection();
                     }
 
-                    JSONObject returnUser = new JSONObject(returnUser(username));
-                    setPermission(returnUser.getInt("id"),deviceId);
-                }else{
-                    log.error("Something went wrong_1: " + result);
+                    JSONObject returnUserInfo = new JSONObject(returnUser(username));
+                    setPermission(returnUserInfo.getInt("id"), traccarDeviceId);
                 }
-            }else{
-                log.error("Something went wrong_2: " + result);
             }
         }
         //executor.shutdown();
@@ -387,7 +383,6 @@ public class TraccarClientImpl implements TraccarClient {
         try {
             TrackerManagementDAOFactory.openConnection();
             trackerDeviceInfo = trackerDAO.getTrackerDevice(device.getId(), tenantId);
-            log.info(trackerDeviceInfo);
         } catch (SQLException e) {
             String msg = "Error occurred establishing the DB connection .";
             log.error(msg, e);
@@ -403,7 +398,6 @@ public class TraccarClientImpl implements TraccarClient {
         //check if the device is already exist before updating the location
         if (trackerDeviceInfo == null){
             //add device if not exist
-            log.info(trackerDeviceInfo);
             addDevice(device, tenantId);
         }else{
             //Update Location
@@ -460,8 +454,6 @@ public class TraccarClientImpl implements TraccarClient {
             //executor.shutdown();
             //remove permissions
 
-            log.info(new Gson().toJson(trackerPermissionInfo));
-            log.info(trackerPermissionInfo);
             if(trackerPermissionInfo!=null){
                 try {
                     removePermission(trackerPermissionInfo.getTraccarUserId(),deviceId);
