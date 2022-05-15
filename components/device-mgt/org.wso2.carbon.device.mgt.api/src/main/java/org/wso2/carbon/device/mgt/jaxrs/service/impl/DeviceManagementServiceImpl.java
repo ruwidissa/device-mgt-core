@@ -42,6 +42,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.application.mgt.common.ApplicationInstallResponse;
@@ -97,7 +98,9 @@ import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceCompliance;
@@ -460,6 +463,27 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    @GET
+    @Override
+    @Path("/traccar-user-token")
+    public Response getTraccarUserToken(@QueryParam("name") String name) {
+
+        if (HttpReportingUtil.isTrackerEnabled()) {
+            JSONObject obj = new JSONObject(DeviceAPIClientServiceImpl.returnUser(name));
+
+            log.info("=================");
+            log.info(obj.toString());
+            log.info("==================");
+            if(obj.has("error")){
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(obj.getString("error")).build();
+            }else{
+                return Response.status(Response.Status.OK).entity(obj.getString("token")).build();
+            }
+        }else{
+            return Response.status(Response.Status.BAD_REQUEST).entity("Traccar is not enabled").build();
         }
     }
 
