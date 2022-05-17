@@ -176,7 +176,9 @@ public class TraccarClientImpl implements TraccarClient {
 
                 traccarUser.setId(obj.getInt("id"));
                 traccarUser.setName(obj.getString("name"));
-                traccarUser.setLogin(obj.getString("login"));
+                if(!obj.isNull("login")){
+                    traccarUser.setLogin(obj.getString("login"));
+                }
                 traccarUser.setEmail(obj.getString("email"));
                 traccarUser.setDeviceLimit(obj.getInt("deviceLimit"));
                 traccarUser.setUserLimit(obj.getInt("userLimit"));
