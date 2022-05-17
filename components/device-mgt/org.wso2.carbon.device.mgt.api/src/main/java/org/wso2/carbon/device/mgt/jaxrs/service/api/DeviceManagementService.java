@@ -634,14 +634,7 @@ public interface DeviceManagementService {
                     response = ErrorResponse.class)
     })
     @Path("/traccar-user-token")
-    Response getTraccarUserToken(
-            @ApiParam(
-                    name = "name",
-                    value = "Boolean flag indicating whether to include device-info (location, application list etc) \n" +
-                            " to the device object.",
-                    required = false)
-            @QueryParam("name")
-            String name);
+    Response getTraccarUserToken();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
