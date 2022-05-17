@@ -472,11 +472,10 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     public Response getTraccarUserToken() {
 
         if (HttpReportingUtil.isTrackerEnabled()) {
-            String loggedUserName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            JSONObject obj = new JSONObject(DeviceAPIClientServiceImpl.returnUser(loggedUserName));
+            String currentUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            JSONObject obj = new JSONObject(DeviceAPIClientServiceImpl.returnUser(currentUser));
 
             log.info("=================");
-            log.info(loggedUserName);
             log.info(obj.toString());
             log.info("==================");
             if(obj.has("error")){
