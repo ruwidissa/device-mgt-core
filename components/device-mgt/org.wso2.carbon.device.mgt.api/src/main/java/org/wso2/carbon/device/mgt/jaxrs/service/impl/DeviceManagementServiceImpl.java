@@ -476,7 +476,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             JSONObject obj = new JSONObject(DeviceAPIClientServiceImpl.returnUser(currentUser));
 
             log.info("=================");
-            log.info(currentUser);
             log.info(obj.toString());
             log.info("==================");
             if(obj.has("error")){
