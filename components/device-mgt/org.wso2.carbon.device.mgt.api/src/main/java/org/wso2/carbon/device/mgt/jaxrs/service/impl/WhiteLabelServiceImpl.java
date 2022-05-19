@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *  Copyright (c) 2022, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  *  Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,37 +20,22 @@ package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
-import org.wso2.carbon.device.mgt.common.exceptions.MetadataKeyNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
-import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
-import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelTheme;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
-import org.wso2.carbon.device.mgt.jaxrs.beans.MetadataList;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.MetadataService;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.WhiteLabelService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
-
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * This is the service class for metadata management.
@@ -70,15 +55,11 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
             byte[] fileContent = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelFavicon();
             return sendFileStream(fileContent);
         } catch (NotFoundException e) {
-            String msg = "Couldn't find such a whitelabel artifact.";
+            String msg = "Favicon not found this tenant.";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
-            String msg = "Error occurred while creating whitelabel for tenant";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (IOException e) {
-            String msg = "Error occurred while getting the byte array of the artifact file. ";
+            String msg = "Error occurred while getting favicon";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
@@ -92,15 +73,11 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
             byte[] fileContent = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelLogo();
             return sendFileStream(fileContent);
         } catch (NotFoundException e) {
-            String msg = "Couldn't find such a whitelabel artifact.";
+            String msg = "Logo not found for this tenant.";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
-            String msg = "Error occurred while creating whitelabel for tenant";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (IOException e) {
-            String msg = "Error occurred while getting the byte array of the artifact file. ";
+            String msg = "Error occurred while getting logo";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
@@ -154,7 +131,7 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
     /**
      * Useful to send files as application/octet-stream responses
      */
-    private Response sendFileStream(byte[] content) throws IOException {
+    private Response sendFileStream(byte[] content) {
         try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
             Response.ResponseBuilder response = Response
                     .ok(binaryDuplicate, MediaType.APPLICATION_OCTET_STREAM);

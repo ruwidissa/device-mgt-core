@@ -70,7 +70,8 @@ public class DeviceMgtTenantMgtListener implements TenantMgtListener {
             }
         }
         try {
-            DeviceManagementDataHolder.getInstance().getMetadataManagementService().addDefaultWhiteLabelThemeIfNotExist();
+            DeviceManagementDataHolder.getInstance().getWhiteLabelManagementService().
+                    addDefaultWhiteLabelThemeIfNotExist(tenantInfoBean.getTenantId());
         } catch (MetadataManagementException e) {
             log.error("Error occurred while adding default white label theme to created tenant.", e);
         }

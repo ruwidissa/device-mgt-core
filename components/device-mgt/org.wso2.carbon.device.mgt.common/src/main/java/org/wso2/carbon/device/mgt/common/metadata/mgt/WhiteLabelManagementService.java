@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *  Copyright (c) 2022, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  *  Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,33 +17,56 @@
  */
 
 package org.wso2.carbon.device.mgt.common.metadata.mgt;
-
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
-import org.wso2.carbon.device.mgt.common.exceptions.MetadataKeyNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
-
 import java.io.IOException;
-import java.util.List;
 
 /**
- * Defines the contract of MetadataManagementService.
+ * Defines the contract of WhiteLabelManagementService.
  */
 public interface WhiteLabelManagementService {
 
+    /**
+     * Use to get byte content of favicon whitelabel image
+     * @return byte content of favicon
+     * @throws MetadataManagementException if error occurred while retrieving favicon
+     * @throws NotFoundException if favicon is not found
+     */
     byte[] getWhiteLabelFavicon() throws
-            MetadataManagementException, NotFoundException, IOException;
+            MetadataManagementException, NotFoundException;
+
+    /**
+     * Use to get byte content of logo whitelabel image
+     * @return byte content of logo
+     * @throws MetadataManagementException if error occurred while retrieving logo
+     * @throws NotFoundException if logo is not found
+     */
     byte[] getWhiteLabelLogo() throws
-            MetadataManagementException, NotFoundException, IOException;
+            MetadataManagementException, NotFoundException;
 
-    void addDefaultWhiteLabelThemeIfNotExist() throws MetadataManagementException;
+    /**
+     * This method is useful to create & persist default white label theme for provided tenant if
+     * it doesn't exist already
+     * @throws MetadataManagementException if error while adding default white label theme
+     */
+    void addDefaultWhiteLabelThemeIfNotExist(int tenantId) throws MetadataManagementException;
 
+    /**
+     * This method is useful to reset existing white label to default whitelabel
+     * @throws MetadataManagementException if error while resetting default white label theme
+     */
     void resetToDefaultWhiteLabelTheme() throws MetadataManagementException;
 
+    /**
+     * This method is useful to update existing white label theme
+     * @throws MetadataManagementException if error while updating existing white label theme
+     */
     WhiteLabelTheme updateWhiteLabelTheme(WhiteLabelThemeCreateRequest createWhiteLabelTheme)
             throws MetadataManagementException;
 
+    /**
+     * This method is useful to get existing white label theme
+     * @throws MetadataManagementException if error while getting existing white label theme
+     */
     WhiteLabelTheme getWhiteLabelTheme() throws MetadataManagementException, NotFoundException;
 }

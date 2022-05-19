@@ -49,10 +49,15 @@ public class WhiteLabelStorageUtil {
         STORAGE_PATH = metadataConfig.getWhiteLabelConfiguration().getWhiteLabelImages().getStoragePath();
     }
 
+    /**
+     * Store provided white label {@link Base64File} image
+     *
+     * @param image base64 image file
+     * @param imageName {@link WhiteLabelImage.ImageName} (i.e FAVICON)
+     */
     public static void storeWhiteLabelImage(Base64File image, WhiteLabelImage.ImageName imageName, int tenantId)
             throws MetadataManagementException {
         String storedLocation;
-
         try {
             String imageStoringBaseDirPath = STORAGE_PATH + File.separator + tenantId;
             StorageManagementUtil.createArtifactDirectory(imageStoringBaseDirPath);
@@ -71,10 +76,16 @@ public class WhiteLabelStorageUtil {
         }
     }
 
-    public static void storeWhiteLabelImage(File file, WhiteLabelImage.ImageName imageName, int tenantId) throws
+    /**
+     * Store provided white label {@link File} image
+     *
+     * @param image white label file
+     * @param imageName {@link WhiteLabelImage.ImageName} (i.e FAVICON)
+     */
+    public static void storeWhiteLabelImage(File image, WhiteLabelImage.ImageName imageName, int tenantId) throws
             MetadataManagementException {
         try {
-            storeWhiteLabelImage(FileUtil.fileToBase64File(file), imageName, tenantId);
+            storeWhiteLabelImage(FileUtil.fileToBase64File(image), imageName, tenantId);
         } catch (IOException e) {
             String msg = "Error occurred when converting provided File object to Base64File class";
             log.error(msg);
@@ -83,18 +94,38 @@ public class WhiteLabelStorageUtil {
     }
 
 
+    /**
+     * Update white label image for provided tenant
+     *
+     * @param image {@link Base64File} white label file
+     * @param imageName (i.e: FAVICON)
+     */
     public static void updateWhiteLabelImage(Base64File image, WhiteLabelImage.ImageName imageName, int tenantId)
             throws MetadataManagementException {
             deleteWhiteLabelImageIfExists(imageName, tenantId);
             storeWhiteLabelImage(image, imageName, tenantId);
     }
 
+    /**
+     * Use to get a given {@link WhiteLabelImage.ImageName (i.e: LOGO)} white label image File
+     *
+     * @param image detail bean
+     * @param imageName (i.e: LOGO)
+     * @return white label image file {@link File}
+     */
     public static File getWhiteLabelImageFile(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
             throws MetadataManagementException, NotFoundException {
         String fullPathToImage = getPathToImage(image, imageName);
         return new File(fullPathToImage);
     }
 
+    /**
+     * Useful to get the given {@link WhiteLabelImage.ImageName (i.e: LOGO)} white label image InputStream
+     *
+     * @param image - white label image detail bean
+     * @param imageName (i.e: LOGO)
+     * @return white label image input stream
+     */
     public static InputStream getWhiteLabelImageStream(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
             throws MetadataManagementException, NotFoundException {
         String fullPathToFile = getPathToImage(image, imageName);
@@ -113,6 +144,13 @@ public class WhiteLabelStorageUtil {
         }
     }
 
+    /**
+     * Construct the path to white label image in the file system and return
+     *
+     * @param image - white label image detail bean
+     * @param imageName (i.e: LOGO)
+     * @return Full path to white label image in the system
+     */
     private static String getPathToImage(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
             throws MetadataManagementException {
         WhiteLabelImage.ImageLocationType imageLocationType = image.getImageLocationType();
@@ -131,7 +169,7 @@ public class WhiteLabelStorageUtil {
     }
 
     /***
-     * This method is responsible to  delete artifact file which is located in the artifact path.
+     * This method is responsible to delete provided white label image file which if exist
      */
     public static void deleteWhiteLabelImageIfExists(WhiteLabelImage.ImageName imageName, int tenantId) throws MetadataManagementException {
         String artifactPath = STORAGE_PATH + File.separator + tenantId + File.separator + imageName;
@@ -146,7 +184,7 @@ public class WhiteLabelStorageUtil {
     }
 
     /***
-     * This method is responsible to  delete artifact file which is located in the artifact path.
+     * This method is responsible to delete all white label images for provided tenant
      */
     public static void deleteWhiteLabelImageForTenantIfExists(int tenantId) throws MetadataManagementException {
         String artifactPath = STORAGE_PATH + File.separator + tenantId;

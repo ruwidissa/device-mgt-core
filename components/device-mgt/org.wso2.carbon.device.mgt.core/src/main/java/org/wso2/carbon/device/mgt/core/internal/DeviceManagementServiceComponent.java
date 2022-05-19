@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
@@ -291,6 +292,8 @@ public class DeviceManagementServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("Registering OSGi service DeviceManagementProviderServiceImpl");
         }
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+
         /* Registering Tenants Observer */
         BundleContext bundleContext = componentContext.getBundleContext();
         TenantCreateObserver listener = new TenantCreateObserver();
@@ -358,7 +361,7 @@ public class DeviceManagementServiceComponent {
         WhiteLabelManagementService whiteLabelManagementService = new WhiteLabelManagementServiceImpl();
         DeviceManagementDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
         try {
-            whiteLabelManagementService.addDefaultWhiteLabelThemeIfNotExist();
+            whiteLabelManagementService.addDefaultWhiteLabelThemeIfNotExist(tenantId);
         } catch (Throwable e) {
             log.error("Error occurred while adding default tenant white label theme", e);
 
