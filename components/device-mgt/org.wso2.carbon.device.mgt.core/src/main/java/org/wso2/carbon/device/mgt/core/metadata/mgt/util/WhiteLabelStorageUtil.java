@@ -88,7 +88,7 @@ public class WhiteLabelStorageUtil {
             storeWhiteLabelImage(FileUtil.fileToBase64File(image), imageName, tenantId);
         } catch (IOException e) {
             String msg = "Error occurred when converting provided File object to Base64File class";
-            log.error(msg);
+            log.error(msg, e);
             throw new MetadataManagementException(msg, e);
         }
     }
@@ -178,7 +178,9 @@ public class WhiteLabelStorageUtil {
             try {
                 StorageManagementUtil.delete(artifact);
             } catch (IOException e) {
-                throw new MetadataManagementException("Error occurred while deleting whitelabel artifacts", e);
+                String msg = "Error occurred while deleting whitelabel artifacts";
+                log.error(msg, e);
+                throw new MetadataManagementException(msg, e);
             }
         }
     }
@@ -193,7 +195,9 @@ public class WhiteLabelStorageUtil {
             try {
                 StorageManagementUtil.delete(artifact);
             } catch (IOException e) {
-                throw new MetadataManagementException("Error occurred while deleting whitelabel artifacts", e);
+                String msg = "Error occurred while deleting whitelabel artifacts";
+                log.error(msg, e);
+                throw new MetadataManagementException(msg, e);
             }
         }
     }

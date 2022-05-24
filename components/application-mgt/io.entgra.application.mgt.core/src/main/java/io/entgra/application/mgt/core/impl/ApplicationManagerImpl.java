@@ -87,7 +87,6 @@ import io.entgra.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
 import io.entgra.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
-import org.wso2.carbon.device.mgt.core.common.util.StorageManagementUtil;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
@@ -611,7 +610,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             return md5OfApp;
         } catch(StorageManagementException e) {
             String msg = "Error occurred while generating md5sum value of " + applicationArtifact.getInstallerName();
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
     }
@@ -713,8 +712,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 } catch (StorageManagementException e) {
                     String msg = "Error occurred while md5sum value retrieving process: application UUID "
                             + applicationReleaseDTO.getUuid();
-                    log.error(msg);
-                    throw new ApplicationStorageManagementException(msg);
+                    log.error(msg, e);
+                    throw new ApplicationStorageManagementException(msg, e);
                 } catch (DBConnectionException e) {
                     String msg = "Error occurred when getting database connection for verifying app release data.";
                     log.error(msg, e);
@@ -828,8 +827,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (StorageManagementException e) {
             String msg = "Error occurred while retrieving md5sum value from the binary file for application "
                     + "release UUID " + applicationReleaseDTO.getUuid();
-            log.error(msg);
-            throw new ApplicationStorageManagementException(msg);
+            log.error(msg, e);
+            throw new ApplicationStorageManagementException(msg, e);
         } catch (IOException e) {
             String msg = "Error occurred when getting byte array of binary file. Installer name: " + applicationArtifact
                     .getInstallerName();
@@ -3310,8 +3309,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 } catch (StorageManagementException e) {
                     String msg = "Error occurred while retrieving md5sum value from the binary file for "
                             + "application release UUID " + applicationReleaseDTO.get().getUuid();
-                    log.error(msg);
-                    throw new ApplicationStorageManagementException(msg);
+                    log.error(msg, e);
+                    throw new ApplicationStorageManagementException(msg, e);
                 } catch (IOException e) {
                     String msg = "Error occurred when getting byte array of binary file. Installer name: "
                             + applicationArtifact.getInstallerName();

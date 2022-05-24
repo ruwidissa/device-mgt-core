@@ -662,17 +662,11 @@ public class RequestValidationUtil {
         }
     }
 
-    public static void validateWhiteLabelArtifactDownloadRequest(String whiteLabelImage) {
-        if (!EnumUtils.isValidEnum(WhiteLabelImage.ImageName.class, whiteLabelImage)) {
-            String msg = "Invalid white label image requested. Image: " + whiteLabelImage;
-            log.error(msg);
-            throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
-                    .setCode(HttpStatus.SC_BAD_REQUEST)
-                    .setMessage(msg).build());
-
-        }
-    }
-
+    /**
+     * Check if whitelabel theme create request contains valid payload and all required payload
+     *
+     * @param whiteLabelThemeCreateRequest {@link WhiteLabelThemeCreateRequest}
+     */
     public static void validateWhiteLabelTheme(WhiteLabelThemeCreateRequest whiteLabelThemeCreateRequest) {
         if (whiteLabelThemeCreateRequest.getFavicon() == null) {
             String msg = "Favicon is required to whitelabel";
@@ -700,7 +694,7 @@ public class RequestValidationUtil {
             validateWhiteLabelImage(whiteLabelThemeCreateRequest.getLogo());
         } catch (InputValidationException e) {
             String msg = "Payload contains invalid base64 files";
-            log.error(msg);
+            log.error(msg, e);
             throw e;
         }
     }
@@ -723,14 +717,13 @@ public class RequestValidationUtil {
             } catch (JsonSyntaxException e) {
                 String msg = "Invalid image payload found with the request. Image object does not represent a Base64 File. " +
                         "Hence verify the request payload object.";
-                log.error(msg);
+                log.error(msg, e);
                 throw new InputValidationException(
                         new ErrorResponse.ErrorResponseBuilder()
                                 .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
             }
-            return;
         }
-        if (whiteLabelImage.getImageType() == WhiteLabelImageRequestPayload.ImageType.URL) {
+        else if (whiteLabelImage.getImageType() == WhiteLabelImageRequestPayload.ImageType.URL) {
             try {
                 String imageUrl = new Gson().fromJson(whiteLabelImage.getImage(), String.class);
                 if (!HttpUtil.isHttpUrlValid(imageUrl)) {
@@ -742,11 +735,17 @@ public class RequestValidationUtil {
                 }
             } catch (JsonSyntaxException e) {
                 String msg = "Invalid payload found with the request. Hence verify the request payload object.";
-                log.error(msg);
+                log.error(msg, e);
                 throw new InputValidationException(
                         new ErrorResponse.ErrorResponseBuilder()
                                 .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
             }
+        } else {
+            String msg = "Invalid payload found with the request. Unknown white label imageType " + whiteLabelImage.getImageType();
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
     }
 

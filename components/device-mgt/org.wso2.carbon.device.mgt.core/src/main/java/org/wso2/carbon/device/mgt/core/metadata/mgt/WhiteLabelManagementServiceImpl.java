@@ -70,7 +70,6 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         try {
             WhiteLabelTheme whiteLabelTheme = getWhiteLabelTheme();
             return getImageContent(whiteLabelTheme.getFaviconImage(), WhiteLabelImage.ImageName.FAVICON);
-
         } catch (IOException e) {
             String msg = "Error occurred while getting byte content of favicon";
             log.error(msg, e);
@@ -179,6 +178,11 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         return whiteLabelConfiguration.getFooterText();
     }
 
+    /**
+     * This is useful to construct and get the default favicon whitelabel image
+     *
+     * @return {@link WhiteLabelImage}
+     */
     private WhiteLabelImage constructDefaultFaviconImage() {
         MetaDataConfiguration metaDataConfiguration = DeviceConfigurationManager.getInstance().
                 getDeviceManagementConfig().getMetaDataConfiguration();
@@ -189,6 +193,11 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         return favicon;
     }
 
+    /**
+     * This is useful to construct and get the default logo whitelabel image
+     *
+     * @return {@link WhiteLabelImage}
+     */
     private WhiteLabelImage constructDefaultLogoImage() {
         MetaDataConfiguration metaDataConfiguration = DeviceConfigurationManager.getInstance().
                 getDeviceManagementConfig().getMetaDataConfiguration();

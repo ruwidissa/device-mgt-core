@@ -526,7 +526,7 @@ public class DeviceMgtAPIUtils {
                     whiteLabelManagementService = (WhiteLabelManagementService) ctx.getOSGiService(
                             WhiteLabelManagementService.class, null);
                     if (whiteLabelManagementService == null) {
-                        throw new IllegalStateException("Metadata Management service not initialized.");
+                        throw new IllegalStateException("Whitelabel Management service not initialized.");
                     }
                 }
             }

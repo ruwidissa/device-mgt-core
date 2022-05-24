@@ -17,9 +17,9 @@
  */
 
 package org.wso2.carbon.device.mgt.common.metadata.mgt;
+
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
-import java.io.IOException;
 
 /**
  * Defines the contract of WhiteLabelManagementService.

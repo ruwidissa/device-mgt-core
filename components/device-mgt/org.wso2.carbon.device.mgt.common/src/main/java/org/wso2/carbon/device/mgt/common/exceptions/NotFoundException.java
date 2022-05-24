@@ -1,6 +1,3 @@
-package org.wso2.carbon.device.mgt.common.exceptions;
-
-
 /*
  * Copyright (c) 2022, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
@@ -18,6 +15,8 @@ package org.wso2.carbon.device.mgt.common.exceptions;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.wso2.carbon.device.mgt.common.exceptions;
 
 /**
  * This exception will be thrown when the requested application or platform not found.

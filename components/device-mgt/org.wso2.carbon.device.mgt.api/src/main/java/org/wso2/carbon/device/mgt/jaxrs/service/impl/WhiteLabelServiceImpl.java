@@ -136,7 +136,6 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
             Response.ResponseBuilder response = Response
                     .ok(binaryDuplicate, MediaType.APPLICATION_OCTET_STREAM);
             response.status(Response.Status.OK);
-//            response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             response.header("Content-Length", content.length);
             return response.build();
         } catch (IOException e) {
