@@ -55,7 +55,8 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
             byte[] fileContent = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelFavicon();
             return sendFileStream(fileContent);
         } catch (NotFoundException e) {
-            String msg = "Favicon not found this tenant.";
+            String msg = "Favicon white label image cannot be found in the system. Updating the whitelabel theme might" +
+                    "help restore it";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
@@ -73,7 +74,8 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
             byte[] fileContent = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelLogo();
             return sendFileStream(fileContent);
         } catch (NotFoundException e) {
-            String msg = "Logo not found for this tenant.";
+            String msg = "Logo white label image cannot be found in the system. Updating the whitelabel theme might" +
+                    "help restore it";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
