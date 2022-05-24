@@ -16,21 +16,31 @@
  *  under the License.
  */
 
-package org.wso2.carbon.device.mgt.core.config.tenant.whitelabel;
+package org.wso2.carbon.device.mgt.core.config.metadata.mgt.whitelabel;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "MetaDataConfiguration")
-public class MetaDataConfiguration {
-    private WhiteLabelConfiguration whiteLabelConfiguration;
+@XmlRootElement(name = "WhiteLabelConfiguration")
+public class WhiteLabelConfiguration {
+    private String footerText;
+    private WhiteLabelImages whiteLabelImages;
 
-    @XmlElement(name = "WhiteLabelConfiguration", required = true)
-    public WhiteLabelConfiguration getWhiteLabelConfiguration() {
-        return whiteLabelConfiguration;
+    @XmlElement(name = "FooterText", required = true)
+    public String getFooterText() {
+        return footerText;
     }
 
-    public void setWhiteLabelConfiguration(WhiteLabelConfiguration whiteLabelConfiguration) {
-        this.whiteLabelConfiguration = whiteLabelConfiguration;
+    public void setFooterText(String footerText) {
+        this.footerText = footerText;
+    }
+
+    @XmlElement(name = "WhiteLabelImages", required = true)
+    public WhiteLabelImages getWhiteLabelImages() {
+        return whiteLabelImages;
+    }
+
+    public void setWhiteLabelImages(WhiteLabelImages whiteLabelImages) {
+        this.whiteLabelImages = whiteLabelImages;
     }
 }

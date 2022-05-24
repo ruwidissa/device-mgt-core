@@ -25,7 +25,7 @@ import org.wso2.carbon.device.mgt.core.config.cache.CertificateCacheConfiguratio
 import org.wso2.carbon.device.mgt.core.config.cache.DeviceCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.GeoFenceCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.operation.timeout.OperationTimeoutConfiguration;
-import org.wso2.carbon.device.mgt.core.config.tenant.whitelabel.MetaDataConfiguration;
+import org.wso2.carbon.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
 import org.wso2.carbon.device.mgt.core.event.config.EventOperationTaskConfiguration;
 import org.wso2.carbon.device.mgt.core.config.geo.location.GeoLocationConfiguration;
 import org.wso2.carbon.device.mgt.core.config.identity.IdentityConfigurations;

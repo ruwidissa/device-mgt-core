@@ -38,8 +38,8 @@ import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementServic
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelTheme;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.tenant.whitelabel.MetaDataConfiguration;
-import org.wso2.carbon.device.mgt.core.config.tenant.whitelabel.WhiteLabelConfiguration;
+import org.wso2.carbon.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
+import org.wso2.carbon.device.mgt.core.config.metadata.mgt.whitelabel.WhiteLabelConfiguration;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOException;

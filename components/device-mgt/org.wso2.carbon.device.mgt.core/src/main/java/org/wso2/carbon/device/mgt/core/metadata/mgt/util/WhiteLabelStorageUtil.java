@@ -28,7 +28,7 @@ import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementExcepti
 import org.wso2.carbon.device.mgt.core.common.util.FileUtil;
 import org.wso2.carbon.device.mgt.core.common.util.StorageManagementUtil;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.tenant.whitelabel.MetaDataConfiguration;
+import org.wso2.carbon.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

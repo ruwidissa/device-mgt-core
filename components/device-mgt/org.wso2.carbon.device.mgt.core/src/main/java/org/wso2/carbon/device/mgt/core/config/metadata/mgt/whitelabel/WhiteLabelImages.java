@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.wso2.carbon.device.mgt.core.config.tenant.whitelabel;
+package org.wso2.carbon.device.mgt.core.config.metadata.mgt.whitelabel;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
