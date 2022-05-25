@@ -17,10 +17,12 @@
 
 package org.wso2.carbon.device.mgt.core.metadata.mgt.util;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Base64File;
+import org.wso2.carbon.device.mgt.common.FileResponse;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelImage;
@@ -126,8 +128,9 @@ public class WhiteLabelStorageUtil {
      * @param imageName (i.e: LOGO)
      * @return white label image input stream
      */
-    public static InputStream getWhiteLabelImageStream(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
+    public static FileResponse getWhiteLabelImageStream(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
             throws MetadataManagementException, NotFoundException {
+        FileResponse fileResponse = new FileResponse();
         String fullPathToFile = getPathToImage(image, imageName);
         try {
             InputStream imageStream = StorageManagementUtil.getInputStream(fullPathToFile);
@@ -136,7 +139,12 @@ public class WhiteLabelStorageUtil {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
-            return imageStream;
+            byte[] fileContent = IOUtils.toByteArray(imageStream);
+            String fileExtension = FileUtil.extractFileExtensionFromFilePath(image.getImageLocation());
+            String mimeType = FileResponse.ImageExtension.mimeTypeOf(fileExtension);
+            fileResponse.setMimeType(mimeType);
+            fileResponse.setFileContent(fileContent);
+            return fileResponse;
         } catch (IOException e) {
             String msg = "Error occurred when accessing the file in file path: " + fullPathToFile;
             log.error(msg, e);

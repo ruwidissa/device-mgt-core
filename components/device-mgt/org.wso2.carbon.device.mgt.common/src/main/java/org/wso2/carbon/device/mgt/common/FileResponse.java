@@ -19,6 +19,7 @@
 package org.wso2.carbon.device.mgt.common;
 
 public class FileResponse {
+    private static final String DEFAULT_MIME_TYPE = "application/octet-stream";
     private byte[] fileContent;
     private String mimeType;
 
@@ -53,10 +54,13 @@ public class FileResponse {
         GIF;
 
         public String mimeType() {
-            return "application/octet-stream";
+            return DEFAULT_MIME_TYPE;
         }
 
         public static String mimeTypeOf(String extension) {
+            if (extension.isEmpty()) {
+                return DEFAULT_MIME_TYPE;
+            }
             ImageExtension imageExtension = ImageExtension.valueOf(extension.toUpperCase());
             return imageExtension.mimeType();
         }

@@ -99,22 +99,7 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         if (image.getImageLocationType() == WhiteLabelImage.ImageLocationType.URL) {
             return getImageFileResponseFromUrl(image.getImageLocation());
         }
-        return getImageFileResponseFromStorage(image, imageName);
-    }
-
-    /**
-     * Useful to get white label image file response from provided image info
-     */
-    private FileResponse getImageFileResponseFromStorage(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
-            throws IOException, NotFoundException, MetadataManagementException {
-        FileResponse fileResponse = new FileResponse();
-        InputStream fileStream = WhiteLabelStorageUtil.getWhiteLabelImageStream(image, imageName);
-        byte[] fileContent = IOUtils.toByteArray(fileStream);
-        String fileExtension = FileUtil.extractFileExtensionFromFilePath(image.getImageLocation());
-        String mimeType = FileResponse.ImageExtension.mimeTypeOf(fileExtension);
-        fileResponse.setMimeType(mimeType);
-        fileResponse.setFileContent(fileContent);
-        return fileResponse;
+        return WhiteLabelStorageUtil.getWhiteLabelImageStream(image, imageName);
     }
 
     /**
