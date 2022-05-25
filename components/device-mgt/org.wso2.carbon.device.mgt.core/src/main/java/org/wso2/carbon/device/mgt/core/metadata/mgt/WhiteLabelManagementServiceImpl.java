@@ -28,6 +28,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Base64File;
+import org.wso2.carbon.device.mgt.common.FileResponse;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
@@ -37,6 +38,8 @@ import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelImageRequestPayl
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelTheme;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
+import org.wso2.carbon.device.mgt.core.common.util.FileUtil;
+import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
 import org.wso2.carbon.device.mgt.core.config.metadata.mgt.whitelabel.WhiteLabelConfiguration;
@@ -46,7 +49,6 @@ import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOExc
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.util.MetadataConstants;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.util.WhiteLabelStorageUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,10 +68,10 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     }
 
     @Override
-    public byte[] getWhiteLabelFavicon() throws MetadataManagementException, NotFoundException {
+    public FileResponse getWhiteLabelFavicon() throws MetadataManagementException, NotFoundException {
         try {
             WhiteLabelTheme whiteLabelTheme = getWhiteLabelTheme();
-            return getImageContent(whiteLabelTheme.getFaviconImage(), WhiteLabelImage.ImageName.FAVICON);
+            return getImageFileResponse(whiteLabelTheme.getFaviconImage(), WhiteLabelImage.ImageName.FAVICON);
         } catch (IOException e) {
             String msg = "Error occurred while getting byte content of favicon";
             log.error(msg, e);
@@ -78,10 +80,10 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     }
 
     @Override
-    public byte[] getWhiteLabelLogo() throws MetadataManagementException, NotFoundException {
+    public FileResponse getWhiteLabelLogo() throws MetadataManagementException, NotFoundException {
         try {
             WhiteLabelTheme whiteLabelTheme = getWhiteLabelTheme();
-            return getImageContent(whiteLabelTheme.getLogoImage(), WhiteLabelImage.ImageName.LOGO);
+            return getImageFileResponse(whiteLabelTheme.getLogoImage(), WhiteLabelImage.ImageName.LOGO);
         } catch (IOException e) {
             String msg = "Error occurred while getting byte content of logo";
             log.error(msg, e);
@@ -90,21 +92,36 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     }
 
     /**
-     * Useful to get white label image file byte content for provided {@link WhiteLabelImage.ImageName}
+     * Useful to get white label image file response for provided {@link WhiteLabelImage.ImageName}
      */
-    private byte[] getImageContent(WhiteLabelImage image, WhiteLabelImage.ImageName imageName) throws
+    private FileResponse getImageFileResponse(WhiteLabelImage image, WhiteLabelImage.ImageName imageName) throws
             IOException, MetadataManagementException, NotFoundException {
         if (image.getImageLocationType() == WhiteLabelImage.ImageLocationType.URL) {
-            return getImageStreamFromUrl(image.getImageLocation());
+            return getImageFileResponseFromUrl(image.getImageLocation());
         }
-        InputStream fileStream = WhiteLabelStorageUtil.getWhiteLabelImageStream(image, imageName);
-        return IOUtils.toByteArray(fileStream);
+        return getImageFileResponseFromStorage(image, imageName);
     }
 
     /**
-     * Useful to get white label image file byte content from provided url
+     * Useful to get white label image file response from provided image info
      */
-    private byte[] getImageStreamFromUrl(String url) throws IOException, NotFoundException  {
+    private FileResponse getImageFileResponseFromStorage(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
+            throws IOException, NotFoundException, MetadataManagementException {
+        FileResponse fileResponse = new FileResponse();
+        InputStream fileStream = WhiteLabelStorageUtil.getWhiteLabelImageStream(image, imageName);
+        byte[] fileContent = IOUtils.toByteArray(fileStream);
+        String fileExtension = FileUtil.extractFileExtensionFromFilePath(image.getImageLocation());
+        String mimeType = FileResponse.ImageExtension.mimeTypeOf(fileExtension);
+        fileResponse.setMimeType(mimeType);
+        fileResponse.setFileContent(fileContent);
+        return fileResponse;
+    }
+
+    /**
+     * Useful to get white label image file response from provided url
+     */
+    private FileResponse getImageFileResponseFromUrl(String url) throws IOException, NotFoundException  {
+        FileResponse fileResponse = new FileResponse();
         try(CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet imageGetRequest = new HttpGet(url);
             HttpResponse response = client.execute(imageGetRequest);
@@ -114,7 +131,11 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
-            return IOUtils.toByteArray(imageStream);
+            byte[] fileContent = IOUtils.toByteArray(imageStream);
+            fileResponse.setFileContent(fileContent);
+            String mimeType = HttpUtil.getContentType(response);
+            fileResponse.setMimeType(mimeType);
+            return fileResponse;
         }
     }
 

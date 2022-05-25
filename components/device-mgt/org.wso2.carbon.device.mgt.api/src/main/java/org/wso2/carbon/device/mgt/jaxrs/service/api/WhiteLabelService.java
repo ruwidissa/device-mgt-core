@@ -87,9 +87,7 @@ public interface WhiteLabelService {
 
     @GET
     @Path("/favicon")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(
-            produces = MediaType.APPLICATION_OCTET_STREAM,
             httpMethod = HTTPConstants.HEADER_GET,
             value = "Get whitelabel favicon",
             notes = "Get whitelabel favicon for the tenant of the logged in user",
@@ -123,9 +121,7 @@ public interface WhiteLabelService {
 
     @GET
     @Path("/logo")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(
-            produces = MediaType.APPLICATION_OCTET_STREAM,
             httpMethod = HTTPConstants.HEADER_GET,
             value = "Get whitelabel logo",
             notes = "Get whitelabel logo for the tenant of the logged in user",

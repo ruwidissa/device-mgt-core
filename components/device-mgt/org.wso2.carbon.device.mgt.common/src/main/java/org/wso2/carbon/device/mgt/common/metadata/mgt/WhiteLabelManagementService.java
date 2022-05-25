@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.common.metadata.mgt;
 
+import org.wso2.carbon.device.mgt.common.FileResponse;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
 
@@ -32,7 +33,7 @@ public interface WhiteLabelManagementService {
      * @throws MetadataManagementException if error occurred while retrieving favicon
      * @throws NotFoundException if favicon is not found
      */
-    byte[] getWhiteLabelFavicon() throws
+    FileResponse getWhiteLabelFavicon() throws
             MetadataManagementException, NotFoundException;
 
     /**
@@ -41,7 +42,7 @@ public interface WhiteLabelManagementService {
      * @throws MetadataManagementException if error occurred while retrieving logo
      * @throws NotFoundException if logo is not found
      */
-    byte[] getWhiteLabelLogo() throws
+    FileResponse getWhiteLabelLogo() throws
             MetadataManagementException, NotFoundException;
 
     /**

@@ -88,7 +88,7 @@ public class FileUtil {
         String suffix = generateDuplicateFileNameSuffix(fileNameCount);
         String fileNameWithoutExtension = extractFileNameWithoutExtension(fileName);
         String fileNameWithSuffix = fileNameWithoutExtension + suffix;
-        fileNameWithSuffix = fileNameWithSuffix + '.' + extractFileExtension(fileName);
+        fileNameWithSuffix = fileNameWithSuffix + '.' + extractFileExtensionFileName(fileName);
         return fileNameWithSuffix;
     }
 
@@ -112,12 +112,26 @@ public class FileUtil {
     }
 
     /**
+     * Use to extract file extension from file path
+     *
+     * @param filePath path of the file
+     * @return extension of the file
+     */
+    public static String extractFileExtensionFromFilePath(String filePath) {
+        File file = new File(filePath);
+        return extractFileExtensionFileName(file.getName());
+    }
+
+    /**
      * Use to extract file extension from file name
      *
      * @param fileName name of the file
      * @return extension of the file
      */
-    private static String extractFileExtension(String fileName) {
+    public static String extractFileExtensionFileName(String fileName) {
+        if (!fileName.contains(".")) {
+            return "";
+        }
         return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
 

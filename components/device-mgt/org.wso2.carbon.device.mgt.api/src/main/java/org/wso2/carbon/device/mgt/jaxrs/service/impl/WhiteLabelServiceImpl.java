@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.FileResponse;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelTheme;
@@ -52,8 +53,8 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
     @Path("/favicon")
     public Response getWhiteLabelFavicon() {
         try {
-            byte[] fileContent = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelFavicon();
-            return sendFileStream(fileContent);
+            FileResponse fileResponse = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelFavicon();
+            return sendFileStream(fileResponse);
         } catch (NotFoundException e) {
             String msg = "Favicon white label image cannot be found in the system. Updating the whitelabel theme might" +
                     "help restore it";
@@ -71,8 +72,8 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
     @Path("/logo")
     public Response getWhiteLabelLogo() {
         try {
-            byte[] fileContent = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelLogo();
-            return sendFileStream(fileContent);
+            FileResponse fileResponse = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelLogo();
+            return sendFileStream(fileResponse);
         } catch (NotFoundException e) {
             String msg = "Logo white label image cannot be found in the system. Updating the whitelabel theme might" +
                     "help restore it";
@@ -131,14 +132,14 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
     }
 
     /**
-     * Useful to send files as application/octet-stream responses
+     * Useful to send file responses
      */
-    private Response sendFileStream(byte[] content) {
-        try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
+    private Response sendFileStream(FileResponse fileResponse) {
+        try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(fileResponse.getFileContent())) {
             Response.ResponseBuilder response = Response
-                    .ok(binaryDuplicate, MediaType.APPLICATION_OCTET_STREAM);
+                    .ok(binaryDuplicate, fileResponse.getMimeType());
             response.status(Response.Status.OK);
-            response.header("Content-Length", content.length);
+            response.header("Content-Length", fileResponse.getFileContent().length);
             return response.build();
         } catch (IOException e) {
             String msg = "Error occurred while creating input stream from buffer array. ";
