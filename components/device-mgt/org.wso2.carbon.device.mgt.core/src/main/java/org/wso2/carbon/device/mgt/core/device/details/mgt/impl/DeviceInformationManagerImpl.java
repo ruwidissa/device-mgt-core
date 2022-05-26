@@ -399,6 +399,8 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                     log.error("InterruptedException : " + e);
                     //throw new RuntimeException(e);
                 }
+            }else{
+                log.info("location publishing is disabled and traccan disabled");
             }
             //Tracker update GPS Location
 

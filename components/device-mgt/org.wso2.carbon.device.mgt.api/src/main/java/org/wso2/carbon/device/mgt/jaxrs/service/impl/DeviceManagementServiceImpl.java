@@ -42,6 +42,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -61,6 +62,8 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
+import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
@@ -88,6 +91,7 @@ import org.wso2.carbon.device.mgt.common.search.PropertyMap;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceStatus;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
+import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
@@ -99,6 +103,7 @@ import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
+import org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
@@ -133,6 +138,11 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 @Path("/devices")
 public class DeviceManagementServiceImpl implements DeviceManagementService {
@@ -475,12 +485,98 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             String currentUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
             JSONObject obj = new JSONObject(DeviceAPIClientServiceImpl.returnUser(currentUser));
 
-            log.info("=================");
-            log.info(obj.toString());
-            log.info("==================");
             if(obj.has("error")){
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(obj.getString("error")).build();
             }else{
+                int userId = obj.getInt("id");
+                List<Integer> traccarValidIdList = new ArrayList<>();
+                /*Get Device Id List*/
+                try {
+                    DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+                    DeviceAccessAuthorizationService deviceAccessAuthorizationService =
+                            DeviceMgtAPIUtils.getDeviceAccessAuthorizationService();
+                    PaginationRequest request = new PaginationRequest(0, 0);
+                    PaginationResult result;
+                    DeviceList devices = new DeviceList();
+                    List<String> status = new ArrayList<>();
+                    status.add("ACTIVE");
+                    status.add("INACTIVE");
+                    status.add("CREATED");
+                    status.add("UNREACHABLE");
+                    boolean isStatusEmpty = true;
+                    for (String statusString : status){
+                        if (StringUtils.isNotBlank(statusString)){
+                            isStatusEmpty = false;
+                            break;
+                        }
+                    }
+                    if (!isStatusEmpty) {
+                        RequestValidationUtil.validateStatus(status);
+                        request.setStatusList(status);
+                    }
+                    // this is the user who initiates the request
+                    String authorizedUser = MultitenantUtils.getTenantAwareUsername(currentUser);
+                    // check whether the user is device-mgt admin
+                    if (!deviceAccessAuthorizationService.isDeviceAdminUser()) {
+                        request.setOwner(authorizedUser);
+                    }
+
+                    result = dms.getAllDevicesIds(request);
+                    if (result == null || result.getData() == null || result.getData().isEmpty()) {
+                        devices.setList(new ArrayList<Device>());
+                        devices.setCount(0);
+                    }else{
+                        devices.setList((List<Device>) result.getData());
+                        devices.setCount(result.getRecordsTotal());
+                    }
+
+                    int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+                    for(int i=0; i<devices.getCount(); i++){
+                        TrackerDeviceInfo trackerDevice = DeviceAPIClientServiceImpl.getTrackerDevice(
+                                devices.getList().get(i).getId(), tenantId);
+
+                        int traccarDeviceId = trackerDevice.getTraccarDeviceId();
+                        boolean getPermission = DeviceAPIClientServiceImpl.getUserIdofPermissionByDeviceIdNUserId(traccarDeviceId, userId);
+                        log.info("--------------------");
+                        log.info(getPermission);
+                        log.info(traccarDeviceId);
+                        log.info(userId);
+                        log.info("--------------------");
+                        traccarValidIdList.add(traccarDeviceId);
+                        if(!getPermission){
+                            DeviceAPIClientServiceImpl.addTrackerUserDevicePermission(userId, traccarDeviceId);
+                        }
+                    }
+
+                    //Remove neecessary
+                    List<TrackerPermissionInfo> getAllUserDevices =
+                            DeviceAPIClientServiceImpl.getUserIdofPermissionByUserIdNIdList(userId, traccarValidIdList);
+                    for (TrackerPermissionInfo getAllUserDevice : getAllUserDevices) {
+                        DeviceAPIClientServiceImpl.removeTrackerUserDevicePermission(
+                                getAllUserDevice.getTraccarUserId(),
+                                getAllUserDevice.getTraccarDeviceId(),
+                                TraccarHandlerConstants.Types.REMOVE_TYPE_SINGLE);
+                    }
+
+                } catch (JSONException e){
+                    String msg = "not a JSONObject, ";
+                    log.error(msg);
+                } catch (DeviceManagementException e) {
+                    String msg = "Error occurred while fetching all enrolled devices";
+                    log.error(msg, e);
+                } catch (DeviceAccessAuthorizationException e) {
+                    String msg = "Error occurred while checking device access authorization";
+                    log.error(msg, e);
+                } catch (TrackerManagementDAOException e) {
+                    String msg = "Error occurred while mapping with deviceId .";
+                    log.error(msg, e);
+                } catch (ExecutionException e) {
+                    log.error("ExecutionException : " + e);
+                } catch (InterruptedException e) {
+                    log.error("InterruptedException : " + e);
+                }
+                /*Get Device Id List*/
+
                 return Response.status(Response.Status.OK).entity(obj.getString("token")).build();
             }
         }else{

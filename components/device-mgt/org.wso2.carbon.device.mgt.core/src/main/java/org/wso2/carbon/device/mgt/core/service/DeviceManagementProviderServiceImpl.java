@@ -32,6 +32,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.device.mgt.core.service;
 
 import com.google.common.reflect.TypeToken;
@@ -172,7 +173,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
         PluginInitializationListener {
@@ -1227,6 +1227,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public PaginationResult getAllDevicesIds(PaginationRequest request) throws DeviceManagementException {
+        return this.getAllDevicesIdList(request);
+    }
+
+    @Override
     public PaginationResult getAllDevices(PaginationRequest request, boolean requireDeviceInfo) throws DeviceManagementException {
         if (request == null) {
             String msg = "Received incomplete pagination request for method getAllDevices";
@@ -1281,6 +1286,48 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 paginationResult.setData(allDevices);
             }
         }
+        paginationResult.setRecordsFiltered(count);
+        paginationResult.setRecordsTotal(count);
+        return paginationResult;
+    }
+
+    @Override
+    public PaginationResult getAllDevicesIdList(PaginationRequest request) throws DeviceManagementException {
+        if (request == null) {
+            String msg = "Received incomplete pagination request for method getAllDevicesIdList";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get devices with pagination " + request.toString());
+        }
+        PaginationResult paginationResult = new PaginationResult();
+        List<Device> allDevices;
+        int count = 0;
+        int tenantId = this.getTenantId();
+        DeviceManagerUtil.validateDeviceListPageSize(request);
+
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            allDevices = deviceDAO.getDevicesIds(request, tenantId);
+            count = deviceDAO.getDeviceCount(request, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving device list pertaining to the current tenant";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getAllDevices";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        paginationResult.setData(allDevices);
+
         paginationResult.setRecordsFiltered(count);
         paginationResult.setRecordsTotal(count);
         return paginationResult;

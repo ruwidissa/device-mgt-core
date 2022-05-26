@@ -1,7 +1,7 @@
 /*
- *   Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2022, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
- *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
  *   in compliance with the License.
  *   You may obtain a copy of the License at
@@ -11,16 +11,18 @@
  *   Unless required by applicable law or agreed to in writing,
  *   software distributed under the License is distributed on an
  *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *   KIND, either express or implied.  See the License for the
+ *   KIND, either express or implied. See the License for the
  *   specific language governing permissions and limitations
  *   under the License.
- *
  */
+
 package org.wso2.carbon.device.mgt.core.dao;
 
 import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
 import org.wso2.carbon.device.mgt.common.TrackerGroupInfo;
 import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
+
+import java.util.List;
 
 public interface TrackerDAO {
 
@@ -36,12 +38,12 @@ public interface TrackerDAO {
 
     /**
      * get trackerDevice info.
-     * @param groupId of the device.
+     * @param deviceId of the device.
      * @param tenantId of the group.
      * @return Tracker Device Info.
      * @throws TrackerManagementDAOException
      */
-    TrackerDeviceInfo getTrackerDevice(int groupId, int tenantId) throws TrackerManagementDAOException;
+    TrackerDeviceInfo getTrackerDevice(int deviceId, int tenantId) throws TrackerManagementDAOException;
 
     /**
      * update trackerDevice status and traccarDeviceId.
@@ -49,7 +51,7 @@ public interface TrackerDAO {
      * @param deviceId of the device.
      * @param tenantId of the group.
      * @param status of the device.
-     * @return Tracker Device Info.
+     * @return boolean value.
      * @throws TrackerManagementDAOException
      */
     Boolean updateTrackerDeviceIdANDStatus(int traccarDeviceId, int deviceId, int tenantId, int status) throws TrackerManagementDAOException;
@@ -86,27 +88,11 @@ public interface TrackerDAO {
 
     /**
      * Remove a Group.
-     * @param id mapping table.
+     * @param id of groups.
+     * @return boolean value.
      * @throws TrackerManagementDAOException
      */
     int removeTrackerGroup(int id) throws TrackerManagementDAOException;
-
-    /**
-     * give permission to a user to view traccar device.
-     * @param traccarUserId mapping table.
-     * @param deviceId mapping table.
-     * @throws TrackerManagementDAOException
-     */
-    Boolean addTrackerUserDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException;
-
-    /**
-     * Remove a permission on viewing a device.
-     * @param deviceId mapping table.
-     * @throws TrackerManagementDAOException
-     */
-    Boolean removeTrackerUserDevicePermission(int deviceId) throws TrackerManagementDAOException;
-
-    TrackerPermissionInfo getUserIdofPermissionByDeviceId(int deviceId) throws TrackerManagementDAOException;
 
     /**
      * get trackerGroup info.
@@ -116,5 +102,47 @@ public interface TrackerDAO {
      * @throws TrackerManagementDAOException
      */
     TrackerGroupInfo getTrackerGroup(int groupId, int tenantId) throws TrackerManagementDAOException;
+
+    /**
+     * give permission to a user to view traccar device.
+     * @param traccarUserId mapping table.
+     * @param deviceId mapping table.
+     * @return boolean value.
+     * @throws TrackerManagementDAOException
+     */
+    Boolean addTrackerUserDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException;
+
+    /**
+     * Remove a permission on viewing a device.
+     * @param deviceId of permissions.
+     * @return boolean value.
+     * @throws TrackerManagementDAOException
+     */
+    Boolean removeTrackerUserDevicePermission(int deviceId, int userId, int removeType) throws TrackerManagementDAOException;
+
+    /**
+     * get list of userDevicePermissions by.
+     * @param deviceId of permissions.
+     * @return Tracker Permission Info.
+     * @throws TrackerManagementDAOException
+     */
+    List<TrackerPermissionInfo> getUserIdofPermissionByDeviceId(int deviceId) throws TrackerManagementDAOException;
+    /**
+     * get list of userDevicePermissions by.
+     * @param userId of permissions.
+     * @param NotInDeviceIdList list of permissions.
+     * @return Tracker Permission Info.
+     * @throws TrackerManagementDAOException
+     */
+    List<TrackerPermissionInfo> getUserIdofPermissionByUserIdNIdList(int userId, List<Integer> NotInDeviceIdList) throws TrackerManagementDAOException;
+
+    /**
+     * get list of userDevicePermissions by.
+     * @param deviceId of permissions.
+     * @param userId of permissions.
+     * @return Tracker Permission Info.
+     * @throws TrackerManagementDAOException
+     */
+    Boolean getUserIdofPermissionByDeviceIdNUserId(int deviceId, int userId) throws TrackerManagementDAOException;
 
 }

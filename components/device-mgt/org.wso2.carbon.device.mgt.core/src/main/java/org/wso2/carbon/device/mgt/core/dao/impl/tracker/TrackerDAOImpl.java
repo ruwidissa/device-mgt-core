@@ -1,7 +1,7 @@
 /*
- *   Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2022, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
- *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
  *   in compliance with the License.
  *   You may obtain a copy of the License at
@@ -11,11 +11,11 @@
  *   Unless required by applicable law or agreed to in writing,
  *   software distributed under the License is distributed on an
  *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *   KIND, either express or implied.  See the License for the
+ *   KIND, either express or implied. See the License for the
  *   specific language governing permissions and limitations
  *   under the License.
- *
  */
+
 package org.wso2.carbon.device.mgt.core.dao.impl.tracker;
 
 import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
@@ -25,16 +25,20 @@ import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.TrackerDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.TrackerManagementDAOUtil;
+import org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TrackerDAOImpl implements TrackerDAO {
 
     @Override
-    public Boolean addTrackerDevice(int traccarDeviceId, int deviceId, int tenantId) throws TrackerManagementDAOException {
+    public Boolean addTrackerDevice(int traccarDeviceId, int deviceId, int tenantId)
+            throws TrackerManagementDAOException {
         PreparedStatement stmt = null;
         try {
             Connection conn = TrackerManagementDAOFactory.getConnection();
@@ -47,14 +51,15 @@ public class TrackerDAOImpl implements TrackerDAO {
 
             return true;
         } catch (SQLException e) {
-            throw new TrackerManagementDAOException("Error occurred while adding traccar device mapping", e);
+            throw new TrackerManagementDAOException("Error occurred while adding on trackerDevice mapping table", e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     @Override
-    public Boolean updateTrackerDeviceIdANDStatus(int traccarDeviceId, int deviceId, int tenantId, int status) throws TrackerManagementDAOException {
+    public Boolean updateTrackerDeviceIdANDStatus(int traccarDeviceId, int deviceId, int tenantId, int status)
+            throws TrackerManagementDAOException {
         PreparedStatement stmt = null;
         try {
             Connection conn = TrackerManagementDAOFactory.getConnection();
@@ -68,7 +73,7 @@ public class TrackerDAOImpl implements TrackerDAO {
 
             return true;
         } catch (SQLException e) {
-            String msg = "Error occurred while updating trackerDevice mapping table";
+            String msg = "Error occurred while updating status on trackerDevice mapping table";
             throw new TrackerManagementDAOException(msg, e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, null);
@@ -93,7 +98,7 @@ public class TrackerDAOImpl implements TrackerDAO {
             }
             return status;
         } catch (SQLException e) {
-            throw new TrackerManagementDAOException("Error occurred while removing trackerDevice", e);
+            throw new TrackerManagementDAOException("Error occurred while removing on trackerDevice table", e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -113,18 +118,19 @@ public class TrackerDAOImpl implements TrackerDAO {
             stmt.setInt(2, tenantId);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                trackerDeviceInfo = this.loadTrackerDevice(rs);
+                trackerDeviceInfo = TrackerManagementDAOUtil.loadTrackerDevice(rs);
             }
             return trackerDeviceInfo;
         } catch (SQLException e) {
-            throw new TrackerManagementDAOException("Error occurred while retrieving the trackerDevice information ", e);
+            throw new TrackerManagementDAOException("Error occurred while retrieving data from the trackerDevice table ", e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, rs);
         }
     }
 
     @Override
-    public Boolean addTrackerGroup(int traccarGroupId, int groupId, int tenantId) throws TrackerManagementDAOException {
+    public Boolean addTrackerGroup(int traccarGroupId, int groupId, int tenantId)
+            throws TrackerManagementDAOException {
         PreparedStatement stmt = null;
         int status = 1 ;
         try {
@@ -139,7 +145,7 @@ public class TrackerDAOImpl implements TrackerDAO {
 
             return true;
         } catch (SQLException e) {
-            String msg = "Error occurred while adding traccar group mapping";
+            String msg = "Error occurred while adding on traccarGroup mapping table";
             throw new TrackerManagementDAOException(msg, e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, null);
@@ -147,7 +153,8 @@ public class TrackerDAOImpl implements TrackerDAO {
     }
 
     @Override
-    public Boolean updateTrackerGroupIdANDStatus(int traccarGroupId, int groupId, int tenantId, int status) throws TrackerManagementDAOException {
+    public Boolean updateTrackerGroupIdANDStatus(int traccarGroupId, int groupId, int tenantId, int status)
+            throws TrackerManagementDAOException {
         PreparedStatement stmt = null;
         try {
             Connection conn = TrackerManagementDAOFactory.getConnection();
@@ -161,7 +168,7 @@ public class TrackerDAOImpl implements TrackerDAO {
 
             return true;
         } catch (SQLException e) {
-            String msg = "Error occurred while updating traccar group mapping table";
+            String msg = "Error occurred while updating status on traccarGroup mapping table";
             throw new TrackerManagementDAOException(msg, e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, null);
@@ -185,7 +192,7 @@ public class TrackerDAOImpl implements TrackerDAO {
             }
             return status;
         } catch (SQLException e) {
-            throw new TrackerManagementDAOException("Error occurred while removing traccar group", e);
+            throw new TrackerManagementDAOException("Error occurred while removing from traccarGroup mapping table", e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -205,18 +212,19 @@ public class TrackerDAOImpl implements TrackerDAO {
             stmt.setInt(2, tenantId);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                trackerGroupInfo = this.loadTrackerGroup(rs);
+                trackerGroupInfo = TrackerManagementDAOUtil.loadTrackerGroup(rs);
             }
             return trackerGroupInfo;
         } catch (SQLException e) {
-            throw new TrackerManagementDAOException("Error occurred while retrieving the traccar group information ", e);
+            throw new TrackerManagementDAOException("Error occurred while retrieving data from the traccarGroup mapping table ", e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, rs);
         }
     }
 
     @Override
-    public Boolean addTrackerUserDevicePermission(int traccarUserId, int deviceId) throws TrackerManagementDAOException {
+    public Boolean addTrackerUserDevicePermission(int traccarUserId, int deviceId)
+            throws TrackerManagementDAOException {
         PreparedStatement stmt = null;
         try {
             Connection conn = TrackerManagementDAOFactory.getConnection();
@@ -228,78 +236,121 @@ public class TrackerDAOImpl implements TrackerDAO {
 
             return true;
         } catch (SQLException e) {
-            throw new TrackerManagementDAOException("Error occurred while adding traccar user device mapping", e);
+            throw new TrackerManagementDAOException("Error occurred while adding permission on permissions mapping table", e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     @Override
-    public Boolean removeTrackerUserDevicePermission(int deviceId) throws TrackerManagementDAOException {
+    public Boolean removeTrackerUserDevicePermission(int deviceId, int userId, int removeType)
+            throws TrackerManagementDAOException {
         PreparedStatement stmt = null;
         try {
             Connection conn = TrackerManagementDAOFactory.getConnection();
-            String sql = "DELETE FROM DM_EXT_PERMISSION_MAPPING WHERE TRACCAR_DEVICE_ID=?";
+            String sql = "DELETE FROM DM_EXT_PERMISSION_MAPPING WHERE TRACCAR_DEVICE_ID = ?";
+            if(removeType != TraccarHandlerConstants.Types.REMOVE_TYPE_MULTIPLE){
+                sql = sql + " AND TRACCAR_USER_ID = ? ";
+            }
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, deviceId);
+            if(removeType != TraccarHandlerConstants.Types.REMOVE_TYPE_MULTIPLE){
+                stmt.setInt(2, userId);
+            }
             stmt.execute();
 
             return true;
         } catch (SQLException e) {
-            throw new TrackerManagementDAOException("Error occurred while removing traccar user device permission mapping", e);
+            throw new TrackerManagementDAOException("Error occurred while removing permission from permissions mapping table", e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     @Override
-    public TrackerPermissionInfo getUserIdofPermissionByDeviceId(int deviceId) throws TrackerManagementDAOException {
+    public List<TrackerPermissionInfo> getUserIdofPermissionByDeviceId(int deviceId)
+            throws TrackerManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<TrackerPermissionInfo> trackerPermissionInfo = null;
+        try {
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "SELECT TRACCAR_DEVICE_ID, TRACCAR_USER_ID FROM DM_EXT_PERMISSION_MAPPING WHERE " +
+                    "TRACCAR_DEVICE_ID = ? ORDER BY TRACCAR_DEVICE_ID ASC";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            rs = stmt.executeQuery();
+            trackerPermissionInfo = new ArrayList<>();
+            while (rs.next()) {
+                TrackerPermissionInfo loadPermission = TrackerManagementDAOUtil.loadPermission(rs);
+                trackerPermissionInfo.add(loadPermission);
+            }
+            return trackerPermissionInfo;
+        } catch (SQLException e) {
+            throw new TrackerManagementDAOException("Error occurred while retrieving permissions data from permissions mapping table ", e);
+        } finally {
+            TrackerManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
+    public List<TrackerPermissionInfo> getUserIdofPermissionByUserIdNIdList(int userId, List<Integer> NotInDeviceIdList)
+            throws TrackerManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<TrackerPermissionInfo> trackerPermissionInfo = null;
+        try {
+            Connection conn = TrackerManagementDAOFactory.getConnection();
+            String sql = "SELECT TRACCAR_DEVICE_ID, TRACCAR_USER_ID FROM DM_EXT_PERMISSION_MAPPING WHERE " +
+                    "TRACCAR_USER_ID = ? ";
+            if(NotInDeviceIdList!=null && (!NotInDeviceIdList.isEmpty())){
+                sql += TrackerManagementDAOUtil.buildDeviceIdNotInQuery(NotInDeviceIdList);
+            }
+            sql += " ORDER BY TRACCAR_USER_ID ASC";
+
+            stmt = conn.prepareStatement(sql);
+            int paramIdx = 1;
+            stmt.setInt(paramIdx++, userId);
+            if(NotInDeviceIdList!=null && (!NotInDeviceIdList.isEmpty())){
+                for (int  id : NotInDeviceIdList) {
+                    stmt.setInt(paramIdx++, id);
+                }
+            }
+            rs = stmt.executeQuery();
+            trackerPermissionInfo = new ArrayList<>();
+            while (rs.next()) {
+                TrackerPermissionInfo loadPermission = TrackerManagementDAOUtil.loadPermission(rs);
+                trackerPermissionInfo.add(loadPermission);
+            }
+            return trackerPermissionInfo;
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving data from the permissions mapping table ";
+            throw new TrackerManagementDAOException(msg, e);
+        } finally {
+            TrackerManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
+    public Boolean getUserIdofPermissionByDeviceIdNUserId(int deviceId, int userId) throws TrackerManagementDAOException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         TrackerPermissionInfo trackerPermissionInfo = null;
         try {
             Connection conn = TrackerManagementDAOFactory.getConnection();
             String sql = "SELECT TRACCAR_DEVICE_ID, TRACCAR_USER_ID FROM DM_EXT_PERMISSION_MAPPING WHERE " +
-                    "TRACCAR_DEVICE_ID = ? ORDER BY TRACCAR_DEVICE_ID DESC LIMIT 1";
+                    "TRACCAR_DEVICE_ID = ? AND TRACCAR_USER_ID = ? ORDER BY TRACCAR_DEVICE_ID DESC";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, deviceId);
+            stmt.setInt(2, userId);
+
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                trackerPermissionInfo = this.loadPermission(rs);
-            }
-            return trackerPermissionInfo;
+            return rs.next();
         } catch (SQLException e) {
-            throw new TrackerManagementDAOException("Error occurred while retrieving the traccar group information ", e);
+            throw new TrackerManagementDAOException("Error occurred while retrieving permissions data from permissions mapping table ", e);
         } finally {
             TrackerManagementDAOUtil.cleanupResources(stmt, rs);
         }
     }
 
-
-    private TrackerGroupInfo loadTrackerGroup(ResultSet rs) throws SQLException {
-        TrackerGroupInfo trackerGroupInfo = new TrackerGroupInfo();
-        trackerGroupInfo.setId(rs.getInt("ID"));
-        trackerGroupInfo.setTraccarGroupId(rs.getInt("TRACCAR_GROUP_ID"));
-        trackerGroupInfo.setGroupId(rs.getInt("GROUP_ID"));
-        trackerGroupInfo.setTenantId(rs.getInt("TENANT_ID"));
-        trackerGroupInfo.setStatus(rs.getInt("STATUS"));
-        return trackerGroupInfo;
-    }
-
-    private TrackerDeviceInfo loadTrackerDevice(ResultSet rs) throws SQLException {
-        TrackerDeviceInfo trackerDeviceInfo = new TrackerDeviceInfo();
-        trackerDeviceInfo.setId(rs.getInt("ID"));
-        trackerDeviceInfo.setTraccarDeviceId(rs.getInt("TRACCAR_DEVICE_ID"));
-        trackerDeviceInfo.setDeviceId(rs.getInt("DEVICE_ID"));
-        trackerDeviceInfo.setTenantId(rs.getInt("TENANT_ID"));
-        trackerDeviceInfo.setStatus(rs.getInt("STATUS"));
-        return trackerDeviceInfo;
-    }
-
-    private TrackerPermissionInfo loadPermission(ResultSet rs) throws SQLException {
-        TrackerPermissionInfo trackerPermissionInfo = new TrackerPermissionInfo();
-        trackerPermissionInfo.setTraccarUserId(rs.getInt("TRACCAR_USER_ID"));
-        trackerPermissionInfo.setTraccarDeviceId(rs.getInt("TRACCAR_DEVICE_ID"));
-        return trackerPermissionInfo;
-    }
 }

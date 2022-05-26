@@ -23,9 +23,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
+import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.exceptions.TrackerAlreadyExistException;
+import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.addons.TraccarClientImpl;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
@@ -35,6 +38,7 @@ import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarUser;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class DeviceAPIClientServiceImpl implements DeviceAPIClientService {
@@ -49,7 +53,7 @@ public class DeviceAPIClientServiceImpl implements DeviceAPIClientService {
                 "", "");
         try {
             client.addDevice(traccarDevice, tenantId);
-        } catch (TraccarConfigurationException e) {
+        } catch (TrackerManagementDAOException e) {
             String msg = "Error occurred while mapping with deviceId";
             log.error(msg, e);
         } catch (TrackerAlreadyExistException e) {
@@ -71,7 +75,7 @@ public class DeviceAPIClientServiceImpl implements DeviceAPIClientService {
                 "", "");
         try {
             client.updateLocation(traccarDevice, traccarPosition, tenantId);
-        } catch (TraccarConfigurationException e) {
+        } catch (TrackerManagementDAOException e) {
             String msg = "Error occurred while mapping with deviceId";
             log.error(msg, e);
         }catch (TrackerAlreadyExistException e) {
@@ -109,20 +113,31 @@ public class DeviceAPIClientServiceImpl implements DeviceAPIClientService {
         client.deleteGroup(groupId, tenantId);
     }
 
-    public static String fetchUserInfo(String userName) throws
-            TraccarConfigurationException, ExecutionException, InterruptedException {
+    public static String fetchUserInfo(String userName) throws ExecutionException, InterruptedException {
         TraccarClientImpl client = new TraccarClientImpl();
         return client.fetchUserInfo(userName);
     }
 
+    public static TrackerDeviceInfo getTrackerDevice(int deviceId, int tenantId) throws
+            TrackerManagementDAOException {
+        TraccarClientImpl client = new TraccarClientImpl();
+        return client.getTrackerDevice(deviceId, tenantId);
+    }
+
+    public static boolean getUserIdofPermissionByDeviceIdNUserId(int deviceId, int userId) throws
+            TrackerManagementDAOException {
+        TraccarClientImpl client = new TraccarClientImpl();
+        return client.getUserIdofPermissionByDeviceIdNUserId(deviceId, userId);
+    }
+
     public static String createUser(TraccarUser traccarUser) throws
-            TraccarConfigurationException, ExecutionException, InterruptedException {
+            TrackerManagementDAOException, ExecutionException, InterruptedException {
         TraccarClientImpl client = new TraccarClientImpl();
         return client.createUser(traccarUser);
     }
 
     public static String updateUser(TraccarUser traccarUser, int userId) throws
-            TraccarConfigurationException, ExecutionException, InterruptedException {
+            TrackerManagementDAOException, ExecutionException, InterruptedException {
         TraccarClientImpl client = new TraccarClientImpl();
         return client.updateUser(traccarUser, userId);
     }
@@ -131,12 +146,28 @@ public class DeviceAPIClientServiceImpl implements DeviceAPIClientService {
         TraccarClientImpl client = new TraccarClientImpl();
         try {
             return client.returnUser(userName);
-        } catch (TraccarConfigurationException e) {
+        } catch (TrackerManagementDAOException e) {
             JSONObject obj = new JSONObject();
             String msg = "Error occurred while creating a user: "+ e;
             obj.put("error", msg);
             return obj.toString();
         }
+    }
+
+    public static void addTrackerUserDevicePermission(int userId, int deviceId) throws
+            TrackerManagementDAOException, ExecutionException, InterruptedException {
+        TraccarClientImpl client = new TraccarClientImpl();
+        client.setPermission(userId, deviceId);
+    }
+
+    public static void removeTrackerUserDevicePermission(int userId, int deviceId, int removeType) throws TrackerManagementDAOException, ExecutionException, InterruptedException {
+        TraccarClientImpl client = new TraccarClientImpl();
+        client.removePermission(userId, deviceId, removeType);
+    }
+
+    public static List<TrackerPermissionInfo> getUserIdofPermissionByUserIdNIdList(int userId, List<Integer> NotInDeviceIdList) throws TrackerManagementDAOException {
+        TraccarClientImpl client = new TraccarClientImpl();
+        return client.getUserIdofPermissionByUserIdNIdList(userId, NotInDeviceIdList);
     }
 
     public static String generateRandomString(int len) {

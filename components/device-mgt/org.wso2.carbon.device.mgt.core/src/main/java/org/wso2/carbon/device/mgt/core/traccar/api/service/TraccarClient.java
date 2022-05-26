@@ -19,25 +19,29 @@
 
 package org.wso2.carbon.device.mgt.core.traccar.api.service;
 
-import org.json.JSONObject;
+import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
+import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
 import org.wso2.carbon.device.mgt.common.exceptions.TrackerAlreadyExistException;
+import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarDevice;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarGroups;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarPosition;
 import org.wso2.carbon.device.mgt.core.traccar.common.beans.TraccarUser;
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
 
+import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface TraccarClient {
 
-    String fetchAllDevices() throws TraccarConfigurationException, ExecutionException, InterruptedException;
+    //String fetchDevicesByUniqueId(String uniqueId) throws ExecutionException, InterruptedException;
 
     void addDevice(TraccarDevice deviceInfo, int tenantId) throws
-            TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException;
+            TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException, TrackerManagementDAOException;
 
     void updateLocation(TraccarDevice device, TraccarPosition deviceInfo, int tenantId) throws
-            TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException;
+            TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException, TrackerManagementDAOException;
 
     void disEnrollDevice(int traccarDeviceId, int tenantId) throws TraccarConfigurationException;
 
@@ -49,9 +53,15 @@ public interface TraccarClient {
 
     void deleteGroup(int traccarGroupId, int tenantId) throws TraccarConfigurationException, ExecutionException, InterruptedException;
 
-    void setPermission(int userId, int deviceId) throws TraccarConfigurationException, ExecutionException, InterruptedException;
+    void setPermission(int userId, int deviceId) throws TrackerManagementDAOException, ExecutionException, InterruptedException;
 
-    void removePermission(int userId, int deviceId) throws TraccarConfigurationException, ExecutionException, InterruptedException;
+    void removePermission(int userId, int deviceId, int removeType) throws ExecutionException, InterruptedException;
+
+    List<TrackerPermissionInfo> getUserIdofPermissionByUserIdNIdList(int userId, List<Integer> NotInDeviceIdList) throws TrackerManagementDAOException;
+
+    boolean getUserIdofPermissionByDeviceIdNUserId(int deviceId, int userId) throws TraccarConfigurationException, SQLException, TrackerManagementDAOException;
+
+    TrackerDeviceInfo getTrackerDevice(int deviceId, int tenantId) throws TraccarConfigurationException, SQLException, TrackerManagementDAOException;
 
     String fetchAllUsers() throws TraccarConfigurationException, ExecutionException, InterruptedException;
 
@@ -61,5 +71,5 @@ public interface TraccarClient {
 
     String updateUser(TraccarUser traccarUser, int userId) throws ExecutionException, InterruptedException;
 
-    String returnUser(String userName) throws TraccarConfigurationException;
+    String returnUser(String userName) throws TraccarConfigurationException, TrackerManagementDAOException;
 }

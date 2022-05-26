@@ -55,6 +55,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -114,7 +115,13 @@ public class TraccarClientImpl implements TraccarClient {
                 requestBody = RequestBody.create(payload.toString(), MediaType.parse("application/json; charset=utf-8"));
                 builder = builder.put(requestBody);
             }else if(Objects.equals(method, TraccarHandlerConstants.Methods.DELETE)){
-                builder = builder.delete();
+                log.info("publisherUrlWithContext - " + publisherUrlWithContext);
+                if(publisherUrlWithContext.indexOf("permission") !=-1){
+                    requestBody = RequestBody.create(payload.toString(), MediaType.parse("application/json; charset=utf-8"));
+                    builder = builder.delete(requestBody);
+                }else{
+                    builder = builder.delete();
+                }
             }
 
             request = builder.url(endpoint+publisherUrlWithContext).addHeader(authorization, authorizationKey).build();
@@ -150,7 +157,7 @@ public class TraccarClientImpl implements TraccarClient {
         return TraccarHandlerConstants.Types.USER_NOT_FOUND;
     }
 
-    public String returnUser(String userName) throws TraccarConfigurationException{
+    public String returnUser(String userName) throws TrackerManagementDAOException{
         try{
             String result = DeviceAPIClientServiceImpl.fetchUserInfo(userName);
             Date today = new Date();
@@ -227,7 +234,7 @@ public class TraccarClientImpl implements TraccarClient {
         return result;
     }
 
-    public void setPermission(int userId, int deviceId) throws TraccarConfigurationException, ExecutionException, InterruptedException {
+    public void setPermission(int userId, int deviceId) throws ExecutionException, InterruptedException, TrackerManagementDAOException {
         JSONObject payload = new JSONObject();
         payload.put("userId", userId);
         payload.put("deviceId", deviceId);
@@ -247,12 +254,12 @@ public class TraccarClientImpl implements TraccarClient {
                 TrackerManagementDAOFactory.rollbackTransaction();
                 String msg = "Error occurred while mapping with deviceId .";
                 log.error(msg, e);
-                throw new TraccarConfigurationException(msg, e);
+                throw new TrackerManagementDAOException(msg, e);
             } catch (TransactionManagementException e) {
                 TrackerManagementDAOFactory.rollbackTransaction();
                 String msg = "Error occurred establishing the DB connection .";
                 log.error(msg, e);
-                throw new TraccarConfigurationException(msg, e);
+                throw new TrackerManagementDAOException(msg, e);
             } finally {
                 TrackerManagementDAOFactory.closeConnection();
             }
@@ -261,7 +268,7 @@ public class TraccarClientImpl implements TraccarClient {
         }
     }
 
-    public void removePermission(int userId, int deviceId) throws TraccarConfigurationException, ExecutionException, InterruptedException {
+    public void removePermission(int userId, int deviceId, int removeType) throws ExecutionException, InterruptedException {
         JSONObject payload = new JSONObject();
         payload.put("userId", userId);
         payload.put("deviceId", deviceId);
@@ -276,32 +283,76 @@ public class TraccarClientImpl implements TraccarClient {
         if(result!=null){
             try {
                 TrackerManagementDAOFactory.beginTransaction();
-                trackerDAO.removeTrackerUserDevicePermission(deviceId);
+                trackerDAO.removeTrackerUserDevicePermission(deviceId, userId, removeType);
                 TrackerManagementDAOFactory.commitTransaction();
             } catch (TrackerManagementDAOException e) {
                 TrackerManagementDAOFactory.rollbackTransaction();
                 String msg = "Error occurred while mapping with deviceId .";
                 log.error(msg, e);
-                throw new TraccarConfigurationException(msg, e);
+                //throw new TraccarConfigurationException(msg, e);
             } catch (TransactionManagementException e) {
                 TrackerManagementDAOFactory.rollbackTransaction();
                 String msg = "Error occurred establishing the DB connection .";
                 log.error(msg, e);
-                throw new TraccarConfigurationException(msg, e);
+                //throw new TraccarConfigurationException(msg, e);
             } finally {
                 TrackerManagementDAOFactory.closeConnection();
             }
         }
     }
 
-    public String fetchAllDevices() throws ExecutionException, InterruptedException {
-        String method = TraccarHandlerConstants.Methods.GET;
-        String url = defaultPort+"/api/devices";
+    public List<TrackerPermissionInfo> getUserIdofPermissionByUserIdNIdList(int userId, List<Integer> NotInDeviceIdList) throws TrackerManagementDAOException {
+        try {
+            TrackerManagementDAOFactory.openConnection();
+            return trackerDAO.getUserIdofPermissionByUserIdNIdList(userId, NotInDeviceIdList);
+        } catch (TrackerManagementDAOException e) {
+            TrackerManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while mapping with deviceId .";
+            log.error(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred establishing the DB connection .";
+            log.error(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
+        } finally {
+            TrackerManagementDAOFactory.closeConnection();
+        }
+    }
 
-        Future<String> result = executor.submit(new OkHttpClientThreadPool(url, null, method));
-        String res = result.get();
-        //executor.shutdown();
-        return res;
+    public TrackerDeviceInfo getTrackerDevice(int deviceId, int tenantId) throws TrackerManagementDAOException {
+        try {
+            TrackerManagementDAOFactory.openConnection();
+            return trackerDAO.getTrackerDevice(deviceId, tenantId);
+        } catch (SQLException e) {
+            String msg = "Error occurred establishing the DB connection .";
+            log.error(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
+        } catch (TrackerManagementDAOException e) {
+            String msg="Could not add new device location";
+            log.error(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
+        } finally{
+            TrackerManagementDAOFactory.closeConnection();
+        }
+    }
+
+    public boolean getUserIdofPermissionByDeviceIdNUserId(int deviceId, int userId) throws TrackerManagementDAOException {
+        Boolean result = false;
+        try {
+            TrackerManagementDAOFactory.openConnection();
+            result = trackerDAO.getUserIdofPermissionByDeviceIdNUserId(deviceId, userId);
+        } catch (TrackerManagementDAOException e) {
+            String msg = "Error occurred while mapping with deviceId .";
+            log.error(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred establishing the DB connection .";
+            log.error(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
+        } finally {
+            TrackerManagementDAOFactory.closeConnection();
+        }
+        return result;
     }
 
     /**
@@ -311,7 +362,7 @@ public class TraccarClientImpl implements TraccarClient {
      * @throws TraccarConfigurationException Failed while add Traccar Device the operation
      */
     public void addDevice(TraccarDevice traccarDevice, int tenantId) throws
-            TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException {
+            TrackerAlreadyExistException, ExecutionException, InterruptedException, TrackerManagementDAOException {
         TrackerDeviceInfo trackerDeviceInfo = null;
         try {
             TrackerManagementDAOFactory.openConnection();
@@ -324,11 +375,11 @@ public class TraccarClientImpl implements TraccarClient {
         } catch (TrackerManagementDAOException e) {
             String msg = "Error occurred while mapping with deviceId .";
             log.error(msg, e);
-            throw new TraccarConfigurationException(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred establishing the DB connection .";
             log.error(msg, e);
-            throw new TraccarConfigurationException(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
         } finally {
             TrackerManagementDAOFactory.closeConnection();
         }
@@ -341,11 +392,14 @@ public class TraccarClientImpl implements TraccarClient {
 
             Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method));
             String result = res.get();
+            log.info("---------res--------" + result);
             if(result.charAt(0)=='{'){
                 JSONObject obj = new JSONObject(result);
                 if (obj.has("id")){
                     int traccarDeviceId = obj.getInt("id");
                     int deviceId = traccarDevice.getId();
+                    log.info("TraccarDeviceId - " + traccarDeviceId);
+                    log.info("DeviceId - " + deviceId);
                     try {
                         TrackerManagementDAOFactory.beginTransaction();
                         trackerDAO.addTrackerDevice(traccarDeviceId, deviceId, tenantId);
@@ -358,12 +412,12 @@ public class TraccarClientImpl implements TraccarClient {
                         TrackerManagementDAOFactory.rollbackTransaction();
                         String msg = "Error occurred while mapping with deviceId .";
                         log.error(msg, e);
-                        throw new TraccarConfigurationException(msg, e);
+                        throw new TrackerManagementDAOException(msg, e);
                     } catch (TransactionManagementException e) {
                         TrackerManagementDAOFactory.rollbackTransaction();
                         String msg = "Error occurred establishing the DB connection .";
                         log.error(msg, e);
-                        throw new TraccarConfigurationException(msg, e);
+                        throw new TrackerManagementDAOException(msg, e);
                     } finally {
                         TrackerManagementDAOFactory.closeConnection();
                     }
@@ -380,7 +434,7 @@ public class TraccarClientImpl implements TraccarClient {
      * Add Device GPS Location operation.
      * @param deviceInfo  with DeviceIdentifier, Timestamp, Lat, Lon, Bearing, Speed, ignition
      */
-    public void updateLocation(TraccarDevice device, TraccarPosition deviceInfo, int tenantId) throws TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException {
+    public void updateLocation(TraccarDevice device, TraccarPosition deviceInfo, int tenantId) throws TrackerManagementDAOException, TrackerAlreadyExistException, ExecutionException, InterruptedException {
         TrackerDeviceInfo trackerDeviceInfo = null;
         try {
             TrackerManagementDAOFactory.openConnection();
@@ -388,11 +442,11 @@ public class TraccarClientImpl implements TraccarClient {
         } catch (SQLException e) {
             String msg = "Error occurred establishing the DB connection .";
             log.error(msg, e);
-            throw new TraccarConfigurationException(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
         } catch (TrackerManagementDAOException e) {
             String msg="Could not add new device location";
             log.error(msg, e);
-            throw new TraccarConfigurationException(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
         } finally{
             TrackerManagementDAOFactory.closeConnection();
         }
@@ -421,21 +475,25 @@ public class TraccarClientImpl implements TraccarClient {
      */
     public void disEnrollDevice(int deviceId, int tenantId) throws TraccarConfigurationException {
         TrackerDeviceInfo trackerDeviceInfo = null;
-        TrackerPermissionInfo trackerPermissionInfo = null;
-        JSONObject trackerDevice = null;
-        
+        List<TrackerPermissionInfo> trackerPermissionInfo = null;
+        //JSONObject trackerDevice = null;
+
         try {
             TrackerManagementDAOFactory.beginTransaction();
             trackerDeviceInfo = trackerDAO.getTrackerDevice(deviceId, tenantId);
+
+            log.info("------deviceId-----" + deviceId);
+            log.info(trackerDeviceInfo);
+            log.info(new Gson().toJson(trackerDeviceInfo));
+            log.info(trackerDeviceInfo.getDeviceId());
+            log.info(trackerDeviceInfo.getTraccarDeviceId());
             if(trackerDeviceInfo!=null){
-                trackerDevice = new JSONObject(trackerDeviceInfo);
-                trackerDAO.removeTrackerDevice(deviceId, tenantId);
+                //trackerDevice = new JSONObject(trackerDeviceInfo);
+                int status = trackerDAO.removeTrackerDevice(deviceId, tenantId);
+                log.info("Status" + status);
                 TrackerManagementDAOFactory.commitTransaction();
 
-                log.error(trackerDevice.getInt("traccarDeviceId"));
-                trackerPermissionInfo = trackerDAO.getUserIdofPermissionByDeviceId(trackerDevice.getInt("traccarDeviceId"));
-                log.error(trackerPermissionInfo);
-                log.error(new Gson().toJson(trackerPermissionInfo));
+                trackerPermissionInfo = trackerDAO.getUserIdofPermissionByDeviceId(trackerDeviceInfo.getTraccarDeviceId());
             }
         } catch (TransactionManagementException e) {
             TrackerManagementDAOFactory.rollbackTransaction();
@@ -451,24 +509,32 @@ public class TraccarClientImpl implements TraccarClient {
             TrackerManagementDAOFactory.closeConnection();
         }
 
+        log.info("__________________");
+        log.info(new Gson().toJson(trackerPermissionInfo));
+        log.info(trackerPermissionInfo.get(0));
+        log.info(new Gson().toJson(trackerPermissionInfo.get(0)));
+        log.info("__________________");
         //Delete from traccar
-        if(trackerDevice!=null){
+        if(trackerDeviceInfo!=null){
             String method = TraccarHandlerConstants.Methods.DELETE;
-            String url = defaultPort+"/api/devices/"+trackerDevice.getInt("traccarDeviceId");
+            String url = defaultPort+"/api/devices/"+trackerPermissionInfo.get(0).getTraccarDeviceId();
+            //executor.submit(new OkHttpClientThreadPool(url, null, method));
+
             executor.submit(new OkHttpClientThreadPool(url, null, method));
             //executor.shutdown();
-            //remove permissions
 
-            if(trackerPermissionInfo!=null){
-                try {
-                    removePermission(trackerPermissionInfo.getTraccarUserId(),trackerDevice.getInt("traccarDeviceId"));
-                } catch (ExecutionException e) {
-                    log.error("ExecutionException : " + e);
-                    //throw new RuntimeException(e);
-                } catch (InterruptedException e) {
-                    log.error("InterruptedException : " + e);
-                    //throw new RuntimeException(e);
-                }
+            //remove permissions
+            try {
+                removePermission(
+                        trackerPermissionInfo.get(0).getTraccarUserId(),
+                        trackerPermissionInfo.get(0).getTraccarDeviceId(),
+                        TraccarHandlerConstants.Types.REMOVE_TYPE_MULTIPLE);
+            } catch (ExecutionException e) {
+                log.error("ExecutionException : " + e);
+                //throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                log.error("InterruptedException : " + e);
+                //throw new RuntimeException(e);
             }
         }
     }

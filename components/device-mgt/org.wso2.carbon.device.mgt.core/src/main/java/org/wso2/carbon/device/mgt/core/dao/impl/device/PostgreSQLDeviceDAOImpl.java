@@ -179,6 +179,81 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
         }
     }
 
+    //Return only not removed id list
+    @Override
+    public List<Device> getDevicesIds(PaginationRequest request, int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        List<Device> devices = null;
+        String owner = request.getOwner();
+        boolean isOwnerProvided = false;
+        String ownership = request.getOwnership();
+        boolean isOwnershipProvided = false;
+        List<String> statusList = request.getStatusList();
+        boolean isStatusProvided = false;
+
+        try {
+            conn = getConnection();
+            String sql = "SELECT " +
+                    "d1.ID AS DEVICE_ID, " +
+                    "d1.DEVICE_IDENTIFICATION, " +
+                    "e.STATUS, " +
+                    "e.OWNER, " +
+                    "e.IS_TRANSFERRED, " +
+                    "e.ID AS ENROLMENT_ID " +
+                    "FROM DM_ENROLMENT e, " +
+                    "(SELECT d.ID, " +
+                    "d.DEVICE_IDENTIFICATION " +
+                    "FROM DM_DEVICE d WHERE d.TENANT_ID = ?) d1 " +
+                    "WHERE d1.ID = e.DEVICE_ID AND e.TENANT_ID = ? ";
+            //Add the query for ownership
+            if (ownership != null && !ownership.isEmpty()) {
+                sql = sql + " AND e.OWNERSHIP = ?";
+                isOwnershipProvided = true;
+            }
+            //Add the query for owner
+            if (owner != null && !owner.isEmpty()) {
+                sql = sql + " AND e.OWNER = ?";
+                isOwnerProvided = true;
+            }
+            if (statusList != null && !statusList.isEmpty()) {
+                sql += buildStatusQuery(statusList);
+                isStatusProvided = true;
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIdx = 1;
+                stmt.setInt(paramIdx++, tenantId);
+                stmt.setInt(paramIdx++, tenantId);
+                if (isOwnershipProvided) {
+                    stmt.setString(paramIdx++, ownership);
+                }
+                if (isOwnerProvided) {
+                    stmt.setString(paramIdx++, owner);
+                }
+                if (isStatusProvided) {
+                    for (String status : statusList) {
+                        stmt.setString(paramIdx++, status);
+                    }
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    devices = new ArrayList<>();
+                    while (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDeviceIds(rs);
+                        devices.add(device);
+                    }
+                    return devices;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of all " +
+                    "registered devices";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
     @Override
     public List<Device> getDeviceListWithoutPagination(int tenantId) throws DeviceManagementDAOException {
         return null;
@@ -186,7 +261,7 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
     @Override
     public List<Device> getAllocatedDevices(PaginationRequest request, int tenantId,
-                                   int activeServerCount, int serverIndex)
+                                            int activeServerCount, int serverIndex)
             throws DeviceManagementDAOException {
         Connection conn;
         List<Device> devices = null;

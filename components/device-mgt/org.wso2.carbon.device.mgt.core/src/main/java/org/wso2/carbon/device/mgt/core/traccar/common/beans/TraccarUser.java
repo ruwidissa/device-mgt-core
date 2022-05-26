@@ -16,6 +16,7 @@
  *   under the License.
  *
  */
+
 package org.wso2.carbon.device.mgt.core.traccar.common.beans;
 
 import java.io.Serializable;

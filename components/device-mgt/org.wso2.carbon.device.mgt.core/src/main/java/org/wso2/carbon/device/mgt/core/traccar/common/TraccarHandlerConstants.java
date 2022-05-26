@@ -44,18 +44,12 @@ public class TraccarHandlerConstants {
         public static final String USER = "USER";
         public static final String PERMISSION = "PERMISSION";
 
-        public static final String USER_CREATE = "USER_CREATE";
-        public static final String USER_CREATE_WITH_INSERT_DEVICE = "USER_CREATE_WITH_INSERT_DEVICE";
-        public static final String USER_UPDATE = "USER_UPDATE";
-        public static final String USER_UPDATE_WITH_INSERT_DEVICE = "USER_UPDATE_WITH_INSERT_DEVICE";
-        public static final String USER_SEARCH = "USER_SEARCH";
-        public static final String FETCH_ALL_USERS = "FETCH_ALL_USERS";
-        public static final String FETCH_ALL_DEVICES = "FETCH_ALL_DEVICES";
-
         public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
 
         public static final int DEFAULT_RANDOM = 10;
         public static final int TRACCAR_TOKEN = 32;
+        public static final int REMOVE_TYPE_MULTIPLE = -1;
+        public static final int REMOVE_TYPE_SINGLE = 1;
     }
 
 }
