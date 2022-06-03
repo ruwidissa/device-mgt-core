@@ -26,6 +26,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -50,6 +51,7 @@ import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfiguratio
 import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarGateway;
 import org.wso2.carbon.device.mgt.core.traccar.common.util.TraccarUtil;
 import org.wso2.carbon.device.mgt.core.traccar.core.config.TraccarConfigurationManager;
+import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -94,11 +96,22 @@ public class TraccarClientImpl implements TraccarClient {
         final String publisherUrlWithContext;
         final JSONObject payload;
         private final String method;
+        private String authorizeKey;
+        private String serverUri;
 
-        private OkHttpClientThreadPool(String publisherUrlWithContext, JSONObject payload, String method) {
+        private OkHttpClientThreadPool(String publisherUrlWithContext, JSONObject payload, String method, String authorizeKey) {
             this.publisherUrlWithContext = publisherUrlWithContext;
             this.payload = payload;
             this.method = method;
+            this.authorizeKey = authorizeKey;
+        }
+        private OkHttpClientThreadPool(String publisherUrlWithContext, JSONObject payload, String method,
+                                       String authorizeKey, String serverUri) {
+            this.publisherUrlWithContext = publisherUrlWithContext;
+            this.payload = payload;
+            this.method = method;
+            this.authorizeKey = authorizeKey;
+            this.serverUri = serverUri;
         }
 
         @Override
@@ -115,7 +128,6 @@ public class TraccarClientImpl implements TraccarClient {
                 requestBody = RequestBody.create(payload.toString(), MediaType.parse("application/json; charset=utf-8"));
                 builder = builder.put(requestBody);
             }else if(Objects.equals(method, TraccarHandlerConstants.Methods.DELETE)){
-                log.info("publisherUrlWithContext - " + publisherUrlWithContext);
                 if(publisherUrlWithContext.indexOf("permission") !=-1){
                     requestBody = RequestBody.create(payload.toString(), MediaType.parse("application/json; charset=utf-8"));
                     builder = builder.delete(requestBody);
@@ -124,7 +136,7 @@ public class TraccarClientImpl implements TraccarClient {
                 }
             }
 
-            request = builder.url(endpoint+publisherUrlWithContext).addHeader(authorization, authorizationKey).build();
+            request = builder.url(serverUri+publisherUrlWithContext).addHeader(authorization, authorizeKey).build();
             response = client.newCall(request).execute();
             return response.body().string();
         }
@@ -134,7 +146,9 @@ public class TraccarClientImpl implements TraccarClient {
         String method = TraccarHandlerConstants.Methods.GET;
         String url = defaultPort+"/api/users";
 
-        Future<String> result = executor.submit(new OkHttpClientThreadPool(url, null, method));
+        Future<String> result = executor.submit(new OkHttpClientThreadPool(url, null, method,
+                authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                serverUrl(HttpReportingUtil.trackerServer())));
         String res = result.get();
         //executor.shutdown();
         return res;
@@ -174,7 +188,7 @@ public class TraccarClientImpl implements TraccarClient {
                 traccarUser.setEmail(userName);
                 traccarUser.setPassword(DeviceAPIClientServiceImpl.generateRandomString(TraccarHandlerConstants.Types.DEFAULT_RANDOM));
                 traccarUser.setDeviceLimit(-1);
-                traccarUser.setUserLimit(-1);
+                //traccarUser.setUserLimit(-1);
                 traccarUser.setExpirationTime(tomorrow.toString());
                 DeviceAPIClientServiceImpl.createUser(traccarUser);
             }else{
@@ -216,7 +230,9 @@ public class TraccarClientImpl implements TraccarClient {
         String url = defaultPort+"/api/users";
         JSONObject payload = TraccarUtil.TraccarUserPayload(traccarUser);
 
-        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method));
+        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+                authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                serverUrl(HttpReportingUtil.trackerServer())));
         String result = res.get();
         //executor.shutdown();
 
@@ -228,7 +244,9 @@ public class TraccarClientImpl implements TraccarClient {
         String url = defaultPort+"/api/users/"+userId;
         JSONObject payload = TraccarUtil.TraccarUserPayload(traccarUser);
 
-        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method));
+        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+                authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                serverUrl(HttpReportingUtil.trackerServer())));
         String result = res.get();
         //executor.shutdown();
         return result;
@@ -242,7 +260,9 @@ public class TraccarClientImpl implements TraccarClient {
         String method = TraccarHandlerConstants.Methods.POST;
         String url = defaultPort+"/api/permissions";
 
-        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method));
+        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+                authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                serverUrl(HttpReportingUtil.trackerServer())));
         String result = res.get();
         //executor.shutdown();
         if(result==""){
@@ -276,7 +296,9 @@ public class TraccarClientImpl implements TraccarClient {
         String method = TraccarHandlerConstants.Methods.DELETE;
         String url = defaultPort+"/api/permissions";
 
-        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method));
+        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+                authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                serverUrl(HttpReportingUtil.trackerServer())));
         String result = res.get();
         //executor.shutdown();
 
@@ -390,7 +412,9 @@ public class TraccarClientImpl implements TraccarClient {
             String url = defaultPort+"/api/devices";
             JSONObject payload = TraccarUtil.TraccarDevicePayload(traccarDevice);
 
-            Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method));
+            Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+                    authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                    serverUrl(HttpReportingUtil.trackerServer())));
             String result = res.get();
             log.info("---------res--------" + result);
             if(result.charAt(0)=='{'){
@@ -463,7 +487,9 @@ public class TraccarClientImpl implements TraccarClient {
                     "&lon="+deviceInfo.getLon()+"&bearing="+deviceInfo.getBearing()+
                     "&speed="+deviceInfo.getSpeed()+"&ignition=true";
 
-            executor.submit(new OkHttpClientThreadPool(url, null, method));
+            executor.submit(new OkHttpClientThreadPool(url, null, method,
+                    authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                    serverUrl(HttpReportingUtil.trackerServer())));
             //executor.shutdown();
         }
     }
@@ -518,9 +544,10 @@ public class TraccarClientImpl implements TraccarClient {
         if(trackerDeviceInfo!=null){
             String method = TraccarHandlerConstants.Methods.DELETE;
             String url = defaultPort+"/api/devices/"+trackerPermissionInfo.get(0).getTraccarDeviceId();
-            //executor.submit(new OkHttpClientThreadPool(url, null, method));
 
-            executor.submit(new OkHttpClientThreadPool(url, null, method));
+            executor.submit(new OkHttpClientThreadPool(url, null, method,
+                    authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                    serverUrl(HttpReportingUtil.trackerServer())));
             //executor.shutdown();
 
             //remove permissions
@@ -574,7 +601,9 @@ public class TraccarClientImpl implements TraccarClient {
         String method = TraccarHandlerConstants.Methods.POST;
         String url = defaultPort+"/api/groups";
 
-        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method));
+        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+                authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                serverUrl(HttpReportingUtil.trackerServer())));
         String result = res.get();
 
         if(result.charAt(0)=='{'){
@@ -664,7 +693,9 @@ public class TraccarClientImpl implements TraccarClient {
             String method = TraccarHandlerConstants.Methods.PUT;
             String url = defaultPort+"/api/groups/"+obj.getInt("traccarGroupId");
 
-            executor.submit(new OkHttpClientThreadPool(url, payload, method));
+            executor.submit(new OkHttpClientThreadPool(url, payload, method,
+                    authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                    serverUrl(HttpReportingUtil.trackerServer())));
             //executor.shutdown();
         }
     }
@@ -689,7 +720,9 @@ public class TraccarClientImpl implements TraccarClient {
                     String method = TraccarHandlerConstants.Methods.DELETE;
                     String url = defaultPort+"/api/groups/"+obj.getInt("traccarGroupId");
 
-                    executor.submit(new OkHttpClientThreadPool(url, null, method));
+                    executor.submit(new OkHttpClientThreadPool(url, null, method,
+                            authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                            serverUrl(HttpReportingUtil.trackerServer())));
                     //executor.shutdown();
                 }
             }
@@ -718,5 +751,25 @@ public class TraccarClientImpl implements TraccarClient {
     private TraccarGateway getTraccarGateway(){
         return TraccarConfigurationManager.getInstance().getTraccarConfig().getTraccarGateway(
                 TraccarHandlerConstants.TraccarConfig.GATEWAY_NAME);
+    }
+
+    public String authorizedKey(String trackerUser, String trackerPassword) {
+        String newAuthorizationKey = authorizationKey;
+        if(trackerUser!=null && trackerPassword!=null){
+            newAuthorizationKey= trackerUser+':'+trackerPassword;
+
+            byte[] result = newAuthorizationKey.getBytes();
+            byte[] res = Base64.encodeBase64(result);
+            newAuthorizationKey  = "Basic " + new String(res);
+        }
+        return newAuthorizationKey;
+    }
+
+    public String serverUrl(String serverUrl) {
+        String newServerUri = endpoint;
+        if(serverUrl!=null){
+            newServerUri= serverUrl;
+        }
+        return newServerUri;
     }
 }
