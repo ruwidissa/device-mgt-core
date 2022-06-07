@@ -236,8 +236,8 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
             if (theme.getFaviconImage().getImageLocationType() == WhiteLabelImage.ImageLocationType.CUSTOM_FILE) {
                 existingFaviconImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getFaviconImage(), WhiteLabelImage.ImageName.FAVICON);
             }
-            if (theme.getFaviconImage().getImageLocationType() == WhiteLabelImage.ImageLocationType.CUSTOM_FILE) {
-                existingLogoImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getFaviconImage(), WhiteLabelImage.ImageName.FAVICON);
+            if (theme.getLogoImage().getImageLocationType() == WhiteLabelImage.ImageLocationType.CUSTOM_FILE) {
+                existingLogoImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getFaviconImage(), WhiteLabelImage.ImageName.LOGO);
             }
             storeWhiteLabelImageIfRequired(createWhiteLabelTheme.getFavicon(), WhiteLabelImage.ImageName.FAVICON, tenantId);
             storeWhiteLabelImageIfRequired(createWhiteLabelTheme.getLogo(), WhiteLabelImage.ImageName.LOGO, tenantId);
