@@ -192,7 +192,7 @@ public interface WhiteLabelService {
                                     "\n Server error occurred while creating white label theme.",
                             response = ErrorResponse.class)
             })
-    Response createWhiteLabelTheme(WhiteLabelThemeCreateRequest whiteLabelThemeCreateRequest);
+    Response updateWhiteLabelTheme(WhiteLabelThemeCreateRequest whiteLabelThemeCreateRequest);
 
     @GET
     @ApiOperation(

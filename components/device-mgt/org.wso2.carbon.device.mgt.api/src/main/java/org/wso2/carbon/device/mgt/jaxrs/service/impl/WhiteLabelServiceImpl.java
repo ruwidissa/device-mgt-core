@@ -88,7 +88,7 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
 
     @PUT
     @Override
-    public Response createWhiteLabelTheme(WhiteLabelThemeCreateRequest whiteLabelThemeCreateRequest) {
+    public Response updateWhiteLabelTheme(WhiteLabelThemeCreateRequest whiteLabelThemeCreateRequest) {
         RequestValidationUtil.validateWhiteLabelTheme(whiteLabelThemeCreateRequest);
         try {
             WhiteLabelTheme createdWhiteLabelTheme = DeviceMgtAPIUtils.getWhiteLabelManagementService().updateWhiteLabelTheme(whiteLabelThemeCreateRequest);
