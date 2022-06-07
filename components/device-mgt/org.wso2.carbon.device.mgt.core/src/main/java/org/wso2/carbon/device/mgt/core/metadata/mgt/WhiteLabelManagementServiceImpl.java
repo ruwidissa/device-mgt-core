@@ -165,13 +165,25 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
      */
     private WhiteLabelTheme getDefaultWhiteLabelTheme() {
         String footerText = getDefaultFooterText();
+        String pageTitle = getDefaultPageTitle();
         WhiteLabelImage favicon = constructDefaultFaviconImage();
         WhiteLabelImage logo = constructDefaultLogoImage();
         WhiteLabelTheme defaultTheme = new WhiteLabelTheme();
         defaultTheme.setFooterText(footerText);
+        defaultTheme.setPageTitle(pageTitle);
         defaultTheme.setLogoImage(logo);
         defaultTheme.setFaviconImage(favicon);
         return defaultTheme;
+    }
+
+    /**
+     * Get default whitelabel label page title from config
+     */
+    private String getDefaultPageTitle() {
+        MetaDataConfiguration metaDataConfiguration = DeviceConfigurationManager.getInstance().
+                getDeviceManagementConfig().getMetaDataConfiguration();
+        WhiteLabelConfiguration whiteLabelConfiguration = metaDataConfiguration.getWhiteLabelConfiguration();
+        return whiteLabelConfiguration.getPageTitle();
     }
 
     /**
@@ -319,6 +331,7 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         whiteLabelTheme.setFaviconImage(faviconImage);
         whiteLabelTheme.setLogoImage(logoImage);
         whiteLabelTheme.setFooterText(whiteLabelThemeCreateRequest.getFooterText());
+        whiteLabelTheme.setPageTitle(whiteLabelThemeCreateRequest.getPageTitle());
         return whiteLabelTheme;
     }
 

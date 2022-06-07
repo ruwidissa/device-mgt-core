@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "WhiteLabelConfiguration")
 public class WhiteLabelConfiguration {
     private String footerText;
+    private String pageTitle;
     private WhiteLabelImages whiteLabelImages;
 
     @XmlElement(name = "FooterText", required = true)
@@ -42,5 +43,14 @@ public class WhiteLabelConfiguration {
 
     public void setWhiteLabelImages(WhiteLabelImages whiteLabelImages) {
         this.whiteLabelImages = whiteLabelImages;
+    }
+
+    @XmlElement(name = "PageTitle", required = true)
+    public String getPageTitle() {
+        return pageTitle;
+    }
+
+    public void setPageTitle(String pageTitle) {
+        this.pageTitle = pageTitle;
     }
 }

@@ -689,6 +689,13 @@ public class RequestValidationUtil {
                     new ErrorResponse.ErrorResponseBuilder()
                             .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
+        if (whiteLabelThemeCreateRequest.getPageTitle() == null) {
+            String msg = "Page title is required to whitelabel";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
         try {
             validateWhiteLabelImage(whiteLabelThemeCreateRequest.getFavicon());
             validateWhiteLabelImage(whiteLabelThemeCreateRequest.getLogo());
