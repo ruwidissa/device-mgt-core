@@ -158,13 +158,16 @@ public class TraccarClientImpl implements TraccarClient {
         String allUsers = fetchAllUsers(); //get all users
         JSONArray fetchAllUsers = new JSONArray(allUsers); //loop users
         for(int i=0; i<fetchAllUsers.length();i++){
-            //if login is null then check the name or if login is not null then check the login
-            if((!fetchAllUsers.getJSONObject(i).isNull("login") &&
-                    fetchAllUsers.getJSONObject(i).getString("login").equals(userName)) ||
-                    (fetchAllUsers.getJSONObject(i).isNull("login") &&
-                            fetchAllUsers.getJSONObject(i).getString("name").equals(userName)) ){
-
-                return fetchAllUsers.getJSONObject(i).toString();
+            // if login is null then check the name or if login is not null then check the login
+            if(fetchAllUsers.getJSONObject(i).isNull("login")){
+                if(Objects.equals(fetchAllUsers.getJSONObject(i).getString("name"), userName)){
+                    return fetchAllUsers.getJSONObject(i).toString();
+                }
+            }else{
+                if(Objects.equals(fetchAllUsers.getJSONObject(i).getString("login"), userName) ||
+                        Objects.equals(fetchAllUsers.getJSONObject(i).getString("name"), userName)){
+                    return fetchAllUsers.getJSONObject(i).toString();
+                }
             }
         }
 
@@ -183,6 +186,7 @@ public class TraccarClientImpl implements TraccarClient {
 
             if(Objects.equals(result, TraccarHandlerConstants.Types.USER_NOT_FOUND)){
                 //create user
+                log.info("Creating a user");
                 traccarUser.setName(userName);
                 traccarUser.setLogin(userName);
                 traccarUser.setEmail(userName);
@@ -193,6 +197,7 @@ public class TraccarClientImpl implements TraccarClient {
                 DeviceAPIClientServiceImpl.createUser(traccarUser);
             }else{
                 //update user
+                log.info("Updating the user");
                 JSONObject obj = new JSONObject(result);
 
                 traccarUser.setId(obj.getInt("id"));
