@@ -22,7 +22,7 @@ public class WhiteLabelTheme {
     private WhiteLabelImage faviconImage;
     private WhiteLabelImage logoImage;
     private String footerText;
-    private String pageTitle;
+    private String appTitle;
 
     public String getFooterText() {
         return footerText;
@@ -48,11 +48,11 @@ public class WhiteLabelTheme {
         this.logoImage = logoImage;
     }
 
-    public String getPageTitle() {
-        return pageTitle;
+    public String getAppTitle() {
+        return appTitle;
     }
 
-    public void setPageTitle(String pageTitle) {
-        this.pageTitle = pageTitle;
+    public void setAppTitle(String appTitle) {
+        this.appTitle = appTitle;
     }
 }

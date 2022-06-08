@@ -38,7 +38,6 @@ import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelImageRequestPayl
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelTheme;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
-import org.wso2.carbon.device.mgt.core.common.util.FileUtil;
 import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
@@ -165,12 +164,12 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
      */
     private WhiteLabelTheme getDefaultWhiteLabelTheme() {
         String footerText = getDefaultFooterText();
-        String pageTitle = getDefaultPageTitle();
+        String appTitle = getDefaultAppTitle();
         WhiteLabelImage favicon = constructDefaultFaviconImage();
         WhiteLabelImage logo = constructDefaultLogoImage();
         WhiteLabelTheme defaultTheme = new WhiteLabelTheme();
         defaultTheme.setFooterText(footerText);
-        defaultTheme.setPageTitle(pageTitle);
+        defaultTheme.setAppTitle(appTitle);
         defaultTheme.setLogoImage(logo);
         defaultTheme.setFaviconImage(favicon);
         return defaultTheme;
@@ -179,11 +178,11 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     /**
      * Get default whitelabel label page title from config
      */
-    private String getDefaultPageTitle() {
+    private String getDefaultAppTitle() {
         MetaDataConfiguration metaDataConfiguration = DeviceConfigurationManager.getInstance().
                 getDeviceManagementConfig().getMetaDataConfiguration();
         WhiteLabelConfiguration whiteLabelConfiguration = metaDataConfiguration.getWhiteLabelConfiguration();
-        return whiteLabelConfiguration.getPageTitle();
+        return whiteLabelConfiguration.getAppTitle();
     }
 
     /**
@@ -331,7 +330,7 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         whiteLabelTheme.setFaviconImage(faviconImage);
         whiteLabelTheme.setLogoImage(logoImage);
         whiteLabelTheme.setFooterText(whiteLabelThemeCreateRequest.getFooterText());
-        whiteLabelTheme.setPageTitle(whiteLabelThemeCreateRequest.getPageTitle());
+        whiteLabelTheme.setAppTitle(whiteLabelThemeCreateRequest.getAppTitle());
         return whiteLabelTheme;
     }
 

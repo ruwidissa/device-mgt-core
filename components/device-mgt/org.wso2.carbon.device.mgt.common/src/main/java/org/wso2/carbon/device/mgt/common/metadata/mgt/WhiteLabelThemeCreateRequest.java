@@ -22,7 +22,7 @@ public class WhiteLabelThemeCreateRequest {
     private WhiteLabelImageRequestPayload favicon;
     private WhiteLabelImageRequestPayload logo;
     private String footerText;
-    private String pageTitle;
+    private String appTitle;
 
     public WhiteLabelImageRequestPayload getFavicon() {
         return favicon;
@@ -48,11 +48,11 @@ public class WhiteLabelThemeCreateRequest {
         this.footerText = footerText;
     }
 
-    public String getPageTitle() {
-        return pageTitle;
+    public String getAppTitle() {
+        return appTitle;
     }
 
-    public void setPageTitle(String pageTitle) {
-        this.pageTitle = pageTitle;
+    public void setAppTitle(String appTitle) {
+        this.appTitle = appTitle;
     }
 }

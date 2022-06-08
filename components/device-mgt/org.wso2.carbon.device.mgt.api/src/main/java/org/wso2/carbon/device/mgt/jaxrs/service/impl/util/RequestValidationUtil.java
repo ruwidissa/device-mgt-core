@@ -21,7 +21,6 @@ package org.wso2.carbon.device.mgt.jaxrs.service.impl.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -35,7 +34,6 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
-import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelImage;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelImageRequestPayload;
 import org.wso2.carbon.device.mgt.common.notification.mgt.Notification;
 import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
@@ -689,7 +687,7 @@ public class RequestValidationUtil {
                     new ErrorResponse.ErrorResponseBuilder()
                             .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
-        if (whiteLabelThemeCreateRequest.getPageTitle() == null) {
+        if (whiteLabelThemeCreateRequest.getAppTitle() == null) {
             String msg = "Page title is required to whitelabel";
             log.error(msg);
             throw new InputValidationException(
