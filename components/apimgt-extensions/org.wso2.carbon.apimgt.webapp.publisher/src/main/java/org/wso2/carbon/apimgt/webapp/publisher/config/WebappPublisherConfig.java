@@ -43,6 +43,7 @@ public class WebappPublisherConfig {
     private boolean isEnabledUpdateApi;
     private Profiles profiles;
     private static boolean isInitialized = false;
+    private Tenants tenants;
 
     private static WebappPublisherConfig config;
 
@@ -98,6 +99,15 @@ public class WebappPublisherConfig {
 
     public void setProfiles(Profiles profiles) {
         this.profiles = profiles;
+    }
+
+    @XmlElement(name = "Tenants", required = true)
+    public Tenants getTenants() {
+        return tenants;
+    }
+
+    public void setTenants(Tenants tenants) {
+        this.tenants = tenants;
     }
 
     public synchronized static void init() throws WebappPublisherConfigurationFailedException {
