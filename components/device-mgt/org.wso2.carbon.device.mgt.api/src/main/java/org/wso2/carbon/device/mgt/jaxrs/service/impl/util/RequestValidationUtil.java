@@ -688,7 +688,7 @@ public class RequestValidationUtil {
                             .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
         if (whiteLabelThemeCreateRequest.getAppTitle() == null) {
-            String msg = "Page title is required to whitelabel";
+            String msg = "App title is required to whitelabel";
             log.error(msg);
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder()
