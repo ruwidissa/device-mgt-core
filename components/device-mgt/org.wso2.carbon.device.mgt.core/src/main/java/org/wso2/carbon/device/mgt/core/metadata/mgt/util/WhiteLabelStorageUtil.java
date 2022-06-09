@@ -116,7 +116,7 @@ public class WhiteLabelStorageUtil {
      * @return white label image file {@link File}
      */
     public static File getWhiteLabelImageFile(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
-            throws MetadataManagementException, NotFoundException {
+            throws MetadataManagementException {
         String fullPathToImage = getPathToImage(image, imageName);
         return new File(fullPathToImage);
     }

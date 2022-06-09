@@ -248,37 +248,38 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
                 existingFaviconImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getFaviconImage(), WhiteLabelImage.ImageName.FAVICON);
             }
             if (theme.getLogoImage().getImageLocationType() == WhiteLabelImage.ImageLocationType.CUSTOM_FILE) {
-                existingLogoImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getFaviconImage(), WhiteLabelImage.ImageName.LOGO);
+                existingLogoImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getLogoImage(), WhiteLabelImage.ImageName.LOGO);
             }
             storeWhiteLabelImageIfRequired(createWhiteLabelTheme.getFavicon(), WhiteLabelImage.ImageName.FAVICON, tenantId);
             storeWhiteLabelImageIfRequired(createWhiteLabelTheme.getLogo(), WhiteLabelImage.ImageName.LOGO, tenantId);
             WhiteLabelTheme whiteLabelTheme = constructWhiteLabelTheme(createWhiteLabelTheme);
             Metadata metadataWhiteLabelTheme = constructWhiteLabelThemeMetadata(whiteLabelTheme);
-
-            MetadataManagementDAOFactory.beginTransaction();
-            metadataDAO.updateMetadata(tenantId, metadataWhiteLabelTheme);
-            MetadataManagementDAOFactory.commitTransaction();
-            if (log.isDebugEnabled()) {
-                log.debug("Metadata entry created successfully. " + createWhiteLabelTheme.toString());
+            try {
+                MetadataManagementDAOFactory.beginTransaction();
+                metadataDAO.updateMetadata(tenantId, metadataWhiteLabelTheme);
+                MetadataManagementDAOFactory.commitTransaction();
+                if (log.isDebugEnabled()) {
+                    log.debug("Metadata entry created successfully. " + createWhiteLabelTheme);
+                }
+                return whiteLabelTheme;
+            } catch (MetadataManagementDAOException e) {
+                MetadataManagementDAOFactory.rollbackTransaction();
+                restoreWhiteLabelImages(existingFaviconImage, existingLogoImage, tenantId);
+                String msg = "Error occurred while creating the metadata entry. " + createWhiteLabelTheme;
+                log.error(msg, e);
+                throw new MetadataManagementException(msg, e);
+            } catch (TransactionManagementException e) {
+                restoreWhiteLabelImages(existingFaviconImage, existingLogoImage, tenantId);
+                String msg = "Error occurred while opening a connection to the data source";
+                log.error(msg, e);
+                throw new MetadataManagementException("Error occurred while creating metadata record", e);
+            } finally {
+                MetadataManagementDAOFactory.closeConnection();
             }
-            return whiteLabelTheme;
-        } catch (MetadataManagementDAOException e) {
-            MetadataManagementDAOFactory.rollbackTransaction();
-            restoreWhiteLabelImages(existingFaviconImage, existingLogoImage, tenantId);
-            String msg = "Error occurred while creating the metadata entry. " + createWhiteLabelTheme.toString();
-            log.error(msg, e);
-            throw new MetadataManagementException(msg, e);
-        } catch (TransactionManagementException e) {
-            restoreWhiteLabelImages(existingFaviconImage, existingLogoImage, tenantId);
-            String msg = "Error occurred while opening a connection to the data source";
-            log.error(msg, e);
-            throw new MetadataManagementException("Error occurred while creating metadata record", e);
         } catch (NotFoundException e) {
             String msg = "Error occurred while retrieving existing white label theme";
             log.error(msg, e);
             throw new MetadataManagementException(msg, e);
-        } finally {
-            MetadataManagementDAOFactory.closeConnection();
         }
     }
 
