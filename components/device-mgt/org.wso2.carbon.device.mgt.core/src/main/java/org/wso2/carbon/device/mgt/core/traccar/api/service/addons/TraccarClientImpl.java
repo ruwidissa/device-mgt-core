@@ -421,14 +421,13 @@ public class TraccarClientImpl implements TraccarClient {
                     authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
                     serverUrl(HttpReportingUtil.trackerServer())));
             String result = res.get();
-            log.info("---------res--------" + result);
+            log.info("---------result--------");
             if(result.charAt(0)=='{'){
                 JSONObject obj = new JSONObject(result);
                 if (obj.has("id")){
                     int traccarDeviceId = obj.getInt("id");
                     int deviceId = traccarDevice.getId();
                     log.info("TraccarDeviceId - " + traccarDeviceId);
-                    log.info("DeviceId - " + deviceId);
                     try {
                         TrackerManagementDAOFactory.beginTransaction();
                         trackerDAO.addTrackerDevice(traccarDeviceId, deviceId, tenantId);
@@ -486,6 +485,7 @@ public class TraccarClientImpl implements TraccarClient {
             addDevice(device, tenantId);
         }else{
             //Update Location
+            log.info("Updating Location");
             String method = TraccarHandlerConstants.Methods.GET;
             String url = locationUpdatePort+"/?id="+deviceInfo.getDeviceIdentifier()+
                     "&timestamp="+deviceInfo.getTimestamp()+"&lat="+deviceInfo.getLat()+
@@ -494,7 +494,7 @@ public class TraccarClientImpl implements TraccarClient {
 
             executor.submit(new OkHttpClientThreadPool(url, null, method,
                     authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
-                    serverUrl(HttpReportingUtil.trackerServer())));
+                    "http://localhost:"));
             //executor.shutdown();
         }
     }
@@ -515,9 +515,6 @@ public class TraccarClientImpl implements TraccarClient {
 
             log.info("------deviceId-----" + deviceId);
             log.info(trackerDeviceInfo);
-            log.info(new Gson().toJson(trackerDeviceInfo));
-            log.info(trackerDeviceInfo.getDeviceId());
-            log.info(trackerDeviceInfo.getTraccarDeviceId());
             if(trackerDeviceInfo!=null){
                 //trackerDevice = new JSONObject(trackerDeviceInfo);
                 int status = trackerDAO.removeTrackerDevice(deviceId, tenantId);
@@ -540,11 +537,7 @@ public class TraccarClientImpl implements TraccarClient {
             TrackerManagementDAOFactory.closeConnection();
         }
 
-        log.info("__________________");
-        log.info(new Gson().toJson(trackerPermissionInfo));
-        log.info(trackerPermissionInfo.get(0));
-        log.info(new Gson().toJson(trackerPermissionInfo.get(0)));
-        log.info("__________________");
+        log.info("--------Disenrolling Device--------");
         //Delete from traccar
         if(trackerDeviceInfo!=null){
             String method = TraccarHandlerConstants.Methods.DELETE;
