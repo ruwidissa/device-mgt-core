@@ -154,9 +154,11 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
 
     @Override
     public void resetToDefaultWhiteLabelTheme() throws MetadataManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         WhiteLabelTheme whiteLabelTheme = getDefaultWhiteLabelTheme();
         Metadata metadata = constructWhiteLabelThemeMetadata(whiteLabelTheme);
         DeviceManagementDataHolder.getInstance().getMetadataManagementService().updateMetadata(metadata);
+        WhiteLabelStorageUtil.deleteWhiteLabelImageForTenantIfExists(tenantId);
     }
 
     /**
