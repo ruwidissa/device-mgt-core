@@ -29,6 +29,8 @@ import java.util.List;
 public class TraccarUtil {
     public static JSONObject TraccarUserPayload(TraccarUser traccarUser){
         JSONObject payload = new JSONObject();
+        JSONObject attribute = new JSONObject();
+        attribute.put("speedUnit", "kmh");
         payload.put("id", traccarUser.getId());
         payload.put("name", traccarUser.getName());
         payload.put("login", traccarUser.getLogin());
@@ -42,6 +44,7 @@ public class TraccarUtil {
         payload.put("deviceReadonly", traccarUser.getDeviceReadonly());
         payload.put("readonly", traccarUser.getReadonly());
         payload.put("expirationTime", traccarUser.getExpirationTime());
+        payload.put("attributes", attribute);
         return payload;
     }
 
