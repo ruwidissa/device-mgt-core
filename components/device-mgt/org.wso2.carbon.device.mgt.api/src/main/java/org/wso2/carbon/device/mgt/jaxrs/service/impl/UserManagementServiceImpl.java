@@ -130,7 +130,9 @@ public class UserManagementServiceImpl implements UserManagementService {
     private static final String API_BASE_PATH = "/users";
     private static final Log log = LogFactory.getLog(UserManagementServiceImpl.class);
 
+    private static final String ADMIN_ROLE = "admin";
     private static final String DEFAULT_DEVICE_USER = "Internal/devicemgt-user";
+    private static final String DEFAULT_DEVICE_ADMIN = "Internal/devicemgt-admin";
     private static final String DEFAULT_SUBSCRIBER = "Internal/subscriber";
 
     // Permissions that are given for a normal device user.
@@ -177,13 +179,19 @@ public class UserManagementServiceImpl implements UserManagementService {
             tmpRoles.add(DEFAULT_DEVICE_USER);
 
             boolean subscriberFound = false;
+            boolean adminFound = false;
 
             if (userInfoRoles != null) {
-
                 //check if subscriber role is coming in the payload
                 for (String r : userInfoRoles) {
-                    if (DEFAULT_SUBSCRIBER.equals(r)) {
-                        subscriberFound = true;
+                    if (!subscriberFound || !adminFound) {
+                        if (DEFAULT_SUBSCRIBER.equals(r)) {
+                            subscriberFound = true;
+                        } else if (ADMIN_ROLE.equals(r)) {
+                            tmpRoles.add(DEFAULT_DEVICE_ADMIN);
+                            adminFound = true;
+                        }
+                    } else {
                         break;
                     }
                 }
