@@ -57,6 +57,7 @@ public class MDMAppConstants {
 			throw new AssertionError();
 		}
 		public static final String INSTALL_ENTERPRISE_APPLICATION = "INSTALL_ENTERPRISE_APPLICATION";
+		public static final String UNINSTALL_ENTERPRISE_APPLICATION = "UNINSTALL_ENTERPRISE_APPLICATION";
 		//App type constants related to window device type
 		public static final String MSI = "MSI";
 		public static final String APPX = "APPX";

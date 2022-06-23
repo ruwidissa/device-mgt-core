@@ -1130,9 +1130,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                             if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                                 return MDMWindowsOperationUtil.createInstallAppOperation(app);
                             } else {
-                                String msg = "Invalid Action is found. Action: " + action;
-                                log.error(msg);
-                                throw new ApplicationManagementException(msg);
+                                if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+                                    return MDMWindowsOperationUtil.createUninstallAppOperation(app);
+                                } else {
+                                    String msg = "Invalid Action is found. Action: " + action;
+                                    log.error(msg);
+                                    throw new ApplicationManagementException(msg);
+                                }
                             }
                         } else {
                             String msg = "Invalid device type is found. Device Type: " + deviceType;
