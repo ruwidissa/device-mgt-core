@@ -36,4 +36,9 @@
     <Profiles>
         <Profile>default</Profile>
     </Profiles>
+
+    <!-- Apart from the super tenant, APIs will be published to the following tenants -->
+    <Tenants>
+        <!-- <Tenant>example.com</Tenant> -->
+    </Tenants>
 </WebappPublisherConfigs>
