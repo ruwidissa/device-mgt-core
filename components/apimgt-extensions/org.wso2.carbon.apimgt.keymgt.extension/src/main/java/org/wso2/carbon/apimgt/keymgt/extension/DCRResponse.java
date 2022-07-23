@@ -18,28 +18,28 @@
 
 package org.wso2.carbon.apimgt.keymgt.extension;
 
-public class MatchingResource {
-    private String urlPattern;
-    private String permission;
+public class DCRResponse {
+    String clientId;
+    String clientSecret;
 
-    public MatchingResource(String urlPattern, String permission) {
-        this.urlPattern = urlPattern;
-        this.permission = permission;
+    public DCRResponse(String clientId, String clientSecret) {
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
     }
 
-    public String getUrlPattern() {
-        return urlPattern;
+    public String getClientId() {
+        return clientId;
     }
 
-    public void setUrlPattern(String urlPattern) {
-        this.urlPattern = urlPattern;
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
-    public String getPermission() {
-        return permission;
+    public String getClientSecret() {
+        return clientSecret;
     }
 
-    public void setPermission(String permission) {
-        this.permission = permission;
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
     }
 }

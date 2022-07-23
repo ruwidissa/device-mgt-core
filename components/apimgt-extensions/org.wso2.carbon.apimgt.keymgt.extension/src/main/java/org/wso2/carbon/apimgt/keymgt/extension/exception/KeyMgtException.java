@@ -16,30 +16,17 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.keymgt.extension;
+package org.wso2.carbon.apimgt.keymgt.extension.exception;
 
-public class MatchingResource {
-    private String urlPattern;
-    private String permission;
+/**
+ * Custom exception class for key management service related exceptions.
+ */
+public class KeyMgtException extends Exception {
 
-    public MatchingResource(String urlPattern, String permission) {
-        this.urlPattern = urlPattern;
-        this.permission = permission;
-    }
+    private static final long serialVersionUID = -3806174803586013552L;
 
-    public String getUrlPattern() {
-        return urlPattern;
-    }
-
-    public void setUrlPattern(String urlPattern) {
-        this.urlPattern = urlPattern;
-    }
-
-    public String getPermission() {
-        return permission;
-    }
-
-    public void setPermission(String permission) {
-        this.permission = permission;
+    public KeyMgtException(String errorMessage) {
+        super(errorMessage);
     }
 }
+
