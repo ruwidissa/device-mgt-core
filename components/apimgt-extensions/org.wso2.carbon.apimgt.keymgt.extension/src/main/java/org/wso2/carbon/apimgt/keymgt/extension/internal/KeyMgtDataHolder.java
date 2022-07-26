@@ -16,30 +16,25 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.keymgt.extension;
+package org.wso2.carbon.apimgt.keymgt.extension.internal;
 
-public class MatchingResource {
-    private String urlPattern;
-    private String permission;
+import org.wso2.carbon.apimgt.keymgt.extension.service.KeyMgtService;
 
-    public MatchingResource(String urlPattern, String permission) {
-        this.urlPattern = urlPattern;
-        this.permission = permission;
+public class KeyMgtDataHolder {
+
+    private static final KeyMgtDataHolder thisInstance = new KeyMgtDataHolder();
+    private KeyMgtService keyMgtService;
+
+    public static KeyMgtDataHolder getInstance() {
+        return thisInstance;
     }
 
-    public String getUrlPattern() {
-        return urlPattern;
+    public KeyMgtService getKeyMgtService() {
+        return keyMgtService;
     }
 
-    public void setUrlPattern(String urlPattern) {
-        this.urlPattern = urlPattern;
+    public void setKeyMgtService(KeyMgtService keyMgtService) {
+        this.keyMgtService = keyMgtService;
     }
 
-    public String getPermission() {
-        return permission;
-    }
-
-    public void setPermission(String permission) {
-        this.permission = permission;
-    }
 }

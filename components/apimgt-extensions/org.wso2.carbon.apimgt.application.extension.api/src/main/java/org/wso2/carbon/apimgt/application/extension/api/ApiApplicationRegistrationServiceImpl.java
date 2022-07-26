@@ -87,12 +87,11 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
     @POST
     public Response register(RegistrationProfile registrationProfile) {
         try {
-            if (registrationProfile.getTags() == null || registrationProfile.getTags().length == 0) {
-                return Response.status(Response.Status.NOT_ACCEPTABLE).entity("Tags should not be empty").build();
-            }
-            if (!APIUtil.getAllowedApisTags().containsAll(Arrays.asList(registrationProfile.getTags()))) {
-                return Response.status(Response.Status.NOT_ACCEPTABLE).entity("APIs(Tags) are not allowed to this user."
-                ).build();
+            if ((registrationProfile.getTags() != null && registrationProfile.getTags().length != 0)) {
+                if (!APIUtil.getAllowedApisTags().containsAll(Arrays.asList(registrationProfile.getTags()))) {
+                    return Response.status(Response.Status.NOT_ACCEPTABLE).entity("APIs(Tags) are not allowed to this user."
+                    ).build();
+                }
             }
             String username = APIUtil.getAuthenticatedUser();
 

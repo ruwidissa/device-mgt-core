@@ -75,6 +75,7 @@ public class OAuthAuthenticator implements WebappAuthenticator {
         }
         try {
             String bearerToken = getBearerToken(request);
+            bearerToken = bearerToken.substring(bearerToken.indexOf("_")+1);
             String resource = requestUri + ":" + requestMethod;
             OAuthValidationResponse oAuthValidationResponse = this.tokenValidator.validateToken(bearerToken, resource);
             authenticationInfo = Utils.setAuthenticationInfo(oAuthValidationResponse, authenticationInfo);
