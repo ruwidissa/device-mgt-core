@@ -103,7 +103,7 @@ public class GroupManagementProviderServiceTest extends BaseDeviceManagementTest
     }
 
     @Test(dependsOnMethods = "createGroup")
-    public void updateGroup() throws GroupManagementException, GroupNotExistException {
+    public void updateGroup() throws GroupManagementException, GroupNotExistException, GroupAlreadyExistException {
         DeviceGroup deviceGroup = groupManagementProviderService.getGroup(TestUtils.createDeviceGroup1().getName(), false);
         deviceGroup.setName(deviceGroup.getName() + "_UPDATED");
         groupManagementProviderService.updateGroup(deviceGroup, deviceGroup.getGroupId());
@@ -116,19 +116,19 @@ public class GroupManagementProviderServiceTest extends BaseDeviceManagementTest
 
     // Rename again to use in different place.
     @Test(dependsOnMethods = "updateGroup")
-    public void updateGroupSecondTime() throws GroupManagementException, GroupNotExistException {
+    public void updateGroupSecondTime() throws GroupManagementException, GroupNotExistException, GroupAlreadyExistException {
         DeviceGroup deviceGroup = groupManagementProviderService.getGroup(TestUtils.createDeviceGroup1().getName() + "_UPDATED", true);
         deviceGroup.setName(TestUtils.createDeviceGroup1().getName());
         groupManagementProviderService.updateGroup(deviceGroup, deviceGroup.getGroupId());
     }
 
-    @Test(dependsOnMethods = "createGroup", expectedExceptions = {GroupManagementException.class, GroupNotExistException.class})
-    public void updateGroupError() throws GroupManagementException, GroupNotExistException {
+    @Test(dependsOnMethods = "createGroup", expectedExceptions = {GroupManagementException.class, GroupNotExistException.class, GroupAlreadyExistException.class})
+    public void updateGroupError() throws GroupManagementException, GroupNotExistException, GroupAlreadyExistException {
         groupManagementProviderService.updateGroup(null, 1);
     }
 
-    @Test(dependsOnMethods = "createGroup", expectedExceptions = {GroupManagementException.class, GroupNotExistException.class})
-    public void updateGroupErrorNotExist() throws GroupManagementException, GroupNotExistException {
+    @Test(dependsOnMethods = "createGroup", expectedExceptions = {GroupManagementException.class, GroupNotExistException.class, GroupAlreadyExistException.class})
+    public void updateGroupErrorNotExist() throws GroupManagementException, GroupNotExistException, GroupAlreadyExistException {
         DeviceGroup deviceGroup = groupManagementProviderService.getGroup(TestUtils.createDeviceGroup2().getName(), false);
         deviceGroup.setName(deviceGroup.getName() + "_UPDATED");
         groupManagementProviderService.updateGroup(deviceGroup, 6);
