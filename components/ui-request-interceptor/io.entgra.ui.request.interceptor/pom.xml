@@ -21,7 +21,7 @@
     <parent>
         <artifactId>ui-request-interceptor</artifactId>
         <groupId>io.entgra.devicemgt</groupId>
-        <version>5.0.8-SNAPSHOT</version>
+        <version>5.0.11-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

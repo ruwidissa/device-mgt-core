@@ -3,7 +3,7 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <version>5.0.8-SNAPSHOT</version>
+        <version>5.0.11-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -43,7 +43,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
+                <version>5.1.7</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -51,10 +51,16 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
                         <Bundle-Description>API Management Application Bundle</Bundle-Description>
+                        <Private-Package>org.wso2.carbon.apimgt.keymgt.extension.internal</Private-Package>
                         <Import-Packages>
+                            org.wso2.carbon.apimgt.application.extension,
+                            org.wso2.carbon.apimgt.application.extension.*,
+                            org.wso2.carbon.device.mgt.common.*,
+                            org.wso2.carbon.device.mgt.core.*
                         </Import-Packages>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.keymgt.extension
+                            !org.wso2.carbon.apimgt.keymgt.extension.internal,
+                            org.wso2.carbon.apimgt.keymgt.extension.*
                         </Export-Package>
                     </instructions>
                 </configuration>

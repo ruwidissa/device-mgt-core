@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>apimgt-extensions-feature</artifactId>
-        <version>5.0.8-SNAPSHOT</version>
+        <version>5.0.11-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -63,6 +63,31 @@
                                     </includes>
                                 </resource>
                             </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-jaxrs-war</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.wso2.carbon.devicemgt</groupId>
+                                    <artifactId>org.wso2.carbon.apimgt.keymgt.extension.api</artifactId>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/maven-shared-archive-resources/webapps/</outputDirectory>
+                                    <destFileName>api-key-management.war</destFileName>
+                                </artifactItem>
+                            </artifactItems>
                         </configuration>
                     </execution>
                 </executions>

@@ -53,4 +53,13 @@
         {% endfor %}
     {% endif %}
     </Profiles>
+
+    <!-- Apart from the super tenant, APIs will be published to the following tenants -->
+    <Tenants>
+    {% if webapp_publisher_configs.tenants is defined %}
+        {%- for tenant in webapp_publisher_configs.tenants -%}
+        <Tenant>{{tenant}}</Tenant>
+        {% endfor %}
+    {% endif %}
+    </Tenants>
 </WebappPublisherConfigs>

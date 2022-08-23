@@ -224,6 +224,13 @@
         <Scope>perm:mac-os:shut-down</Scope>
         <Scope>perm:mac-os:restart</Scope>
         <Scope>perm:android:info</Scope>
+        <Scope>perm:windows:lock-devices</Scope>
+        <Scope>perm:windows:disenroll</Scope>
+        <Scope>perm:windows:wipe</Scope>
+        <Scope>perm:windows:ring</Scope>
+        <Scope>perm:windows:lock-reset</Scope>
+        <Scope>perm:windows:reboot</Scope>
+        <Scope>perm:windows:location</Scope>
     {% if mdm_ui_conf.scopes is defined %}
         {%- for scope in mdm_ui_conf.scopes -%}
         <Scope>{{scope}}</Scope>
