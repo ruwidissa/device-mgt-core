@@ -1737,12 +1737,24 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "AP_APP.NAME = ? AND "
                 + "AP_APP.DEVICE_TYPE_ID = ? AND "
                 + "AP_APP.TENANT_ID = ?";
+        if(deviceTypeId != -1){
+            sql = "SELECT AP_APP.ID AS ID "
+                    + "FROM AP_APP "
+                    + "WHERE "
+                    + "AP_APP.NAME = ? AND "
+                    + "AP_APP.TENANT_ID = ?";
+        }
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)){
-                stmt.setString(1, appName);
-                stmt.setInt(2, deviceTypeId);
-                stmt.setInt(3, tenantId);
+                if(deviceTypeId != -1){
+                    stmt.setString(1, appName);
+                    stmt.setInt(2, tenantId);
+                } else {
+                    stmt.setString(1, appName);
+                    stmt.setInt(2, deviceTypeId);
+                    stmt.setInt(3, tenantId);
+                }
                 try (ResultSet rs = stmt.executeQuery()){
                     return rs.next();
                 }
