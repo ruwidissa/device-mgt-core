@@ -727,7 +727,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             Connection conn = GroupManagementDAOFactory.getConnection();
             String sql =
                     "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
-                            + "WHERE GROUP_NAME = ? AND TENANT_ID = ?";
+                            + "WHERE LOWER(GROUP_NAME) = LOWER(?) AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, groupName);
             stmt.setInt(2, tenantId);

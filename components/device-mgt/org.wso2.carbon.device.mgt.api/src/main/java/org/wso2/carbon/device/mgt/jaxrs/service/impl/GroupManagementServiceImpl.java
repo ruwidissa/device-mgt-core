@@ -218,7 +218,11 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (GroupNotExistException e) {
-            String msg = "There is another group already exists with name '" + deviceGroup.getName() + "'.";
+            String msg = "Group doesn't exist with ID '" + deviceGroup.getGroupId() + "'.";
+            log.warn(msg);
+            return Response.status(Response.Status.CONFLICT).entity(msg).build();
+        } catch (GroupAlreadyExistException e) {
+            String msg = "Group already exists with name '" + deviceGroup.getName() + "'.";
             log.warn(msg);
             return Response.status(Response.Status.CONFLICT).entity(msg).build();
         }

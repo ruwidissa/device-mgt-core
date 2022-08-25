@@ -71,7 +71,8 @@ public interface GroupManagementProviderService {
      * @param groupId of the group.
      * @throws GroupManagementException
      */
-    void updateGroup(DeviceGroup deviceGroup, int groupId) throws GroupManagementException, GroupNotExistException;
+    void updateGroup(DeviceGroup deviceGroup, int groupId)
+            throws GroupManagementException, GroupNotExistException, GroupAlreadyExistException;
 
     /**
      * Delete existing device group.
