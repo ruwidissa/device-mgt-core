@@ -132,7 +132,15 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -485,9 +493,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             String currentUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
             JSONObject obj = new JSONObject(DeviceAPIClientServiceImpl.returnUser(currentUser));
 
-            if(obj.has("error")){
+            if (obj.has("error")) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(obj.getString("error")).build();
-            }else{
+            } else {
                 int userId = obj.getInt("id");
                 List<Integer> traccarValidIdList = new ArrayList<>();
                 /*Get Device Id List*/
@@ -504,8 +512,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     status.add("CREATED");
                     status.add("UNREACHABLE");
                     boolean isStatusEmpty = true;
-                    for (String statusString : status){
-                        if (StringUtils.isNotBlank(statusString)){
+                    for (String statusString : status) {
+                        if (StringUtils.isNotBlank(statusString)) {
                             isStatusEmpty = false;
                             break;
                         }
@@ -525,16 +533,15 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     if (result == null || result.getData() == null || result.getData().isEmpty()) {
                         devices.setList(new ArrayList<Device>());
                         devices.setCount(0);
-                    }else{
+                    } else {
                         devices.setList((List<Device>) result.getData());
                         devices.setCount(result.getRecordsTotal());
                     }
 
                     int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-                    for(int i=0; i<devices.getCount(); i++){
+                    for (int i = 0; i < devices.getCount(); i++) {
                         TrackerDeviceInfo trackerDevice = DeviceAPIClientServiceImpl.getTrackerDevice(
                                 devices.getList().get(i).getId(), tenantId);
-
                         int traccarDeviceId = trackerDevice.getTraccarDeviceId();
                         boolean getPermission = DeviceAPIClientServiceImpl.getUserIdofPermissionByDeviceIdNUserId(traccarDeviceId, userId);
                         log.info("--------------------");
@@ -543,11 +550,10 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                         log.info(userId);
                         log.info("--------------------");
                         traccarValidIdList.add(traccarDeviceId);
-                        if(!getPermission){
+                        if (!getPermission) {
                             DeviceAPIClientServiceImpl.addTrackerUserDevicePermission(userId, traccarDeviceId);
                         }
                     }
-
                     //Remove neecessary
                     List<TrackerPermissionInfo> getAllUserDevices =
                             DeviceAPIClientServiceImpl.getUserIdofPermissionByUserIdNIdList(userId, traccarValidIdList);
@@ -557,29 +563,35 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                                 getAllUserDevice.getTraccarDeviceId(),
                                 TraccarHandlerConstants.Types.REMOVE_TYPE_SINGLE);
                     }
-
-                } catch (JSONException e){
+                } catch (JSONException e) {
                     String msg = "not a JSONObject, ";
                     log.error(msg);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (DeviceManagementException e) {
                     String msg = "Error occurred while fetching all enrolled devices";
                     log.error(msg, e);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (DeviceAccessAuthorizationException e) {
                     String msg = "Error occurred while checking device access authorization";
                     log.error(msg, e);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (TrackerManagementDAOException e) {
                     String msg = "Error occurred while mapping with deviceId .";
                     log.error(msg, e);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (ExecutionException e) {
-                    log.error("ExecutionException : " + e);
+                    String msg = "ExecutionException occured ";
+                    log.error(msg, e);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (InterruptedException e) {
-                    log.error("InterruptedException : " + e);
+                    String msg = "InterruptedException occured ";
+                    log.error(msg, e);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 }
                 /*Get Device Id List*/
-
                 return Response.status(Response.Status.OK).entity(obj.getString("token")).build();
             }
-        }else{
+        } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("Traccar is not enabled").build();
         }
     }

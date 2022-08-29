@@ -95,7 +95,9 @@ public final class TrackerManagementDAOUtil {
             final InitialContext context = new InitialContext(jndiProperties);
             return (DataSource) context.lookup(dataSourceName);
         } catch (Exception e) {
-            throw new RuntimeException("Error in looking up data source: " + e.getMessage(), e);
+            String msg = "Error in looking up data source: " + e.getMessage();
+            log.error(msg, e);
+            throw new RuntimeException(msg, e);
         }
     }
 
@@ -129,11 +131,11 @@ public final class TrackerManagementDAOUtil {
     public static String buildDeviceIdNotInQuery(List<Integer> DeviceIdList) throws TrackerManagementDAOException {
         if (DeviceIdList == null || DeviceIdList.isEmpty()) {
             String msg = "SQL query build for Device Id list failed. Device Id list cannot be empty or null";
+            log.error(msg);
             throw new TrackerManagementDAOException(msg);
         }
         StringJoiner joiner = new StringJoiner(",", " AND TRACCAR_DEVICE_ID NOT IN(", ")");
         DeviceIdList.stream().map(status -> "?").forEach(joiner::add);
-
         return joiner.toString();
     }
 }

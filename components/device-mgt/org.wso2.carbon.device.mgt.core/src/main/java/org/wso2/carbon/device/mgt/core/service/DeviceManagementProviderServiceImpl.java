@@ -428,9 +428,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             } catch (ExecutionException e) {
                 log.error("ExecutionException : " + e);
                 //throw new RuntimeException(e);
+                //Exception was not thrown due to being conflicted with non-traccar features
             } catch (InterruptedException e) {
                 log.error("InterruptedException : " + e);
                 //throw new RuntimeException(e);
+                //Exception was not thrown due to being conflicted with non-traccar features
             }
         }
         //enroll Traccar device
@@ -612,10 +614,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throw new DeviceManagementException(msg, e);
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while initiating transaction";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (Exception e) {
-            String msg = "Error occurred while dis-enrolling device: " + deviceId.getId();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         } finally {
@@ -3969,9 +3967,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     deviceLocation.setSpeed(Float.parseFloat(speed));
                     deviceLocation.setBearing(Float.parseFloat(bearing));
                     deviceInformationManager.addDeviceLocation(device, deviceLocation);
-                } catch (Exception e) {
+                } catch (DeviceDetailsMgtException e) {
                     //We are not failing the execution since this is not critical for the functionality. But logging as
                     // a warning for reference.
+                    //Exception was not thrown due to being conflicted with non-traccar features
                     log.warn("Error occurred while trying to add '" + device.getType() + "' device '" +
                             device.getDeviceIdentifier() + "' (id:'" + device.getId() + "') location (lat:" + latitude +
                             ", lon:" + longitude + ", altitude: " + altitude +

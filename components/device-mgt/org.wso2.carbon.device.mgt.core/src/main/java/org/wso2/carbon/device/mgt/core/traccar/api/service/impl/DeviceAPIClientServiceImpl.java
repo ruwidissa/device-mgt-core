@@ -26,6 +26,7 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
 import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.exceptions.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
