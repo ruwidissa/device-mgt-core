@@ -180,7 +180,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
      */
     @Override
     public void updateGroup(DeviceGroup deviceGroup, int groupId)
-            throws GroupManagementException, GroupNotExistException {
+            throws GroupManagementException, GroupNotExistException, GroupAlreadyExistException {
         if (deviceGroup == null) {
             String msg = "Received incomplete data for updateGroup";
             log.error(msg);
@@ -194,6 +194,10 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             GroupManagementDAOFactory.beginTransaction();
             DeviceGroup existingGroup = this.groupDAO.getGroup(groupId, tenantId);
             if (existingGroup != null) {
+                boolean existingGroupName = this.groupDAO.getGroup(deviceGroup.getName(), tenantId) != null;
+                if (existingGroupName) {
+                    throw new GroupAlreadyExistException("Group already exists with name '" + deviceGroup.getName() + "'.");
+                }
                 List<DeviceGroup> groupsToUpdate = new ArrayList<>();
                 String immediateParentID = StringUtils.substringAfterLast(existingGroup.getParentPath(), DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
                 String parentPath = "";
@@ -247,7 +251,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             String msg = "Error occurred while initiating transaction.";
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
-        } catch (GroupNotExistException ex) {
+        } catch (GroupNotExistException | GroupAlreadyExistException ex) {
             throw ex;
         } catch (Exception e) {
             String msg = "Error occurred in updating the device group with ID - '" + groupId + "'.";

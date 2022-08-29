@@ -45,7 +45,7 @@ public class MDMWindowsOperationUtil {
     private static final Log log = LogFactory.getLog(MDMWindowsOperationUtil.class);
 
     /**
-     * This method is used to create Install Authentication operation.
+     * This method is used to create Install Application operation.
      *
      * @param application MobileApp application
      * @return operation object
@@ -55,6 +55,82 @@ public class MDMWindowsOperationUtil {
 
         ProfileOperation operation = new ProfileOperation();
         operation.setCode(MDMAppConstants.WindowsConstants.INSTALL_ENTERPRISE_APPLICATION);
+        operation.setType(Operation.Type.PROFILE);
+        String appType = windowsAppType(application.getName());
+        String metaData = application.getMetaData();
+        JsonArray metaJsonArray = jsonStringToArray(metaData);
+
+        switch (application.getType()) {
+            case ENTERPRISE:
+                EnterpriseApplication enterpriseApplication = new EnterpriseApplication();
+                if (appType.equalsIgnoreCase(MDMAppConstants.WindowsConstants.APPX)) {
+                    HostedAppxApplication hostedAppxApplication = new HostedAppxApplication();
+                    List<String> dependencyPackageList = new ArrayList<>();
+                    for (int i = 0; i < metaJsonArray.size(); i++) {
+                        JsonElement metaElement = metaJsonArray.get(i);
+                        JsonObject metaObject = metaElement.getAsJsonObject();
+
+                        if (MDMAppConstants.WindowsConstants.APPX_PACKAGE_URI.equals(metaObject.get("key").getAsString())) {
+                            hostedAppxApplication.setPackageUri(metaObject.get("value").getAsString().trim());
+                        }
+                        else if (MDMAppConstants.WindowsConstants.APPX_PACKAGE_FAMILY_NAME.equals(metaObject.get("key").getAsString())) {
+                            hostedAppxApplication.setPackageFamilyName(metaObject.get("value").getAsString().trim());
+                        }
+                        else if (MDMAppConstants.WindowsConstants.APPX_DEPENDENCY_PACKAGE_URL.equals(metaObject.get("key").getAsString())
+                                && metaObject.has("value")) {
+                            dependencyPackageList.add(metaObject.get("value").getAsString().trim());
+                            hostedAppxApplication.setDependencyPackageUri(dependencyPackageList);
+                        }
+                        else if (MDMAppConstants.WindowsConstants.APPX_CERTIFICATE_HASH.equals(metaObject.get("key").getAsString())
+                                && metaObject.has("value")) {
+                            hostedAppxApplication.setCertificateHash(metaObject.get("value").getAsString().trim());
+                        }
+                        else if (MDMAppConstants.WindowsConstants.APPX_ENCODED_CERT_CONTENT.equals(metaObject.get("key").getAsString())
+                                && metaObject.has("value")) {
+                            hostedAppxApplication.setEncodedCertificate(metaObject.get("value").getAsString().trim());
+                        }
+                    }
+                    enterpriseApplication.setHostedAppxApplication(hostedAppxApplication);
+
+                } else if (appType.equalsIgnoreCase(MDMAppConstants.WindowsConstants.MSI)) {
+                    HostedMSIApplication hostedMSIApplication = new HostedMSIApplication();
+                    for (int i = 0; i < metaJsonArray.size(); i++) {
+                        JsonElement metaElement = metaJsonArray.get(i);
+                        JsonObject metaObject = metaElement.getAsJsonObject();
+                        if (MDMAppConstants.WindowsConstants.MSI_PRODUCT_ID.equals(metaObject.get("key").getAsString())) {
+                            hostedMSIApplication.setProductId(metaObject.get("value").getAsString().trim());
+                        }
+                        else if (MDMAppConstants.WindowsConstants.MSI_CONTENT_URI.equals(metaObject.get("key").getAsString())) {
+                            hostedMSIApplication.setContentUrl(metaObject.get("value").getAsString().trim());
+                        }
+                        else if (MDMAppConstants.WindowsConstants.MSI_FILE_HASH.equals(metaObject.get("key").getAsString())) {
+                            hostedMSIApplication.setFileHash(metaObject.get("value").getAsString().trim());
+                        }
+                    }
+                    enterpriseApplication.setHostedMSIApplication(hostedMSIApplication);
+                }
+                operation.setPayLoad(enterpriseApplication.toJSON());
+                break;
+            default:
+                String msg = "Application type " + application.getType() + " is not supported";
+                log.error(msg);
+                throw new UnknownApplicationTypeException(msg);
+        }
+
+        return operation;
+    }
+
+    /**
+     * This method is used to create Uninstall Application operation.
+     *
+     * @param application MobileApp application
+     * @return operation object
+     * @throws UnknownApplicationTypeException
+     */
+    public static Operation createUninstallAppOperation(App application) throws UnknownApplicationTypeException {
+
+        ProfileOperation operation = new ProfileOperation();
+        operation.setCode(MDMAppConstants.WindowsConstants.UNINSTALL_ENTERPRISE_APPLICATION);
         operation.setType(Operation.Type.PROFILE);
         String appType = windowsAppType(application.getName());
         String metaData = application.getMetaData();

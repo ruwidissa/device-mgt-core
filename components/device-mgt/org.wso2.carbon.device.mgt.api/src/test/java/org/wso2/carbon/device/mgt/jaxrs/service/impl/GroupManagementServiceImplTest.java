@@ -205,7 +205,7 @@ public class GroupManagementServiceImplTest {
     }
 
     @Test(description = "This method tests the functionality of updateGroup method under various conditions")
-    public void testUpdateGroup() throws GroupManagementException, GroupNotExistException {
+    public void testUpdateGroup() throws GroupManagementException, GroupNotExistException, GroupAlreadyExistException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
         DeviceGroup deviceGroup = new DeviceGroup();
