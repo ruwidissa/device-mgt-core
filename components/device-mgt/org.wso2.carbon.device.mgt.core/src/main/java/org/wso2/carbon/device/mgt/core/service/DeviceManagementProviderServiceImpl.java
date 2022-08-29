@@ -616,6 +616,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred while initiating transaction";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred while dis-enrolling device: " + deviceId.getId();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
