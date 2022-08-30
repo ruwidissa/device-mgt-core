@@ -544,11 +544,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                                 devices.getList().get(i).getId(), tenantId);
                         int traccarDeviceId = trackerDevice.getTraccarDeviceId();
                         boolean getPermission = DeviceAPIClientServiceImpl.getUserIdofPermissionByDeviceIdNUserId(traccarDeviceId, userId);
-                        log.info("--------------------");
-                        log.info(getPermission);
-                        log.info(traccarDeviceId);
-                        log.info(userId);
-                        log.info("--------------------");
                         traccarValidIdList.add(traccarDeviceId);
                         if (!getPermission) {
                             DeviceAPIClientServiceImpl.addTrackerUserDevicePermission(userId, traccarDeviceId);
@@ -563,10 +558,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                                 getAllUserDevice.getTraccarDeviceId(),
                                 TraccarHandlerConstants.Types.REMOVE_TYPE_SINGLE);
                     }
-                } catch (JSONException e) {
-                    String msg = "not a JSONObject, ";
-                    log.error(msg);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (DeviceManagementException e) {
                     String msg = "Error occurred while fetching all enrolled devices";
                     log.error(msg, e);
