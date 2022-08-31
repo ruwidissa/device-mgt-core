@@ -32,6 +32,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.device.mgt.core.service;
 
 import com.google.common.reflect.TypeToken;
@@ -50,7 +51,24 @@ import org.apache.http.protocol.HTTP;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.*;
+import org.wso2.carbon.device.mgt.common.ActivityPaginationRequest;
+import org.wso2.carbon.device.mgt.common.Billing;
+import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceEnrollmentInfoNotification;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DeviceManager;
+import org.wso2.carbon.device.mgt.common.DeviceNotification;
+import org.wso2.carbon.device.mgt.common.DevicePropertyNotification;
+import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
+import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.FeatureManager;
+import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
+import org.wso2.carbon.device.mgt.common.MonitoringOperation;
+import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
@@ -104,7 +122,14 @@ import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.impl.DeviceCacheManagerImpl;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
-import org.wso2.carbon.device.mgt.core.dao.*;
+import org.wso2.carbon.device.mgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.device.mgt.core.dao.BillingDAO;
+import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
+import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
+import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.dao.DeviceStatusDAO;
+import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
+import org.wso2.carbon.device.mgt.core.dao.EnrollmentDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
@@ -112,7 +137,6 @@ import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
-import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementServiceComponent;
 import org.wso2.carbon.device.mgt.core.internal.PluginInitializationListener;
@@ -120,6 +144,7 @@ import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.email.sender.core.ContentProviderInfo;
 import org.wso2.carbon.email.sender.core.EmailContext;
 import org.wso2.carbon.email.sender.core.EmailSendingFailedException;
@@ -141,11 +166,20 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
-//import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
         PluginInitializationListener {
@@ -394,6 +428,22 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             status = true;
         }
 
+        //enroll Traccar device
+        if (HttpReportingUtil.isTrackerEnabled()) {
+            try {
+                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService().addDevice(device, tenantId);
+            } catch (ExecutionException e) {
+                log.error("ExecutionException : " + e);
+                //throw new RuntimeException(e);
+                //Exception was not thrown due to being conflicted with non-traccar features
+            } catch (InterruptedException e) {
+                log.error("InterruptedException : " + e);
+                //throw new RuntimeException(e);
+                //Exception was not thrown due to being conflicted with non-traccar features
+            }
+        }
+        //enroll Traccar device
+
         if (status) {
             addDeviceToGroups(deviceIdentifier, device.getEnrolmentInfo().getOwnership());
             if (enrollmentConfiguration != null) {
@@ -455,6 +505,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             }
             deviceDAO.updateDevice(device, tenantId);
             enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
+
             DeviceManagementDAOFactory.commitTransaction();
             this.removeDeviceFromCache(deviceIdentifier);
         } catch (DeviceManagementDAOException e) {
@@ -554,6 +605,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             deviceDAO.updateDevice(device, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
             this.removeDeviceFromCache(deviceId);
+
+            //procees to dis-enroll a device from traccar starts
+            if (HttpReportingUtil.isTrackerEnabled()) {
+                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                        .disEnrollDevice(device.getId(), tenantId);
+            }
+            //procees to dis-enroll a device from traccar ends
+
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while dis-enrolling '" + deviceId.getType() +
@@ -1177,6 +1236,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public PaginationResult getAllDevicesIds(PaginationRequest request) throws DeviceManagementException {
+        return this.getAllDevicesIdList(request);
+    }
+
+    @Override
     public PaginationResult getAllDevices(PaginationRequest request, boolean requireDeviceInfo) throws DeviceManagementException {
         if (request == null) {
             String msg = "Received incomplete pagination request for method getAllDevices";
@@ -1231,6 +1295,48 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 paginationResult.setData(allDevices);
             }
         }
+        paginationResult.setRecordsFiltered(count);
+        paginationResult.setRecordsTotal(count);
+        return paginationResult;
+    }
+
+    @Override
+    public PaginationResult getAllDevicesIdList(PaginationRequest request) throws DeviceManagementException {
+        if (request == null) {
+            String msg = "Received incomplete pagination request for method getAllDevicesIdList";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get devices with pagination " + request.toString());
+        }
+        PaginationResult paginationResult = new PaginationResult();
+        List<Device> allDevices;
+        int count = 0;
+        int tenantId = this.getTenantId();
+        DeviceManagerUtil.validateDeviceListPageSize(request);
+
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            allDevices = deviceDAO.getDevicesIds(request, tenantId);
+            count = deviceDAO.getDeviceCount(request, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving device list pertaining to the current tenant";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getAllDevices";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        paginationResult.setData(allDevices);
+
         paginationResult.setRecordsFiltered(count);
         paginationResult.setRecordsTotal(count);
         return paginationResult;
@@ -3872,9 +3978,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     deviceLocation.setSpeed(Float.parseFloat(speed));
                     deviceLocation.setBearing(Float.parseFloat(bearing));
                     deviceInformationManager.addDeviceLocation(device, deviceLocation);
-                } catch (Exception e) {
+                } catch (DeviceDetailsMgtException e) {
                     //We are not failing the execution since this is not critical for the functionality. But logging as
                     // a warning for reference.
+                    //Exception was not thrown due to being conflicted with non-traccar features
                     log.warn("Error occurred while trying to add '" + device.getType() + "' device '" +
                             device.getDeviceIdentifier() + "' (id:'" + device.getId() + "') location (lat:" + latitude +
                             ", lon:" + longitude + ", altitude: " + altitude +

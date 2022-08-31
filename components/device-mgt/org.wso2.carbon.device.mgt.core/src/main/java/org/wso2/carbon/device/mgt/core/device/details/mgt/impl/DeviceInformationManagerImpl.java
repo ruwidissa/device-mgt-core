@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
@@ -385,6 +386,24 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 //                        LOCATION_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
 //                );
             }
+
+            //Tracker update GPS Location
+            if (HttpReportingUtil.isLocationPublishing() && HttpReportingUtil.isTrackerEnabled()) {
+                try {
+                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                            .updateLocation(device, deviceLocation, CarbonContext.getThreadLocalCarbonContext().getTenantId());
+                } catch (ExecutionException e) {
+                    log.error("ExecutionException : " + e);
+                    //throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    log.error("InterruptedException : " + e);
+                    //throw new RuntimeException(e);
+                }
+            } else {
+                log.info("location publishing is disabled and traccan disabled");
+            }
+            //Tracker update GPS Location
+
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
             throw new DeviceDetailsMgtException("Transactional error occurred while adding the device location " +

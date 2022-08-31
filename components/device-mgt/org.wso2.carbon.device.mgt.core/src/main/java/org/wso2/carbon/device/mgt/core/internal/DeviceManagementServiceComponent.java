@@ -53,6 +53,7 @@ import org.wso2.carbon.device.mgt.core.config.ui.UIConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.event.config.EventConfigurationProviderServiceImpl;
@@ -78,6 +79,8 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceIm
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.task.DeviceTaskManagerService;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagementSchemaInitializer;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.DeviceMgtTenantMgtListener;
@@ -190,6 +193,7 @@ public class DeviceManagementServiceComponent {
 
             DeviceManagementDAOFactory.init(dsConfig);
             GroupManagementDAOFactory.init(dsConfig);
+            TrackerManagementDAOFactory.init(dsConfig);
             NotificationManagementDAOFactory.init(dsConfig);
             OperationManagementDAOFactory.init(dsConfig);
             MetadataManagementDAOFactory.init(dsConfig);
@@ -301,6 +305,11 @@ public class DeviceManagementServiceComponent {
         DeviceManagementProviderService deviceManagementProvider = new DeviceManagementProviderServiceImpl();
         DeviceManagementDataHolder.getInstance().setDeviceManagementProvider(deviceManagementProvider);
         bundleContext.registerService(DeviceManagementProviderService.class.getName(), deviceManagementProvider, null);
+
+        /* Registering Device API Client Service */
+        DeviceAPIClientService deviceAPIClientService = new DeviceAPIClientServiceImpl();
+        DeviceManagementDataHolder.getInstance().setDeviceAPIClientService(deviceAPIClientService);
+        bundleContext.registerService(DeviceAPIClientService.class.getName(), deviceAPIClientService, null);
 
         /* Registering Group Management Service */
         GroupManagementProviderService groupManagementProvider = new GroupManagementProviderServiceImpl();
