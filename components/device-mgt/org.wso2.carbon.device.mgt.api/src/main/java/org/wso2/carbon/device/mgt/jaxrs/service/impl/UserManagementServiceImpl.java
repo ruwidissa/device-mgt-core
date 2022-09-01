@@ -278,9 +278,8 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @GET
-    @Path("/{username}")
     @Override
-    public Response getUser(@PathParam("username") String username, @QueryParam("domain") String domain,
+    public Response getUser(@QueryParam("username") String username, @QueryParam("domain") String domain,
                             @HeaderParam("If-Modified-Since") String ifModifiedSince) {
         if (domain != null && !domain.isEmpty()) {
             username = domain + '/' + username;
@@ -307,9 +306,8 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @PUT
-    @Path("/{username}")
     @Override
-    public Response updateUser(@PathParam("username") String username, @QueryParam("domain") String domain, UserInfo userInfo) {
+    public Response updateUser(@QueryParam("username") String username, @QueryParam("domain") String domain, UserInfo userInfo) {
         if (domain != null && !domain.isEmpty()) {
             username = domain + '/' + username;
         }
@@ -386,10 +384,9 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @DELETE
-    @Path("/{username}")
     @Consumes(MediaType.WILDCARD)
     @Override
-    public Response removeUser(@PathParam("username") String username, @QueryParam("domain") String domain) {
+    public Response removeUser(@QueryParam("username") String username, @QueryParam("domain") String domain) {
         if (domain != null && !domain.isEmpty()) {
             username = domain + '/' + username;
         }
@@ -421,9 +418,9 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @GET
-    @Path("/{username}/roles")
+    @Path("/roles")
     @Override
-    public Response getRolesOfUser(@PathParam("username") String username, @QueryParam("domain") String domain) {
+    public Response getRolesOfUser(@QueryParam("username") String username, @QueryParam("domain") String domain) {
         if (domain != null && !domain.isEmpty()) {
             username = domain + '/' + username;
         }
@@ -450,10 +447,11 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @GET
+    @Path("/list")
     @Override
     public Response getUsers(@QueryParam("filter") String filter, @HeaderParam("If-Modified-Since") String timestamp,
-                             @QueryParam("offset") int offset,
-                             @QueryParam("limit") int limit) {
+                             @QueryParam("offset") int offset, @QueryParam("limit") int limit,
+                             @QueryParam("domain") String domain) {
         if (log.isDebugEnabled()) {
             log.debug("Getting the list of users with all user-related information");
         }
@@ -472,8 +470,11 @@ public class UserManagementServiceImpl implements UserManagementService {
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
 
             //As the listUsers function accepts limit only to accommodate offset we are passing offset + limit
-            String[] users = userStoreManager.listUsers(appliedFilter, appliedLimit);
-            userList = new ArrayList<>(users.length);
+            List<String> users = Arrays.asList(userStoreManager.listUsers(appliedFilter, appliedLimit));
+            if (domain != null && !domain.isEmpty()) {
+                users = getUsersFromDomain(domain, users);
+            }
+            userList = new ArrayList<>(users.size());
             BasicUserInfo user;
             for (String username : users) {
                 user = getBasicUserInfo(username);
@@ -495,7 +496,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             }
             BasicUserInfoList result = new BasicUserInfoList();
             result.setList(offsetList);
-            result.setCount(users.length);
+            result.setCount(userList.size());
 
             return Response.status(Response.Status.OK).entity(result).build();
         } catch (UserStoreException e) {
@@ -515,7 +516,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             @QueryParam("limit") int limit) {
 
         if (RequestValidationUtil.isNonFilterRequest(username,firstName, lastName, emailAddress)) {
-            return getUsers(null, timestamp, offset, limit);
+            return getUsers(null, timestamp, offset, limit, null);
         }
 
         RequestValidationUtil.validatePaginationParameters(offset, limit);
@@ -701,7 +702,12 @@ public class UserManagementServiceImpl implements UserManagementService {
         List<UserInfo> userList;
         try {
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
-            String[] users = userStoreManager.listUsers(userStoreDomain + "/" + filter + "*", limit);
+            String[] users;
+            if (userStoreDomain.equals("all")) {
+                users = userStoreManager.listUsers(filter + "*", limit);
+            } else {
+                users = userStoreManager.listUsers(userStoreDomain + "/" + filter + "*", limit);
+            }
             userList = new ArrayList<>();
             UserInfo user;
             for (String username : users) {
@@ -927,24 +933,28 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @PUT
     @Override
-    @Path("/claims/{username}")
+    @Path("/claims")
     public Response updateUserClaimsForDevices(
-            @PathParam("username") String username,
-            JsonArray deviceList) {
+            @QueryParam("username") String username, JsonArray deviceList,
+            @QueryParam("domain") String domain) {
         try {
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
+            if (domain != null && !domain.isEmpty()) {
+                username = domain + Constants.FORWARD_SLASH + username;
+            } else {
+                RealmConfiguration realmConfiguration = PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                        .getUserRealm()
+                        .getRealmConfiguration();
+                domain = realmConfiguration
+                        .getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
+                if (!StringUtils.isBlank(domain)) {
+                    username = domain + Constants.FORWARD_SLASH + username;
+                }
+            }
             if (!userStoreManager.isExistingUser(username)) {
                 String msg = "User by username: " + username + " does not exist.";
                 log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
-            }
-            RealmConfiguration realmConfiguration = PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .getUserRealm()
-                    .getRealmConfiguration();
-            String domain = realmConfiguration
-                    .getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
-            if (!StringUtils.isBlank(domain)) {
-                username = domain + Constants.FORWARD_SLASH + username;
             }
             ClaimMetadataManagementAdminService
                     claimMetadataManagementAdminService = new ClaimMetadataManagementAdminService();
@@ -989,24 +999,28 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @GET
     @Override
-    @Path("/claims/{username}")
+    @Path("/claims")
     public Response getUserClaimsForDevices(
-            @PathParam("username") String username) {
+            @QueryParam("username") String username, @QueryParam("domain") String domain) {
         try {
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
             Map<String, String> claims = new HashMap<>();
+            if (domain != null && !domain.isEmpty()) {
+                username = domain + Constants.FORWARD_SLASH + username;
+            } else {
+                RealmConfiguration realmConfiguration = PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                        .getUserRealm()
+                        .getRealmConfiguration();
+                domain = realmConfiguration
+                        .getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
+                if (!StringUtils.isBlank(domain)) {
+                    username = domain + Constants.FORWARD_SLASH + username;
+                }
+            }
             if (!userStoreManager.isExistingUser(username)) {
                 String msg = "User by username: " + username + " does not exist.";
                 log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
-            }
-            RealmConfiguration realmConfiguration = PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .getUserRealm()
-                    .getRealmConfiguration();
-            String domain = realmConfiguration
-                    .getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
-            if (!StringUtils.isBlank(domain)) {
-                username = domain + Constants.FORWARD_SLASH + username;
             }
             String[] allUserClaims = userStoreManager.getClaimManager().getAllClaimUris();
             if (!Arrays.asList(allUserClaims).contains(Constants.USER_CLAIM_DEVICES)) {
@@ -1027,24 +1041,28 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @DELETE
     @Override
-    @Path("/claims/{username}")
+    @Path("/claims")
     public Response deleteUserClaimsForDevices(
-            @PathParam("username") String username) {
+            @QueryParam("username") String username, @QueryParam("domain") String domain) {
         try {
             String[] claimArray = new String[1];
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
+            if (domain != null && !domain.isEmpty()) {
+                username = domain + Constants.FORWARD_SLASH + username;
+            } else {
+                RealmConfiguration realmConfiguration = PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                        .getUserRealm()
+                        .getRealmConfiguration();
+                domain = realmConfiguration
+                        .getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
+                if (!StringUtils.isBlank(domain)) {
+                    username = domain + Constants.FORWARD_SLASH + username;
+                }
+            }
             if (!userStoreManager.isExistingUser(username)) {
                 String msg = "User by username: " + username + " does not exist.";
                 log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
-            }
-            RealmConfiguration realmConfiguration = PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .getUserRealm()
-                    .getRealmConfiguration();
-            String domain = realmConfiguration
-                    .getUserStoreProperty(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
-            if (!StringUtils.isBlank(domain)) {
-                username = domain + Constants.FORWARD_SLASH + username;
             }
             String[] allUserClaims = userStoreManager.getClaimManager().getAllClaimUris();
             if (!Arrays.asList(allUserClaims).contains(Constants.USER_CLAIM_DEVICES)) {
@@ -1313,5 +1331,24 @@ public class UserManagementServiceImpl implements UserManagementService {
         userStoreList.setList(userStores);
         userStoreList.setCount(userStores.size());
         return Response.status(Response.Status.OK).entity(userStoreList).build();
+    }
+
+    /**
+     * Iterates through the list of all users and returns a list of users from the specified user store domain
+     * @param domain user store domain name
+     * @param users list of all users from UserStoreManager
+     * @return list of users from specified user store domain
+     */
+    public List<String> getUsersFromDomain(String domain, List<String> users) {
+        List<String> userList = new ArrayList<>();
+        for(String username : users) {
+            String[] domainName = username.split("/");
+            if(domain.equals(Constants.PRIMARY_USER_STORE) && domainName.length == 1) {
+                userList.add(username);
+            } else if (domainName[0].equals(domain) && domainName.length > 1) {
+                userList.add(username);
+            }
+        }
+        return userList;
     }
 }

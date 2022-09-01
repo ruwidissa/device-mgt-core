@@ -74,7 +74,7 @@ import javax.ws.rs.core.Response;
 public interface UserManagementAdminService {
 
     @POST
-    @Path("/{username}/credentials")
+    @Path("/credentials")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -115,7 +115,7 @@ public interface UserManagementAdminService {
                     value = "The username of the user." +
                             "INFO: Add a new user using the POST /users API that is under User Management.",
                     required = true)
-            @PathParam("username")
+            @QueryParam("username")
             @Size(max = 45)
             String username,
             @ApiParam(
@@ -131,7 +131,7 @@ public interface UserManagementAdminService {
 
 
     @DELETE
-    @Path("/{username}/devices")
+    @Path("/devices")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -183,7 +183,7 @@ public interface UserManagementAdminService {
             name = "username",
             value = "Username of the users devices to be deleted.",
             required = true)
-                         @PathParam("username") String username);
+                         @QueryParam("username") String username);
 
 
 
