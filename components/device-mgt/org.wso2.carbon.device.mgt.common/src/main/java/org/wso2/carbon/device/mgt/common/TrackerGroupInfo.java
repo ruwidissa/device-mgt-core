@@ -22,7 +22,7 @@ import java.io.Serializable;
 
 public class TrackerGroupInfo implements Serializable {
 
-    private static final long serialVersionUID = 1998101712L;
+    private static final long serialVersionUID = 2156646949297006690L;
 
     private int id;
     private int traccarGroupId;

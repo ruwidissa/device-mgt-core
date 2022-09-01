@@ -441,6 +441,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 //throw new RuntimeException(e);
                 //Exception was not thrown due to being conflicted with non-traccar features
             }
+        } else {
+            log.info("Traccar is disabled");
         }
         //enroll Traccar device
 

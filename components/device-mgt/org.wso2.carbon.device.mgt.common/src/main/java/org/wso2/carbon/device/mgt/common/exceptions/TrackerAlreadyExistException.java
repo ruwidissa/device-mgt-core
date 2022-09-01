@@ -23,7 +23,7 @@ package org.wso2.carbon.device.mgt.common.exceptions;
  */
 public class TrackerAlreadyExistException extends Exception {
 
-    private static final long serialVersionUID = -312678379574816874L;
+    private static final long serialVersionUID = 5241722939654800965L;
     private String errorMessage;
 
     public TrackerAlreadyExistException(String msg, Exception nestedEx) {

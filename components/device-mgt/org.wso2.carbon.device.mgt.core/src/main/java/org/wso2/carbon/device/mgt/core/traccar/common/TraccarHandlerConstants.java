@@ -31,6 +31,7 @@ public class TraccarHandlerConstants {
         public static final String LOCATION_UPDATE_PORT = "location-update-port";
     }
 
+    // TODO: Get these from http client
     public static class Methods {
         public static final String POST = "POST";
         public static final String GET = "GET";

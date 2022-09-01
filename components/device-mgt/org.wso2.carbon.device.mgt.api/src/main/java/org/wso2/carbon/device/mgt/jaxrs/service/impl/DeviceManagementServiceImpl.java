@@ -511,17 +511,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     status.add("INACTIVE");
                     status.add("CREATED");
                     status.add("UNREACHABLE");
-                    boolean isStatusEmpty = true;
-                    for (String statusString : status) {
-                        if (StringUtils.isNotBlank(statusString)) {
-                            isStatusEmpty = false;
-                            break;
-                        }
-                    }
-                    if (!isStatusEmpty) {
-                        RequestValidationUtil.validateStatus(status);
-                        request.setStatusList(status);
-                    }
+                    request.setStatusList(status);
                     // this is the user who initiates the request
                     String authorizedUser = MultitenantUtils.getTenantAwareUsername(currentUser);
                     // check whether the user is device-mgt admin
@@ -539,9 +529,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     }
 
                     int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-                    for (int i = 0; i < devices.getCount(); i++) {
-                        TrackerDeviceInfo trackerDevice = DeviceAPIClientServiceImpl.getTrackerDevice(
-                                devices.getList().get(i).getId(), tenantId);
+                    for (Device device : devices.getList()) {
+                        TrackerDeviceInfo trackerDevice = DeviceAPIClientServiceImpl
+                                .getTrackerDevice(device.getId(), tenantId);
                         int traccarDeviceId = trackerDevice.getTraccarDeviceId();
                         boolean getPermission = DeviceAPIClientServiceImpl.getUserIdofPermissionByDeviceIdNUserId(traccarDeviceId, userId);
                         traccarValidIdList.add(traccarDeviceId);
@@ -549,7 +539,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                             DeviceAPIClientServiceImpl.addTrackerUserDevicePermission(userId, traccarDeviceId);
                         }
                     }
-                    //Remove neecessary
+                    //Remove necessary
                     List<TrackerPermissionInfo> getAllUserDevices =
                             DeviceAPIClientServiceImpl.getUserIdofPermissionByUserIdNIdList(userId, traccarValidIdList);
                     for (TrackerPermissionInfo getAllUserDevice : getAllUserDevices) {
@@ -558,10 +548,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                                 getAllUserDevice.getTraccarDeviceId(),
                                 TraccarHandlerConstants.Types.REMOVE_TYPE_SINGLE);
                     }
-                } catch (JSONException e) {
-                    String msg = "not a JSONObject. ";
-                    log.error(msg);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (DeviceManagementException e) {
                     String msg = "Error occurred while fetching all enrolled devices. ";
                     log.error(msg, e);
@@ -575,11 +561,11 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     log.error(msg, e);
                     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (ExecutionException e) {
-                    String msg = "ExecutionException occurred ";
+                    String msg = "Execution error occurred handling traccar device permissions";
                     log.error(msg, e);
                     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (InterruptedException e) {
-                    String msg = "InterruptedException occurred ";
+                    String msg = "Interruption error occurred handling traccar device permissions";
                     log.error(msg, e);
                     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 }

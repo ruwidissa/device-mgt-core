@@ -588,8 +588,8 @@ public interface DeviceManagementService {
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "Getting Details of Registered Devices Owned by an Authenticated User",
-            notes = "Provides details of devices enrolled by authenticated users.",
+            value = "Getting Details of Registered Devices Owned by an Authenticated User to generate token for Traccar",
+            notes = "Provides details of devices enrolled by authenticated users to generate token for Traccar.",
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {

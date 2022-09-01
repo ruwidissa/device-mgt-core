@@ -26,7 +26,7 @@ import java.io.Serializable;
 @ApiModel(value = "User", description = "This class carries all information related to a managed Traccar User.")
 public class TrackerUserInfo implements Serializable {
 
-    private static final long serialVersionUID = 1998101712L;
+    private static final long serialVersionUID = -6808358733610879805L;
 
     @ApiModelProperty(name = "userName", value = "The user's name that can be set on the device by the device user.",
             required = true)

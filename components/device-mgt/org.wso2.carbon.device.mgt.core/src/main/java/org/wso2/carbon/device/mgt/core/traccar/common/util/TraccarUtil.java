@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TraccarUtil {
-    public static JSONObject TraccarUserPayload(TraccarUser traccarUser){
+    public static JSONObject TraccarUserPayload(TraccarUser traccarUser) {
         JSONObject payload = new JSONObject();
         JSONObject attribute = new JSONObject();
         attribute.put("speedUnit", "kmh");
@@ -48,7 +48,7 @@ public class TraccarUtil {
         return payload;
     }
 
-    public static JSONObject TraccarDevicePayload(TraccarDevice deviceInfo){
+    public static JSONObject TraccarDevicePayload(TraccarDevice deviceInfo) {
         JSONObject payload = new JSONObject();
         payload.put("name", deviceInfo.getDeviceName());
         payload.put("uniqueId", deviceInfo.getUniqueId());

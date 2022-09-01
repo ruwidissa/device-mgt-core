@@ -23,7 +23,7 @@ import java.io.Serializable;
 
 public class TraccarUser implements Serializable {
 
-    private static final long serialVersionUID = 1998101712L;
+    private static final long serialVersionUID = -1916365851689588289L;
 
     private int id;
     private String name;

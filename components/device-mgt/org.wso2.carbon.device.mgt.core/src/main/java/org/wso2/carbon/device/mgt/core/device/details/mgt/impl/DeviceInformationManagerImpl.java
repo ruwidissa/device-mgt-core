@@ -395,12 +395,19 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 } catch (ExecutionException e) {
                     log.error("ExecutionException : " + e);
                     //throw new RuntimeException(e);
+                    //Exception was not thrown due to being conflicted with non-traccar features
                 } catch (InterruptedException e) {
                     log.error("InterruptedException : " + e);
                     //throw new RuntimeException(e);
+                    //Exception was not thrown due to being conflicted with non-traccar features
                 }
             } else {
-                log.info("location publishing is disabled and traccan disabled");
+                if(!HttpReportingUtil.isLocationPublishing()) {
+                    log.info("Location publishing is disabled");
+                }
+                if (!HttpReportingUtil.isTrackerEnabled()) {
+                    log.info("Traccar is disabled");
+                }
             }
             //Tracker update GPS Location
 

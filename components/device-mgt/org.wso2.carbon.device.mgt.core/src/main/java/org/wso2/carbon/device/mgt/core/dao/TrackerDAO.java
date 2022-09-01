@@ -34,7 +34,7 @@ public interface TrackerDAO {
      * @return boolean value.
      * @throws TrackerManagementDAOException
      */
-    Boolean addTrackerDevice(int traccarDeviceId, int deviceId, int tenantId) throws TrackerManagementDAOException;
+    void addTrackerDevice(int traccarDeviceId, int deviceId, int tenantId) throws TrackerManagementDAOException;
 
     /**
      * get trackerDevice info.
@@ -51,10 +51,9 @@ public interface TrackerDAO {
      * @param deviceId of the device.
      * @param tenantId of the group.
      * @param status of the device.
-     * @return boolean value.
      * @throws TrackerManagementDAOException
      */
-    Boolean updateTrackerDeviceIdANDStatus(int traccarDeviceId, int deviceId, int tenantId, int status) throws TrackerManagementDAOException;
+    void updateTrackerDeviceIdANDStatus(int traccarDeviceId, int deviceId, int tenantId, int status) throws TrackerManagementDAOException;
 
     /**
      * Remove a Device.
@@ -63,17 +62,16 @@ public interface TrackerDAO {
      * @return sql execution result.
      * @throws TrackerManagementDAOException
      */
-    int removeTrackerDevice(int deviceId, int tenantId) throws TrackerManagementDAOException;
+    void removeTrackerDevice(int deviceId, int tenantId) throws TrackerManagementDAOException;
 
     /**
      * Add new Group.
      * @param traccarGroupId to be added.
      * @param groupId of the group.
      * @param tenantId of the group.
-     * @return boolean value.
      * @throws TrackerManagementDAOException
      */
-    Boolean addTrackerGroup(int traccarGroupId, int groupId, int tenantId) throws TrackerManagementDAOException;
+    void addTrackerGroup(int traccarGroupId, int groupId, int tenantId) throws TrackerManagementDAOException;
 
     /**
      * Update status and traccarGroupId of a Group.
