@@ -23,8 +23,7 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.exceptions.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
-import org.wso2.carbon.device.mgt.core.traccar.common.config.TraccarConfigurationException;
-
+import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import java.util.concurrent.ExecutionException;
 
 public interface DeviceAPIClientService {
@@ -34,15 +33,16 @@ public interface DeviceAPIClientService {
      *
      * @param device to be added to update location of the device
      * @param deviceLocation to be added to update location of the device
-     * @throws TraccarConfigurationException errors thrown while inserting location of a device traccar configuration
+     * @throws TrackerManagementDAOException errors thrown while inserting location of a traccar device
      */
-    void updateLocation(Device device, DeviceLocation deviceLocation, int tenantId) throws ExecutionException, InterruptedException;
+    void updateLocation(Device device, DeviceLocation deviceLocation, int tenantId) throws
+            ExecutionException, InterruptedException;
 
     /**
      * Create device Traccar configuration records
      *
      * @param device to be added
-     * @throws TraccarConfigurationException errors thrown while creating a device traccar configuration
+     * @throws TrackerManagementDAOException errors thrown while creating a traccar device
      */
     void addDevice(Device device, int tenantId) throws ExecutionException, InterruptedException;
 
@@ -50,32 +50,35 @@ public interface DeviceAPIClientService {
      * Delete a device Traccar configuration records
      *
      * @param deviceId to be delete a device
-     * @throws TraccarConfigurationException errors thrown while deleting a device traccar configuration
+     * @throws TrackerManagementDAOException errors thrown while deleting a traccar device
      */
-    void disEnrollDevice(int deviceId, int tenantId);
+    void disEnrollDevice(int deviceId, int tenantId) throws ExecutionException, InterruptedException;
 
     /**
      * Delete a device Traccar configuration records
      *
      * @param group to be add a group
-     * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
+     * @throws TrackerManagementDAOException errors thrown while adding a traccar group
      */
-    void addGroup(DeviceGroup group, int groupID, int tenantId) throws TraccarConfigurationException, TrackerAlreadyExistException, ExecutionException, InterruptedException;
+    void addGroup(DeviceGroup group, int groupID, int tenantId) throws
+            TrackerManagementDAOException, TrackerAlreadyExistException, ExecutionException, InterruptedException;
 
     /**
      * Delete a device Traccar configuration records
      *
      * @param group to be update the group
-     * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
+     * @throws TrackerManagementDAOException errors thrown while adding a traccar group
      */
-    void updateGroup(DeviceGroup group, int groupID, int tenantId) throws ExecutionException, InterruptedException, TraccarConfigurationException, TrackerAlreadyExistException;
+    void updateGroup(DeviceGroup group, int groupID, int tenantId) throws
+            TrackerManagementDAOException, TrackerAlreadyExistException, ExecutionException, InterruptedException;
 
     /**
      * Delete a device Traccar configuration records
      *
      * @param groupId to delete a group
      * @param tenantId to delete a group
-     * @throws TraccarConfigurationException errors thrown while adding a group traccar configuration
+     * @throws TrackerManagementDAOException errors thrown while adding a traccar group
      */
-    void deleteGroup(int groupId, int tenantId) throws ExecutionException, InterruptedException, TraccarConfigurationException;
+    void deleteGroup(int groupId, int tenantId) throws
+            TrackerManagementDAOException, ExecutionException, InterruptedException;
 }

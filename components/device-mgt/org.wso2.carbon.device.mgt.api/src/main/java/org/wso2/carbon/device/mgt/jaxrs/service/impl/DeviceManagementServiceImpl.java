@@ -497,6 +497,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(obj.getString("error")).build();
             } else {
                 int userId = obj.getInt("id");
+                String msg = "";
                 List<Integer> traccarValidIdList = new ArrayList<>();
                 /*Get Device Id List*/
                 try {
@@ -558,24 +559,28 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                                 getAllUserDevice.getTraccarDeviceId(),
                                 TraccarHandlerConstants.Types.REMOVE_TYPE_SINGLE);
                     }
+                } catch (JSONException e) {
+                    msg = "not a JSONObject. ";
+                    log.error(msg);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (DeviceManagementException e) {
-                    String msg = "Error occurred while fetching all enrolled devices";
+                    msg = "Error occurred while fetching all enrolled devices. ";
                     log.error(msg, e);
                     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (DeviceAccessAuthorizationException e) {
-                    String msg = "Error occurred while checking device access authorization";
+                    msg = "Error occurred while checking device access authorization. ";
                     log.error(msg, e);
                     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (TrackerManagementDAOException e) {
-                    String msg = "Error occurred while mapping with deviceId .";
+                    msg = "Error occurred while mapping with deviceId .";
                     log.error(msg, e);
                     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (ExecutionException e) {
-                    String msg = "ExecutionException occured ";
+                    msg = "ExecutionException occurred ";
                     log.error(msg, e);
                     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 } catch (InterruptedException e) {
-                    String msg = "InterruptedException occured ";
+                    msg = "InterruptedException occurred ";
                     log.error(msg, e);
                     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 }
