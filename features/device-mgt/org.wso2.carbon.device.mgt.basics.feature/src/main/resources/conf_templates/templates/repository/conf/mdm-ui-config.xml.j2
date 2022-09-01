@@ -35,6 +35,39 @@
     <LoginCacheCapacity>10000</LoginCacheCapacity>
     {% endif %}
 
+    <Billing>
+            {% if mdm_ui_conf.hide_bill_generation_in_super_tenant is defined %}
+            <HideBillGenerationInSuperTenant>{{mdm_ui_conf.hide_bill_generation_in_super_tenant}}</HideBillGenerationInSuperTenant>
+            {% else %}
+            <HideBillGenerationInSuperTenant>false</HideBillGenerationInSuperTenant>
+            {% endif %}
+            {% if mdm_ui_conf.hide_bill_generation_in_sub_tenant is defined %}
+            <HideBillGenerationInSubTenant>{{mdm_ui_conf.hide_bill_generation_in_sub_tenant}}</HideBillGenerationInSubTenant>
+            {% else %}
+            <HideBillGenerationInSubTenant>true</HideBillGenerationInSubTenant>
+            {% endif %}
+            {% if mdm_ui_conf.hide_total_calculation_in_super_tenant is defined %}
+            <HideTotalCalculationInSuperTenant>{{mdm_ui_conf.hide_total_calculation_in_super_tenant}}</HideTotalCalculationInSuperTenant>
+            {% else %}
+            <HideTotalCalculationInSuperTenant>false</HideTotalCalculationInSuperTenant>
+            {% endif %}
+            {% if mdm_ui_conf.hide_total_calculation_in_sub_tenant is defined %}
+            <HideTotalCalculationInSubTenant>{{mdm_ui_conf.hide_total_calculation_in_sub_tenant}}</HideTotalCalculationInSubTenant>
+            {% else %}
+            <HideTotalCalculationInSubTenant>true</HideTotalCalculationInSubTenant>
+            {% endif %}
+            {% if mdm_ui_conf.hide_domain_selection_in_super_tenant is defined %}
+            <HideDomainSelectionInSuperTenant>{{mdm_ui_conf.hide_domain_selection_in_super_tenant}}</HideDomainSelectionInSuperTenant>
+            {% else %}
+            <HideDomainSelectionInSuperTenant>false</HideDomainSelectionInSuperTenant>
+            {% endif %}
+            {% if mdm_ui_conf.hide_domain_selection_in_sub_tenant is defined %}
+            <HideDomainSelectionInSubTenant>{{mdm_ui_conf.hide_domain_selection_in_sub_tenant}}</HideDomainSelectionInSubTenant>
+            {% else %}
+            <HideDomainSelectionInSubTenant>true</HideDomainSelectionInSubTenant>
+            {% endif %}
+        </Billing>
+
     <AppRegistration>
         <Tags>
         {% if mdm_ui_conf.app_registration.tags is defined %}
@@ -231,6 +264,8 @@
         <Scope>perm:windows:lock-reset</Scope>
         <Scope>perm:windows:reboot</Scope>
         <Scope>perm:windows:location</Scope>
+        <Scope>perm:admin:tenant:view</Scope>
+        <Scope>perm:admin:metadata:view</Scope>
         <Scope>perm:android:authenticate-account</Scope>
     {% if mdm_ui_conf.scopes is defined %}
         {%- for scope in mdm_ui_conf.scopes -%}

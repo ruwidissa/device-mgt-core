@@ -26,9 +26,9 @@
     <LoginCacheCapacity>10000</LoginCacheCapacity>
     <Billing>
         <HideBillGenerationInSuperTenant>false</HideBillGenerationInSuperTenant>
-        <HideBillGenerationInSubTenant>false</HideBillGenerationInSubTenant>
+        <HideBillGenerationInSubTenant>true</HideBillGenerationInSubTenant>
         <HideTotalCalculationInSuperTenant>false</HideTotalCalculationInSuperTenant>
-        <HideTotalCalculationInSubTenant>false</HideTotalCalculationInSubTenant>
+        <HideTotalCalculationInSubTenant>true</HideTotalCalculationInSubTenant>
         <HideDomainSelectionInSuperTenant>false</HideDomainSelectionInSuperTenant>
         <HideDomainSelectionInSubTenant>true</HideDomainSelectionInSubTenant>
     </Billing>
@@ -209,6 +209,8 @@
         <Scope>perm:windows:lock-reset</Scope>
         <Scope>perm:windows:reboot</Scope>
         <Scope>perm:windows:location</Scope>
+        <Scope>perm:admin:tenant:view</Scope>
+        <Scope>perm:admin:metadata:view</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
