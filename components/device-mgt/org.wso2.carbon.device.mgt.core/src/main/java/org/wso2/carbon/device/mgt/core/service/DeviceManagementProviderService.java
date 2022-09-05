@@ -66,7 +66,6 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
-import org.wso2.carbon.device.mgt.common.geo.service.GeoCoordinate;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -191,6 +190,16 @@ public interface DeviceManagementProviderService {
      * Method to retrieve all the devices with pagination support.
      *
      * @param request PaginationRequest object holding the data for pagination
+     * @return PaginationResult - Result including the required parameters necessary to do pagination.
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching the
+     *                                   devices.
+     */
+    PaginationResult getAllDevicesIds(PaginationRequest request) throws DeviceManagementException;
+
+    /**
+     * Method to retrieve all the devices with pagination support.
+     *
+     * @param request PaginationRequest object holding the data for pagination
      * @param requireDeviceInfo - A boolean indicating whether the device-info (location, app-info etc) is also required
      *                          along with the device data.
      * @return PaginationResult - Result including the required parameters necessary to do pagination.
@@ -219,6 +228,16 @@ public interface DeviceManagementProviderService {
     PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
 
 
+
+    /**
+     * Method to retrieve all the devices with pagination support.
+     *
+     * @param request PaginationRequest object holding the data for pagination
+     * @return PaginationResult - Result including the required parameters necessary to do pagination.
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching the
+     *                                   devices.
+     */
+    PaginationResult getAllDevicesIdList(PaginationRequest request) throws DeviceManagementException;
 
     /**
      * Returns the device of specified id.

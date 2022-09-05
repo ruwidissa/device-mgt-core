@@ -65,6 +65,7 @@ import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -131,8 +132,24 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                     this.groupDAO.addGroupProperties(deviceGroup, updatedGroupID, tenantId);
                 }
                 GroupManagementDAOFactory.commitTransaction();
+
+                //add new group in traccar
+                if (HttpReportingUtil.isTrackerEnabled()) {
+                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                            .addGroup(deviceGroup, updatedGroupID, tenantId);
+                }
+                //add new group in traccar
             } else {
-                throw new GroupAlreadyExistException("Group already exists with name '" + deviceGroup.getName() + "'.");
+                // add a group if not exist in traccar starts
+                if (HttpReportingUtil.isTrackerEnabled()){
+                    existingGroup = this.groupDAO.getGroup(deviceGroup.getName(), tenantId);
+                    int groupId = existingGroup.getGroupId();
+                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                            .addGroup(deviceGroup, groupId, tenantId);
+                }
+                // add a group if not exist in traccar starts
+
+                throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
             }
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();
@@ -213,6 +230,14 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 if (deviceGroup.getGroupProperties() != null && deviceGroup.getGroupProperties().size() > 0) {
                     this.groupDAO.updateGroupProperties(deviceGroup, groupId, tenantId);
                 }
+
+                //procees to update a group in traccar starts
+                if (HttpReportingUtil.isTrackerEnabled()) {
+                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                            .updateGroup(deviceGroup, groupId, tenantId);
+                }
+                //procees to update a group in traccar starts
+
                 GroupManagementDAOFactory.commitTransaction();
             } else {
                 throw new GroupNotExistException("Group with ID - '" + groupId + "' doesn't exists!");
@@ -271,6 +296,14 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                     }
                 }
             }
+
+            //procees to delete a group from traccar starts
+            if (HttpReportingUtil.isTrackerEnabled()) {
+                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                        .deleteGroup(groupId, tenantId);
+            }
+            //procees to delete a group from traccar ends
+
             if (isDeleteChildren) {
                 groupIdsToDelete.add(groupId);
                 groupDAO.deleteGroupsMapping(groupIdsToDelete, tenantId);
@@ -287,6 +320,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             if (log.isDebugEnabled()) {
                 log.debug("DeviceGroup " + deviceGroup.getName() + " removed.");
             }
+
             return true;
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();
