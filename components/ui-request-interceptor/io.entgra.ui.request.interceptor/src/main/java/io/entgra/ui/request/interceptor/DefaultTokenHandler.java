@@ -24,6 +24,7 @@ import com.google.gson.JsonParser;
 import io.entgra.ui.request.interceptor.beans.AuthData;
 import io.entgra.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.ui.request.interceptor.util.HandlerUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -69,11 +70,20 @@ public class DefaultTokenHandler extends HttpServlet {
                 String clientId = authData.getClientId();
                 String clientSecret = authData.getClientSecret();
 
+                String queryString = req.getQueryString();
+                String scopeString = "";
+                if (StringUtils.isNotEmpty(queryString)) {
+                    scopeString = req.getParameter("scopes");
+                    if (scopeString != null) {
+                        scopeString = "?scopes=" + scopeString;
+                    }
+                }
+
                 String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR
                         + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                         + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
                 String tokenUrl = iotsCoreUrl + "/api/device-mgt/v1.0/devices/" + clientId
-                                + "/" + clientSecret + "/default-token";
+                                + "/" + clientSecret + "/default-token" + scopeString;
 
                 HttpGet defaultTokenRequest = new HttpGet(tokenUrl);
                 defaultTokenRequest
@@ -131,9 +141,21 @@ public class DefaultTokenHandler extends HttpServlet {
         ub.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_REMOTE_SESSION_HTTPS_PORT_ENV_VAR)));
         ub.setPath(HandlerConstants.REMOTE_SESSION_CONTEXT);
 
+        URIBuilder ub2 = new URIBuilder();
+        ub2.setScheme(HandlerConstants.WSS_PROTOCOL);
+        ub2.setHost(System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR));
+        ub2.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_GATEWAY_WEBSOCKET_WSS_PORT_ENV_VAR)));
+
+        URIBuilder ub3 = new URIBuilder();
+        ub3.setScheme(HandlerConstants.WS_PROTOCOL);
+        ub3.setHost(System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR));
+        ub3.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_GATEWAY_WEBSOCKET_WS_PORT_ENV_VAR)));
+
         JsonObject responseJsonObj = new JsonObject();
         responseJsonObj.addProperty("default-access-token", defaultAccessToken);
         responseJsonObj.addProperty("remote-session-base-url", ub.toString());
+        responseJsonObj.addProperty("secured-websocket-gateway-url", ub2.toString());
+        responseJsonObj.addProperty("unsecured-websocket-gateway-url", ub3.toString());
 
         Gson gson = new Gson();
         String payload = gson.toJson(responseJsonObj);

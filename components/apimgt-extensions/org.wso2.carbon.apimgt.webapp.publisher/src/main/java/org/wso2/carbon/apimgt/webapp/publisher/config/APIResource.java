@@ -29,6 +29,7 @@ public class APIResource {
     private String consumes;
     private String produces;
     private ApiScope scope;
+    private String uriMapping;
 
     public String getAuthType() {
         return AuthType;
@@ -84,5 +85,13 @@ public class APIResource {
 
     public void setScope(ApiScope scope) {
         this.scope = scope;
+    }
+
+    public String getUriMapping() {
+        return uriMapping;
+    }
+
+    public void setUriMapping(String uriMapping) {
+        this.uriMapping = uriMapping;
     }
 }

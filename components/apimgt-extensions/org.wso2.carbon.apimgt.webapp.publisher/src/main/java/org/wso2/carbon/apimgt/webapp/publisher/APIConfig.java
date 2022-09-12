@@ -58,6 +58,10 @@ public class APIConfig {
     private String[] tags;
     private Set<ApiScope> scopes;
     private boolean isDefault = true;
+    private String endpointType;
+    private String inSequenceName;
+    private String inSequenceConfig;
+    private String asyncApiDefinition;
 
     @XmlElement(name = "Policy", required = true)
     public String getPolicy() {
@@ -193,5 +197,41 @@ public class APIConfig {
 
     public void setDefault(boolean aDefault) {
         isDefault = aDefault;
+    }
+
+    @XmlElement(name = "endpointType")
+    public String getEndpointType() {
+        return endpointType;
+    }
+
+    public void setEndpointType(String endpointType) {
+        this.endpointType = endpointType;
+    }
+
+    @XmlElement(name = "inSequenceName")
+    public String getInSequenceName() {
+        return inSequenceName;
+    }
+
+    public void setInSequenceName(String inSequenceName) {
+        this.inSequenceName = inSequenceName;
+    }
+
+    @XmlElement(name = "inSequenceConfig")
+    public String getInSequenceConfig() {
+        return inSequenceConfig;
+    }
+
+    public void setInSequenceConfig(String inSequenceConfig) {
+        this.inSequenceConfig = inSequenceConfig;
+    }
+
+    @XmlElement(name = "asyncApiDefinition")
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
     }
 }

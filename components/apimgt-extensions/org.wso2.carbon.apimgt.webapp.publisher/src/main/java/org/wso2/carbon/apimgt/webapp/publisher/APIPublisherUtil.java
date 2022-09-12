@@ -47,6 +47,7 @@ public class APIPublisherUtil {
     private static final String DEFAULT_API_VERSION = "1.0.0";
     private static final String API_CONFIG_DEFAULT_VERSION = "1.0.0";
     private static final String PARAM_MANAGED_API_ENDPOINT = "managed-api-endpoint";
+    private static final String PARAM_MANAGED_API_ENDPOINT_TYPE = "managed-api-endpoint-type";
     private static final String PARAM_MANAGED_API_TRANSPORTS = "managed-api-transports";
     private static final String PARAM_MANAGED_API_POLICY = "managed-api-policy";
     private static final String PARAM_MANAGED_API_IS_SECURED = "managed-api-isSecured";
@@ -62,8 +63,16 @@ public class APIPublisherUtil {
         return Utils.replaceSystemProperty(webappPublisherConfig.getHost());
     }
 
+    public static String getWsServerBaseUrl() {
+        return getServerBaseUrl().replace("https","wss");
+    }
+
     public static String getApiEndpointUrl(String context) {
         return getServerBaseUrl() + context;
+    }
+
+    public static String getWsApiEndpointUrl(String context) {
+        return getWsServerBaseUrl() + context;
     }
 
     /**
@@ -105,6 +114,14 @@ public class APIPublisherUtil {
         }
         apiConfig.setContext(context);
 
+        apiConfig.setEndpointType(apiDef.getEndpointType());
+
+        apiConfig.setInSequenceName(apiDef.getInSequenceName());
+
+        apiConfig.setInSequenceConfig(apiDef.getInSequenceConfig());
+
+        apiConfig.setAsyncApiDefinition(apiDef.getAsyncApiDefinition());
+
         String[] tags = apiDef.getTags();
         if (tags == null || tags.length == 0) {
             if (log.isDebugEnabled()) {
@@ -127,6 +144,10 @@ public class APIPublisherUtil {
             }
             String endpointContext = apiDef.getContext();
             endpoint = APIPublisherUtil.getApiEndpointUrl(endpointContext);
+
+            if ("WS".equals(apiDef.getEndpointType())) {
+                endpoint = APIPublisherUtil.getWsApiEndpointUrl(endpointContext);
+            }
         }
         apiConfig.setEndpoint(endpoint);
 
@@ -158,6 +179,9 @@ public class APIPublisherUtil {
                         "which is 'https'");
             }
             transports = "https,http";
+            if ("WS".equals(apiDef.getEndpointType())) {
+                transports = "wss,ws";
+            }
         }
         apiConfig.setTransports(transports);
 
@@ -176,6 +200,7 @@ public class APIPublisherUtil {
             template.setResourceURI(apiResource.getUri());
             template.setUriTemplate(apiResource.getUriTemplate());
             template.setScope(apiResource.getScope());
+            template.setUriMapping(apiResource.getUriMapping());
             uriTemplates.add(template);
         }
         apiConfig.setUriTemplates(uriTemplates);

@@ -1752,7 +1752,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     @Override
     public Response getDefaultToken(
             @PathParam("clientId") String clientId,
-            @PathParam("clientSecret") String clientSecret) {
+            @PathParam("clientSecret") String clientSecret,
+            @QueryParam("scopes") String scopes) {
         JWTClientManagerService jwtClientManagerService = DeviceMgtAPIUtils.getJWTClientManagerService();
         try {
             JWTClient jwtClient = jwtClientManagerService.getJWTClient();
@@ -1761,7 +1762,11 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             if (!"carbon.super".equals(tenantDomain)) {
                 username += "@" + tenantDomain;
             }
-            AccessTokenInfo accessTokenInfo = jwtClient.getAccessToken(clientId, clientSecret, username, "default");
+            String scopeString = "default";
+            if (!StringUtils.isBlank(scopes)) {
+                scopeString = scopes;
+            }
+            AccessTokenInfo accessTokenInfo = jwtClient.getAccessToken(clientId, clientSecret, username, scopeString);
             return Response.status(Response.Status.OK).entity(accessTokenInfo).build();
         } catch (JWTClientException e) {
             String msg = "Error occurred while getting default access token by using given client Id and client secret.";

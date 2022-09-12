@@ -30,8 +30,12 @@ public class APIResourceConfiguration {
 	private String version;
 	private List<APIResource> resources;
 	private String[] tags;
+    private String endpointType;
+    private String inSequenceName;
+    private String inSequenceConfig;
+    private String asyncApiDefinition;
 
-	public List<APIResource> getResources() {
+    public List<APIResource> getResources() {
 		return resources;
 	}
 
@@ -76,4 +80,38 @@ public class APIResourceConfiguration {
 		this.tags = tags;
 	}
 
+    public String getEndpointType() {
+        return endpointType;
+    }
+
+    @XmlElement(name = "EndpointType")
+    public void setEndpointType(String endpointType) {
+        this.endpointType = endpointType;
+    }
+
+    public String getInSequenceName() {
+        return inSequenceName;
+    }
+
+    @XmlElement(name = "inSequenceName")
+    public void setInSequenceName(String inSequenceName) {
+        this.inSequenceName = inSequenceName;
+    }
+
+    public String getInSequenceConfig() {
+        return inSequenceConfig;
+    }
+
+    @XmlElement(name = "inSequenceConfig")
+    public void setInSequenceConfig(String inSequenceConfig) {
+        this.inSequenceConfig = inSequenceConfig;
+    }
+
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+    @XmlElement(name = "asyncApiDefinition")
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
+    }
 }

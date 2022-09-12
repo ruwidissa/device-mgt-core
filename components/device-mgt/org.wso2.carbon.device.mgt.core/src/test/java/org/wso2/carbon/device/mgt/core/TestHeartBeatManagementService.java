@@ -24,6 +24,8 @@ import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementExc
 import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
 
+import java.util.Map;
+
 public class TestHeartBeatManagementService implements HeartBeatManagementService {
     @Override
     public boolean isTaskPartitioningEnabled() throws HeartBeatManagementException {
@@ -59,5 +61,9 @@ public class TestHeartBeatManagementService implements HeartBeatManagementServic
     @Override
     public boolean isQualifiedToExecuteTask() throws HeartBeatManagementException {
         return false;
+    }
+
+    @Override public Map<Integer, ServerContext> getActiveServers() throws HeartBeatManagementException {
+        return null;
     }
 }

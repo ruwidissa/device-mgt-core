@@ -185,7 +185,9 @@
                             org.wso2.carbon.user.core.service;version="4.6",
                             org.wso2.carbon.user.core.tenant;version="4.6",
                             org.wso2.carbon.utils;version="4.6",
-                            org.wso2.carbon.utils.multitenancy;version="4.6"
+                            org.wso2.carbon.utils.multitenancy;version="4.6",
+                            org.wso2.carbon.apimgt.impl.definitions,
+                            org.apache.commons.lang
                         </Import-Package>
                         <Embed-Dependency>
                             jsr311-api;scope=compile|runtime;inline=false
