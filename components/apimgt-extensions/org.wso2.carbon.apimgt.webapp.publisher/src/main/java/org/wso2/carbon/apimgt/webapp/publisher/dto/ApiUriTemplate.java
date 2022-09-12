@@ -28,6 +28,7 @@ public class ApiUriTemplate {
     private String resourceURI;
     private String uriTemplate;
     private ApiScope scope;
+    private String uriMapping;
 
     public ApiUriTemplate() {}
 
@@ -69,5 +70,13 @@ public class ApiUriTemplate {
 
     public void setScope(ApiScope scope) {
         this.scope = scope;
+    }
+
+    public String getUriMapping() {
+        return uriMapping;
+    }
+
+    public void setUriMapping(String uriMapping) {
+        this.uriMapping = uriMapping;
     }
 }

@@ -35,4 +35,5 @@ public interface APIPublisherService {
      */
     void publishAPI(APIConfig api) throws APIManagerPublisherException;
 
+    void updateScopeRoleMapping() throws APIManagerPublisherException;
 }

@@ -35,6 +35,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementExcepti
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -302,4 +303,37 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
         return operationSuccess;
     }
 
+    @Override
+    public Map<Integer, ServerContext> getActiveServers() throws HeartBeatManagementException {
+        Map<Integer, ServerContext> activeServers = new HashMap<>();
+
+        if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
+            try {
+                HeartBeatBeaconDAOFactory.openConnection();
+                int timeOutIntervalInSeconds = HeartBeatBeaconConfig.getInstance().getServerTimeOutIntervalInSeconds();
+                int timeSkew = HeartBeatBeaconConfig.getInstance().getTimeSkew();
+                int cumilativeTimeOut = timeOutIntervalInSeconds + timeSkew;
+                Map<String, ServerContext> serverCtxMap = heartBeatDAO.getActiveServerDetails(cumilativeTimeOut);
+                for (String uuid : serverCtxMap.keySet()) {
+                    ServerContext serverContext = serverCtxMap.get(uuid);
+                    activeServers.put(serverContext.getIndex(), serverContext);
+                }
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection to the underlying data source";
+                log.error(msg, e);
+                throw new HeartBeatManagementException(msg, e);
+            } catch (HeartBeatDAOException e) {
+                String msg = "Error occurred while retrieving active server details.";
+                log.error(msg, e);
+                throw new HeartBeatManagementException(msg, e);
+            } finally {
+                HeartBeatBeaconDAOFactory.closeConnection();
+            }
+        } else {
+            String msg = "Heart Beat Configuration Disabled. Server Context Information Not available.";
+            log.error(msg);
+            throw new HeartBeatManagementException(msg);
+        }
+        return activeServers;
+    }
 }

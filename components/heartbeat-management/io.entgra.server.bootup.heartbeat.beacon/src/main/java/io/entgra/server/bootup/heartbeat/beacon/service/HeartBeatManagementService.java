@@ -23,6 +23,8 @@ import io.entgra.server.bootup.heartbeat.beacon.dto.ServerContext;
 import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
 
+import java.util.Map;
+
 public interface HeartBeatManagementService {
 
     boolean isTaskPartitioningEnabled() throws HeartBeatManagementException;
@@ -39,4 +41,5 @@ public interface HeartBeatManagementService {
 
     boolean isQualifiedToExecuteTask() throws HeartBeatManagementException;
 
+    Map<Integer, ServerContext> getActiveServers() throws HeartBeatManagementException;
 }

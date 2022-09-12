@@ -18,11 +18,9 @@
  */
 package org.wso2.carbon.apimgt.webapp.publisher;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.webapp.publisher.dto.ApiScope;
-import org.wso2.carbon.apimgt.webapp.publisher.dto.ApiUriTemplate;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -31,26 +29,42 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.webapp.publisher.config.WebappPublisherConfig;
+import org.wso2.carbon.apimgt.webapp.publisher.dto.ApiScope;
+import org.wso2.carbon.apimgt.webapp.publisher.dto.ApiUriTemplate;
 import org.wso2.carbon.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantSearchResult;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -59,6 +73,7 @@ import java.util.Set;
  */
 public class APIPublisherServiceImpl implements APIPublisherService {
     private static final String UNLIMITED_TIER = "Unlimited";
+    private static final String WS_UNLIMITED_TIER = "AsyncUnlimited";
     private static final String API_PUBLISH_ENVIRONMENT = "Default";
     private static final String CREATED_STATUS = "CREATED";
     private static final String PUBLISH_ACTION = "Publish";
@@ -129,7 +144,20 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             API api = getAPI(apiConfig, true);
                             api.setId(apiIdentifier);
                             API createdAPI = apiProvider.addAPI(api);
+                            if (apiConfig.getEndpointType() != null && "WS".equals(apiConfig.getEndpointType())) {
+                                apiProvider.saveAsyncApiDefinition(api, apiConfig.getAsyncApiDefinition());
+                            }
                             if (CREATED_STATUS.equals(createdAPI.getStatus())) {
+                                // if endpoint type "dynamic" and then add in sequence
+                                if ("dynamic".equals(apiConfig.getEndpointType())) {
+                                    Mediation mediation = new Mediation();
+                                    mediation.setName(apiConfig.getInSequenceName());
+                                    mediation.setConfig(apiConfig.getInSequenceConfig());
+                                    mediation.setType("in");
+                                    mediation.setGlobal(false);
+                                    apiProvider.addApiSpecificMediationPolicy(createdAPI.getUuid(), mediation,
+                                            tenantDomain);
+                                }
                                 apiProvider.changeLifeCycleStatus(tenantDomain, createdAPI.getUuid(), PUBLISH_ACTION, null);
                                 APIRevision apiRevision = new APIRevision();
                                 apiRevision.setApiUUID(createdAPI.getUuid());
@@ -207,6 +235,37 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 api.setStatus(existingAPI.getStatus());
                                 apiProvider.updateAPI(api);
 
+                                if (apiConfig.getEndpointType() != null && "WS".equals(apiConfig.getEndpointType())) {
+                                    apiProvider.saveAsyncApiDefinition(api, apiConfig.getAsyncApiDefinition());
+                                }
+
+                                // if endpoint type "dynamic" and then add /update in sequence
+                                if ("dynamic".equals(apiConfig.getEndpointType())) {
+                                    Mediation mediation = new Mediation();
+                                    mediation.setName(apiConfig.getInSequenceName());
+                                    mediation.setConfig(apiConfig.getInSequenceConfig());
+                                    mediation.setType("in");
+                                    mediation.setGlobal(false);
+
+                                    List<Mediation> mediationList = apiProvider
+                                            .getAllApiSpecificMediationPolicies(apiIdentifier);
+                                    boolean isMediationPolicyFound = false;
+                                    for (Mediation m : mediationList) {
+                                        if (apiConfig.getInSequenceName().equals(m.getName())) {
+                                            m.setConfig(apiConfig.getInSequenceConfig());
+                                            apiProvider
+                                                    .updateApiSpecificMediationPolicyContent(existingAPI.getUuid(), m,
+                                                            tenantDomain);
+                                            isMediationPolicyFound = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!isMediationPolicyFound) {
+                                        apiProvider.addApiSpecificMediationPolicy(existingAPI.getUuid(), mediation,
+                                                tenantDomain);
+                                    }
+                                }
+
                                 // Assumption: Assume the latest revision is the published one
                                 String latestRevisionUUID = apiProvider.getLatestRevisionUUID(existingAPI.getUuid());
                                 List<APIRevisionDeployment> latestRevisionDeploymentList =
@@ -250,6 +309,93 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         }
     }
 
+    @Override
+    public void updateScopeRoleMapping()
+            throws APIManagerPublisherException {
+        // todo: This logic has written assuming all the scopes are now work as shared scopes
+        WebappPublisherConfig config = WebappPublisherConfig.getInstance();
+        List<String> tenants = new ArrayList<>(Collections.singletonList(APIConstants.SUPER_TENANT_DOMAIN));
+        tenants.addAll(config.getTenants().getTenant());
+        try {
+            for (String tenantDomain : tenants) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                APIProvider apiProvider = API_MANAGER_FACTORY.getAPIProvider(MultitenantUtils.getTenantAwareUsername(
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration()
+                                .getAdminUserName()));
+
+                try {
+                    String fileName =
+                            CarbonUtils.getCarbonConfigDirPath() + File.separator + "etc"
+                            + File.separator + tenantDomain + ".csv";
+                    if (Files.exists(Paths.get(fileName))) {
+                        BufferedReader br = new BufferedReader(new FileReader(fileName));
+                        int lineNumber = 0;
+                        Map<Integer, String> roles = new HashMap<>();
+                        String line = "";
+                        String splitBy = ",";
+                        while ((line = br.readLine()) != null)   //returns a Boolean value
+                        {
+                            lineNumber++;
+                            String[] scopeMapping = line.split(splitBy);    // use comma as separator
+                            if (lineNumber == 1) { // skip titles
+                                for (int i = 0; i < scopeMapping.length; i++) {
+                                    if (i > 3) {
+                                        roles.put(i, scopeMapping[i]); // add roles to the map
+                                    }
+                                }
+                                continue;
+                            }
+
+                            Scope scope = new Scope();
+                            scope.setName(
+                                    scopeMapping[0] != null ? StringUtils.trim(scopeMapping[0]) : StringUtils.EMPTY);
+                            scope.setDescription(
+                                    scopeMapping[1] != null ? StringUtils.trim(scopeMapping[1]) : StringUtils.EMPTY);
+                            scope.setKey(
+                                    scopeMapping[2] != null ? StringUtils.trim(scopeMapping[2]) : StringUtils.EMPTY);
+                            //                        scope.setPermissions(
+                            //                                scopeMapping[3] != null ? StringUtils.trim(scopeMapping[3]) : StringUtils.EMPTY);
+
+                            String roleString = "";
+                            for (int i = 4; i < scopeMapping.length; i++) {
+                                if (scopeMapping[i] != null && StringUtils.trim(scopeMapping[i]).equals("Yes")) {
+                                    roleString = roleString + "," + roles.get(i);
+                                }
+                            }
+                            if (roleString.length() > 1) {
+                                roleString = roleString.substring(1); // remove first , (comma)
+                            }
+                            scope.setRoles(roleString);
+
+                            if (apiProvider.isSharedScopeNameExists(scope.getKey(), tenantDomain)) {
+                                apiProvider.updateSharedScope(scope, tenantDomain);
+                            } else {
+                                // todo: come to this level means, that scope is removed from API, but haven't removed from the scope-role-permission-mappings list
+                                if (log.isDebugEnabled()) {
+                                    log.debug(scope.getKey() + " not available as shared scope");
+                                }
+                            }
+                        }
+                    }
+                } catch (IOException | DirectoryIteratorException ex) {
+                    log.error("failed to read scopes from file.", ex);
+                }
+
+            }
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while reading tenant admin username";
+            log.error(msg, e);
+            throw new APIManagerPublisherException(e);
+        } catch (APIManagementException e) {
+            String msg = "Error occurred while loading api provider";
+            log.error(msg, e);
+            throw new APIManagerPublisherException(e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
     private API getAPI(APIConfig config, boolean includeScopes) {
 
         APIIdentifier apiIdentifier = new APIIdentifier(config.getOwner(), config.getName(), config.getVersion());
@@ -262,44 +408,58 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         api.setWsdlUrl(null);
         api.setResponseCache("Disabled");
         api.setContextTemplate(context + "/{version}");
-        api.setSwaggerDefinition(APIPublisherUtil.getSwaggerDefinition(config));
-        api.setType("HTTP");
+        if (config.getEndpointType() != null && "WS".equals(config.getEndpointType())) {
+            api.setAsyncApiDefinition(config.getAsyncApiDefinition());
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            try {
+                api.setUriTemplates(asyncApiParser.getURITemplates(config.getAsyncApiDefinition(), true));
+            } catch (APIManagementException e) {
 
-        Set<URITemplate> uriTemplates = new HashSet<>();
-        Iterator<ApiUriTemplate> iterator;
-        for (iterator = config.getUriTemplates().iterator(); iterator.hasNext(); ) {
-            ApiUriTemplate apiUriTemplate = iterator.next();
-            URITemplate uriTemplate = new URITemplate();
-            uriTemplate.setAuthType(apiUriTemplate.getAuthType());
-            uriTemplate.setHTTPVerb(apiUriTemplate.getHttpVerb());
-            uriTemplate.setResourceURI(apiUriTemplate.getResourceURI());
-            uriTemplate.setUriTemplate(apiUriTemplate.getUriTemplate());
-            if (includeScopes) {
-                Scope scope = new Scope();
-                if (apiUriTemplate.getScope() != null) {
-                    scope.setName(apiUriTemplate.getScope().getName());
-                    scope.setDescription(apiUriTemplate.getScope().getDescription());
-                    scope.setKey(apiUriTemplate.getScope().getKey());
-                    scope.setRoles(apiUriTemplate.getScope().getRoles());
-                    uriTemplate.setScopes(scope);
-                }
             }
-            uriTemplates.add(uriTemplate);
+            api.setWsUriMapping(asyncApiParser.buildWSUriMapping(config.getAsyncApiDefinition()));
+        } else {
+            api.setSwaggerDefinition(APIPublisherUtil.getSwaggerDefinition(config));
+
+            Set<URITemplate> uriTemplates = new HashSet<>();
+            Iterator<ApiUriTemplate> iterator;
+            for (iterator = config.getUriTemplates().iterator(); iterator.hasNext(); ) {
+                ApiUriTemplate apiUriTemplate = iterator.next();
+                URITemplate uriTemplate = new URITemplate();
+                uriTemplate.setAuthType(apiUriTemplate.getAuthType());
+                uriTemplate.setHTTPVerb(apiUriTemplate.getHttpVerb());
+                uriTemplate.setResourceURI(apiUriTemplate.getResourceURI());
+                uriTemplate.setUriTemplate(apiUriTemplate.getUriTemplate());
+                if (includeScopes) {
+                    Scope scope = new Scope();
+                    if (apiUriTemplate.getScope() != null) {
+                        scope.setName(apiUriTemplate.getScope().getName());
+                        scope.setDescription(apiUriTemplate.getScope().getDescription());
+                        scope.setKey(apiUriTemplate.getScope().getKey());
+                        scope.setRoles(apiUriTemplate.getScope().getRoles());
+                        uriTemplate.setScopes(scope);
+                    }
+
+                }
+                uriTemplates.add(uriTemplate);
+            }
+            api.setUriTemplates(uriTemplates);
         }
-        api.setUriTemplates(uriTemplates);
 
         api.setApiOwner(config.getOwner());
 
 
         api.setDefaultVersion(config.isDefault());
-        api.setTransports("https,http");
 
         Set<String> tags = new HashSet<>();
         tags.addAll(Arrays.asList(config.getTags()));
         api.setTags(tags);
 
         Set<Tier> availableTiers = new HashSet<>();
-        availableTiers.add(new Tier(UNLIMITED_TIER));
+        if (config.getEndpointType() != null && "WS".equals(config.getEndpointType())) {
+            availableTiers.add(new Tier(WS_UNLIMITED_TIER));
+        } else {
+            availableTiers.add(new Tier(UNLIMITED_TIER));
+        }
         api.setAvailableTiers(availableTiers);
 
         Set<String> environments = new HashSet<>();
@@ -315,7 +475,23 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         }
         String endpointConfig = "{ \"endpoint_type\": \"http\", \"sandbox_endpoints\": { \"url\": \" " +
                 config.getEndpoint() + "\" }, \"production_endpoints\": { \"url\": \" " + config.getEndpoint() + "\" } }";
+        api.setTransports(config.getTransports());
+        api.setType("HTTP");
 
+        // if dynamic endpoint
+        if (config.getEndpointType() != null && "dynamic".equals(config.getEndpointType())) {
+            endpointConfig = "{ \"endpoint_type\":\"default\", \"sandbox_endpoints\":{ \"url\":\"default\" }, \"production_endpoints\":{ \"url\":\"default\" } }";
+            api.setInSequence(config.getInSequenceName());
+        }
+
+        // if ws endpoint
+        if (config.getEndpointType() != null && "WS".equals(config.getEndpointType())) {
+            endpointConfig = "{ \"endpoint_type\": \"ws\", \"sandbox_endpoints\": { \"url\": \" " +
+                    config.getEndpoint() + "\" }, \"production_endpoints\": { \"url\": \" " + config.getEndpoint()
+                    + "\" } }";
+            api.setTransports("wss,ws");
+            api.setType("WS");
+        }
         api.setEndpointConfig(endpointConfig);
         List<String> accessControlAllowOrigins = new ArrayList<>();
         accessControlAllowOrigins.add("*");
@@ -343,7 +519,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         keyManagers.add("all");
         api.setKeyManagers(keyManagers);
         api.setEnableStore(true);
-
+        api.setEnableSchemaValidation(false);
+        api.setMonetizationEnabled(false);
         return api;
     }
 }

@@ -99,6 +99,8 @@ public class HandlerConstants {
     public static final String IOT_GW_HTTP_PORT_ENV_VAR = "iot.gateway.http.port";
     public static final String IOT_REMOTE_SESSION_HOST_ENV_VAR = "iot.remotesession.server.host";
     public static final String IOT_REMOTE_SESSION_HTTPS_PORT_ENV_VAR = "iot.remotesession.server.https.port";
+    public static final String IOT_GATEWAY_WEBSOCKET_WSS_PORT_ENV_VAR = "iot.gateway.websocket.wss.port";
+    public static final String IOT_GATEWAY_WEBSOCKET_WS_PORT_ENV_VAR = "iot.gateway.websocket.ws.port";
     public static final String IOT_GW_HTTPS_PORT_ENV_VAR = "iot.gateway.https.port";
     public static final String IOT_REPORTING_WEBAPP_HOST_ENV_VAR = "iot.reporting.webapp.host";
     public static final String USER_SCOPES = "userScopes";

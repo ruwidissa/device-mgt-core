@@ -73,6 +73,10 @@ public class AnnotationProcessor {
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_ROLES = "roles";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_VERSION = "version";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_CONTEXT = "context";
+    private static final String SWAGGER_ANNOTATIONS_PROPERTIES_ENDPOINT_TYPE = "endpointType";
+    private static final String SWAGGER_ANNOTATIONS_PROPERTIES_IN_SEQUENCE_NAME = "inSequenceName";
+    private static final String SWAGGER_ANNOTATIONS_PROPERTIES_IN_SEQUENCE_CONFIG = "inSequenceConfig";
+    private static final String SWAGGER_ANNOTATIONS_PROPERTIES_ASYNC_API_DEFINITION = "asyncApiDefinition";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_VALUE = "value";
     private static final String ANNOTATIONS_SCOPES = "scopes";
     private static final String ANNOTATIONS_SCOPE = "scope";
@@ -290,20 +294,23 @@ public class AnnotationProcessor {
                         resource.setProduces(invokeMethod(producesClassMethods[0], producesAnno, STRING_ARR));
                     }
                     if (annotations[i].annotationType().getName().equals(ApiOperation.class.getName())) {
-                        ApiScope scope = this.getScope(annotations[i]);
-                        if (scope != null) {
-                            resource.setScope(scope);
-                        } else {
-                            log.warn("Scope is not defined for '" + makeContextURLReady(resourceRootContext) +
-                                    makeContextURLReady(subCtx) + "' endpoint, hence assigning the default scope");
-                            scope = new ApiScope();
-                            scope.setName(DEFAULT_SCOPE_NAME);
-                            scope.setDescription(DEFAULT_SCOPE_NAME);
-                            scope.setKey(DEFAULT_SCOPE_KEY);
-                            scope.setRoles(DEFAULT_SCOPE_ROLE);
-                            scope.setPermissions(DEFAULT_SCOPE_PERMISSION);
-                            resource.setScope(scope);
-                        }
+                        resource = getAPiOperationExtensions(annotations[i], resource);
+//                        ApiScope scope = this.getScope(annotations[i]);
+//                        if (scope != null) {
+//                            resource.setScope(scope);
+//                        } else {
+//                            log.warn("Scope is not defined for '" + makeContextURLReady(resourceRootContext) +
+//                                    makeContextURLReady(subCtx) + "' endpoint, hence assigning the default scope");
+//                            scope = new ApiScope();
+//                            scope.setName(DEFAULT_SCOPE_NAME);
+//                            scope.setDescription(DEFAULT_SCOPE_NAME);
+//                            scope.setKey(DEFAULT_SCOPE_KEY);
+//                            scope.setRoles(DEFAULT_SCOPE_ROLE);
+//                            scope.setPermissions(DEFAULT_SCOPE_PERMISSION);
+//                            resource.setScope(scope);
+//                        }
+//
+//                        String uriMapping =
                     }
                 }
                 resourceList.add(resource);
@@ -404,6 +411,26 @@ public class AnnotationProcessor {
                     if ("".equals(value)) return null;
                     apiResourceConfig.setContext(value);
                     break;
+                case SWAGGER_ANNOTATIONS_PROPERTIES_ENDPOINT_TYPE:
+                    if ("".equals(value))
+                        return null;
+                    apiResourceConfig.setEndpointType(value);
+                    break;
+                case SWAGGER_ANNOTATIONS_PROPERTIES_IN_SEQUENCE_NAME:
+                    if ("".equals(value))
+                        return null;
+                    apiResourceConfig.setInSequenceName(value);
+                    break;
+                case SWAGGER_ANNOTATIONS_PROPERTIES_IN_SEQUENCE_CONFIG:
+                    if ("".equals(value))
+                        return null;
+                    apiResourceConfig.setInSequenceConfig(value);
+                    break;
+                case SWAGGER_ANNOTATIONS_PROPERTIES_ASYNC_API_DEFINITION:
+                    if ("".equals(value))
+                        return null;
+                    apiResourceConfig.setAsyncApiDefinition(value);
+                    break;
                 default:
                     break;
             }
@@ -473,6 +500,56 @@ public class AnnotationProcessor {
         {
             throw new RuntimeException(e);
         }
+    }
+
+    private APIResource getAPiOperationExtensions(Annotation currentMethod, APIResource apiResource) throws Throwable {
+        InvocationHandler methodHandler = Proxy.getInvocationHandler(currentMethod);
+        Annotation[] extensions = (Annotation[]) methodHandler.invoke(currentMethod,
+                apiOperation.getMethod(SWAGGER_ANNOTATIONS_EXTENSIONS, null), null);
+        if (extensions != null) {
+            methodHandler = Proxy.getInvocationHandler(extensions[0]);
+            Annotation[] properties = (Annotation[]) methodHandler.invoke(extensions[0], extensionClass
+                    .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES, null), null);
+            String scopeKey;
+            String propertyName;
+            String urlMapping;
+            for (Annotation property : properties) {
+                methodHandler = Proxy.getInvocationHandler(property);
+                propertyName = (String) methodHandler.invoke(property, extensionPropertyClass
+                        .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_NAME, null), null);
+                if (ANNOTATIONS_SCOPE.equals(propertyName)) {
+                    scopeKey = (String) methodHandler.invoke(property, extensionPropertyClass
+                            .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_VALUE, null), null);
+                    if (scopeKey.isEmpty()) {
+                        return null;
+                    }
+
+
+                    ApiScope scope = apiScopes.get(scopeKey);
+                    if (scope != null) {
+                        apiResource.setScope(scope);
+                    } else {
+//                        log.warn("Scope is not defined for '" + makeContextURLReady(resourceRootContext) +
+//                                makeContextURLReady(subCtx) + "' endpoint, hence assigning the default scope");
+                        scope = new ApiScope();
+                        scope.setName(DEFAULT_SCOPE_NAME);
+                        scope.setDescription(DEFAULT_SCOPE_NAME);
+                        scope.setKey(DEFAULT_SCOPE_KEY);
+                        scope.setRoles(DEFAULT_SCOPE_ROLE);
+                        scope.setPermissions(DEFAULT_SCOPE_PERMISSION);
+                        apiResource.setScope(scope);
+                    }
+                }
+
+                if ("urlMapping".equals(propertyName)) {
+                    urlMapping = (String) methodHandler.invoke(property, extensionPropertyClass
+                            .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_VALUE, null), null);
+
+                    apiResource.setUriMapping(urlMapping);
+                }
+            }
+        }
+        return apiResource;
     }
 
     private ApiScope getScope(Annotation currentMethod) throws Throwable {
