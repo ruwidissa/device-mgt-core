@@ -37,6 +37,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.common.ActivityIdList;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -173,7 +174,8 @@ public interface ActivityInfoProviderService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
                     })
-            }
+            },
+            nickname = "getActivitiesByActivityIdList"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -220,7 +222,7 @@ public interface ActivityInfoProviderService {
                     value = "Comma separated activity/operation IDs",
                     required = true,
                     defaultValue = "ACTIVITY_0")
-            @QueryParam("ids") ActivityIdList activityIdList);
+            ActivityIdList activityIdList);
 
 
     @GET
@@ -322,7 +324,8 @@ public interface ActivityInfoProviderService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
                     })
-            }
+            },
+            nickname = "getActivitiesByOperationCode"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -385,7 +388,8 @@ public interface ActivityInfoProviderService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
                     })
-            }
+            },
+            nickname = "getActivitiesWithFilters"
     )
     @ApiResponses(value = {
             @ApiResponse(

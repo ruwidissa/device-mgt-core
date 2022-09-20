@@ -785,7 +785,8 @@ public interface PolicyManagementService {
             httpMethod = "GET",
             value = "Getting Details of Policies",
             responseContainer = "List",
-            notes = "Retrieve the details of all the policies filtered by policy type in WSO2 EMM.",
+            notes = "Retrieve the details of all the policies filtered by policy type in Entgra " +
+                    "EMM.",
             response = Policy.class,
             tags = "Device Policy Management",
             extensions = {

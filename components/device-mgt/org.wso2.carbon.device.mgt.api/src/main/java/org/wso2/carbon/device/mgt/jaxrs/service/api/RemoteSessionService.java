@@ -122,7 +122,7 @@ public interface RemoteSessionService {
                     required = true)
             @PathParam("deviceId") String deviceId,
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "The device type, such as ios, android, or windows.",
                     required = true)
             @PathParam("deviceType")

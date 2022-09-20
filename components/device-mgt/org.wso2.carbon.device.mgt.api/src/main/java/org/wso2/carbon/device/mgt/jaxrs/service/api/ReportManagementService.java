@@ -471,10 +471,10 @@ public interface ReportManagementService {
             })
     Response getAppNotInstalledDevices(
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "The device type name, such as ios, android, windows, or fire-alarm.",
                     required = true)
-            @PathParam("device-type")
+            @PathParam("deviceType")
                     String deviceType,
             @ApiParam(
                     name = "package-name",

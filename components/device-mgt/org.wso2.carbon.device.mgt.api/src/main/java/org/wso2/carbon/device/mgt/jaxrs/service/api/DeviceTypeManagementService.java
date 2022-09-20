@@ -131,7 +131,8 @@ public interface DeviceTypeManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:types")
                     })
-            }
+            },
+            nickname = "getAllDeviceTypesPaginated"
     )
     @ApiResponses(
             value = {
@@ -212,7 +213,8 @@ public interface DeviceTypeManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:types")
                     })
-            }
+            },
+            nickname = "getDeviceTypeByDeviceTypeName"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device type.",
