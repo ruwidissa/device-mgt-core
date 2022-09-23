@@ -400,23 +400,39 @@ public class CertificateGenerator {
                         generateCertificate(byteArrayInputStream);
 
                 if (reqCert != null && reqCert.getSerialNumber() != null) {
-                    Certificate lookUpCertificate = keyStoreReader.getCertificateByAlias(
+                    log.debug("looking up certificate for serial: " + reqCert.getSerialNumber().toString());
+                    CertificateResponse lookUpCertificate = keyStoreReader.getCertificateBySerial(
                             reqCert.getSerialNumber().toString());
-
-                    if (lookUpCertificate instanceof X509Certificate) {
-                        return (X509Certificate) lookUpCertificate;
+                    if (lookUpCertificate != null && lookUpCertificate.getCertificate() != null) {
+                        log.debug("certificate found for serial: " + reqCert.getSerialNumber()
+                                .toString());
+                        Certificate certificate = (Certificate) Serializer.deserialize(lookUpCertificate.getCertificate());
+                        if (certificate instanceof X509Certificate) {
+                            return (X509Certificate) certificate;
+                        }
+                    } else {
+                        log.debug("certificate not found for serial: " + reqCert.getSerialNumber()
+                                .toString());
                     }
+
                 }
 
             }
         } catch (CMSException e) {
             String errorMsg = "CMSException when decoding certificate signature";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (IOException e) {
             String errorMsg = "IOException when decoding certificate signature";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (CertificateException e) {
             String errorMsg = "CertificateException when decoding certificate signature";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        } catch (ClassNotFoundException e) {
+            String errorMsg = "Certificate class not found";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         }
 
