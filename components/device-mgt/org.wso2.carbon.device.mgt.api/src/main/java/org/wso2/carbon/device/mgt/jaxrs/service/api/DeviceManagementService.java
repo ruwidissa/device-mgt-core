@@ -1035,7 +1035,8 @@ public interface DeviceManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
                     })
-            }
+            },
+            nickname = "isEnrolledByType"
     )
     @ApiResponses(
             value = {

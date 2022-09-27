@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-@ApiModel(value = "User Store List")
+@ApiModel(value = "UserStoreList")
 public class UserStoreList extends BasePaginatedResult {
 
     private List<String> userStores;

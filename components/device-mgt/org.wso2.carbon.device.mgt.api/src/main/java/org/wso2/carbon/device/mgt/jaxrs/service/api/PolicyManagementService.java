@@ -793,7 +793,8 @@ public interface PolicyManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:get-details")
                     })
-            }
+            },
+            nickname = "getPoliciesFilteredByType"
     )
     @ApiResponses(
             value = {

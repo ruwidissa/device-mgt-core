@@ -74,7 +74,7 @@ public interface RemoteSessionService {
      * Retrieve Analytics for the device type
      */
     @GET
-    @Path("connection/{deviceType}/{deviceId}")
+    @Path("connect/{deviceType}/{deviceId}")
     @ApiOperation(
             consumes = "application/json",
             produces = "application/json",
