@@ -48,6 +48,8 @@ import org.jscep.message.*;
 import org.jscep.transaction.FailInfo;
 import org.jscep.transaction.Nonce;
 import org.jscep.transaction.TransactionId;
+import org.wso2.carbon.certificate.mgt.core.cache.CertificateCacheManager;
+import org.wso2.carbon.certificate.mgt.core.cache.impl.CertificateCacheManagerImpl;
 import org.wso2.carbon.certificate.mgt.core.dao.CertificateDAO;
 import org.wso2.carbon.certificate.mgt.core.dao.CertificateManagementDAOException;
 import org.wso2.carbon.certificate.mgt.core.dao.CertificateManagementDAOFactory;
@@ -209,27 +211,35 @@ public class CertificateGenerator {
             return certificate;
         } catch (NoSuchAlgorithmException e) {
             String errorMsg = "No such algorithm found when generating certificate";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (NoSuchProviderException e) {
             String errorMsg = "No such provider found when generating certificate";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (OperatorCreationException e) {
             String errorMsg = "Issue in operator creation when generating certificate";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (CertificateExpiredException e) {
             String errorMsg = "Certificate expired after generating certificate";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (CertificateNotYetValidException e) {
             String errorMsg = "Certificate not yet valid when generating certificate";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (CertificateException e) {
             String errorMsg = "Certificate issue occurred when generating certificate";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (InvalidKeyException e) {
             String errorMsg = "Invalid key used when generating certificate";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (SignatureException e) {
             String errorMsg = "Signature related issue occurred when generating certificate";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         }
     }
@@ -285,18 +295,23 @@ public class CertificateGenerator {
 
         } catch (CertificateException e) {
             String errorMsg = "Certificate issue occurred when generating getPKIMessage";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (MessageEncodingException e) {
             String errorMsg = "Message encoding issue occurred when generating getPKIMessage";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (IOException e) {
             String errorMsg = "Input output issue occurred when generating getPKIMessage";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (MessageDecodingException e) {
             String errorMsg = "Message decoding issue occurred when generating getPKIMessage";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (CMSException e) {
             String errorMsg = "CMS issue occurred when generating getPKIMessage";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         }
     }
@@ -511,12 +526,15 @@ public class CertificateGenerator {
             saveCertInKeyStore(certificates);
         } catch (CertIOException e) {
             String errorMsg = "Certificate Input output issue occurred when generating generateCertificateFromCSR";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (OperatorCreationException e) {
             String errorMsg = "Operator creation issue occurred when generating generateCertificateFromCSR";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (CertificateException e) {
             String errorMsg = "Certificate issue occurred when generating generateCertificateFromCSR";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         }
 
@@ -547,9 +565,11 @@ public class CertificateGenerator {
             return generator.generate(new CMSAbsentContent());
         } catch (CertificateEncodingException e) {
             String errorMsg = "Certificate encoding issue occurred when generating getMessageData";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (CMSException e) {
             String errorMsg = "Message decoding issue occurred when generating getMessageData";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         }
     }
@@ -641,12 +661,15 @@ public class CertificateGenerator {
             return scepResponse;
         } catch (CertificateEncodingException e) {
             String errorMsg = "Certificate encoding issue occurred in getCACert";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (CMSException e) {
             String errorMsg = "CMS issue occurred in getCACert";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         } catch (IOException e) {
             String errorMsg = "Input output issue occurred in getCACert";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         }
     }
@@ -665,10 +688,12 @@ public class CertificateGenerator {
             CertificateManagementDAOFactory.commitTransaction();
         } catch (CertificateManagementDAOException e) {
             String errorMsg = "Error occurred when saving the generated certificate";
+            log.error(errorMsg);
             CertificateManagementDAOFactory.rollbackTransaction();
             throw new KeystoreException(errorMsg, e);
         } catch (TransactionManagementException e) {
             String errorMsg = "Error occurred when saving the generated certificate";
+            log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         }
     }
