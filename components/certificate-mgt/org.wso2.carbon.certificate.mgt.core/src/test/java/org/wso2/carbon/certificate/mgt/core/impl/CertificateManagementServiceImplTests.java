@@ -312,8 +312,9 @@ public class CertificateManagementServiceImplTests extends BaseDeviceManagementC
     }
 
     @Test(description = "This test case tests extracting Certificate from the header Signature")
-    public void testExtractCertificateFromSignature() throws KeystoreException, CertificateEncodingException, CMSException, IOException {
+    public void testExtractCertificateFromSignature() throws KeystoreException, CertificateEncodingException, CMSException, IOException, DeviceManagementException {
         BASE64Encoder encoder = new BASE64Encoder();
+        DeviceConfigurationManager.getInstance().initConfig();
         //generate and save a certificate in the keystore
         X509Certificate x509Certificate = managementService.generateX509Certificate();
         //Generate CMSdata
