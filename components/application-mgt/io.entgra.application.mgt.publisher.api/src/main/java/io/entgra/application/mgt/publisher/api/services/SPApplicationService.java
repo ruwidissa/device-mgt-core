@@ -309,7 +309,8 @@ public interface SPApplicationService {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:create")
                     })
-            }
+            },
+            nickname = "createEntAppForSP"
     )
     Response createEntApp(@PathParam("identity-server-id") int identityServerId,
                           @PathParam("service-provider-id") String serviceProviderId, ApplicationWrapper app,
@@ -335,7 +336,8 @@ public interface SPApplicationService {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:create")
                     })
-            }
+            },
+            nickname = "createPubAppForSP"
     )
     Response createPubApp(@PathParam("identity-server-id") int identityServerId,
                           @PathParam("service-provider-id") String serviceProviderId, PublicAppWrapper app,
@@ -358,7 +360,8 @@ public interface SPApplicationService {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:service-provider:create")
                     })
-            }
+            },
+            nickname = "createWebAppForSP"
     )
     Response createWebApp(@PathParam("identity-server-id") int identityServerId,
                           @PathParam("service-provider-id") String serviceProviderId, WebAppWrapper app,

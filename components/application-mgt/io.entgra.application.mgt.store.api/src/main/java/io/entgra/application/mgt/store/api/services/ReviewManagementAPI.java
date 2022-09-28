@@ -360,7 +360,8 @@ public interface ReviewManagementAPI {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:review:update")
                     })
-            }
+            },
+            nickname = "deleteReviewComment"
     )
 
     @ApiResponses(

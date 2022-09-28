@@ -429,7 +429,8 @@ public interface ApplicationManagementPublisherAPI {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
-            }
+            },
+            nickname = "createCustomAppByAppWrapper"
     )
     @ApiResponses(
             value = {
@@ -679,7 +680,7 @@ public interface ApplicationManagementPublisherAPI {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
-            consumes = MediaType.MULTIPART_FORM_DATA,
+            consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "POST",
             value = "Upload artifacts",
@@ -769,11 +770,11 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @PUT
-    @Path("/ent-app-artifacts/{deviceType}/{appId}/{uuid}")
+    @Path("/ent-app-artifact/{deviceType}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
-            consumes = MediaType.MULTIPART_FORM_DATA,
+            consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "POST",
             value = "Upload artifacts",
@@ -783,7 +784,8 @@ public interface ApplicationManagementPublisherAPI {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
-            }
+            },
+            nickname = "updateApplicationArtifactByDeviceTypeAndUUID"
     )
     @ApiResponses(
             value = {
@@ -851,7 +853,7 @@ public interface ApplicationManagementPublisherAPI {
             })
     Response updateEntAppRelease(
             @ApiParam(
-                    name = "UUID",
+                    name = "uuid",
                     value = "Unique identifier of the ApplicationDTO Release",
                     required = true)
             @PathParam("uuid") String applicationUUID,
@@ -895,7 +897,7 @@ public interface ApplicationManagementPublisherAPI {
             })
     Response updatePubAppRelease(
             @ApiParam(
-                    name = "UUID",
+                    name = "uuid",
                     value = "Unique identifier of the ApplicationDTO Release",
                     required = true)
             @PathParam("uuid") String applicationUUID,
@@ -939,7 +941,7 @@ public interface ApplicationManagementPublisherAPI {
             })
     Response updateWebAppRelease(
             @ApiParam(
-                    name = "UUID",
+                    name = "uuid",
                     value = "Unique identifier of the ApplicationDTO Release",
                     required = true)
             @PathParam("uuid") String applicationUUID,
@@ -984,7 +986,7 @@ public interface ApplicationManagementPublisherAPI {
             })
     Response updateCustomAppRelease(
             @ApiParam(
-                    name = "UUID",
+                    name = "uuid",
                     value = "Unique identifier of the ApplicationDTO Release",
                     required = true)
             @PathParam("uuid") String applicationUUID,
@@ -1349,7 +1351,7 @@ public interface ApplicationManagementPublisherAPI {
             })
     Response addApplicationTags(
             @ApiParam(
-                    name = "oldTagName",
+                    name = "appId",
                     value = "Existing Tag Name",
                     required = true)
             @PathParam("appId") int appId,

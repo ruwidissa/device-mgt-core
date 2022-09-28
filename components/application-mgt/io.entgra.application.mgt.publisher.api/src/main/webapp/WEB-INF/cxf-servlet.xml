@@ -44,8 +44,8 @@
         <property name="host" value="localhost:9443"/>
         <property name="schemes" value="https" />
         <property name="basePath" value="/api/application-mgt-publisher/v1.0"/>
-        <property name="title" value="Application Management Admin Service API Definitions"/>
-        <property name="contact" value="dev@wso2.org"/>
+        <property name="title" value="Application Management Publisher API Definitions"/>
+        <property name="contact" value="bizdev-group@entgra.io"/>
         <property name="license" value="Apache 2.0"/>
         <property name="licenseUrl" value="http://www.apache.org/licenses/LICENSE-2.0.html"/>
         <property name="scan" value="true"/>
