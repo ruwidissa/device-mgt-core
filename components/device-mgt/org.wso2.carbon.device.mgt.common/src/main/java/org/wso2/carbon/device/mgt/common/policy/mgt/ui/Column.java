@@ -32,6 +32,7 @@ public class Column {
     private Input input;
     private Upload upload;
     private Checkbox checkbox;
+    private SearchInput searchInput;
     private boolean isRequired;
     private String tooltip;
     private String docLink;
@@ -98,6 +99,15 @@ public class Column {
 
     public void setCheckbox(Checkbox checkbox) {
         this.checkbox = checkbox;
+    }
+
+    @XmlElement(name = "SearchInput")
+    public SearchInput getSearchInput() {
+        return searchInput;
+    }
+
+    public void setSearchInput(SearchInput searchInput) {
+        this.searchInput = searchInput;
     }
 
     @XmlElement(name = "RequiredItem")

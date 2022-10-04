@@ -292,14 +292,24 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                         "WHERE A.NAME = DM_APPLICATION.NAME " +
                         "AND A.ID < DM_APPLICATION.ID) " +
                     "AND PLATFORM = ? " +
-                    "AND TENANT_ID = ?  LIMIT ? OFFSET ?";
+                    "AND TENANT_ID = ?";
         try {
+            String filter = request.getFilter();
+            if (filter != null) {
+                sql = sql + "AND NAME LIKE ?";
+            }
+            sql = sql + "LIMIT ? OFFSET ?";
             Connection conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, request.getDeviceType());
-                stmt.setInt(2, tenantId);
-                stmt.setInt(3, request.getRowCount());
-                stmt.setInt(4, request.getStartIndex());
+                int paramIdx = 1;
+                stmt.setString(paramIdx++, request.getDeviceType());
+                stmt.setInt(paramIdx++, tenantId);
+                if (filter != null){
+                    stmt.setString(paramIdx++, filter);
+                }
+                stmt.setInt(paramIdx++, request.getRowCount());
+                stmt.setInt(paramIdx, request.getStartIndex());
+
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         application = loadApplication(rs);
