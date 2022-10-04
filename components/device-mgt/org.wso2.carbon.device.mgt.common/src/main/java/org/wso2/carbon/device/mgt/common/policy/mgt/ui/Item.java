@@ -45,6 +45,7 @@ public class Item {
     private APITable apiTable;
     private Text text;
     private InputList inputList;
+    private SearchInput searchInput;
     private String nullableValue;
     private String divider;
     private boolean isHidden;
@@ -210,6 +211,15 @@ public class Item {
 
     public void setInputList(InputList inputList) {
         this.inputList = inputList;
+    }
+
+    @XmlElement(name = "SearchInput")
+    public SearchInput getSearchInput() {
+        return searchInput;
+    }
+
+    public void setSearchInput(SearchInput searchInput) {
+        this.searchInput = searchInput;
     }
 
     @XmlElement(name = "NullableValue")

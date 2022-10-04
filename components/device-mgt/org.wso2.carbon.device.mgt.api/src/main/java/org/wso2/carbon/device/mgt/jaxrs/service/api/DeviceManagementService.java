@@ -2623,7 +2623,9 @@ public interface DeviceManagementService {
 
     @GET
     @Path("/{deviceType}/applications")
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
             value = "Getting Details of Applications",
@@ -2681,7 +2683,12 @@ public interface DeviceManagementService {
                     value = "Provide how many device details you require from the starting pagination index/offset.",
                     defaultValue = "10")
             @QueryParam("limit")
-                    int limit);
+                    int limit,
+            @ApiParam(
+                    name = "appName",
+                    value = "App name to be searched")
+            @QueryParam("appName")
+                    String appName);
 
     @GET
     @Path("/application/{packageName}/versions")

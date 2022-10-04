@@ -131,6 +131,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
+import javax.ws.rs.Consumes;
 import javax.validation.constraints.Size;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -1605,16 +1606,19 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     @GET
     @Override
+    @Consumes("application/json")
     @Path("/{deviceType}/applications")
     public Response getApplications(
             @PathParam("deviceType") String deviceType,
             @DefaultValue("0")
             @QueryParam("offset") int offset,
             @DefaultValue("10")
-            @QueryParam("limit") int limit) {
+            @QueryParam("limit") int limit,
+            @QueryParam("appName") String appName) {
         PaginationRequest request = new PaginationRequest(offset, limit);
         ApplicationList applicationList = new ApplicationList();
         request.setDeviceType(deviceType);
+        request.setFilter(appName);
         try {
             PaginationResult paginationResult = DeviceMgtAPIUtils
                     .getDeviceManagementService()
