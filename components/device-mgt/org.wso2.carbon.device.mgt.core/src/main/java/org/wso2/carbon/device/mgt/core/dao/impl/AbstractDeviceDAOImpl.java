@@ -1086,7 +1086,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 stmt.setInt(paramIdx++, groupId);
                 stmt.setInt(paramIdx++, tenantId);
                 if (isDeviceNameProvided) {
-                    stmt.setString(paramIdx++, deviceName + "%");
+                    stmt.setString(paramIdx++, "%" + deviceName + "%");
                 }
                 if (isSinceProvided) {
                     stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
@@ -1362,7 +1362,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     stmt.setString(paramIdx++, request.getDeviceType());
                 }
                 if (isDeviceNameProvided) {
-                    stmt.setString(paramIdx++, request.getDeviceName() + "%");
+                    stmt.setString(paramIdx++, "%" + request.getDeviceName() + "%");
                 }
                 stmt.setInt(paramIdx++, tenantId);
                 if (isOwnershipProvided) {

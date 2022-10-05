@@ -153,7 +153,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     stmt.setString(paramIdx++, deviceType);
                 }
                 if (isDeviceNameProvided) {
-                    stmt.setString(paramIdx++, deviceName + "%");
+                    stmt.setString(paramIdx++, "%" + deviceName + "%");
                 }
                 stmt.setInt(paramIdx++, tenantId);
                 if (isOwnershipProvided) {
@@ -500,7 +500,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 stmt.setInt(paramIdx++, groupId);
                 stmt.setInt(paramIdx++, tenantId);
                 if (isDeviceNameProvided) {
-                    stmt.setString(paramIdx++, deviceName + "%");
+                    stmt.setString(paramIdx++, "%" + deviceName + "%");
                 }
                 if (isSinceProvided) {
                     stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
