@@ -264,7 +264,8 @@ public interface DeviceAgentService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:publish-event")
                     })
-            }
+            },
+            nickname = "publishEventFromAgent"
     )
     @ApiResponses(
             value = {
@@ -329,7 +330,8 @@ public interface DeviceAgentService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:publish-event")
                     })
-            }
+            },
+            nickname = "publishEventsByTypeAndDevice"
     )
     @ApiResponses(
             value = {

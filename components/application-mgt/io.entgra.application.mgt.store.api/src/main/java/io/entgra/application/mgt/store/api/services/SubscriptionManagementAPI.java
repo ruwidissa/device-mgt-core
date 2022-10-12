@@ -112,7 +112,7 @@ public interface SubscriptionManagementAPI {
             })
     Response performAppOperationForDevices(
             @ApiParam(
-                    name = "installationDetails",
+                    name = "uuid",
                     value = "The application ID and list of devices/users/roles",
                     required = true
             )
@@ -124,8 +124,8 @@ public interface SubscriptionManagementAPI {
             )
             @PathParam("action") String action,
             @ApiParam(
-                    name = "installationDetails",
-                    value = "The application ID and list of devices/users/roles",
+                    name = "deviceIdentifiers",
+                    value = "The list of device identifiers",
                     required = true
             )
             @Valid List<DeviceIdentifier> deviceIdentifiers,
@@ -227,7 +227,7 @@ public interface SubscriptionManagementAPI {
             })
     Response performEntAppSubscriptionOnDevices(
             @ApiParam(
-                    name = "UUID",
+                    name = "uuid",
                     value = "The application UUID",
                     required = true
             )
@@ -239,7 +239,7 @@ public interface SubscriptionManagementAPI {
             )
             @PathParam("action") String action,
             @ApiParam(
-                    name = "installationDetails",
+                    name = "deviceIdentifiers",
                     value = "The  list of device identifiers",
                     required = true
             )
@@ -329,7 +329,8 @@ public interface SubscriptionManagementAPI {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:uninstall")
                     })
-            }
+            },
+            nickname = "getAppInstalledDevicesByUUID"
     )
     @ApiResponses(
             value = {

@@ -88,7 +88,7 @@ public interface ArtifactDownloadAPI {
                     required = true)
             @PathParam("tenantId") int tenantId,
             @ApiParam(
-            name = "hash-value",
+            name = "appHashValue",
             value = "Hash value of the application release.",
             required = true)
             @PathParam("appHashValue") String uuid,

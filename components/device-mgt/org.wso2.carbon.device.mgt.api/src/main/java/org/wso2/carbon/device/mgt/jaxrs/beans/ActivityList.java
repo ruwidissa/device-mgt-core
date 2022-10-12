@@ -26,14 +26,14 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 
 import java.util.List;
 
-@ApiModel(value = "List of activities", description = "This contains a set of activities that matches a given"
+@ApiModel(value = "ListOfActivities", description = "This contains a set of activities that " +
+        "matches a given"
         + " criteria as a collection")
 public class ActivityList extends BasePaginatedResult {
 
     private List<Activity> activities;
 
-    @ApiModelProperty(value = "Returns the list of activities that match the offset and limit parameter values"
-            + " that were specified.")
+    @ApiModelProperty(value = "List of activity Ids")
     @JsonProperty("activities")
     public List<Activity> getList() {
         return activities;

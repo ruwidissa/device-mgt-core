@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-@ApiModel(value = "Role List")
+@ApiModel(value = "RoleList")
 public class RoleList extends BasePaginatedResult {
 
     private List<String> roles;

@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 import java.util.List;
 
-@ApiModel(value = "Permission List")
+@ApiModel(value = "PermissionList")
 public class PermissionList implements Serializable {
 
     private List<String> permissions;

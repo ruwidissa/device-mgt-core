@@ -386,7 +386,7 @@ public interface DeviceTypeManagementAdminService {
 
 
     @POST
-    @Path("/versions")
+    @Path("/{deviceTypeName}/versions")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(

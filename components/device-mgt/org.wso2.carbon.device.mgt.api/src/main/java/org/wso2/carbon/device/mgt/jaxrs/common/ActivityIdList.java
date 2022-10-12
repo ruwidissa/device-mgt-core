@@ -18,12 +18,26 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.common;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Arrays;
 import java.util.List;
 
+@ApiModel(value = "ActivityIdList", description = "List of activity IDs")
 public class ActivityIdList {
 
+    @ApiModelProperty(
+            name = "operationId",
+            value = "operation Id",
+            example = "1")
     private String ids;
+
+    @ApiModelProperty(
+            name = "activityId",
+            value = "Activity identifiers",
+            required = true,
+            example = "ACTIVITY_1, ACTIVITY_2")
     private List<String> idList;
 
     public ActivityIdList(String ids) {

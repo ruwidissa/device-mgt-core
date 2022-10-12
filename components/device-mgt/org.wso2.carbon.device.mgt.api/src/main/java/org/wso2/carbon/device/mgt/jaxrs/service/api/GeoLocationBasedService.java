@@ -419,7 +419,7 @@ public interface GeoLocationBasedService {
                     required = true)
             @PathParam("deviceId") String deviceId,
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "The device type, such as ios, android, or windows.",
                     required = true)
             @PathParam("deviceType")
@@ -538,7 +538,7 @@ public interface GeoLocationBasedService {
                     required = true)
             @PathParam("deviceId") String deviceId,
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "The device type, such as ios, android, or windows.",
                     required = true)
             @PathParam("deviceType")
@@ -655,7 +655,7 @@ public interface GeoLocationBasedService {
                     required = true)
             @PathParam("deviceId") String deviceId,
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "The device type, such as ios, android. or windows.",
                     required = true)
             @PathParam("deviceType")
@@ -1022,7 +1022,8 @@ public interface GeoLocationBasedService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
                     })
-            }
+            },
+            nickname = "getGeofenceByFenceId"
     )
     @ApiResponses(value = {
             @ApiResponse(

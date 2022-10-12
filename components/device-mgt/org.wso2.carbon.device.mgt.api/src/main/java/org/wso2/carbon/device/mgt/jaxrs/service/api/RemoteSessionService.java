@@ -74,7 +74,7 @@ public interface RemoteSessionService {
      * Retrieve Analytics for the device type
      */
     @GET
-    @Path("connection/{deviceType}/{deviceId}")
+    @Path("connect/{deviceType}/{deviceId}")
     @ApiOperation(
             consumes = "application/json",
             produces = "application/json",
@@ -122,7 +122,7 @@ public interface RemoteSessionService {
                     required = true)
             @PathParam("deviceId") String deviceId,
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "The device type, such as ios, android, or windows.",
                     required = true)
             @PathParam("deviceType")

@@ -213,7 +213,8 @@ public interface GroupManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:groups")
                     })
-            }
+            },
+            nickname = "getGroupsWithFilter"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of device groups.",
@@ -287,7 +288,8 @@ public interface GroupManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:groups")
                     })
-            }
+            },
+            nickname = "getGroupsWithHierarchyNonAdmin"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of device hierarchical groups.",
@@ -367,7 +369,8 @@ public interface GroupManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:count")
                     })
-            }
+            },
+            nickname = "getGroupCountNonAdmin"
 
     )
     @ApiResponses(value = {
@@ -411,7 +414,8 @@ public interface GroupManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:add")
                     })
-            }
+            },
+            nickname = "createGroupByGroupObject"
     )
     @ApiResponses(
             value = {
@@ -545,7 +549,8 @@ public interface GroupManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:groups-view")
                     })
-            }
+            },
+            nickname = "getGroupByGroupNameFilter"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device group.",
@@ -760,7 +765,7 @@ public interface GroupManagementService {
                     response = ErrorResponse.class)
     })
     Response manageGroupSharing(@ApiParam(
-            name = "groupName",
+            name = "groupId",
             value = "Name of the group to be shared or unshared.",
             required = true)
                                 @PathParam("groupId") int groupId,
@@ -1130,7 +1135,8 @@ public interface GroupManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:device")
                     })
-            }
+            },
+            nickname = "getGroupsNonAdmin"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK.",

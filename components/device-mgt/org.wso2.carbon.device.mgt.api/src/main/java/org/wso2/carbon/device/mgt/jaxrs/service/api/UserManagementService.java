@@ -591,7 +591,8 @@ public interface UserManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:user-details")
                     })
-            }
+            },
+            nickname = "getUsersByFilter"
     )
     @ApiResponses(value = {
             @ApiResponse(

@@ -401,21 +401,25 @@ public interface DeviceManagementService {
                     name = "tenantDomain",
                     value = "The tenant domain.",
                     required = false)
+            @QueryParam("tenantDomain")
                     String tenantDomain,
             @ApiParam(
                     name = "startDate",
                     value = "The start date.",
                     required = false)
+            @QueryParam("startDate")
                     Timestamp startDate,
             @ApiParam(
                     name = "endDate",
                     value = "The end date.",
                     required = false)
+            @QueryParam("endDate")
                     Timestamp endDate,
             @ApiParam(
                     name = "generateBill",
                     value = "The generate bill boolean.",
                     required = false)
+            @QueryParam("generateBill")
                     boolean generateBill,
             @ApiParam(
                     name = "offset",
@@ -492,21 +496,25 @@ public interface DeviceManagementService {
                     name = "tenantDomain",
                     value = "The tenant domain.",
                     required = false)
+            @QueryParam("tenantDomain")
                     String tenantDomain,
             @ApiParam(
                     name = "startDate",
                     value = "The start date.",
                     required = false)
+            @QueryParam("startDate")
                     Timestamp startDate,
             @ApiParam(
                     name = "endDate",
                     value = "The end date.",
                     required = false)
+            @QueryParam("endDate")
                     Timestamp endDate,
             @ApiParam(
                     name = "generateBill",
                     value = "The generate bill boolean.",
                     required = false)
+            @QueryParam("generateBill")
                     boolean generateBill);
 
     @GET
@@ -862,7 +870,7 @@ public interface DeviceManagementService {
     })
     Response getDeviceLocationInfo(
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "The device type, such as ios, android, or windows.",
                     required = true)
             @PathParam("deviceType")
@@ -1027,7 +1035,8 @@ public interface DeviceManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
                     })
-            }
+            },
+            nickname = "isEnrolledByType"
     )
     @ApiResponses(
             value = {
@@ -1286,14 +1295,14 @@ public interface DeviceManagementService {
                     required = true)
                     Device device,
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "The device type, such as ios, android, or windows.",
                     required = true)
             @PathParam("deviceType")
             @Size(max = 45)
                     String deviceType,
             @ApiParam(
-                    name = "device-id",
+                    name = "deviceId",
                     value = "The device identifier of the device.",
                     required = true)
             @PathParam("deviceId")
@@ -1315,7 +1324,8 @@ public interface DeviceManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:delete")
                     })
-            }
+            },
+            nickname = "deleteDeviceByTypeAndId"
     )
     @ApiResponses(
             value = {
@@ -1356,14 +1366,14 @@ public interface DeviceManagementService {
             })
     Response deleteDevice(
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "The device type, such as ios, android, or windows.",
                     required = true)
             @PathParam("deviceType")
             @Size(max = 45)
                     String deviceType,
             @ApiParam(
-                    name = "device-id",
+                    name = "deviceId",
                     value = "The device identifier of the device.",
                     required = true)
             @PathParam("deviceId")
@@ -2546,7 +2556,7 @@ public interface DeviceManagementService {
             })
     Response getPolicyCompliance(
             @ApiParam(
-                    name = "compliance-status",
+                    name = "complianceStatus",
                     value = "Compliance status for devices. If true, devices which are compliant with policies. " +
                             "If false, devices which are not compliant",
                     required = true)
@@ -2587,7 +2597,7 @@ public interface DeviceManagementService {
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "Getting Policy Compliance Status of all devices",
+            value = "Getting non compliant policy features",
             notes = "A policy is enforced on the devices that register with Entgra IoTS. " +
                     "The server checks if the settings in the device comply with the policy that is enforced on the device using this REST API.",
             tags = "Device Management",
@@ -2667,7 +2677,7 @@ public interface DeviceManagementService {
             })
     Response getApplications(
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "Device type (platform) of the application",
                     required = true)
             @PathParam("deviceType")
@@ -2729,7 +2739,7 @@ public interface DeviceManagementService {
             })
     Response getAppVersions(
             @ApiParam(
-                    name = "package-name",
+                    name = "packageName",
                     value = "The package name of the app.",
                     required = true)
             @PathParam("packageName")
@@ -2778,7 +2788,7 @@ public interface DeviceManagementService {
             })
     Response updateOperationStatus(
             @ApiParam(
-                    name = "device-type",
+                    name = "deviceType",
                     value = "The device type, such as ios, android, or windows.")
             @PathParam("deviceType") String deviceType,
             @ApiParam(
@@ -2867,17 +2877,20 @@ public interface DeviceManagementService {
     )
     Response getDefaultToken(
             @ApiParam(
-                    name = "client ID",
+                    name = "clientId",
                     value = "Client Id.",
                     required = true)
             @PathParam("clientId")
                     String clientId,
             @ApiParam(
-                    name = "client secret",
+                    name = "clientSecret",
                     value = "Client Secret",
                     required = true)
             @PathParam("clientSecret")
                     String clientSecret,
+            @ApiParam(
+                    name = "scopes",
+                    value = "Oauth scopes")
             @QueryParam("scopes") String scopes
     );
 }

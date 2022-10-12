@@ -17,9 +17,25 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.beans;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel(value = "DeviceTypeVersionWrapper", description = "Provides details about the device " +
+        "type version and statues")
 public class DeviceTypeVersionWrapper {
 
+    @ApiModelProperty(
+            name = "versionName",
+            value = "Sub version name of the device type (example OS version)",
+            required = true,
+            example = "8.1")
     String versionName;
+
+    @ApiModelProperty(
+            name = "versionStatus",
+            value = "ACTIVE or INACTIVE status of this version",
+            required = true,
+            example = "ACTIVE")
     String versionStatus;
 
     public String getVersionName() {
