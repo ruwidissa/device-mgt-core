@@ -1759,9 +1759,9 @@
     </dependencyManagement>
 
     <scm>
-        <url>https://gitlab.com/entgra/carbon-device-mgt.git</url>
-        <developerConnection>scm:git:https://gitlab.com/entgra/carbon-device-mgt.git</developerConnection>
-        <connection>scm:git:https://gitlab.com/entgra/carbon-device-mgt.git</connection>
+        <url>https://repository.entgra.net/community/device-mgt-core.git</url>
+        <developerConnection>scm:git:https://repository.entgra.net/community/device-mgt-core.git</developerConnection>
+        <connection>scm:git:https://repository.entgra.net/community/device-mgt-core.git</connection>
         <tag>HEAD</tag>
     </scm>
 
