@@ -1,23 +1,22 @@
 /*
- * Copyright (C) 2022 Entgra (Pvt) Ltd, Inc - All Rights Reserved.
+ *   Copyright (c) 2022, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
- * Unauthorised copying/redistribution of this file, via any medium is strictly prohibited.
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
  *
- * Licensed under the Entgra Commercial License, Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *      https://entgra.io/licenses/entgra-commercial/1.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
  */
 
-package org.wso2.carbon.device.mgt.core.traccar.api.service.addons;
+package org.wso2.carbon.device.mgt.core.traccar.api.service;
 
 import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
@@ -51,6 +50,7 @@ import org.wso2.carbon.device.mgt.core.traccar.common.util.TraccarUtil;
 import org.wso2.carbon.device.mgt.core.traccar.core.config.TraccarConfigurationManager;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -64,9 +64,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class TraccarClientImpl implements TraccarClient {
-    private static final Log log = LogFactory.getLog(TraccarClientImpl.class);
+public class TraccarClientFactory {
+
+    private static TraccarClientFactory INSTANCE;
+    private static final Log log = LogFactory.getLog(TraccarClientFactory.class);
     private static final int THREAD_POOL_SIZE = 50;
     private final OkHttpClient client;
     private final ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
@@ -80,7 +84,10 @@ public class TraccarClientImpl implements TraccarClient {
     final String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
     private final TrackerDAO trackerDAO;
 
-    public TraccarClientImpl() {
+    /**
+     * This is the private constructor method as this class is a singleton
+     */
+    private TraccarClientFactory() {
         client = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
@@ -90,7 +97,19 @@ public class TraccarClientImpl implements TraccarClient {
         this.trackerDAO = TrackerManagementDAOFactory.getTrackerDAO();
     }
 
-    private class OkHttpClientThreadPool implements Callable {
+    /**
+     * This method is used to initiate a singleton instance of this class.
+     *
+     * @return TraccarClientFactory instance
+     */
+    public static TraccarClientFactory getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = new TraccarClientFactory();
+        }
+        return INSTANCE;
+    }
+
+    private class OkHttpClientThreadPool implements Callable<String> {
         final String publisherUrlWithContext;
         final JSONObject payload;
         private final String method;
@@ -107,7 +126,7 @@ public class TraccarClientImpl implements TraccarClient {
         }
 
         @Override
-        public String call() throws Exception {
+        public String call() throws IOException {
             RequestBody requestBody;
             Request.Builder builder = new Request.Builder();
             Request request;
@@ -135,10 +154,9 @@ public class TraccarClientImpl implements TraccarClient {
     }
 
     public String fetchAllUsers() throws ExecutionException, InterruptedException {
-        String method = TraccarHandlerConstants.Methods.GET;
         String url = defaultPort + "/api/users";
 
-        Future<String> result = executor.submit(new OkHttpClientThreadPool(url, null, method,
+        Future<String> result = executor.submit(new OkHttpClientThreadPool(url, null, TraccarHandlerConstants.Methods.GET,
                 authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
                 serverUrl(HttpReportingUtil.trackerServer())));
         return result.get();
@@ -160,13 +178,12 @@ public class TraccarClientImpl implements TraccarClient {
                 }
             }
         }
-
         return TraccarHandlerConstants.Types.USER_NOT_FOUND;
     }
 
     public String returnUser(String userName) throws TrackerManagementDAOException {
         try {
-            String result = DeviceAPIClientServiceImpl.fetchUserInfo(userName);
+            String result = fetchUserInfo(userName);
             Date today = new Date();
             LocalDateTime tomorrow = LocalDateTime.from(today.toInstant().atZone(ZoneId.of("UTC"))).plusDays(1);
             String token = DeviceAPIClientServiceImpl.generateRandomString(TraccarHandlerConstants.Types.TRACCAR_TOKEN);
@@ -182,7 +199,6 @@ public class TraccarClientImpl implements TraccarClient {
                 traccarUser.setEmail(userName);
                 traccarUser.setPassword(DeviceAPIClientServiceImpl.generateRandomString(TraccarHandlerConstants.Types.DEFAULT_RANDOM));
                 traccarUser.setDeviceLimit(-1);
-                //traccarUser.setUserLimit(-1);
                 traccarUser.setExpirationTime(tomorrow.toString());
                 DeviceAPIClientServiceImpl.createUser(traccarUser);
             } else {
@@ -208,7 +224,7 @@ public class TraccarClientImpl implements TraccarClient {
                 }
                 DeviceAPIClientServiceImpl.updateUser(traccarUser, obj.getInt("id"));
             }
-            result = DeviceAPIClientServiceImpl.fetchUserInfo(userName);
+            result = fetchUserInfo(userName);
             return result;
         } catch (InterruptedException | ExecutionException e) {
             JSONObject obj = new JSONObject();
@@ -221,22 +237,20 @@ public class TraccarClientImpl implements TraccarClient {
     }
 
     public String createUser(TraccarUser traccarUser) throws ExecutionException, InterruptedException {
-        String method = TraccarHandlerConstants.Methods.POST;
         String url = defaultPort + "/api/users";
         JSONObject payload = TraccarUtil.TraccarUserPayload(traccarUser);
 
-        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, TraccarHandlerConstants.Methods.POST,
                 authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
                 serverUrl(HttpReportingUtil.trackerServer())));
         return res.get();
     }
 
     public String updateUser(TraccarUser traccarUser, int userId) throws ExecutionException, InterruptedException {
-        String method = TraccarHandlerConstants.Methods.PUT;
         String url = defaultPort + "/api/users/" + userId;
         JSONObject payload = TraccarUtil.TraccarUserPayload(traccarUser);
 
-        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, TraccarHandlerConstants.Methods.PUT,
                 authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
                 serverUrl(HttpReportingUtil.trackerServer())));
         return res.get();
@@ -248,10 +262,9 @@ public class TraccarClientImpl implements TraccarClient {
         payload.put("userId", userId);
         payload.put("deviceId", deviceId);
 
-        String method = TraccarHandlerConstants.Methods.POST;
         String url = defaultPort + "/api/permissions";
 
-        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, TraccarHandlerConstants.Methods.POST,
                 authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
                 serverUrl(HttpReportingUtil.trackerServer())));
         String result = res.get();
@@ -275,7 +288,9 @@ public class TraccarClientImpl implements TraccarClient {
                 TrackerManagementDAOFactory.closeConnection();
             }
         } else {
-            log.error("Couldn't add the permission record: " + result);
+            String msg = "Couldn't add the permission record: " + result;
+            log.error(msg);
+            throw new TrackerManagementDAOException(msg);
         }
     }
 
@@ -285,10 +300,9 @@ public class TraccarClientImpl implements TraccarClient {
         payload.put("userId", userId);
         payload.put("deviceId", deviceId);
 
-        String method = TraccarHandlerConstants.Methods.DELETE;
         String url = defaultPort + "/api/permissions";
 
-        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, TraccarHandlerConstants.Methods.DELETE,
                 authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
                 serverUrl(HttpReportingUtil.trackerServer())));
 
@@ -310,6 +324,10 @@ public class TraccarClientImpl implements TraccarClient {
             } finally {
                 TrackerManagementDAOFactory.closeConnection();
             }
+        } else {
+            String msg = "Error occured while removing permission.";
+            log.error(msg);
+            throw new TrackerManagementDAOException(msg);
         }
     }
 
@@ -319,7 +337,6 @@ public class TraccarClientImpl implements TraccarClient {
             TrackerManagementDAOFactory.openConnection();
             return trackerDAO.getUserIdofPermissionByUserIdNIdList(userId, NotInDeviceIdList);
         } catch (TrackerManagementDAOException e) {
-            TrackerManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while mapping with deviceId .";
             log.error(msg, e);
             throw new TrackerManagementDAOException(msg, e);
@@ -335,7 +352,16 @@ public class TraccarClientImpl implements TraccarClient {
     public TrackerDeviceInfo getTrackerDevice(int deviceId, int tenantId) throws TrackerManagementDAOException {
         try {
             TrackerManagementDAOFactory.openConnection();
-            return trackerDAO.getTrackerDevice(deviceId, tenantId);
+            TrackerDeviceInfo trackerDeviceInfo = trackerDAO.getTrackerDevice(deviceId, tenantId);
+            if(trackerDeviceInfo == null) {
+                String msg = "No tracker device is found upon the device ID of: " + deviceId;
+                if (log.isDebugEnabled()) {
+                    log.debug(msg);
+                }
+                return null;
+            } else {
+                return trackerDeviceInfo;
+            }
         } catch (SQLException e) {
             String msg = "Error occurred establishing the DB connection .";
             log.error(msg, e);
@@ -404,7 +430,7 @@ public class TraccarClientImpl implements TraccarClient {
                     serverUrl(HttpReportingUtil.trackerServer())));
             String result = res.get();
             log.info("Device " + traccarDevice.getDeviceIdentifier() + " has been added to Traccar.");
-            if (result.charAt(0) == '{') {
+            if (res.isDone() && result.charAt(0) == '{') {
                 JSONObject obj = new JSONObject(result);
                 if (obj.has("id")) {
                     int traccarDeviceId = obj.getInt("id");
@@ -499,36 +525,50 @@ public class TraccarClientImpl implements TraccarClient {
         List<TrackerPermissionInfo> trackerPermissionInfo = null;
         try {
             TrackerManagementDAOFactory.beginTransaction();
-            trackerDeviceInfo = trackerDAO.getTrackerDevice(deviceId, tenantId);
-            log.info("deviceId - " + deviceId);
-            if (trackerDeviceInfo != null) {
-                trackerDAO.removeTrackerDevice(deviceId, tenantId);
-                TrackerManagementDAOFactory.commitTransaction();
-                trackerPermissionInfo = trackerDAO.getUserIdofPermissionByDeviceId(trackerDeviceInfo.getTraccarDeviceId());
+            try {
+                TrackerManagementDAOFactory.openConnection();
+                trackerDeviceInfo = trackerDAO.getTrackerDevice(deviceId, tenantId);
+                if (trackerDeviceInfo != null) {
+                    trackerDAO.removeTrackerDevice(deviceId, tenantId);
+                    TrackerManagementDAOFactory.commitTransaction();
+                    trackerPermissionInfo = trackerDAO.getUserIdofPermissionByDeviceId(trackerDeviceInfo.getTraccarDeviceId());
+                } else {
+                    String msg = "Tracker device for device id " + deviceId +  " not found";
+                    log.error(msg);
+                    throw new TrackerManagementDAOException(msg);
+                }
+            } catch (SQLException e) {
+                String msg = "Error occurred establishing the DB connection .";
+                log.error(msg, e);
+                throw new TrackerManagementDAOException(msg, e);
+            } catch (TrackerManagementDAOException e) {
+                String msg = "Could not add new device location";
+                log.error(msg, e);
+                throw new TrackerManagementDAOException(msg, e);
+            } finally {
+                TrackerManagementDAOFactory.closeConnection();
             }
         } catch (TransactionManagementException e) {
             TrackerManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred establishing the DB connection";
             log.error(msg, e);
             throw new TrackerManagementDAOException(msg, e);
-        } catch (TrackerManagementDAOException e) {
-            TrackerManagementDAOFactory.rollbackTransaction();
-            String msg = "Error occurred while mapping with deviceId";
-            log.error(msg, e);
-            throw new TrackerManagementDAOException(msg, e);
-        } finally {
-            TrackerManagementDAOFactory.closeConnection();
         }
-        log.info("--------Disenrolling Device with device id " + deviceId + " from traccar client--------");
+        log.info("Disenrolling Device with device id " + deviceId + " from traccar client");
         //Delete from traccar
         if (trackerDeviceInfo != null) {
-            String method = TraccarHandlerConstants.Methods.DELETE;
-            String url = defaultPort + "/api/devices/" + trackerPermissionInfo.get(0).getTraccarDeviceId();
 
-            executor.submit(new OkHttpClientThreadPool(url, null, method,
-                    authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
-                    serverUrl(HttpReportingUtil.trackerServer())));
+            if (trackerPermissionInfo.size() > 0) {
+                String url = defaultPort + "/api/devices/" + trackerPermissionInfo.get(0).getTraccarDeviceId();
 
+                executor.submit(new OkHttpClientThreadPool(url, null, TraccarHandlerConstants.Methods.DELETE,
+                        authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                        serverUrl(HttpReportingUtil.trackerServer())));
+            } else {
+                String msg = "Tracker permission mapping info not found";
+                log.error(msg);
+                throw new TrackerManagementDAOException(msg);
+            }
             //remove permissions
             try {
                 removePermission(
@@ -536,9 +576,14 @@ public class TraccarClientImpl implements TraccarClient {
                         trackerPermissionInfo.get(0).getTraccarDeviceId(),
                         TraccarHandlerConstants.Types.REMOVE_TYPE_MULTIPLE);
             } catch (ExecutionException e) {
-                log.error("ExecutionException : " + e);
-                throw new ExecutionException(e);
+                String msg = "Error occured while removing tacker permissions ";
+                log.error(msg);
+                throw new ExecutionException(msg, e);
             }
+        } else {
+            String msg = "Tracker device not found";
+            log.error(msg);
+            throw new TrackerManagementDAOException(msg);
         }
     }
 
@@ -575,10 +620,9 @@ public class TraccarClientImpl implements TraccarClient {
         payload.put("name", groupInfo.getName());
         payload.put("attributes", new JSONObject());
 
-        String method = TraccarHandlerConstants.Methods.POST;
         String url = defaultPort + "/api/groups";
 
-        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, method,
+        Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, TraccarHandlerConstants.Methods.POST,
                 authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
                 serverUrl(HttpReportingUtil.trackerServer())));
         String result = res.get();
@@ -587,25 +631,25 @@ public class TraccarClientImpl implements TraccarClient {
             JSONObject obj = new JSONObject(result);
             if (obj.has("id")) {
                 int traccarGroupId = obj.getInt("id");
-
                 try {
                     TrackerManagementDAOFactory.beginTransaction();
                     trackerDAO.addTrackerGroup(traccarGroupId, groupId, tenantId);
                     trackerGroupInfo = trackerDAO.getTrackerGroup(groupId, tenantId);
                     if (trackerGroupInfo.getStatus() == 0) {
                         trackerDAO.updateTrackerGroupIdANDStatus(trackerGroupInfo.getTraccarGroupId(), groupId, tenantId, 1);
+                        TrackerManagementDAOFactory.commitTransaction();
                     }
-                } catch (TrackerManagementDAOException e) {
-                    TrackerManagementDAOFactory.rollbackTransaction();
-                    String msg = "Error occurred while mapping with deviceId. ";
-                    log.error(msg, e);
-                    throw new TrackerManagementDAOException(msg, e);
                 } catch (TransactionManagementException e) {
                     String msg = "Error occurred establishing the DB connection. ";
                     log.error(msg, e);
                     TrackerManagementDAOFactory.rollbackTransaction();
                     throw new TrackerManagementDAOException(msg, e);
-                } finally {
+                } catch (TrackerManagementDAOException e) {
+                    TrackerManagementDAOFactory.rollbackTransaction();
+                    String msg = "Error occurred while mapping with deviceId. ";
+                    log.error(msg, e);
+                    throw new TrackerManagementDAOException(msg, e);
+                }  finally {
                     TrackerManagementDAOFactory.closeConnection();
                 }
             } else {
@@ -671,10 +715,9 @@ public class TraccarClientImpl implements TraccarClient {
             payload.put("name", groupInfo.getName());
             payload.put("attributes", new JSONObject());
 
-            String method = TraccarHandlerConstants.Methods.PUT;
             String url = defaultPort + "/api/groups/" + obj.getInt("traccarGroupId");
 
-            executor.submit(new OkHttpClientThreadPool(url, payload, method,
+            executor.submit(new OkHttpClientThreadPool(url, payload, TraccarHandlerConstants.Methods.PUT,
                     authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
                     serverUrl(HttpReportingUtil.trackerServer())));
         }
@@ -696,14 +739,20 @@ public class TraccarClientImpl implements TraccarClient {
                 obj = new JSONObject(res);
                 if (obj != null) {
                     trackerDAO.removeTrackerGroup(obj.getInt("id"));
-                    TrackerManagementDAOFactory.commitTransaction();
-
                     String url = defaultPort + "/api/groups/" + obj.getInt("traccarGroupId");
-
                     executor.submit(new OkHttpClientThreadPool(url, null, TraccarHandlerConstants.Methods.DELETE,
                             authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
                             serverUrl(HttpReportingUtil.trackerServer())));
+                    TrackerManagementDAOFactory.commitTransaction();
+                } else {
+                    String msg = "Tracker group JSON object is null";
+                    log.error(msg);
+                    throw new TrackerManagementDAOException(msg);
                 }
+            } else {
+                String msg = "Tracker group not found";
+                log.error(msg);
+                throw new TrackerManagementDAOException(msg);
             }
         } catch (TransactionManagementException e) {
             TrackerManagementDAOFactory.rollbackTransaction();
@@ -723,10 +772,7 @@ public class TraccarClientImpl implements TraccarClient {
     public String generateRandomString(int len) {
         String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         Random rnd = new Random();
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++)
-            sb.append(chars.charAt(rnd.nextInt(chars.length())));
-        return sb.toString();
+        return IntStream.range(0, len).mapToObj(i -> String.valueOf(chars.charAt(rnd.nextInt(chars.length())))).collect(Collectors.joining());
     }
 
     private TraccarGateway getTraccarGateway() {
@@ -747,10 +793,10 @@ public class TraccarClientImpl implements TraccarClient {
     }
 
     public String serverUrl(String serverUrl) {
-        String newServerUri = endpoint;
         if (serverUrl != null) {
-            newServerUri = serverUrl;
+            return serverUrl;
+        } else {
+            return endpoint;
         }
-        return newServerUri;
     }
 }

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.dao.impl.tracker;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
@@ -26,6 +27,7 @@ import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.TrackerDAO;
+import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dao.util.TrackerManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants;
 
@@ -104,27 +106,34 @@ public class TrackerDAOImpl implements TrackerDAO {
 
     @Override
     public TrackerDeviceInfo getTrackerDevice(int deviceId, int tenantId) throws TrackerManagementDAOException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        TrackerDeviceInfo trackerDeviceInfo = null;
         try {
             Connection conn = TrackerManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, TRACCAR_DEVICE_ID, DEVICE_ID, TENANT_ID, STATUS FROM DM_EXT_DEVICE_MAPPING WHERE " +
-                    "DEVICE_ID = ? AND TENANT_ID = ? ORDER BY ID DESC LIMIT 1";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, deviceId);
-            stmt.setInt(2, tenantId);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return TrackerManagementDAOUtil.loadTrackerDevice(rs);
+            String sql = "SELECT " +
+                            "DM_EXT_DEVICE_MAPPING.ID, " +
+                            "DM_EXT_DEVICE_MAPPING.TRACCAR_DEVICE_ID, " +
+                            "DM_EXT_DEVICE_MAPPING.DEVICE_ID, " +
+                            "DM_EXT_DEVICE_MAPPING.TENANT_ID, " +
+                            "DM_EXT_DEVICE_MAPPING.STATUS " +
+                        "FROM DM_EXT_DEVICE_MAPPING " +
+                        "JOIN DM_DEVICE ON DM_EXT_DEVICE_MAPPING.DEVICE_ID=DM_DEVICE.ID " +
+                        "WHERE DM_EXT_DEVICE_MAPPING.DEVICE_ID = ? AND DM_EXT_DEVICE_MAPPING.TENANT_ID = ? " +
+                        "ORDER BY DM_EXT_DEVICE_MAPPING.ID DESC LIMIT 1";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, deviceId);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        trackerDeviceInfo = TrackerManagementDAOUtil.loadTrackerDevice(rs);
+                    }
+                }
             }
-            return null;
         } catch (SQLException e) {
             String msg = "Error occurred while retrieving data from the trackerDevice table ";
             log.error(msg, e);
             throw new TrackerManagementDAOException(msg, e);
-        } finally {
-            TrackerManagementDAOUtil.cleanupResources(stmt, rs);
         }
+        return trackerDeviceInfo;
     }
 
     @Override

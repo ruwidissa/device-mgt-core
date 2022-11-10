@@ -87,6 +87,7 @@ import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeVersionWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
@@ -590,6 +591,19 @@ public class DeviceMgtAPIUtils {
             throw new IllegalStateException(msg);
         }
         return analyticsDataAPI;
+    }
+
+    public static DeviceAPIClientService getDeviceAPIClientService() {
+        DeviceAPIClientService deviceAPIClientService;
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        deviceAPIClientService = (DeviceAPIClientService) ctx.getOSGiService(
+                DeviceAPIClientService.class, null);
+        if (deviceAPIClientService == null) {
+            String msg = "Device API Client service not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return deviceAPIClientService;
     }
 
     public static int getTenantId(String tenantDomain) throws DeviceManagementException {

@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
+import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
@@ -375,6 +376,27 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             throw new DeviceDetailsMgtDAOException("Error occurred while fetching the location of the registered devices.", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
+    public boolean hasLocations(int deviceId, int enrollmentId) throws
+            DeviceDetailsMgtDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "SELECT DEVICE_ID FROM DM_DEVICE_LOCATION WHERE DEVICE_ID = ? AND ENROLMENT_ID = ? " +
+                    "LIMIT 1";
+            ResultSet rs;
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, deviceId);
+                stmt.setInt(2, enrollmentId);
+                rs = stmt.executeQuery();
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching the location of the registered devices.";
+            log.error(msg, e);
+            throw new DeviceDetailsMgtDAOException(msg, e);
         }
     }
 

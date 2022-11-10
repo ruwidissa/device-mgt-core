@@ -20,10 +20,14 @@
 package org.wso2.carbon.device.mgt.core.traccar.api.service;
 
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
+import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.exceptions.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
+
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface DeviceAPIClientService {
@@ -81,4 +85,22 @@ public interface DeviceAPIClientService {
      */
     void deleteGroup(int groupId, int tenantId) throws
             TrackerManagementDAOException, ExecutionException, InterruptedException;
+
+    String returnUser(String username);
+
+    TrackerDeviceInfo getTrackerDevice(int deviceId, int tenantId) throws
+            TrackerManagementDAOException;
+
+    boolean getUserIdofPermissionByDeviceIdNUserId(int deviceId, int userId) throws
+            TrackerManagementDAOException;
+
+    void addTrackerUserDevicePermission(int userId, int deviceId) throws
+            TrackerManagementDAOException, ExecutionException, InterruptedException;
+
+    List<TrackerPermissionInfo> getUserIdofPermissionByUserIdNIdList(int userId, List<Integer> NotInDeviceIdList) throws
+            TrackerManagementDAOException;
+
+    void removeTrackerUserDevicePermission(int userId, int deviceId, int removeType) throws
+            TrackerManagementDAOException, ExecutionException, InterruptedException;
+
 }

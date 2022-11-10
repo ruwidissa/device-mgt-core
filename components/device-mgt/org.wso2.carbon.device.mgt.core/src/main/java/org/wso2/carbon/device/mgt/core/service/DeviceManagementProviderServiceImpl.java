@@ -3981,9 +3981,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     deviceLocation.setBearing(Float.parseFloat(bearing));
                     deviceInformationManager.addDeviceLocation(device, deviceLocation);
                 } catch (DeviceDetailsMgtException e) {
-                    //We are not failing the execution since this is not critical for the functionality. But logging as
-                    // a warning for reference.
-                    //Exception was not thrown due to being conflicted with non-traccar features
+                    /***
+                     * NOTE:
+                     * We are not failing the execution since this is not critical for the functionality. But logging as
+                     * a warning for reference.
+                     * Exception was not thrown due to being conflicted with non-traccar features
+                     */
                     log.warn("Error occurred while trying to add '" + device.getType() + "' device '" +
                             device.getDeviceIdentifier() + "' (id:'" + device.getId() + "') location (lat:" + latitude +
                             ", lon:" + longitude + ", altitude: " + altitude +

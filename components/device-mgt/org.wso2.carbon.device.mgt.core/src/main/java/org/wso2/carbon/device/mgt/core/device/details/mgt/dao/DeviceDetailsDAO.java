@@ -99,6 +99,17 @@ public interface DeviceDetailsDAO {
      */
     DeviceLocation getDeviceLocation(int deviceId, int enrollmentId) throws DeviceDetailsMgtDAOException;
 
+
+    /**
+     * This method will return the device location exist or not
+     * @param deviceId - id of the device.
+     * @param enrollmentId - enrolment id of the device.
+     * @return - if device location exist
+     * @throws DeviceDetailsMgtDAOException if SQL error occurred while processing the query.
+     */
+    boolean hasLocations(int deviceId, int enrollmentId) throws DeviceDetailsMgtDAOException;
+
+
     /**
      * This method will delete the device location from the database.
      * @param deviceId

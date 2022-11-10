@@ -27,8 +27,8 @@
             <Properties>
                 <Property name="sample-property">sample</Property>
                 <Property name="api-endpoint">http://localhost:</Property>
-                <Property name="default-port"></Property>
-                <Property name="location-update-port">5055</Property>
+                <Property name="default-port">4385</Property>
+                <Property name="location-update-port">8085</Property>
                 <Property name="authorization">Authorization</Property>
                 <Property name="authorization-key">Basic YWRtaW46YWRtaW4=</Property>
             </Properties>

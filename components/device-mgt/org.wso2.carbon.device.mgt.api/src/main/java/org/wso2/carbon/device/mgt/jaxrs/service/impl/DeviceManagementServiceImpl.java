@@ -102,6 +102,7 @@ import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
+import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
@@ -492,7 +493,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
         if (HttpReportingUtil.isTrackerEnabled()) {
             String currentUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            JSONObject obj = new JSONObject(DeviceAPIClientServiceImpl.returnUser(currentUser));
+            DeviceAPIClientService deviceAPIClientService = DeviceMgtAPIUtils.getDeviceAPIClientService();
+            JSONObject obj = new JSONObject(deviceAPIClientService.returnUser(currentUser));
 
             if (obj.has("error")) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(obj.getString("error")).build();
@@ -530,21 +532,23 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     }
 
                     int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+                    TrackerDeviceInfo trackerDevice;
                     for (Device device : devices.getList()) {
-                        TrackerDeviceInfo trackerDevice = DeviceAPIClientServiceImpl
-                                .getTrackerDevice(device.getId(), tenantId);
-                        int traccarDeviceId = trackerDevice.getTraccarDeviceId();
-                        boolean getPermission = DeviceAPIClientServiceImpl.getUserIdofPermissionByDeviceIdNUserId(traccarDeviceId, userId);
-                        traccarValidIdList.add(traccarDeviceId);
-                        if (!getPermission) {
-                            DeviceAPIClientServiceImpl.addTrackerUserDevicePermission(userId, traccarDeviceId);
+                        trackerDevice = deviceAPIClientService.getTrackerDevice(device.getId(), tenantId);
+                        if(trackerDevice != null) {
+                            int traccarDeviceId = trackerDevice.getTraccarDeviceId();
+                            boolean getPermission = deviceAPIClientService.getUserIdofPermissionByDeviceIdNUserId(traccarDeviceId, userId);
+                            traccarValidIdList.add(traccarDeviceId);
+                            if (!getPermission) {
+                                deviceAPIClientService.addTrackerUserDevicePermission(userId, traccarDeviceId);
+                            }
                         }
                     }
                     //Remove necessary
                     List<TrackerPermissionInfo> getAllUserDevices =
-                            DeviceAPIClientServiceImpl.getUserIdofPermissionByUserIdNIdList(userId, traccarValidIdList);
+                            deviceAPIClientService.getUserIdofPermissionByUserIdNIdList(userId, traccarValidIdList);
                     for (TrackerPermissionInfo getAllUserDevice : getAllUserDevices) {
-                        DeviceAPIClientServiceImpl.removeTrackerUserDevicePermission(
+                        deviceAPIClientService.removeTrackerUserDevicePermission(
                                 getAllUserDevice.getTraccarUserId(),
                                 getAllUserDevice.getTraccarDeviceId(),
                                 TraccarHandlerConstants.Types.REMOVE_TYPE_SINGLE);
@@ -570,6 +574,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     log.error(msg, e);
                     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
                 }
+
                 /*Get Device Id List*/
                 return Response.status(Response.Status.OK).entity(obj.getString("token")).build();
             }

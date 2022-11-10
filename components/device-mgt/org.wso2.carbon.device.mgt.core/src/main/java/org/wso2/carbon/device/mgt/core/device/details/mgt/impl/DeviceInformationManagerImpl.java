@@ -403,10 +403,14 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 }
             } else {
                 if(!HttpReportingUtil.isLocationPublishing()) {
-                    log.info("Location publishing is disabled");
+                    if (log.isDebugEnabled()) {
+                        log.debug("Location publishing is disabled");
+                    }
                 }
                 if (!HttpReportingUtil.isTrackerEnabled()) {
-                    log.info("Traccar is disabled");
+                    if (log.isDebugEnabled()) {
+                        log.info("Traccar is disabled");
+                    }
                 }
             }
             //Tracker update GPS Location
@@ -435,16 +439,45 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             DeviceLocation mostRecentDeviceLocation = deviceLocations.get(deviceLocations.size()  - 1);
             mostRecentDeviceLocation.setDeviceId(device.getId());
             DeviceManagementDAOFactory.beginTransaction();
-            DeviceLocation previousLocation = deviceDetailsDAO.getDeviceLocation(device.getId(),
+            boolean previousLocation = deviceDetailsDAO.hasLocations(device.getId(),
                     device.getEnrolmentInfo().getId());
-            if (previousLocation == null) {
-                deviceDetailsDAO.addDeviceLocation(mostRecentDeviceLocation, device.getEnrolmentInfo().getId());
-            } else {
+            if (previousLocation) {
                 deviceDetailsDAO.updateDeviceLocation(mostRecentDeviceLocation, device.getEnrolmentInfo().getId());
+            } else {
+                deviceDetailsDAO.addDeviceLocation(mostRecentDeviceLocation, device.getEnrolmentInfo().getId());
             }
 
             deviceDetailsDAO.addDeviceLocationsInfo(device, deviceLocations,
                     CarbonContext.getThreadLocalCarbonContext().getTenantId());
+
+            for (DeviceLocation deviceLocation: deviceLocations) {
+                //Tracker update GPS Location
+                if (HttpReportingUtil.isLocationPublishing() && HttpReportingUtil.isTrackerEnabled()) {
+                    try {
+                        DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                                .updateLocation(device, deviceLocation, CarbonContext.getThreadLocalCarbonContext().getTenantId());
+                    } catch (ExecutionException e) {
+                        log.error("ExecutionException : " + e);
+                        //throw new RuntimeException(e);
+                        // NOTE: Exception was not thrown due to being conflicted with non-traccar features
+                    } catch (InterruptedException e) {
+                        log.error("InterruptedException : " + e);
+                        //throw new RuntimeException(e);
+                        // NOTE: Exception was not thrown due to being conflicted with non-traccar features
+                    }
+                } else {
+                    if(!HttpReportingUtil.isLocationPublishing()) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Location publishing is disabled");
+                        }
+                    }
+                    if (!HttpReportingUtil.isTrackerEnabled()) {
+                        if (log.isDebugEnabled()) {
+                            log.info("Traccar is disabled");
+                        }
+                    }
+                }
+            }
 
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
