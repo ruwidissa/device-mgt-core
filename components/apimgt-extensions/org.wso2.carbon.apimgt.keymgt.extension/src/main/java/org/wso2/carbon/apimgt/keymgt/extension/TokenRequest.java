@@ -24,13 +24,18 @@ public class TokenRequest {
     private String refreshToken;
     private String scope;
     private String grantType;
+    private String assertion;
+    private String admin_access_token;
 
-    public TokenRequest(String clientId, String clientSecret, String refreshToken, String scope, String grantType) {
+    public TokenRequest(String clientId, String clientSecret, String refreshToken, String scope, String grantType,
+                        String assertion, String admin_access_token) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.refreshToken = refreshToken;
         this.scope = scope;
         this.grantType = grantType;
+        this.assertion = assertion;
+        this.admin_access_token = admin_access_token;
     }
 
     public String getClientId() {
@@ -71,5 +76,21 @@ public class TokenRequest {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public String getAssertion() {
+        return assertion;
+    }
+
+    public void setAssertion(String assertion) {
+        this.assertion = assertion;
+    }
+
+    public String getAdminAccessToken() {
+        return admin_access_token;
+    }
+
+    public void setAdminAccessToken(String admin_access_token) {
+        this.admin_access_token = admin_access_token;
     }
 }

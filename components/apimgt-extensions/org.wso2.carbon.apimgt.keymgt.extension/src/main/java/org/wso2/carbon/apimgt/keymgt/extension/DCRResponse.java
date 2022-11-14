@@ -19,27 +19,27 @@
 package org.wso2.carbon.apimgt.keymgt.extension;
 
 public class DCRResponse {
-    String clientId;
-    String clientSecret;
+    String client_id;
+    String client_secret;
 
-    public DCRResponse(String clientId, String clientSecret) {
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
+    public DCRResponse(String client_id, String client_secret) {
+        this.client_id = client_id;
+        this.client_secret = client_secret;
     }
 
     public String getClientId() {
-        return clientId;
+        return client_id;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setClientId(String client_id) {
+        this.client_id = client_id;
     }
 
     public String getClientSecret() {
-        return clientSecret;
+        return client_secret;
     }
 
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
+    public void setClientSecret(String client_secret) {
+        this.client_secret = client_secret;
     }
 }

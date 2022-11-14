@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.keymgt.extension.api;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -38,9 +39,12 @@ public interface KeyManagerService {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/token")
-    Response generateAccessToken(@FormParam("client_id") String clientId,
+    Response generateAccessToken(@HeaderParam("Authorization") String basicAuthHeader,
+                                 @FormParam("client_id") String clientId,
                                  @FormParam("client_secret") String clientSecret,
                                  @FormParam("refresh_token") String refreshToken,
                                  @FormParam("scope") String scope,
-                                 @FormParam("grant_type") String grantType);
+                                 @FormParam("grant_type") String grantType,
+                                 @FormParam("assertion") String assertion,
+                                 @FormParam("admin_access_token") String admin_access_token);
 }

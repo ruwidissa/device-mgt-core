@@ -28,9 +28,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DCRRequest {
     @XmlElement(required = true)
-    private String clientName;
+    private String applicationName;
     @XmlElement(required = true)
-    private String owner;
+    private String username;
     @XmlElement(required = true)
     private String grantTypes;
     @XmlElement
@@ -40,20 +40,20 @@ public class DCRRequest {
     @XmlElement
     private boolean isSaasApp;
 
-    public String getClientName() {
-        return clientName;
+    public String getApplicationName() {
+        return applicationName;
     }
 
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
-    public String getOwner() {
-        return owner;
+    public String getUsername() {
+        return username;
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getGrantTypes() {

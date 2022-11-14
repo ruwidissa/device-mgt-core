@@ -1,3 +1,4 @@
 instructions.configure = \
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/webapps/);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.keymgt.extension_${feature.version}/webapps/api-key-management.war,target:${installFolder}/../../deployment/server/webapps/api-key-management.war,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.keymgt.extension_${feature.version}/synapse-configs/default/api/_API_Key_Management_.xml,target:${installFolder}/../../deployment/server/synapse-configs/default/api/_API_Key_Management_.xml,overwrite:true);\
