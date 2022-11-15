@@ -17,7 +17,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.devicemgt</groupId>
@@ -37,7 +38,7 @@
         <module>components/heartbeat-management</module>
         <module>components/device-mgt</module>
         <module>components/device-mgt-extensions</module>
-	    <module>components/identity-extensions</module>
+        <module>components/identity-extensions</module>
         <module>components/apimgt-extensions</module>
         <module>components/application-mgt</module>
         <module>components/policy-mgt</module>
@@ -54,7 +55,7 @@
         <module>features/heartbeat-management</module>
         <module>features/ui-request-interceptor</module>
         <module>features/jwt-client</module>
-	    <module>features/device-mgt-extensions</module>
+        <module>features/device-mgt-extensions</module>
         <module>features/transport-mgt</module>
         <module>features/analytics-mgt</module>
         <module>features/webapp-authenticator-framework</module>
@@ -366,11 +367,11 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-			<dependency>
-				<groupId>org.wso2.carbon</groupId>
-				<artifactId>org.wso2.carbon.application.deployer</artifactId>
-				<version>${carbon.kernel.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.application.deployer</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.registry.core</artifactId>
@@ -540,7 +541,8 @@
                     </exclusion>
                     <exclusion>
                         <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>                    </exclusion>
+                        <artifactId>javax.servlet-api</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -1236,11 +1238,11 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-			<dependency>
-				<groupId>org.wso2.carbon.commons</groupId>
-				<artifactId>org.wso2.carbon.application.mgt.stub</artifactId>
-				<version>${carbon.commons.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.commons</groupId>
+                <artifactId>org.wso2.carbon.application.mgt.stub</artifactId>
+                <version>${carbon.commons.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.event-processing</groupId>
                 <artifactId>org.wso2.carbon.event.processor.stub</artifactId>
@@ -1329,11 +1331,11 @@
                 <artifactId>neethi</artifactId>
                 <version>${neethi.version}</version>
             </dependency>
-			<dependency>
-				<groupId>commons-codec</groupId>
-				<artifactId>commons-codec</artifactId>
-				<version>${commons.codec.verision}</version>
-			</dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons.codec.verision}</version>
+            </dependency>
 
             <dependency>
                 <groupId>commons-pool.wso2</groupId>
@@ -1504,31 +1506,31 @@
                 <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
                 <version>${carbon.analytics.common.version}</version>
             </dependency>
-			<dependency>
-				<groupId>org.wso2.carbon.analytics</groupId>
-				<artifactId>org.wso2.carbon.analytics.datasource.commons</artifactId>
-				<version>${carbon.analytics.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.wso2.carbon.analytics</groupId>
-				<artifactId>org.wso2.carbon.analytics.dataservice.commons</artifactId>
-				<version>${carbon.analytics.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.wso2.carbon.analytics-common</groupId>
-				<artifactId>org.wso2.carbon.event.publisher.stub</artifactId>
-				<version>${carbon.analytics.common.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.wso2.carbon.analytics</groupId>
-				<artifactId>org.wso2.carbon.analytics.api</artifactId>
-				<version>${carbon.analytics.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.wso2.carbon.analytics-common</groupId>
-				<artifactId>org.wso2.carbon.event.stream.persistence.stub</artifactId>
-				<version>${carbon.analytics.common.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics</groupId>
+                <artifactId>org.wso2.carbon.analytics.datasource.commons</artifactId>
+                <version>${carbon.analytics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics</groupId>
+                <artifactId>org.wso2.carbon.analytics.dataservice.commons</artifactId>
+                <version>${carbon.analytics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.publisher.stub</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics</groupId>
+                <artifactId>org.wso2.carbon.analytics.api</artifactId>
+                <version>${carbon.analytics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.stream.persistence.stub</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.devicemgt</groupId>
                 <artifactId>org.wso2.carbon.device.mgt.extensions.device.type.deployer</artifactId>
@@ -1544,37 +1546,37 @@
                 <artifactId>org.wso2.carbon.device.mgt.extensions.push.notification.provider.mqtt</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
-			<dependency>
-				<groupId>org.wso2.carbon.devicemgt</groupId>
-				<artifactId>org.wso2.carbon.device.mgt.extensions.push.notification.provider.http</artifactId>
-				<version>${carbon.device.mgt.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>org.wso2.carbon.device.mgt.extensions.push.notification.provider.http</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.devicemgt</groupId>
                 <artifactId>org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
-			<dependency>
-				<groupId>org.wso2.carbon.devicemgt</groupId>
-				<artifactId>org.wso2.carbon.device.mgt.extensions.pull.notification</artifactId>
-				<version>${carbon.device.mgt.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>org.wso2.carbon.device.mgt.extensions.pull.notification</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson-annotations.version}</version>
             </dependency>
-			<dependency>
-				<groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson-databind.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-databind.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>org.wso2.orbit.joda-time</groupId>
-				<artifactId>joda-time</artifactId>
-				<version>${joda-time.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda-time.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.org.owasp.encoder</groupId>
                 <artifactId>encoder</artifactId>
@@ -1611,46 +1613,46 @@
                 <artifactId>wss4j</artifactId>
                 <version>${org.apache.ws.security.wso2.version}</version>
             </dependency>
-			<dependency>
-				<groupId>org.wso2.carbon.store</groupId>
-				<artifactId>org.wso2.store.sso.common</artifactId>
-				<version>${carbon.store.sso.common.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.github.openfeign</groupId>
-				<artifactId>feign-core</artifactId>
-				<version>${io.github.openfeign.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.github.openfeign</groupId>
-				<artifactId>feign-jaxrs</artifactId>
-				<version>${io.github.openfeign.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.github.openfeign</groupId>
-				<artifactId>feign-gson</artifactId>
-				<version>${io.github.openfeign.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.github.openfeign</groupId>
-				<artifactId>feign-jackson</artifactId>
-				<version>${io.github.openfeign.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.github.openfeign</groupId>
-				<artifactId>feign-slf4j</artifactId>
-				<version>${io.github.openfeign.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.oltu.oauth2</groupId>
-				<artifactId>org.apache.oltu.oauth2.client</artifactId>
-				<version>${oltu.client.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.datatype</groupId>
-				<artifactId>jackson-datatype-joda</artifactId>
-				<version>${jackson.datatype.joda.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.store</groupId>
+                <artifactId>org.wso2.store.sso.common</artifactId>
+                <version>${carbon.store.sso.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-core</artifactId>
+                <version>${io.github.openfeign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-jaxrs</artifactId>
+                <version>${io.github.openfeign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-gson</artifactId>
+                <version>${io.github.openfeign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-jackson</artifactId>
+                <version>${io.github.openfeign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-slf4j</artifactId>
+                <version>${io.github.openfeign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.oltu.oauth2</groupId>
+                <artifactId>org.apache.oltu.oauth2.client</artifactId>
+                <version>${oltu.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-joda</artifactId>
+                <version>${jackson.datatype.joda.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
@@ -1905,133 +1907,6 @@
         </pluginManagement>
     </build>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>internal.nexus</id>
-            <name>Entgra Internal Repository</name>
-            <url>https://nexus-local.entgra.io/repository/maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </pluginRepository>
-        <pluginRepository>
-            <id>wso2.releases</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </pluginRepository>
-        <pluginRepository>
-            <id>wso2.snapshots</id>
-            <name>Apache Snapshot Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </pluginRepository>
-        <pluginRepository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </pluginRepository>
-    </pluginRepositories>
-
-    <repositories>
-        <!-- Before adding ANYTHING in here, please start a discussion on the dev list.
-             Ideally the Axis2 build should only use Maven central (which is available
-             by default) and nothing else. We had troubles with other repositories in
-             the past. Therefore configuring additional repositories here should be
-             considered very carefully. -->
-      <repository>
-            <id>internal.nexus</id>
-            <name>Entgra Internal Repository</name>
-            <url>https://nexus-local.entgra.io/repository/maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-      </repository>
-      <repository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </repository>
-        <repository>
-            <id>wso2.releases</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </repository>
-        <repository>
-            <id>wso2.snapshots</id>
-            <name>WSO2 Snapshot Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>entgra-nexus</id>
-            <name>Entgra internal Repository</name>
-            <url>http://nexus.entgra.io/repository/maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </repository>
-        <repository>
-            <id>entgra.releases</id>
-            <name>Entgra internal Repository</name>
-            <url>http://nexus.entgra.io/repository/maven-releases/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </repository>
-        <repository>
-            <id>entgra.snapshots</id>
-            <name>Entgra Snapshot Repository</name>
-            <url>http://nexus.entgra.io/repository/maven-snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
-
     <properties>
         <servelet.jsp.version>2.2.1</servelet.jsp.version>
         <testng.version>7.4.0</testng.version>
@@ -2079,11 +1954,11 @@
 
         <!-- Carbon Identity -->
         <carbon.identity.framework.version>5.18.187</carbon.identity.framework.version>
-		<carbon.identity.framework.version.range>[5.2.0, 7.0.0)</carbon.identity.framework.version.range>
+        <carbon.identity.framework.version.range>[5.2.0, 7.0.0)</carbon.identity.framework.version.range>
         <identity.inbound.auth.oauth.version>6.4.111</identity.inbound.auth.oauth.version>
         <identity.inbound.auth.saml.version>5.5.2</identity.inbound.auth.saml.version>
-		<carbon.identity.jwt.grant.version>1.0.31</carbon.identity.jwt.grant.version>
-		<carbon.identity.jwt.grant.version.range>[1.0.31, 2.0.0)</carbon.identity.jwt.grant.version.range>
+        <carbon.identity.jwt.grant.version>1.0.31</carbon.identity.jwt.grant.version>
+        <carbon.identity.jwt.grant.version.range>[1.0.31, 2.0.0)</carbon.identity.jwt.grant.version.range>
         <!-- Carbon Identity import version ranges -->
         <carbon.identity.imp.pkg.version>[5.14.0, 6.0.0)</carbon.identity.imp.pkg.version>
         <carbon.identity-inbound-auth-oauth.imp.pkg.version>[6.0.0, 7.0.0)</carbon.identity-inbound-auth-oauth.imp.pkg.version>
@@ -2106,10 +1981,10 @@
         <!-- Carbon Commons -->
         <carbon.commons.version>4.7.35</carbon.commons.version>
         <version.commons.codec>1.4.0.wso2v1</version.commons.codec>
-		<commons-codec.wso2.osgi.version.range>[1.4.0,2.0.0)</commons-codec.wso2.osgi.version.range>
+        <commons-codec.wso2.osgi.version.range>[1.4.0,2.0.0)</commons-codec.wso2.osgi.version.range>
         <version.commons.io>2.4.0.wso2v1</version.commons.io>
         <version.commons.lang>2.6.0.wso2v1</version.commons.lang>
-	    <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
+        <commons-lang.wso2.osgi.version.range>[2.6.0,3.0.0)</commons-lang.wso2.osgi.version.range>
 
         <!-- Carbon API Management -->
         <carbon.api.mgt.version>9.0.174</carbon.api.mgt.version>
@@ -2118,8 +1993,8 @@
         <!-- Carbon Analytics -->
         <carbon.analytics.common.version>5.1.37</carbon.analytics.common.version>
         <carbon.analytics.common.version.range>[5.1.3,6.0.0)</carbon.analytics.common.version.range>
-		<carbon.analytics.version>1.3.25</carbon.analytics.version>
-		<carbon.analytics.version.range>[1.3.0,2.0.0)</carbon.analytics.version.range>
+        <carbon.analytics.version>1.3.25</carbon.analytics.version>
+        <carbon.analytics.version.range>[1.3.0,2.0.0)</carbon.analytics.version.range>
         <carbon.event-processing.version>2.1.23</carbon.event-processing.version>
 
         <!-- Carbon Registry -->
@@ -2165,7 +2040,7 @@
 
         <!--SC Annotations Dependency -->
         <scannotation.version>1.0.3.wso2v1</scannotation.version>
-		<scannotation.version.range>[1.0.3, 2.0.0)</scannotation.version.range>
+        <scannotation.version.range>[1.0.3, 2.0.0)</scannotation.version.range>
         <commons.pool.wso2.version>1.5.6.wso2v1</commons.pool.wso2.version>
 
         <httpclient.version>4.3.1.wso2v2</httpclient.version>
@@ -2201,8 +2076,8 @@
         <!--JWT grant type extension feature-->
         <identity.jwt.extension.version>1.0.10</identity.jwt.extension.version>
         <jackson-annotations.version>2.9.8.wso2v1</jackson-annotations.version>
-		<jackson-databind.version>2.6.1.wso2v3</jackson-databind.version>
-		<joda-time.version>2.8.2.wso2v1</joda-time.version>
+        <jackson-databind.version>2.6.1.wso2v3</jackson-databind.version>
+        <joda-time.version>2.8.2.wso2v1</joda-time.version>
         <owasp.encoder.version>1.2.0.wso2v1</owasp.encoder.version>
 
         <hibernate-validator.version>5.0.2.Final</hibernate-validator.version>
@@ -2227,18 +2102,18 @@
         <org.apache.synapse.version>2.1.7-wso2v227</org.apache.synapse.version>
         <org.apache.ws.security.wso2.version>1.5.11.wso2v15</org.apache.ws.security.wso2.version>
 
-		<!--carbon store version-->
-		<carbon.store.sso.common.version>1.5.1</carbon.store.sso.common.version>
+        <!--carbon store version-->
+        <carbon.store.sso.common.version>1.5.1</carbon.store.sso.common.version>
 
-		<!--Feign Version-->
-		<io.github.openfeign.version>9.3.1</io.github.openfeign.version>
-		<io.github.openfeign.version.range>[9.3.1,10.0.0)</io.github.openfeign.version.range>
-		<!--Oltu client Version-->
-		<oltu.client.version>1.0.1</oltu.client.version>
-		<jackson.datatype.joda.version>2.1.5</jackson.datatype.joda.version>
-		<commons.codec.verision>1.9</commons.codec.verision>
-		<commons.codec.verision.range>(1.9,2.0]</commons.codec.verision.range>
-		<javassist.version>3.26.0-GA</javassist.version>
+        <!--Feign Version-->
+        <io.github.openfeign.version>9.3.1</io.github.openfeign.version>
+        <io.github.openfeign.version.range>[9.3.1,10.0.0)</io.github.openfeign.version.range>
+        <!--Oltu client Version-->
+        <oltu.client.version>1.0.1</oltu.client.version>
+        <jackson.datatype.joda.version>2.1.5</jackson.datatype.joda.version>
+        <commons.codec.verision>1.9</commons.codec.verision>
+        <commons.codec.verision.range>(1.9,2.0]</commons.codec.verision.range>
+        <javassist.version>3.26.0-GA</javassist.version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
 
         <!-- jacoco plugin version -->
@@ -2269,14 +2144,75 @@
         <imp.package.version.osgi.service>[1.2.0,1.3.0)</imp.package.version.osgi.service>
     </properties>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>internal.nexus</id>
+            <name>Entgra Internal Repository</name>
+            <url>https://nexus-local.entgra.io/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </pluginRepository>
+        <pluginRepository>
+            <id>wso2-nexus</id>
+            <name>WSO2 Public Repository</name>
+            <url>https://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <repositories>
+        <!-- Before adding ANYTHING in here, please start a discussion on the dev list.
+             Ideally the Axis2 build should only use Maven central (which is available
+             by default) and nothing else. We had troubles with other repositories in
+             the past. Therefore configuring additional repositories here should be
+             considered very carefully. -->
+        <repository>
+            <id>internal.nexus</id>
+            <name>Entgra Internal Repository</name>
+            <url>https://nexus-local.entgra.io/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>entgra.nexus</id>
+            <name>Entgra Public Repository</name>
+            <url>https://nexus.entgra.io/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>wso2-nexus</id>
+            <name>WSO2 Public Repository</name>
+            <url>https://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+    </repositories>
+
     <distributionManagement>
         <snapshotRepository>
             <id>maven-snapshots</id>
-            <url>https://nexus.entgra.io/repository/maven-snapshots/</url>
-    	</snapshotRepository>
-    	<repository>
+            <url>https://nexus.entgra.io/repository/maven-snapshot/</url>
+        </snapshotRepository>
+        <repository>
             <id>maven-release</id>
-            <url>https://nexus.entgra.io/repository/maven-releases/</url>
+            <url>https://nexus.entgra.io/repository/maven-release/</url>
         </repository>
     </distributionManagement>
 
