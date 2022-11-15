@@ -22,14 +22,14 @@ public class TokenResponse {
     private String access_token;
     private String refresh_token;
     private String scope;
-    private String tokenType;
+    private String token_type;
     private int expires_in;
 
-    public TokenResponse(String access_token, String refresh_token, String scope, String tokenType, int expires_in) {
+    public TokenResponse(String access_token, String refresh_token, String scope, String token_type, int expires_in) {
         this.access_token = access_token;
         this.refresh_token = refresh_token;
         this.scope = scope;
-        this.tokenType = tokenType;
+        this.token_type = token_type;
         this.expires_in = expires_in;
     }
 
@@ -57,12 +57,12 @@ public class TokenResponse {
         this.scope = scope;
     }
 
-    public String getTokenType() {
-        return tokenType;
+    public String getToken_Type() {
+        return token_type;
     }
 
-    public void setTokenType(String tokenType) {
-        this.tokenType = tokenType;
+    public void setTokenType(String token_type) {
+        this.token_type = token_type;
     }
 
     public int getExpiresIn() {

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.keymgt.extension.service;
 
 import com.google.gson.Gson;
 import okhttp3.Credentials;
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -41,7 +42,6 @@ import org.wso2.carbon.apimgt.keymgt.extension.KeyMgtConstants;
 import org.wso2.carbon.apimgt.keymgt.extension.OAuthApplication;
 import org.wso2.carbon.apimgt.keymgt.extension.TokenRequest;
 import org.wso2.carbon.apimgt.keymgt.extension.TokenResponse;
-import org.wso2.carbon.apimgt.keymgt.extension.exception.BadRequestException;
 import org.wso2.carbon.apimgt.keymgt.extension.exception.KeyMgtException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
@@ -53,9 +53,7 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -82,6 +80,17 @@ public class KeyMgtServiceImpl implements KeyMgtService {
     public DCRResponse dynamicClientRegistration(String clientName, String owner, String grantTypes, String callBackUrl,
                                                  String[] tags, boolean isSaasApp) throws KeyMgtException {
 
+        if (owner == null) {
+            PrivilegedCarbonContext threadLocalCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            try {
+                owner = APIUtil.getTenantAdminUserName(threadLocalCarbonContext.getTenantDomain());
+            } catch (APIManagementException e) {
+                String msg = "Error occurred while retrieving admin user for the tenant " + threadLocalCarbonContext.getTenantDomain();
+                log.error(msg, e);
+                throw new KeyMgtException(msg);
+            }
+        }
+
         String tenantDomain = MultitenantUtils.getTenantDomain(owner);
         int tenantId;
 
@@ -97,10 +106,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
         kmConfig = getKeyManagerConfig();
 
         if (KeyMgtConstants.SUPER_TENANT.equals(tenantDomain)) {
-            OAuthApplication superTenantOauthApp = createOauthApplication(
-                    KeyMgtConstants.RESERVED_OAUTH_APP_NAME_PREFIX + KeyMgtConstants.SUPER_TENANT,
-                    kmConfig.getAdminUsername(), tags);
-            return new DCRResponse(superTenantOauthApp.getClientId(), superTenantOauthApp.getClientSecret());
+            OAuthApplication dcrApplication = createOauthApplication(clientName, kmConfig.getAdminUsername(), tags);
+            return new DCRResponse(dcrApplication.getClientId(), dcrApplication.getClientSecret());
         } else {
             // super-tenant admin dcr and token generation
             OAuthApplication superTenantOauthApp = createOauthApplication(
@@ -141,7 +148,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
         }
     }
 
-    public TokenResponse generateAccessToken(TokenRequest tokenRequest) throws KeyMgtException, BadRequestException {
+    public TokenResponse generateAccessToken(TokenRequest tokenRequest) throws KeyMgtException {
         try {
             Application application = APIUtil.getApplicationByClientId(tokenRequest.getClientId());
             String tenantDomain = MultitenantUtils.getTenantDomain(application.getOwner());
@@ -167,20 +174,43 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             }
 
             JSONObject jsonObject = new JSONObject();
-            if ("client_credentials".equals(tokenRequest.getGrantType())) {
-                jsonObject.put("grant_type", "password");
-                jsonObject.put("username", username);
-                jsonObject.put("password", password);
-            } else if ("refresh_token".equals(tokenRequest.getGrantType())) {
-                jsonObject.put("grant_type", "refresh_token");
-                jsonObject.put("refresh_token", tokenRequest.getRefreshToken());
-            } else {
-                msg = "Invalid grant type: " + tokenRequest.getGrantType();
-                throw new BadRequestException(msg);
+            RequestBody appTokenPayload;
+            switch (tokenRequest.getGrantType()) {
+                case "client_credentials":
+                case "password":
+                    appTokenPayload = new FormBody.Builder()
+                            .add("grant_type", "password")
+                            .add("username", username)
+                            .add("password", password)
+                            .add("scope", tokenRequest.getScope()).build();
+                    break;
+
+                case "refresh_token":
+                    appTokenPayload = new FormBody.Builder()
+                            .add("grant_type", "refresh_token")
+                            .add("refresh_token", tokenRequest.getRefreshToken())
+                            .add("scope", tokenRequest.getScope()).build();
+                    break;
+                case "urn:ietf:params:oauth:grant-type:jwt-bearer":
+                    appTokenPayload = new FormBody.Builder()
+                            .add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                            .add("assertion", tokenRequest.getAssertion())
+                            .add("scope", tokenRequest.getScope()).build();
+                    break;
+                case "access_token":
+                    appTokenPayload = new FormBody.Builder()
+                            .add("grant_type", "access_token")
+                            .add("admin_access_token", tokenRequest.getAdminAccessToken())
+                            .add("scope", tokenRequest.getScope()).build();
+                    break;
+                default:
+                    appTokenPayload = new FormBody.Builder()
+                            .add("grant_type", tokenRequest.getGrantType())
+                            .add("scope", tokenRequest.getScope()).build();
+                    break;
             }
             jsonObject.put("scope", tokenRequest.getScope());
 
-            RequestBody appTokenPayload = RequestBody.Companion.create(jsonObject.toString(), JSON);
             kmConfig = getKeyManagerConfig();
             String appTokenEndpoint = kmConfig.getServerUrl() + KeyMgtConstants.OAUTH2_TOKEN_ENDPOINT;
             Request request = new Request.Builder()
@@ -449,12 +479,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
         };
         return new OkHttpClient.Builder()
                 .sslSocketFactory(getSimpleTrustedSSLSocketFactory(), trustAllCerts)
-                .hostnameVerifier(new HostnameVerifier() {
-                    @Override
-                    public boolean verify(String s, SSLSession sslSession) {
-                        return true;
-                    }
-                }).build();
+                .hostnameVerifier((hostname, sslSession) -> true).build();
     }
 
     private static SSLSocketFactory getSimpleTrustedSSLSocketFactory() {
