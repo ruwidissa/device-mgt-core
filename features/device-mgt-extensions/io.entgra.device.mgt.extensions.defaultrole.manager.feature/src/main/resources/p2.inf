@@ -1,0 +1,2 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.device.mgt.extensions.defaultrole.manager_${feature.version}/conf/default-roles-config.xml,target:${installFolder}/../../../repository/conf/default-roles-config.xml,overwrite:true);\
