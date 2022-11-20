@@ -40,6 +40,9 @@
         <module>org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp</module>
         <module>org.wso2.carbon.device.mgt.extensions.device.type.deployer</module>
 		<module>org.wso2.carbon.device.mgt.extensions.pull.notification</module>
+        <module>io.entgra.device.mgt.extensions.logger</module>
+        <module>io.entgra.device.mgt.extensions.defaultrole.manager</module>
+        <module>io.entgra.device.mgt.extensions.stateengine</module>
     </modules>
 
 </project>

@@ -38,6 +38,9 @@
         <module>org.wso2.carbon.device.mgt.extensions.push.notification.provider.mqtt.feature</module>
         <module>org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp.feature</module>
 		<module>org.wso2.carbon.device.mgt.extensions.push.notification.provider.http.feature</module>
+        <module>io.entgra.device.mgt.extensions.defaultrole.manager.feature</module>
+        <module>io.entgra.device.mgt.extensions.logger.feature</module>
+        <module>io.entgra.device.mgt.extensions.stateengine.feature</module>
     </modules>
 
 </project>
