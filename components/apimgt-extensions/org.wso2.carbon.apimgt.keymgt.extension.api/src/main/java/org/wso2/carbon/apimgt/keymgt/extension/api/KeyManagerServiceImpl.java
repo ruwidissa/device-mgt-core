@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.extension.api;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.keymgt.extension.DCRResponse;
@@ -41,6 +42,8 @@ import java.util.Base64;
 
 public class KeyManagerServiceImpl implements KeyManagerService {
 
+    Gson gson = new Gson();
+
     @Override
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -51,7 +54,7 @@ public class KeyManagerServiceImpl implements KeyManagerService {
             KeyMgtService keyMgtService = new KeyMgtServiceImpl();
             DCRResponse resp = keyMgtService.dynamicClientRegistration(dcrRequest.getApplicationName(), dcrRequest.getUsername(),
                     dcrRequest.getGrantTypes(), dcrRequest.getCallBackUrl(), dcrRequest.getTags(), dcrRequest.getIsSaasApp());
-            return Response.status(Response.Status.CREATED).entity(resp).build();
+            return Response.status(Response.Status.CREATED).entity(gson.toJson(resp)).build();
         } catch (KeyMgtException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
@@ -80,7 +83,7 @@ public class KeyManagerServiceImpl implements KeyManagerService {
                     new TokenRequest(encodedClientCredentials.split(":")[0],
                             encodedClientCredentials.split(":")[1], refreshToken, scope,
                             grantType, assertion,admin_access_token));
-            return Response.status(Response.Status.CREATED).entity(resp).build();
+            return Response.status(Response.Status.CREATED).entity(gson.toJson(resp)).build();
         } catch (KeyMgtException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         } catch (BadRequestException e) {

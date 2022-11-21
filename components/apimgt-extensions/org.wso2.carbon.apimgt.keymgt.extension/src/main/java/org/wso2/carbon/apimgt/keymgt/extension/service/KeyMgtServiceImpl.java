@@ -28,11 +28,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -42,6 +40,7 @@ import org.wso2.carbon.apimgt.keymgt.extension.KeyMgtConstants;
 import org.wso2.carbon.apimgt.keymgt.extension.OAuthApplication;
 import org.wso2.carbon.apimgt.keymgt.extension.TokenRequest;
 import org.wso2.carbon.apimgt.keymgt.extension.TokenResponse;
+import org.wso2.carbon.apimgt.keymgt.extension.exception.BadRequestException;
 import org.wso2.carbon.apimgt.keymgt.extension.exception.KeyMgtException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
@@ -64,7 +63,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 
 public class KeyMgtServiceImpl implements KeyMgtService {
 
@@ -148,9 +147,17 @@ public class KeyMgtServiceImpl implements KeyMgtService {
         }
     }
 
-    public TokenResponse generateAccessToken(TokenRequest tokenRequest) throws KeyMgtException {
+    public TokenResponse generateAccessToken(TokenRequest tokenRequest) throws KeyMgtException, BadRequestException {
         try {
             Application application = APIUtil.getApplicationByClientId(tokenRequest.getClientId());
+            if (application == null) {
+                JSONObject errorResponse = new JSONObject();
+                errorResponse.put("error", "invalid_client");
+                errorResponse.put("error_description", "A valid OAuth client could not be found for client_id: "
+                        + tokenRequest.getClientId());
+                throw new BadRequestException(errorResponse.toString());
+            }
+
             String tenantDomain = MultitenantUtils.getTenantDomain(application.getOwner());
 
             String username, password;
@@ -173,7 +180,6 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                 }
             }
 
-            JSONObject jsonObject = new JSONObject();
             RequestBody appTokenPayload;
             switch (tokenRequest.getGrantType()) {
                 case "client_credentials":
@@ -209,7 +215,6 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                             .add("scope", tokenRequest.getScope()).build();
                     break;
             }
-            jsonObject.put("scope", tokenRequest.getScope());
 
             kmConfig = getKeyManagerConfig();
             String appTokenEndpoint = kmConfig.getServerUrl() + KeyMgtConstants.OAUTH2_TOKEN_ENDPOINT;
@@ -220,20 +225,25 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                     .build();
 
             Response response = client.newCall(request).execute();
-            jsonObject = new JSONObject(response.body().string());
+            JSONObject responseObj = new JSONObject(Objects.requireNonNull(response.body()).string());
+
+            if (!response.isSuccessful()) {
+                throw new BadRequestException(responseObj.toString());
+            }
+
             String accessToken;
             if (KeyMgtConstants.SUPER_TENANT.equals(tenantDomain)) {
-                accessToken = jsonObject.getString("access_token");
+                accessToken = responseObj.getString("access_token");
             } else {
                 int tenantId = getRealmService()
                         .getTenantManager().getTenantId(tenantDomain);
-                accessToken = tenantId + "_" + jsonObject.getString("access_token");
+                accessToken = tenantId + "_" + responseObj.getString("access_token");
             }
             return new TokenResponse(accessToken,
-                    jsonObject.getString("refresh_token"),
-                    jsonObject.getString("scope"),
-                    jsonObject.getString("token_type"),
-                    jsonObject.getInt("expires_in"));
+                    responseObj.getString("refresh_token"),
+                    responseObj.getString("scope"),
+                    responseObj.getString("token_type"),
+                    responseObj.getInt("expires_in"));
 
         } catch (APIManagementException e) {
             msg = "Error occurred while retrieving application";
