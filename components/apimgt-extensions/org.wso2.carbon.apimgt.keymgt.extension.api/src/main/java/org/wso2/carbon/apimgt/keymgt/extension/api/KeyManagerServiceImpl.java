@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.keymgt.extension.api;
 
 import com.google.gson.Gson;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.keymgt.extension.DCRResponse;
 import org.wso2.carbon.apimgt.keymgt.extension.TokenRequest;
 import org.wso2.carbon.apimgt.keymgt.extension.TokenResponse;
@@ -83,7 +81,7 @@ public class KeyManagerServiceImpl implements KeyManagerService {
                     new TokenRequest(encodedClientCredentials.split(":")[0],
                             encodedClientCredentials.split(":")[1], refreshToken, scope,
                             grantType, assertion,admin_access_token));
-            return Response.status(Response.Status.CREATED).entity(gson.toJson(resp)).build();
+            return Response.status(Response.Status.OK).entity(gson.toJson(resp)).build();
         } catch (KeyMgtException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         } catch (BadRequestException e) {
