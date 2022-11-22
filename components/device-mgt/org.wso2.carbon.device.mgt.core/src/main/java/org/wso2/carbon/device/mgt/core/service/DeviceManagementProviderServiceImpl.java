@@ -143,6 +143,7 @@ import org.wso2.carbon.device.mgt.core.internal.PluginInitializationListener;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
+import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.email.sender.core.ContentProviderInfo;
@@ -4859,5 +4860,38 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
         paginationResult.setData(populateAllDeviceInfo(subscribedDeviceDetails));
         return paginationResult;
+    }
+
+    @Override
+    public Boolean SendDeviceNameChangedNotification(Device device) throws DeviceManagementException {
+
+        try {
+            ProfileOperation operation = new ProfileOperation();
+            operation.setCode("SEND_USERNAME");
+            operation.setType(Operation.Type.PROFILE);
+            operation.setPayLoad(device.getName());
+
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
+            deviceIdentifier.setId(device.getDeviceIdentifier());
+            deviceIdentifier.setType(device.getType());
+
+            List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
+            deviceIdentifiers.add(deviceIdentifier);
+
+            Activity activity;
+            activity = addOperation(device.getType(), operation, deviceIdentifiers);
+
+            return activity != null;
+
+        } catch (OperationManagementException e) {
+            String msg = "Error occurred while sending operation" ;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (InvalidDeviceException e) {
+            String msg = "Invalid Device exception occurred";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
+
     }
 }
