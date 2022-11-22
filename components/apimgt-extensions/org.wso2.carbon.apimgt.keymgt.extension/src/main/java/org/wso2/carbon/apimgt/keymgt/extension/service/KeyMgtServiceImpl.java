@@ -160,37 +160,40 @@ public class KeyMgtServiceImpl implements KeyMgtService {
 
             String tenantDomain = MultitenantUtils.getTenantDomain(application.getOwner());
 
-            String username, password;
-            if (KeyMgtConstants.SUPER_TENANT.equals(tenantDomain)) {
-                kmConfig = getKeyManagerConfig();
-                username = kmConfig.getAdminUsername();
-                password = kmConfig.getAdminUsername();
-            } else {
-                try {
-                    username = getRealmService()
-                            .getTenantUserRealm(-1234).getRealmConfiguration()
-                            .getRealmProperty("reserved_tenant_user_username") + "@" + tenantDomain;
-                    password = getRealmService()
-                            .getTenantUserRealm(-1234).getRealmConfiguration()
-                            .getRealmProperty("reserved_tenant_user_password");
-                } catch (UserStoreException e) {
-                    msg = "Error while loading user realm configuration";
-                    log.error(msg);
-                    throw new KeyMgtException(msg);
-                }
-            }
+//            String username, password;
+//            if (KeyMgtConstants.SUPER_TENANT.equals(tenantDomain)) {
+//                kmConfig = getKeyManagerConfig();
+//                username = kmConfig.getAdminUsername();
+//                password = kmConfig.getAdminPassword();
+//            } else {
+//                try {
+//                    username = getRealmService()
+//                            .getTenantUserRealm(-1234).getRealmConfiguration()
+//                            .getRealmProperty("reserved_tenant_user_username") + "@" + tenantDomain;
+//                    password = getRealmService()
+//                            .getTenantUserRealm(-1234).getRealmConfiguration()
+//                            .getRealmProperty("reserved_tenant_user_password");
+//                } catch (UserStoreException e) {
+//                    msg = "Error while loading user realm configuration";
+//                    log.error(msg);
+//                    throw new KeyMgtException(msg);
+//                }
+//            }
 
             RequestBody appTokenPayload;
             switch (tokenRequest.getGrantType()) {
                 case "client_credentials":
+                    appTokenPayload = new FormBody.Builder()
+                            .add("grant_type", "client_credentials")
+                            .add("scope", tokenRequest.getScope()).build();
+                    break;
                 case "password":
                     appTokenPayload = new FormBody.Builder()
                             .add("grant_type", "password")
-                            .add("username", username)
-                            .add("password", password)
+                            .add("username", tokenRequest.getUsername())
+                            .add("password", tokenRequest.getPassword())
                             .add("scope", tokenRequest.getScope()).build();
                     break;
-
                 case "refresh_token":
                     appTokenPayload = new FormBody.Builder()
                             .add("grant_type", "refresh_token")
@@ -239,12 +242,19 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                         .getTenantManager().getTenantId(tenantDomain);
                 accessToken = tenantId + "_" + responseObj.getString("access_token");
             }
-            return new TokenResponse(accessToken,
-                    responseObj.getString("refresh_token"),
-                    responseObj.getString("scope"),
-                    responseObj.getString("token_type"),
-                    responseObj.getInt("expires_in"));
 
+            if (tokenRequest.getGrantType().equals("client_credentials")) {
+                return new TokenResponse(accessToken,
+                        responseObj.getString("scope"),
+                        responseObj.getString("token_type"),
+                        responseObj.getInt("expires_in"));
+            } else {
+                return new TokenResponse(accessToken,
+                        responseObj.getString("refresh_token"),
+                        responseObj.getString("scope"),
+                        responseObj.getString("token_type"),
+                        responseObj.getInt("expires_in"));
+            }
         } catch (APIManagementException e) {
             msg = "Error occurred while retrieving application";
             log.error(msg);
