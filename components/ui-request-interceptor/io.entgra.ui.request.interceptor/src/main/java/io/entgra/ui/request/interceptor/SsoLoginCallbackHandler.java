@@ -68,7 +68,7 @@ public class SsoLoginCallbackHandler extends HttpServlet {
 
         String scope = session.getAttribute("scope").toString();
 
-        HttpPost tokenEndpoint = new HttpPost(keyManagerUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(keyManagerUrl + HandlerConstants.OAUTH2_TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + session.getAttribute("encodedClientApp"));
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 

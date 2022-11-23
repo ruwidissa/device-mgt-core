@@ -159,6 +159,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             }
 
             String tenantDomain = MultitenantUtils.getTenantDomain(application.getOwner());
+            kmConfig = getKeyManagerConfig();
+            String appTokenEndpoint = kmConfig.getServerUrl() + KeyMgtConstants.OAUTH2_TOKEN_ENDPOINT;
 
             RequestBody appTokenPayload;
             switch (tokenRequest.getGrantType()) {
@@ -184,6 +186,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                             .add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
                             .add("assertion", tokenRequest.getAssertion())
                             .add("scope", tokenRequest.getScope()).build();
+                    appTokenEndpoint += "?tenantDomain=carbon.super";
                     break;
                 case "access_token":
                     appTokenPayload = new FormBody.Builder()
@@ -198,8 +201,6 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                     break;
             }
 
-            kmConfig = getKeyManagerConfig();
-            String appTokenEndpoint = kmConfig.getServerUrl() + KeyMgtConstants.OAUTH2_TOKEN_ENDPOINT;
             Request request = new Request.Builder()
                     .url(appTokenEndpoint)
                     .addHeader(KeyMgtConstants.AUTHORIZATION_HEADER, Credentials.basic(tokenRequest.getClientId(), tokenRequest.getClientSecret()))

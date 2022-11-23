@@ -55,7 +55,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
-import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
 import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -654,7 +653,7 @@ public class HandlerUtil {
         return tokenResultResponse;
     }
     public static ProxyResponse getTokenResult(AuthData authData, String keymanagerUrl) throws IOException {
-        HttpPost tokenEndpoint = new HttpPost(keymanagerUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(keymanagerUrl + HandlerConstants.OAUTH2_TOKEN_ENDPOINT);
         StringEntity tokenEndpointPayload = new StringEntity(
                 "grant_type=refresh_token&refresh_token=" + authData.getRefreshToken(),
                 ContentType.APPLICATION_FORM_URLENCODED);
