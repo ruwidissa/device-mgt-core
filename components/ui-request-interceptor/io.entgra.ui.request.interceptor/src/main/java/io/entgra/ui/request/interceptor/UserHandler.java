@@ -71,6 +71,7 @@ public class UserHandler extends HttpServlet {
             }
 
             String accessToken = authData.getAccessToken();
+            String accessTokenWithoutPrefix = accessToken.substring(accessToken.indexOf("_") + 1);
 
             HttpPost tokenEndpoint = new HttpPost(keymanagerUrl + HandlerConstants.INTROSPECT_ENDPOINT);
             tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
@@ -79,7 +80,7 @@ public class UserHandler extends HttpServlet {
             String adminPassword = dmc.getKeyManagerConfigurations().getAdminPassword();
             tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
                     .encodeToString((adminUsername + HandlerConstants.COLON + adminPassword).getBytes()));
-            StringEntity tokenEPPayload = new StringEntity("token=" + accessToken,
+            StringEntity tokenEPPayload = new StringEntity("token=" + accessTokenWithoutPrefix,
                     ContentType.APPLICATION_FORM_URLENCODED);
             tokenEndpoint.setEntity(tokenEPPayload);
             ProxyResponse tokenStatus = HandlerUtil.execute(tokenEndpoint);

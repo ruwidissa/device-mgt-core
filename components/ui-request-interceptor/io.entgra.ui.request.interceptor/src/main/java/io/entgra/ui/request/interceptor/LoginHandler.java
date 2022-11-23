@@ -229,7 +229,7 @@ public class LoginHandler extends HttpServlet {
      * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
     private ProxyResponse getTokenResult(String encodedClientApp, JsonArray scopes) throws IOException {
-        HttpPost tokenEndpoint = new HttpPost(kmManagerUrl+ HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.INTERNAL_TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
         String scopeString = HandlerUtil.getScopeString(scopes);
