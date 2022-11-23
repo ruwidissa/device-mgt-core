@@ -40,8 +40,6 @@ public interface KeyManagerService {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/token")
     Response generateAccessToken(@HeaderParam("Authorization") String basicAuthHeader,
-                                 @FormParam("client_id") String clientId,
-                                 @FormParam("client_secret") String clientSecret,
                                  @FormParam("refresh_token") String refreshToken,
                                  @FormParam("scope") String scope,
                                  @FormParam("grant_type") String grantType,
