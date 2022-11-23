@@ -69,7 +69,9 @@ public class KeyManagerServiceImpl implements KeyManagerService {
                                         @FormParam("scope") String scope,
                                         @FormParam("grant_type") String grantType,
                                         @FormParam("assertion") String assertion,
-                                        @FormParam("admin_access_token") String admin_access_token) {
+                                        @FormParam("admin_access_token") String admin_access_token,
+                                        @FormParam("username") String username,
+                                        @FormParam("password") String password) {
         try {
             if (basicAuthHeader == null) {
                 String msg = "Invalid credentials. Make sure your API call is invoked with a Basic Authorization header.";
@@ -80,7 +82,7 @@ public class KeyManagerServiceImpl implements KeyManagerService {
             TokenResponse resp = keyMgtService.generateAccessToken(
                     new TokenRequest(encodedClientCredentials.split(":")[0],
                             encodedClientCredentials.split(":")[1], refreshToken, scope,
-                            grantType, assertion,admin_access_token));
+                            grantType, assertion, admin_access_token, username, password));
             return Response.status(Response.Status.OK).entity(gson.toJson(resp)).build();
         } catch (KeyMgtException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
