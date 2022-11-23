@@ -160,26 +160,6 @@ public class KeyMgtServiceImpl implements KeyMgtService {
 
             String tenantDomain = MultitenantUtils.getTenantDomain(application.getOwner());
 
-//            String username, password;
-//            if (KeyMgtConstants.SUPER_TENANT.equals(tenantDomain)) {
-//                kmConfig = getKeyManagerConfig();
-//                username = kmConfig.getAdminUsername();
-//                password = kmConfig.getAdminPassword();
-//            } else {
-//                try {
-//                    username = getRealmService()
-//                            .getTenantUserRealm(-1234).getRealmConfiguration()
-//                            .getRealmProperty("reserved_tenant_user_username") + "@" + tenantDomain;
-//                    password = getRealmService()
-//                            .getTenantUserRealm(-1234).getRealmConfiguration()
-//                            .getRealmProperty("reserved_tenant_user_password");
-//                } catch (UserStoreException e) {
-//                    msg = "Error while loading user realm configuration";
-//                    log.error(msg);
-//                    throw new KeyMgtException(msg);
-//                }
-//            }
-
             RequestBody appTokenPayload;
             switch (tokenRequest.getGrantType()) {
                 case "client_credentials":
@@ -197,8 +177,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                 case "refresh_token":
                     appTokenPayload = new FormBody.Builder()
                             .add("grant_type", "refresh_token")
-                            .add("refresh_token", tokenRequest.getRefreshToken())
-                            .add("scope", tokenRequest.getScope()).build();
+                            .add("refresh_token", tokenRequest.getRefreshToken()).build();
                     break;
                 case "urn:ietf:params:oauth:grant-type:jwt-bearer":
                     appTokenPayload = new FormBody.Builder()
