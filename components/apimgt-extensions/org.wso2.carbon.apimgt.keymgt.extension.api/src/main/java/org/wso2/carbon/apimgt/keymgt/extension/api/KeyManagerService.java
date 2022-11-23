@@ -46,5 +46,7 @@ public interface KeyManagerService {
                                  @FormParam("scope") String scope,
                                  @FormParam("grant_type") String grantType,
                                  @FormParam("assertion") String assertion,
-                                 @FormParam("admin_access_token") String admin_access_token);
+                                 @FormParam("admin_access_token") String admin_access_token,
+                                 @FormParam("username") String username,
+                                 @FormParam("password") String password);
 }
