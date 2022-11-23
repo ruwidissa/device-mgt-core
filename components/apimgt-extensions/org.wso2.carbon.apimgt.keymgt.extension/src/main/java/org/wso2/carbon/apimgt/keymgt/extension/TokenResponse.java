@@ -33,6 +33,13 @@ public class TokenResponse {
         this.expires_in = expires_in;
     }
 
+    public TokenResponse(String access_token, String scope, String token_type, int expires_in) {
+        this.access_token = access_token;
+        this.scope = scope;
+        this.token_type = token_type;
+        this.expires_in = expires_in;
+    }
+
     public String getAccessToken() {
         return access_token;
     }
