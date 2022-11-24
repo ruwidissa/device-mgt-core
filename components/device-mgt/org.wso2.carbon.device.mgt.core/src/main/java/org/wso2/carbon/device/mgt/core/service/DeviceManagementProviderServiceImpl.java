@@ -120,6 +120,7 @@ import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.DeviceManagementPluginRepository;
 import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.impl.DeviceCacheManagerImpl;
+import org.wso2.carbon.device.mgt.core.common.Constants;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.dao.ApplicationDAO;
@@ -4867,7 +4868,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
         try {
             ProfileOperation operation = new ProfileOperation();
-            operation.setCode("SEND_USERNAME");
+            operation.setCode(Constants.SEND_USERNAME);
             operation.setType(Operation.Type.PROFILE);
             operation.setPayLoad(device.getName());
 
@@ -4877,14 +4878,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
             List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
             deviceIdentifiers.add(deviceIdentifier);
-
             Activity activity;
             activity = addOperation(device.getType(), operation, deviceIdentifiers);
 
             return activity != null;
-
         } catch (OperationManagementException e) {
-            String msg = "Error occurred while sending operation" ;
+            String msg = "Error occurred while sending operation";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         } catch (InvalidDeviceException e) {
@@ -4892,6 +4891,5 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
-
     }
 }

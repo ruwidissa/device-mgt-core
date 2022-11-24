@@ -717,44 +717,17 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             persistedDevice.setName(device.getName());
             System.out.println("This is rename device");
             boolean responseOfmodifyEnrollment = deviceManagementProviderService.modifyEnrollment(persistedDevice);
-            boolean responseOfDeviceNameChanged = deviceManagementProviderService.SendDeviceNameChangedNotification(persistedDevice);
-
-//            boolean response = responseOfmodifyEnrollment || responseOfDeviceNameChanged;
-
-
-//                ProfileOperation operation = new ProfileOperation();
-//                operation.setCode("SEND_USERNAME");
-//                operation.setType(Operation.Type.PROFILE);
-//                operation.setPayLoad(device.getName());
-//
-//                DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
-//                deviceIdentifier.setId(persistedDevice.getDeviceIdentifier());
-//                deviceIdentifier.setType(persistedDevice.getType());
-//
-//                List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
-//                deviceIdentifiers.add(deviceIdentifier);
-//
-////                Activity activity;
-//            Activity activity = deviceManagementProviderService.addOperation(persistedDevice.getType(), operation, deviceIdentifiers);
-//            ;
-//            boolean responseOfDeviceNameChanged = activity != null;
-
-            boolean response = responseOfmodifyEnrollment || responseOfDeviceNameChanged;
-
+            boolean responseOfDeviceNameChanged = deviceManagementProviderService.SendDeviceNameChangedNotification(
+                    persistedDevice);
+            boolean response = responseOfmodifyEnrollment && responseOfDeviceNameChanged;
 
             return Response.status(Response.Status.CREATED).entity(response).build();
-//            return Response.status(Response.Status.CREATED).entity(responseOfmodifyEnrollment).build();
-
         } catch (DeviceManagementException e) {
             log.error("Error encountered while updating device of type : " + deviceType + " and " +
                     "ID : " + deviceId);
             return Response.status(Response.Status.BAD_REQUEST).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage("Error while updating " +
                             "device of type " + deviceType + " and ID : " + deviceId).build()).build();
-//        } catch (OperationManagementException e) {
-//            throw new RuntimeException(e);
-//        } catch (InvalidDeviceException e) {
-//            throw new RuntimeException(e);
         }
     }
 
