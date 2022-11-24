@@ -194,8 +194,8 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             GroupManagementDAOFactory.beginTransaction();
             DeviceGroup existingGroup = this.groupDAO.getGroup(groupId, tenantId);
             if (existingGroup != null) {
-                boolean existingGroupName = this.groupDAO.getGroup(deviceGroup.getName(), tenantId) != null;
-                if (existingGroupName) {
+                DeviceGroup existingGroupByName = this.groupDAO.getGroup(deviceGroup.getName(), tenantId);
+                if (existingGroupByName != null && existingGroupByName.getGroupId() != groupId) {
                     throw new GroupAlreadyExistException("Group already exists with name '" + deviceGroup.getName() + "'.");
                 }
                 List<DeviceGroup> groupsToUpdate = new ArrayList<>();
