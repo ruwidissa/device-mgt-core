@@ -626,7 +626,9 @@ public class TraccarClientFactory {
                 authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
                 serverUrl(HttpReportingUtil.trackerServer())));
         String result = res.get();
-        log.info("Group " + trackerGroupInfo.getGroupId() + " has been added to Traccar.");
+        if (null != trackerGroupInfo) {
+            log.info("Group " + trackerGroupInfo.getGroupId() + " has been added to Traccar.");
+        }
         if (res.isDone() && result.charAt(0) == '{') {
             JSONObject obj = new JSONObject(result);
             if (obj.has("id")) {
