@@ -17,14 +17,13 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.devicemgt</groupId>
     <artifactId>carbon-devicemgt</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.14-SNAPSHOT</version>
+    <version>5.0.14</version>
     <name>WSO2 Carbon - Device Management - Parent</name>
     <url>http://wso2.org</url>
     <description>WSO2 Connected Device Manager Components</description>
@@ -1822,7 +1821,7 @@
         <url>https://repository.entgra.net/community/device-mgt-core.git</url>
         <developerConnection>scm:git:https://repository.entgra.net/community/device-mgt-core.git</developerConnection>
         <connection>scm:git:https://repository.entgra.net/community/device-mgt-core.git</connection>
-        <tag>HEAD</tag>
+        <tag>v5.0.14</tag>
     </scm>
 
     <build>
@@ -2034,7 +2033,7 @@
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <carbon.device.mgt.version>5.0.14-SNAPSHOT</carbon.device.mgt.version>
+        <carbon.device.mgt.version>5.0.14</carbon.device.mgt.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.7.35</carbon.commons.version>
