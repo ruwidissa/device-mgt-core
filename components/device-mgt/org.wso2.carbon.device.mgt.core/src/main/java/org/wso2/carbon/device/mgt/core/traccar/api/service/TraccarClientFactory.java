@@ -470,6 +470,54 @@ public class TraccarClientFactory {
     }
 
     /**
+     * Modify the Device
+     *
+     * @param traccarDevice with DeviceName UniqueId, Status, Disabled LastUpdate, PositionId, GroupId
+     *                      Model, Contact, Category, fenceIds
+     * @throws TrackerManagementDAOException Failed while add Traccar Device the operation
+     */
+    public void modifyDevice(TraccarDevice traccarDevice, int tenantId) throws TrackerManagementDAOException, ExecutionException, InterruptedException {
+        TrackerDeviceInfo trackerDeviceInfo = null;
+        try {
+            TrackerManagementDAOFactory.openConnection();
+            trackerDeviceInfo = trackerDAO.getTrackerDevice(traccarDevice.getId(), tenantId);
+        } catch (TrackerManagementDAOException e) {
+            String msg = "Error occurred while mapping with deviceId .";
+            log.error(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred establishing the DB connection .";
+            log.error(msg, e);
+            throw new TrackerManagementDAOException(msg, e);
+        } finally {
+            TrackerManagementDAOFactory.closeConnection();
+        }
+        if (trackerDeviceInfo != null) {
+            log.info("Preparing to rename device (" + traccarDevice.getId() + " to taccar server");
+            String url = defaultPort + "/api/devices/" + trackerDeviceInfo.getTraccarDeviceId();
+            JSONObject payload = TraccarUtil.TraccarDevicePayload(traccarDevice, trackerDeviceInfo.getTraccarDeviceId());
+            Future<String> res = executor.submit(new OkHttpClientThreadPool(url, payload, TraccarHandlerConstants.Methods.PUT,
+                    authorizedKey(HttpReportingUtil.trackerUser(), HttpReportingUtil.trackerPassword()),
+                    serverUrl(HttpReportingUtil.trackerServer())));
+            String result = res.get();
+            log.info("Device " + traccarDevice.getDeviceIdentifier() + " has been added to Traccar.");
+            if (res.isDone() && result.charAt(0) == '{') {
+                log.info("Succesfully renamed Traccar Device - " + traccarDevice.getId() + "in server");
+            } else {
+                log.info("Failed to rename Traccar Device" + traccarDevice.getId() + "in server");
+            }
+        } else {
+//            forward to add device
+            try {
+                addDevice(traccarDevice, tenantId);
+            } catch (TrackerAlreadyExistException e) {
+                String msg = "The device already exist";
+                log.error(msg, e);
+            }
+        }
+    }
+
+    /**
      * Add Device GPS Location operation.
      *
      * @param deviceInfo with DeviceIdentifier, Timestamp, Lat, Lon, Bearing, Speed, ignition

@@ -66,4 +66,12 @@ public class TraccarUtil {
         payload.put("attributes", new JSONObject());
         return payload;
     }
+
+    public static JSONObject TraccarDevicePayload(TraccarDevice deviceInfo, int id) {
+        JSONObject payload = new JSONObject();
+        payload.put("id", id);
+        payload.put("name", deviceInfo.getDeviceName());
+        payload.put("uniqueId", deviceInfo.getUniqueId());
+        return payload;
+    }
 }

@@ -527,6 +527,24 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.closeConnection();
         }
         extractDeviceLocationToUpdate(device);
+        //enroll Traccar device
+        if (HttpReportingUtil.isTrackerEnabled()) {
+            try {
+                int tenantId = this.getTenantId();
+                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService().modifyDevice(device, tenantId);
+            } catch (ExecutionException e) {
+                log.error("ExecutionException : " + e);
+                //throw new RuntimeException(e);
+                //Exception was not thrown due to being conflicted with non-traccar features
+            } catch (InterruptedException e) {
+                log.error("InterruptedException : " + e);
+                //throw new RuntimeException(e);
+                //Exception was not thrown due to being conflicted with non-traccar features
+            }
+        } else {
+            log.info("Traccar is disabled");
+        }
+        //enroll Traccar device
         return status;
     }
 
