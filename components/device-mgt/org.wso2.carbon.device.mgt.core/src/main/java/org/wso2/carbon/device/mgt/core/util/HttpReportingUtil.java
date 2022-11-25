@@ -26,6 +26,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HTTP;
+import org.json.JSONObject;
 import org.wso2.carbon.device.mgt.common.exceptions.EventPublishingException;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import java.io.IOException;
@@ -39,6 +40,7 @@ public class HttpReportingUtil {
     private static final String TRACKER_SERVER_URI = "trackerServer";
     private static final String TRACKER_PASSWORD = "trackerPassword";
     private static final String TRACKER_USER = "trackerUsername";
+    private static final String TRACKER_CONFIG = "locationPublishing";
 
     public static String getReportingHost() {
         return System.getProperty(DeviceManagementConstants.Report.REPORTING_EVENT_HOST);
@@ -63,47 +65,49 @@ public class HttpReportingUtil {
     public static boolean isPublishingEnabledForTenant() {
         Object configuration = DeviceManagerUtil.getConfiguration(IS_EVENT_PUBLISHING_ENABLED);
         if (configuration != null) {
-            return Boolean.valueOf(configuration.toString());
+            return Boolean.parseBoolean(configuration.toString());
         }
         return false;
     }
 
     public static boolean isLocationPublishing() {
-        Object configuration = DeviceManagerUtil.getConfiguration(IS_LOCATION_PUBLISHING_ENABLED);
-        if (configuration != null) {
-            return Boolean.valueOf(configuration.toString());
-        }
-        return false;
+        return getTrackerBooleanValues(IS_LOCATION_PUBLISHING_ENABLED);
     }
 
     public static boolean isTrackerEnabled() {
-        Object configuration = DeviceManagerUtil.getConfiguration(IS_TRACKER_ENABLED);
+        return getTrackerBooleanValues(IS_TRACKER_ENABLED);
+    }
+
+    public static String trackerServer() {
+        return getTrackerStringValues(TRACKER_SERVER_URI);
+    }
+
+    public static String trackerPassword() {
+        return getTrackerStringValues(TRACKER_PASSWORD);
+    }
+
+    public static String trackerUser() {
+        return getTrackerStringValues(TRACKER_USER);
+    }
+
+    public static boolean getTrackerBooleanValues(String trackerConfigKey) {
+        Object configuration = DeviceManagerUtil.getConfiguration(TRACKER_CONFIG);
         if (configuration != null) {
-            return Boolean.valueOf(configuration.toString());
+            JSONObject locationConfig = new JSONObject(configuration.toString());
+            if (locationConfig.has(trackerConfigKey)) {
+                return Boolean.parseBoolean(locationConfig.get(trackerConfigKey).toString());
+            }
         }
         return false;
     }
 
-    public static String trackerServer() {
-        Object configuration = DeviceManagerUtil.getConfiguration(TRACKER_SERVER_URI);
+    public static String getTrackerStringValues(String trackerConfigKey) {
+        Object configuration = DeviceManagerUtil.getConfiguration(TRACKER_CONFIG);
         if (configuration != null) {
-            return configuration.toString();
-        }
-        return null;
-    }
-
-    public static String trackerPassword() {
-        Object configuration = DeviceManagerUtil.getConfiguration(TRACKER_PASSWORD);
-        if (configuration != null) {
-            return configuration.toString();
-        }
-        return null;
-    }
-
-    public static String trackerUser() {
-        Object configuration = DeviceManagerUtil.getConfiguration(TRACKER_USER);
-        if (configuration != null) {
-            return configuration.toString();
+            JSONObject locationConfig = new JSONObject(configuration.toString());
+            if (locationConfig.has(trackerConfigKey)) {
+                return locationConfig.get(trackerConfigKey).toString();
+            }
         }
         return null;
     }
