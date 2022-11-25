@@ -54,12 +54,7 @@ import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupNotExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.RoleDoesNotExistException;
-import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.dao.GroupDAO;
-import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
-import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.dao.*;
 import org.wso2.carbon.device.mgt.core.event.config.GroupAssignmentEventOperationExecutor;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
@@ -76,6 +71,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -299,8 +295,16 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
             //procees to delete a group from traccar starts
             if (HttpReportingUtil.isTrackerEnabled()) {
-                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                        .deleteGroup(groupId, tenantId);
+                try {
+                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                            .deleteGroup(groupId, tenantId);
+                } catch (TrackerManagementDAOException e) {
+                    String msg = "Failed while deleting traccar group " + groupId;
+                    log.error(msg, e);
+                } catch (ExecutionException | InterruptedException e) {
+                    String msg = "Failed while deleting traccar group "+groupId+" due to concurrent execution failure";
+                    log.error(msg, e);
+                }
             }
             //procees to delete a group from traccar ends
 
