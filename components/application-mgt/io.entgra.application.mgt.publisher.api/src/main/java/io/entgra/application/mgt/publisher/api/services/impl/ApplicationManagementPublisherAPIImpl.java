@@ -169,7 +169,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/ent-app")
     public Response createEntApp(
-            ApplicationWrapper applicationWrapper, @QueryParam("is-published") boolean isPublished) {
+            ApplicationWrapper applicationWrapper, @QueryParam("isPublished") boolean isPublished) {
         try {
             return createApplication(applicationWrapper, isPublished);
         } catch (BadRequestException e) {
@@ -191,7 +191,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/web-app")
     public Response createWebApp(
-            WebAppWrapper webAppWrapper, @QueryParam("is-published") boolean isPublished) {
+            WebAppWrapper webAppWrapper, @QueryParam("isPublished") boolean isPublished) {
         try {
             return createApplication(webAppWrapper, isPublished);
         } catch (BadRequestException e) {
@@ -208,12 +208,12 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
-    
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/public-app")
     public Response createPubApp(
-            PublicAppWrapper publicAppWrapper, @QueryParam("is-published") boolean isPublished) {
+            PublicAppWrapper publicAppWrapper, @QueryParam("isPublished") boolean isPublished) {
         try {
             return createApplication(publicAppWrapper, isPublished);
         } catch (BadRequestException e) {
@@ -235,7 +235,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/custom-app")
     public Response createCustomApp(
-            CustomAppWrapper customAppWrapper, @QueryParam("is-published") boolean isPublished) {
+            CustomAppWrapper customAppWrapper, @QueryParam("isPublished") boolean isPublished) {
         try {
             return createApplication(customAppWrapper, isPublished);
         } catch (BadRequestException e) {
