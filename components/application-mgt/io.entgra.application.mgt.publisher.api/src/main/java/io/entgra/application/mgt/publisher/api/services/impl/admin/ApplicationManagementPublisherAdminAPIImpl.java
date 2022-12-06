@@ -104,9 +104,9 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
     @DELETE
     @Override
     @Consumes(MediaType.WILDCARD)
-    @Path("/tags/{tagName}")
+    @Path("/tags")
     public Response deleteTag(
-            @PathParam("tagName") String tagName) {
+            @QueryParam("tag-name") String tagName) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             applicationManager.deleteTag(tagName);
@@ -169,9 +169,9 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
     @DELETE
     @Override
     @Consumes(MediaType.WILDCARD)
-    @Path("/categories/{categoryName}")
+    @Path("/categories")
     public Response deleteCategory(
-            @PathParam("categoryName") String categoryName) {
+            @QueryParam("category-name") String categoryName) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             applicationManager.deleteCategory(categoryName);
