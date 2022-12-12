@@ -25,6 +25,7 @@ import io.entgra.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.application.mgt.common.exception.DBConnectionException;
 import io.entgra.application.mgt.core.exception.ApplicationManagementDAOException;
 import io.entgra.application.mgt.core.util.DAOUtil;
+import io.entgra.application.mgt.core.util.Constants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -93,7 +94,7 @@ public class SQLServerApplicationDAOImpl extends GenericApplicationDAOImpl {
                 || StringUtils.isNotEmpty(filter.getAppReleaseType())) {
             sql += "LEFT JOIN AP_APP_RELEASE ON AP_APP.ID = AP_APP_RELEASE.AP_APP_ID ";
         }
-        if (StringUtils.isNotEmpty(filter.getAppType())) {
+        if (StringUtils.isNotEmpty(filter.getAppType()) && !Constants.ALL.equalsIgnoreCase(filter.getAppType())) {
             sql += "AND AP_APP.TYPE = ? ";
         }
         if (StringUtils.isNotEmpty(filter.getAppName())) {
@@ -144,7 +145,7 @@ public class SQLServerApplicationDAOImpl extends GenericApplicationDAOImpl {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIndex = 1;
-                if (StringUtils.isNotEmpty(filter.getAppType())) {
+                if (StringUtils.isNotEmpty(filter.getAppType()) && !Constants.ALL.equalsIgnoreCase(filter.getAppType())) {
                     stmt.setString(paramIndex++, filter.getAppType());
                 }
                 if (StringUtils.isNotEmpty(filter.getAppName())) {

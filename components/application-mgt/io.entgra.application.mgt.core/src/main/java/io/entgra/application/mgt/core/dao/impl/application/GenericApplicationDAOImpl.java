@@ -31,6 +31,7 @@ import io.entgra.application.mgt.core.util.DAOUtil;
 import io.entgra.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.application.mgt.core.exception.ApplicationManagementDAOException;
 import io.entgra.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.application.mgt.core.util.Constants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -149,7 +150,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
         sql += "WHERE AP_APP.TENANT_ID = ? ";
 
-        if (StringUtils.isNotEmpty(filter.getAppType())) {
+        if (StringUtils.isNotEmpty(filter.getAppType()) && !Constants.ALL.equalsIgnoreCase(filter.getAppType())) {
             sql += "AND AP_APP.TYPE = ? ";
         }
         if (StringUtils.isNotEmpty(filter.getAppName())) {
@@ -204,7 +205,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIndex = 1;
                 stmt.setInt(paramIndex++, tenantId);
-                if (StringUtils.isNotEmpty(filter.getAppType())) {
+                if (StringUtils.isNotEmpty(filter.getAppType()) && !Constants.ALL.equalsIgnoreCase(filter.getAppType())) {
                     stmt.setString(paramIndex++, filter.getAppType());
                 }
                 if (StringUtils.isNotEmpty(filter.getAppName())) {
