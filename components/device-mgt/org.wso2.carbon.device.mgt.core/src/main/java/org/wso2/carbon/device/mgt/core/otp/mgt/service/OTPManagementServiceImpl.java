@@ -85,10 +85,10 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         try {
             ConnectionManagerUtil.beginDBTransaction();
             this.otpManagementDAO.addOTPData(Collections.singletonList(oneTimePinDTO));
-            Properties props = new Properties();
-            props.setProperty("first-name", tenant.getAdminFirstName());
-            props.setProperty("otp-token", oneTimePinDTO.getOtpToken());
-            sendMail(props, tenant.getEmail(), DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE);
+//            Properties props = new Properties();
+//            props.setProperty("first-name", tenant.getAdminFirstName());
+//            props.setProperty("otp-token", oneTimePinDTO.getOtpToken());
+//            sendMail(props, tenant.getEmail(), DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE);
             ConnectionManagerUtil.commitDBTransaction();
             return oneTimePinDTO.getOtpToken();
         } catch (TransactionManagementException e) {
