@@ -78,18 +78,19 @@ public class OTPManagementServiceImpl implements OTPManagementService {
     }
 
     @Override
-    public void sendUserVerifyingMail(OTPWrapper otpWrapper) throws OTPManagementException, DeviceManagementException {
+    public String sendUserVerifyingMail(OTPWrapper otpWrapper) throws OTPManagementException, DeviceManagementException {
         Tenant tenant = validateTenantCreatingDetails(otpWrapper);
         OneTimePinDTO oneTimePinDTO = createOneTimePin(otpWrapper.getEmail(), otpWrapper.getEmailType(),
                 otpWrapper.getUsername(), tenant, -1234);
         try {
             ConnectionManagerUtil.beginDBTransaction();
             this.otpManagementDAO.addOTPData(Collections.singletonList(oneTimePinDTO));
-            Properties props = new Properties();
-            props.setProperty("first-name", tenant.getAdminFirstName());
-            props.setProperty("otp-token", oneTimePinDTO.getOtpToken());
-            sendMail(props, tenant.getEmail(), DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE);
+//            Properties props = new Properties();
+//            props.setProperty("first-name", tenant.getAdminFirstName());
+//            props.setProperty("otp-token", oneTimePinDTO.getOtpToken());
+//            sendMail(props, tenant.getEmail(), DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE);
             ConnectionManagerUtil.commitDBTransaction();
+            return oneTimePinDTO.getOtpToken();
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while disabling AutoCommit.";
             log.error(msg, e);

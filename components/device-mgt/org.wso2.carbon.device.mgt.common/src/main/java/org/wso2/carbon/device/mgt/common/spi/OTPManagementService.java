@@ -34,7 +34,7 @@ public interface OTPManagementService {
      * @throws OTPManagementException if error occurs while creating OTP token and storing tenant details.
      * @throws BadRequestException if found and incompatible payload to create OTP token.
      */
-    void sendUserVerifyingMail(OTPWrapper otpWrapper) throws OTPManagementException, DeviceManagementException;
+    String sendUserVerifyingMail(OTPWrapper otpWrapper) throws OTPManagementException, DeviceManagementException;
 
     /**
      * Check the validity of the OTP
