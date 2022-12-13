@@ -54,6 +54,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.services.utils.ChangeRolePermissionsUtil;
 import org.wso2.carbon.user.api.*;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
+import org.wso2.carbon.user.core.constants.UserCoreErrorConstants.ErrorMessages;
 import org.wso2.carbon.user.mgt.UserRealmProxy;
 import org.wso2.carbon.user.mgt.common.UIPermissionNode;
 import org.wso2.carbon.user.mgt.common.UserAdminException;
@@ -316,21 +317,31 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                     entity("Role '" + roleInfo.getRoleName() + "' has " + "successfully been"
                             + " added").build();
         } catch (UserStoreException e) {
-            String msg = "Error occurred while adding role '" + roleInfo.getRoleName() + "'";
-            log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            String errorCode = "";
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && !errorMessage.isEmpty() &&
+                    errorMessage.contains(ErrorMessages.ERROR_CODE_ROLE_ALREADY_EXISTS.getCode())) {
+                errorCode = e.getMessage().split("-")[0].trim();
+            }
+            if (ErrorMessages.ERROR_CODE_ROLE_ALREADY_EXISTS.getCode().equals(errorCode)) {
+                String roleName = roleInfo.getRoleName().split("/")[1];
+                String msg = "Role already exists with name " + roleName + ".";
+                log.warn(msg);
+                return Response.status(Response.Status.CONFLICT).entity(msg).build();
+            } else {
+                String msg = "Error occurred while adding role '" + roleInfo.getRoleName() + "'";
+                log.error(msg, e);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
         } catch (URISyntaxException e) {
             String msg = "Error occurred while composing the URI at which the information of the newly created role " +
                     "can be retrieved";
             log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (UnsupportedEncodingException e) {
             String msg = "Error occurred while encoding role name";
             log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
