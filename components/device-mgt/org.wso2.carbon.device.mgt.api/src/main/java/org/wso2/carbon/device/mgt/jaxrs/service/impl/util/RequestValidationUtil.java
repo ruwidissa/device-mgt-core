@@ -185,12 +185,18 @@ public class RequestValidationUtil {
         switch (ownership) {
             case "BYOD":
             case "COPE":
+            case "WORK_PROFILE":
+            case "GOOGLE_ENTERPRISE":
+            case "COSU":
+            case "FULLY_MANAGED":
+            case "DEDICATED_DEVICE":
                 return;
             default:
                 throw new InputValidationException(
                         new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(
                                 "Invalid ownership type received. " +
-                                        "Valid ownership types are BYOD | COPE").build());
+                                        "Valid ownership types are BYOD | COPE " +
+                                        "WORK_PROFILE | GOOGLE_ENTERPRISE | COSU | FULLY_MANAGED | DEDICATED_DEVICE").build());
         }
     }
 
