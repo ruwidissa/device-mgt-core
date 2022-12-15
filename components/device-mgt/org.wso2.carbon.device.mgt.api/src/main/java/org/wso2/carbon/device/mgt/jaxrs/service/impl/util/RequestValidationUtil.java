@@ -153,11 +153,21 @@ public class RequestValidationUtil {
                 case "REMOVED":
                 case "BLOCKED":
                 case "CREATED":
+                case "CONFIGURED":
+                case "READY_TO_CONNECT":
+                case "RETURN_PENDING":
+                case "RETURNED":
+                case "DEFECTIVE":
+                case "WARRANTY_PENDING":
+                case "WARRANTY_SENT":
+                case "WARRANTY_REPLACED":
+                case "ASSIGNED":
                     break;
                 default:
                     String msg = "Invalid enrollment status type: " + status + ". \nValid status types are " +
                                  "ACTIVE | INACTIVE | UNCLAIMED | UNREACHABLE | SUSPENDED | " +
-                                 "DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED";
+                                 "DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED | CONFIGURED | READY_TO_CONNECT | " +
+                                 "RETURN_PENDING | RETURNED | DEFECTIVE | WARRANTY_PENDING | WARRANTY_SENT | WARRANTY_REPLACED | ASSIGNED ";
                     log.error(msg);
                     throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
                                                                .setCode(HttpStatus.SC_BAD_REQUEST)

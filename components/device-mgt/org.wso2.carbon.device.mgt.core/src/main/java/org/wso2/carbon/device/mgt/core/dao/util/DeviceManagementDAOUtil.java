@@ -26,6 +26,7 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.el.lang.ELSupport;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceBilling;
@@ -211,6 +212,24 @@ public final class DeviceManagementDAOUtil {
             return enrolmentInfos.get(EnrolmentInfo.Status.SUSPENDED);
         } else if (enrolmentInfos.containsKey(EnrolmentInfo.Status.BLOCKED)) {
             return enrolmentInfos.get(EnrolmentInfo.Status.BLOCKED);
+        } else if (enrolmentInfos.containsKey(EnrolmentInfo.Status.CONFIGURED)) {
+            return enrolmentInfos.get(EnrolmentInfo.Status.CONFIGURED);
+        } else if (enrolmentInfos.containsKey(EnrolmentInfo.Status.READY_TO_CONNECT)) {
+            return enrolmentInfos.get(EnrolmentInfo.Status.READY_TO_CONNECT);
+        } else if (enrolmentInfos.containsKey(EnrolmentInfo.Status.RETURN_PENDING)) {
+            return enrolmentInfos.get(EnrolmentInfo.Status.RETURN_PENDING);
+        } else if (enrolmentInfos.containsKey(EnrolmentInfo.Status.RETURNED)) {
+            return enrolmentInfos.get(EnrolmentInfo.Status.RETURNED);
+        } else if (enrolmentInfos.containsKey(EnrolmentInfo.Status.DEFECTIVE)) {
+            return enrolmentInfos.get(EnrolmentInfo.Status.DEFECTIVE);
+        } else if (enrolmentInfos.containsKey(EnrolmentInfo.Status.WARRANTY_PENDING)) {
+            return enrolmentInfos.get(EnrolmentInfo.Status.WARRANTY_PENDING);
+        } else if (enrolmentInfos.containsKey(EnrolmentInfo.Status.WARRANTY_SENT)) {
+            return enrolmentInfos.get(EnrolmentInfo.Status.WARRANTY_SENT);
+        } else if (enrolmentInfos.containsKey(EnrolmentInfo.Status.WARRANTY_REPLACED)) {
+            return enrolmentInfos.get(EnrolmentInfo.Status.WARRANTY_REPLACED);
+        } else if (enrolmentInfos.containsKey(EnrolmentInfo.Status.ASSIGNED)) {
+            return enrolmentInfos.get(EnrolmentInfo.Status.ASSIGNED);
         }
         return enrolmentInfo;
     }
