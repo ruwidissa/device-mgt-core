@@ -260,7 +260,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @PathParam("deviceType") String deviceTypeName,
             @PathParam("appId") int appId,
             EntAppReleaseWrapper entAppReleaseWrapper,
-            @QueryParam("isPublished") boolean isPublished) {
+            @QueryParam("is-published") boolean isPublished) {
         try {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             applicationManager.validateEntAppReleaseCreatingRequest(entAppReleaseWrapper, deviceTypeName);
@@ -284,7 +284,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     public Response createPubAppRelease(
             @PathParam("deviceType") String deviceTypeName,
             @PathParam("appId") int appId,
-            PublicAppReleaseWrapper publicAppReleaseWrapper, @QueryParam("isPublished") boolean isPublished) {
+            PublicAppReleaseWrapper publicAppReleaseWrapper, @QueryParam("is-published") boolean isPublished) {
 
         try {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
@@ -312,7 +312,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Override
     public Response createWebAppRelease(
             @PathParam("appId") int appId,
-            WebAppReleaseWrapper webAppReleaseWrapper, @QueryParam("isPublished") boolean isPublished) {
+            WebAppReleaseWrapper webAppReleaseWrapper, @QueryParam("is-published") boolean isPublished) {
         try {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             applicationManager.validateWebAppReleaseCreatingRequest(webAppReleaseWrapper);
@@ -340,7 +340,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     public Response createCustomAppRelease(
             @PathParam("deviceType") String deviceTypeName,
             @PathParam("appId") int appId,
-            CustomAppReleaseWrapper customAppReleaseWrapper, @QueryParam("isPublished") boolean isPublished) {
+            CustomAppReleaseWrapper customAppReleaseWrapper, @QueryParam("is-published") boolean isPublished) {
         try {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             applicationManager.validateCustomAppReleaseCreatingRequest(customAppReleaseWrapper, deviceTypeName);
