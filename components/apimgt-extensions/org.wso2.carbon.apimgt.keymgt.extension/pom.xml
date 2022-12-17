@@ -3,7 +3,7 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <version>5.0.15-SNAPSHOT</version>
+        <version>5.0.15</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
