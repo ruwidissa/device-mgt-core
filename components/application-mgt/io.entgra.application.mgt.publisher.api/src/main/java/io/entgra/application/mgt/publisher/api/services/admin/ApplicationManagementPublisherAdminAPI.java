@@ -157,12 +157,12 @@ public interface ApplicationManagementPublisherAdminAPI {
             @PathParam("appId") int applicatioId);
 
     @DELETE
-    @Path("/tags/{tagName}")
+    @Path("/tags")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
+            httpMethod = "DELETE",
             value = "Delete application tag",
             notes = "This will delete application tag",
             tags = "Application Management",
@@ -185,10 +185,10 @@ public interface ApplicationManagementPublisherAdminAPI {
             })
     Response deleteTag(
             @ApiParam(
-                    name = "tagName",
+                    name = "tag-name",
                     value = "Tag Name",
                     required = true)
-            @PathParam("tagName") String tagName
+            @QueryParam("tag-name") String tagName
     );
 
     @POST
@@ -273,7 +273,7 @@ public interface ApplicationManagementPublisherAdminAPI {
     );
 
     @DELETE
-    @Path("/categories/{categoryName}")
+    @Path("/categories")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
@@ -301,10 +301,10 @@ public interface ApplicationManagementPublisherAdminAPI {
             })
     Response deleteCategory(
             @ApiParam(
-                    name = "categoryName",
+                    name = "category-name",
                     value = "Category Name",
                     required = true)
-            @PathParam("categoryName") String categoryName
+            @QueryParam("category-name") String categoryName
     );
 
     @PUT

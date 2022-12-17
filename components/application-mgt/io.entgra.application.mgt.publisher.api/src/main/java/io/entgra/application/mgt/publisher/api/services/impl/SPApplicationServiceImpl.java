@@ -295,7 +295,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
     @Override
     public Response createEntApp(@PathParam("identity-server-id") int identityServerId,
                                   @PathParam("service-provider-id") String serviceProviderId, ApplicationWrapper app,
-                                    @QueryParam("isPublished") boolean isPublished) {
+                                    @QueryParam("is-published") boolean isPublished) {
         return createSPApplication(identityServerId, serviceProviderId, app, isPublished);
     }
 
@@ -304,7 +304,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
     @Override
     public Response createPubApp(@PathParam("identity-server-id") int identityServerId,
                                  @PathParam("service-provider-id") String serviceProviderId, PublicAppWrapper app,
-                                 @QueryParam("isPublished") boolean isPublished) {
+                                 @QueryParam("is-published") boolean isPublished) {
         return createSPApplication(identityServerId, serviceProviderId, app, isPublished);
     }
 
@@ -313,7 +313,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
     @Override
     public Response createWebApp(@PathParam("identity-server-id") int identityServerId,
                                  @PathParam("service-provider-id") String serviceProviderId, WebAppWrapper app,
-                                 @QueryParam("isPublished") boolean isPublished) {
+                                 @QueryParam("is-published") boolean isPublished) {
         return createSPApplication(identityServerId, serviceProviderId, app, isPublished);
     }
 
@@ -322,7 +322,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
     @Override
     public Response createCustomApp(@PathParam("identity-server-id") int identityServerId,
                                  @PathParam("service-provider-id") String serviceProviderId, CustomAppWrapper app,
-                                    @QueryParam("isPublished") boolean isPublished) {
+                                    @QueryParam("is-published") boolean isPublished) {
         return createSPApplication(identityServerId, serviceProviderId, app, isPublished);
     }
 

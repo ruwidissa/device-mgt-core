@@ -318,7 +318,7 @@ public interface SPApplicationService {
                                   name = "isPublished",
                                   value = "Published state of the application"
                           )
-                          @QueryParam("isPublished") boolean isPublished);
+                          @QueryParam("is-published") boolean isPublished);
 
     /**
      * This method is used to register an APIM application for tenant domain.
@@ -345,7 +345,7 @@ public interface SPApplicationService {
                                   name = "isPublished",
                                   value = "Published state of the application"
                           )
-                          @QueryParam("isPublished") boolean isPublished);
+                          @QueryParam("is-published") boolean isPublished);
 
     @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/web-app")
     @POST
@@ -369,7 +369,7 @@ public interface SPApplicationService {
                                   name = "isPublished",
                                   value = "Published state of the application"
                           )
-                          @QueryParam("isPublished") boolean isPublished);
+                          @QueryParam("is-published") boolean isPublished);
 
     @Path("/{identity-server-id}/service-provider/{service-provider-id}/create/custom-app")
     @POST
@@ -392,5 +392,5 @@ public interface SPApplicationService {
                                      name = "isPublished",
                                      value = "Published state of the application"
                              )
-                             @QueryParam("isPublished") boolean isPublished);
+                             @QueryParam("is-published") boolean isPublished);
 }

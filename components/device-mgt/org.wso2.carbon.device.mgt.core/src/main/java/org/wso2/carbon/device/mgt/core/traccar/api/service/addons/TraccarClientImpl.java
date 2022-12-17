@@ -555,7 +555,7 @@ public class TraccarClientImpl implements TraccarClient {
             TrackerManagementDAOFactory.openConnection();
             trackerGroupInfo = trackerDAO.getTrackerGroup(groupId, tenantId);
             if (trackerGroupInfo != null) {
-                String msg = "The group already exit";
+                String msg = "The group already exists in Traccar.";
                 log.error(msg);
                 throw new TrackerAlreadyExistException(msg);
             }

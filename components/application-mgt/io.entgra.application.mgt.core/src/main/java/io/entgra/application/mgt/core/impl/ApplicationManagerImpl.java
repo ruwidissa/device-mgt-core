@@ -2932,7 +2932,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (!StringUtils.isEmpty(appType)) {
             boolean isValidAppType = false;
             for (ApplicationType applicationType : ApplicationType.values()) {
-                if (applicationType.toString().equalsIgnoreCase(appType)) {
+                if (applicationType.toString().equalsIgnoreCase(appType) || Constants.ALL.equalsIgnoreCase(appType)) {
                     isValidAppType = true;
                     break;
                 }

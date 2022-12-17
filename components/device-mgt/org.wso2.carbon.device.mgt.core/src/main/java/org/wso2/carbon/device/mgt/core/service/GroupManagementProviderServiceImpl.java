@@ -47,6 +47,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.exceptions.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
@@ -140,12 +141,15 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 if (HttpReportingUtil.isTrackerEnabled()){
                     existingGroup = this.groupDAO.getGroup(deviceGroup.getName(), tenantId);
                     int groupId = existingGroup.getGroupId();
-                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                            .addGroup(deviceGroup, groupId, tenantId);
+                    try {
+                        DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                                .addGroup(deviceGroup, groupId, tenantId);
+                    } catch (TrackerAlreadyExistException e) {
+                        throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
+                    }
+                } else {
+                    throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
                 }
-                // add a group if not exist in traccar starts
-
-                throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
             }
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();

@@ -322,7 +322,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "isPublished",
                     value = "Published state of the application"
             )
-            @QueryParam("isPublished") boolean isPublished);
+            @QueryParam("is-published") boolean isPublished);
 
     @POST
     @Path("/web-app")
@@ -366,7 +366,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "isPublished",
                     value = "Published state of the application"
             )
-            @QueryParam("isPublished") boolean isPublished
+            @QueryParam("is-published") boolean isPublished
     );
 
     @POST
@@ -411,7 +411,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "isPublished",
                     value = "Published state of the application"
             )
-            @QueryParam("isPublished") boolean isPublished
+            @QueryParam("is-published") boolean isPublished
     );
 
     @POST
@@ -457,7 +457,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "isPublished",
                     value = "Published state of the application"
             )
-            @QueryParam("isPublished") boolean isPublished
+            @QueryParam("is-published") boolean isPublished
     );
 
     @POST
@@ -512,7 +512,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "isPublished",
                     value = "Published state of the application"
             )
-            @QueryParam("isPublished") boolean isPublished
+            @QueryParam("is-published") boolean isPublished
     );
 
     @POST
@@ -567,7 +567,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "isPublished",
                     value = "Published state of the application"
             )
-            @QueryParam("isPublished") boolean isPublished
+            @QueryParam("is-published") boolean isPublished
     );
 
     @POST
@@ -617,7 +617,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "isPublished",
                     value = "Published state of the application"
             )
-            @QueryParam("isPublished") boolean isPublished
+            @QueryParam("is-published") boolean isPublished
     );
 
     @POST
@@ -672,7 +672,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "isPublished",
                     value = "Published state of the application"
             )
-            @QueryParam("isPublished") boolean isPublished
+            @QueryParam("is-published") boolean isPublished
     );
 
     @PUT
