@@ -211,6 +211,7 @@
         <Scope>perm:windows:location</Scope>
         <Scope>perm:admin:tenant:view</Scope>
         <Scope>perm:admin:metadata:view</Scope>
+        <Scope>perm:admin:usage:view</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

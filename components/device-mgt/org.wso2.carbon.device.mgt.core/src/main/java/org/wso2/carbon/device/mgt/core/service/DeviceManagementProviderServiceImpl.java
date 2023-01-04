@@ -69,8 +69,10 @@ import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
+import org.wso2.carbon.device.mgt.common.BillingResponse;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
+import org.wso2.carbon.device.mgt.common.app.mgt.MobileAppTypes;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
@@ -119,11 +121,11 @@ import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformVersion;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.DeviceManagementPluginRepository;
 import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
+import org.wso2.carbon.device.mgt.core.cache.impl.BillingCacheManagerImpl;
 import org.wso2.carbon.device.mgt.core.cache.impl.DeviceCacheManagerImpl;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.device.mgt.core.dao.BillingDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -141,6 +143,7 @@ import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementServiceComponent;
 import org.wso2.carbon.device.mgt.core.internal.PluginInitializationListener;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOException;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
@@ -164,8 +167,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.Format;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -193,7 +195,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private final EnrollmentDAO enrollmentDAO;
     private final ApplicationDAO applicationDAO;
     private MetadataDAO metadataDAO;
-    private final BillingDAO billingDAO;
     private final DeviceStatusDAO deviceStatusDAO;
 
     public DeviceManagementProviderServiceImpl() {
@@ -203,7 +204,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         this.deviceTypeDAO = DeviceManagementDAOFactory.getDeviceTypeDAO();
         this.enrollmentDAO = DeviceManagementDAOFactory.getEnrollmentDAO();
         this.metadataDAO = MetadataManagementDAOFactory.getMetadataDAO();
-        this.billingDAO = DeviceManagementDAOFactory.getBillingDAO();
         this.deviceStatusDAO = DeviceManagementDAOFactory.getDeviceStatusDAO();
 
         /* Registering a listener to retrieve events when some device management service plugin is installed after
@@ -1021,236 +1021,232 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         return this.getAllDevices(request, true);
     }
 
-    public PaginationResult calculateCost(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill, List<Device> allDevices) throws DeviceManagementException {
+    /**
+     * Calculate cost of a tenants Device List.
+     * Once the full device list of a tenant is sent here devices are looped for cost calculation
+     * Cost per tenant is retrieved from the Meta Table
+     * When looping the devices the most recent device status of that device is retrieved from status table
+     * If device is enrolled prior to start date now in removed state --> time is calculated from - startDate to last updated time
+     * If device is enrolled prior to start date now in not removed --> time is calculated from - startDate to endDate
+     * If device is enrolled after the start date now in removed state --> time is calculated from - dateOfEnrollment to last updated time
+     * If device is enrolled after the start date now in not removed --> time is calculated from - dateOfEnrollment to endDate
+     * Once time is calculated cost is set for each device
+     *
+     * @param tenantDomain Tenant domain cost id calculated for.
+     * @param startDate    start date of usage period.
+     * @param endDate      end date of usage period.
+     * @param allDevices   device list of the tenant for the selected time-period.
+     * @return Whether status is changed or not
+     * @throws DeviceManagementException on errors while trying to calculate Cost
+     */
+    public BillingResponse calculateCost(String tenantDomain, Timestamp startDate, Timestamp endDate, List<Device> allDevices) throws MetadataManagementDAOException, DeviceManagementException {
 
-        PaginationResult paginationResult = new PaginationResult();
+        BillingResponse billingResponse = new BillingResponse();
+        List<Device> deviceStatusNotAvailable = new ArrayList<>();
         double totalCost = 0.0;
-        boolean allDevicesBilledDateIsValid = true;
-        ArrayList<String> lastBilledDatesList =  new ArrayList<>();
-        List<Billing> invalidDevices =  new ArrayList<>();
-        List<Device> removeBillingPeriodInvalidDevices =  new ArrayList<>() ;
-        List<Device> removeStatusUpdateInvalidDevices =  new ArrayList<>() ;
 
         try {
-            MetadataManagementDAOFactory.beginTransaction();
+            MetadataManagementDAOFactory.openConnection();
             Metadata metadata = metadataDAO.getMetadata(MultitenantConstants.SUPER_TENANT_ID, DeviceManagementConstants.META_KEY);
 
             Gson g = new Gson();
             Collection<Cost> costData = null;
 
-
-            Type collectionType = new TypeToken<Collection<Cost>>() {}.getType();
+            Type collectionType = new TypeToken<Collection<Cost>>() {
+            }.getType();
             if (metadata != null) {
                 costData = g.fromJson(metadata.getMetaValue(), collectionType);
                 for (Cost tenantCost : costData) {
                     if (tenantCost.getTenantDomain().equals(tenantDomain)) {
                         for (Device device : allDevices) {
-                            device.setDeviceStatusInfo(getDeviceStatusHistory(device, null, null, true));
                             long dateDiff = 0;
-
+                            device.setDeviceStatusInfo(getDeviceStatusHistory(device, null, endDate, true));
                             List<DeviceStatus> deviceStatus = device.getDeviceStatusInfo();
-                            boolean firstDateBilled = false;
-                            boolean deviceStatusIsValid = false;
-
-                            List<Billing> deviceBilling = billingDAO.getBilling(device.getId(), startDate, endDate);
-                            boolean billDateIsInvalid = false;
-
-                            if (deviceBilling.isEmpty()) {
-                                billDateIsInvalid = false;
-                            }
-
-                            if (generateBill) {
-                                for (Billing bill : deviceBilling) {
-                                    if ((bill.getBillingStart() <= startDate.getTime() && startDate.getTime() <= bill.getBillingEnd()) ||
-                                            (bill.getBillingStart() <= endDate.getTime()  && endDate.getTime() <= bill.getBillingEnd())) {
-                                        billDateIsInvalid = true;
-                                        invalidDevices.add(bill);
+                            if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
+                                if (!deviceStatus.isEmpty() && deviceStatus.get(0).getStatus().equals("REMOVED")) {
+                                    if (deviceStatus.get(0).getUpdateTime().getTime() >= startDate.getTime()) {
+                                        dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - startDate.getTime();
                                     }
+                                } else if (!deviceStatus.isEmpty() && !deviceStatus.get(0).getStatus().equals("REMOVED")) {
+                                    dateDiff = endDate.getTime() - startDate.getTime();
                                 }
-                            }
-
-                            if (!billDateIsInvalid) {
-                                for (int i = 0; i < deviceStatus.size(); i++) {
-                                    if (DeviceManagementConstants.ACTIVE_STATUS.equals(deviceStatus.get(i).getStatus().toString())) {
-                                        if (deviceStatus.size() > i + 1) {
-                                            if (!firstDateBilled) {
-                                                firstDateBilled = true;
-                                                if (device.getEnrolmentInfo().getLastBilledDate() == 0) {
-                                                    deviceStatusIsValid = true;
-                                                    dateDiff = dateDiff + (deviceStatus.get(i + 1).getUpdateTime().getTime() - deviceStatus.get(i).getUpdateTime().getTime());
-                                                } else {
-                                                    if (deviceStatus.get(i + 1).getUpdateTime().getTime() >= device.getEnrolmentInfo().getLastBilledDate()) {
-                                                        deviceStatusIsValid = true;
-                                                        dateDiff = dateDiff + (deviceStatus.get(i + 1).getUpdateTime().getTime() - device.getEnrolmentInfo().getLastBilledDate());
-                                                    }
-                                                }
-                                            } else {
-                                                if (deviceStatus.get(i).getUpdateTime().getTime() >= device.getEnrolmentInfo().getLastBilledDate()) {
-                                                    deviceStatusIsValid = true;
-                                                    dateDiff = dateDiff + (deviceStatus.get(i + 1).getUpdateTime().getTime() - deviceStatus.get(i).getUpdateTime().getTime());
-                                                }
-                                            }
-                                        } else {
-
-                                            // If only one status row is retrieved this block is executed
-                                            if (!firstDateBilled) {
-                                                firstDateBilled = true;
-
-                                                // Is executed if there is no lastBilled date and if the updates time is before the end date
-                                                if (device.getEnrolmentInfo().getLastBilledDate() == 0) {
-                                                    if (endDate.getTime() >= deviceStatus.get(i).getUpdateTime().getTime()) {
-                                                        deviceStatusIsValid = true;
-                                                        dateDiff = dateDiff + (endDate.getTime() - deviceStatus.get(i).getUpdateTime().getTime());
-                                                    }
-                                                } else {
-                                                    if (endDate.getTime() >= device.getEnrolmentInfo().getLastBilledDate()) {
-                                                        deviceStatusIsValid = true;
-                                                        dateDiff = dateDiff + (endDate.getTime() - device.getEnrolmentInfo().getLastBilledDate());
-                                                    }
-                                                }
-                                            } else {
-                                                if (device.getEnrolmentInfo().getLastBilledDate() <= deviceStatus.get(i).getUpdateTime().getTime()
-                                                        && endDate.getTime() >= deviceStatus.get(i).getUpdateTime().getTime()) {
-                                                    deviceStatusIsValid = true;
-                                                    dateDiff = dateDiff + (endDate.getTime() - deviceStatus.get(i).getUpdateTime().getTime());
-                                                }
-                                                if (device.getEnrolmentInfo().getLastBilledDate() >= deviceStatus.get(i).getUpdateTime().getTime()
-                                                        && endDate.getTime() >= device.getEnrolmentInfo().getLastBilledDate()) {
-                                                    deviceStatusIsValid = true;
-                                                    dateDiff = dateDiff + (endDate.getTime() - device.getEnrolmentInfo().getLastBilledDate());
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                long dateInDays = TimeUnit.DAYS.convert(dateDiff, TimeUnit.MILLISECONDS);
-                                double cost = (tenantCost.getCost() / 365) * dateInDays;
-                                totalCost = cost + totalCost;
-                                device.setCost(Math.round(cost * 100.0) / 100.0);
-                                device.setDaysUsed((int) dateInDays);
-
-                                if (generateBill) {
-                                    enrollmentDAO.updateEnrollmentLastBilledDate(device.getEnrolmentInfo(), endDate, tenantId);
-                                    billingDAO.addBilling(device.getId(), tenantId, startDate, endDate);
-                                    DeviceManagementDAOFactory.commitTransaction();
-                                }
-
                             } else {
-
-                                for (int i = 0; i < deviceStatus.size(); i++) {
-                                    if (endDate.getTime() >= deviceStatus.get(i).getUpdateTime().getTime()
-                                            && startDate.getTime() <= deviceStatus.get(i).getUpdateTime().getTime()) {
-                                        deviceStatusIsValid = true;
+                                if (!deviceStatus.isEmpty() && deviceStatus.get(0).getStatus().equals("REMOVED")) {
+                                    if (deviceStatus.get(0).getUpdateTime().getTime() >= device.getEnrolmentInfo().getDateOfEnrolment()) {
+                                        dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
                                     }
+                                } else if (!deviceStatus.isEmpty() && !deviceStatus.get(0).getStatus().equals("REMOVED")) {
+                                    dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
                                 }
-                                if (device.getEnrolmentInfo().getLastBilledDate() != 0) {
-                                    Date date = new Date(device.getEnrolmentInfo().getLastBilledDate());
-                                    Format format = new SimpleDateFormat("yyyy MM dd");
-
-                                    for (String lastBillDate : lastBilledDatesList) {
-                                        if (!lastBillDate.equals(format.format(date))) {
-                                            lastBilledDatesList.add(format.format(date));
-                                        }
-                                    }
-                                }
-                                removeBillingPeriodInvalidDevices.add(device);
                             }
-
-                            if (!deviceStatusIsValid) {
-                                removeStatusUpdateInvalidDevices.add(device);
+                            long dateInDays = TimeUnit.DAYS.convert(dateDiff, TimeUnit.MILLISECONDS);
+                            double cost = (tenantCost.getCost() / 365) * dateInDays;
+                            totalCost += cost;
+                            device.setCost(Math.round(cost * 100.0) / 100.0);
+                            long totalDays = dateInDays + device.getDaysUsed();
+                            device.setDaysUsed((int) totalDays);
+                            if (deviceStatus.isEmpty()) {
+                                deviceStatusNotAvailable.add(device);
                             }
                         }
 
                     }
                 }
             }
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while retrieving device list pertaining to the current tenant";
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred calculating cost of devices";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
-        } catch (Exception e) {
-            String msg = "Error occurred in getAllDevices";
+        } catch (SQLException e) {
+            String msg = "Error when retrieving data";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (MetadataManagementDAOException e) {
+            String msg = "Error when retrieving metadata of billing feature";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            MetadataManagementDAOFactory.closeConnection();
+        }
+
+        if (!deviceStatusNotAvailable.isEmpty()) {
+            allDevices.removeAll(deviceStatusNotAvailable);
+        }
+
+        Calendar calStart = Calendar.getInstance();
+        Calendar calEnd = Calendar.getInstance();
+        calStart.setTimeInMillis(startDate.getTime());
+        calEnd.setTimeInMillis(endDate.getTime());
+
+        billingResponse.setDevice(allDevices);
+        billingResponse.setYear(String.valueOf(calStart.get(Calendar.YEAR)));
+        billingResponse.setStartDate(startDate.toString());
+        billingResponse.setEndDate(endDate.toString());
+        billingResponse.setBillPeriod(calStart.get(Calendar.YEAR) + " - " + calEnd.get(Calendar.YEAR));
+        billingResponse.setTotalCostPerYear(Math.round(totalCost * 100.0) / 100.0);
+        billingResponse.setDeviceCount(allDevices.size());
+
+        return billingResponse;
+    }
+
+    @Override
+    public PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate) throws DeviceManagementException {
+
+        PaginationResult paginationResult = new PaginationResult();
+        List<Device> allDevices = new ArrayList<>();
+        List<BillingResponse> billingResponseList = new ArrayList<>();
+        double totalCost = 0.0;
+        int deviceCount = 0;
+        Timestamp initialStartDate = startDate;
+        boolean remainingDaysConsidered = false;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+
+            // TODO Do the check of cache enabling here
+            paginationResult = BillingCacheManagerImpl.getInstance().getBillingFromCache(tenantDomain, startDate, endDate);
+            if (paginationResult == null) {
+                paginationResult = new PaginationResult();
+                long difference_In_Time = endDate.getTime() - startDate.getTime();
+
+                long difference_In_Years = (difference_In_Time / (1000L * 60 * 60 * 24 * 365));
+
+                long difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24)) % 365;
+
+                for (int i = 1; i <= difference_In_Years; i++) {
+                    List<Device> allDevicesPerYear = new ArrayList<>();
+                    LocalDateTime oneYearAfterStart = startDate.toLocalDateTime().plusYears(1);
+                    Timestamp newStartDate;
+                    Timestamp newEndDate;
+
+                    if (i == difference_In_Years) {
+                        if (difference_In_Days == 0 || Timestamp.valueOf(oneYearAfterStart).getTime() >= endDate.getTime()) {
+                            remainingDaysConsidered = true;
+                            oneYearAfterStart = startDate.toLocalDateTime();
+                            newEndDate = endDate;
+                        } else if (Timestamp.valueOf(oneYearAfterStart).getTime() >= endDate.getTime()) {
+                            newEndDate = Timestamp.valueOf(oneYearAfterStart);
+                        } else {
+                            oneYearAfterStart = startDate.toLocalDateTime().plusYears(1);
+                            newEndDate = Timestamp.valueOf(oneYearAfterStart);
+                        }
+                    } else {
+                        oneYearAfterStart = startDate.toLocalDateTime().plusYears(1);
+                        newEndDate = Timestamp.valueOf(oneYearAfterStart);
+                    }
+
+                    newStartDate = startDate;
+
+                    // The query returns devices which are enrolled in this year now in not removed state
+                    allDevicesPerYear.addAll(deviceDAO.getNonRemovedYearlyDeviceList(tenantId, newStartDate, newEndDate));
+
+                    // The query returns devices which are enrolled in this year now in removed state
+                    allDevicesPerYear.addAll(deviceDAO.getRemovedYearlyDeviceList(tenantId, newStartDate, newEndDate));
+
+                    // The query returns devices which are enrolled prior this year now in not removed state
+                    allDevicesPerYear.addAll(deviceDAO.getNonRemovedPriorYearsDeviceList(tenantId, newStartDate, newEndDate));
+
+                    // The query returns devices which are enrolled prior this year now in removed state
+                    allDevicesPerYear.addAll(deviceDAO.getRemovedPriorYearsDeviceList(tenantId, newStartDate, newEndDate));
+
+                    BillingResponse billingResponse = calculateCost(tenantDomain, newStartDate, newEndDate, allDevicesPerYear);
+                    billingResponseList.add(billingResponse);
+                    allDevices.addAll(billingResponse.getDevice());
+                    totalCost = totalCost + billingResponse.getTotalCostPerYear();
+                    deviceCount = deviceCount + billingResponse.getDeviceCount();
+                    LocalDateTime nextStartDate = oneYearAfterStart.plusDays(1);
+                    startDate = Timestamp.valueOf(nextStartDate);
+                }
+
+                if (difference_In_Days != 0 && !remainingDaysConsidered) {
+                    List<Device> allDevicesPerRemainingDays = new ArrayList<>();
+
+                    // The query returns devices which are enrolled in this year now in not removed state
+                    allDevicesPerRemainingDays.addAll(deviceDAO.getNonRemovedYearlyDeviceList(tenantId, startDate, endDate));
+
+                    // The query returns devices which are enrolled in this year now in removed state
+                    allDevicesPerRemainingDays.addAll(deviceDAO.getRemovedYearlyDeviceList(tenantId, startDate, endDate));
+
+                    // The query returns devices which are enrolled prior this year now in not removed state
+                    allDevicesPerRemainingDays.addAll(deviceDAO.getNonRemovedPriorYearsDeviceList(tenantId, startDate, endDate));
+
+                    // The query returns devices which are enrolled prior this year now in removed state
+                    allDevicesPerRemainingDays.addAll(deviceDAO.getRemovedPriorYearsDeviceList(tenantId, startDate, endDate));
+
+                    BillingResponse billingResponse = calculateCost(tenantDomain, startDate, endDate, allDevicesPerRemainingDays);
+                    billingResponseList.add(billingResponse);
+                    allDevices.addAll(billingResponse.getDevice());
+                    totalCost = totalCost + billingResponse.getTotalCostPerYear();
+                    deviceCount = deviceCount + billingResponse.getDeviceCount();
+                }
+
+                Calendar calStart = Calendar.getInstance();
+                Calendar calEnd = Calendar.getInstance();
+                calStart.setTimeInMillis(initialStartDate.getTime());
+                calEnd.setTimeInMillis(endDate.getTime());
+
+                BillingResponse billingResponse = new BillingResponse("all", Math.round(totalCost * 100.0) / 100.0, allDevices, calStart.get(Calendar.YEAR) + " - " + calEnd.get(Calendar.YEAR), initialStartDate.toString(), endDate.toString(), allDevices.size());
+                billingResponseList.add(billingResponse);
+                paginationResult.setData(billingResponseList);
+                paginationResult.setTotalCost(Math.round(totalCost * 100.0) / 100.0);
+                paginationResult.setTotalDeviceCount(deviceCount);
+                BillingCacheManagerImpl.getInstance().addBillingToCache(paginationResult, tenantDomain, initialStartDate, endDate);
+                return paginationResult;
+            }
+
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving device bill list related to the current tenant";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (MetadataManagementDAOException e) {
+            String msg = "Error when retrieving metadata of billing feature";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
-            MetadataManagementDAOFactory.closeConnection();
-        }
-
-        if(!removeBillingPeriodInvalidDevices.isEmpty() && removeBillingPeriodInvalidDevices.size() == allDevices.size()) {
-            allDevicesBilledDateIsValid = false;
-            paginationResult.setMessage("Invalid bill period.");
-        }
-        if(!removeStatusUpdateInvalidDevices.isEmpty() && removeStatusUpdateInvalidDevices.size() == allDevices.size()) {
-            allDevicesBilledDateIsValid = false;
-            if (paginationResult.getMessage() != null){
-                paginationResult.setMessage(paginationResult.getMessage() + " and no device updates within entered bill period.");
-            } else {
-                paginationResult.setMessage("Devices have not been updated within the given period or entered end date comes before the " +
-                        "last billed date.");
-            }
-
-        }
-        allDevices.removeAll(removeBillingPeriodInvalidDevices);
-        allDevices.removeAll(removeStatusUpdateInvalidDevices);
-
-        paginationResult.setBilledDateIsValid(allDevicesBilledDateIsValid);
-        paginationResult.setData(allDevices);
-        paginationResult.setTotalCost(Math.round(totalCost * 100.0) / 100.0);
-        return paginationResult;
-    }
-
-    @Override
-    public PaginationResult getAllDevicesBillings(PaginationRequest request, int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException {
-        if (request == null) {
-            String msg = "Received incomplete pagination request for method getAllDeviceBillings";
-            log.error(msg);
-            throw new DeviceManagementException(msg);
-        }
-
-        DeviceManagerUtil.validateDeviceListPageSize(request);
-        PaginationResult paginationResult = new PaginationResult();
-        List<Device> allDevices;
-        int count = 0;
-
-        try {
-            DeviceManagementDAOFactory.beginTransaction();
-            allDevices = deviceDAO.getDevices(request, tenantId);
-            count = deviceDAO.getDeviceCount(request, tenantId);
-            paginationResult = calculateCost(tenantId, tenantDomain, startDate, endDate, generateBill, allDevices);
-
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while retrieving device bill list pertaining to the current tenant";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (Exception e) {
-            String msg = "Error occurred in getAllDevicesBillings";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        }
-        paginationResult.setRecordsFiltered(count);
-        paginationResult.setRecordsTotal(count);
-        return paginationResult;
-    }
-
-    @Override
-    public PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException {
-        PaginationResult paginationResult = new PaginationResult();
-        List<Device> allDevices;
-        try {
-            DeviceManagementDAOFactory.beginTransaction();
-            allDevices = deviceDAO.getDeviceListWithoutPagination(tenantId);
-            paginationResult = calculateCost(tenantId, tenantDomain, startDate, endDate, generateBill, allDevices);
-
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while retrieving device bill list without pagination pertaining to the current tenant";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (Exception e) {
-            String msg = "Error occurred in createBillingFile";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
         }
         return paginationResult;
     }

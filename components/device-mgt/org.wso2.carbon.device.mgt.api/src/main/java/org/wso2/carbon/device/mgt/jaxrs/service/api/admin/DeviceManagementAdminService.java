@@ -65,6 +65,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.sql.Timestamp;
 import java.util.List;
 
 @SwaggerDefinition(
@@ -110,7 +111,14 @@ import java.util.List;
                         key = "perm:devices:permanent-delete",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/devices/permanent-delete"}
-                )
+                ),
+                @Scope(
+                        name = "Get Usage of Devices",
+                        description = "Get Usage of Devices",
+                        key = "perm:admin:usage:view",
+                        roles = {"Internal/devicemgt-admin"},
+                        permissions = {"/device-mgt/admin/devices/usage/view"}
+                ),
         }
 )
 public interface DeviceManagementAdminService {
@@ -422,5 +430,79 @@ public interface DeviceManagementAdminService {
                     required = true)
                     List<String> actions
     );
+
+    @GET
+    @Path("/billing")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Cost details of devices in a tenant",
+            notes = "Provides individual cost and total cost of all devices per tenant.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:usage:view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of devices.",
+                    response = DeviceList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "Content-Disposition",
+                                    description = "The content disposition of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client already has the latest version of " +
+                            "the requested resource.\n"),
+            @ApiResponse(
+                    code = 400,
+                    message = "The incoming request has more than one selection criteria defined via the query parameters.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "The search criteria did not match any device registered with the server.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    })
+    Response getBilling(
+            @ApiParam(
+                    name = "tenantDomain",
+                    value = "The tenant domain.",
+                    required = false)
+            @QueryParam("tenantDomain")
+                    String tenantDomain,
+            @ApiParam(
+                    name = "startDate",
+                    value = "The start date.",
+                    required = false)
+            @QueryParam("startDate")
+                    Timestamp startDate,
+            @ApiParam(
+                    name = "endDate",
+                    value = "The end date.",
+                    required = false)
+            @QueryParam("endDate")
+                    Timestamp endDate);
 
 }

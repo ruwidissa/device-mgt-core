@@ -211,23 +211,11 @@ public interface DeviceManagementProviderService {
     /**
      * Method to retrieve all the devices with pagination support.
      *
-     * @param request PaginationRequest object holding the data for pagination
-     * @return PaginationResult - Result including the required parameters necessary to do pagination.
-     * @throws DeviceManagementException If some unusual behaviour is observed while fetching billing of
-     *                                   devices.
-     */
-    PaginationResult getAllDevicesBillings(PaginationRequest request, int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
-
-    /**
-     * Method to retrieve all the devices with pagination support.
-     *
      * @return PaginationResult - Result including the device bill list without pagination.
      * @throws DeviceManagementException If some unusual behaviour is observed while fetching billing of
      *                                   devices.
      */
-    PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
-
-
+    PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate) throws DeviceManagementException;
 
     /**
      * Method to retrieve all the devices with pagination support.

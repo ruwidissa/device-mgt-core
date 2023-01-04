@@ -25,13 +25,7 @@ public class DeviceStatusDAOImpl implements DeviceStatusDAO {
       conn = this.getConnection();
       // either we list all status values for the device using the device id or only get status values for the given enrolment id
       String idType = isDeviceId ? "DEVICE_ID" : "ENROLMENT_ID";
-      String sql;
-
-      if (billingStatus) {
-        sql = "SELECT ENROLMENT_ID, DEVICE_ID, UPDATE_TIME, STATUS, CHANGED_BY FROM DM_DEVICE_STATUS WHERE STATUS IN ('ACTIVE','REMOVED') AND " + idType + " = ?";
-      } else {
-        sql = "SELECT ENROLMENT_ID, DEVICE_ID, UPDATE_TIME, STATUS, CHANGED_BY FROM DM_DEVICE_STATUS WHERE " + idType + " = ?";
-      }
+      String sql = "SELECT ENROLMENT_ID, DEVICE_ID, UPDATE_TIME, STATUS, CHANGED_BY FROM DM_DEVICE_STATUS WHERE " + idType + " = ?";
 
       // filter the data based on a date range if specified
       if (fromDate != null){
@@ -39,6 +33,10 @@ public class DeviceStatusDAOImpl implements DeviceStatusDAO {
       }
       if (toDate != null){
         sql += " AND UPDATE_TIME <= ?";
+      }
+
+      if (billingStatus) {
+        sql += " ORDER BY UPDATE_TIME DESC";
       }
 
       stmt = conn.prepareStatement(sql);

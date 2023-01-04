@@ -94,6 +94,11 @@
         <ExpiryTime>600</ExpiryTime>
         <Capacity>10000</Capacity>
     </GeoFenceCacheConfiguration>
+    <BillingCacheConfiguration>
+        <Enable>true</Enable>
+        <ExpiryTime>600</ExpiryTime>
+        <Capacity>10000</Capacity>
+    </BillingCacheConfiguration>
     <EventOperationTaskConfiguration>
         <Enable>true</Enable>
     </EventOperationTaskConfiguration>

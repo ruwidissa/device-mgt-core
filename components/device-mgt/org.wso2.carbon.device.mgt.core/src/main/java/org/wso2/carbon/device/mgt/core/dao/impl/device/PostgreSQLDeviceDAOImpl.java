@@ -179,6 +179,35 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
         }
     }
 
+    //   TODO - add PostgreSQL support for below billing method
+    @Override
+    public List<Device> getNonRemovedYearlyDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate)
+            throws DeviceManagementDAOException {
+        return null;
+    }
+
+    //   TODO - add PostgreSQL support for below billing method
+    @Override
+    public List<Device> getRemovedYearlyDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate)
+            throws DeviceManagementDAOException {
+        return null;
+    }
+
+    //   TODO - add PostgreSQL support for below billing method
+    @Override
+    public List<Device> getNonRemovedPriorYearsDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate)
+            throws DeviceManagementDAOException {
+        return null;
+    }
+
+    //   TODO - add PostgreSQL support for below billing method
+    @Override
+    public List<Device> getRemovedPriorYearsDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate)
+            throws DeviceManagementDAOException {
+        return null;
+    }
+
+
     //Return only not removed id list
     @Override
     public List<Device> getDevicesIds(PaginationRequest request, int tenantId)

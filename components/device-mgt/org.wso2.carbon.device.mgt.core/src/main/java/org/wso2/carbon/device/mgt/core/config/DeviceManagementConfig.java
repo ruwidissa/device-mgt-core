@@ -21,6 +21,7 @@ import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotif
 import org.wso2.carbon.device.mgt.common.roles.config.DefaultRoles;
 import org.wso2.carbon.device.mgt.core.config.analytics.OperationAnalyticsConfiguration;
 import org.wso2.carbon.device.mgt.core.config.archival.ArchivalConfiguration;
+import org.wso2.carbon.device.mgt.core.config.cache.BillingCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.CertificateCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.DeviceCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.GeoFenceCacheConfiguration;
@@ -58,6 +59,7 @@ public final class DeviceManagementConfig {
     private DeviceStatusTaskConfig deviceStatusTaskConfig;
     private DeviceCacheConfiguration deviceCacheConfiguration;
     private GeoFenceCacheConfiguration geoFenceCacheConfiguration;
+    private BillingCacheConfiguration billingCacheConfiguration;
     private EventOperationTaskConfiguration eventOperationTaskConfiguration;
     private CertificateCacheConfiguration certificateCacheConfiguration;
     private OperationAnalyticsConfiguration operationAnalyticsConfiguration;
@@ -167,6 +169,15 @@ public final class DeviceManagementConfig {
 
     public void setGeoFenceCacheConfiguration(GeoFenceCacheConfiguration geoFenceCacheConfiguration) {
         this.geoFenceCacheConfiguration = geoFenceCacheConfiguration;
+    }
+
+    @XmlElement(name = "BillingCacheConfiguration", required = true)
+    public BillingCacheConfiguration getBillingCacheConfiguration() {
+        return billingCacheConfiguration;
+    }
+
+    public void setBillingCacheConfiguration(BillingCacheConfiguration billingCacheConfiguration) {
+        this.billingCacheConfiguration = billingCacheConfiguration;
     }
 
     @XmlElement(name = "EventOperationTaskConfiguration", required = true)
