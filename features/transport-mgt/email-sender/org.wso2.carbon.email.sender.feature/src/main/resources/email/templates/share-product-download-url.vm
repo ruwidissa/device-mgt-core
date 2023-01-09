@@ -1,22 +1,22 @@
 #*
-   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+    Copyright (c) 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
 
-   WSO2 Inc. licenses this file to you under the Apache License,
-   Version 2.0 (the "License"); you may not use this file except
-   in compliance with the License.
-   you may obtain a copy of the License at
+    Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+    Version 2.0 (the "License"); you may not use this file except
+    in compliance with the License.
+    You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+        http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing,
-   software distributed under the License is distributed on an
-   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-   KIND, either express or implied.  See the License for the
-   specific language governing permissions and limitations
-   under the License.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
 *#
 <EmailConfig>
-    <Subject>You have successfully been registered in Entgra IoT</Subject>
+    <Subject>You have been invited to enroll your device in Entgra IoT</Subject>
     <Body>
     <![CDATA[
     <html>
@@ -35,23 +35,13 @@
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px 20px;">
                     Hi $first-name,
                 </p>
-
                 <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
-                    You have been registered in Entgra IoT and invited to enrol your device.
-                    Click <a href="$base-url-https/endpoint-mgt/devices/enroll">here</a> to begin device enrolment.</p>
-
-                <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
-                    Use following credentials to log in to Entgra IoT Device Management application.
-                </p>
+                    Thank you very much for your interest in the Entgra IoT server. Please click
+                    Click <a href="$download-url">here</a> to download the latest release of the Entgra IoT server.</p>
 
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
-                    <b>Username:</b> $username
-                    <br/>
-                    <b>Password:</b> $password
-                </p>
-
-                <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
-                    Should you need assistance, please contact your administrator.
+                    If you need assistance, please contact us through <a href="https://entgra.io/contact-us/">Entgra
+                    contact us </a>>
                 </p>
 
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 20px 0px 5px;">
