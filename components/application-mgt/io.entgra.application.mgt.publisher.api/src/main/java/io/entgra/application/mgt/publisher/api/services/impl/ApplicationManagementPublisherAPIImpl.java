@@ -371,19 +371,28 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             if (appName == null) {
                 String msg = "Invalid app name, appName query param cannot be empty/null.";
                 log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            }
+            if (appName.length() > 20) {
+                String msg = "Invalid app name, maximum length of the application name should be 20 characters.";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             if (applicationManager.isExistingAppName(appName, deviceType)) {
-                return Response.status(Response.Status.CONFLICT).build();
+                String msg = "Invalid app name, app name already exists.";
+                log.error(msg);
+                return Response.status(Response.Status.CONFLICT).entity(msg).build();
             }
             return Response.status(Response.Status.OK).build();
         } catch (BadRequestException e) {
-            log.error("Found invalid device type to check application existence.", e);
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            String msg = "Found invalid device type to check application existence.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            log.error("Internal Error occurred while checking the application existence.", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            String msg = "Internal Error occurred while checking the application existence.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 

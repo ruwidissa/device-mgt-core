@@ -3434,6 +3434,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int deviceTypeId = -1;
         String appName;
+        int appNameLength = 20;
         List<String> appCategories;
         List<String> unrestrictedRoles;
 
@@ -3442,6 +3443,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             appName = applicationWrapper.getName();
             if (StringUtils.isEmpty(appName)) {
                 String msg = "Application name cannot be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (appName.length() > appNameLength) {
+                String msg = "Application name must be less than or equal to 20 characters in length.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
@@ -3474,6 +3480,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             appName = webAppWrapper.getName();
             if (StringUtils.isEmpty(appName)) {
                 String msg = "Web Clip name cannot be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (appName.length() > appNameLength) {
+                String msg = "Application name must be less than or equal to 20 characters in length.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
@@ -3510,6 +3521,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
+            if (appName.length() > appNameLength) {
+                String msg = "Application name must be less than or equal to 20 characters in length.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
             appCategories = publicAppWrapper.getCategories();
             if (appCategories == null) {
                 String msg = "Application category can't be null.";
@@ -3539,6 +3555,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             appName = customAppWrapper.getName();
             if (StringUtils.isEmpty(appName)) {
                 String msg = "Application name cannot be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (appName.length() > appNameLength) {
+                String msg = "Application name must be less than or equal to 20 characters in length.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
