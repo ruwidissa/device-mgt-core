@@ -16,7 +16,7 @@
     under the License.
 *#
 <EmailConfig>
-    <Subject>You have been invited to enroll your device in Entgra IoT</Subject>
+    <Subject>Experience Entgra IoT Server</Subject>
     <Body>
     <![CDATA[
     <html>
@@ -37,11 +37,11 @@
                 </p>
                 <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
                     Thank you very much for your interest in the Entgra IoT server. Please click
-                    Click <a href="$download-url">here</a> to download the latest release of the Entgra IoT server.</p>
+                    <a href="$download-url">here</a> to download the latest release of the Entgra IoT server.</p>
 
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
                     If you need assistance, please contact us through <a href="https://entgra.io/contact-us/">Entgra
-                    contact us </a>>
+                    contact us </a>
                 </p>
 
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 20px 0px 5px;">
