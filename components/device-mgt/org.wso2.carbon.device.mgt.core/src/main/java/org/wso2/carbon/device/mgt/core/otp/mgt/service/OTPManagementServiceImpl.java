@@ -130,7 +130,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
 
         Properties props = new Properties();
         props.setProperty("first-name", downloadURLDetails.getFirstName());
-        props.setProperty("download-url", downloadURLDetails.getFirstName());
+        props.setProperty("download-url", downloadURLDetails.getURL());
         sendMail(props, downloadURLDetails.getEmail(),
                     DeviceManagementConstants.EmailAttributes.PRODUCT_DOWNLOAD_LINK_SHARING_TEMPLATE);
     }
