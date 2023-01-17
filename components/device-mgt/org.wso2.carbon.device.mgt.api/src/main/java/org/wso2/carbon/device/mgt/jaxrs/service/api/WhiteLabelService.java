@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *  Copyright (c) 2022, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  *  Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -20,7 +20,6 @@ package org.wso2.carbon.device.mgt.jaxrs.service.api;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Extension;
@@ -35,18 +34,12 @@ import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.MetadataList;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -56,11 +49,11 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "Metadata Service",
+                title = "Whitelabel Service",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = "name", value = "DeviceMetadataManagement"),
-                                @ExtensionProperty(name = "context", value = "/api/device-mgt/v1.0/metadata"),
+                                @ExtensionProperty(name = "name", value = "WhiteLabelManagement"),
+                                @ExtensionProperty(name = "context", value = "/api/device-mgt/v1.0/whitelabel"),
                         })
                 }
         ),
@@ -71,60 +64,40 @@ import javax.ws.rs.core.Response;
 @Scopes(
         scopes = {
                 @Scope(
-                        name = "View metadata records",
-                        description = "View metadata records",
-                        key = "perm:metadata:view",
+                        name = "View Whitelabel",
+                        description = "View whitelabel details",
+                        key = "perm:whitelabel:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/metadata/view"}
+                        permissions = {"/device-mgt/whitelabel/view"}
                 ),
                 @Scope(
-                        name = "Create a metadata record",
-                        description = "Create a metadata record",
-                        key = "perm:metadata:create",
+                        name = "Update Whitelabel",
+                        description = "Updating whitelabel",
+                        key = "perm:whitelabel:update",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/metadata/create"}
+                        permissions = {"/device-mgt/whitelabel/update"}
                 ),
-                @Scope(
-                        name = "Update a metadata record",
-                        description = "Updating a specified metadata record",
-                        key = "perm:metadata:update",
-                        roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/metadata/update"}
-                ),
-                @Scope(
-                        name = "Delete a metadata record",
-                        description = "Delete a specified metadata record",
-                        key = "perm:metadata:remove",
-                        roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/metadata/remove"}
-                )
         }
 )
-@Api(value = "Device Metadata Management")
-@Path("/metadata")
+@Api(value = "Whitelabel Management")
+@Path("/whitelabel")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public interface MetadataService {
+public interface WhiteLabelService {
 
     @GET
+    @Path("/favicon")
     @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
             httpMethod = HTTPConstants.HEADER_GET,
-            value = "Get all metadata entries",
-            notes = "Provides a list of metadata entries, which are stored as key-value pairs.",
-            tags = "Device Metadata Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:metadata:view")
-                    })
-            }
+            value = "Get whitelabel favicon",
+            notes = "Get whitelabel favicon for the tenant of the logged in user",
+            tags = "Tenant Metadata Management"
     )
     @ApiResponses(
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully fetched the list of metadata entries.",
-                            response = MetadataList.class,
+                            message = "OK. \n Successfully retrieved white label favicon.",
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
@@ -139,47 +112,26 @@ public interface MetadataService {
                                                     "Used by caches, or in conditional requests."),
                             }),
                     @ApiResponse(
-                            code = 400,
-                            message = "Bad Request. \n Invalid request or validation error.",
-                            response = ErrorResponse.class),
-                    @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. " +
-                                    "\n Server error occurred while fetching the metadata entry list.",
+                                    "\n Server error occurred while getting white label artifact.",
                             response = ErrorResponse.class)
             })
-    Response getAllMetadataEntries(
-            @ApiParam(
-                    name = "offset",
-                    value = "The starting pagination index for the complete list of qualified items.")
-            @QueryParam("offset")
-                    int offset,
-            @ApiParam(
-                    name = "limit",
-                    value = "Provide how many metadata entries you require from the starting pagination index/offset.",
-                    defaultValue = "5")
-            @QueryParam("limit")
-                    int limit);
+    Response getWhiteLabelFavicon();
 
     @GET
-    @Path("/{metaKey}")
+    @Path("/logo")
     @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
             httpMethod = HTTPConstants.HEADER_GET,
-            value = "Get metadata by metaKey",
-            notes = "Retrieve a metadata entry by providing a metaKey value",
-            tags = "Device Metadata Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:metadata:view")
-                    })
-            }
+            value = "Get whitelabel logo",
+            notes = "Get whitelabel logo for the tenant of the logged in user",
+            tags = "Tenant Metadata Management"
     )
     @ApiResponses(
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully fetched the requested metadata entry.",
+                            message = "OK. \n Successfully retrieved white label logo.",
                             response = Metadata.class,
                             responseHeaders = {
                                     @ResponseHeader(
@@ -197,77 +149,21 @@ public interface MetadataService {
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. " +
-                                    "\n Server error occurred while fetching the metadata entry.",
+                                    "\n Server error occurred while getting white label artifact.",
                             response = ErrorResponse.class)
             })
-    Response getMetadataEntry(
-            @ApiParam(
-                    name = "metaKey",
-                    value = "Key of the metadata",
-                    required = true)
-            @PathParam("metaKey") String metaKey);
-
-    @POST
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = HTTPConstants.HEADER_PUT,
-            value = "Create metadata entry",
-            notes = "Create a entry in metadata repository",
-            tags = "Device Metadata Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:metadata:create")
-                    })
-            }
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 200,
-                            message = "OK. \n Successfully created the metadata entry.",
-                            response = Metadata.class,
-                            responseHeaders = {
-                                    @ResponseHeader(
-                                            name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                    "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description = "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
-                            }),
-                    @ApiResponse(
-                            code = 400,
-                            message = "Bad Request. \n Invalid request or validation error.",
-                            response = ErrorResponse.class),
-                    @ApiResponse(
-                            code = 409,
-                            message = "Conflict. \n The provided metadataKey is already exist.",
-                            response = ErrorResponse.class),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. " +
-                                    "\n Server error occurred while creating the metadata entry.",
-                            response = ErrorResponse.class)
-            })
-    Response createMetadataEntry(
-            Metadata metadata
-    );
+    Response getWhiteLabelLogo();
 
     @PUT
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
-            httpMethod = HTTPConstants.HEADER_PUT,
-            value = "Update metadata entry",
-            notes = "Update metadata entry by the provided metaKey of the Metadata object, if the metaKey is not " +
-                    "already exist a new entry will be inserted.",
-            tags = "Device Metadata Management",
+            httpMethod = HTTPConstants.HEADER_POST,
+            value = "Create whitelabel for tenant",
+            notes = "Create whitelabel for the tenant of the logged in user",
+            tags = "Tenant Metadata Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:metadata:update")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:whitelabel:update")
                     })
             }
     )
@@ -275,7 +171,7 @@ public interface MetadataService {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully updated the provided metadata entry.",
+                            message = "OK. \n Successfully created white label theme.",
                             response = Metadata.class,
                             responseHeaders = {
                                     @ResponseHeader(
@@ -291,30 +187,23 @@ public interface MetadataService {
                                                     "Used by caches, or in conditional requests."),
                             }),
                     @ApiResponse(
-                            code = 400,
-                            message = "Bad Request. \n Invalid request or validation error.",
-                            response = ErrorResponse.class),
-                    @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. " +
-                                    "\n Server error occurred while updating the metadata entry.",
+                                    "\n Server error occurred while creating white label theme.",
                             response = ErrorResponse.class)
             })
-    Response updateMetadataEntry(
-            Metadata metadata
-    );
+    Response updateWhiteLabelTheme(WhiteLabelThemeCreateRequest whiteLabelThemeCreateRequest);
 
-    @DELETE
-    @Path("/{metaKey}")
+    @GET
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
-            httpMethod = HTTPConstants.HEADER_DELETE,
-            value = "Delete metadata entry",
-            notes = "Delete metadata entry by providing a metaKey value",
-            tags = "Device Metadata Management",
+            httpMethod = HTTPConstants.HEADER_POST,
+            value = "Get whitelabel for tenant",
+            notes = "Get whitelabel for the tenant of the logged in user",
+            tags = "Tenant Metadata Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:metadata:remove")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:whitelabel:view")
                     })
             }
     )
@@ -322,7 +211,7 @@ public interface MetadataService {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully deleted the requested metadata entry.",
+                            message = "OK. \n Successfully fetched white label theme.",
                             response = Metadata.class,
                             responseHeaders = {
                                     @ResponseHeader(
@@ -338,21 +227,51 @@ public interface MetadataService {
                                                     "Used by caches, or in conditional requests."),
                             }),
                     @ApiResponse(
-                            code = 404,
-                            message = "Not Found. \n The requested metadata entry to be deleted is not found.",
-                            response = ErrorResponse.class),
+                            code = 500,
+                            message = "Internal Server Error. " +
+                                    "\n Server error occurred while fetching white label theme.",
+                            response = ErrorResponse.class)
+            })
+    Response getWhiteLabelTheme();
+
+    @PUT
+    @Path("/reset")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HTTPConstants.HEADER_POST,
+            value = "Reset whitelabel for tenant",
+            notes = "Reset whitelabel to default for the tenant of the logged in user",
+            tags = "Tenant Metadata Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:whitelabel:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched white label theme.",
+                            response = Metadata.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. " +
-                                    "\n Server error occurred while deleting the metadata entry.",
+                                    "\n Server error occurred while deleting white label theme.",
                             response = ErrorResponse.class)
             })
-    Response deleteMetadataEntry(
-            @ApiParam(
-                    name = "metaKey",
-                    value = "Key of the metadata",
-                    required = true)
-            @PathParam("metaKey") String metaKey
-    );
-
+    Response resetWhiteLabel();
 }

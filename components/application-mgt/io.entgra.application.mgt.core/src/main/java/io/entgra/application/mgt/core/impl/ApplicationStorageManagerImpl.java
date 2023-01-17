@@ -19,6 +19,7 @@ package io.entgra.application.mgt.core.impl;
 
 import com.dd.plist.NSDictionary;
 import net.dongliu.apk.parser.bean.ApkMeta;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,12 +32,13 @@ import io.entgra.application.mgt.common.services.ApplicationStorageManager;
 import io.entgra.application.mgt.core.exception.ParsingException;
 import io.entgra.application.mgt.core.util.ArtifactsParser;
 import io.entgra.application.mgt.core.util.Constants;
-import io.entgra.application.mgt.core.util.StorageManagementUtil;
+import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
+import org.wso2.carbon.device.mgt.core.common.util.StorageManagementUtil;
 
 import java.io.*;
 import java.util.List;
 
-import static io.entgra.application.mgt.core.util.StorageManagementUtil.saveFile;
+import static org.wso2.carbon.device.mgt.core.common.util.StorageManagementUtil.saveFile;
 
 /**
  * This class contains the default concrete implementation of ApplicationStorage Management.
@@ -112,6 +114,11 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     + applicationReleaseDTO.getUuid();
             log.error(msg, e);
             throw new ApplicationStorageManagementException(msg, e);
+        } catch (StorageManagementException e) {
+            String msg = "Error occurred while uploading image artifacts"
+                    + applicationReleaseDTO.getUuid();
+            log.error(msg, e);
+            throw new ResourceManagementException(msg, e);
         }
     }
 
@@ -159,6 +166,11 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     + applicationReleaseDTO.getUuid();
             log.error(msg, e);
             throw new ResourceManagementException( msg, e);
+        } catch (StorageManagementException e) {
+            String msg = "Error occurred while uploading image artifacts"
+                    + applicationReleaseDTO.getUuid();
+            log.error(msg, e);
+            throw new ResourceManagementException(msg, e);
         }
     }
 
@@ -285,5 +297,18 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             log.error(msg);
             throw new ApplicationStorageManagementException(msg);
         }
+    }
+
+    @Override
+    public String getMD5(InputStream inputStream) throws StorageManagementException {
+        String md5;
+        try {
+            md5 = DigestUtils.md5Hex(inputStream);
+        } catch (IOException e) {
+            String msg = "IO Exception occurred while trying to get the md5sum value of application";
+            log.error(msg, e);
+            throw new StorageManagementException(msg, e);
+        }
+        return md5;
     }
 }

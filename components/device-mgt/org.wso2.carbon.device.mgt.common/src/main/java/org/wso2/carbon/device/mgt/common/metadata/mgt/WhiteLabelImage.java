@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ * Copyright (c) 2022, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
  * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,20 +15,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.entgra.application.mgt.core.config;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+package org.wso2.carbon.device.mgt.common.metadata.mgt;
 
-/**
- * This represents Artifacts element in application-mgt configuration file.
- */
-@XmlRootElement(name = "Artifacts")
-public class Artifacts {
+public class WhiteLabelImage {
+    private ImageLocationType imageLocationType;
     private String imageLocation;
-    private String binaryLocation;
 
-    @XmlElement(name = "ImageLocationType", required = true)
+    public ImageLocationType getImageLocationType() {
+        return imageLocationType;
+    }
+
+    public void setImageLocationType(ImageLocationType imageLocationType) {
+        this.imageLocationType = imageLocationType;
+    }
+
     public String getImageLocation() {
         return imageLocation;
     }
@@ -37,12 +38,19 @@ public class Artifacts {
         this.imageLocation = imageLocation;
     }
 
-    @XmlElement(name = "BinaryLocation", required = true)
-    public String getBinaryLocation() {
-        return binaryLocation;
+    public enum ImageName {
+        FAVICON,
+        LOGO;
+
+        @Override
+        public String toString() {
+            return name().toLowerCase();
+        }
     }
 
-    public void setBinaryLocation(String binaryLocation) {
-        this.binaryLocation = binaryLocation;
+    public enum ImageLocationType {
+        URL,
+        CUSTOM_FILE,
+        DEFAULT_FILE
     }
 }

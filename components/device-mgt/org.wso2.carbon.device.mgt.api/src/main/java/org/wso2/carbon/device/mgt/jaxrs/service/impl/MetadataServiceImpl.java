@@ -18,20 +18,27 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataKeyNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelTheme;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import org.wso2.carbon.device.mgt.jaxrs.beans.MetadataList;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.MetadataService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -142,6 +149,24 @@ public class MetadataServiceImpl implements MetadataService {
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while deleting the metadata entry for metaKey:" + metaKey;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    /**
+     * Useful to send files as application/octet-stream responses
+     */
+    private Response sendFileStream(byte[] content) throws IOException {
+        try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
+            Response.ResponseBuilder response = Response
+                    .ok(binaryDuplicate, MediaType.APPLICATION_OCTET_STREAM);
+            response.status(Response.Status.OK);
+//            response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            response.header("Content-Length", content.length);
+            return response.build();
+        } catch (IOException e) {
+            String msg = "Error occurred while creating input stream from buffer array. ";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

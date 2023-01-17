@@ -195,6 +195,8 @@
         <Scope>perm:android:upgrade-firmware</Scope>
         <Scope>perm:android:send-notification</Scope>
         <Scope>perm:geo-service:geo-fence</Scope>
+        <Scope>perm:whitelabel:view</Scope>
+        <Scope>perm:whitelabel:update</Scope>
         <Scope>perm:metadata:view</Scope>
         <Scope>perm:metadata:create</Scope>
         <Scope>perm:metadata:update</Scope>

@@ -16,7 +16,7 @@
  */
 package io.entgra.application.mgt.common.wrapper;
 
-import io.entgra.application.mgt.common.Base64File;
+import org.wso2.carbon.device.mgt.common.Base64File;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 

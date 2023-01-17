@@ -42,19 +42,16 @@ import io.entgra.application.mgt.core.impl.ApplicationManagerImpl;
 import io.entgra.application.mgt.core.internal.DataHolder;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.Base64File;
 import org.wso2.carbon.device.mgt.core.common.util.FileUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ApplicationManagementTest extends BaseTestCase {
 
