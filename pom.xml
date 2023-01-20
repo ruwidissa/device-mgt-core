@@ -58,6 +58,7 @@
         <module>features/transport-mgt</module>
         <module>features/analytics-mgt</module>
         <module>features/webapp-authenticator-framework</module>
+        <module>components/logger</module>
     </modules>
 
     <dependencyManagement>
