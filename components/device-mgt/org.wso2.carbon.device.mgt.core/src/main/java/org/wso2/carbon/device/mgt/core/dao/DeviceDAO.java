@@ -294,6 +294,50 @@ public interface DeviceDAO {
     List<Device> getDevices(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
 
     /**
+     * This method is used to retrieve the not removed device list in a year of a given tenant without pagination.
+     *
+     * @param tenantId tenant id.
+     * @param startDate start date of usage period.
+     * @param endDate end date of usage period.
+     * @return returns a list of not removed devices enrolled in that year.
+     * @throws DeviceManagementDAOException
+     */
+    List<Device> getNonRemovedYearlyDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate) throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to retrieve the removed device list in a year of a given tenant without pagination.
+     *
+     * @param tenantId tenant id.
+     * @param startDate start date of usage period.
+     * @param endDate end date of usage period.
+     * @return returns a list of removed devices enrolled in that year.
+     * @throws DeviceManagementDAOException
+     */
+    List<Device> getRemovedYearlyDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate) throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to retrieve the not removed device list in the prior year of a given tenant without pagination.
+     *
+     * @param tenantId tenant id.
+     * @param startDate start date of usage period.
+     * @param endDate end date of usage period.
+     * @return returns a list of not removed devices enrolled prior to that year.
+     * @throws DeviceManagementDAOException
+     */
+    List<Device> getNonRemovedPriorYearsDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate) throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to retrieve the removed device list in the prior year of a given tenant without pagination.
+     *
+     * @param tenantId tenant id.
+     * @param startDate start date of usage period.
+     * @param endDate end date of usage period.
+     * @return returns a list of removed devices enrolled prior to that year.
+     * @throws DeviceManagementDAOException
+     */
+    List<Device> getRemovedPriorYearsDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate) throws DeviceManagementDAOException;
+
+    /**
      * This method is used to retrieve the devices of a given tenant without pagination.
      * @param tenantId tenant id.
      * @return returns a list of devices of the tenant.

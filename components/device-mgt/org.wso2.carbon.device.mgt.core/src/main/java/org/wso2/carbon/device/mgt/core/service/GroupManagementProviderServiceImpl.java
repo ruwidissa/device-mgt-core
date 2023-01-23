@@ -47,6 +47,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.exceptions.TrackerAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
@@ -54,12 +55,7 @@ import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupNotExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.RoleDoesNotExistException;
-import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.dao.GroupDAO;
-import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOException;
-import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.dao.*;
 import org.wso2.carbon.device.mgt.core.event.config.GroupAssignmentEventOperationExecutor;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
@@ -76,6 +72,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -144,12 +141,15 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 if (HttpReportingUtil.isTrackerEnabled()){
                     existingGroup = this.groupDAO.getGroup(deviceGroup.getName(), tenantId);
                     int groupId = existingGroup.getGroupId();
-                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                            .addGroup(deviceGroup, groupId, tenantId);
+                    try {
+                        DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                                .addGroup(deviceGroup, groupId, tenantId);
+                    } catch (TrackerAlreadyExistException e) {
+                        throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
+                    }
+                } else {
+                    throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
                 }
-                // add a group if not exist in traccar starts
-
-                throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
             }
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();
@@ -194,8 +194,8 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             GroupManagementDAOFactory.beginTransaction();
             DeviceGroup existingGroup = this.groupDAO.getGroup(groupId, tenantId);
             if (existingGroup != null) {
-                boolean existingGroupName = this.groupDAO.getGroup(deviceGroup.getName(), tenantId) != null;
-                if (existingGroupName) {
+                DeviceGroup existingGroupByName = this.groupDAO.getGroup(deviceGroup.getName(), tenantId);
+                if (existingGroupByName != null && existingGroupByName.getGroupId() != groupId) {
                     throw new GroupAlreadyExistException("Group already exists with name '" + deviceGroup.getName() + "'.");
                 }
                 List<DeviceGroup> groupsToUpdate = new ArrayList<>();
@@ -299,8 +299,16 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
             //procees to delete a group from traccar starts
             if (HttpReportingUtil.isTrackerEnabled()) {
-                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                        .deleteGroup(groupId, tenantId);
+                try {
+                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
+                            .deleteGroup(groupId, tenantId);
+                } catch (TrackerManagementDAOException e) {
+                    String msg = "Failed while deleting traccar group " + groupId;
+                    log.error(msg, e);
+                } catch (ExecutionException | InterruptedException e) {
+                    String msg = "Failed while deleting traccar group "+groupId+" due to concurrent execution failure";
+                    log.error(msg, e);
+                }
             }
             //procees to delete a group from traccar ends
 

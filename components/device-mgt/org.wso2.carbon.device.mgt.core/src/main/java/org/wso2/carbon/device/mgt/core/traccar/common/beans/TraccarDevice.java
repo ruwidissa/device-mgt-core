@@ -55,6 +55,12 @@ public class TraccarDevice {
         this.category =category;
     }
 
+    public TraccarDevice(int id, String uniqueId, String deviceName) {
+        this.id = id;
+        this.uniqueId = uniqueId;
+        this.deviceName = deviceName;
+    }
+
     public TraccarDevice(){ }
 
     public int getId() { return id; }

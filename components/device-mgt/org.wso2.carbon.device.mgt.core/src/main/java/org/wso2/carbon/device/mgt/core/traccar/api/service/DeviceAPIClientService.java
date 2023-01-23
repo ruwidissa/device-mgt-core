@@ -51,6 +51,14 @@ public interface DeviceAPIClientService {
     void addDevice(Device device, int tenantId) throws ExecutionException, InterruptedException;
 
     /**
+     * Updates device Traccar configuration records (like device name)
+     *
+     * @params device to be modifies
+     * @throws TrackerManagementDAOException errors thrown while modifing a traccar device
+     */
+    void modifyDevice(Device device, int tenantId) throws ExecutionException, InterruptedException;
+
+    /**
      * Delete a device Traccar configuration records
      *
      * @param deviceId to be delete a device

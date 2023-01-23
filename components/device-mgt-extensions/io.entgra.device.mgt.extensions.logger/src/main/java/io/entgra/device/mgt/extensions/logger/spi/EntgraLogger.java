@@ -24,57 +24,29 @@ import org.apache.commons.logging.Log;
 
 public interface EntgraLogger extends Log {
 
-    void info(String message);
+    void info(Object object, LogContext logContext);
+    
+    void info(Object object, Throwable t, LogContext logContext);
 
-    void info(String message, Throwable t);
+    void debug(Object object, LogContext logContext);
 
-    void info(String message, LogContext logContext);
+    void debug(Object object, Throwable t, LogContext logContext);
 
-    void debug(String message);
+    void error(Object object, LogContext logContext);
 
-    void debug(String message, Throwable t);
+    void error(Object object, Throwable t, LogContext logContext);
 
-    void debug(String message, LogContext logContext);
+    void fatal(Object object, LogContext logContext);
 
-    void error(String message);
+    void fatal(Object object, Throwable t, LogContext logContext);
 
-    void error(String message, Throwable t);
+    void trace(Object object, LogContext logContext);
 
-    void error(String message, LogContext logContext);
+    void trace(Object object, Throwable t, LogContext logContext);
 
-    void error(String message, Throwable t, LogContext logContext);
+    void warn(Object object, LogContext logContext);
 
-    void warn(String message);
-
-    void warn(String message, Throwable t);
-
-    void warn(String message, LogContext logContext);
-
-    void warn(String message, Throwable t, LogContext logContext);
-
-    void trace(String message);
-
-    void trace(String message, Throwable t);
-
-    void trace(String message, LogContext logContext);
-
-    void fatal(String message);
-
-    void fatal(String message, Throwable t);
-
-    void fatal(String message, LogContext logContext);
-
-    boolean isDebugEnabled();
-
-    boolean isErrorEnabled();
-
-    boolean isFatalEnabled();
-
-    boolean isInfoEnabled();
-
-    boolean isTraceEnabled();
-
-    boolean isWarnEnabled();
+    void warn(Object object, Throwable t, LogContext logContext);
 
     void clearLogContext();
 

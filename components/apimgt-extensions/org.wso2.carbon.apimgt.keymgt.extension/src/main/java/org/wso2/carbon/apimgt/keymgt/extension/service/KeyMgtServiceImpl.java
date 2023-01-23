@@ -159,49 +159,34 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             }
 
             String tenantDomain = MultitenantUtils.getTenantDomain(application.getOwner());
-
-            String username, password;
-            if (KeyMgtConstants.SUPER_TENANT.equals(tenantDomain)) {
-                kmConfig = getKeyManagerConfig();
-                username = kmConfig.getAdminUsername();
-                password = kmConfig.getAdminUsername();
-            } else {
-                try {
-                    username = getRealmService()
-                            .getTenantUserRealm(-1234).getRealmConfiguration()
-                            .getRealmProperty("reserved_tenant_user_username") + "@" + tenantDomain;
-                    password = getRealmService()
-                            .getTenantUserRealm(-1234).getRealmConfiguration()
-                            .getRealmProperty("reserved_tenant_user_password");
-                } catch (UserStoreException e) {
-                    msg = "Error while loading user realm configuration";
-                    log.error(msg);
-                    throw new KeyMgtException(msg);
-                }
-            }
+            kmConfig = getKeyManagerConfig();
+            String appTokenEndpoint = kmConfig.getServerUrl() + KeyMgtConstants.OAUTH2_TOKEN_ENDPOINT;
 
             RequestBody appTokenPayload;
             switch (tokenRequest.getGrantType()) {
                 case "client_credentials":
+                    appTokenPayload = new FormBody.Builder()
+                            .add("grant_type", "client_credentials")
+                            .add("scope", tokenRequest.getScope()).build();
+                    break;
                 case "password":
                     appTokenPayload = new FormBody.Builder()
                             .add("grant_type", "password")
-                            .add("username", username)
-                            .add("password", password)
+                            .add("username", tokenRequest.getUsername())
+                            .add("password", tokenRequest.getPassword())
                             .add("scope", tokenRequest.getScope()).build();
                     break;
-
                 case "refresh_token":
                     appTokenPayload = new FormBody.Builder()
                             .add("grant_type", "refresh_token")
-                            .add("refresh_token", tokenRequest.getRefreshToken())
-                            .add("scope", tokenRequest.getScope()).build();
+                            .add("refresh_token", tokenRequest.getRefreshToken()).build();
                     break;
                 case "urn:ietf:params:oauth:grant-type:jwt-bearer":
                     appTokenPayload = new FormBody.Builder()
                             .add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
                             .add("assertion", tokenRequest.getAssertion())
                             .add("scope", tokenRequest.getScope()).build();
+                    appTokenEndpoint += "?tenantDomain=carbon.super";
                     break;
                 case "access_token":
                     appTokenPayload = new FormBody.Builder()
@@ -216,8 +201,6 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                     break;
             }
 
-            kmConfig = getKeyManagerConfig();
-            String appTokenEndpoint = kmConfig.getServerUrl() + KeyMgtConstants.OAUTH2_TOKEN_ENDPOINT;
             Request request = new Request.Builder()
                     .url(appTokenEndpoint)
                     .addHeader(KeyMgtConstants.AUTHORIZATION_HEADER, Credentials.basic(tokenRequest.getClientId(), tokenRequest.getClientSecret()))
@@ -239,12 +222,19 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                         .getTenantManager().getTenantId(tenantDomain);
                 accessToken = tenantId + "_" + responseObj.getString("access_token");
             }
-            return new TokenResponse(accessToken,
-                    responseObj.getString("refresh_token"),
-                    responseObj.getString("scope"),
-                    responseObj.getString("token_type"),
-                    responseObj.getInt("expires_in"));
 
+            if (tokenRequest.getGrantType().equals("client_credentials")) {
+                return new TokenResponse(accessToken,
+                        responseObj.getString("scope"),
+                        responseObj.getString("token_type"),
+                        responseObj.getInt("expires_in"));
+            } else {
+                return new TokenResponse(accessToken,
+                        responseObj.getString("refresh_token"),
+                        responseObj.getString("scope"),
+                        responseObj.getString("token_type"),
+                        responseObj.getInt("expires_in"));
+            }
         } catch (APIManagementException e) {
             msg = "Error occurred while retrieving application";
             log.error(msg);

@@ -63,6 +63,17 @@ public class DeviceAPIClientServiceImpl implements DeviceAPIClientService {
     }
 
     @Override
+    public void modifyDevice(Device device, int tenantId) throws ExecutionException, InterruptedException {
+        TraccarDevice traccarDevice = new TraccarDevice(device.getId(), device.getDeviceIdentifier(), device.getName());
+        try {
+            client.modifyDevice(traccarDevice, tenantId);
+        } catch (TrackerManagementDAOException e) {
+            String msg = "Error occurred while mapping with deviceId";
+            log.error(msg, e);
+        }
+    }
+
+    @Override
     public void updateLocation(Device device, DeviceLocation deviceLocation, int tenantId) throws ExecutionException, InterruptedException {
         TraccarPosition traccarPosition = new TraccarPosition(device.getDeviceIdentifier(),
                 deviceLocation.getUpdatedTime().getTime(),

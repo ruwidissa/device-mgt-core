@@ -38,7 +38,7 @@
 
                 <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
                     You have been registered in Entgra IoT and invited to enrol your device.
-                    Click <a href="$base-url-https/devicemgt/device/enroll">here</a> to begin device enrolment.</p>
+                    Click <a href="$base-url-https/endpoint-mgt/devices/enroll">here</a> to begin device enrolment.</p>
 
                 <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
                     Use following credentials to log in to Entgra IoT Device Management application.

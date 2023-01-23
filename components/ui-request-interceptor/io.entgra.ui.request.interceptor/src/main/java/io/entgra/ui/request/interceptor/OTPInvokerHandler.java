@@ -166,7 +166,7 @@ public class OTPInvokerHandler extends HttpServlet {
             throws IOException {
         String schema = req.getScheme();
         apiEndpoint = schema + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
-                + HandlerConstants.COLON + HandlerUtil.getGatewayPort(schema);
+                + HandlerConstants.COLON + HandlerUtil.getCorePort(schema);
 
         if (StringUtils.isBlank(req.getHeader(HandlerConstants.OTP_HEADER))) {
             log.error("Unauthorized, Please provide OTP token.");

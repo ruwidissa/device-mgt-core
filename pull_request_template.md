@@ -5,7 +5,7 @@
 > Describe the solutions that this feature/fix will introduce to resolve the problems described above
 
 ## Approach
-> Describe how you are implementing the solutions. Include an animated GIF or screenshot if the change affects the UI (email documentation@wso2.com to review all UI text). Include a link to a Markdown file or Google doc if the feature write-up is too long to paste here.
+> Describe how you are implementing the solutions. Include an animated GIF or screenshot if the change affects the UI (email content-group@entgra.io to review all UI text). Include a link to a Markdown file or Google doc if the feature write-up is too long to paste here.
 
 ## User stories
 > Summary of user stories addressed by this change>
@@ -14,7 +14,7 @@
 > Brief description of the new feature or bug fix as it will appear in the release notes
 
 ## Documentation
-> Link(s) to product documentation that addresses the changes of this PR. If no doc impact, enter “N/A” plus brief explanation of why there’s no doc impact
+> Link(s) to product documentation that addresses the changes of this PR. If no doc impact, enter “N/A” plus brief explanation of why there's no doc impact
 
 ## Training
 > Link to the PR for changes to the training content in https://github.com/wso2/WSO2-Training, if applicable

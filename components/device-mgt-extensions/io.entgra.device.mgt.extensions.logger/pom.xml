@@ -22,7 +22,7 @@
     <parent>
         <artifactId>device-mgt-extensions</artifactId>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <version>5.0.14-SNAPSHOT</version>
+        <version>5.0.16-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -51,7 +51,7 @@
                         <Bundle-Description>Entgra Logger Bundle</Bundle-Description>
                         <Import-Package>
                             io.entgra.device.mgt.extensions.logger,
-                            org.apache.commons.logging;version="[1.2,2)
+                            org.apache.commons.logging
                         </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.extensions.logger.*

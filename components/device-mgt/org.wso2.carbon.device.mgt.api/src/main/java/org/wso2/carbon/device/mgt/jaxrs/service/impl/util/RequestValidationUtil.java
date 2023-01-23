@@ -153,11 +153,21 @@ public class RequestValidationUtil {
                 case "REMOVED":
                 case "BLOCKED":
                 case "CREATED":
+                case "CONFIGURED":
+                case "READY_TO_CONNECT":
+                case "RETURN_PENDING":
+                case "RETURNED":
+                case "DEFECTIVE":
+                case "WARRANTY_PENDING":
+                case "WARRANTY_SENT":
+                case "WARRANTY_REPLACED":
+                case "ASSIGNED":
                     break;
                 default:
                     String msg = "Invalid enrollment status type: " + status + ". \nValid status types are " +
                                  "ACTIVE | INACTIVE | UNCLAIMED | UNREACHABLE | SUSPENDED | " +
-                                 "DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED";
+                                 "DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED | CONFIGURED | READY_TO_CONNECT | " +
+                                 "RETURN_PENDING | RETURNED | DEFECTIVE | WARRANTY_PENDING | WARRANTY_SENT | WARRANTY_REPLACED | ASSIGNED ";
                     log.error(msg);
                     throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
                                                                .setCode(HttpStatus.SC_BAD_REQUEST)
@@ -175,12 +185,18 @@ public class RequestValidationUtil {
         switch (ownership) {
             case "BYOD":
             case "COPE":
+            case "WORK_PROFILE":
+            case "GOOGLE_ENTERPRISE":
+            case "COSU":
+            case "FULLY_MANAGED":
+            case "DEDICATED_DEVICE":
                 return;
             default:
                 throw new InputValidationException(
                         new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(
                                 "Invalid ownership type received. " +
-                                        "Valid ownership types are BYOD | COPE").build());
+                                        "Valid ownership types are BYOD | COPE " +
+                                        "WORK_PROFILE | GOOGLE_ENTERPRISE | COSU | FULLY_MANAGED | DEDICATED_DEVICE").build());
         }
     }
 
