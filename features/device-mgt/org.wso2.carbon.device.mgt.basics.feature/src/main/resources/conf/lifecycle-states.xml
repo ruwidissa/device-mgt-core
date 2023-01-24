@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~ Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ you may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<LifecycleManagementConfiguration>
+    <LifecycleStates>
+        <LifecycleState name="CREATED">
+            <ProceedingStates>
+                <State>ACTIVE</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="ACTIVE">
+            <ProceedingStates>
+                <State>UNREACHABLE</State>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="UNREACHABLE">
+            <ProceedingStates>
+                <State>INACTIVE</State>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="INACTIVE">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="UNCLAIMED">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="SUSPENDED">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="BLOCKED">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="DEFECTIVE">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="CONFIGURED">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="RETURNED">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="READY_TO_CONNECT">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="DISENROLLMENT_REQUESTED">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="ASSIGNED">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="RETURN_PENDING">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="WARRANTY_PENDING">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="WARRANTY_SENT">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="WARRANTY_REPLACED">
+            <ProceedingStates>
+                <State>REMOVED</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="REMOVED">
+                    <ProceedingStates>
+                        <State>ACTIVE</State>
+                        <State>CREATED</State>
+                    </ProceedingStates>
+        </LifecycleState>
+    </LifecycleStates>
+</LifecycleManagementConfiguration>

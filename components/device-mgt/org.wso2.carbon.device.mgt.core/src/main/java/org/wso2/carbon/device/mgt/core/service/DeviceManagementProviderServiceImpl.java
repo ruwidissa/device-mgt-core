@@ -2121,10 +2121,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.debug("get status history of device: " + device.getDeviceIdentifier());
         }
         try {
+            DeviceManagementDAOFactory.openConnection();
             int tenantId = this.getTenantId();
             return deviceStatusDAO.getStatus(device.getId(), tenantId, fromDate, toDate, billingStatus);
         } catch (DeviceManagementDAOException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
+//            DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while retrieving status history";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
@@ -2132,6 +2133,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred in retrieving status history for device :" + device.getDeviceIdentifier();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
         }
     }
 

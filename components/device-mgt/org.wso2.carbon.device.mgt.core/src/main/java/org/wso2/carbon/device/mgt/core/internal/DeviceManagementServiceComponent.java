@@ -25,6 +25,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceLifecycleState;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
@@ -48,6 +49,7 @@ import org.wso2.carbon.device.mgt.core.authorization.DeviceAccessAuthorizationSe
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
+import org.wso2.carbon.device.mgt.core.config.lifecycleState.DeviceLifecycleConfigManager;
 import org.wso2.carbon.device.mgt.core.config.tenant.PlatformConfigurationManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.config.ui.UIConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -58,6 +60,7 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManag
 import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.event.config.EventConfigurationProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.geo.service.GeoLocationProviderServiceImpl;
+import org.wso2.carbon.device.mgt.core.lifeCycle.DeviceLifecycleStateManager;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.notification.mgt.NotificationManagementServiceImpl;
@@ -76,6 +79,8 @@ import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.search.mgt.impl.SearchManagerServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import org.wso2.carbon.device.mgt.core.service.DeviceStateManagementService;
+import org.wso2.carbon.device.mgt.core.service.DeviceStateManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.task.DeviceTaskManagerService;
@@ -274,6 +279,19 @@ public class DeviceManagementServiceComponent {
             if (log.isDebugEnabled()) {
                 log.debug("Device management core bundle has been successfully initialized");
             }
+
+            /* Initializing DeviceLifecycleState Configuration */
+            List<DeviceLifecycleState> deviceLifecycleStates = DeviceLifecycleConfigManager.getInstance().
+                    getDeviceLifecycleConfig().getDeviceLifecycleStates();
+            DeviceLifecycleStateManager deviceLifecycleStateManager = new DeviceLifecycleStateManager();
+            deviceLifecycleStateManager.init(deviceLifecycleStates);
+            DeviceManagementDataHolder.getInstance().setDeviceLifecycleStateManager(deviceLifecycleStateManager);
+            componentContext.getBundleContext().registerService(DeviceLifecycleStateManager.class.getName(),
+                    deviceLifecycleStateManager, null);
+
+            DeviceStateManagementService deviceStateManagementService = new DeviceStateManagementServiceImpl();
+            componentContext.getBundleContext().registerService(DeviceStateManagementService.class.getName(),
+                    deviceStateManagementService, null);
         } catch (Throwable e) {
             log.error("Error occurred while initializing device management core bundle", e);
         }
