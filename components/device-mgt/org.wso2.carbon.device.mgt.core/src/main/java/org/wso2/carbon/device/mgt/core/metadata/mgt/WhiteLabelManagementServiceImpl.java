@@ -26,9 +26,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Base64File;
 import org.wso2.carbon.device.mgt.common.FileResponse;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
@@ -48,6 +50,8 @@ import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOExc
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.util.MetadataConstants;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.util.WhiteLabelStorageUtil;
+import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,24 +71,48 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     }
 
     @Override
-    public FileResponse getWhiteLabelFavicon() throws MetadataManagementException, NotFoundException {
+    public FileResponse getWhiteLabelFavicon(String tenantDomain) throws MetadataManagementException, NotFoundException {
         try {
-            WhiteLabelTheme whiteLabelTheme = getWhiteLabelTheme();
-            return getImageFileResponse(whiteLabelTheme.getFaviconImage(), WhiteLabelImage.ImageName.FAVICON);
+            WhiteLabelTheme whiteLabelTheme = getWhiteLabelTheme(tenantDomain);
+            return getImageFileResponse(whiteLabelTheme.getFaviconImage(), WhiteLabelImage.ImageName.FAVICON, tenantDomain);
         } catch (IOException e) {
             String msg = "Error occurred while getting byte content of favicon";
+            log.error(msg, e);
+            throw new MetadataManagementException(msg, e);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while getting tenant details of favicon";
             log.error(msg, e);
             throw new MetadataManagementException(msg, e);
         }
     }
 
     @Override
-    public FileResponse getWhiteLabelLogo() throws MetadataManagementException, NotFoundException {
+    public FileResponse getWhiteLabelLogo(String tenantDomain) throws MetadataManagementException, NotFoundException {
         try {
-            WhiteLabelTheme whiteLabelTheme = getWhiteLabelTheme();
-            return getImageFileResponse(whiteLabelTheme.getLogoImage(), WhiteLabelImage.ImageName.LOGO);
+            WhiteLabelTheme whiteLabelTheme = getWhiteLabelTheme(tenantDomain);
+            return getImageFileResponse(whiteLabelTheme.getLogoImage(), WhiteLabelImage.ImageName.LOGO, tenantDomain);
         } catch (IOException e) {
             String msg = "Error occurred while getting byte content of logo";
+            log.error(msg, e);
+            throw new MetadataManagementException(msg, e);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while getting tenant details of logo";
+            log.error(msg, e);
+            throw new MetadataManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public FileResponse getWhiteLabelLogoIcon(String tenantDomain) throws MetadataManagementException, NotFoundException {
+        try {
+            WhiteLabelTheme whiteLabelTheme = getWhiteLabelTheme(tenantDomain);
+            return getImageFileResponse(whiteLabelTheme.getLogoIconImage(), WhiteLabelImage.ImageName.LOGO_ICON, tenantDomain);
+        } catch (IOException e) {
+            String msg = "Error occurred while getting byte content of logo";
+            log.error(msg, e);
+            throw new MetadataManagementException(msg, e);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while getting tenant details of icon";
             log.error(msg, e);
             throw new MetadataManagementException(msg, e);
         }
@@ -93,12 +121,12 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     /**
      * Useful to get white label image file response for provided {@link WhiteLabelImage.ImageName}
      */
-    private FileResponse getImageFileResponse(WhiteLabelImage image, WhiteLabelImage.ImageName imageName) throws
-            IOException, MetadataManagementException, NotFoundException {
+    private FileResponse getImageFileResponse(WhiteLabelImage image, WhiteLabelImage.ImageName imageName, String tenantDomain) throws
+            IOException, MetadataManagementException, NotFoundException, DeviceManagementException {
         if (image.getImageLocationType() == WhiteLabelImage.ImageLocationType.URL) {
             return getImageFileResponseFromUrl(image.getImageLocation());
         }
-        return WhiteLabelStorageUtil.getWhiteLabelImageStream(image, imageName);
+        return WhiteLabelStorageUtil.getWhiteLabelImageStream(image, imageName, tenantDomain);
     }
 
     /**
@@ -169,10 +197,12 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         String appTitle = getDefaultAppTitle();
         WhiteLabelImage favicon = constructDefaultFaviconImage();
         WhiteLabelImage logo = constructDefaultLogoImage();
+        WhiteLabelImage logoIcon = constructDefaultLogoIconImage();
         WhiteLabelTheme defaultTheme = new WhiteLabelTheme();
         defaultTheme.setFooterText(footerText);
         defaultTheme.setAppTitle(appTitle);
         defaultTheme.setLogoImage(logo);
+        defaultTheme.setLogoIconImage(logoIcon);
         defaultTheme.setFaviconImage(favicon);
         return defaultTheme;
     }
@@ -228,6 +258,21 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     }
 
     /**
+     * This is useful to construct and get the default logo whitelabel image
+     *
+     * @return {@link WhiteLabelImage}
+     */
+    private WhiteLabelImage constructDefaultLogoIconImage() {
+        MetaDataConfiguration metaDataConfiguration = DeviceConfigurationManager.getInstance().
+                getDeviceManagementConfig().getMetaDataConfiguration();
+        WhiteLabelConfiguration whiteLabelConfiguration = metaDataConfiguration.getWhiteLabelConfiguration();
+        WhiteLabelImage logoIcon = new WhiteLabelImage();
+        logoIcon.setImageLocation(whiteLabelConfiguration.getWhiteLabelImages().getDefaultLogoIconName());
+        setDefaultWhiteLabelImageCommonProperties(logoIcon);
+        return logoIcon;
+    }
+
+    /**
      * This is useful to set common properties such as DEFAULT_FILE type for {@link WhiteLabelImage.ImageLocationType}
      * for default white label image bean{@link WhiteLabelImage}
      */
@@ -242,18 +287,24 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
             log.debug("Creating Metadata : [" + createWhiteLabelTheme.toString() + "]");
         }
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
         File existingFaviconImage = null;
         File existingLogoImage = null;
+        File existingLogoIconImage = null;
         try {
-            WhiteLabelTheme theme = getWhiteLabelTheme();
+            WhiteLabelTheme theme = getWhiteLabelTheme(tenantDomain);
             if (theme.getFaviconImage().getImageLocationType() == WhiteLabelImage.ImageLocationType.CUSTOM_FILE) {
-                existingFaviconImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getFaviconImage(), WhiteLabelImage.ImageName.FAVICON);
+                existingFaviconImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getFaviconImage(), WhiteLabelImage.ImageName.FAVICON, tenantDomain);
             }
             if (theme.getLogoImage().getImageLocationType() == WhiteLabelImage.ImageLocationType.CUSTOM_FILE) {
-                existingLogoImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getLogoImage(), WhiteLabelImage.ImageName.LOGO);
+                existingLogoImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getLogoImage(), WhiteLabelImage.ImageName.LOGO, tenantDomain);
+            }
+            if (theme.getLogoIconImage().getImageLocationType() == WhiteLabelImage.ImageLocationType.CUSTOM_FILE) {
+                existingLogoIconImage = WhiteLabelStorageUtil.getWhiteLabelImageFile(theme.getLogoIconImage(), WhiteLabelImage.ImageName.LOGO_ICON, tenantDomain);
             }
             storeWhiteLabelImageIfRequired(createWhiteLabelTheme.getFavicon(), WhiteLabelImage.ImageName.FAVICON, tenantId);
             storeWhiteLabelImageIfRequired(createWhiteLabelTheme.getLogo(), WhiteLabelImage.ImageName.LOGO, tenantId);
+            storeWhiteLabelImageIfRequired(createWhiteLabelTheme.getLogoIcon(), WhiteLabelImage.ImageName.LOGO_ICON, tenantId);
             WhiteLabelTheme whiteLabelTheme = constructWhiteLabelTheme(createWhiteLabelTheme);
             Metadata metadataWhiteLabelTheme = constructWhiteLabelThemeMetadata(whiteLabelTheme);
             try {
@@ -266,12 +317,12 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
                 return whiteLabelTheme;
             } catch (MetadataManagementDAOException e) {
                 MetadataManagementDAOFactory.rollbackTransaction();
-                restoreWhiteLabelImages(existingFaviconImage, existingLogoImage, tenantId);
+                restoreWhiteLabelImages(existingFaviconImage, existingLogoImage, existingLogoIconImage, tenantId);
                 String msg = "Error occurred while creating the metadata entry. " + createWhiteLabelTheme;
                 log.error(msg, e);
                 throw new MetadataManagementException(msg, e);
             } catch (TransactionManagementException e) {
-                restoreWhiteLabelImages(existingFaviconImage, existingLogoImage, tenantId);
+                restoreWhiteLabelImages(existingFaviconImage, existingLogoImage, existingLogoIconImage, tenantId);
                 String msg = "Error occurred while opening a connection to the data source";
                 log.error(msg, e);
                 throw new MetadataManagementException("Error occurred while creating metadata record", e);
@@ -282,6 +333,11 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
             String msg = "Error occurred while retrieving existing white label theme";
             log.error(msg, e);
             throw new MetadataManagementException(msg, e);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while getting tenant details of white label";
+            log.error(msg, e);
+            throw new MetadataManagementException(msg, e);
+
         }
     }
 
@@ -294,7 +350,7 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
      * @param existingFavicon existing favicon image file
      * @param existingLogo existing logo image file
      */
-    private void restoreWhiteLabelImages(File existingFavicon, File existingLogo, int tenantId)
+    private void restoreWhiteLabelImages(File existingFavicon, File existingLogo,  File existingLogoIcon, int tenantId)
             throws MetadataManagementException {
         WhiteLabelStorageUtil.deleteWhiteLabelImageForTenantIfExists(tenantId);
         if (existingFavicon != null) {
@@ -302,6 +358,9 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         }
         if (existingLogo != null) {
             WhiteLabelStorageUtil.storeWhiteLabelImage(existingLogo, WhiteLabelImage.ImageName.LOGO, tenantId);
+        }
+        if (existingLogoIcon != null) {
+            WhiteLabelStorageUtil.storeWhiteLabelImage(existingLogoIcon, WhiteLabelImage.ImageName.LOGO_ICON, tenantId);
         }
     }
 
@@ -328,10 +387,13 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
         WhiteLabelTheme whiteLabelTheme = new WhiteLabelTheme();
         WhiteLabelImageRequestPayload faviconPayload = whiteLabelThemeCreateRequest.getFavicon();
         WhiteLabelImageRequestPayload logoPayload = whiteLabelThemeCreateRequest.getLogo();
+        WhiteLabelImageRequestPayload logoIconPayload = whiteLabelThemeCreateRequest.getLogoIcon();
         WhiteLabelImage faviconImage = constructWhiteLabelImageDTO(faviconPayload);
         WhiteLabelImage logoImage = constructWhiteLabelImageDTO(logoPayload);
+        WhiteLabelImage logoIconImage = constructWhiteLabelImageDTO(logoIconPayload);
         whiteLabelTheme.setFaviconImage(faviconImage);
         whiteLabelTheme.setLogoImage(logoImage);
+        whiteLabelTheme.setLogoIconImage(logoIconImage);
         whiteLabelTheme.setFooterText(whiteLabelThemeCreateRequest.getFooterText());
         whiteLabelTheme.setAppTitle(whiteLabelThemeCreateRequest.getAppTitle());
         return whiteLabelTheme;
@@ -367,8 +429,8 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     }
 
     @Override
-    public WhiteLabelTheme getWhiteLabelTheme() throws MetadataManagementException, NotFoundException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+    public WhiteLabelTheme getWhiteLabelTheme(String tenantDomain) throws MetadataManagementException, NotFoundException, DeviceManagementException {
+        int tenantId = DeviceManagerUtil.getTenantId(tenantDomain);
         if (log.isDebugEnabled()) {
             log.debug("Retrieving whitelabel theme for tenant: " + tenantId);
         }

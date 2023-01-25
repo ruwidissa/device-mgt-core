@@ -19,6 +19,7 @@
 package org.wso2.carbon.device.mgt.common.metadata.mgt;
 
 import org.wso2.carbon.device.mgt.common.FileResponse;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
 
@@ -33,7 +34,7 @@ public interface WhiteLabelManagementService {
      * @throws MetadataManagementException if error occurred while retrieving favicon
      * @throws NotFoundException if favicon is not found
      */
-    FileResponse getWhiteLabelFavicon() throws
+    FileResponse getWhiteLabelFavicon(String tenantDomain) throws
             MetadataManagementException, NotFoundException;
 
     /**
@@ -42,7 +43,16 @@ public interface WhiteLabelManagementService {
      * @throws MetadataManagementException if error occurred while retrieving logo
      * @throws NotFoundException if logo is not found
      */
-    FileResponse getWhiteLabelLogo() throws
+    FileResponse getWhiteLabelLogo(String tenantDomain) throws
+            MetadataManagementException, NotFoundException;
+
+    /**
+     * Use to get byte content of logo icon whitelabel image
+     * @return byte content of logo icon
+     * @throws MetadataManagementException if error occurred while retrieving logo icon
+     * @throws NotFoundException if logo icon is not found
+     */
+    FileResponse getWhiteLabelLogoIcon(String tenantDomain) throws
             MetadataManagementException, NotFoundException;
 
     /**
@@ -69,5 +79,5 @@ public interface WhiteLabelManagementService {
      * This method is useful to get existing white label theme
      * @throws MetadataManagementException if error while getting existing white label theme
      */
-    WhiteLabelTheme getWhiteLabelTheme() throws MetadataManagementException, NotFoundException;
+    WhiteLabelTheme getWhiteLabelTheme(String tenantDomain) throws MetadataManagementException, NotFoundException, DeviceManagementException;
 }

@@ -40,7 +40,8 @@ public class WhiteLabelImage {
 
     public enum ImageName {
         FAVICON,
-        LOGO;
+        LOGO,
+        LOGO_ICON;
 
         @Override
         public String toString() {

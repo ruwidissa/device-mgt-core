@@ -696,6 +696,13 @@ public class RequestValidationUtil {
                     new ErrorResponse.ErrorResponseBuilder()
                             .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
+        if (whiteLabelThemeCreateRequest.getLogoIcon() == null) {
+            String msg = "Logo Icon is required to whitelabel";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
         if (whiteLabelThemeCreateRequest.getFooterText() == null) {
             String msg = "Footer text is required to whitelabel";
             log.error(msg);
@@ -713,6 +720,7 @@ public class RequestValidationUtil {
         try {
             validateWhiteLabelImage(whiteLabelThemeCreateRequest.getFavicon());
             validateWhiteLabelImage(whiteLabelThemeCreateRequest.getLogo());
+            validateWhiteLabelImage(whiteLabelThemeCreateRequest.getLogoIcon());
         } catch (InputValidationException e) {
             String msg = "Payload contains invalid base64 files";
             log.error(msg, e);

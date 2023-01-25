@@ -28,6 +28,7 @@ public class WhiteLabelImages {
     private String defaultImagesLocation;
     private String defaultFaviconName;
     private String defaultLogoName;
+    private String defaultLogoIconName;
 
     @XmlElement(name = "StoragePath", required = true)
     public String getStoragePath() {
@@ -59,6 +60,15 @@ public class WhiteLabelImages {
     @XmlElement(name = "DefaultImagesLocation", required = true)
     public String getDefaultImagesLocation() {
         return defaultImagesLocation;
+    }
+
+    @XmlElement(name = "DefaultLogoIconName", required = true)
+    public String getDefaultLogoIconName() {
+        return defaultLogoIconName;
+    }
+
+    public void setDefaultLogoIconName(String defaultLogoIconName) {
+        this.defaultLogoIconName = defaultLogoIconName;
     }
 
     public void setDefaultImagesLocation(String defaultImagesLocation) {

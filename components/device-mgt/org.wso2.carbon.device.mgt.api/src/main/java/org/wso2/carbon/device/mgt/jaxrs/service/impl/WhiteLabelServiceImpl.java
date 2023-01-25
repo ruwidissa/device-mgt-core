@@ -20,7 +20,9 @@ package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.FileResponse;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelTheme;
@@ -33,6 +35,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
@@ -50,10 +53,10 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
 
     @GET
     @Override
-    @Path("/favicon")
-    public Response getWhiteLabelFavicon() {
+    @Path("/{tenantDomain}/favicon")
+    public Response getWhiteLabelFavicon(@PathParam("tenantDomain") String tenantDomain) {
         try {
-            FileResponse fileResponse = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelFavicon();
+            FileResponse fileResponse = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelFavicon(tenantDomain);
             return sendFileStream(fileResponse);
         } catch (NotFoundException e) {
             String msg = "Favicon white label image cannot be found in the system. Updating the whitelabel theme might" +
@@ -69,10 +72,29 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
 
     @GET
     @Override
-    @Path("/logo")
-    public Response getWhiteLabelLogo() {
+    @Path("/{tenantDomain}/logo")
+    public Response getWhiteLabelLogo(@PathParam("tenantDomain") String tenantDomain) {
         try {
-            FileResponse fileResponse = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelLogo();
+            FileResponse fileResponse = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelLogo(tenantDomain);
+            return sendFileStream(fileResponse);
+        } catch (NotFoundException e) {
+            String msg = "Logo white label image cannot be found in the system. Updating the whitelabel theme might" +
+                    "help restore it";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while getting logo";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Override
+    @Path("/{tenantDomain}/icon")
+    public Response getWhiteLabelLogoIcon(@PathParam("tenantDomain") String tenantDomain) {
+        try {
+            FileResponse fileResponse = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelLogoIcon(tenantDomain);
             return sendFileStream(fileResponse);
         } catch (NotFoundException e) {
             String msg = "Logo white label image cannot be found in the system. Updating the whitelabel theme might" +
@@ -104,7 +126,8 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
     @Override
     public Response getWhiteLabelTheme() {
         try {
-            WhiteLabelTheme whiteLabelTheme = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelTheme();
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            WhiteLabelTheme whiteLabelTheme = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelTheme(tenantDomain);
             return Response.status(Response.Status.CREATED).entity(whiteLabelTheme).build();
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while deleting whitelabel for tenant";
@@ -114,6 +137,10 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
             String msg = "Not white label theme configured for this tenant";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retrieving tenant details of whitelabel";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 

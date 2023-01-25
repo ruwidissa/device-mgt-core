@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Base64File;
 import org.wso2.carbon.device.mgt.common.FileResponse;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.NotFoundException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelImage;
@@ -31,6 +32,8 @@ import org.wso2.carbon.device.mgt.core.common.util.FileUtil;
 import org.wso2.carbon.device.mgt.core.common.util.StorageManagementUtil;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
+import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -115,9 +118,9 @@ public class WhiteLabelStorageUtil {
      * @param imageName (i.e: LOGO)
      * @return white label image file {@link File}
      */
-    public static File getWhiteLabelImageFile(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
-            throws MetadataManagementException {
-        String fullPathToImage = getPathToImage(image, imageName);
+    public static File getWhiteLabelImageFile(WhiteLabelImage image, WhiteLabelImage.ImageName imageName, String tenantDomain)
+            throws MetadataManagementException, DeviceManagementException {
+        String fullPathToImage = getPathToImage(image, imageName, tenantDomain);
         return new File(fullPathToImage);
     }
 
@@ -128,10 +131,10 @@ public class WhiteLabelStorageUtil {
      * @param imageName (i.e: LOGO)
      * @return white label image input stream
      */
-    public static FileResponse getWhiteLabelImageStream(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
-            throws MetadataManagementException, NotFoundException {
+    public static FileResponse getWhiteLabelImageStream(WhiteLabelImage image, WhiteLabelImage.ImageName imageName, String tenantDomain)
+            throws MetadataManagementException, NotFoundException, DeviceManagementException {
         FileResponse fileResponse = new FileResponse();
-        String fullPathToFile = getPathToImage(image, imageName);
+        String fullPathToFile = getPathToImage(image, imageName, tenantDomain);
         try {
             InputStream imageStream = StorageManagementUtil.getInputStream(fullPathToFile);
             if (imageStream == null) {
@@ -159,15 +162,22 @@ public class WhiteLabelStorageUtil {
      * @param imageName (i.e: LOGO)
      * @return Full path to white label image in the system
      */
-    private static String getPathToImage(WhiteLabelImage image, WhiteLabelImage.ImageName imageName)
-            throws MetadataManagementException {
+    private static String getPathToImage(WhiteLabelImage image, WhiteLabelImage.ImageName imageName, String tenantDomain)
+            throws MetadataManagementException, DeviceManagementException {
         WhiteLabelImage.ImageLocationType imageLocationType = image.getImageLocationType();
         if (imageLocationType == WhiteLabelImage.ImageLocationType.URL) {
             String msg = "White label images of URL type is not stored, hence it doesn't have a path in file system.";
             log.error(msg);
             throw new MetadataManagementException(msg);
         }
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        int tenantId = 0;
+        try {
+            tenantId = DeviceManagerUtil.getTenantId(tenantDomain);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while getting tenant details of logo";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
         String fileName = image.getImageLocation();
         String filePath = String.valueOf(tenantId);
         if (imageLocationType == WhiteLabelImage.ImageLocationType.DEFAULT_FILE) {

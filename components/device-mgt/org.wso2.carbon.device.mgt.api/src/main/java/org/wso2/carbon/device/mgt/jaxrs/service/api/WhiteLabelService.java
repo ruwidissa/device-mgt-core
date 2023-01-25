@@ -17,7 +17,6 @@
  */
 
 package org.wso2.carbon.device.mgt.jaxrs.service.api;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -28,6 +27,7 @@ import io.swagger.annotations.Info;
 import io.swagger.annotations.ResponseHeader;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
+import io.swagger.annotations.ApiParam;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
@@ -40,6 +40,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -86,7 +87,7 @@ import javax.ws.rs.core.Response;
 public interface WhiteLabelService {
 
     @GET
-    @Path("/favicon")
+    @Path("/{tenantDomain}/favicon")
     @ApiOperation(
             httpMethod = HTTPConstants.HEADER_GET,
             value = "Get whitelabel favicon",
@@ -117,10 +118,13 @@ public interface WhiteLabelService {
                                     "\n Server error occurred while getting white label artifact.",
                             response = ErrorResponse.class)
             })
-    Response getWhiteLabelFavicon();
+    Response getWhiteLabelFavicon( @ApiParam(
+            name = "tenantDomain",
+            value = "The tenant domain.",
+            required = true) @PathParam("tenantDomain") String tenantDomain);
 
     @GET
-    @Path("/logo")
+    @Path("/{tenantDomain}/logo")
     @ApiOperation(
             httpMethod = HTTPConstants.HEADER_GET,
             value = "Get whitelabel logo",
@@ -152,7 +156,50 @@ public interface WhiteLabelService {
                                     "\n Server error occurred while getting white label artifact.",
                             response = ErrorResponse.class)
             })
-    Response getWhiteLabelLogo();
+    Response getWhiteLabelLogo(
+            @ApiParam(
+                    name = "tenantDomain",
+                    value = "The tenant domain.",
+                    required = true)
+            @PathParam("tenantDomain") String tenantDomain);
+
+    @GET
+    @Path("/{tenantDomain}/icon")
+    @ApiOperation(
+            httpMethod = HTTPConstants.HEADER_GET,
+            value = "Get whitelabel logo icon",
+            notes = "Get whitelabel logo icon for the tenant of the logged in user",
+            tags = "Tenant Metadata Management"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully retrieved white label logo.",
+                            response = Metadata.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. " +
+                                    "\n Server error occurred while getting white label artifact.",
+                            response = ErrorResponse.class)
+            })
+    Response getWhiteLabelLogoIcon(  @ApiParam(
+            name = "tenantDomain",
+            value = "The tenant domain.",
+            required = true) @PathParam("tenantDomain") String tenantDomain);
 
     @PUT
     @ApiOperation(

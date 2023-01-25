@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.common.metadata.mgt;
 public class WhiteLabelThemeCreateRequest {
     private WhiteLabelImageRequestPayload favicon;
     private WhiteLabelImageRequestPayload logo;
+    private WhiteLabelImageRequestPayload logoIcon;
     private String footerText;
     private String appTitle;
 
@@ -54,5 +55,13 @@ public class WhiteLabelThemeCreateRequest {
 
     public void setAppTitle(String appTitle) {
         this.appTitle = appTitle;
+    }
+
+    public WhiteLabelImageRequestPayload getLogoIcon() {
+        return logoIcon;
+    }
+
+    public void setLogoIcon(WhiteLabelImageRequestPayload logoIcon) {
+        this.logoIcon = logoIcon;
     }
 }

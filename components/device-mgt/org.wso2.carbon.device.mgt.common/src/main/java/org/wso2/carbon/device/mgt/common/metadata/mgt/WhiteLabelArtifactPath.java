@@ -21,14 +21,16 @@ package org.wso2.carbon.device.mgt.common.metadata.mgt;
 public class WhiteLabelArtifactPath {
     private String faviconPath;
     private String logoPath;
+    private String logoIconPath;
 
     public WhiteLabelArtifactPath() {
 
     }
 
-    public WhiteLabelArtifactPath(String faviconPath, String logoPath) {
+    public WhiteLabelArtifactPath(String faviconPath, String logoPath, String logoIconPath) {
         this.faviconPath = faviconPath;
         this.logoPath = logoPath;
+        this.logoIconPath = logoIconPath;
     }
 
     public String getFaviconPath() {
@@ -45,5 +47,13 @@ public class WhiteLabelArtifactPath {
 
     public void setLogoPath(String logoPath) {
         this.logoPath = logoPath;
+    }
+
+    public String getLogoIconPath() {
+        return logoIconPath;
+    }
+
+    public void setLogoIconPath(String logoIconPath) {
+        this.logoIconPath = logoIconPath;
     }
 }
