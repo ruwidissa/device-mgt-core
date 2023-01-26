@@ -321,7 +321,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
                         new ErrorResponse.ErrorResponseBuilder().setMessage(message).build()).build();
             }
             LifecycleStateDevice updatedInfo = DeviceMgtAPIUtils.getDeviceStateManagementService()
-                    .changeDeviceStatus(device.getEnrolmentInfo(), nextStatus);
+                    .changeDeviceStatus(device, nextStatus);
             return Response.status(Response.Status.OK).entity(updatedInfo).build();
         } catch (InvalidStatusException e) {
             String msg = "Error occured while changing status: Invalid status or invalid status change";
@@ -373,8 +373,8 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
             LifecycleStateDeviceList states = new LifecycleStateDeviceList();
-            result = (PaginationResult) DeviceMgtAPIUtils.getDeviceStateManagementService()
-                    .getDeviceLifecycleHistory(device);
+            result = DeviceMgtAPIUtils.getDeviceStateManagementService()
+                    .getDeviceLifecycleHistory(request, device);
             states.setLifecycleStates((List<LifecycleStateDevice>) result.getData());
             states.setCount(result.getRecordsTotal());
             return Response.status(Response.Status.OK).entity(states).build();

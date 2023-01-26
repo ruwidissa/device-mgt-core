@@ -124,7 +124,7 @@ public class DeviceStateManagementServiceImpl implements DeviceStateManagementSe
             List<LifecycleStateDevice> listLifecycle = deviceLifecycleDAO.getDeviceLifecycle(id);
             return listLifecycle;
         } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while getting lifecycle history";
+            String msg = "Error occurred while getting lifrcycle history";
             log.error(msg, e);
             throw new DeviceStatusException(msg, e);
         } catch (SQLException e) {
