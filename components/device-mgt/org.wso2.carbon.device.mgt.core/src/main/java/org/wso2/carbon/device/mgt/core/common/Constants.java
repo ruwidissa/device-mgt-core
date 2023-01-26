@@ -24,4 +24,6 @@ public class Constants {
     public static final String URI_SEPARATOR = "/";
     public static final String BASIC_AUTH_HEADER_PREFIX = "Basic ";
     public static final String BEARER = "Bearer ";
+    public static final String SEND_USERNAME = "SEND_USERNAME";
+
 }
