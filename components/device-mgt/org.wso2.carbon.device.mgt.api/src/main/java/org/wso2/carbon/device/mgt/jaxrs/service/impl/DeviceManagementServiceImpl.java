@@ -618,7 +618,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             persistedDevice.setName(device.getName());
             System.out.println("This is rename device");
             boolean responseOfmodifyEnrollment = deviceManagementProviderService.modifyEnrollment(persistedDevice);
-            boolean responseOfDeviceNameChanged = deviceManagementProviderService.SendDeviceNameChangedNotification(
+            boolean responseOfDeviceNameChanged = deviceManagementProviderService.sendDeviceNameChangedNotification(
                     persistedDevice);
             boolean response = responseOfmodifyEnrollment && responseOfDeviceNameChanged;
 

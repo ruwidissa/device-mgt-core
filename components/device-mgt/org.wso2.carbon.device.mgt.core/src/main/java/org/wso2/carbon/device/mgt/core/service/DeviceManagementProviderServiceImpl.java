@@ -4878,7 +4878,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public Boolean SendDeviceNameChangedNotification(Device device) throws DeviceManagementException {
+    public Boolean sendDeviceNameChangedNotification(Device device) throws DeviceManagementException {
 
         try {
             ProfileOperation operation = new ProfileOperation();
