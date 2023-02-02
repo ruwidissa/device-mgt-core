@@ -616,9 +616,13 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             Device persistedDevice = deviceManagementProviderService.getDevice(new DeviceIdentifier
                     (deviceId, deviceType), true);
             persistedDevice.setName(device.getName());
-            boolean response = deviceManagementProviderService.modifyEnrollment(persistedDevice);
-            return Response.status(Response.Status.CREATED).entity(response).build();
+            System.out.println("This is rename device");
+            boolean responseOfmodifyEnrollment = deviceManagementProviderService.modifyEnrollment(persistedDevice);
+            boolean responseOfDeviceNameChanged = deviceManagementProviderService.sendDeviceNameChangedNotification(
+                    persistedDevice);
+            boolean response = responseOfmodifyEnrollment && responseOfDeviceNameChanged;
 
+            return Response.status(Response.Status.CREATED).entity(response).build();
         } catch (DeviceManagementException e) {
             log.error("Error encountered while updating device of type : " + deviceType + " and " +
                     "ID : " + deviceId);

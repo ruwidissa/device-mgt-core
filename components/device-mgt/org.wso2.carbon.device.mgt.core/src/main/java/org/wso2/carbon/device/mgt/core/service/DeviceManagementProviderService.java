@@ -1030,4 +1030,6 @@ public interface DeviceManagementProviderService {
      */
     PaginationResult getDevicesDetails(PaginationRequest request, List<Integer> devicesIds, String groupName)
             throws DeviceManagementException;
+
+    Boolean sendDeviceNameChangedNotification(Device device) throws DeviceManagementException;
 }
