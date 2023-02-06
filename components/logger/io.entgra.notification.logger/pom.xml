@@ -25,17 +25,13 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>logger</artifactId>
-        <version>5.0.16-SNAPSHOT</version>
+        <version>5.0.17-SNAPSHOT</version>
     </parent>
 
     <artifactId>io.entgra.notification.logger</artifactId>
     <packaging>bundle</packaging>
 
     <dependencies>
-        <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>io.entgra.device.mgt.extensions.logger</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
@@ -45,8 +41,11 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>io.entgra.device.mgt.extensions.logger</artifactId>
+        </dependency>
     </dependencies>
-    <version>5.0.16-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
