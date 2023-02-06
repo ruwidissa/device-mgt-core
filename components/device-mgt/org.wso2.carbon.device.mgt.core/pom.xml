@@ -114,7 +114,7 @@
                             org.apache.commons.codec.binary,
                             io.entgra.server.bootup.heartbeat.beacon,
                             io.entgra.device.mgt.extensions.logger.*,
-                            io.entgra.logger.*,
+                            io.entgra.notification.logger.*
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.device.mgt.core.internal,

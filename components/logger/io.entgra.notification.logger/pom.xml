@@ -77,7 +77,7 @@
                             org.wso2.carbon.context;version="[4.4,5)
                         </Import-Package>
                         <Export-Package>
-                            io.entgra.logger.*
+                            io.entgra.notification.logger.*
                         </Export-Package>
                     </instructions>
                 </configuration>
