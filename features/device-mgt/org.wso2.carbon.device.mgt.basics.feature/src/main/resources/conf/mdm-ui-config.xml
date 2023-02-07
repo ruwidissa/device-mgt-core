@@ -124,6 +124,7 @@
         <Scope>perm:users:send-invitation</Scope>
         <Scope>perm:admin-users:view</Scope>
         <Scope>perm:admin:devices:update-enrollment</Scope>
+        <Scope>perm:admin:devices:change-status</Scope>
         <Scope>perm:groups:devices</Scope>
         <Scope>perm:groups:update</Scope>
         <Scope>perm:groups:add</Scope>
