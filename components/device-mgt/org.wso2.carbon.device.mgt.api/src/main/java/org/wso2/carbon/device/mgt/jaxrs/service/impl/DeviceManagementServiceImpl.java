@@ -890,16 +890,14 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     }
 
     @GET
-    @Path("/{type}/{id}/features")
+    @Path("/device-type/{type}/features")
     @Override
     public Response getFeaturesOfDevice(
             @PathParam("type") @Size(max = 45) String type,
-            @PathParam("id") @Size(max = 45) String id,
             @HeaderParam("If-Modified-Since") String ifModifiedSince) {
         List<Feature> features = new ArrayList<>();
         DeviceManagementProviderService dms;
         try {
-            RequestValidationUtil.validateDeviceIdentifier(type, id);
             dms = DeviceMgtAPIUtils.getDeviceManagementService();
             FeatureManager fm;
             try {
@@ -913,8 +911,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 features = fm.getFeatures();
             }
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while retrieving the list of features of '" + type + "' device, which " +
-                    "carries the id '" + id + "'";
+            String msg = "Error occurred while retrieving the list of features of '" + type + "'";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();

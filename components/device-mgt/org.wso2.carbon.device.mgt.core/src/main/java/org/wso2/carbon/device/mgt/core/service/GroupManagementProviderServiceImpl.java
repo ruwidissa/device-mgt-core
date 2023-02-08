@@ -43,6 +43,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
@@ -51,6 +52,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.TrackerAlreadyExistException
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceTypesOfGroups;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupNotExistException;
@@ -79,6 +81,7 @@ import java.util.stream.Collectors;
 public class GroupManagementProviderServiceImpl implements GroupManagementProviderService {
 
     private static final Log log = LogFactory.getLog(GroupManagementProviderServiceImpl.class);
+    private static final String DEVICE_STATUS_REMOVED = "REMOVED";
 
     private final GroupDAO groupDAO;
     private final DeviceDAO deviceDAO;
@@ -1378,5 +1381,61 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         for (DeviceGroup nextParentGroup : immediateChildrenGroups) {
             createGroupWithChildren(nextParentGroup, childrenGroups, requireGroupProps, tenantId, depth, counter);
         }
+    }
+    @Override
+    public DeviceTypesOfGroups getDeviceTypesOfGroups(List<String> identifiers) throws GroupManagementException {
+        DeviceTypesOfGroups deviceTypesOfGroups = new DeviceTypesOfGroups();
+        List<Integer> groupsIDs = new ArrayList<>();
+        try {
+            for (String id : identifiers) {
+                groupsIDs.add(Integer.parseInt(id));
+            }
+
+            List<String> deviceIDs = new ArrayList<>();
+            List<Device> allDevices = new ArrayList<>();
+            for (Integer groupID : groupsIDs) {
+                DeviceGroup deviceGroup = getGroup(groupID, false);
+                if (deviceGroup == null) {
+                    String errorMessage = "Invalid Group ID provided.";
+                    log.error(errorMessage);
+                    throw new GroupManagementException(errorMessage);
+                }
+                List<Device> devices = getAllDevicesOfGroup(deviceGroup.getName(), false);
+                for (Device device : devices) {
+                    if (!DEVICE_STATUS_REMOVED.equals(device.getEnrolmentInfo().getStatus().toString())
+                            && !deviceIDs.contains(device.getDeviceIdentifier())) {
+                        deviceIDs.add(device.getDeviceIdentifier());
+                        allDevices.add(device);
+                    }
+                }
+            }
+
+            for (Device device : allDevices) {
+                if (DeviceManagementConstants.MobileDeviceTypes.MOBILE_DEVICE_TYPE_ANDROID.equals(device.getType())) {
+                    deviceTypesOfGroups.setHasAndroid(true);
+                    break;
+                }
+            }
+            for (Device device : allDevices) {
+                if (DeviceManagementConstants.MobileDeviceTypes.MOBILE_DEVICE_TYPE_IOS.equals(device.getType())) {
+                    deviceTypesOfGroups.setHasIos(true);
+                    break;
+                }
+            }
+            for (Device device : allDevices) {
+                if (DeviceManagementConstants.MobileDeviceTypes.MOBILE_DEVICE_TYPE_WINDOWS.equals(device.getType())) {
+                    deviceTypesOfGroups.setHasWindows(true);
+                    break;
+                }
+            }
+
+        } catch (NumberFormatException e) {
+            String errorMessage = "Only numbers can exists in a group ID";
+            log.error(errorMessage);
+            throw new GroupManagementException(errorMessage, e);
+
+        }
+
+        return deviceTypesOfGroups;
     }
 }
