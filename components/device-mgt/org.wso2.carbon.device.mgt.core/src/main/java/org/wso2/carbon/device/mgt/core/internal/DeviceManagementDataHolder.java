@@ -34,7 +34,6 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManag
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
-import org.wso2.carbon.device.mgt.core.lifeCycle.DeviceLifecycleStateManager;
 import org.wso2.carbon.device.mgt.core.operation.timeout.task.OperationTimeoutTaskManagerService;
 import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
 import org.wso2.carbon.device.mgt.core.push.notification.mgt.PushNotificationProviderRepository;
@@ -87,7 +86,6 @@ public class DeviceManagementDataHolder {
     private OperationTimeoutTaskManagerService operationTimeoutTaskManagerService;
     private DeviceAPIClientService deviceAPIClientService;
 
-    private DeviceLifecycleStateManager deviceLifecycleStateManager;
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
 
@@ -360,13 +358,5 @@ public class DeviceManagementDataHolder {
 
     public void setDeviceAPIClientService(DeviceAPIClientService deviceAPIClientService) {
         this.deviceAPIClientService = deviceAPIClientService;
-    }
-
-    public DeviceLifecycleStateManager getDeviceLifecycleStateManager() {
-        return deviceLifecycleStateManager;
-    }
-
-    public void setDeviceLifecycleStateManager(DeviceLifecycleStateManager deviceLifecycleStateManager) {
-        this.deviceLifecycleStateManager = deviceLifecycleStateManager;
     }
 }

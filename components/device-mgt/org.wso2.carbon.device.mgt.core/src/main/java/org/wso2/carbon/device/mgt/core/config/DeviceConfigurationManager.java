@@ -40,7 +40,6 @@ public class DeviceConfigurationManager {
     private static final String DEVICE_MGT_CONFIG_PATH =
             CarbonUtils.getCarbonConfigDirPath() + File.separator +
                     DeviceManagementConstants.DataSourceProperties.DEVICE_CONFIG_XML_NAME;
-
     private static final String DEVICE_MGT_CONFIG_SCHEMA_PATH = "resources/config/schema/device-mgt-config-schema.xsd";
 
     public static DeviceConfigurationManager getInstance() {

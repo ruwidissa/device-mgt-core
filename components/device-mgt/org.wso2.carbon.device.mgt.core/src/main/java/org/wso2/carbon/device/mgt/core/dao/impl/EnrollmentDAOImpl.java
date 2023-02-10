@@ -348,7 +348,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
             // if there was no record for the enrolment or the previous status is not the same as the current status
             // we'll add a record
-            if (previousStatus == null || previousStatus != status) {
+            if (previousStatus == null || previousStatus != status){
                 if (deviceId == -1) {
                     // we need the device id in order to add a new record, therefore we get it from the enrolment table
                     sql = "SELECT DEVICE_ID FROM DM_ENROLMENT WHERE ID = ?";
@@ -364,16 +364,8 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                     }
                     DeviceManagementDAOUtil.cleanupResources(stmt, null);
                 }
-                sql = "INSERT INTO DM_DEVICE_STATUS (ENROLMENT_ID, DEVICE_ID, STATUS, UPDATE_TIME, CHANGED_BY";
-                if (previousStatus != null) {
-                    sql += ", PREVIOUS_STATUS";
-                }
-                sql += ") VALUES(?, ?, ?, ?, ?";
-                if (previousStatus != null) {
-                    sql += ", ?";
-                }
-                sql += ")";
 
+                sql = "INSERT INTO DM_DEVICE_STATUS (ENROLMENT_ID, DEVICE_ID, STATUS, UPDATE_TIME, CHANGED_BY) VALUES(?, ?, ?, ?, ?)";
                 stmt = conn.prepareStatement(sql);
                 Timestamp updateTime = new Timestamp(new Date().getTime());
                 stmt.setInt(1, enrolmentId);
@@ -381,10 +373,9 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 stmt.setString(3, status.toString());
                 stmt.setTimestamp(4, updateTime);
                 stmt.setString(5, changedBy);
-                if (previousStatus != null) {
-                    stmt.setString(6, previousStatus.toString());
-                }
-                stmt.executeUpdate();
+                stmt.execute();
+            } else {
+                // no need to update status since the last recorded status is the same as the current status
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while setting the status of device", e);
