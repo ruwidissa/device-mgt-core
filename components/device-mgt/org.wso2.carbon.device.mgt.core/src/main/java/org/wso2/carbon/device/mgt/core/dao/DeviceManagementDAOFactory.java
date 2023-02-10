@@ -125,10 +125,6 @@ public class DeviceManagementDAOFactory {
         return new EnrollmentDAOImpl();
     }
 
-    public static DeviceLifecycleDAO getDeviceLifecycleDAO() {
-        return new DeviceLifecycleDAOImpl();
-    }
-
     public static TrackerDAO getTrackerDAO() {
         if (databaseEngine != null) {
             switch (databaseEngine) {

@@ -58,7 +58,6 @@ public class Constants {
 			"core.polcy.AndroidPolicyPayloadValidator";
 	public static final String IOS = "ios";
 	public static final String WINDOWS = "windows";
-	public static final String ANY = "any";
 
 
 	public final class OperationStatus {
