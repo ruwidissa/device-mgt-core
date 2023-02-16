@@ -1038,7 +1038,7 @@ public class PolicyManagerImpl implements PolicyManager {
                 .getInstance().getDeviceManagementService();
         List<Device> allDevices;
         try {
-            allDevices = deviceManagementService.getAllDevices();
+            allDevices = deviceManagementService.getAllDevices(false);
         } catch (DeviceManagementException e) {
             throw new PolicyManagementException("Error occurred while getting the devices related to policy id (" +
                     policyId + ")", e);
