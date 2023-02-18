@@ -46,6 +46,7 @@
         <module>components/transport-mgt</module>
         <module>components/analytics-mgt</module>
         <module>components/webapp-authenticator-framework</module>
+        <module>components/task-mgt</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -58,6 +59,8 @@
         <module>features/transport-mgt</module>
         <module>features/analytics-mgt</module>
         <module>features/webapp-authenticator-framework</module>
+        <module>features/task-mgt</module>
+
     </modules>
 
     <dependencyManagement>
@@ -349,6 +352,29 @@
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <!-- Device Management dependencies -->
+
+            <!-- Task Management dependencies -->
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.common</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.core</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.watcher</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.feature</artifactId>
+                <type>zip</type>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
 
             <!-- Governance dependencies -->
             <dependency>

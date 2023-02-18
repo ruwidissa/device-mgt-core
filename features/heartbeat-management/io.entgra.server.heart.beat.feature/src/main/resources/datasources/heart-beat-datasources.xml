@@ -29,10 +29,10 @@
 			</jndiConfig>
 			<definition type="RDBMS">
 				<configuration>
-					<url>jdbc:mysql://localhost:3306/heart_beat</url>
-					<username>root</username>
-					<password>root</password>
-					<driverClassName>com.mysql.jdbc.Driver</driverClassName>
+					<url>jdbc:h2:./repository/database/HEART_BEAT_DB;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE</url>
+					<username>wso2carbon</username>
+					<password>wso2carbon</password>
+					<driverClassName>org.h2.Driver</driverClassName>
 					<maxActive>50</maxActive>
 					<maxWait>60000</maxWait>
 					<testOnBorrow>true</testOnBorrow>
