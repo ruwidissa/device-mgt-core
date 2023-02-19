@@ -409,7 +409,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 }
                 if (!HttpReportingUtil.isTrackerEnabled()) {
                     if (log.isDebugEnabled()) {
-                        log.info("Traccar is disabled");
+                        log.debug("Traccar is disabled");
                     }
                 }
             }
@@ -473,7 +473,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                     }
                     if (!HttpReportingUtil.isTrackerEnabled()) {
                         if (log.isDebugEnabled()) {
-                            log.info("Traccar is disabled");
+                            log.debug("Traccar is disabled");
                         }
                     }
                 }
