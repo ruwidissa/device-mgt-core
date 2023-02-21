@@ -17,7 +17,7 @@
  */
 package io.entgra.task.mgt.core.dao.common;
 
-import io.entgra.task.mgt.common.constant.TaskMgtConstant;
+import io.entgra.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.task.mgt.common.exception.IllegalTransactionStateException;
 import io.entgra.task.mgt.common.exception.TransactionManagementException;
 import io.entgra.task.mgt.common.exception.UnsupportedDatabaseEngineException;
@@ -25,9 +25,9 @@ import io.entgra.task.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.task.mgt.core.config.datasource.JNDILookupDefinition;
 import io.entgra.task.mgt.core.dao.DynamicTaskDAO;
 import io.entgra.task.mgt.core.dao.DynamicTaskPropDAO;
-import io.entgra.task.mgt.core.dao.util.TaskManagementDAOUtil;
 import io.entgra.task.mgt.core.dao.impl.DynamicTaskDAOImpl;
 import io.entgra.task.mgt.core.dao.impl.DynamicTaskPropDAOImpl;
+import io.entgra.task.mgt.core.dao.util.TaskManagementDAOUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -48,8 +48,8 @@ public class TaskManagementDAOFactory {
     public static DynamicTaskDAO getDynamicTaskDAO() {
         if (databaseEngine != null) {
             switch (databaseEngine) {
-                case TaskMgtConstant.DataBaseTypes.DB_TYPE_H2:
-                case TaskMgtConstant.DataBaseTypes.DB_TYPE_MYSQL:
+                case TaskMgtConstants.DataBaseTypes.DB_TYPE_H2:
+                case TaskMgtConstants.DataBaseTypes.DB_TYPE_MYSQL:
                     return new DynamicTaskDAOImpl();
                 default:
                     throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
@@ -61,8 +61,8 @@ public class TaskManagementDAOFactory {
     public static DynamicTaskPropDAO getDynamicTaskPropDAO() {
         if (databaseEngine != null) {
             switch (databaseEngine) {
-                case TaskMgtConstant.DataBaseTypes.DB_TYPE_H2:
-                case TaskMgtConstant.DataBaseTypes.DB_TYPE_MYSQL:
+                case TaskMgtConstants.DataBaseTypes.DB_TYPE_H2:
+                case TaskMgtConstants.DataBaseTypes.DB_TYPE_MYSQL:
                     return new DynamicTaskPropDAOImpl();
                 default:
                     throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);

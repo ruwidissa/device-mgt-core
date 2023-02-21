@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Entgra Pvt Ltd. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2023, Entgra Pvt Ltd. (https://entgra.io) All Rights Reserved.
  *
  * Entgra Pvt Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -17,11 +17,12 @@
  */
 package io.entgra.task.mgt.core.service;
 
+import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import io.entgra.task.mgt.common.bean.DynamicTask;
-import io.entgra.task.mgt.common.constant.TaskMgtConstant;
-import io.entgra.task.mgt.common.exception.TaskNotFoundException;
+import io.entgra.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.task.mgt.common.exception.TaskManagementDAOException;
 import io.entgra.task.mgt.common.exception.TaskManagementException;
+import io.entgra.task.mgt.common.exception.TaskNotFoundException;
 import io.entgra.task.mgt.common.exception.TransactionManagementException;
 import io.entgra.task.mgt.common.spi.TaskManagementService;
 import io.entgra.task.mgt.core.dao.DynamicTaskDAO;
@@ -62,13 +63,13 @@ public class TaskManagementServiceImpl implements TaskManagementService {
             throw new TaskManagementException(msg);
         }
         if (!nTaskService.getRegisteredTaskTypes().contains(
-                TaskMgtConstant.Task.DYNAMIC_TASK_TYPE)) {
+                TaskMgtConstants.Task.DYNAMIC_TASK_TYPE)) {
             try {
-                nTaskService.registerTaskType(TaskMgtConstant.Task.DYNAMIC_TASK_TYPE);
-                this.taskManager = nTaskService.getTaskManager(TaskMgtConstant.Task.DYNAMIC_TASK_TYPE);
+                nTaskService.registerTaskType(TaskMgtConstants.Task.DYNAMIC_TASK_TYPE);
+                this.taskManager = nTaskService.getTaskManager(TaskMgtConstants.Task.DYNAMIC_TASK_TYPE);
             } catch (TaskException e) {
                 String msg = "Error occurred while registering task type ["
-                        + TaskMgtConstant.Task.DYNAMIC_TASK_TYPE
+                        + TaskMgtConstants.Task.DYNAMIC_TASK_TYPE
                         + "], hence unable to schedule the task.";
                 log.error(msg);
                 throw new TaskManagementException(msg, e);
@@ -90,6 +91,17 @@ public class TaskManagementServiceImpl implements TaskManagementService {
             // add into the ntask core
             taskId = TaskManagementUtil.generateTaskId(dynamicTaskId);
 
+            try {
+                int serverHashIdx = TaskManagerDataHolder.getInstance().getHeartBeatService()
+                        .getServerCtxInfo().getLocalServerHashIdx();
+                taskProperties.put(TaskMgtConstants.Task.LOCAL_HASH_INDEX, String.valueOf(serverHashIdx));
+                taskProperties.put(TaskMgtConstants.Task.LOCAL_TASK_NAME, taskId);
+            } catch (HeartBeatManagementException e) {
+                String msg = "Unexpected exception when getting server hash index.";
+                log.error(msg, e);
+                throw new TaskManagementException(msg, e);
+            }
+
             if (!isTaskExists(taskId)) {
                 TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
                 triggerInfo.setCronExpression(dynamicTask.getCronExpression());
@@ -101,7 +113,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
                 }
             } else {
                 String msg = "Task '" + taskId + "' is already exists in the ntask core "
-                        + "Hence cannot create another task for the same.";
+                        + "Hence not creating another task for the same name.";
                 log.error(msg);
             }
 
