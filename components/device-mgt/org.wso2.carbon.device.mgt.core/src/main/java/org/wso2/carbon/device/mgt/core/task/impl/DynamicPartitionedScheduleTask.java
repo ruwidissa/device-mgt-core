@@ -19,10 +19,11 @@
 package org.wso2.carbon.device.mgt.core.task.impl;
 
 import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
+import io.entgra.task.mgt.common.constant.TaskMgtConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
 import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
+import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.ntask.core.Task;
 
@@ -37,11 +38,11 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
     private Map<String, String> properties;
 
     @Override
-    public void setProperties(Map<String, String> properties) {
+    public final void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
 
-    public String getProperty(String name) {
+    public final String getProperty(String name) {
         if (properties == null) {
             return null;
         }
@@ -62,7 +63,7 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
                 }
             }
         } catch (HeartBeatManagementException e) {
-            log.error("Error Instantiating Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function." , e);
+            log.error("Error Instantiating Variables necessary for Dynamic Task Scheduling. Dynamic Tasks will not function.", e);
         }
         setup();
     }
@@ -70,11 +71,40 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
     @Override
     public final void execute() {
         refreshContext();
-        executeDynamicTask();
+        if (taskContext != null && taskContext.isPartitioningEnabled()) {
+            String localHashIndex = getProperty(TaskMgtConstants.Task.LOCAL_HASH_INDEX);
+            // These tasks are not dynamically scheduled. They are added via a config so scheduled in each node
+            // during the server startup
+            if (localHashIndex == null ) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Executing startup scheduled task (" + getTaskName() +  ")");
+                }
+                executeDynamicTask();
+                return;
+            }
+            if (localHashIndex.equals(String.valueOf(taskContext.getServerHashIndex()))) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Executing dynamically scheduled task (" + getTaskName() +
+                            ") for current server hash index: " + localHashIndex);
+                }
+                executeDynamicTask();
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Ignoring execution of task (" + getTaskName() +
+                            ") not belonging to current serer hash index: " + localHashIndex);
+                }
+            }
+        } else {
+            executeDynamicTask();
+        }
     }
 
-    public void refreshContext(){
-        if(taskContext != null && taskContext.isPartitioningEnabled()) {
+    public String getTaskName() {
+        return getProperty(TaskMgtConstants.Task.LOCAL_TASK_NAME);
+    }
+
+    public void refreshContext() {
+        if (taskContext != null && taskContext.isPartitioningEnabled()) {
             try {
                 updateContext();
             } catch (HeartBeatManagementException e) {

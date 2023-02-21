@@ -17,7 +17,7 @@
  */
 package io.entgra.task.mgt.core.config;
 
-import io.entgra.task.mgt.common.constant.TaskMgtConstant;
+import io.entgra.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.task.mgt.common.exception.TaskManagementException;
 import io.entgra.task.mgt.core.util.TaskManagementUtil;
 import org.w3c.dom.Document;
@@ -38,7 +38,7 @@ public class TaskConfigurationManager {
 
     private static final String TASK_MGT_CONFIG_PATH =
             CarbonUtils.getCarbonConfigDirPath() + File.separator +
-                    TaskMgtConstant.DataSourceProperties.TASK_CONFIG_XML_NAME;
+                    TaskMgtConstants.DataSourceProperties.TASK_CONFIG_XML_NAME;
 
     public static TaskConfigurationManager getInstance() {
         if (taskConfigurationManager == null) {

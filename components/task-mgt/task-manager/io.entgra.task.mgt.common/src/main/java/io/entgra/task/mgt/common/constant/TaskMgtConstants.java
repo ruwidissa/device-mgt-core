@@ -17,7 +17,7 @@
  */
 package io.entgra.task.mgt.common.constant;
 
-public class TaskMgtConstant {
+public class TaskMgtConstants {
     public static final class DataSourceProperties {
         private DataSourceProperties() {
             throw new AssertionError();
@@ -46,7 +46,8 @@ public class TaskMgtConstant {
         public static final String NAME_SEPARATOR = "_";
         public static final String PROPERTY_KEY_COLUMN_NAME = "PROPERTY_NAME";
         public static final String PROPERTY_VALUE_COLUMN_NAME = "PROPERTY_VALUE";
-        public static final String __TENANT_ID_PROP__ = "__TENANT_ID_PROP__";
-
+        public static final String TENANT_ID_PROP = "__TENANT_ID_PROP__";
+        public static final String LOCAL_HASH_INDEX = "__LOCAL_HASH_INDEX__";
+        public static final String LOCAL_TASK_NAME = "__LOCAL_TASK_NAME__";
     }
 }

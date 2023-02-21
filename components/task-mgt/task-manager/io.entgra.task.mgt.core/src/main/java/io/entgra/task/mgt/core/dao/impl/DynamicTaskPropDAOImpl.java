@@ -17,15 +17,14 @@
  */
 package io.entgra.task.mgt.core.dao.impl;
 
-import io.entgra.task.mgt.common.constant.TaskMgtConstant;
+import io.entgra.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.task.mgt.common.exception.TaskManagementDAOException;
 import io.entgra.task.mgt.core.dao.DynamicTaskPropDAO;
-import io.entgra.task.mgt.core.dao.util.TaskManagementDAOUtil;
 import io.entgra.task.mgt.core.dao.common.TaskManagementDAOFactory;
+import io.entgra.task.mgt.core.dao.util.TaskManagementDAOUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -79,8 +78,8 @@ public class DynamicTaskPropDAOImpl implements DynamicTaskPropDAO {
             resultSet = stmt.executeQuery();
             properties = new HashMap<>();
             while (resultSet.next()) {
-                properties.put(resultSet.getString(TaskMgtConstant.Task.PROPERTY_KEY_COLUMN_NAME)
-                        , resultSet.getString(TaskMgtConstant.Task.PROPERTY_VALUE_COLUMN_NAME));
+                properties.put(resultSet.getString(TaskMgtConstants.Task.PROPERTY_KEY_COLUMN_NAME)
+                        , resultSet.getString(TaskMgtConstants.Task.PROPERTY_VALUE_COLUMN_NAME));
             }
         } catch (SQLException e) {
             String msg = "Error occurred while fetching task properties of : '" + dynamicTaskId + "'";
@@ -119,7 +118,7 @@ public class DynamicTaskPropDAOImpl implements DynamicTaskPropDAO {
             throw new TaskManagementDAOException
                     ("Error occurred while updating device properties to database.", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+            TaskManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 }

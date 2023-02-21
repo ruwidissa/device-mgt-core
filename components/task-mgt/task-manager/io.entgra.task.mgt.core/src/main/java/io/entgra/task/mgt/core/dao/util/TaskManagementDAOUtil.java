@@ -20,7 +20,6 @@ package io.entgra.task.mgt.core.dao.util;
 import io.entgra.task.mgt.common.bean.DynamicTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.Device;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;

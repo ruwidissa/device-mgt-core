@@ -19,7 +19,7 @@ package io.entgra.task.mgt.core.util;
 
 import com.google.gson.Gson;
 import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
-import io.entgra.task.mgt.common.constant.TaskMgtConstant;
+import io.entgra.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.task.mgt.common.exception.TaskManagementException;
 import io.entgra.task.mgt.core.internal.TaskManagerDataHolder;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -31,7 +31,6 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -60,8 +59,8 @@ public class TaskManagementUtil {
         try {
             int serverHashIdx = TaskManagerDataHolder.getInstance().getHeartBeatService()
                     .getServerCtxInfo().getLocalServerHashIdx();
-            return TaskMgtConstant.Task.DYNAMIC_TASK_TYPE + TaskMgtConstant.Task.NAME_SEPARATOR + dynamicTaskId
-                    + TaskMgtConstant.Task.NAME_SEPARATOR + serverHashIdx;
+            return TaskMgtConstants.Task.DYNAMIC_TASK_TYPE + TaskMgtConstants.Task.NAME_SEPARATOR + dynamicTaskId
+                    + TaskMgtConstants.Task.NAME_SEPARATOR + serverHashIdx;
         } catch (HeartBeatManagementException e) {
             String msg = "Failed to generate task id for a dynamic task " + dynamicTaskId;
             log.error(msg, e);
@@ -70,11 +69,12 @@ public class TaskManagementUtil {
     }
 
     public static String generateTaskPropsMD5(Map<String, String> taskProperties) throws TaskManagementException {
-        if (taskProperties.containsKey(TaskMgtConstant.Task.__TENANT_ID_PROP__)) {
-            taskProperties.remove(TaskMgtConstant.Task.__TENANT_ID_PROP__);
-        }
+        taskProperties.remove(TaskMgtConstants.Task.TENANT_ID_PROP);
+        taskProperties.remove(TaskMgtConstants.Task.LOCAL_HASH_INDEX);
+        taskProperties.remove(TaskMgtConstants.Task.LOCAL_TASK_NAME);
         Gson gson = new Gson();
         String json = gson.toJson(taskProperties);
         return DigestUtils.md5Hex(json);
     }
+
 }

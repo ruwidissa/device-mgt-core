@@ -20,7 +20,7 @@ package io.entgra.task.mgt.watcher;
 
 
 import io.entgra.task.mgt.common.bean.DynamicTask;
-import io.entgra.task.mgt.common.constant.TaskMgtConstant;
+import io.entgra.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.task.mgt.common.exception.TaskManagementException;
 import io.entgra.task.mgt.core.util.TaskManagementUtil;
 import io.entgra.task.mgt.watcher.internal.TaskWatcherDataHolder;
@@ -64,10 +64,10 @@ public class IoTSStartupHandler implements ServerStartupObserver {
         }
         try {
             if (!nTaskService.getRegisteredTaskTypes().contains(
-                    TaskMgtConstant.Task.DYNAMIC_TASK_TYPE)) {
-                nTaskService.registerTaskType(TaskMgtConstant.Task.DYNAMIC_TASK_TYPE);
+                    TaskMgtConstants.Task.DYNAMIC_TASK_TYPE)) {
+                nTaskService.registerTaskType(TaskMgtConstants.Task.DYNAMIC_TASK_TYPE);
             }
-            taskManager = nTaskService.getTaskManager(TaskMgtConstant.Task.DYNAMIC_TASK_TYPE);
+            taskManager = nTaskService.getTaskManager(TaskMgtConstants.Task.DYNAMIC_TASK_TYPE);
 
             List<DynamicTask> dynamicTasks = TaskWatcherDataHolder.getInstance().getTaskManagementService()
                     .getAllDynamicTasks();

@@ -63,10 +63,12 @@
                             javax.naming,
                             io.entgra.task.mgt.common.*,
                             org.wso2.carbon.utils.*,
-                            org.wso2.carbon.ntask.*,
-                            org.wso2.carbon.device.mgt.core.*,
+                            org.wso2.carbon.ntask.core.*,
+                            org.wso2.carbon.ntask.common,
                             org.wso2.carbon.device.mgt.common.*,
                             org.wso2.carbon.context,
+                            org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
+                            org.apache.commons.codec.digest;version="${commons-codec.wso2.osgi.version.range}",
                             io.entgra.server.bootup.heartbeat.beacon.dto,
                             io.entgra.server.bootup.heartbeat.beacon.exception,
                             io.entgra.server.bootup.heartbeat.beacon.service,
@@ -113,8 +115,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <groupId>commons-codec.wso2</groupId>
+            <artifactId>commons-codec</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -125,6 +127,13 @@
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
             <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--nTask dependencies-->
+        <dependency>
+            <groupId>org.wso2.carbon.commons</groupId>
+            <artifactId>org.wso2.carbon.ntask.core</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
