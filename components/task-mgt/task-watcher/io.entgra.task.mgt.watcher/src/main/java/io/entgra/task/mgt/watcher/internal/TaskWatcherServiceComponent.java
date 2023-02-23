@@ -17,7 +17,7 @@
  */
 package io.entgra.task.mgt.watcher.internal;
 
-
+import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.task.mgt.common.spi.TaskManagementService;
 import io.entgra.task.mgt.core.config.TaskConfigurationManager;
 import io.entgra.task.mgt.core.config.TaskManagementConfig;
@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.ntask.core.service.TaskService;
-
+import org.wso2.carbon.user.core.service.RealmService;
 
 /**
  * @scr.component
@@ -45,6 +45,18 @@ import org.wso2.carbon.ntask.core.service.TaskService;
  * policy="dynamic"
  * bind="setTaskMgtService"
  * unbind="unsetTaskMgtService"
+ * @scr.reference name="entgra.heart.beat.service"
+ * interface="io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
+ * cardinality="0..1"
+ * policy="dynamic"
+ * bind="setHeartBeatService"
+ * unbind="unsetHeartBeatService"
+ * @scr.reference name="user.realmservice.default"
+ * interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setRealmService"
+ * unbind="unsetRealmService"
  */
 public class TaskWatcherServiceComponent {
 
@@ -108,6 +120,48 @@ public class TaskWatcherServiceComponent {
             log.debug("Removing the task service from Task Watcher Service Component ");
         }
         TaskWatcherDataHolder.getInstance().setTaskManagementService(null);
+    }
+
+    @SuppressWarnings("unused")
+    protected void setHeartBeatService(HeartBeatManagementService heartBeatService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting heart beat service to Task Manager Service Component");
+        }
+        TaskWatcherDataHolder.getInstance().setHeartBeatService(heartBeatService);
+    }
+
+    @SuppressWarnings("unused")
+    protected void unsetHeartBeatService(HeartBeatManagementService heartBeatManagementService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Removing heart beat service from Task Manager Service Component");
+        }
+        TaskWatcherDataHolder.getInstance().setHeartBeatService(null);
+    }
+
+    /**
+     * Sets Realm Service.
+     *
+     * @param realmService An instance of RealmService
+     */
+    @SuppressWarnings("unused")
+    protected void setRealmService(RealmService realmService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting Realm Service");
+        }
+        TaskWatcherDataHolder.getInstance().setRealmService(realmService);
+    }
+
+    /**
+     * Unsets Realm Service.
+     *
+     * @param realmService An instance of RealmService
+     */
+    @SuppressWarnings("unused")
+    protected void unsetRealmService(RealmService realmService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting Realm Service");
+        }
+        TaskWatcherDataHolder.getInstance().setRealmService(null);
     }
 
 }

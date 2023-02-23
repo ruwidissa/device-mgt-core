@@ -27,7 +27,7 @@ public class TaskManagerDataHolder {
 
     private HeartBeatManagementService heartBeatService;
 
-    private static TaskManagerDataHolder thisInstance = new TaskManagerDataHolder();
+    private static final TaskManagerDataHolder thisInstance = new TaskManagerDataHolder();
 
     private TaskManagerDataHolder() {
     }

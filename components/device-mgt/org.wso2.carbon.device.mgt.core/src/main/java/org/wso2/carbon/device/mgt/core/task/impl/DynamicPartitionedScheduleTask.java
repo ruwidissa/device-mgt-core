@@ -77,7 +77,8 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
             // during the server startup
             if (localHashIndex == null ) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Executing startup scheduled task (" + getTaskName() +  ")");
+                    log.debug("Executing startup scheduled task (" + getTaskName() +  ") with class: " +
+                            this.getClass().getName());
                 }
                 executeDynamicTask();
                 return;

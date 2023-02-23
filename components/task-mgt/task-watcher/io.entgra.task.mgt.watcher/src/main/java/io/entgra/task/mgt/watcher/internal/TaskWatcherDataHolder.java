@@ -17,16 +17,20 @@
  */
 package io.entgra.task.mgt.watcher.internal;
 
-
+import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.task.mgt.common.spi.TaskManagementService;
 import org.wso2.carbon.ntask.core.service.TaskService;
+import org.wso2.carbon.user.core.service.RealmService;
 
 public class TaskWatcherDataHolder {
     private TaskManagementService taskManagerService;
 
     private TaskService nTaskService;
 
-    private static TaskWatcherDataHolder thisInstance = new TaskWatcherDataHolder();
+    private HeartBeatManagementService heartBeatService;
+    private RealmService realmService;
+
+    private static final TaskWatcherDataHolder thisInstance = new TaskWatcherDataHolder();
 
     private TaskWatcherDataHolder() {}
 
@@ -48,6 +52,22 @@ public class TaskWatcherDataHolder {
 
     public void setnTaskService(TaskService nTaskService) {
         this.nTaskService = nTaskService;
+    }
+
+    public HeartBeatManagementService getHeartBeatService() {
+        return heartBeatService;
+    }
+
+    public void setHeartBeatService(HeartBeatManagementService heartBeatService) {
+        this.heartBeatService = heartBeatService;
+    }
+
+    public RealmService getRealmService() {
+        return this.realmService;
+    }
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
     }
 
 }

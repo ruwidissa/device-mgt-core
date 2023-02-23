@@ -293,7 +293,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
     @Override
     public List<DynamicTask> getAllDynamicTasks() throws TaskManagementException {
-        List<DynamicTask> dynamicTasks = null;
+        List<DynamicTask> dynamicTasks;
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Fetching the details of all dynamic tasks");
@@ -324,7 +324,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
     @Override
     public DynamicTask getDynamicTaskById(int dynamicTaskId) throws TaskManagementException {
-        DynamicTask dynamicTask = null;
+        DynamicTask dynamicTask;
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Fetching the details of dynamic task '" + dynamicTaskId + "'");
@@ -352,7 +352,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
     @Override
     public List<DynamicTask> getActiveDynamicTasks() throws TaskManagementException {
-        List<DynamicTask> dynamicTasks = null;
+        List<DynamicTask> dynamicTasks;
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Fetching the details of all active dynamic tasks");
