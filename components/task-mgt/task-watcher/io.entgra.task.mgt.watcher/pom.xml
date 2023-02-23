@@ -52,13 +52,18 @@
                         <Bundle-Description>Task Watcher Bundle</Bundle-Description>
                         <Private-Package>io.entgra.task.mgt.watcher.internal</Private-Package>
                         <Import-Package>
-                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
-                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.logging,
-                            org.wso2.carbon.ntask.*,
+                            io.entgra.server.bootup.heartbeat.beacon.*,
                             io.entgra.task.mgt.common.*,
                             io.entgra.task.mgt.core.*,
+                            org.apache.commons.logging,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.wso2.carbon.context,
                             org.wso2.carbon.core,
+                            org.wso2.carbon.device.mgt.common.*,
+                            org.wso2.carbon.ntask.*,
+                            org.wso2.carbon.user.api,
+                            org.wso2.carbon.user.core.*,
                         </Import-Package>
                         <Export-Package>
                             io.entgra.task.mgt.watcher.*
@@ -97,12 +102,38 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
             <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.user.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.user.api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
