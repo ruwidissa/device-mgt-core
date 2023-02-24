@@ -62,8 +62,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
             log.error(msg);
             throw new TaskManagementException(msg);
         }
-        if (!nTaskService.getRegisteredTaskTypes().contains(
-                TaskMgtConstants.Task.DYNAMIC_TASK_TYPE)) {
+        if (!nTaskService.getRegisteredTaskTypes().contains(TaskMgtConstants.Task.DYNAMIC_TASK_TYPE)) {
             try {
                 nTaskService.registerTaskType(TaskMgtConstants.Task.DYNAMIC_TASK_TYPE);
                 this.taskManager = nTaskService.getTaskManager(TaskMgtConstants.Task.DYNAMIC_TASK_TYPE);

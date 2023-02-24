@@ -72,7 +72,7 @@ public class TaskManagementUtil {
                 + TaskMgtConstants.Task.NAME_SEPARATOR + serverHashIdx;
     }
 
-    public static String generateTaskPropsMD5(Map<String, String> taskProperties) throws TaskManagementException {
+    public static String generateTaskPropsMD5(Map<String, String> taskProperties) {
         taskProperties.remove(TaskMgtConstants.Task.TENANT_ID_PROP);
         taskProperties.remove(TaskMgtConstants.Task.LOCAL_HASH_INDEX);
         taskProperties.remove(TaskMgtConstants.Task.LOCAL_TASK_NAME);

@@ -64,7 +64,7 @@ public class IoTSStartupHandler implements ServerStartupObserver {
                     log.error("Error occurred when comparing tasks.", e);
                 }
             }
-        }, 200000, 600000);
+        }, 200000, 300000);
     }
 
     private void compareTasks() {
@@ -127,29 +127,18 @@ public class IoTSStartupHandler implements ServerStartupObserver {
             // add or update task into nTask core
             for (DynamicTask dt : tenantedDynamicTasks.get(tenantId)) {
                 String generatedTaskId = TaskManagementUtil.generateTaskId(dt.getDynamicTaskId());
-                Map<String, String> taskProperties = dt.getProperties();
-                try {
-                    int serverHashIdx = TaskWatcherDataHolder.getInstance().getHeartBeatService()
-                            .getServerCtxInfo().getLocalServerHashIdx();
-                    taskProperties.put(TaskMgtConstants.Task.LOCAL_HASH_INDEX, String.valueOf(serverHashIdx));
-                    taskProperties.put(TaskMgtConstants.Task.LOCAL_TASK_NAME, generatedTaskId);
-                } catch (HeartBeatManagementException e) {
-                    String msg = "Unexpected exception when getting server hash index.";
-                    log.error(msg, e);
-                    throw new TaskManagementException(msg, e);
-                }
                 boolean isExist = false;
                 for (TaskInfo taskInfo : tasks) {
                     if (taskInfo.getName().equals(generatedTaskId)) {
                         isExist = true;
                         TaskInfo.TriggerInfo triggerInfo = taskInfo.getTriggerInfo();
-                        String dynamicTaskPropMD5 = TaskManagementUtil.generateTaskPropsMD5(taskProperties);
+                        String dynamicTaskPropMD5 = TaskManagementUtil.generateTaskPropsMD5(dt.getProperties());
                         String existingTaskPropMD5 = TaskManagementUtil.generateTaskPropsMD5(taskInfo.getProperties());
                         if (!triggerInfo.getCronExpression().equals(dt.getCronExpression())
                                 || !dynamicTaskPropMD5.equals(existingTaskPropMD5)) {
                             triggerInfo.setCronExpression(dt.getCronExpression());
                             taskInfo.setTriggerInfo(triggerInfo);
-                            taskInfo.setProperties(taskProperties);
+                            taskInfo.setProperties(populateTaskProperties(tenantId, generatedTaskId, dt.getProperties()));
                             taskManager.registerTask(taskInfo);
                             taskManager.rescheduleTask(generatedTaskId);
                             if (log.isDebugEnabled()) {
@@ -176,7 +165,7 @@ public class IoTSStartupHandler implements ServerStartupObserver {
                     TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
                     triggerInfo.setCronExpression(dt.getCronExpression());
                     TaskInfo taskInfo = new TaskInfo(generatedTaskId, dt.getTaskClassName(),
-                            taskProperties, triggerInfo);
+                            populateTaskProperties(tenantId, generatedTaskId, dt.getProperties()), triggerInfo);
                     taskManager.registerTask(taskInfo);
                     taskManager.scheduleTask(generatedTaskId);
                     if (log.isDebugEnabled()) {
@@ -185,6 +174,23 @@ public class IoTSStartupHandler implements ServerStartupObserver {
                 }
             }
             PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    private static Map<String, String> populateTaskProperties(int tenantId, String generatedTaskId,
+                                                              Map<String, String> taskProperties)
+            throws TaskManagementException {
+        try {
+            int serverHashIdx = TaskWatcherDataHolder.getInstance().getHeartBeatService()
+                    .getServerCtxInfo().getLocalServerHashIdx();
+            taskProperties.put(TaskMgtConstants.Task.LOCAL_HASH_INDEX, String.valueOf(serverHashIdx));
+            taskProperties.put(TaskMgtConstants.Task.LOCAL_TASK_NAME, generatedTaskId);
+            taskProperties.put(TaskMgtConstants.Task.TENANT_ID_PROP, String.valueOf(tenantId));
+            return taskProperties;
+        } catch (HeartBeatManagementException e) {
+            String msg = "Unexpected exception when getting server hash index.";
+            log.error(msg, e);
+            throw new TaskManagementException(msg, e);
         }
     }
 
