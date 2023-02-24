@@ -59,13 +59,17 @@ public class TaskManagementUtil {
         try {
             int serverHashIdx = TaskManagerDataHolder.getInstance().getHeartBeatService()
                     .getServerCtxInfo().getLocalServerHashIdx();
-            return TaskMgtConstants.Task.DYNAMIC_TASK_TYPE + TaskMgtConstants.Task.NAME_SEPARATOR + dynamicTaskId
-                    + TaskMgtConstants.Task.NAME_SEPARATOR + serverHashIdx;
+            return generateTaskId(dynamicTaskId, serverHashIdx);
         } catch (HeartBeatManagementException e) {
             String msg = "Failed to generate task id for a dynamic task " + dynamicTaskId;
             log.error(msg, e);
             throw new TaskManagementException(msg, e);
         }
+    }
+
+    public static String generateTaskId(int dynamicTaskId, int serverHashIdx) {
+        return TaskMgtConstants.Task.DYNAMIC_TASK_TYPE + TaskMgtConstants.Task.NAME_SEPARATOR + dynamicTaskId
+                + TaskMgtConstants.Task.NAME_SEPARATOR + serverHashIdx;
     }
 
     public static String generateTaskPropsMD5(Map<String, String> taskProperties) throws TaskManagementException {
