@@ -36,6 +36,7 @@
 package org.wso2.carbon.policy.mgt.core.dao;
 
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.policy.mgt.CorrectiveAction;
 import org.wso2.carbon.policy.mgt.common.Criterion;
 import org.wso2.carbon.device.mgt.common.policy.mgt.DeviceGroupWrapper;
@@ -214,4 +215,13 @@ public interface PolicyDAO {
     HashMap<Integer, Integer> getAppliedPolicyIdsDeviceIds() throws PolicyManagerDAOException;
 
     List<Policy> getAllPolicies(String policyType) throws PolicyManagerDAOException;
+
+    /**
+     * This method is used to retrieve policies from the database based on the offset and limit
+     * sent through the PaginationRequest
+     * @param request {@link PaginationRequest} contains offset and limit
+     * @return {@link List<Policy>} - list of policies for current tenant
+     * @throws PolicyManagerDAOException when there is an error while retrieving the policies from database
+     */
+    List<Policy> getAllPolicies(PaginationRequest request) throws PolicyManagerDAOException;
 }

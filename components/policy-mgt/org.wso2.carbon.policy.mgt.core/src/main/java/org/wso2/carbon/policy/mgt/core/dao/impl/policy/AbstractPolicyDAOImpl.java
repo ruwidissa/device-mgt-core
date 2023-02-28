@@ -33,7 +33,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.policy.mgt.core.dao.impl;
+package org.wso2.carbon.policy.mgt.core.dao.impl.policy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,9 +66,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
-public class PolicyDAOImpl implements PolicyDAO {
+/**
+ * Abstract implementation of PolicyDAO which holds generic SQL queries.
+ */
+public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
 
-    private static final Log log = LogFactory.getLog(PolicyDAOImpl.class);
+    private static final Log log = LogFactory.getLog(AbstractPolicyDAOImpl.class);
 
     @Override
     public Policy addPolicy(Policy policy) throws PolicyManagerDAOException {
@@ -1838,7 +1841,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    private List<Policy> extractPolicyListFromDbResult(ResultSet resultSet, int tenantId) throws SQLException {
+    protected List<Policy> extractPolicyListFromDbResult(ResultSet resultSet, int tenantId) throws SQLException {
         List<Policy> policies = new ArrayList<>();
         while (resultSet.next()) {
             Policy policy = new Policy();
