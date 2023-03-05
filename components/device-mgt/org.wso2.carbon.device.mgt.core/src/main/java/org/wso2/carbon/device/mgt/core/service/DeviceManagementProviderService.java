@@ -66,7 +66,9 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoCluster;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -644,6 +646,8 @@ public interface DeviceManagementProviderService {
 
     void sendEnrolmentInvitation(String templateName, EmailMetaInfo metaInfo) throws DeviceManagementException,
             ConfigurationManagementException;
+
+    void sendEnrolmentGuide(MultipartFile enrolmentGuide) throws DeviceManagementException, ConfigurationManagementException, IOException;
 
     void sendRegistrationEmail(EmailMetaInfo metaInfo) throws DeviceManagementException, ConfigurationManagementException;
 

@@ -38,6 +38,7 @@ package org.wso2.carbon.device.mgt.core.service;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.collections.map.SingletonMap;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -160,12 +161,13 @@ import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -185,6 +187,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
+import javax.ws.rs.core.MultivaluedMap;
+
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
         PluginInitializationListener {
 
@@ -198,6 +206,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private final ApplicationDAO applicationDAO;
     private MetadataDAO metadataDAO;
     private final DeviceStatusDAO deviceStatusDAO;
+    int count = 0;
 
     public DeviceManagementProviderServiceImpl() {
         this.pluginRepository = new DeviceManagementPluginRepository();
@@ -1549,6 +1558,178 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.error(msg, ex);
             throw new DeviceManagementException(msg, ex);
         }
+    }
+
+    // save to somewhere
+    private void writeFile(byte[] content, String filename) throws IOException {
+
+        File file = new File(filename);
+
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        FileOutputStream fop = new FileOutputStream(file);
+
+        fop.write(content);
+        fop.flush();
+        fop.close();
+
+    }
+
+    @Override
+    public void sendEnrolmentGuide(MultipartFile enrolmentGuide) throws DeviceManagementException, ConfigurationManagementException, IOException {
+
+//        String fileName = "";
+//        MultivaluedMap<String, String> multivaluedMap = null;
+//        String fileName = null;
+//        InputStream inputStream = null;
+//        String uploadFilePath = null;
+//
+//        Map<String, List<InputPart>> map = enrolmentGuide.getFormDataMap();
+//        List<InputPart> inputParts = map.get("file");
+//
+//        for (InputPart inputPart : inputParts) {
+//
+//            try {
+//
+//                multivaluedMap = inputPart.getHeaders();
+//                fileName = getFileName(multivaluedMap);
+//
+//                //convert the uploaded file to inputstream
+//                InputStream inputStream = inputPart.getBody(InputStream.class,null);
+//
+//                byte [] bytes = IOUtils.toByteArray(inputStream);
+//
+//                //constructs upload file path
+//                fileName = UPLOADED_FILE_PATH + fileName;
+//
+//                writeFile(bytes,fileName);
+//
+//                System.out.println("Done");
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+
+        // Recipient's email ID needs to be mentioned.
+
+//        String charset = enrolmentGuide.getFormDataMap().get("_charset_").get(0).getBodyAsString();
+//        File file = (File) enrolmentGuide.getFormDataMap().get("file").get(0);
+        String to = "oshani@entgra.io";
+
+        // Sender's email ID needs to be mentioned
+        String from = "oshsilva1996@gmail.com";
+
+        // Assuming you are sending email from through gmails smtp
+        String host = "smtp.gmail.com";
+
+        // Get system properties
+        Properties properties = System.getProperties();
+
+        // Setup mail server
+        properties.put("mail.smtp.host", host);
+        properties.put("mail.smtp.port", "465");
+        properties.put("mail.smtp.ssl.enable", "true");
+        properties.put("mail.smtp.auth", "true");
+
+        // Get the Session object.// and pass username and password
+        Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
+
+            protected PasswordAuthentication getPasswordAuthentication() {
+
+                return new PasswordAuthentication("oshsilva1996@gmail.com", "layzvxhcxlwzkgwf");
+
+            }
+
+        });
+
+        // Used to debug SMTP issues
+        session.setDebug(true);
+
+        try {
+            // Create a default MimeMessage object.
+            MimeMessage message = new MimeMessage(session);
+
+            // Set From: header field of the header.
+            message.setFrom(new InternetAddress(from));
+
+            // Set To: header field of the header.
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+
+//            // Set Subject: header field
+            message.setSubject("Enrollment Guide Triggered " + ++count);
+
+//            message.setText(enrolmentGuide);
+
+//            Multipart multipart = new MimeMultipart();
+//
+//            MimeBodyPart attachmentPart = new MimeBodyPart();
+//
+//            MimeBodyPart textPart = new MimeBodyPart();
+//
+//            try {
+//
+////                String charset = enrolmentGuide.getFormDataMap().get("_charset_").get(0).getBodyAsString();
+////                InputPart file = enrolmentGuide.getFormDataMap().get("file").get(0);
+////                InputStream inputStream = file.getBody(InputStream.class, null);
+////                BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, charset));
+////                String line;
+////                StringBuilder content = new StringBuilder();
+////                while ((line = br.readLine()) != null) {
+////                    content.append(line);
+////                }
+////
+////                writeFile(content, "test");
+////
+////                File f =new File("H:\\pepipost_tutorials\\javaemail1.PNG");
+//
+//                attachmentPart.attachFile(file);
+//                textPart.setText("This is text");
+//                multipart.addBodyPart(textPart);
+//                multipart.addBodyPart(attachmentPart);
+//
+//            } catch (IOException e) {
+//
+//                e.printStackTrace();
+//
+//            }
+//
+//            message.setContent(multipart);
+
+            System.out.println("sending...");
+            // Send message
+            Transport.send(message);
+            System.out.println("Sent message successfully....");
+        } catch (MessagingException mex) {
+            mex.printStackTrace();
+        }
+//
+//        try {
+//            // Create a default MimeMessage object.
+//            MimeMessage message = new MimeMessage(session);
+//
+//            // Set From: header field of the header.
+//            message.setFrom(new InternetAddress(from));
+//
+//            // Set To: header field of the header.
+//            message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+//
+//            // Set Subject: header field
+//            message.setSubject("Enrollment Guide Triggered " + ++count);
+//
+//            // Now set the actual message
+//            message.setText("enrolmentGuide");
+//
+//            System.out.println("sending...");
+//            // Send message
+//            Transport.send(message);
+//            System.out.println("Sent message successfully....");
+//        } catch (MessagingException mex) {
+//            mex.printStackTrace();
+//        }
     }
 
     @Override

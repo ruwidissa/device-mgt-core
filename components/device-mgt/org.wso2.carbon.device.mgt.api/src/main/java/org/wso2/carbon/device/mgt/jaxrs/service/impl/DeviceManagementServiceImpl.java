@@ -68,6 +68,7 @@ import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
@@ -101,6 +102,7 @@ import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
@@ -130,6 +132,7 @@ import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -144,6 +147,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -815,6 +819,43 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         }
         return Response.status(Response.Status.OK).entity(device).build();
     }
+
+    @POST
+    @Path("/enrollment/guide")
+    @Override
+    public Response sendEnrollmentGuide(MultipartFile enrolmentGuide) {
+        if (log.isDebugEnabled()) {
+            log.debug("Sending enrollment invitation mail to existing user.");
+        }
+        DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+        try {
+//            Set<String> recipients = new HashSet<>();
+//            recipients.add(email);
+//            Properties props = new Properties();
+//            props.setProperty("enrolment-guide", enrolmentGuide);
+//
+//            EmailMetaInfo metaInfo = new EmailMetaInfo(recipients, props);
+//            dms.sendEnrolmentInvitation("enrolment-guide-template", metaInfo);
+            dms.sendEnrolmentGuide(enrolmentGuide);
+            return Response.status(Response.Status.OK).entity("Invitation mails have been sent.").build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while inviting user to enrol their device";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }  catch (ConfigurationManagementException e) {
+            String msg = "Error occurred while sending the email invitations. Mail server not configured.";
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (IOException e) {
+            e.printStackTrace();
+            String msg = "testtttt.";
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+//        return Response.status(Response.Status.OK).entity("Invitation mails have been sent.").build();
+    }
+
 
     @POST
     @Path("/type/any/list")
