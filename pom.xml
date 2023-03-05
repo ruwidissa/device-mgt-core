@@ -23,7 +23,7 @@
     <groupId>org.wso2.carbon.devicemgt</groupId>
     <artifactId>carbon-devicemgt</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.19-SNAPSHOT</version>
+    <version>5.0.20-SNAPSHOT</version>
     <name>WSO2 Carbon - Device Management - Parent</name>
     <url>http://wso2.org</url>
     <description>WSO2 Connected Device Manager Components</description>
@@ -46,6 +46,7 @@
         <module>components/transport-mgt</module>
         <module>components/analytics-mgt</module>
         <module>components/webapp-authenticator-framework</module>
+        <module>components/task-mgt</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -58,6 +59,8 @@
         <module>features/transport-mgt</module>
         <module>features/analytics-mgt</module>
         <module>features/webapp-authenticator-framework</module>
+        <module>features/task-mgt</module>
+
     </modules>
 
     <dependencyManagement>
@@ -349,6 +352,29 @@
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <!-- Device Management dependencies -->
+
+            <!-- Task Management dependencies -->
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.common</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.core</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.watcher</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.feature</artifactId>
+                <type>zip</type>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
 
             <!-- Governance dependencies -->
             <dependency>
@@ -2033,7 +2059,7 @@
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <carbon.device.mgt.version>5.0.19-SNAPSHOT</carbon.device.mgt.version>
+        <carbon.device.mgt.version>5.0.20-SNAPSHOT</carbon.device.mgt.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.7.35</carbon.commons.version>
