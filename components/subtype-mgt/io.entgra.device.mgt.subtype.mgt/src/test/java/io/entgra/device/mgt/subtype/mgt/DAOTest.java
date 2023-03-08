@@ -1,0 +1,132 @@
+/*
+ * Copyright (C) 2018 - 2023 Entgra (Pvt) Ltd, Inc - All Rights Reserved.
+ *
+ * Unauthorised copying/redistribution of this file, via any medium is strictly prohibited.
+ *
+ * Licensed under the Entgra Commercial License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://entgra.io/licenses/entgra-commercial/1.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package io.entgra.device.mgt.subtype.mgt;
+
+import io.entgra.device.mgt.subtype.mgt.dao.DeviceSubTypeDAO;
+import io.entgra.device.mgt.subtype.mgt.dao.DeviceSubTypeDAOFactory;
+import io.entgra.device.mgt.subtype.mgt.dao.util.ConnectionManagerUtil;
+import io.entgra.device.mgt.subtype.mgt.dto.DeviceSubType;
+import io.entgra.device.mgt.subtype.mgt.exception.DBConnectionException;
+import io.entgra.device.mgt.subtype.mgt.exception.SubTypeMgtDAOException;
+import io.entgra.device.mgt.subtype.mgt.mock.BaseDeviceSubTypePluginTest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+
+import java.util.List;
+
+public class DAOTest extends BaseDeviceSubTypePluginTest {
+    private static final Log log = LogFactory.getLog(DAOTest.class);
+
+    private DeviceSubTypeDAO deviceSubTypeDAO;
+
+    @BeforeClass
+    public void init() {
+        deviceSubTypeDAO = DeviceSubTypeDAOFactory.getDeviceSubTypeDAO();
+        log.info("DAO test initialized");
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceSubType")
+    public void testGetDeviceSubType() throws DBConnectionException, SubTypeMgtDAOException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        ConnectionManagerUtil.openDBConnection();
+        DeviceSubType subTypeActual = deviceSubTypeDAO.getDeviceSubType(1, tenantId,
+                DeviceSubType.DeviceType.COM);
+        ConnectionManagerUtil.closeDBConnection();
+        Assert.assertNotNull(subTypeActual, "Should not be null");
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceSubType")
+    public void testGetAllDeviceSubTypes() throws DBConnectionException, SubTypeMgtDAOException {
+        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        ConnectionManagerUtil.openDBConnection();
+        List<DeviceSubType> subTypesActual = deviceSubTypeDAO.getAllDeviceSubTypes(tenantId, deviceType);
+        ConnectionManagerUtil.closeDBConnection();
+        log.info(deviceType + " sub types count should be " + subTypesActual.size());
+        Assert.assertNotNull(subTypesActual, "Should not be null");
+    }
+
+    @Test
+    public void testAddDeviceSubType() throws DBConnectionException, SubTypeMgtDAOException {
+        int subTypeId = 1;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String subTypeName = "TestSubType";
+        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
+        String typeDefinition = TestUtils.createNewDeviceSubType(subTypeId);
+
+        DeviceSubType deviceSubType = new DeviceSubType() {
+            @Override
+            public <T> DeviceSubType setDeviceSubType(T objType, String typeDef) {
+                return null;
+            }
+
+            @Override
+            public String parseSubTypeToJson(Object objType) {
+                return null;
+            }
+        };
+        deviceSubType.setSubTypeId(subTypeId);
+        deviceSubType.setSubTypeName(subTypeName);
+        deviceSubType.setDeviceType(deviceType);
+        deviceSubType.setTenantId(tenantId);
+        deviceSubType.setTypeDefinition(typeDefinition);
+
+        ConnectionManagerUtil.beginDBTransaction();
+        deviceSubTypeDAO.addDeviceSubType(deviceSubType);
+        ConnectionManagerUtil.commitDBTransaction();
+        DeviceSubType subTypeActual = deviceSubTypeDAO.getDeviceSubType(subTypeId, tenantId, deviceType);
+        ConnectionManagerUtil.closeDBConnection();
+        Assert.assertNotNull(subTypeActual, "Cannot be null");
+        TestUtils.verifyDeviceSubTypeDAO(subTypeActual);
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceSubType")
+    public void testUpdateDeviceSubType() throws DBConnectionException, SubTypeMgtDAOException {
+        int subTypeId = 1;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
+        String subTypeName = "TestSubType";
+        String subTypeExpected = TestUtils.createUpdateDeviceSubType(subTypeId);
+
+        ConnectionManagerUtil.beginDBTransaction();
+        deviceSubTypeDAO.updateDeviceSubType(subTypeId, tenantId, deviceType, subTypeName, subTypeExpected);
+        ConnectionManagerUtil.commitDBTransaction();
+        DeviceSubType subTypeActual = deviceSubTypeDAO.getDeviceSubType(subTypeId, tenantId, deviceType);
+        ConnectionManagerUtil.closeDBConnection();
+
+        Assert.assertNotNull(subTypeActual, "Cannot be null");
+        TestUtils.verifyUpdatedDeviceSubTypeDAO(subTypeActual);
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceSubType")
+    public void testGetDeviceTypeCount() throws DBConnectionException, SubTypeMgtDAOException {
+        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
+        ConnectionManagerUtil.openDBConnection();
+        int subTypeCount = deviceSubTypeDAO.getDeviceSubTypeCount(deviceType);
+        ConnectionManagerUtil.closeDBConnection();
+        log.info(deviceType + " Device subtypes count: " + subTypeCount);
+        Assert.assertEquals(subTypeCount, 1);
+    }
+
+}
