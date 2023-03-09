@@ -67,7 +67,6 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
@@ -855,7 +854,7 @@ public interface DeviceManagementService {
                     name = "enrolmentGuide",
                     value = "The details of the enrolment path suggested.",
                     required = true)
-                    MultipartFile enrolmentGuide);
+                    String enrolmentGuide);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

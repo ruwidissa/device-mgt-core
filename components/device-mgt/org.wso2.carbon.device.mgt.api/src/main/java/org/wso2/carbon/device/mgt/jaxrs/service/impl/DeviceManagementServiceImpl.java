@@ -132,7 +132,6 @@ import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -823,37 +822,20 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     @POST
     @Path("/enrollment/guide")
     @Override
-    public Response sendEnrollmentGuide(MultipartFile enrolmentGuide) {
+    public Response sendEnrollmentGuide(String enrolmentGuide) {
         if (log.isDebugEnabled()) {
             log.debug("Sending enrollment invitation mail to existing user.");
         }
         DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
         try {
-//            Set<String> recipients = new HashSet<>();
-//            recipients.add(email);
-//            Properties props = new Properties();
-//            props.setProperty("enrolment-guide", enrolmentGuide);
-//
-//            EmailMetaInfo metaInfo = new EmailMetaInfo(recipients, props);
-//            dms.sendEnrolmentInvitation("enrolment-guide-template", metaInfo);
             dms.sendEnrolmentGuide(enrolmentGuide);
             return Response.status(Response.Status.OK).entity("Invitation mails have been sent.").build();
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while inviting user to enrol their device";
+            String msg = "Error occurred  sending mail to group in enrollment guide";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-        }  catch (ConfigurationManagementException e) {
-            String msg = "Error occurred while sending the email invitations. Mail server not configured.";
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-        } catch (IOException e) {
-            e.printStackTrace();
-            String msg = "testtttt.";
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
-//        return Response.status(Response.Status.OK).entity("Invitation mails have been sent.").build();
     }
 
 
