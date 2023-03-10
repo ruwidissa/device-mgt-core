@@ -189,6 +189,13 @@ import java.util.List;
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/add"}
                 ),
+                @Scope(
+                        name = "Viewing Enrollment Guide",
+                        description = "Show enrollment guide to users",
+                        key = "perm:devices:enrollment-guide:view",
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/device-mgt/devices/enrollment-guide/view"}
+                ),
         }
 )
 @Path("/devices")
@@ -816,7 +823,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:enrollment-guide:view")
                     })
             }
     )

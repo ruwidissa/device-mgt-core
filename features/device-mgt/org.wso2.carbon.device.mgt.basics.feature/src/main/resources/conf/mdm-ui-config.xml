@@ -100,6 +100,7 @@
         <Scope>perm:devices:details</Scope>
         <Scope>perm:devices:update</Scope>
         <Scope>perm:devices:view</Scope>
+        <Scope>perm:devices:enrollment-guide:view</Scope>
         <Scope>perm:view-configuration</Scope>
         <Scope>perm:manage-configuration</Scope>
         <Scope>perm:policies:remove</Scope>
