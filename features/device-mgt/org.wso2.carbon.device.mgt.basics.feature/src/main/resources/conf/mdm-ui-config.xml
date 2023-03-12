@@ -24,6 +24,7 @@
     <SessionTimeOut>3600</SessionTimeOut>
     <!--  maximum number of login cache entries  -->
     <LoginCacheCapacity>10000</LoginCacheCapacity>
+    <ChatConfig>pat-na1-33bc59e0-3526-45b0-b9cf-f353d0ae0ced</ChatConfig>
     <Billing>
         <HideBillGenerationInSuperTenant>false</HideBillGenerationInSuperTenant>
         <HideBillGenerationInSubTenant>true</HideBillGenerationInSubTenant>

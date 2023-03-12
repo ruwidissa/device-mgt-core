@@ -34,6 +34,7 @@ public class UIConfiguration {
     private int sessionTimeOut;
     private int loginCacheCapacity;
     private Billing billing;
+    private String chatConfig;
 
     @XmlElement(name = "AppRegistration", required=true)
     public AppRegistration getAppRegistration() {
@@ -61,6 +62,15 @@ public class UIConfiguration {
 
     public void setSsoEnable(boolean ssoEnable) {
         isSsoEnable = ssoEnable;
+    }
+
+    @XmlElement(name = "ChatConfig", required = true)
+    public String getChatConfig() {
+        return chatConfig;
+    }
+
+    public void setChatConfig(String chatConfig) {
+        this.chatConfig = chatConfig;
     }
 
     @XmlElement(name = "Billing", required=true)
