@@ -213,6 +213,8 @@
         <Scope>perm:admin:tenant:view</Scope>
         <Scope>perm:admin:metadata:view</Scope>
         <Scope>perm:admin:usage:view</Scope>
+        <Scope>perm:android:clear-applicatio</Scope>
+        <Scope>perm:android:suspend-package</Scope>
         <Scope>perm:android:alternate-install</Scope>
     </Scopes>
     <SSOConfiguration>
