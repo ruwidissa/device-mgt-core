@@ -1581,16 +1581,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public void sendEnrolmentGuide(String enrolmentGuide) {
+    public void sendEnrolmentGuide(String enrolmentGuide) throws DeviceManagementException {
 
         String to = "oshani@entgra.io";
-
-        // Sender's email ID needs to be mentioned
         String from = "oshsilva1996@gmail.com";
-
         String host = "smtp.gmail.com";
-
-        // Get system properties
         Properties properties = System.getProperties();
 
         // Setup mail server
@@ -1599,7 +1594,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         properties.put("mail.smtp.ssl.enable", "true");
         properties.put("mail.smtp.auth", "true");
 
-        // Get the Session object
         Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
 
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -1615,11 +1609,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(from));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-            message.setSubject("Enrollment Guide Triggered " + ++count);
+            message.setSubject("[Enrollment Guide Triggered] (#" + ++count + ")");
             message.setText(enrolmentGuide);
             Transport.send(message);
-        } catch (MessagingException mex) {
-            mex.printStackTrace();
+        } catch (MessagingException e) {
+            String msg = "Error occurred while sending message to support dev group";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
         }
     }
 
