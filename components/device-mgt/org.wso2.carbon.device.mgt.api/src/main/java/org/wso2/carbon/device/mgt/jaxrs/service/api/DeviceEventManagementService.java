@@ -29,6 +29,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @SwaggerDefinition(
         info = @Info(
@@ -69,64 +70,64 @@ import javax.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public interface DeviceEventManagementService {
 
-//    @POST
-//    @Path("/{type}")
-//    @ApiOperation(
-//            produces = MediaType.APPLICATION_JSON,
-//            httpMethod = "POST",
-//            value = "Adding the Event Type Definition",
-//            notes = "Add the event definition for a device.",
-//            tags = "Device Event Management",
-//            extensions = {
-//                    @Extension(properties = {
-//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events")
-//                    })
-//            }
-//    )
-//    @ApiResponses(
-//            value = {
-//                    @ApiResponse(
-//                            code = 200,
-//                            message = "OK. \n Successfully added the event defintion.",
-//                            responseHeaders = {
-//                                    @ResponseHeader(
-//                                            name = "Content-Type",
-//                                            description = "The content type of the body"),
-//                                    @ResponseHeader(
-//                                            name = "ETag",
-//                                            description = "Entity Tag of the response resource.\n" +
-//                                                    "Used by caches, or in conditional requests."),
-//                                    @ResponseHeader(
-//                                            name = "Last-Modified",
-//                                            description =
-//                                                    "Date and time the resource was last modified.\n" +
-//                                                            "Used by caches, or in conditional requests."),
-//                            }
-//                    ),
-//                    @ApiResponse(
-//                            code = 400,
-//                            message =
-//                                    "Bad Request. \n"),
-//                    @ApiResponse(
-//                            code = 406,
-//                            message = "Not Acceptable.\n The requested media type is not supported"),
-//                    @ApiResponse(
-//                            code = 500,
-//                            message = "Internal Server Error. \n Server error occurred while fetching the " +
-//                                    "list of supported device types.",
-//                            response = ErrorResponse.class)
-//            }
-//    )
-//    Response deployDeviceTypeEventDefinition(
-//            @ApiParam(name = "type", value = "The device type, such as android, ios, and windows.")
-//            @PathParam("type")String deviceType,
-//            @ApiParam(name = "skipPersist", value = "Is it required to persist the data or not")
-//            @QueryParam("skipPersist") boolean skipPersist,
-//            @ApiParam(name = "isSharedWithAllTenants", value = "Should artifacts be available to all tenants")
-//            @QueryParam("isSharedWithAllTenants") boolean isSharedWithAllTenants,
-//            @ApiParam(name = "deviceTypeEvent", value = "Add the data to complete the  DeviceTypeEvent object.",
-//                    required = true)
-//            @Valid DeviceTypeEvent deviceTypeEvent);
+    @POST
+    @Path("/{type}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Adding the Event Type Definition",
+            notes = "Add the event definition for a device.",
+            tags = "Device Event Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully added the event defintion.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description =
+                                                    "Date and time the resource was last modified.\n" +
+                                                            "Used by caches, or in conditional requests."),
+                            }
+                    ),
+                    @ApiResponse(
+                            code = 400,
+                            message =
+                                    "Bad Request. \n"),
+                    @ApiResponse(
+                            code = 406,
+                            message = "Not Acceptable.\n The requested media type is not supported"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Server error occurred while fetching the " +
+                                    "list of supported device types.",
+                            response = ErrorResponse.class)
+            }
+    )
+    Response deployDeviceTypeEventDefinition(
+            @ApiParam(name = "type", value = "The device type, such as android, ios, and windows.")
+            @PathParam("type")String deviceType,
+            @ApiParam(name = "skipPersist", value = "Is it required to persist the data or not")
+            @QueryParam("skipPersist") boolean skipPersist,
+            @ApiParam(name = "isSharedWithAllTenants", value = "Should artifacts be available to all tenants")
+            @QueryParam("isSharedWithAllTenants") boolean isSharedWithAllTenants,
+            @ApiParam(name = "deviceTypeEvents", value = "Add the data to complete the  DeviceTypeEvent object.",
+                    required = true)
+            @Valid List<DeviceTypeEvent> deviceTypeEvent);
 
     @DELETE
     @Path("/{type}")
