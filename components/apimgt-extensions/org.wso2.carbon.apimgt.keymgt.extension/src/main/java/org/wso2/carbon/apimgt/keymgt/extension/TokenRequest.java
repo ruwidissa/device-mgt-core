@@ -29,8 +29,10 @@ public class TokenRequest {
     private String username;
     private String password;
 
+    private int validityPeriod;
+
     public TokenRequest(String clientId, String clientSecret, String refreshToken, String scope, String grantType,
-                        String assertion, String admin_access_token, String username, String password) {
+                        String assertion, String admin_access_token, String username, String password, int validityPeriod) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.refreshToken = refreshToken;
@@ -40,6 +42,7 @@ public class TokenRequest {
         this.admin_access_token = admin_access_token;
         this.username = username;
         this.password = password;
+        this.validityPeriod = validityPeriod;
     }
 
     public String getClientId() {
@@ -112,5 +115,13 @@ public class TokenRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getValidityPeriod() {
+        return validityPeriod;
+    }
+
+    public void setValidityPeriod(int validityPeriod) {
+        this.validityPeriod = validityPeriod;
     }
 }
