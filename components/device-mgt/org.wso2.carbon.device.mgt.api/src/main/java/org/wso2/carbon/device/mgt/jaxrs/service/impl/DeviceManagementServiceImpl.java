@@ -872,14 +872,14 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         DeviceManagementProviderService deviceManagementProviderService =
                 DeviceMgtAPIUtils.getDeviceManagementService();
         int validityTime = 3600;
-        List<String> mqttTopicStructure = new ArrayList<>();
+        List<String> mqttEventTopicStructure = new ArrayList<>();
         try {
             DeviceType deviceType = deviceManagementProviderService.getDeviceType(type);
             if (deviceType != null) {
                 if (deviceType.getDeviceTypeMetaDefinition().isLongLivedToken()) {
                     validityTime = Integer.MAX_VALUE;
                 }
-                mqttTopicStructure = deviceType.getDeviceTypeMetaDefinition().getMqttTopicStructures();
+                mqttEventTopicStructure = deviceType.getDeviceTypeMetaDefinition().getMqttEventTopicStructures();
             } else {
                 String msg = "Device not found, device id : " +  id + ", device type : " + type;
                 log.error(msg);
@@ -907,9 +907,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
             StringBuilder scopes = new StringBuilder("device_" + type.replace(" ", "")
                     .replace("_", "") + "_" + id);
-            for (String topic : mqttTopicStructure) {
-                if (topic.contains("<deviceId>")) {
-                    topic = topic.replace("<deviceId>", id);
+            for (String topic : mqttEventTopicStructure) {
+                if (topic.contains("${deviceId}")) {
+                    topic = topic.replace("${deviceId}", id);
                 }
                 topic = topic.replace("/",":");
                 scopes.append(" perm:topic:sub:".concat(topic));

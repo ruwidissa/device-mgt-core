@@ -20,7 +20,7 @@ public class DeviceTypeMetaDefinition {
     private String description;
     private boolean isSharedWithAllTenants;
 
-    private List<String> mqttTopicStructures;
+    private List<String> mqttEventTopicStructures;
 
     private boolean longLivedToken = false;
 
@@ -89,12 +89,12 @@ public class DeviceTypeMetaDefinition {
         isSharedWithAllTenants = sharedWithAllTenants;
     }
 
-    public List<String> getMqttTopicStructures() {
-        return mqttTopicStructures;
+    public List<String> getMqttEventTopicStructures() {
+        return mqttEventTopicStructures;
     }
 
-    public void setMqttTopicStructures(List<String> mqttTopicStructures) {
-        this.mqttTopicStructures = mqttTopicStructures;
+    public void setMqttEventTopicStructures(List<String> mqttEventTopicStructures) {
+        this.mqttEventTopicStructures = mqttEventTopicStructures;
     }
 
     public boolean isLongLivedToken() {
