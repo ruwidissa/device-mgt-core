@@ -800,9 +800,6 @@ public class OperationManagerImpl implements OperationManager {
                 if ((currentTime - updatedTime) < notNowOperationFrequency) {
                     dtoOperation = operationDAO.getNextOperation(enrolmentInfo.getId(),
                             org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Status.PENDING);
-                } else {
-                    log.warn("Updated timestamp (" + updatedTime + ") of operation (" +
-                            new Gson().toJson(dtoOperation) + ") is ahead from current: " + currentTime);
                 }
             } else {
                 dtoOperation = operationDAO.getNextOperation(enrolmentInfo.getId(),
