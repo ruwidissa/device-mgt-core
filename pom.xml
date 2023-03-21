@@ -50,6 +50,7 @@
         <module>components/task-mgt</module>
         <module>components/subtype-mgt</module>
         <module>components/tenant-mgt</module>
+        <module>components/operation-template-mgt</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -66,6 +67,8 @@
         <module>features/task-mgt</module>
         <module>features/subtype-mgt</module>
         <module>features/tenant-mgt</module>
+        <module>features/operation-template-mgt-plugin-feature</module>
+
     </modules>
 
     <dependencyManagement>
@@ -427,6 +430,19 @@
             </dependency>
             <!-- End of SubType Management dependencies -->
 
+            <!-- Operation Template Management dependencies -->
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.device.mgt.operation.template</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.device.mgt.subtype.mgt.feature</artifactId>
+                <type>zip</type>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <!-- End of Operation Template Management dependencies -->
             <!-- Governance dependencies -->
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
