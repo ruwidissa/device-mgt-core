@@ -24,13 +24,13 @@
     <parent>
         <artifactId>carbon-devicemgt</artifactId>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <version>5.0.17-SNAPSHOT</version>
+        <version>5.0.21-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>logger</artifactId>
     <packaging>pom</packaging>
-    <name>Entgra IoT - Notification logger</name>
+    <name>Entgra - Notification Logger Component</name>
     <url>http://entgra.io</url>
 
     <modules>

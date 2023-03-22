@@ -25,11 +25,13 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>logger</artifactId>
-        <version>5.0.17-SNAPSHOT</version>
+        <version>5.0.21-SNAPSHOT</version>
     </parent>
 
     <artifactId>io.entgra.notification.logger</artifactId>
+    <name>Entgra - Notification Logger</name>
     <packaging>bundle</packaging>
+    <url>http://entgra.io</url>
 
     <dependencies>
         <dependency>
@@ -69,8 +71,7 @@
                         <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
                         <Bundle-Description>Device Notification Logger Bundle</Bundle-Description>
                         <Import-Package>
-                            io.entgra.logger;version="[2.0,3)",
-                            io.entgra.logger.spi;version="[2.0,3)",
+                            io.entgra.device.mgt.extensions.logger.*
                             org.apache.commons.logging;version="[1.2,2)",
                             org.apache.log4j;version="[1.2,2)",
                             org.wso2.carbon.context;version="[4.4,5)

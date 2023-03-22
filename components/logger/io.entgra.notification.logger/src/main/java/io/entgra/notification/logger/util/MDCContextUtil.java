@@ -18,6 +18,7 @@
 package io.entgra.notification.logger.util;
 
 import io.entgra.notification.logger.DeviceLogContext;
+import io.entgra.notification.logger.UserLogContext;
 import org.apache.log4j.MDC;
 
 public final class MDCContextUtil {
@@ -31,6 +32,21 @@ public final class MDCContextUtil {
         }
         if (mdcContext.getOperationCode() != null) {
             MDC.put("OperationCode", mdcContext.getOperationCode());
+        }
+        if (mdcContext.getTenantID() != null) {
+            MDC.put("TenantId", mdcContext.getTenantID());
+        }
+    }
+
+    public static void populateUserMDCContext(final UserLogContext mdcContext) {
+        if (mdcContext.getUserName() != null) {
+            MDC.put("UserName", mdcContext.getUserName());
+        }
+        if (mdcContext.getUserEmail() != null) {
+            MDC.put("UserEmail", mdcContext.getUserEmail());
+        }
+        if (mdcContext.getMetaInfo() != null) {
+            MDC.put("MetaInfo", mdcContext.getMetaInfo());
         }
         if (mdcContext.getTenantID() != null) {
             MDC.put("TenantId", mdcContext.getTenantID());

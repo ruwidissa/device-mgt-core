@@ -23,14 +23,14 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>logger-feature</artifactId>
-        <version>5.0.17-SNAPSHOT</version>
+        <version>5.0.21-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>io.entgra.notification.logger.feature</artifactId>
     <packaging>pom</packaging>
-    <name>Entgra - Device Notification logger</name>
+    <name>Entgra - Notification logger</name>
     <url>http://entgra.io</url>
     <description>
         This feature bundles for the Entgra Notification logger
