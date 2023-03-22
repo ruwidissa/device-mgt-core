@@ -41,6 +41,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceTypesOfGroups;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupNotExistException;
@@ -335,4 +336,11 @@ public interface GroupManagementProviderService {
      */
     boolean isDeviceMappedToGroup(int groupId, DeviceIdentifier deviceIdentifier) throws GroupManagementException;
 
+    /**
+     *
+     * @param identifiers identifiers of groups
+     * @return whether the groups has android, iOS, Windows device types
+     * @throws GroupManagementException
+     */
+    DeviceTypesOfGroups getDeviceTypesOfGroups(List<String> identifiers) throws GroupManagementException;
 }

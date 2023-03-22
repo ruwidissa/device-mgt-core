@@ -48,7 +48,6 @@ import org.wso2.carbon.device.mgt.core.task.DeviceMgtTaskException;
 import org.wso2.carbon.device.mgt.core.task.DeviceTaskManager;
 
 import java.util.List;
-import java.util.Map;
 
 public class DeviceDetailsRetrieverTask extends DynamicPartitionedScheduleTask {
 
@@ -57,13 +56,8 @@ public class DeviceDetailsRetrieverTask extends DynamicPartitionedScheduleTask {
     private DeviceManagementProviderService deviceManagementProviderService;
 
     @Override
-    public void setProperties(Map<String, String> map) {
-        super.setProperties(map);
-        deviceType = map.get("DEVICE_TYPE");
-    }
-
-    @Override
     public void executeDynamicTask() {
+        deviceType = getProperty("DEVICE_TYPE");
         deviceManagementProviderService = DeviceManagementDataHolder.getInstance()
                 .getDeviceManagementProvider();
         OperationMonitoringTaskConfig operationMonitoringTaskConfig = deviceManagementProviderService

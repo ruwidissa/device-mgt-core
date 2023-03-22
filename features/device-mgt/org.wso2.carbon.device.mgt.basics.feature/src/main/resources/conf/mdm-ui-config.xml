@@ -129,6 +129,7 @@
         <Scope>perm:groups:add</Scope>
         <Scope>perm:groups:device</Scope>
         <Scope>perm:groups:devices-count</Scope>
+        <Scope>perm:groups:devices-types</Scope>
         <Scope>perm:groups:remove</Scope>
         <Scope>perm:groups:groups</Scope>
         <Scope>perm:groups:groups-view</Scope>
@@ -212,6 +213,7 @@
         <Scope>perm:admin:tenant:view</Scope>
         <Scope>perm:admin:metadata:view</Scope>
         <Scope>perm:admin:usage:view</Scope>
+        <Scope>perm:android:alternate-install</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

@@ -94,6 +94,7 @@ public class SQLServerApplicationDAOImpl extends GenericApplicationDAOImpl {
                 || StringUtils.isNotEmpty(filter.getAppReleaseType())) {
             sql += "LEFT JOIN AP_APP_RELEASE ON AP_APP.ID = AP_APP_RELEASE.AP_APP_ID ";
         }
+        sql += "WHERE AP_APP.TENANT_ID = ? ";
         if (StringUtils.isNotEmpty(filter.getAppType()) && !Constants.ALL.equalsIgnoreCase(filter.getAppType())) {
             sql += "AND AP_APP.TYPE = ? ";
         }
@@ -128,7 +129,7 @@ public class SQLServerApplicationDAOImpl extends GenericApplicationDAOImpl {
             sql += filter.getSortBy() +" ";
         }
         if (filter.getLimit() != -1) {
-            sql += "ORDER BY ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
+            sql += "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
         }
         sql += ") AS app_data ON app_data.ID = AP_APP.ID "
                 + "LEFT JOIN ("
@@ -145,6 +146,7 @@ public class SQLServerApplicationDAOImpl extends GenericApplicationDAOImpl {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIndex = 1;
+                stmt.setInt(paramIndex++, tenantId);
                 if (StringUtils.isNotEmpty(filter.getAppType()) && !Constants.ALL.equalsIgnoreCase(filter.getAppType())) {
                     stmt.setString(paramIndex++, filter.getAppType());
                 }

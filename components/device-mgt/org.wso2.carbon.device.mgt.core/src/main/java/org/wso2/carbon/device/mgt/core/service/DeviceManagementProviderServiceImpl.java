@@ -444,7 +444,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 //Exception was not thrown due to being conflicted with non-traccar features
             }
         } else {
-            log.info("Traccar is disabled");
+            if (log.isDebugEnabled()) {
+                log.debug("Traccar is disabled");
+            }
         }
         //enroll Traccar device
 
@@ -544,7 +546,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 //Exception was not thrown due to being conflicted with non-traccar features
             }
         } else {
-            log.info("Traccar is disabled");
+            if (log.isDebugEnabled()) {
+                log.debug("Traccar is disabled");
+            }
         }
         //enroll Traccar device
         return status;

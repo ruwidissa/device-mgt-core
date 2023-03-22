@@ -46,5 +46,6 @@ public interface KeyManagerService {
                                  @FormParam("assertion") String assertion,
                                  @FormParam("admin_access_token") String admin_access_token,
                                  @FormParam("username") String username,
-                                 @FormParam("password") String password);
+                                 @FormParam("password") String password,
+                                 @FormParam("validityPeriod") int validityPeriod);
 }

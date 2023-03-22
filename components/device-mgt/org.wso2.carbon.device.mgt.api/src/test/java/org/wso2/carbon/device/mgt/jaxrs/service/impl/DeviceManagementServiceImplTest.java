@@ -590,7 +590,7 @@ public class DeviceManagementServiceImplTest {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
         Response response = this.deviceManagementService
-                .getFeaturesOfDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), null);
+                .getFeaturesOfDevice(TEST_DEVICE_TYPE, null);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
@@ -601,7 +601,7 @@ public class DeviceManagementServiceImplTest {
         Mockito.when(this.deviceManagementProviderService.getFeatureManager(Mockito.anyString()))
                 .thenThrow(new DeviceTypeNotFoundException());
         Response response = this.deviceManagementService
-                .getFeaturesOfDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), null);
+                .getFeaturesOfDevice(TEST_DEVICE_TYPE, null);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode());
         Mockito.reset(this.deviceManagementProviderService);
     }
