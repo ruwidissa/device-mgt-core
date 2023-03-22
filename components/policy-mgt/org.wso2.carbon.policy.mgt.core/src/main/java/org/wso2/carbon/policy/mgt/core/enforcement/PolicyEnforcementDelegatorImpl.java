@@ -44,6 +44,8 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementExcept
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
+import org.wso2.carbon.device.mgt.core.operation.mgt.PolicyOperation;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.policy.mgt.common.PolicyAdministratorPoint;
 import org.wso2.carbon.policy.mgt.common.PolicyEvaluationException;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
@@ -96,6 +98,7 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
                  */
                 if (devicePolicy == null || devicePolicy.getId() != policy.getId() || updatedPolicyIds.contains
                         (policy.getId())) {
+                    this.markPreviousPolicyBundlesRepeated(device);
                     this.addPolicyRevokeOperation(deviceIdentifiers);
                     this.addPolicyOperation(deviceIdentifiers, policy);
                 }
@@ -198,6 +201,31 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
             return policyManagerService.getAppliedPolicyToDevice(device);
         } catch (PolicyManagementException e) {
             String msg = "Error occurred while retrieving the applied policy for devices.";
+            log.error(msg, e);
+            throw new PolicyDelegationException(msg, e);
+        }
+    }
+
+    /**
+     * Update the previous pending policy operation's status as REPEATED
+     * @param device Device
+     * @throws PolicyDelegationException throws when getting pending operations
+     */
+    public void markPreviousPolicyBundlesRepeated(Device device) throws PolicyDelegationException {
+        DeviceManagementProviderService deviceManagerService = PolicyManagementDataHolder.getInstance().
+                getDeviceManagementService();
+        try {
+            List<? extends Operation> operations = deviceManagerService.getPendingOperations(device);
+            for(Operation operation : operations) {
+                String operationCode = operation.getCode();
+                if(PolicyOperation.POLICY_OPERATION_CODE.equals(operationCode) ||
+                        OperationMgtConstants.OperationCodes.POLICY_REVOKE.equals(operationCode)) {
+                    operation.setStatus(Operation.Status.REPEATED);
+                    deviceManagerService.updateOperation(device, operation);
+                }
+            }
+        } catch (OperationManagementException e) {
+            String msg = "Error occurred while retrieving pending operations of device id "+device.getId();
             log.error(msg, e);
             throw new PolicyDelegationException(msg, e);
         }
