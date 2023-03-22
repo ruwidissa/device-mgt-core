@@ -92,12 +92,14 @@ public class MetadataManagementServiceImpl implements MetadataManagementService 
         }
         try {
             MetadataManagementDAOFactory.openConnection();
+            int tenantId;
             if (metaKey.equals("EVALUATE_TENANTS")){
-                return metadataDAO.getMetadata(MultitenantConstants.SUPER_TENANT_ID, metaKey);
+                // for getting evaluate tenant list to provide the live chat feature
+                 tenantId = MultitenantConstants.SUPER_TENANT_ID;
             } else {
-                return metadataDAO.getMetadata(
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true), metaKey);
+                 tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
             }
+            return metadataDAO.getMetadata(tenantId, metaKey);
         } catch (MetadataManagementDAOException e) {
             String msg = "Error occurred while retrieving the metadata entry for metaKey:" + metaKey;
             log.error(msg, e);
