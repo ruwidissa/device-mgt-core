@@ -27,11 +27,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.MDC;
 
 
-public class EntgraLoggerImpl implements EntgraLogger {
+public class EntgraDeviceLoggerImpl implements EntgraLogger {
 
     private static Log log = null;
 
-    public EntgraLoggerImpl(Class<?> clazz) {
+    public EntgraDeviceLoggerImpl(Class<?> clazz) {
         log = LogFactory.getLog(clazz);
     }
 
