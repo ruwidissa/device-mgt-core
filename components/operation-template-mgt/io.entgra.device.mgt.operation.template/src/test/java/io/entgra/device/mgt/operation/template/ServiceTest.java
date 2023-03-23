@@ -83,11 +83,10 @@ public class ServiceTest extends BaseOperationTemplatePluginTest {
         Assert.assertEquals(operationTemplateActual.getDeviceType(), TestUtils.deviceType);
     }
 
-    @Test(dependsOnMethods = {"testAddOperationTemplate", "testGetOperationTemplate", "testUpdateOperationTemplate"},
-            expectedExceptions = {CacheLoader.InvalidCacheLoadException.class})
+    @Test(dependsOnMethods = {"testAddOperationTemplate", "testGetOperationTemplate", "testUpdateOperationTemplate"})
     public void testDeleteOperationTemplate() throws OperationTemplateMgtPluginException {
         operationTemplateService.deleteOperationTemplate(TestUtils.subtypeId, TestUtils.deviceType, TestUtils.operationCode);
-        getOperationTemplateBySubtypeIdAndDeviceTypeAndOperationCode(TestUtils.subtypeId, TestUtils.deviceType, TestUtils.operationCode);
+        Assert.assertNull(getOperationTemplateBySubtypeIdAndDeviceTypeAndOperationCode(TestUtils.subtypeId, TestUtils.deviceType, TestUtils.operationCode));
     }
 
     public OperationTemplate getOperationTemplateBySubtypeIdAndDeviceTypeAndOperationCode(int subtypeId, String deviceType, String operationCode) throws OperationTemplateMgtPluginException {

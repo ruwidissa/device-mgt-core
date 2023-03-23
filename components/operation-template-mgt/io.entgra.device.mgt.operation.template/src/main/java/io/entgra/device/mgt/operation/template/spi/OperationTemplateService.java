@@ -28,9 +28,11 @@ import io.entgra.device.mgt.operation.template.exception.OperationTemplateMgtPlu
 public interface OperationTemplateService {
 
     void addOperationTemplate(OperationTemplate operationTemplate) throws OperationTemplateMgtPluginException;
+
     OperationTemplate updateOperationTemplate(OperationTemplate operationTemplate) throws OperationTemplateMgtPluginException;
+
     OperationTemplate getOperationTemplate(int subTypeId, String deviceType, String operationCode) throws OperationTemplateMgtPluginException;
+
     void deleteOperationTemplate(int subTypeId, String deviceType, String operationCode) throws OperationTemplateMgtPluginException;
-    boolean isExistsOperationTemplateBySubtypeIdAndOperationCode(int subTypeId, String deviceType, String operationCode) throws OperationTemplateMgtPluginException;
 
 }

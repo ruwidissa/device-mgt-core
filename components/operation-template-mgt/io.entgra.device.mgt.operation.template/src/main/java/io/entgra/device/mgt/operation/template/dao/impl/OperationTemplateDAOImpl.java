@@ -44,7 +44,6 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
     private static final Log log = LogFactory.getLog(OperationTemplateDAOImpl.class);
 
     /**
-     *
      * @param operationTemplate
      * @throws OperationTemplateManagementDAOException
      */
@@ -82,7 +81,6 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
     }
 
     /**
-     *
      * @param operationTemplate
      * @return
      * @throws OperationTemplateManagementDAOException
@@ -93,15 +91,16 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
 
         try {
             String sql =
-                    "UPDATE SUB_OPERATION_TEMPLATE SET OPERATION_DEFINITION = ? WHERE SUB_TYPE_ID = ? AND DEVICE_TYPE = ? "
+                    "UPDATE SUB_OPERATION_TEMPLATE SET OPERATION_DEFINITION = ?, UPDATE_TIMESTAMP = ? WHERE SUB_TYPE_ID = ? AND DEVICE_TYPE = ? "
                             + "AND OPERATION_CODE = ?";
 
             Connection conn = ConnectionManagerUtils.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, operationTemplate.getOperationDefinition());
-                stmt.setInt(2, operationTemplate.getSubTypeId());
-                stmt.setString(3, operationTemplate.getDeviceType());
-                stmt.setString(4, operationTemplate.getCode());
+                stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+                stmt.setInt(3, operationTemplate.getSubTypeId());
+                stmt.setString(4, operationTemplate.getDeviceType());
+                stmt.setString(5, operationTemplate.getCode());
                 stmt.executeUpdate();
 
                 return getOperationTemplate(operationTemplate.getSubTypeId(), operationTemplate.getDeviceType(), operationTemplate.getCode());
@@ -117,7 +116,6 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
     }
 
     /**
-     *
      * @param subTypeId
      * @param deviceType
      * @param operationCode
@@ -154,7 +152,6 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
     }
 
     /**
-     *
      * @param subTypeId
      * @param deviceType
      * @param operationCode
@@ -185,7 +182,6 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
     }
 
     /**
-     *
      * @param subTypeId
      * @param deviceType
      * @param operationCode
