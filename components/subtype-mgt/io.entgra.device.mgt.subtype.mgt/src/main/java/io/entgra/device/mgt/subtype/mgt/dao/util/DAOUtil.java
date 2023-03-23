@@ -19,8 +19,6 @@
 package io.entgra.device.mgt.subtype.mgt.dao.util;
 
 import io.entgra.device.mgt.subtype.mgt.dto.DeviceSubType;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,8 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DAOUtil {
-
-    private static final Log log = LogFactory.getLog(DAOUtil.class);
 
     public static DeviceSubType loadDeviceSubType(ResultSet rs) throws SQLException {
         DeviceSubType deviceSubType = new DeviceSubType() {
