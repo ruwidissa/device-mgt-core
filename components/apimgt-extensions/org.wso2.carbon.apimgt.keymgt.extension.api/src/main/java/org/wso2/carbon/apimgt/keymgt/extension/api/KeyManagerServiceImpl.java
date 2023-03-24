@@ -51,7 +51,7 @@ public class KeyManagerServiceImpl implements KeyManagerService {
         try {
             KeyMgtService keyMgtService = new KeyMgtServiceImpl();
             DCRResponse resp = keyMgtService.dynamicClientRegistration(dcrRequest.getApplicationName(), dcrRequest.getUsername(),
-                    dcrRequest.getGrantTypes(), dcrRequest.getCallBackUrl(), dcrRequest.getTags(), dcrRequest.getIsSaasApp());
+                    dcrRequest.getGrantTypes(), dcrRequest.getCallBackUrl(), dcrRequest.getTags(), dcrRequest.getIsSaasApp(), dcrRequest.getValidityPeriod());
             return Response.status(Response.Status.CREATED).entity(gson.toJson(resp)).build();
         } catch (KeyMgtException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -69,7 +69,8 @@ public class KeyManagerServiceImpl implements KeyManagerService {
                                         @FormParam("assertion") String assertion,
                                         @FormParam("admin_access_token") String admin_access_token,
                                         @FormParam("username") String username,
-                                        @FormParam("password") String password) {
+                                        @FormParam("password") String password,
+                                        @FormParam("validityPeriod") int validityPeriod) {
         try {
             if (basicAuthHeader == null) {
                 String msg = "Invalid credentials. Make sure your API call is invoked with a Basic Authorization header.";
@@ -80,7 +81,7 @@ public class KeyManagerServiceImpl implements KeyManagerService {
             TokenResponse resp = keyMgtService.generateAccessToken(
                     new TokenRequest(encodedClientCredentials.split(":")[0],
                             encodedClientCredentials.split(":")[1], refreshToken, scope,
-                            grantType, assertion, admin_access_token, username, password));
+                            grantType, assertion, admin_access_token, username, password, validityPeriod));
             return Response.status(Response.Status.OK).entity(gson.toJson(resp)).build();
         } catch (KeyMgtException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

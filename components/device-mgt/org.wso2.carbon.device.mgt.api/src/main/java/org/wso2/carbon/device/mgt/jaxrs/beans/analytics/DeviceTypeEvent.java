@@ -20,14 +20,18 @@ package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
+
 /**
  * This hold stats data record
  */
 public class DeviceTypeEvent {
 
+    private String eventName;
     private EventAttributeList eventAttributes;
     private TransportType transport;
 
+    private String eventTopicStructure;
     @ApiModelProperty(value = "Attributes related to device type event")
     @JsonProperty("eventAttributes")
     public EventAttributeList getEventAttributeList() {
@@ -47,6 +51,26 @@ public class DeviceTypeEvent {
 
     public void setTransportType(TransportType transport) {
         this.transport = transport;
+    }
+
+    @ApiModelProperty(value = "event topic structure")
+    @JsonProperty("eventTopicStructure")
+    public String getEventTopicStructure() {
+        return eventTopicStructure;
+    }
+
+    public void setEventTopicStructure(String eventTopicStructure) {
+        this.eventTopicStructure = eventTopicStructure;
+    }
+
+    @ApiModelProperty(value = "event topic name")
+    @JsonProperty("eventName")
+    public String getEventName() {
+        return eventName;
+    }
+
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
     }
 }
 

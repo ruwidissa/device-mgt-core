@@ -37,33 +37,26 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import com.google.gson.Gson;
+import io.entgra.application.mgt.common.ApplicationInstallResponse;
+import io.entgra.application.mgt.common.SubscriptionType;
+import io.entgra.application.mgt.common.exception.SubscriptionManagementException;
 import io.entgra.application.mgt.common.services.ApplicationManager;
+import io.entgra.application.mgt.common.services.SubscriptionManager;
+import io.entgra.application.mgt.core.util.HelperUtil;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.keymgt.extension.DCRResponse;
+import org.wso2.carbon.apimgt.keymgt.extension.TokenRequest;
+import org.wso2.carbon.apimgt.keymgt.extension.TokenResponse;
+import org.wso2.carbon.apimgt.keymgt.extension.exception.KeyMgtException;
+import org.wso2.carbon.apimgt.keymgt.extension.service.KeyMgtService;
+import org.wso2.carbon.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.application.mgt.common.ApplicationInstallResponse;
-import io.entgra.application.mgt.common.SubscriptionType;
-import io.entgra.application.mgt.common.exception.SubscriptionManagementException;
-import io.entgra.application.mgt.common.services.SubscriptionManager;
-import io.entgra.application.mgt.core.util.HelperUtil;
-import org.wso2.carbon.device.mgt.common.DeviceFilters;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.OperationLogFilters;
-import org.wso2.carbon.device.mgt.common.MDMAppConstants;
-import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
-import org.wso2.carbon.device.mgt.common.Feature;
-import org.wso2.carbon.device.mgt.common.FeatureManager;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
-import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
+import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
@@ -73,12 +66,8 @@ import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshotWrapper;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
-import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
-import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
-import org.wso2.carbon.device.mgt.common.exceptions.UnAuthorizedException;
+import org.wso2.carbon.device.mgt.common.exceptions.*;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
@@ -102,22 +91,12 @@ import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
-import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceCompliance;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ComplianceDeviceList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OperationList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationUninstallation;
+import org.wso2.carbon.device.mgt.jaxrs.beans.*;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -130,30 +109,17 @@ import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerSer
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
 import javax.validation.constraints.Size;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -909,6 +875,100 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
         return Response.status(Response.Status.OK).entity(deviceInfo).build();
+
+    }
+    @GET
+    @Path("/{type}/{id}/config")
+    @Override
+    public Response getDeviceConfiguration(
+            @PathParam("type") @Size(max = 45) String type,
+            @PathParam("id") @Size(max = 45) String id,
+            @HeaderParam("If-Modified-Since") String ifModifiedSince) {
+
+        DeviceConfig deviceConfig = new DeviceConfig();
+        deviceConfig.setDeviceId(id);
+        deviceConfig.setType(type);
+
+        // find token validity time
+        DeviceManagementProviderService deviceManagementProviderService =
+                DeviceMgtAPIUtils.getDeviceManagementService();
+        int validityTime = 3600;
+        List<String> mqttEventTopicStructure = new ArrayList<>();
+        try {
+            DeviceType deviceType = deviceManagementProviderService.getDeviceType(type);
+            if (deviceType != null) {
+                if (deviceType.getDeviceTypeMetaDefinition().isLongLivedToken()) {
+                    validityTime = Integer.MAX_VALUE;
+                }
+                mqttEventTopicStructure = deviceType.getDeviceTypeMetaDefinition().getMqttEventTopicStructures();
+            } else {
+                String msg = "Device not found, device id : " +  id + ", device type : " + type;
+                log.error(msg);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retrieving device, device id : " +  id + ", device type : " + type;
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        String applicationName = type.replace(" ", "").replace("_", "")
+                + "_" + tenantDomain;
+
+        KeyMgtService keyMgtService = new KeyMgtServiceImpl();
+        try {
+            DCRResponse dcrResponse = keyMgtService.dynamicClientRegistration(applicationName, username,
+                    "client_credentials", null, new String[] {"device_management"}, false, validityTime);
+            deviceConfig.setClientId(dcrResponse.getClientId());
+            deviceConfig.setClientSecret(dcrResponse.getClientSecret());
+
+            StringBuilder scopes = new StringBuilder("device_" + type.replace(" ", "")
+                    .replace("_", "") + "_" + id);
+            for (String topic : mqttEventTopicStructure) {
+                if (topic.contains("${deviceId}")) {
+                    topic = topic.replace("${deviceId}", id);
+                }
+                topic = topic.replace("/",":");
+                scopes.append(" perm:topic:sub:".concat(topic));
+                scopes.append(" perm:topic:pub:".concat(topic));
+            }
+
+            TokenRequest tokenRequest = new TokenRequest(dcrResponse.getClientId(), dcrResponse.getClientSecret(),
+                    null, scopes.toString(), "client_credentials", null,
+                    null, null, null,  validityTime);
+            TokenResponse tokenResponse = keyMgtService.generateAccessToken(tokenRequest);
+            deviceConfig.setAccessToken(tokenResponse.getAccessToken());
+            deviceConfig.setRefreshToken(tokenResponse.getRefreshToken());
+
+            try {
+                deviceConfig.setPlatformConfiguration(deviceManagementProviderService.getConfiguration(type));
+            } catch (DeviceManagementException e) {
+                String msg = "Error occurred while reading platform configurations token, device id : " +  id + ", device type : " + type;
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+
+            deviceConfig.setMqttGateway("tcp://" + System.getProperty("mqtt.broker.host") + ":" + System.getProperty("mqtt.broker.port"));
+            deviceConfig.setHttpGateway("http://" + System.getProperty("iot.gateway.host") + ":" + System.getProperty("iot.gateway.http.port"));
+            deviceConfig.setHttpsGateway("https://" + System.getProperty("iot.gateway.host") + ":" + System.getProperty("iot.gateway.https.port"));
+
+        } catch (KeyMgtException e) {
+            String msg = "Error occurred while creating oauth application, device id : " +  id + ", device type : " + type;
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (org.wso2.carbon.apimgt.keymgt.extension.exception.BadRequestException e) {
+            String msg = "Error occurred while generating token, device id : " +  id + ", device type : " + type;
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+        return Response.status(Response.Status.OK).entity(deviceConfig).build();
 
     }
 
