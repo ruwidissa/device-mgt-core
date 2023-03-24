@@ -180,41 +180,4 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
             throw new OperationTemplateManagementDAOException(msg, e);
         }
     }
-
-    /**
-     * @param subTypeId
-     * @param deviceType
-     * @param operationCode
-     * @return
-     * @throws OperationTemplateManagementDAOException
-     */
-    @Override
-    public boolean isExistsOperationTemplateBySubtypeIdAndOperationCode(int subTypeId, String deviceType,
-                                                                        String operationCode) throws OperationTemplateManagementDAOException {
-        try {
-            String sql = "SELECT * FROM SUB_OPERATION_TEMPLATE WHERE SUB_TYPE_ID = ? AND DEVICE_TYPE = ? AND OPERATION_CODE = ?";
-
-            Connection conn = ConnectionManagerUtils.getDBConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, subTypeId);
-                stmt.setString(2, deviceType);
-                stmt.setString(3, operationCode);
-
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return true;
-                    }
-                    return false;
-                }
-            } catch (SQLException e) {
-                String msg = "Error occurred while loading operation template.";
-                log.error(e.getMessage());
-                throw new OperationTemplateManagementDAOException(msg, e);
-            }
-        } catch (DBConnectionException e) {
-            String msg = "Error occurred while obtaining DB connection to loading operation template.";
-            log.error(msg);
-            throw new OperationTemplateManagementDAOException(msg, e);
-        }
-    }
 }

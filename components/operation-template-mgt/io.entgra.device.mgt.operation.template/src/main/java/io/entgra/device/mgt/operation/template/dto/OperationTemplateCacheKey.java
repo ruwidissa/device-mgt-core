@@ -21,9 +21,9 @@ package io.entgra.device.mgt.operation.template.dto;
 
 public class OperationTemplateCacheKey {
 
-    int subTypeId;
-    String deviceType;
-    String operationCode;
+    private int subTypeId;
+    private String deviceType;
+    private String operationCode;
 
     public int getSubTypeId() {
         return subTypeId;

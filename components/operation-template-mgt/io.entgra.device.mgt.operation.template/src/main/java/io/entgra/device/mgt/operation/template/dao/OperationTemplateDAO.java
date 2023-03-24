@@ -36,5 +36,4 @@ public interface OperationTemplateDAO {
 
     void deleteOperationTemplate(int subTypeId, String deviceCode, String operationCode) throws OperationTemplateManagementDAOException;
 
-    boolean isExistsOperationTemplateBySubtypeIdAndOperationCode(int subTypeId, String deviceType, String operationCode) throws OperationTemplateManagementDAOException;
 }
