@@ -48,6 +48,22 @@ public interface EntgraLogger extends Log {
 
     void warn(Object object, Throwable t, LogContext logContext);
 
+    void info(String message, LogContext logContext);
+
+    void debug(String message, LogContext logContext);
+
+    void error(String message, LogContext logContext);
+
+    void error(String message, Throwable t, LogContext logContext);
+
+    void warn(String message, LogContext logContext);
+
+    void warn(String message, Throwable t, LogContext logContext);
+
+    void trace(String message, LogContext logContext);
+
+    void fatal(String message, LogContext logContext);
+
     void clearLogContext();
 
 }
