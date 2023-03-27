@@ -24,8 +24,15 @@
     <SessionTimeOut>3600</SessionTimeOut>
     <!--  maximum number of login cache entries  -->
     <LoginCacheCapacity>10000</LoginCacheCapacity>
-    <!--  access token for hubspot live chat feature - whenever the access token will be rotated, needs to be changed this with the new token  -->
-    <ChatConfig>pat-na1-33bc59e0-3526-45b0-b9cf-f353d0ae0ced</ChatConfig>
+    <!-- hubspot account info for live chat -->
+    <HubspotChat>
+        <EnableHubspot>false</EnableHubspot>
+        <TrackingUrl>tracking_url</TrackingUrl>
+        <!--  access token - whenever the access token will be rotated, needs to be changed this with the new token  -->
+        <AccessToken>access_token</AccessToken>
+        <SenderActorId>sender_actorId</SenderActorId>
+        <ChannelAccountId>channel_AccountId</ChannelAccountId>
+    </HubspotChat>
     <Billing>
         <HideBillGenerationInSuperTenant>false</HideBillGenerationInSuperTenant>
         <HideBillGenerationInSubTenant>true</HideBillGenerationInSubTenant>

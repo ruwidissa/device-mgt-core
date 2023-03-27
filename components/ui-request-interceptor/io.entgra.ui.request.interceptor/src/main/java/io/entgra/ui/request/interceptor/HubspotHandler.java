@@ -96,6 +96,7 @@ public class HubspotHandler extends HttpServlet {
          */
         private boolean validateRequest(HttpServletRequest req, HttpServletResponse resp)
                 throws IOException {
+            httpSession = req.getSession(false);
             if (httpSession == null) {
                 log.error("Unauthorized, You are not logged in. Please log in to the portal");
                 HandlerUtil.handleError(resp, HttpStatus.SC_UNAUTHORIZED);
@@ -106,14 +107,13 @@ public class HubspotHandler extends HttpServlet {
                 HandlerUtil.handleError(resp, HttpStatus.SC_BAD_REQUEST);
                 return false;
             }
-            httpSession = req.getSession(false);
             gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
                     + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
             iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                     + HandlerConstants.COLON + HandlerUtil.getCorePort(req.getScheme());
             String uiConfigUrl = iotsCoreUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
             uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
-            chatConfig = uiConfigJsonObject.get("chatConfig").getAsString();
+            chatConfig = uiConfigJsonObject.get("hubspotChat").getAsJsonObject().get("accessToken").getAsString();
             hubspotEndpoint = HandlerConstants.HTTPS_PROTOCOL + HandlerConstants.SCHEME_SEPARATOR + HandlerConstants.HUBSPOT_CHAT_URL;
             return true;
         }
