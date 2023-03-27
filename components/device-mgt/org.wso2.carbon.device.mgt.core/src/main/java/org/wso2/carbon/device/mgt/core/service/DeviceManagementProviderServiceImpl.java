@@ -38,7 +38,6 @@ package org.wso2.carbon.device.mgt.core.service;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import org.apache.commons.collections.map.SingletonMap;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -162,11 +161,11 @@ import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.mail.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import java.io.*;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -185,12 +184,6 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
-import javax.ws.rs.core.MultivaluedMap;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
         PluginInitializationListener {
@@ -1561,23 +1554,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.error(msg, ex);
             throw new DeviceManagementException(msg, ex);
         }
-    }
-
-    // save to somewhere
-    private void writeFile(byte[] content, String filename) throws IOException {
-
-        File file = new File(filename);
-
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-
-        FileOutputStream fop = new FileOutputStream(file);
-
-        fop.write(content);
-        fop.flush();
-        fop.close();
-
     }
 
     @Override
