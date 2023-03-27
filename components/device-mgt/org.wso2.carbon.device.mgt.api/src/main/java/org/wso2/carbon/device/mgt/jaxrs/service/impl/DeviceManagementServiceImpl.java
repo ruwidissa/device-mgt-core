@@ -872,6 +872,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         DeviceManagementProviderService deviceManagementProviderService =
                 DeviceMgtAPIUtils.getDeviceManagementService();
         int validityTime = 3600;
+        // add scopes for event topics
         List<String> mqttEventTopicStructure = new ArrayList<>();
         try {
             DeviceType deviceType = deviceManagementProviderService.getDeviceType(type);
@@ -912,9 +913,15 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     topic = topic.replace("${deviceId}", id);
                 }
                 topic = topic.replace("/",":");
-                scopes.append(" perm:topic:sub:".concat(topic));
+//                scopes.append(" perm:topic:sub:".concat(topic));
                 scopes.append(" perm:topic:pub:".concat(topic));
             }
+
+            // add scopes for retrieve operation topic /tenantDomain/deviceType/deviceId/operation/#
+            scopes.append(" perm:topic:sub:" + tenantDomain + ":" + type + ":" + id + ":operation");
+
+            // add scopes for update operation /tenantDomain/deviceType/deviceId/update/operation
+            scopes.append(" perm:topic:pub:" + tenantDomain + ":" + type + ":" + id + ":update:operation");
 
             TokenRequest tokenRequest = new TokenRequest(dcrResponse.getClientId(), dcrResponse.getClientSecret(),
                     null, scopes.toString(), "client_credentials", null,
