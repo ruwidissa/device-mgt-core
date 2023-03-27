@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.core.metadata.mgt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
@@ -91,8 +92,14 @@ public class MetadataManagementServiceImpl implements MetadataManagementService 
         }
         try {
             MetadataManagementDAOFactory.openConnection();
-            return metadataDAO.getMetadata(
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true), metaKey);
+            int tenantId;
+            if (metaKey.equals("EVALUATE_TENANTS")){
+                // for getting evaluate tenant list to provide the live chat feature
+                 tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            } else {
+                 tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+            }
+            return metadataDAO.getMetadata(tenantId, metaKey);
         } catch (MetadataManagementDAOException e) {
             String msg = "Error occurred while retrieving the metadata entry for metaKey:" + metaKey;
             log.error(msg, e);
