@@ -1583,38 +1583,17 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     @Override
     public void sendEnrolmentGuide(String enrolmentGuide) throws DeviceManagementException {
 
-        String to = "oshani@entgra.io";
-        String from = "oshsilva1996@gmail.com";
-        String host = "smtp.gmail.com";
-        Properties properties = System.getProperties();
-
-        // Setup mail server
-        properties.put("mail.smtp.host", host);
-        properties.put("mail.smtp.port", "465");
-        properties.put("mail.smtp.ssl.enable", "true");
-        properties.put("mail.smtp.auth", "true");
-
-        Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
-
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("oshsilva1996@gmail.com", "layzvxhcxlwzkgwf");
-            }
-
-        });
-
-        // Used to debug SMTP issues
-        session.setDebug(true);
+        Properties props = new Properties();
+        props.setProperty("mail-subject", "[Enrollment Guide Triggered] (#" + ++count + ")");
+        props.setProperty("enrollment-guide", enrolmentGuide);
 
         try {
-            MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(from));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-            message.setSubject("[Enrollment Guide Triggered] (#" + ++count + ")");
-            message.setText(enrolmentGuide);
-            Transport.send(message);
-        } catch (MessagingException e) {
-            String msg = "Error occurred while sending message to support dev group";
-            log.error(msg, e);
+            EmailMetaInfo metaInfo = new EmailMetaInfo("support-dev-group@entgra.io", props);
+            sendEnrolmentInvitation(DeviceManagementConstants.EmailAttributes.ENROLLMENT_GUIDE_TEMPLATE, metaInfo);
+
+        } catch (ConfigurationManagementException e) {
+            String msg = "Error occurred while sending the mail.";
+            log.error(msg);
             throw new DeviceManagementException(msg, e);
         }
     }
