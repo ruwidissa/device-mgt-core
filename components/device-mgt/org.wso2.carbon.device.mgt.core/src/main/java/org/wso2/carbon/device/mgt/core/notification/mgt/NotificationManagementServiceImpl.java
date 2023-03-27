@@ -18,8 +18,9 @@
 
 package org.wso2.carbon.device.mgt.core.notification.mgt;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import io.entgra.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.notification.logger.DeviceLogContext;
+import io.entgra.notification.logger.impl.EntgraDeviceLoggerImpl;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
@@ -45,8 +46,8 @@ import java.util.List;
  */
 public class NotificationManagementServiceImpl implements NotificationManagementService {
 
-    private static final Log log = LogFactory.getLog(NotificationManagementServiceImpl.class);
-
+    private static final EntgraLogger log = new EntgraDeviceLoggerImpl(NotificationManagementServiceImpl.class);
+    DeviceLogContext.Builder deviceLogContexBuilder = new DeviceLogContext.Builder();
     private NotificationDAO notificationDAO;
 
     public NotificationManagementServiceImpl() {
