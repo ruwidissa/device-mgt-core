@@ -25,6 +25,24 @@
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
+            <artifactId>httpcore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+        </dependency>
+    </dependencies>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>apimgt-extensions</artifactId>
@@ -40,6 +58,7 @@
         <module>org.wso2.carbon.apimgt.keymgt.extension</module>
         <module>org.wso2.carbon.apimgt.keymgt.extension.api</module>
         <module>io.entgra.device.mgt.core.apimgt.analytics.extension</module>
+        <module>io.entgra.devicemgt.apimgt.extension.publisher.api</module>
     </modules>
 
     <build>

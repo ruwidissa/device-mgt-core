@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.webapp.publisher;
 
+import io.entgra.devicemgt.apimgt.extension.publisher.api.ScopeServices;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.webapp.publisher.exception.APIManagerPublisherException;
@@ -37,6 +38,7 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
     private static Stack<APIConfig> currentAPIsStack;
 
     private APIPublisherService publisher;
+    private ScopeServices scopeServices;
 
     @Override
     public void completingServerStartup() {
@@ -54,6 +56,12 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
                     log.debug("Server has just started, hence started publishing unpublished APIs");
                     log.debug("Total number of unpublished APIs: "
                             + APIPublisherDataHolder.getInstance().getUnpublishedApis().size());
+                }
+
+                try {
+                    scopeServices.registerApplication();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
                 publisher = APIPublisherDataHolder.getInstance().getApiPublisherService();
                 int retryCount = 0;
