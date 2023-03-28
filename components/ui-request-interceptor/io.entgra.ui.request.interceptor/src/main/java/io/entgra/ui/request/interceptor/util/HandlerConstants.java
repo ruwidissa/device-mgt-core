@@ -105,4 +105,5 @@ public class HandlerConstants {
     public static final String IOT_GW_HTTPS_PORT_ENV_VAR = "iot.gateway.https.port";
     public static final String IOT_REPORTING_WEBAPP_HOST_ENV_VAR = "iot.reporting.webapp.host";
     public static final String USER_SCOPES = "userScopes";
+    public static final String HUBSPOT_CHAT_URL = "api.hubapi.com";
 }

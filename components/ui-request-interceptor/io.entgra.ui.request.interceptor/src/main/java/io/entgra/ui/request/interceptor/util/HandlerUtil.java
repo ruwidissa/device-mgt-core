@@ -435,6 +435,23 @@ public class HandlerUtil {
         }
     }
 
+    /**
+     * Generate te request entity for POST requests from the hubspot's incoming request.
+     *
+     * @param req          incoming {@link HttpServletRequest}.
+     * @param proxyRequest proxy request instance.
+     * @throws IOException         If error occurred while generating the request body.
+     */
+    public static void generateChatRequestEntity(HttpServletRequest req, HttpEntityEnclosingRequestBase proxyRequest)
+            throws  IOException {
+        if (StringUtils.isNotEmpty(req.getHeader(HttpHeaders.CONTENT_LENGTH)) ||
+                StringUtils.isNotEmpty(req.getHeader(HttpHeaders.TRANSFER_ENCODING))) {
+            InputStreamEntity entity = new InputStreamEntity(req.getInputStream(),
+                    Long.parseLong(req.getHeader(HttpHeaders.CONTENT_LENGTH)));
+            proxyRequest.setEntity(new BufferedHttpEntity(entity));
+        }
+    }
+
     /***
      * Constructs the application registration payload for DCR.
      *
