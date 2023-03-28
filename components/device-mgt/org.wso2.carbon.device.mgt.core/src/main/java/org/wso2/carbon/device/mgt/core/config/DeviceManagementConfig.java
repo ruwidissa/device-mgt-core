@@ -70,6 +70,7 @@ public final class DeviceManagementConfig {
     private EnrollmentNotificationConfiguration enrollmentNotificationConfiguration;
     private DefaultRoles defaultRoles;
     private OperationTimeoutConfiguration operationTimeoutConfiguration;
+    private String enrollmentGuideMail;
 
     @XmlElement(name = "ManagementRepository", required = true)
     public DeviceManagementConfigRepository getDeviceManagementConfigRepository() {
@@ -264,6 +265,15 @@ public final class DeviceManagementConfig {
 
     public void setOperationTimeoutConfiguration(OperationTimeoutConfiguration operationTimeoutConfiguration) {
         this.operationTimeoutConfiguration = operationTimeoutConfiguration;
+    }
+
+    @XmlElement(name = "EnrollmentGuideMail", required = true)
+    public String getEnrollmentGuideMail() {
+        return enrollmentGuideMail;
+    }
+
+    public void setEnrollmentGuideMail(String enrollmentGuideMail) {
+        this.enrollmentGuideMail = enrollmentGuideMail;
     }
 }
 

@@ -1559,17 +1559,18 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     @Override
     public void sendEnrolmentGuide(String enrolmentGuide) throws DeviceManagementException {
 
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        String recipientMail = config.getEnrollmentGuideMail();
         Properties props = new Properties();
         props.setProperty("mail-subject", "[Enrollment Guide Triggered] (#" + ++count + ")");
         props.setProperty("enrollment-guide", enrolmentGuide);
 
         try {
-            EmailMetaInfo metaInfo = new EmailMetaInfo("support-dev-group@entgra.io", props);
+            EmailMetaInfo metaInfo = new EmailMetaInfo(recipientMail, props);
             sendEnrolmentInvitation(DeviceManagementConstants.EmailAttributes.ENROLLMENT_GUIDE_TEMPLATE, metaInfo);
-
         } catch (ConfigurationManagementException e) {
             String msg = "Error occurred while sending the mail.";
-            log.error(msg);
+            log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
     }

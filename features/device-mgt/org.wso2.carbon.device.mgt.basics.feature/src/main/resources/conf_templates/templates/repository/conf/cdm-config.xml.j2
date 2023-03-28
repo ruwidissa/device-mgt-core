@@ -322,7 +322,7 @@
             </Role>
         </Roles>
     </DefaultRoles>
-     <OperationTimeoutConfigurations>
+    <OperationTimeoutConfigurations>
             <OperationTimeouts>
             <!--<OperationTimeout>-->
                 <!--<DeviceTypes>-->
@@ -350,6 +350,11 @@
                 {% endfor %}
                 {% endif%}
             </OperationTimeouts>
-        </OperationTimeoutConfigurations>
+    </OperationTimeoutConfigurations>
+    {% if device_mgt_conf.enrollment_guide_mail is defined %}
+    <EnrollmentGuideMail>{{device_mgt_conf.enrollment_guide_mail}}</EnrollmentGuideMail>
+    {% else %}
+    <EnrollmentGuideMail>support-dev-group@entgra.io</EnrollmentGuideMail>
+    {% endif %}
 </DeviceMgtConfiguration>
 
