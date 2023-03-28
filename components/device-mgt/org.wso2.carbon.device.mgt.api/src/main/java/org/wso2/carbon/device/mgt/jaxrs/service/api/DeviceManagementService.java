@@ -2011,7 +2011,7 @@ public interface DeviceManagementService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{type}/{id}/getstatushistory")
+    @Path("/{type}/{id}/status-history")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -2079,7 +2079,7 @@ public interface DeviceManagementService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{type}/{id}/getenrolmentstatushistory")
+    @Path("/{type}/{id}/enrolment-status-history")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",

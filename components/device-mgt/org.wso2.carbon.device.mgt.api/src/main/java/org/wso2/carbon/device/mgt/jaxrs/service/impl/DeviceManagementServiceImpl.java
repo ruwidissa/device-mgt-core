@@ -1344,7 +1344,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
      * @return {@link Response} object
      */
     @GET
-    @Path("/{type}/{id}/getstatushistory")
+    @Path("/{type}/{id}/status-history")
     public Response getDeviceStatusHistory(@PathParam("type") @Size(max = 45) String type,
                                            @PathParam("id") @Size(max = 45) String id) {
         //TODO check authorization for this
@@ -1376,7 +1376,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
      * @return {@link Response} object
      */
     @GET
-    @Path("/{type}/{id}/getenrolmentstatushistory")
+    @Path("/{type}/{id}/enrolment-status-history")
     public Response getCurrentEnrolmentDeviceStatusHistory(@PathParam("type") @Size(max = 45) String type,
                                                            @PathParam("id") @Size(max = 45) String id) {
         //TODO check authorization for this or current enrolment should be based on for the enrolment associated with the user
