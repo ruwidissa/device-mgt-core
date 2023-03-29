@@ -17,7 +17,10 @@
  */
 package io.entgra.device.mgt.core.apimgt.analytics.extension;
 
-import io.entgra.device.mgt.core.apimgt.analytics.extension.dto.*;
+import io.entgra.device.mgt.core.apimgt.analytics.extension.dto.EventPublisherData;
+import io.entgra.device.mgt.core.apimgt.analytics.extension.dto.EventReceiverData;
+import io.entgra.device.mgt.core.apimgt.analytics.extension.dto.EventStreamData;
+import io.entgra.device.mgt.core.apimgt.analytics.extension.dto.MetaData;
 import io.entgra.device.mgt.core.apimgt.analytics.extension.exception.EventPublisherDeployerException;
 import io.entgra.device.mgt.core.apimgt.analytics.extension.exception.EventReceiverDeployerException;
 import io.entgra.device.mgt.core.apimgt.analytics.extension.exception.EventStreamDeployerException;
@@ -29,11 +32,15 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 
 public class AnalyticsArtifactsDeployer {
 
-    public static final String TEMPLATE_LOCATION = "repository" + File.separator + "resources" + File.separator + "io.entgra.device.mgt.core.apimgt.analytics.extension/src/main/resources/iot-analytics-templates";
+    public static final String TEMPLATE_LOCATION = "repository" + File.separator + "resources" + File.separator + "iot-analytics-templates";
     public static final String EVENT_STREAM_LOCATION = "eventstreams";
     public static final String EVENT_PUBLISHER_LOCATION = "eventpublishers";
     public static final String EVENT_RECEIVER_LOCATION = "eventreceivers";
