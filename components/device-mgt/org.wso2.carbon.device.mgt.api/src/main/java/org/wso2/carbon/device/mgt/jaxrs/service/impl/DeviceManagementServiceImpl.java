@@ -80,6 +80,8 @@ import org.wso2.carbon.device.mgt.common.search.PropertyMap;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceStatus;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
+import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
@@ -790,6 +792,12 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     public Response sendEnrollmentGuide(String enrolmentGuide) {
         if (log.isDebugEnabled()) {
             log.debug("Sending enrollment invitation mail to existing user.");
+        }
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        if (!config.getEnrollmentGuideConfiguration().isEnabled()) {
+            String msg = "Sending enrollment guide config is not enabled.";
+            log.error(msg);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         }
         DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
         try {

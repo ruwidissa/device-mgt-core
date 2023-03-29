@@ -25,6 +25,7 @@ import org.wso2.carbon.device.mgt.core.config.cache.BillingCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.CertificateCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.DeviceCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.GeoFenceCacheConfiguration;
+import org.wso2.carbon.device.mgt.core.config.enrollment.guide.EnrollmentGuideConfiguration;
 import org.wso2.carbon.device.mgt.core.config.operation.timeout.OperationTimeoutConfiguration;
 import org.wso2.carbon.device.mgt.core.event.config.EventOperationTaskConfiguration;
 import org.wso2.carbon.device.mgt.core.config.geo.location.GeoLocationConfiguration;
@@ -70,7 +71,7 @@ public final class DeviceManagementConfig {
     private EnrollmentNotificationConfiguration enrollmentNotificationConfiguration;
     private DefaultRoles defaultRoles;
     private OperationTimeoutConfiguration operationTimeoutConfiguration;
-    private String enrollmentGuideMail;
+    private EnrollmentGuideConfiguration enrollmentGuideConfiguration;
 
     @XmlElement(name = "ManagementRepository", required = true)
     public DeviceManagementConfigRepository getDeviceManagementConfigRepository() {
@@ -267,13 +268,13 @@ public final class DeviceManagementConfig {
         this.operationTimeoutConfiguration = operationTimeoutConfiguration;
     }
 
-    @XmlElement(name = "EnrollmentGuideMail", required = true)
-    public String getEnrollmentGuideMail() {
-        return enrollmentGuideMail;
+    @XmlElement(name = "EnrollmentGuideConfiguration", required = true)
+    public EnrollmentGuideConfiguration getEnrollmentGuideConfiguration() {
+        return enrollmentGuideConfiguration;
     }
 
-    public void setEnrollmentGuideMail(String enrollmentGuideMail) {
-        this.enrollmentGuideMail = enrollmentGuideMail;
+    public void setEnrollmentGuideConfiguration(EnrollmentGuideConfiguration enrollmentGuideConfiguration) {
+        this.enrollmentGuideConfiguration = enrollmentGuideConfiguration;
     }
 }
 

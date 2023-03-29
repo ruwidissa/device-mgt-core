@@ -351,10 +351,14 @@
                 {% endif%}
             </OperationTimeouts>
     </OperationTimeoutConfigurations>
-    {% if device_mgt_conf.enrollment_guide_mail is defined %}
-    <EnrollmentGuideMail>{{device_mgt_conf.enrollment_guide_mail}}</EnrollmentGuideMail>
-    {% else %}
-    <EnrollmentGuideMail>support-dev-group@entgra.io</EnrollmentGuideMail>
-    {% endif %}
+    <EnrollmentGuideConfiguration>
+            {% if device_mgt_conf.enrollment_guide_conf is defined %}
+            <Enable>{{device_mgt_conf.enrollment_guide_conf.enable}}</Enable>
+            <Mail>{{device_mgt_conf.enrollment_guide_conf.mail}}</Mail>
+            {% else %}
+            <Enable>false</Enable>
+            <Mail>Replace with mail</Mail>
+            {% endif %}
+    </EnrollmentGuideConfiguration>
 </DeviceMgtConfiguration>
 

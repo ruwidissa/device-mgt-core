@@ -1560,7 +1560,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     public void sendEnrolmentGuide(String enrolmentGuide) throws DeviceManagementException {
 
         DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
-        String recipientMail = config.getEnrollmentGuideMail();
+        String recipientMail = config.getEnrollmentGuideConfiguration().getMail();
         Properties props = new Properties();
         props.setProperty("mail-subject", "[Enrollment Guide Triggered] (#" + ++count + ")");
         props.setProperty("enrollment-guide", enrolmentGuide);

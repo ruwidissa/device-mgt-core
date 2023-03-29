@@ -187,6 +187,9 @@
         <OperationTimeouts>
         </OperationTimeouts>
     </OperationTimeoutConfigurations>
-    <EnrollmentGuideMail>support-dev-group@entgra.io</EnrollmentGuideMail>
+    <EnrollmentGuideConfiguration>
+        <Enable>false</Enable>
+        <Mail>Replace with mail</Mail>
+    </EnrollmentGuideConfiguration>
 </DeviceMgtConfiguration>
 
