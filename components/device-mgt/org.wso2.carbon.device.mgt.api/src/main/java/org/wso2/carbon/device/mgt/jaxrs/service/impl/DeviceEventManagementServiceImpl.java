@@ -1,30 +1,20 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
+import io.entgra.device.mgt.core.apimgt.analytics.extension.AnalyticsArtifactsDeployer;
+import io.entgra.device.mgt.core.apimgt.analytics.extension.dto.*;
+import io.entgra.device.mgt.core.apimgt.analytics.extension.exception.EventReceiverDeployerException;
+import io.entgra.device.mgt.core.apimgt.analytics.extension.exception.EventPublisherDeployerException;
+import io.entgra.device.mgt.core.apimgt.analytics.extension.exception.EventStreamDeployerException;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Stub;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.velocity.util.ArrayListWrapper;
-import org.json.JSONObject;
-import org.opensaml.xml.signature.J;
-import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminService;
-import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceEventStreamPersistenceAdminServiceExceptionException;
-import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
-import org.wso2.carbon.analytics.stream.persistence.stub.dto.AnalyticsTable;
-import org.wso2.carbon.analytics.stream.persistence.stub.dto.AnalyticsTableRecord;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Attribute;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AttributeType;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.DeviceTypeEvent;
@@ -34,24 +24,16 @@ import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceEventManagementService
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.event.input.adapter.core.InputEventAdapterConfiguration;
-import org.wso2.carbon.event.input.adapter.core.MessageType;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
-import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
-import org.wso2.carbon.event.output.adapter.rdbms.RDBMSEventAdapter;
-import org.wso2.carbon.event.output.adapter.rdbms.internal.ds.RDBMSEventAdapterServiceDS;
-import org.wso2.carbon.event.processor.manager.core.EventProcessorManagementService;
-import org.wso2.carbon.event.processor.manager.core.EventPublisherManagementService;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.publisher.core.config.EventPublisherConfiguration;
 import org.wso2.carbon.event.publisher.core.config.mapping.JSONOutputMapping;
 import org.wso2.carbon.event.publisher.core.config.mapping.MapOutputMapping;
 import org.wso2.carbon.event.publisher.core.exception.EventPublisherConfigurationException;
-import org.wso2.carbon.event.publisher.core.internal.ds.EventPublisherServiceDS;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceCallbackHandler;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceStub;
 import org.wso2.carbon.event.receiver.core.EventReceiverService;
 import org.wso2.carbon.event.receiver.core.config.EventReceiverConfiguration;
-import org.wso2.carbon.event.receiver.core.config.InputMapping;
 import org.wso2.carbon.event.receiver.core.config.mapping.JSONInputMapping;
 import org.wso2.carbon.event.receiver.core.config.mapping.WSO2EventInputMapping;
 import org.wso2.carbon.event.receiver.core.exception.EventReceiverConfigurationException;
@@ -59,7 +41,6 @@ import org.wso2.carbon.event.receiver.stub.EventReceiverAdminServiceCallbackHand
 import org.wso2.carbon.event.receiver.stub.EventReceiverAdminServiceStub;
 import org.wso2.carbon.event.receiver.stub.types.BasicInputAdapterPropertyDto;
 import org.wso2.carbon.event.receiver.stub.types.EventReceiverConfigurationDto;
-import org.wso2.carbon.event.receiver.stub.types.InputAdapterConfigurationDto;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.event.stream.core.exception.EventStreamConfigurationException;
 import org.wso2.carbon.event.stream.stub.EventStreamAdminServiceStub;
@@ -71,7 +52,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -225,6 +205,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
 
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             for (DeviceTypeEvent deviceTypeEvent : deviceTypeEvents) {
                 TransportType transportType = deviceTypeEvent.getTransportType();
@@ -239,46 +220,101 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
                     log.error(errorMessage);
                     return Response.status(Response.Status.BAD_REQUEST).build();
                 }
+                // event stream
                 String streamName = DeviceMgtAPIUtils.getStreamDefinition(deviceType, tenantDomain, eventName);
-                publishStreamDefinitons(streamName, Constants.DEFAULT_STREAM_VERSION, eventAttributes);
+                AnalyticsArtifactsDeployer artifactsDeployer = new AnalyticsArtifactsDeployer();
+                List<Property> props = new ArrayList<>();
+                for (Attribute attribute : eventAttributes.getList()) {
+                    props.add(new Property(attribute.getName(), attribute.getType().name()));
+                }
+                EventStreamData eventStreamData = new EventStreamData();
+                eventStreamData.setName(streamName);
+                eventStreamData.setVersion(Constants.DEFAULT_STREAM_VERSION);
+                eventStreamData.setMetaData(new MetaData(DEFAULT_DEVICE_ID_ATTRIBUTE, "STRING"));
+                eventStreamData.setPayloadData(props);
+                artifactsDeployer.deployEventStream(eventStreamData, tenantId);
 
+                // event receiver
                 String receiverName = getReceiverName(deviceType, tenantDomain, transportType, eventName);
-                publishEventReceivers(streamName, Constants.DEFAULT_STREAM_VERSION, transportType, tenantDomain,
-                        isSharedWithAllTenants, deviceType, deviceTypeEvent.getEventTopicStructure(), receiverName);
-                if (!skipPersist) {
-                    String rdbmsPublisherName = getPublisherName(deviceType, tenantDomain, eventName) + "_rdbms_publisher";
-                    publishEventStore(streamName, Constants.DEFAULT_STREAM_VERSION, rdbmsPublisherName);
-                }
-                String wsPublisherName = getPublisherName(deviceType, tenantDomain, eventName) + "_ws_publisher";
-                publishWebsocketPublisherDefinition(streamName, Constants.DEFAULT_STREAM_VERSION, wsPublisherName);
-                try {
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                            MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                    if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                        publishStreamDefinitons(streamName, Constants.DEFAULT_STREAM_VERSION, eventAttributes);
-                        publishEventReceivers(streamName, Constants.DEFAULT_STREAM_VERSION, transportType, tenantDomain,
-                                isSharedWithAllTenants, deviceType, deviceTypeEvent.getEventTopicStructure(), receiverName);
+                EventReceiverData receiverData  = new EventReceiverData();
+                receiverData.setName(receiverName);
+                receiverData.setStreamName(streamName);
+                receiverData.setStreamVersion(Constants.DEFAULT_STREAM_VERSION);
+                List<Property> propertyList = new ArrayList<>();
+                if (transportType == TransportType.MQTT) {
+                    receiverData.setEventAdapterType(OAUTH_MQTT_ADAPTER_TYPE);
+                    propertyList.add(new Property(MQTT_CONTENT_TRANSFORMER_TYPE, MQTT_CONTENT_TRANSFORMER));
+                    propertyList.add(new Property(MQTT_CONTENT_VALIDATOR_TYPE, MQTT_CONTENT_VALIDATOR));
+                    String topic;
+                    if (!StringUtils.isEmpty(deviceTypeEvent.getEventTopicStructure())) {
+                        if (isSharedWithAllTenants) {
+                            topic = deviceTypeEvent.getEventTopicStructure().replace("${deviceId}", "+")
+                                    .replace("${deviceType}", deviceType)
+                                    .replace("${tenantDomain}", "+");
+                        } else {
+                            topic = deviceTypeEvent.getEventTopicStructure().replace("${deviceId}", "+")
+                                    .replace("${deviceType}", deviceType)
+                                    .replace("${tenantDomain}", tenantDomain);
+                        }
+                    } else {
+                        if (isSharedWithAllTenants) {
+                            topic = "+/" + deviceType + "/+/events";
+                        } else {
+                            topic = tenantDomain + "/" + deviceType + "/+/events";
+                        }
                     }
-                } finally {
-                    PrivilegedCarbonContext.endTenantFlow();
+                    propertyList.add(new Property("topic", topic));
+                    receiverData.setCustomMappingType("json");
+
+                } else {
+                    receiverData.setEventAdapterType(THRIFT_ADAPTER_TYPE);
+                    propertyList.add(new Property("events.duplicated.in.cluster", "false"));
+                    receiverData.setCustomMappingType("wso2event");
                 }
+                receiverData.setPropertyList(propertyList);
+                artifactsDeployer.deployEventReceiver(receiverData, tenantId);
+
+                if (!skipPersist) {
+                    // rdbms event publisher
+                    String rdbmsPublisherName = getPublisherName(deviceType, tenantDomain, eventName) + "_rdbms_publisher";
+
+                    EventPublisherData eventPublisherData = new EventPublisherData();
+                    eventPublisherData.setName(rdbmsPublisherName);
+                    eventPublisherData.setStreamName(streamName);
+                    eventPublisherData.setStreamVersion(Constants.DEFAULT_STREAM_VERSION);
+                    eventPublisherData.setEventAdaptorType("rdbms");
+                    eventPublisherData.setCustomMappingType("map");
+                    List<Property> publisherProps = new ArrayList<>();
+                    publisherProps.add(new Property("datasource.name", "EVENT_DB"));
+                    publisherProps.add(new Property("table.name", "table_" + rdbmsPublisherName.replace(".", "")));
+                    publisherProps.add(new Property("execution.mode", "insert"));
+                    eventPublisherData.setPropertyList(publisherProps);
+                    artifactsDeployer.deployEventPublisher(eventPublisherData, tenantId);
+                }
+
+                // web socket event publisher
+                String wsPublisherName = getPublisherName(deviceType, tenantDomain, eventName) + "_ws_publisher";
+                EventPublisherData wsEventPublisherData = new EventPublisherData();
+                wsEventPublisherData.setName(wsPublisherName);
+                wsEventPublisherData.setStreamName(streamName);
+                wsEventPublisherData.setStreamVersion(Constants.DEFAULT_STREAM_VERSION);
+                wsEventPublisherData.setEventAdaptorType("websocket-local");
+                wsEventPublisherData.setCustomMappingType("json");
+                artifactsDeployer.deployEventPublisher(wsEventPublisherData, tenantId);
+
             }
             return Response.ok().build();
         } catch (DeviceManagementException e) {
             log.error("Failed to access device management service, tenantDomain: " + tenantDomain, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (MalformedStreamDefinitionException e) {
-            log.error("Failed while creating stream definition, tenantDomain: " + tenantDomain, e);
+        } catch (EventStreamDeployerException e) {
+            log.error("Failed while deploying event stream definition, tenantDomain: " + tenantDomain, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (EventStreamConfigurationException e) {
-            log.error("Failed while configuring stream definition, tenantDomain: " + tenantDomain, e);
+        } catch (EventPublisherDeployerException e) {
+            log.error("Failed while deploying event publisher, tenantDomain: " + tenantDomain, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (EventPublisherConfigurationException e) {
-            log.error("Failed while configuring event publisher, tenantDomain: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (EventReceiverConfigurationException e) {
-            log.error("Failed while configuring event receiver, tenantDomain: " + tenantDomain, e);
+        } catch (EventReceiverDeployerException e) {
+            log.error("Failed while deploying event receiver, tenantDomain: " + tenantDomain, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }

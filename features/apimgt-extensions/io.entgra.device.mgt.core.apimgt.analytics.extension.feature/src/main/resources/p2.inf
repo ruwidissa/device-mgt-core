@@ -1,0 +1,2 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.device.mgt.core.apimgt.analytics.extension_${feature.version}/iot-analytics-templates/,target:${installFolder}/../../resources/,overwrite:true);\
