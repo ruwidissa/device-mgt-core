@@ -23,7 +23,7 @@
     <groupId>org.wso2.carbon.devicemgt</groupId>
     <artifactId>carbon-devicemgt</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.16-SNAPSHOT</version>
+    <version>5.0.21-SNAPSHOT</version>
     <name>WSO2 Carbon - Device Management - Parent</name>
     <url>http://wso2.org</url>
     <description>WSO2 Connected Device Manager Components</description>
@@ -46,6 +46,8 @@
         <module>components/transport-mgt</module>
         <module>components/analytics-mgt</module>
         <module>components/webapp-authenticator-framework</module>
+        <module>components/logger</module>
+        <module>components/task-mgt</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -58,6 +60,9 @@
         <module>features/transport-mgt</module>
         <module>features/analytics-mgt</module>
         <module>features/webapp-authenticator-framework</module>
+        <module>features/logger</module>
+        <module>features/task-mgt</module>
+
     </modules>
 
     <dependencyManagement>
@@ -348,7 +353,40 @@
                 <artifactId>org.wso2.carbon.apimgt.keymgt.extension.api</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.keymgt.extension</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.notification.logger</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
             <!-- Device Management dependencies -->
+
+            <!-- Task Management dependencies -->
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.common</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.core</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.watcher</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.task.mgt.feature</artifactId>
+                <type>zip</type>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
 
             <!-- Governance dependencies -->
             <dependency>
@@ -1420,6 +1458,31 @@
                 <artifactId>org.wso2.carbon.databridge.core</artifactId>
                 <version>${carbon.analytics.common.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.stream.core</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.receiver.core</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.publisher.core</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.core</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.analytics-common</groupId>
+                <artifactId>org.wso2.carbon.event.output.adapter.rdbms</artifactId>
+                <version>${carbon.analytics.common.version}</version>
+            </dependency>
             <!--<dependency>-->
                 <!--<groupId>org.wso2.carbon.commons</groupId>-->
                 <!--<artifactId>org.wso2.carbon.databridge.commons</artifactId>-->
@@ -2033,7 +2096,7 @@
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <carbon.device.mgt.version>5.0.16-SNAPSHOT</carbon.device.mgt.version>
+        <carbon.device.mgt.version>5.0.21-SNAPSHOT</carbon.device.mgt.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.7.35</carbon.commons.version>
@@ -2048,8 +2111,8 @@
         <carbon.api.mgt.version.range>[9.0.0, 10.0.0)</carbon.api.mgt.version.range>
 
         <!-- Carbon Analytics -->
-        <carbon.analytics.common.version>5.1.37</carbon.analytics.common.version>
-        <carbon.analytics.common.version.range>[5.1.3,6.0.0)</carbon.analytics.common.version.range>
+        <carbon.analytics.common.version>5.2.34</carbon.analytics.common.version>
+        <carbon.analytics.common.version.range>[5.2.34,6.0.0)</carbon.analytics.common.version.range>
         <carbon.analytics.version>1.3.25</carbon.analytics.version>
         <carbon.analytics.version.range>[1.3.0,2.0.0)</carbon.analytics.version.range>
         <carbon.event-processing.version>2.1.23</carbon.event-processing.version>

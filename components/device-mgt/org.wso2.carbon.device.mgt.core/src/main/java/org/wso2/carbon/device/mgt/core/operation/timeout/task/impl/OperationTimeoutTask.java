@@ -32,31 +32,10 @@ import org.wso2.carbon.device.mgt.core.task.impl.DynamicPartitionedScheduleTask;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class OperationTimeoutTask extends DynamicPartitionedScheduleTask {
 
     private static final Log log = LogFactory.getLog(OperationTimeoutTask.class);
-    private OperationTimeout operationTimeoutConfig;
-
-    @Override
-    public void setProperties(Map<String, String> properties) {
-        super.setProperties(properties);
-        String operationTimeoutTaskConfigStr = properties
-                .get(OperationTimeoutTaskManagerServiceImpl.OPERATION_TIMEOUT_TASK_CONFIG);
-        Gson gson = new Gson();
-        operationTimeoutConfig = gson.fromJson(operationTimeoutTaskConfigStr, OperationTimeout.class);
-    }
-
-    @Override
-    public String getProperty(String name) {
-        return super.getProperty(name);
-    }
-
-    @Override
-    public void refreshContext() {
-        super.refreshContext();
-    }
 
     @Override
     protected void setup() {
@@ -65,12 +44,15 @@ public class OperationTimeoutTask extends DynamicPartitionedScheduleTask {
 
     @Override
     protected void executeDynamicTask() {
+        String operationTimeoutTaskConfigStr = getProperty(
+                OperationTimeoutTaskManagerServiceImpl.OPERATION_TIMEOUT_TASK_CONFIG);
+        Gson gson = new Gson();
+        OperationTimeout operationTimeoutConfig = gson.fromJson(operationTimeoutTaskConfigStr, OperationTimeout.class);
         try {
-
             long timeMillis = System.currentTimeMillis() - operationTimeoutConfig.getTimeout() * 60 * 1000;
             List<String> deviceTypes = new ArrayList<>();
             if (operationTimeoutConfig.getDeviceTypes().size() == 1 &&
-                    "ALL".equals(operationTimeoutConfig.getDeviceTypes().get( 0))) {
+                    "ALL".equals(operationTimeoutConfig.getDeviceTypes().get(0))) {
                 try {
                     List<DeviceType> deviceTypeList = DeviceManagementDataHolder.getInstance()
                             .getDeviceManagementProvider().getDeviceTypes();

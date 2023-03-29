@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.operation.mgt;
 
+import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -792,9 +793,7 @@ public class OperationManagerImpl implements OperationManager {
 
             if (dtoOperation != null) {
                 long currentTime = Calendar.getInstance().getTime().getTime();
-                log.info("Current timestamp:" + currentTime);
                 long updatedTime = Timestamp.valueOf(dtoOperation.getReceivedTimeStamp()).getTime();
-                log.info("Updated timestamp: " + updatedTime);
 
                 // check if notnow frequency is met and set next pending operation if not, otherwise let notnow
                 // operation to proceed

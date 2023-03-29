@@ -19,13 +19,14 @@
 package io.entgra.server.bootup.heartbeat.beacon.dto;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ElectedCandidate {
 
     private String serverUUID;
     private Timestamp timeOfElection;
-    private List<String> acknowledgedTaskList = null;
+    private List<String> acknowledgedTaskList = new ArrayList<>();
 
     public List<String> getAcknowledgedTaskList() {
         return acknowledgedTaskList;

@@ -25,6 +25,7 @@ import org.wso2.carbon.device.mgt.core.config.cache.BillingCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.CertificateCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.DeviceCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.GeoFenceCacheConfiguration;
+import org.wso2.carbon.device.mgt.core.config.enrollment.guide.EnrollmentGuideConfiguration;
 import org.wso2.carbon.device.mgt.core.config.operation.timeout.OperationTimeoutConfiguration;
 import org.wso2.carbon.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
 import org.wso2.carbon.device.mgt.core.event.config.EventOperationTaskConfiguration;
@@ -72,6 +73,7 @@ public final class DeviceManagementConfig {
     private DefaultRoles defaultRoles;
     private OperationTimeoutConfiguration operationTimeoutConfiguration;
     private MetaDataConfiguration metaDataConfiguration;
+    private EnrollmentGuideConfiguration enrollmentGuideConfiguration;
 
     @XmlElement(name = "ManagementRepository", required = true)
     public DeviceManagementConfigRepository getDeviceManagementConfigRepository() {
@@ -275,6 +277,15 @@ public final class DeviceManagementConfig {
 
     public void setMetaDataConfiguration(MetaDataConfiguration metaDataConfiguration) {
         this.metaDataConfiguration = metaDataConfiguration;
+    }
+
+    @XmlElement(name = "EnrollmentGuideConfiguration", required = true)
+    public EnrollmentGuideConfiguration getEnrollmentGuideConfiguration() {
+        return enrollmentGuideConfiguration;
+    }
+
+    public void setEnrollmentGuideConfiguration(EnrollmentGuideConfiguration enrollmentGuideConfiguration) {
+        this.enrollmentGuideConfiguration = enrollmentGuideConfiguration;
     }
 }
 

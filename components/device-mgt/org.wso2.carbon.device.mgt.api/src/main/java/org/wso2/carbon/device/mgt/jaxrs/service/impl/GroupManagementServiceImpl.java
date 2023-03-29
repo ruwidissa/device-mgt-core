@@ -48,6 +48,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceTypesOfGroups;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupNotExistException;
@@ -66,6 +67,7 @@ import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -426,6 +428,22 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             String msg = "Error occurred while getting groups of device.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @POST
+    @Path("/device-types")
+    @Override
+    public Response getGroupHasDeviceTypes(List<String> identifiers) {
+        try {
+            DeviceTypesOfGroups deviceTypesOfGroups = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                    .getDeviceTypesOfGroups(identifiers);
+
+            return Response.status(Response.Status.OK).entity(deviceTypesOfGroups).build();
+        } catch (GroupManagementException e) {
+            String msg = "Only numbers can exists in a group ID or Invalid Group ID provided.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 

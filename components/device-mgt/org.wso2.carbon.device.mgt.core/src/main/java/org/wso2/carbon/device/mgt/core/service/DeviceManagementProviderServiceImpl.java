@@ -123,6 +123,7 @@ import org.wso2.carbon.device.mgt.core.DeviceManagementPluginRepository;
 import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.impl.BillingCacheManagerImpl;
 import org.wso2.carbon.device.mgt.core.cache.impl.DeviceCacheManagerImpl;
+import org.wso2.carbon.device.mgt.core.common.Constants;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.dao.ApplicationDAO;
@@ -146,6 +147,7 @@ import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataDAO;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOException;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
+import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.email.sender.core.ContentProviderInfo;
@@ -196,6 +198,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private final ApplicationDAO applicationDAO;
     private MetadataDAO metadataDAO;
     private final DeviceStatusDAO deviceStatusDAO;
+    int count = 0;
 
     public DeviceManagementProviderServiceImpl() {
         this.pluginRepository = new DeviceManagementPluginRepository();
@@ -442,7 +445,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 //Exception was not thrown due to being conflicted with non-traccar features
             }
         } else {
-            log.info("Traccar is disabled");
+            if (log.isDebugEnabled()) {
+                log.debug("Traccar is disabled");
+            }
         }
         //enroll Traccar device
 
@@ -542,7 +547,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 //Exception was not thrown due to being conflicted with non-traccar features
             }
         } else {
-            log.info("Traccar is disabled");
+            if (log.isDebugEnabled()) {
+                log.debug("Traccar is disabled");
+            }
         }
         //enroll Traccar device
         return status;
@@ -1546,6 +1553,25 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred in setEnrollmentInvitation";
             log.error(msg, ex);
             throw new DeviceManagementException(msg, ex);
+        }
+    }
+
+    @Override
+    public void sendEnrolmentGuide(String enrolmentGuide) throws DeviceManagementException {
+
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        String recipientMail = config.getEnrollmentGuideConfiguration().getMail();
+        Properties props = new Properties();
+        props.setProperty("mail-subject", "[Enrollment Guide Triggered] (#" + ++count + ")");
+        props.setProperty("enrollment-guide", enrolmentGuide);
+
+        try {
+            EmailMetaInfo metaInfo = new EmailMetaInfo(recipientMail, props);
+            sendEnrolmentInvitation(DeviceManagementConstants.EmailAttributes.ENROLLMENT_GUIDE_TEMPLATE, metaInfo);
+        } catch (ConfigurationManagementException e) {
+            String msg = "Error occurred while sending the mail.";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
         }
     }
 
@@ -4873,5 +4899,35 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
         paginationResult.setData(populateAllDeviceInfo(subscribedDeviceDetails));
         return paginationResult;
+    }
+
+    @Override
+    public Boolean sendDeviceNameChangedNotification(Device device) throws DeviceManagementException {
+
+        try {
+            ProfileOperation operation = new ProfileOperation();
+            operation.setCode(Constants.SEND_USERNAME);
+            operation.setType(Operation.Type.PROFILE);
+            operation.setPayLoad(device.getName());
+
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
+            deviceIdentifier.setId(device.getDeviceIdentifier());
+            deviceIdentifier.setType(device.getType());
+
+            List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
+            deviceIdentifiers.add(deviceIdentifier);
+            Activity activity;
+            activity = addOperation(device.getType(), operation, deviceIdentifiers);
+
+            return activity != null;
+        } catch (OperationManagementException e) {
+            String msg = "Error occurred while sending operation";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (InvalidDeviceException e) {
+            String msg = "Invalid Device exception occurred";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
     }
 }

@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>device-mgt</artifactId>
-        <version>5.0.16-SNAPSHOT</version>
+        <version>5.0.21-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -103,6 +103,7 @@
                             org.wso2.carbon.ndatasource.core,
                             org.wso2.carbon.ntask.core.*,
                             org.wso2.carbon.ntask.common,
+                            io.entgra.task.mgt.common.*,
                             org.apache.commons.collections;version="${commons-collections.version.range}",
                             org.wso2.carbon.email.sender.*,
                             io.swagger.annotations.*;resolution:=optional,
@@ -112,7 +113,9 @@
                             org.wso2.carbon.event.processor.stub,
                             org.wso2.carbon.identity.jwt.client.extension.service,
                             org.apache.commons.codec.binary,
-                            io.entgra.server.bootup.heartbeat.beacon
+                            io.entgra.server.bootup.heartbeat.beacon,
+                            io.entgra.device.mgt.extensions.logger.*,
+                            io.entgra.notification.logger.*
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.device.mgt.core.internal,
@@ -346,6 +349,14 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>io.entgra.task.mgt.common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>io.entgra.notification.logger</artifactId>
         </dependency>
     </dependencies>
 

@@ -645,6 +645,8 @@ public interface DeviceManagementProviderService {
     void sendEnrolmentInvitation(String templateName, EmailMetaInfo metaInfo) throws DeviceManagementException,
             ConfigurationManagementException;
 
+    void sendEnrolmentGuide(String enrolmentGuide) throws DeviceManagementException;
+
     void sendRegistrationEmail(EmailMetaInfo metaInfo) throws DeviceManagementException, ConfigurationManagementException;
 
     FeatureManager getFeatureManager(String deviceType) throws DeviceTypeNotFoundException;
@@ -1030,4 +1032,6 @@ public interface DeviceManagementProviderService {
      */
     PaginationResult getDevicesDetails(PaginationRequest request, List<Integer> devicesIds, String groupName)
             throws DeviceManagementException;
+
+    Boolean sendDeviceNameChangedNotification(Device device) throws DeviceManagementException;
 }
