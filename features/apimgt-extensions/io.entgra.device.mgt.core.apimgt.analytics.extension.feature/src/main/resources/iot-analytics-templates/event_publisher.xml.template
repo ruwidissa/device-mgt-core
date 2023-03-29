@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~  Copyright (c) 2023, Entgra (pvt) Ltd. (http://entgra.io)
+  ~
+  ~  All Rights Reserved.
+  ~
+  ~  Unauthorized copying of this file, via any medium is strictly prohibited.
+  ~  Proprietary and confidential.
+  -->
+<eventPublisher name="${name}" processing="enable"
+  statistics="disable" trace="disable" xmlns="http://wso2.org/carbon/eventpublisher">
+  <from streamName="${streamName}" version="${streamVersion}"/>
+  <mapping customMapping="disable" type="${customMappingType}"/>
+  <to eventAdapterType="${eventAdapterType}">
+  #foreach( $property in $properties )
+      <property name="${property.name}">${property.value}</property>
+  #end
+  </to>
+</eventPublisher>

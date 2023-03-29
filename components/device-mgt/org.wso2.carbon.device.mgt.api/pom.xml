@@ -450,5 +450,10 @@
             <artifactId>org.wso2.carbon.event.output.adapter.rdbms</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.analytics.extension</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
