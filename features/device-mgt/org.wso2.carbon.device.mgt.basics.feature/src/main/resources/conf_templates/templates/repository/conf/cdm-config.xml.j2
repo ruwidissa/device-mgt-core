@@ -322,7 +322,7 @@
             </Role>
         </Roles>
     </DefaultRoles>
-     <OperationTimeoutConfigurations>
+    <OperationTimeoutConfigurations>
             <OperationTimeouts>
             <!--<OperationTimeout>-->
                 <!--<DeviceTypes>-->
@@ -350,6 +350,15 @@
                 {% endfor %}
                 {% endif%}
             </OperationTimeouts>
-        </OperationTimeoutConfigurations>
+    </OperationTimeoutConfigurations>
+    <EnrollmentGuideConfiguration>
+            {% if device_mgt_conf.enrollment_guide_conf is defined %}
+            <Enable>{{device_mgt_conf.enrollment_guide_conf.enable}}</Enable>
+            <Mail>{{device_mgt_conf.enrollment_guide_conf.mail}}</Mail>
+            {% else %}
+            <Enable>false</Enable>
+            <Mail>Replace with mail</Mail>
+            {% endif %}
+    </EnrollmentGuideConfiguration>
 </DeviceMgtConfiguration>
 

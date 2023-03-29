@@ -187,5 +187,9 @@
         <OperationTimeouts>
         </OperationTimeouts>
     </OperationTimeoutConfigurations>
+    <EnrollmentGuideConfiguration>
+        <Enable>false</Enable>
+        <Mail>Replace with mail</Mail>
+    </EnrollmentGuideConfiguration>
 </DeviceMgtConfiguration>
 

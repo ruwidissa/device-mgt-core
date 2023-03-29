@@ -80,6 +80,8 @@ import org.wso2.carbon.device.mgt.common.search.PropertyMap;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceStatus;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
+import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
@@ -785,6 +787,32 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     }
 
     @POST
+    @Path("/enrollment/guide")
+    @Override
+    public Response sendEnrollmentGuide(String enrolmentGuide) {
+        if (log.isDebugEnabled()) {
+            log.debug("Sending enrollment invitation mail to existing user.");
+        }
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        if (!config.getEnrollmentGuideConfiguration().isEnabled()) {
+            String msg = "Sending enrollment guide config is not enabled.";
+            log.error(msg);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        }
+        DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+        try {
+            dms.sendEnrolmentGuide(enrolmentGuide);
+            return Response.status(Response.Status.OK).entity("Invitation mails have been sent.").build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred  sending mail to group in enrollment guide";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+
+    @POST
     @Path("/type/any/list")
     @Override
     public Response getDeviceByIdList(List<String> deviceIds) {
@@ -1331,7 +1359,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
      * @return {@link Response} object
      */
     @GET
-    @Path("/{type}/{id}/getstatushistory")
+    @Path("/{type}/{id}/status-history")
     public Response getDeviceStatusHistory(@PathParam("type") @Size(max = 45) String type,
                                            @PathParam("id") @Size(max = 45) String id) {
         //TODO check authorization for this
@@ -1363,7 +1391,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
      * @return {@link Response} object
      */
     @GET
-    @Path("/{type}/{id}/getenrolmentstatushistory")
+    @Path("/{type}/{id}/enrolment-status-history")
     public Response getCurrentEnrolmentDeviceStatusHistory(@PathParam("type") @Size(max = 45) String type,
                                                            @PathParam("id") @Size(max = 45) String id) {
         //TODO check authorization for this or current enrolment should be based on for the enrolment associated with the user
