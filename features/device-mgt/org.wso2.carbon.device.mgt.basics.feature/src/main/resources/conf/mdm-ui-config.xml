@@ -31,7 +31,6 @@
         <!--  access token - whenever the access token will be rotated, needs to be changed this with the new token  -->
         <AccessToken>access_token</AccessToken>
         <SenderActorId>sender_actorId</SenderActorId>
-        <ChannelAccountId>channel_AccountId</ChannelAccountId>
     </HubspotChat>
     <Billing>
         <HideBillGenerationInSuperTenant>false</HideBillGenerationInSuperTenant>
