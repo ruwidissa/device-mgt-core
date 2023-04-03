@@ -25,7 +25,6 @@ public class HubspotChat {
     private String trackingUrl;
     private String accessToken;
     private String senderActorId;
-    private long channelAccountId;
 
     @XmlElement(name = "EnableHubspot")
     public boolean isEnableHubspot() {
@@ -60,13 +59,5 @@ public class HubspotChat {
 
     public void setSenderActorId(String senderActorId) {
         this.senderActorId = senderActorId;
-    }
-    @XmlElement(name = "ChannelAccountId")
-    public long getChannelAccountId() {
-        return channelAccountId;
-    }
-
-    public void setChannelAccountId(long channelAccountId) {
-        this.channelAccountId = channelAccountId;
     }
 }
