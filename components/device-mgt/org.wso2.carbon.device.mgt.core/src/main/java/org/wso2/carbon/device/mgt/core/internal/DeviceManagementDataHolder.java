@@ -26,6 +26,8 @@ import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorization
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManager;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
 import org.wso2.carbon.device.mgt.core.app.mgt.config.AppManagementConfig;
@@ -34,6 +36,7 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManag
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.operation.timeout.task.OperationTimeoutTaskManagerService;
 import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
 import org.wso2.carbon.device.mgt.core.push.notification.mgt.PushNotificationProviderRepository;
@@ -69,7 +72,7 @@ public class DeviceManagementDataHolder {
     private AppManagementConfig appManagerConfig;
     private OperationManager operationManager;
     private ConfigurationContextService configurationContextService;
-    private final HashMap<String,Boolean> requireDeviceAuthorization = new HashMap<>();
+    private final HashMap<String, Boolean> requireDeviceAuthorization = new HashMap<>();
     private DeviceAccessAuthorizationService deviceAccessAuthorizationService;
     private GroupManagementProviderService groupManagementProviderService;
     private TaskService taskService;
@@ -85,17 +88,20 @@ public class DeviceManagementDataHolder {
     private ExecutorService eventConfigExecutors;
     private OperationTimeoutTaskManagerService operationTimeoutTaskManagerService;
     private DeviceAPIClientService deviceAPIClientService;
+    private MetadataManagementService metadataManagementService;
+    private WhiteLabelManagementService whiteLabelManagementService;
 
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
 
     private final Map<String, OperationMonitoringTaskConfig> map = new HashMap<>();
 
-    public Map<String, OperationMonitoringTaskConfig> getMap(){
+    public Map<String, OperationMonitoringTaskConfig> getMap() {
         return this.map;
     }
 
-    private DeviceManagementDataHolder() {}
+    private DeviceManagementDataHolder() {
+    }
 
     public static DeviceManagementDataHolder getInstance() {
         return thisInstance;
@@ -204,7 +210,7 @@ public class DeviceManagementDataHolder {
     }
 
     public void setRequireDeviceAuthorization(String pluginType, boolean requireAuthentication) {
-        requireDeviceAuthorization.put(pluginType,requireAuthentication);
+        requireDeviceAuthorization.put(pluginType, requireAuthentication);
     }
 
     public boolean requireDeviceAuthorization(String pluginType) {
@@ -351,12 +357,28 @@ public class DeviceManagementDataHolder {
             OperationTimeoutTaskManagerService operationTimeoutTaskManagerService) {
         this.operationTimeoutTaskManagerService = operationTimeoutTaskManagerService;
     }
-
+    
     public DeviceAPIClientService getDeviceAPIClientService() {
         return deviceAPIClientService;
     }
 
     public void setDeviceAPIClientService(DeviceAPIClientService deviceAPIClientService) {
         this.deviceAPIClientService = deviceAPIClientService;
+    }
+
+    public MetadataManagementService getMetadataManagementService() {
+        return metadataManagementService;
+    }
+
+    public void setMetadataManagementService(MetadataManagementService metadataManagementService) {
+        this.metadataManagementService = metadataManagementService;
+    }
+
+    public WhiteLabelManagementService getWhiteLabelManagementService() {
+        return whiteLabelManagementService;
+    }
+
+    public void setWhiteLabelManagementService(WhiteLabelManagementService whiteLabelManagementService) {
+        this.whiteLabelManagementService = whiteLabelManagementService;
     }
 }

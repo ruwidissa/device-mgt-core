@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
@@ -31,6 +32,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementService;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
@@ -59,6 +61,7 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformation
 import org.wso2.carbon.device.mgt.core.event.config.EventConfigurationProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.geo.service.GeoLocationProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.WhiteLabelManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.notification.mgt.NotificationManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.notification.mgt.dao.NotificationManagementDAOFactory;
@@ -293,6 +296,8 @@ public class DeviceManagementServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("Registering OSGi service DeviceManagementProviderServiceImpl");
         }
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+
         /* Registering Tenants Observer */
         BundleContext bundleContext = componentContext.getBundleContext();
         TenantCreateObserver listener = new TenantCreateObserver();
@@ -358,7 +363,19 @@ public class DeviceManagementServiceComponent {
 
         /* Registering Metadata Service */
         MetadataManagementService metadataManagementService = new MetadataManagementServiceImpl();
+        DeviceManagementDataHolder.getInstance().setMetadataManagementService(metadataManagementService);
         bundleContext.registerService(MetadataManagementService.class.getName(), metadataManagementService, null);
+
+        /* Registering Whitelabel Service */
+        WhiteLabelManagementService whiteLabelManagementService = new WhiteLabelManagementServiceImpl();
+        DeviceManagementDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
+        try {
+            whiteLabelManagementService.addDefaultWhiteLabelThemeIfNotExist(tenantId);
+        } catch (Throwable e) {
+            log.error("Error occurred while adding default tenant white label theme", e);
+
+        }
+        bundleContext.registerService(WhiteLabelManagementService.class.getName(), whiteLabelManagementService, null);
 
         /* Registering Event Configuration Service */
         EventConfigurationProviderService eventConfigurationService = new EventConfigurationProviderServiceImpl();

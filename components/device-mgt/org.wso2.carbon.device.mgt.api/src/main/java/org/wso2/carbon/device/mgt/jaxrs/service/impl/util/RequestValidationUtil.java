@@ -18,10 +18,13 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.impl.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.wso2.carbon.device.mgt.common.Base64File;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
@@ -31,8 +34,11 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelImageRequestPayload;
 import org.wso2.carbon.device.mgt.common.notification.mgt.Notification;
+import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
@@ -667,6 +673,122 @@ public class RequestValidationUtil {
             throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
                     .setCode(HttpStatus.SC_BAD_REQUEST)
                     .setMessage(msg).build());
+        }
+    }
+
+    /**
+     * Check if whitelabel theme create request contains valid payload and all required payload
+     *
+     * @param whiteLabelThemeCreateRequest {@link WhiteLabelThemeCreateRequest}
+     */
+    public static void validateWhiteLabelTheme(WhiteLabelThemeCreateRequest whiteLabelThemeCreateRequest) {
+        if (whiteLabelThemeCreateRequest.getFavicon() == null) {
+            String msg = "Favicon is required to whitelabel";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (whiteLabelThemeCreateRequest.getLogo() == null) {
+            String msg = "Logo is required to whitelabel";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (whiteLabelThemeCreateRequest.getLogoIcon() == null) {
+            String msg = "Logo Icon is required to whitelabel";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (whiteLabelThemeCreateRequest.getFooterText() == null) {
+            String msg = "Footer text is required to whitelabel";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (whiteLabelThemeCreateRequest.getAppTitle() == null) {
+            String msg = "App title is required to whitelabel";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        try {
+            validateWhiteLabelImage(whiteLabelThemeCreateRequest.getFavicon());
+            validateWhiteLabelImage(whiteLabelThemeCreateRequest.getLogo());
+            validateWhiteLabelImage(whiteLabelThemeCreateRequest.getLogoIcon());
+        } catch (InputValidationException e) {
+            String msg = "Payload contains invalid base64 files";
+            log.error(msg, e);
+            throw e;
+        }
+    }
+
+    /**
+     * Validate if {@link WhiteLabelImageRequestPayload} contains mandatory fields.
+     */
+    private static void validateWhiteLabelImage(WhiteLabelImageRequestPayload whiteLabelImage) {
+        if (whiteLabelImage.getImageType() == null) {
+            String msg = "Invalid payload found with the request. White label imageType cannot be null.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (whiteLabelImage.getImageType() == WhiteLabelImageRequestPayload.ImageType.BASE64) {
+            try {
+                Base64File image = new Gson().fromJson(whiteLabelImage.getImage(), Base64File.class);
+                validateBase64File(image);
+            } catch (JsonSyntaxException e) {
+                String msg = "Invalid image payload found with the request. Image object does not represent a Base64 File. " +
+                        "Hence verify the request payload object.";
+                log.error(msg, e);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder()
+                                .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+            }
+        }
+        else if (whiteLabelImage.getImageType() == WhiteLabelImageRequestPayload.ImageType.URL) {
+            try {
+                String imageUrl = new Gson().fromJson(whiteLabelImage.getImage(), String.class);
+                if (!HttpUtil.isHttpUrlValid(imageUrl)) {
+                    String msg = "Invalid image url provided for white label image.";
+                    log.error(msg);
+                    throw new InputValidationException(
+                            new ErrorResponse.ErrorResponseBuilder()
+                                    .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+                }
+            } catch (JsonSyntaxException e) {
+                String msg = "Invalid payload found with the request. Hence verify the request payload object.";
+                log.error(msg, e);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder()
+                                .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+            }
+        } else {
+            String msg = "Invalid payload found with the request. Unknown white label imageType " + whiteLabelImage.getImageType();
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+    }
+
+    /**
+     * Validate if {@link Base64File} contains mandatory fields.
+     */
+    private static void validateBase64File(Base64File base64File) {
+        if (base64File.getBase64String() == null || base64File.getName() == null) {
+            String msg = "Base64File doesn't contain required properties. name and base64String properties " +
+                    "are required fields for base64file type";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
     }
 

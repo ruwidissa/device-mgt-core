@@ -27,6 +27,7 @@ import org.wso2.carbon.device.mgt.core.config.cache.DeviceCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.GeoFenceCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.enrollment.guide.EnrollmentGuideConfiguration;
 import org.wso2.carbon.device.mgt.core.config.operation.timeout.OperationTimeoutConfiguration;
+import org.wso2.carbon.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
 import org.wso2.carbon.device.mgt.core.event.config.EventOperationTaskConfiguration;
 import org.wso2.carbon.device.mgt.core.config.geo.location.GeoLocationConfiguration;
 import org.wso2.carbon.device.mgt.core.config.identity.IdentityConfigurations;
@@ -71,6 +72,7 @@ public final class DeviceManagementConfig {
     private EnrollmentNotificationConfiguration enrollmentNotificationConfiguration;
     private DefaultRoles defaultRoles;
     private OperationTimeoutConfiguration operationTimeoutConfiguration;
+    private MetaDataConfiguration metaDataConfiguration;
     private EnrollmentGuideConfiguration enrollmentGuideConfiguration;
 
     @XmlElement(name = "ManagementRepository", required = true)
@@ -266,6 +268,15 @@ public final class DeviceManagementConfig {
 
     public void setOperationTimeoutConfiguration(OperationTimeoutConfiguration operationTimeoutConfiguration) {
         this.operationTimeoutConfiguration = operationTimeoutConfiguration;
+    }
+
+    @XmlElement(name = "MetaDataConfiguration", required = true)
+    public MetaDataConfiguration getMetaDataConfiguration() {
+        return metaDataConfiguration;
+    }
+
+    public void setMetaDataConfiguration(MetaDataConfiguration metaDataConfiguration) {
+        this.metaDataConfiguration = metaDataConfiguration;
     }
 
     @XmlElement(name = "EnrollmentGuideConfiguration", required = true)

@@ -71,6 +71,7 @@ import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementService;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
@@ -166,6 +167,7 @@ public class DeviceMgtAPIUtils {
 
     //    private static IntegrationClientService integrationClientService;
     private static MetadataManagementService metadataManagementService;
+    private static WhiteLabelManagementService whiteLabelManagementService;
     private static OTPManagementService otpManagementService;
 
     private static volatile SubscriptionManager subscriptionManager;
@@ -501,6 +503,28 @@ public class DeviceMgtAPIUtils {
             throw new IllegalStateException("Notification Management service not initialized.");
         }
         return notificationManagementService;
+    }
+
+    /**
+     * Initializing and accessing method for WhiteLabelManagementService.
+     *
+     * @return WhiteLabelManagementService instance
+     * @throws IllegalStateException if whiteLabelManagementService cannot be initialized
+     */
+    public static WhiteLabelManagementService getWhiteLabelManagementService() {
+        if (whiteLabelManagementService == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (whiteLabelManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    whiteLabelManagementService = (WhiteLabelManagementService) ctx.getOSGiService(
+                            WhiteLabelManagementService.class, null);
+                    if (whiteLabelManagementService == null) {
+                        throw new IllegalStateException("Whitelabel Management service not initialized.");
+                    }
+                }
+            }
+        }
+        return whiteLabelManagementService;
     }
 
     /**

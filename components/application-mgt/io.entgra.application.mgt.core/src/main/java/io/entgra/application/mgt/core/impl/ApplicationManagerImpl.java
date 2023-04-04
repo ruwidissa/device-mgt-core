@@ -17,7 +17,7 @@
 
 package io.entgra.application.mgt.core.impl;
 
-import io.entgra.application.mgt.common.Base64File;
+import org.wso2.carbon.device.mgt.common.Base64File;
 import io.entgra.application.mgt.core.dao.SPApplicationDAO;
 import io.entgra.application.mgt.core.util.ApplicationManagementUtil;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -86,7 +86,7 @@ import io.entgra.application.mgt.core.internal.DataHolder;
 import io.entgra.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
 import io.entgra.application.mgt.core.util.Constants;
-import io.entgra.application.mgt.core.util.StorageManagementUtil;
+import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
@@ -600,16 +600,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
      */
     private String generateMD5OfApp(ApplicationArtifact applicationArtifact, byte[] content) throws ApplicationManagementException {
         try {
-            String md5OfApp = StorageManagementUtil.getMD5(new ByteArrayInputStream(content));
+            ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
+            String md5OfApp = applicationStorageManager.getMD5(new ByteArrayInputStream(content));
             if (md5OfApp == null) {
                 String msg = "Error occurred while generating md5sum value of " + applicationArtifact.getInstallerName();
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
             return md5OfApp;
-        } catch( ApplicationStorageManagementException e) {
+        } catch(StorageManagementException e) {
             String msg = "Error occurred while generating md5sum value of " + applicationArtifact.getInstallerName();
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
     }
@@ -689,7 +690,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         log.error(msg);
                         throw new ApplicationManagementException(msg);
                     }
-                    String md5OfApp = StorageManagementUtil.getMD5(new ByteArrayInputStream(content));
+                    String md5OfApp = applicationStorageManager.getMD5(new ByteArrayInputStream(content));
                     if (md5OfApp == null) {
                         String msg = "Error occurred while md5sum value retrieving process: application UUID "
                                 + applicationReleaseDTO.getUuid();
@@ -708,6 +709,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         applicationStorageManager
                                 .uploadReleaseArtifact(applicationReleaseDTO, deviceType, binaryDuplicate, tenantId);
                     }
+                } catch (StorageManagementException e) {
+                    String msg = "Error occurred while md5sum value retrieving process: application UUID "
+                            + applicationReleaseDTO.getUuid();
+                    log.error(msg, e);
+                    throw new ApplicationStorageManagementException(msg, e);
                 } catch (DBConnectionException e) {
                     String msg = "Error occurred when getting database connection for verifying app release data.";
                     log.error(msg, e);
@@ -752,7 +758,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
 
             try (ByteArrayInputStream binaryClone = new ByteArrayInputStream(content)) {
-                String md5OfApp = StorageManagementUtil.getMD5(binaryClone);
+                String md5OfApp = applicationStorageManager.getMD5(binaryClone);
 
                 if (md5OfApp == null) {
                     String msg = "Error occurred while retrieving md5sum value from the binary file for application "
@@ -818,6 +824,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     }
                 }
             }
+        } catch (StorageManagementException e) {
+            String msg = "Error occurred while retrieving md5sum value from the binary file for application "
+                    + "release UUID " + applicationReleaseDTO.getUuid();
+            log.error(msg, e);
+            throw new ApplicationStorageManagementException(msg, e);
         } catch (IOException e) {
             String msg = "Error occurred when getting byte array of binary file. Installer name: " + applicationArtifact
                     .getInstallerName();
@@ -2162,9 +2173,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
-    
+
     public ApplicationRelease changeLifecycleState(ApplicationReleaseDTO applicationReleaseDTO, LifecycleChanger lifecycleChanger) throws ApplicationManagementException {
-    
+
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (lifecycleChanger == null || StringUtils.isEmpty(lifecycleChanger.getAction())) {
@@ -2172,7 +2183,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new BadRequestException(msg);
         }
-        
+
         try{
             if (lifecycleStateManager
                     .isValidStateChange(applicationReleaseDTO.getCurrentState(), lifecycleChanger.getAction(), userName,
@@ -3254,7 +3265,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 try {
                     byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
                     try (ByteArrayInputStream binaryClone = new ByteArrayInputStream(content)) {
-                        String md5OfApp = StorageManagementUtil.getMD5(binaryClone);
+                        String md5OfApp = applicationStorageManager.getMD5(binaryClone);
                         if (md5OfApp == null) {
                             String msg = "Error occurred while retrieving md5sum value from the binary file for "
                                     + "application release UUID " + applicationReleaseDTO.get().getUuid();
@@ -3300,6 +3311,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             }
                         }
                     }
+                } catch (StorageManagementException e) {
+                    String msg = "Error occurred while retrieving md5sum value from the binary file for "
+                            + "application release UUID " + applicationReleaseDTO.get().getUuid();
+                    log.error(msg, e);
+                    throw new ApplicationStorageManagementException(msg, e);
                 } catch (IOException e) {
                     String msg = "Error occurred when getting byte array of binary file. Installer name: "
                             + applicationArtifact.getInstallerName();

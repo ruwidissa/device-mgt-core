@@ -16,16 +16,12 @@
  * under the License.
  */
 
-package io.entgra.application.mgt.core.util;
+package org.wso2.carbon.device.mgt.core.common.util;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.application.mgt.common.ImageArtifact;
-import io.entgra.application.mgt.common.exception.ApplicationStorageManagementException;
-import io.entgra.application.mgt.common.exception.ResourceManagementException;
+import org.wso2.carbon.device.mgt.common.Base64File;
+import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,14 +43,13 @@ public class StorageManagementUtil {
      * This method is responsible for creating artifact parent directories in the given path.
      *
      * @param artifactDirectoryPath Path for the artifact directory.
-     * @throws ResourceManagementException Resource Management Exception.
      */
-    public static void createArtifactDirectory(String artifactDirectoryPath) throws ResourceManagementException {
+    public static void createArtifactDirectory(String artifactDirectoryPath) throws StorageManagementException {
         File artifactDirectory = new File(artifactDirectoryPath);
 
         if (!artifactDirectory.exists() && !artifactDirectory.mkdirs()) {
-                throw new ResourceManagementException(
-                        "Cannot create directories in the path to save the application related artifacts");
+                throw new StorageManagementException(
+                        "Cannot create directories in the path: " + artifactDirectoryPath);
         }
     }
 
@@ -103,20 +98,13 @@ public class StorageManagementUtil {
     }
 
     /**
-     * To create {@link ImageArtifact}.
+     * To save a bas64 string of a file in a given location.
      *
-     * @param imageFile         Image File.
-     * @param imageArtifactPath Path of the image artifact file.
-     * @return Image Artifact.
-     * @throws IOException IO Exception.
+     * @param base64File {@link Base64File} of the file.
      */
-    public static ImageArtifact createImageArtifact(File imageFile, String imageArtifactPath) throws IOException {
-        ImageArtifact imageArtifact = new ImageArtifact();
-        imageArtifact.setName(imageFile.getName());
-        imageArtifact.setType(Files.probeContentType(imageFile.toPath()));
-        byte[] imageBytes = IOUtils.toByteArray(new FileInputStream(imageArtifactPath));
-        imageArtifact.setEncodedImage(Base64.encodeBase64URLSafeString(imageBytes));
-        return imageArtifact;
+    public static void saveFile(Base64File base64File, String path) throws IOException {
+        InputStream inputStream = FileUtil.base64ToInputStream(base64File.getBase64String());
+        saveFile(inputStream, path);
     }
 
     /***
@@ -137,17 +125,5 @@ public class StorageManagementUtil {
             log.error(msg, e);
             throw new IOException(msg, e);
         }
-    }
-
-    public static String getMD5(InputStream binaryFile) throws ApplicationStorageManagementException {
-        String md5;
-        try {
-            md5 = DigestUtils.md5Hex(binaryFile);
-        } catch (IOException e) {
-            String msg = "IO Exception occurred while trying to get the md5sum value of application";
-            log.error(msg, e);
-            throw new ApplicationStorageManagementException(msg, e);
-        }
-        return md5;
     }
 }
