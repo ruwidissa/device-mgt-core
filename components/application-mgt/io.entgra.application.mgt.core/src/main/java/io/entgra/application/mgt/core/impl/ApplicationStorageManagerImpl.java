@@ -115,7 +115,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             log.error(msg, e);
             throw new ApplicationStorageManagementException(msg, e);
         } catch (StorageManagementException e) {
-            String msg = "Error occurred while uploading image artifacts"
+            String msg = "Error occurred while uploading image artifacts. UUID: "
                     + applicationReleaseDTO.getUuid();
             log.error(msg, e);
             throw new ResourceManagementException(msg, e);
@@ -167,7 +167,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             log.error(msg, e);
             throw new ResourceManagementException( msg, e);
         } catch (StorageManagementException e) {
-            String msg = "Error occurred while uploading image artifacts"
+            String msg = "Error occurred while uploading image artifacts. UUID: "
                     + applicationReleaseDTO.getUuid();
             log.error(msg, e);
             throw new ResourceManagementException(msg, e);
@@ -301,14 +301,12 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
     @Override
     public String getMD5(InputStream inputStream) throws StorageManagementException {
-        String md5;
         try {
-            md5 = DigestUtils.md5Hex(inputStream);
+            return DigestUtils.md5Hex(inputStream);
         } catch (IOException e) {
             String msg = "IO Exception occurred while trying to get the md5sum value of application";
             log.error(msg, e);
             throw new StorageManagementException(msg, e);
         }
-        return md5;
     }
 }

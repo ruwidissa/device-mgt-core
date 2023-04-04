@@ -162,7 +162,6 @@ public class MetadataServiceImpl implements MetadataService {
             Response.ResponseBuilder response = Response
                     .ok(binaryDuplicate, MediaType.APPLICATION_OCTET_STREAM);
             response.status(Response.Status.OK);
-//            response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             response.header("Content-Length", content.length);
             return response.build();
         } catch (IOException e) {
@@ -171,5 +170,4 @@ public class MetadataServiceImpl implements MetadataService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
-
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *  Copyright (c) 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  *  Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -59,8 +59,7 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
             FileResponse fileResponse = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelFavicon(tenantDomain);
             return sendFileStream(fileResponse);
         } catch (NotFoundException e) {
-            String msg = "Favicon white label image cannot be found in the system. Updating the whitelabel theme might" +
-                    "help restore it";
+            String msg = "Favicon white label image cannot be found in the system. Uploading the favicon white label image again might help solve the issue.";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
@@ -78,8 +77,7 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
             FileResponse fileResponse = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelLogo(tenantDomain);
             return sendFileStream(fileResponse);
         } catch (NotFoundException e) {
-            String msg = "Logo white label image cannot be found in the system. Updating the whitelabel theme might" +
-                    "help restore it";
+            String msg = "Logo white label image cannot be found in the system. Uploading the logo white label image again might help solve the issue.";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {
@@ -97,8 +95,7 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
             FileResponse fileResponse = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelLogoIcon(tenantDomain);
             return sendFileStream(fileResponse);
         } catch (NotFoundException e) {
-            String msg = "Logo white label image cannot be found in the system. Updating the whitelabel theme might" +
-                    "help restore it";
+            String msg = "Icon white label image cannot be found in the system. Uploading the icon white label image again might help solve the issue.";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (MetadataManagementException e) {

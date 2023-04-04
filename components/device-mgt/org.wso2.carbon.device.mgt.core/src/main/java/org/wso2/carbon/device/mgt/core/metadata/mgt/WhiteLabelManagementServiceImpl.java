@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *  Copyright (c) 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  *  Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -439,7 +439,7 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
             Metadata metadata =  metadataDAO.getMetadata(tenantId, MetadataConstants.WHITELABEL_META_KEY);
             if (metadata == null) {
                 String msg = "Whitelabel theme not found for tenant: " + tenantId;
-                log.debug(msg);
+                log.error(msg);
                 throw new NotFoundException(msg);
             }
             return new Gson().fromJson(metadata.getMetaValue(), WhiteLabelTheme.class);
