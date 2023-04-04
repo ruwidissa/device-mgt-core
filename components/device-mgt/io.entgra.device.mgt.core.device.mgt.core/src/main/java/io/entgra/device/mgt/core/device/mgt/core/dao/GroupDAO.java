@@ -23,6 +23,7 @@ import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.ReportManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,21 @@ public interface GroupDAO {
      */
     int addGroup(DeviceGroup deviceGroup, int tenantId) throws GroupManagementDAOException;
 
+
+    /**
+     * Add properties for device group.
+     * Note that groupId parameter is considered seperately due to the groupId parameter passed with
+     * device group Payload is ignored in the add/update logic instead the internal groupId reference is used.
+     *
+     * @param groups to be added.
+     * @param tenantId    of the group.
+     * @return sql execution result.
+     * @throws GroupManagementDAOException
+     */
+    int addGroupWithRoles(DeviceGroupRoleWrapper groups, int tenantId) throws GroupManagementDAOException;
+
+
+
     /**
      * Add properties for device group.
      * Note that groupId parameter is considered seperately due to the groupId parameter passed with
@@ -51,7 +67,21 @@ public interface GroupDAO {
      * @return sql execution result.
      * @throws GroupManagementDAOException
      */
+
     boolean addGroupProperties(DeviceGroup deviceGroup, int groupId, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Update properties for device group.
+     * Note that groupId parameter is considered seperately due to the groupId parameter passed with
+     * device group Payload is ignored in the add/update logic instead the internal groupId reference is used.
+     *
+     * @param groups to be updated.
+     * @param tenantId    of the group.
+     * @return sql execution result.
+     * @throws GroupManagementDAOException
+     */
+
+    boolean addGroupPropertiesWithRoles(DeviceGroupRoleWrapper groups, int groupId, int tenantId) throws GroupManagementDAOException;
 
     /**
      * Update properties for device group.

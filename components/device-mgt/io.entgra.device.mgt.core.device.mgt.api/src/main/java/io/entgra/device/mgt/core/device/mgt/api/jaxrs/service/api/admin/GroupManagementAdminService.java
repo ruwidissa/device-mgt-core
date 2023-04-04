@@ -36,9 +36,16 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
-
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
 import javax.validation.Valid;
-import javax.ws.rs.*;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -367,5 +374,80 @@ public interface GroupManagementAdminService {
             value = "Define the group object with data.",
             required = true)
                          @Valid DeviceGroup group);
+
+
+
+    @POST
+    @Path("/roles/share")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HTTPConstants.HEADER_POST,
+            value = "Consolidated API for Creating a Device Group, Adding Devices, and Sharing",
+            notes = "This API can be used to create a new device group, add devices to the group, and share the group with user roles.",
+            tags = "Device Group Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:add")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "Created. \n Device group has successfully been created.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Location",
+                                            description = "The URL of the created group."),
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body."),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource has been modified the last time.\n" +
+                                                    "Used by caches, or in conditional requests.")
+                            }
+                    ),
+                    @ApiResponse(
+                            code = 303,
+                            message = "See Other. \n Source can be retrieved from the URL specified at the Location " +
+                                    "header.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Location",
+                                            description = "The Source URL of the document.")}),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 401,
+                            message = "Unauthorized. \n Current logged in user is not authorized to perform the operation.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Group not found.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 406,
+                            message = "Not Acceptable.\n The requested media type is not supported."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred while creating the group or adding devices or sharing the group.",
+                            response = ErrorResponse.class)
+            })
+    Response createGroupWithRoles(@ApiParam(
+            name = "group",
+            value = "Define the group object with data.",
+            required = true)
+                                  @Valid DeviceGroupRoleWrapper group
+
+    );
 
 }

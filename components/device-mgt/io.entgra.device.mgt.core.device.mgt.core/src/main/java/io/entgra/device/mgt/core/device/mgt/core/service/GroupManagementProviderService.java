@@ -23,12 +23,7 @@ import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceTypesOfGroups;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.*;
 
 import java.util.List;
 
@@ -47,6 +42,17 @@ public interface GroupManagementProviderService {
      */
     void createGroup(DeviceGroup deviceGroup, String defaultRole,
                      String[] defaultPermissions) throws GroupManagementException, GroupAlreadyExistException;
+
+    /**
+     * Add new device group and create default role with default permissions.
+     *
+     * @param groups        to add
+     * @param defaultRole        of the deviceGroup
+     * @param defaultPermissions of the default role
+     * @throws GroupManagementException
+     */
+    void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole,
+                              String[] defaultPermissions )throws GroupManagementException, GroupAlreadyExistException, RoleDoesNotExistException;
 
     /**
      * Update existing device group.

@@ -17,21 +17,25 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.GroupManagementAdminService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -144,4 +148,30 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
             return Response.status(Response.Status.CONFLICT).entity(msg).build();
         }
     }
+    @POST
+    @Path("/roles/share")
+    @Override
+    public Response createGroupWithRoles(DeviceGroupRoleWrapper group) {
+        String owner = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        if (group == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        group.setOwner(owner);
+        group.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
+        try {
+            DeviceMgtAPIUtils.getGroupManagementProviderService().createGroupWithRoles(group, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS);
+            DeviceMgtAPIUtils.getGroupManagementProviderService().manageGroupSharing(group.getGroupId(), group.getUserRoles());
+            return Response.status(Response.Status.CREATED).build();
+        } catch (GroupManagementException e) {
+            String msg = "Error occurred while adding new group.";
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (GroupAlreadyExistException e) {
+            String msg = "Group already exists with name : " + group.getName() + ".";
+            return Response.status(Response.Status.CONFLICT).entity(msg).build();
+        } catch (RoleDoesNotExistException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
 }
+

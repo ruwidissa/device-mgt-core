@@ -18,6 +18,20 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.service;
 
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceTypesOfGroups;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.dao.GroupDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,14 +47,6 @@ import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TrackerAlreadyExistException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceTypesOfGroups;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.*;
 import io.entgra.device.mgt.core.device.mgt.core.event.config.GroupAssignmentEventOperationExecutor;
 import io.entgra.device.mgt.core.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
@@ -57,7 +63,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -139,6 +144,68 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
         if (log.isDebugEnabled()) {
             log.debug("DeviceGroup added: " + deviceGroup.getName());
+        }
+    }
+
+
+    public void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole, String[] defaultPermissions)
+            throws GroupManagementException, GroupAlreadyExistException {
+        if (groups == null) {
+            String msg = "Received incomplete data for createGroup";
+            log.error(msg);
+            throw new GroupManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Creating group '" + groups.getName() + "'");
+        }
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            DeviceGroup existingGroup = this.groupDAO.getGroup(groups.getName(), tenantId);
+            if (existingGroup == null) {
+                if (groups.getParentGroupId() == 0) {
+                    groups.setParentPath(DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
+                } else {
+                    DeviceGroup immediateParentGroup = groupDAO.getGroup(groups.getParentGroupId(), tenantId);
+                    if (immediateParentGroup == null) {
+                        String msg = "Parent group with group ID '" + groups.getParentGroupId()
+                                + "' does not exist.  Hence creating of group '" + groups.getName()
+                                + "' was not success";
+                        log.error(msg);
+                        throw new GroupManagementException(msg);
+                    }
+                    String parentPath = DeviceManagerUtil.createParentPath(immediateParentGroup);
+                    groups.setParentPath(parentPath);
+                }
+                int updatedGroupID = this.groupDAO.addGroupWithRoles(groups, tenantId);
+                if (groups.getGroupProperties() != null && groups.getGroupProperties().size() > 0) {
+                    this.groupDAO.addGroupPropertiesWithRoles(groups, updatedGroupID, tenantId);
+                }
+                GroupManagementDAOFactory.commitTransaction();
+            } else {
+                throw new GroupAlreadyExistException("Group exist with name " + groups.getName());
+            }
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while adding deviceGroup '" + groups.getName() + "' to database.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (GroupAlreadyExistException ex) {
+            throw ex;
+        } catch (Exception e) {
+            String msg = "Error occurred in creating group '" + groups.getName() + "'";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("DeviceGroup added: " + groups.getName());
         }
     }
 
