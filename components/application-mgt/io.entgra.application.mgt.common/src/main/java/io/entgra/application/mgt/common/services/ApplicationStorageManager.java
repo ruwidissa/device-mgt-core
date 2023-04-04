@@ -22,6 +22,7 @@ import io.entgra.application.mgt.common.dto.ApplicationReleaseDTO;
 import io.entgra.application.mgt.common.exception.ApplicationStorageManagementException;
 import io.entgra.application.mgt.common.exception.RequestValidatingException;
 import io.entgra.application.mgt.common.exception.ResourceManagementException;
+import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
 
 import java.io.InputStream;
 import java.util.List;
@@ -121,4 +122,14 @@ public interface ApplicationStorageManager {
      * @throws ApplicationStorageManagementException throws if an error occurs when accessing the file.
      */
     InputStream getFileStream(String deviceType, String tenantDomain) throws ApplicationStorageManagementException;
+
+    /**
+     * Useful to generate MD5 string of {@link InputStream}
+     *
+     * @param inputStream {@link InputStream}
+     * @return md5 string of provided input stream
+     *
+     * @throws StorageManagementException if errors while generating md5 string
+     */
+    String getMD5(InputStream inputStream) throws StorageManagementException;
 }

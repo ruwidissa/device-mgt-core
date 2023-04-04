@@ -40,6 +40,9 @@ public class DCRRequest {
     @XmlElement
     private boolean isSaasApp;
 
+    @XmlElement
+    private int validityPeriod;
+
     public String getApplicationName() {
         return applicationName;
     }
@@ -86,5 +89,13 @@ public class DCRRequest {
 
     public void setIsSaasApp(boolean saasApp) {
         isSaasApp = saasApp;
+    }
+
+    public int getValidityPeriod() {
+        return validityPeriod;
+    }
+
+    public void setValidityPeriod(int validityPeriod) {
+        this.validityPeriod = validityPeriod;
     }
 }

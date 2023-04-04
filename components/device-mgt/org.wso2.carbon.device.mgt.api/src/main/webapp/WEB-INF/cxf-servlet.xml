@@ -49,6 +49,7 @@
             <ref bean="swaggerResource"/>
             <ref bean="analyticsArtifactsManagementService"/>
             <ref bean="metadataService"/>
+            <ref bean="whitelabelService"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <ref bean="jsonProvider"/>
@@ -99,6 +100,7 @@
 	<bean id="jsonProvider" class="org.wso2.carbon.device.mgt.jaxrs.common.GsonMessageBodyHandler"/>
     <bean id="analyticsArtifactsManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.AnalyticsArtifactsManagementServiceImpl"/>
     <bean id="metadataService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.MetadataServiceImpl"/>
+    <bean id="whitelabelService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.WhiteLabelServiceImpl"/>
 
     <!--<bean id="errorHandler" class="org.wso2.carbon.device.mgt.jaxrs.common.ErrorHandler"/>-->
     <cxf:bus>

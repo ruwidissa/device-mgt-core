@@ -28,7 +28,7 @@ public class Artifacts {
     private String imageLocation;
     private String binaryLocation;
 
-    @XmlElement(name = "ImageLocation", required = true)
+    @XmlElement(name = "ImageLocationType", required = true)
     public String getImageLocation() {
         return imageLocation;
     }

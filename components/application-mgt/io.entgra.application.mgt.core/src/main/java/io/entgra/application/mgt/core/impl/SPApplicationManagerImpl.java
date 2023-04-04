@@ -49,6 +49,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -327,9 +328,7 @@ public class SPApplicationManagerImpl implements SPApplicationManager {
      * @throws BadRequestException if url is invalid
      */
     private void validateIdentityServerUrl(String url) throws BadRequestException {
-        String[] schemes = {"http","https"};
-        UrlValidator urlValidator = new UrlValidator(schemes, UrlValidator.ALLOW_LOCAL_URLS);
-        if (!urlValidator.isValid(url)) {
+        if (!HttpUtil.isHttpUrlValid(url)) {
             String msg = "Identity server url is not a valid url";
             log.error(msg);
             throw new BadRequestException(msg);

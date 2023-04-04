@@ -50,15 +50,12 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
 import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
+import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.Utils;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.MonitoringOperation;
-import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
+import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
@@ -74,6 +71,7 @@ import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementService;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
@@ -95,8 +93,11 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
+import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceStub;
+import org.wso2.carbon.event.receiver.core.EventReceiverService;
 import org.wso2.carbon.event.receiver.stub.EventReceiverAdminServiceStub;
+import org.wso2.carbon.event.stream.core.EventStreamService;
 import org.wso2.carbon.event.stream.stub.EventStreamAdminServiceStub;
 import org.wso2.carbon.identity.claim.metadata.mgt.dto.ClaimPropertyDTO;
 import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
@@ -111,11 +112,7 @@ import org.wso2.carbon.policy.mgt.common.PolicyMonitoringTaskException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.policy.mgt.core.task.TaskScheduleService;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.user.api.AuthorizationManager;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.api.UserRealm;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.api.*;
 import org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.common.UIPermissionNode;
@@ -128,11 +125,7 @@ import javax.net.ssl.TrustManagerFactory;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -172,8 +165,9 @@ public class DeviceMgtAPIUtils {
     private static KeyStore trustStore;
     private static char[] keyStorePassword;
 
-//    private static IntegrationClientService integrationClientService;
+    //    private static IntegrationClientService integrationClientService;
     private static MetadataManagementService metadataManagementService;
+    private static WhiteLabelManagementService whiteLabelManagementService;
     private static OTPManagementService otpManagementService;
 
     private static volatile SubscriptionManager subscriptionManager;
@@ -512,6 +506,28 @@ public class DeviceMgtAPIUtils {
     }
 
     /**
+     * Initializing and accessing method for WhiteLabelManagementService.
+     *
+     * @return WhiteLabelManagementService instance
+     * @throws IllegalStateException if whiteLabelManagementService cannot be initialized
+     */
+    public static WhiteLabelManagementService getWhiteLabelManagementService() {
+        if (whiteLabelManagementService == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (whiteLabelManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    whiteLabelManagementService = (WhiteLabelManagementService) ctx.getOSGiService(
+                            WhiteLabelManagementService.class, null);
+                    if (whiteLabelManagementService == null) {
+                        throw new IllegalStateException("Whitelabel Management service not initialized.");
+                    }
+                }
+            }
+        }
+        return whiteLabelManagementService;
+    }
+
+    /**
      * Initializing and accessing method for MetadataManagementService.
      *
      * @return MetadataManagementService instance
@@ -581,6 +597,36 @@ public class DeviceMgtAPIUtils {
         return geoService;
     }
 
+    public static EventStreamService getEventStreamService() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        EventStreamService
+                eventStreamService = (EventStreamService) ctx.getOSGiService(EventStreamService.class, null);
+        if (eventStreamService == null) {
+            throw new IllegalStateException("Event Stream Service has not been initialized.");
+        }
+        return eventStreamService;
+    }
+
+    public static EventReceiverService getEventReceiverService() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        EventReceiverService
+                eventReceiverService = (EventReceiverService) ctx.getOSGiService(EventReceiverService.class, null);
+        if (eventReceiverService == null) {
+            throw new IllegalStateException("Event Receiver Service has not been initialized.");
+        }
+        return eventReceiverService;
+    }
+
+    public static EventPublisherService getEventPublisherService() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        EventPublisherService
+                eventPublisherService = (EventPublisherService) ctx.getOSGiService(EventPublisherService.class, null);
+        if (eventPublisherService == null) {
+            throw new IllegalStateException("Event Receiver Service has not been initialized.");
+        }
+        return eventPublisherService;
+    }
+
     public static AnalyticsDataAPI getAnalyticsDataAPI() {
         PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         AnalyticsDataAPI analyticsDataAPI =
@@ -642,10 +688,13 @@ public class DeviceMgtAPIUtils {
 //        return eventsPublisherService;
 //    }
 
+    public static String getStreamDefinition(String deviceType, String tenantDomain, String eventName) {
+        return getStreamDefinition(deviceType, tenantDomain) + "." + eventName;
+    }
+
     public static String getStreamDefinition(String deviceType, String tenantDomain) {
         return STREAM_DEFINITION_PREFIX + tenantDomain + "." + deviceType.replace(" ", ".");
     }
-
     public static EventStreamAdminServiceStub getEventStreamAdminServiceStub()
             throws AxisFault, UserStoreException, JWTClientException {
         EventStreamAdminServiceStub eventStreamAdminServiceStub = new EventStreamAdminServiceStub(

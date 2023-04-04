@@ -48,7 +48,10 @@
     <context-param>
         <param-name>nonSecuredEndPoints</param-name>
         <param-value>
-            /api/device-mgt/v1.0/users/validate
+            /api/device-mgt/v1.0/users/validate,
+            /api/device-mgt/v1.0/whitelabel/.*/favicon,
+            /api/device-mgt/v1.0/whitelabel/.*/logo,
+            /api/device-mgt/v1.0/whitelabel/.*/icon,
         </param-value>
     </context-param>
 

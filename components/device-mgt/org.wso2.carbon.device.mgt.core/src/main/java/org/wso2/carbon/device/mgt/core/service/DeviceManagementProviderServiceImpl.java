@@ -198,6 +198,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private final ApplicationDAO applicationDAO;
     private MetadataDAO metadataDAO;
     private final DeviceStatusDAO deviceStatusDAO;
+    int count = 0;
 
     public DeviceManagementProviderServiceImpl() {
         this.pluginRepository = new DeviceManagementPluginRepository();
@@ -1552,6 +1553,25 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred in setEnrollmentInvitation";
             log.error(msg, ex);
             throw new DeviceManagementException(msg, ex);
+        }
+    }
+
+    @Override
+    public void sendEnrolmentGuide(String enrolmentGuide) throws DeviceManagementException {
+
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        String recipientMail = config.getEnrollmentGuideConfiguration().getMail();
+        Properties props = new Properties();
+        props.setProperty("mail-subject", "[Enrollment Guide Triggered] (#" + ++count + ")");
+        props.setProperty("enrollment-guide", enrolmentGuide);
+
+        try {
+            EmailMetaInfo metaInfo = new EmailMetaInfo(recipientMail, props);
+            sendEnrolmentInvitation(DeviceManagementConstants.EmailAttributes.ENROLLMENT_GUIDE_TEMPLATE, metaInfo);
+        } catch (ConfigurationManagementException e) {
+            String msg = "Error occurred while sending the mail.";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
         }
     }
 

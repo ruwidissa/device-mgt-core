@@ -17,7 +17,7 @@
 package io.entgra.application.mgt.common.services;
 
 import io.entgra.application.mgt.common.ApplicationType;
-import io.entgra.application.mgt.common.Base64File;
+import org.wso2.carbon.device.mgt.common.Base64File;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.application.mgt.common.exception.ResourceManagementException;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;

@@ -18,13 +18,11 @@
 package io.entgra.application.mgt.core.util;
 
 import io.entgra.application.mgt.common.ApplicationArtifact;
-import io.entgra.application.mgt.common.Base64File;
+import org.wso2.carbon.device.mgt.common.Base64File;
 import io.entgra.application.mgt.common.FileDataHolder;
 import io.entgra.application.mgt.common.dto.ApplicationDTO;
-import io.entgra.application.mgt.common.dto.ApplicationReleaseDTO;
 import io.entgra.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.application.mgt.common.exception.RequestValidatingException;
-import io.entgra.application.mgt.common.exception.ResourceManagementException;
 import io.entgra.application.mgt.common.services.SPApplicationManager;
 import io.entgra.application.mgt.common.wrapper.ApplicationWrapper;
 import io.entgra.application.mgt.common.wrapper.CustomAppReleaseWrapper;
