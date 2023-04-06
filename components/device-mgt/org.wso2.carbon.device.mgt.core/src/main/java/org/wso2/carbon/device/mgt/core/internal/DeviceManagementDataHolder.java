@@ -19,6 +19,7 @@
 package org.wso2.carbon.device.mgt.core.internal;
 
 import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
@@ -30,6 +31,7 @@ import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
+import org.wso2.carbon.device.mgt.common.spi.TraccarManagementService;
 import org.wso2.carbon.device.mgt.core.app.mgt.config.AppManagementConfig;
 import org.wso2.carbon.device.mgt.core.config.license.LicenseConfig;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
@@ -90,6 +92,7 @@ public class DeviceManagementDataHolder {
     private DeviceAPIClientService deviceAPIClientService;
     private MetadataManagementService metadataManagementService;
     private WhiteLabelManagementService whiteLabelManagementService;
+    private TraccarManagementService traccarManagementService;
 
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
@@ -357,7 +360,7 @@ public class DeviceManagementDataHolder {
             OperationTimeoutTaskManagerService operationTimeoutTaskManagerService) {
         this.operationTimeoutTaskManagerService = operationTimeoutTaskManagerService;
     }
-    
+
     public DeviceAPIClientService getDeviceAPIClientService() {
         return deviceAPIClientService;
     }
@@ -380,5 +383,21 @@ public class DeviceManagementDataHolder {
 
     public void setWhiteLabelManagementService(WhiteLabelManagementService whiteLabelManagementService) {
         this.whiteLabelManagementService = whiteLabelManagementService;
+    }
+
+    public TraccarManagementService getTraccarManagementService() {
+        TraccarManagementService traccarManagementService;
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        traccarManagementService = (TraccarManagementService) ctx.getOSGiService(
+                TraccarManagementService.class, null);
+        if (traccarManagementService == null) {
+            String msg = "Traccar management service not initialized.";
+            throw new IllegalStateException(msg);
+        }
+        return traccarManagementService;
+    }
+
+    public void setTraccarManagementService(TraccarManagementService traccarManagementService) {
+        this.traccarManagementService = traccarManagementService;
     }
 }
