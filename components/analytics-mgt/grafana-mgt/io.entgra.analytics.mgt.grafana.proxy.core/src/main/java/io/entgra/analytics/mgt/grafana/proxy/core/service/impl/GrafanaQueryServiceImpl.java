@@ -68,8 +68,23 @@ public class GrafanaQueryServiceImpl implements GrafanaQueryService {
             int datasourceId = datasourceIdJson.getAsInt();
             CacheManager cacheManager = CacheManager.getInstance();
             String encodedQuery = cacheManager.getEncodedQueryCache().getIfPresent(rawSql);
-            if (cacheManager.getEncodedQueryCache().getIfPresent(rawSql) != null) {
-                queryObj.addProperty(GrafanaConstants.RAW_SQL_KEY, encodedQuery);
+            if (encodedQuery != null && !encodedQuery.isEmpty()) {
+                // Checks if the tenant ID in the cached query (encodedQuery) is matching the current tenant ID
+                // taken from Carbon Context and if it's not matching then the query is modified with the current
+                // tenant ID and then added to the cache
+                if (encodedQuery.contains(GrafanaConstants.ENCODED_QUERY_TENANT_ID_KEY)) {
+                    String encodedQueryTenantId = GrafanaPreparedQueryBuilder.getEncodedQueryTenantId(encodedQuery);
+                    boolean isMatchingTenantId = GrafanaPreparedQueryBuilder.isMatchingTenantId(encodedQueryTenantId);
+                    if (isMatchingTenantId) {
+                        queryObj.addProperty(GrafanaConstants.RAW_SQL_KEY, encodedQuery);
+                    } else {
+                        String modifiedEncodedQuery = GrafanaPreparedQueryBuilder.modifyEncodedQuery(encodedQuery);
+                        CacheManager.getInstance().getEncodedQueryCache().put(rawSql, modifiedEncodedQuery);
+                        queryObj.addProperty(GrafanaConstants.RAW_SQL_KEY, modifiedEncodedQuery);
+                    }
+                } else {
+                    queryObj.addProperty(GrafanaConstants.RAW_SQL_KEY, encodedQuery);
+                }
                 return;
             }
             Datasource datasource = cacheManager.getDatasourceAPICache().getIfPresent(datasourceId);
