@@ -52,12 +52,15 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.DeviceManagementAdminService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
@@ -71,6 +74,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Path("/admin/devices")
@@ -147,7 +151,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
     @Path("/device-owner")
     public Response updateEnrollOwner(
             @QueryParam("owner") String owner,
-            List<String> deviceIdentifiers){
+            List<String> deviceIdentifiers) {
         try {
             if (DeviceMgtAPIUtils.getDeviceManagementService().updateEnrollment(owner, true, deviceIdentifiers)) {
                 String msg = "Device owner is updated successfully.";
@@ -165,7 +169,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (UserNotFoundException e) {
-            String msg = "Couldn't found the owner in user store to update the owner of devices.";
+            String msg = "Could not found the owner in user store to update the owner of devices.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
@@ -190,12 +194,10 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-        }
-        catch (InvalidDeviceException e) {
+        } catch (InvalidDeviceException e) {
             String msg = "Found Invalid devices";
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -205,7 +207,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
     public Response triggerCorrectiveActions(
             @PathParam("deviceId") String deviceIdentifier,
             @PathParam("featureCode") String featureCode,
-            List<String> actions){
+            List<String> actions) {
         DeviceManagementProviderService deviceManagementService = DeviceMgtAPIUtils.getDeviceManagementService();
         PlatformConfigurationManagementService platformConfigurationManagementService = DeviceMgtAPIUtils
                 .getPlatformConfigurationManagementService();
@@ -219,7 +221,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Bad request, can't proceed. Hence verify the request and re-try";
+            String msg = "Bad request, cannot proceed. Hence verify the request and re-try";
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (DeviceManagementException e) {
@@ -227,10 +229,57 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (DeviceNotFoundException e) {
-            String msg = "Couldn't find an device for device identifier: " + deviceIdentifier;
+            String msg = "Could not find an device";
             log.error(msg);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
         return Response.status(Response.Status.OK).entity("Triggered action successfully").build();
+    }
+
+    @GET
+    @Override
+    @Path("/billing")
+    public Response getBilling(
+            @QueryParam("tenantDomain") String tenantDomain,
+            @QueryParam("startDate") Timestamp startDate,
+            @QueryParam("endDate") Timestamp endDate) {
+        try {
+            PaginationResult result;
+            int tenantId = 0;
+            RealmService realmService = DeviceMgtAPIUtils.getRealmService();
+
+            int tenantIdContext = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+            if (!tenantDomain.isEmpty()) {
+                tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+            }
+            if (tenantIdContext != MultitenantConstants.SUPER_TENANT_ID && tenantIdContext != tenantId) {
+                String msg = "Current logged in user is not authorized to  access billing details of other tenants";
+                log.error(msg);
+                return Response.status(Response.Status.UNAUTHORIZED).entity(msg).build();
+            } else {
+                DeviceList devices = new DeviceList();
+                DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+                result = dms.createBillingFile(tenantId, tenantDomain, startDate, endDate);
+                devices.setList((List<Device>) result.getData());
+                devices.setDeviceCount(result.getTotalDeviceCount());
+                devices.setMessage(result.getMessage());
+                devices.setTotalCost(result.getTotalCost());
+                devices.setBillPeriod(startDate.toString() + " - " + endDate.toString());
+                return Response.status(Response.Status.OK).entity(devices).build();
+            }
+        } catch (BadRequestException e) {
+            String msg = "Bad request, can't proceed. Hence verify the request and re-try";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retrieving billing data";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while processing tenant configuration.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
     }
 }

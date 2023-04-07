@@ -26,11 +26,14 @@ import org.wso2.carbon.device.mgt.common.exceptions.UnsupportedDatabaseEngineExc
 import org.wso2.carbon.policy.mgt.core.config.datasource.DataSourceConfig;
 import org.wso2.carbon.policy.mgt.core.config.datasource.JNDILookupDefinition;
 import org.wso2.carbon.policy.mgt.core.dao.impl.MonitoringDAOImpl;
-import org.wso2.carbon.policy.mgt.core.dao.impl.PolicyDAOImpl;
 import org.wso2.carbon.policy.mgt.core.dao.impl.ProfileDAOImpl;
 import org.wso2.carbon.policy.mgt.core.dao.impl.feature.GenericFeatureDAOImpl;
 import org.wso2.carbon.policy.mgt.core.dao.impl.feature.OracleServerFeatureDAOImpl;
 import org.wso2.carbon.policy.mgt.core.dao.impl.feature.SQLServerFeatureDAOImpl;
+import org.wso2.carbon.policy.mgt.core.dao.impl.policy.GenericPolicyDAOImpl;
+import org.wso2.carbon.policy.mgt.core.dao.impl.policy.OraclePolicyDAOImpl;
+import org.wso2.carbon.policy.mgt.core.dao.impl.policy.PostgreSQLPolicyDAOImpl;
+import org.wso2.carbon.policy.mgt.core.dao.impl.policy.SQLServerPolicyDAOImpl;
 import org.wso2.carbon.policy.mgt.core.dao.util.PolicyManagementDAOUtil;
 
 import javax.sql.DataSource;
@@ -65,7 +68,22 @@ public class PolicyManagementDAOFactory {
     }
 
     public static PolicyDAO getPolicyDAO() {
-        return new PolicyDAOImpl();
+        if (databaseEngine != null) {
+            switch (databaseEngine) {
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerPolicyDAOImpl();
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_ORACLE:
+                    return new OraclePolicyDAOImpl();
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                    return new PostgreSQLPolicyDAOImpl();
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MYSQL:
+                    return new GenericPolicyDAOImpl();
+                default:
+                    throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
+            }
+        }
+        throw new IllegalStateException("Database engine has not initialized properly.");
     }
 
     public static ProfileDAO getProfileDAO() {

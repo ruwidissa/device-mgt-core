@@ -58,6 +58,7 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
@@ -76,6 +77,7 @@ import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagement
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
+import org.wso2.carbon.device.mgt.core.cache.BillingCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.GeoCacheKey;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
@@ -137,6 +139,7 @@ public final class DeviceManagerUtil {
     public static final String GENERAL_CONFIG_RESOURCE_PATH = "general";
 
     private  static boolean isDeviceCacheInitialized = false;
+    private  static boolean isBillingCacheInitialized = false;
     private  static boolean isAPIResourcePermissionCacheInitialized = false;
     private static boolean isGeoFenceCacheInitialized = false;
 
@@ -653,6 +656,47 @@ public final class DeviceManagerUtil {
     }
 
     /**
+     * Enable Billing caching according to the configurations provided by cdm-config.xml
+     */
+    public static void initializeBillingCache() {
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        int billingCacheExpiry = config.getBillingCacheConfiguration().getExpiryTime();
+        long billingCacheCapacity = config.getBillingCacheConfiguration().getCapacity();
+        CacheManager manager = getCacheManager();
+        if (config.getBillingCacheConfiguration().isEnabled()) {
+            if(!isBillingCacheInitialized) {
+                isBillingCacheInitialized = true;
+                if (manager != null) {
+                    if (billingCacheExpiry > 0) {
+                        manager.<BillingCacheKey, PaginationResult>createCacheBuilder(DeviceManagementConstants.BILLING_CACHE).
+                                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                                        billingCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
+                                        Duration(TimeUnit.SECONDS, billingCacheExpiry)).setStoreByValue(true).build();
+                        if(billingCacheCapacity > 0 ) {
+                            ((CacheImpl) manager.<BillingCacheKey, PaginationResult>getCache(DeviceManagementConstants.BILLING_CACHE)).
+                                    setCapacity(billingCacheCapacity);
+                        }
+                    } else {
+                        manager.<BillingCacheKey, PaginationResult>getCache(DeviceManagementConstants.BILLING_CACHE);
+                    }
+                } else {
+                    if (billingCacheExpiry > 0) {
+                        Caching.getCacheManager().
+                                        <BillingCacheKey, PaginationResult>createCacheBuilder(DeviceManagementConstants.BILLING_CACHE).
+                                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                                        billingCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
+                                        Duration(TimeUnit.SECONDS, billingCacheExpiry)).setStoreByValue(true).build();
+                        ((CacheImpl)(manager.<BillingCacheKey, PaginationResult>getCache(DeviceManagementConstants.BILLING_CACHE))).
+                                setCapacity(billingCacheCapacity);
+                    } else {
+                        Caching.getCacheManager().<BillingCacheKey, PaginationResult>getCache(DeviceManagementConstants.BILLING_CACHE);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Enable Geofence caching according to the configurations proviced by cdm-config.xml
      */
     public static void initializeGeofenceCache() {
@@ -709,6 +753,28 @@ public final class DeviceManagerUtil {
             }
         }
         return deviceCache;
+    }
+
+    /**
+     * Get billing cache object
+     * @return {@link Cache<BillingCacheKey, PaginationResult>}
+     */
+    public static Cache<BillingCacheKey, PaginationResult> getBillingCache() {
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        CacheManager manager = getCacheManager();
+        Cache<BillingCacheKey, PaginationResult> billingCache = null;
+        if (config.getBillingCacheConfiguration().isEnabled()) {
+            if(!isBillingCacheInitialized) {
+                initializeBillingCache();
+            }
+            if (manager != null) {
+                billingCache = manager.getCache(DeviceManagementConstants.BILLING_CACHE);
+            } else {
+                billingCache =  Caching.getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER)
+                        .getCache(DeviceManagementConstants.BILLING_CACHE);
+            }
+        }
+        return billingCache;
     }
 
     /**

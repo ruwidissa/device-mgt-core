@@ -33,8 +33,6 @@ public interface EnrollmentDAO {
 
     boolean updateEnrollmentStatus(List<EnrolmentInfo> enrolmentInfos) throws DeviceManagementDAOException;
 
-    boolean updateEnrollmentLastBilledDate(EnrolmentInfo enrolmentInfos, Timestamp lastBilledDate, int tenantId) throws DeviceManagementDAOException;
-
     int removeEnrollment(int deviceId, String currentOwner, int tenantId) throws DeviceManagementDAOException;
 
     @Deprecated

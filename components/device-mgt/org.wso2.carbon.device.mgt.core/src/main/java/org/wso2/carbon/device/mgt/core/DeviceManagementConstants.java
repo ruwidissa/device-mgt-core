@@ -44,6 +44,7 @@ public final class DeviceManagementConstants {
     public static final String DEVICE_CACHE = "DEVICE_CACHE";
     public static final String API_RESOURCE_PERMISSION_CACHE = "API_RESOURCE_CACHE_CACHE";
     public static final String GEOFENCE_CACHE = "GEOFENCE_CACHE";
+    public static final String BILLING_CACHE = "BILLING_CACHE";
     public static final String META_KEY = "PER_DEVICE_COST";
     public static final String ACTIVE_STATUS = "ACTIVE";
     public static final String ENROLLMENT_NOTIFICATION_API_ENDPOINT = "/api/device-mgt/enrollment-notification";
@@ -131,9 +132,11 @@ public final class DeviceManagementConstants {
         public static final String USER_REGISTRATION_TEMPLATE = "user-registration";
         public static final String USER_ENROLLMENT_TEMPLATE = "user-enrollment";
         public static final String USER_VERIFY_TEMPLATE = "user-verify";
+        public static final String PRODUCT_DOWNLOAD_LINK_SHARING_TEMPLATE = "share-product-download-url";
         public static final String POLICY_VIOLATE_TEMPLATE = "policy-violating-notifier";
         public static final String USER_WELCOME_TEMPLATE = "user-welcome";
         public static final String DEFAULT_ENROLLMENT_TEMPLATE = "default-enrollment-invitation";
+        public static final String ENROLLMENT_GUIDE_TEMPLATE = "enrollment-guide";
     }
 
     public static final class OperationAttributes {

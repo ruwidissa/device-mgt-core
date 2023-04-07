@@ -157,10 +157,8 @@ public class UserManagementServiceImpl implements UserManagementService {
                             " already exists. Therefore, request made to add user was refused.");
                 }
                 // returning response with bad request state
-                return Response.status(Response.Status.CONFLICT).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("User by username: " +
-                                userInfo.getUsername() + " already exists. Therefore, request made to add user " +
-                                "was refused.").build()).build();
+                String msg = "User by username: " + userInfo.getUsername() + " already exists. Try with another username." ;
+                return Response.status(Response.Status.CONFLICT).entity(msg).build();
             }
 
             String initialUserPassword;
@@ -290,9 +288,8 @@ public class UserManagementServiceImpl implements UserManagementService {
                 if (log.isDebugEnabled()) {
                     log.debug("User by username: " + username + " does not exist.");
                 }
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage(
-                                "User doesn't exist.").build()).build();
+                String msg = "User by username: " + username + " does not exist.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
 
             BasicUserInfo user = this.getBasicUserInfo(username);
@@ -318,9 +315,8 @@ public class UserManagementServiceImpl implements UserManagementService {
                     log.debug("User by username: " + username +
                             " doesn't exists. Therefore, request made to update user was refused.");
                 }
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("User by username: " +
-                                username + " doesn't  exist.").build()).build();
+                String msg = "User by username: " + username + " does not exist.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
 
             Map<String, String> defaultUserClaims =
@@ -396,9 +392,8 @@ public class UserManagementServiceImpl implements UserManagementService {
                 if (log.isDebugEnabled()) {
                     log.debug("User by username: " + username + " does not exist for removal.");
                 }
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("User '" +
-                                username + "' does not exist for removal.").build()).build();
+                String msg = "User by username: " + username + " does not exist for removal.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
             // Un-enroll all devices for the user
             DeviceManagementProviderService deviceManagementService = DeviceMgtAPIUtils.getDeviceManagementService();
@@ -430,9 +425,8 @@ public class UserManagementServiceImpl implements UserManagementService {
                 if (log.isDebugEnabled()) {
                     log.debug("User by username: " + username + " does not exist for role retrieval.");
                 }
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("User by username: " + username +
-                                " does not exist for role retrieval.").build()).build();
+                String msg = "User by username: " + username + " does not exist for role retrieval.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
 
             RoleList result = new RoleList();
@@ -867,8 +861,8 @@ public class UserManagementServiceImpl implements UserManagementService {
             try {
                 ifSinceDate = format.parse(ifModifiedSince);
             } catch (ParseException e) {
-                return Response.status(400).entity(new ErrorResponse.ErrorResponseBuilder()
-                        .setMessage("Invalid date string is provided in 'If-Modified-Since' header").build()).build();
+                String msg = "Invalid date string is provided in [If-Modified-Since] header";
+                return Response.status(400).entity(msg).build();
             }
             ifModifiedSinceTimestamp = ifSinceDate.getTime();
             isIfModifiedSinceSet = true;
@@ -879,8 +873,8 @@ public class UserManagementServiceImpl implements UserManagementService {
             try {
                 sinceDate = format.parse(since);
             } catch (ParseException e) {
-                return Response.status(400).entity(new ErrorResponse.ErrorResponseBuilder()
-                        .setMessage("Invalid date string is provided in 'since' filter").build()).build();
+                String msg = "Invalid date string is provided in [since] filter";
+                return Response.status(400).entity(msg).build();
             }
             sinceTimestamp = sinceDate.getTime();
             timestamp = sinceTimestamp / 1000;
@@ -1094,8 +1088,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             if (!userStoreManager.isExistingUser(username)) {
                 String message = "User by username: " + username + " does not exist for permission retrieval.";
                 log.error(message);
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(message).build()).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(message).build();
             }
             // Get a list of roles which the user assigned to
             List<String> roles = getFilteredRoles(userStoreManager, username);

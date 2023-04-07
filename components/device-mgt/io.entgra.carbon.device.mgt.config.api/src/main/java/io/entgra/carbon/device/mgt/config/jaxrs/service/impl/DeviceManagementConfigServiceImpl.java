@@ -91,9 +91,7 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             if (properties == null || properties.isEmpty()) {
                 String msg = "Devices configuration retrieval criteria cannot be null or empty.";
                 log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()
-                ).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
 
             ObjectMapper mapper = new ObjectMapper();
@@ -113,18 +111,15 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (DeviceNotFoundException e) {
             log.warn(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(e.getMessage()).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (AmbiguousConfigurationException e) {
             String msg = "Configurations are ambiguous. " + e.getMessage();
             log.warn(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (JsonParseException | JsonMappingException e) {
             String msg = "Malformed device property structure";
             log.error(msg.concat(" ").concat(properties), e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (IOException e) {
             String msg = "Error occurred while parsing query param JSON data.";
             log.error(msg.concat(" ").concat(properties), e);
@@ -150,8 +145,7 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             if (devicesTransferred.isEmpty()) {
                 String msg = "Devices are not enrolled to super tenant";
                 log.warn(msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             } else {
                 return Response.status(Response.Status.OK).entity(devicesTransferred).build();
             }
@@ -163,8 +157,7 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (DeviceNotFoundException e) {
             log.error(e.getMessage(), e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(e.getMessage()).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 

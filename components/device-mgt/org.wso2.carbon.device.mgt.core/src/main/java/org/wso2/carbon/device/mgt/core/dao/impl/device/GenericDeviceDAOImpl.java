@@ -84,7 +84,6 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "e.IS_TRANSFERRED, " +
                     "e.DATE_OF_LAST_UPDATE, " +
                     "e.DATE_OF_ENROLMENT, " +
-                    "e.LAST_BILLED_DATE, " +
                     "e.ID AS ENROLMENT_ID " +
                     "FROM DM_ENROLMENT e, " +
                     "(SELECT d.ID, " +
@@ -188,6 +187,169 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         }
     }
 
+    @Override
+    public List<Device> getNonRemovedYearlyDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate)
+            throws DeviceManagementDAOException {
+        List<Device> devices = new ArrayList<>();
+        try {
+            Connection conn = getConnection();
+            String sql = "SELECT d.ID AS DEVICE_ID, " +
+                    "DEVICE_IDENTIFICATION, " +
+                    "DESCRIPTION, " +
+                    "NAME, " +
+                    "DATE_OF_ENROLMENT, " +
+                    "STATUS, " +
+                    "DATE_OF_LAST_UPDATE, " +
+                    "TIMESTAMPDIFF(DAY, ?, DATE_OF_ENROLMENT) as DAYS_SINCE_ENROLLED " +
+                    "FROM DM_DEVICE d, DM_ENROLMENT e " +
+                    "WHERE " +
+                    "e.TENANT_ID=? AND " +
+                    "d.ID=e.DEVICE_ID AND " +
+                    "STATUS !='REMOVED' AND " +
+                    "(" +
+                    "DATE_OF_ENROLMENT BETWEEN ? AND ? " +
+                    ")";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, String.valueOf(endDate));
+                stmt.setInt(2, tenantId);
+                stmt.setString(3, String.valueOf(startDate));
+                stmt.setString(4, String.valueOf(endDate));
+                ResultSet rs = stmt.executeQuery();
+
+                while (rs.next()) {
+                    devices.add(DeviceManagementDAOUtil.loadDeviceBilling(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while fetching the list of NonRemovedYearly device billing ", e);
+        }
+        return devices;
+    }
+
+    @Override
+    public List<Device> getRemovedYearlyDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        List<Device> devices = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            String sql = "select d.ID AS DEVICE_ID, " +
+                    "DEVICE_IDENTIFICATION, " +
+                    "DESCRIPTION, " +
+                    "NAME, " +
+                    "DATE_OF_ENROLMENT, " +
+                    "DATE_OF_LAST_UPDATE, " +
+                    "STATUS, " +
+                    "TIMESTAMPDIFF(DAY, DATE_OF_LAST_UPDATE, DATE_OF_ENROLMENT) AS DAYS_USED " +
+                    "from DM_DEVICE d, DM_ENROLMENT e " +
+                    "where " +
+                    "e.TENANT_ID=? and d.ID=e.DEVICE_ID and " +
+                    "STATUS ='REMOVED' and " +
+                    "(" +
+                    "DATE_OF_ENROLMENT between ? and ? " +
+                    ") and " +
+                    "(" +
+                    "DATE_OF_LAST_UPDATE >= ? " +
+                    ")";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.setString(2, String.valueOf(startDate));
+                stmt.setString(3, String.valueOf(endDate));
+                stmt.setString(4, String.valueOf(startDate));
+                ResultSet rs = stmt.executeQuery();
+
+                while (rs.next()) {
+                    devices.add(DeviceManagementDAOUtil.loadDeviceBilling(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while fetching the list of RemovedYearly device billing ", e);
+        }
+        return devices;
+    }
+
+    @Override
+    public List<Device> getNonRemovedPriorYearsDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        List<Device> devices = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            String sql = "select d.ID AS DEVICE_ID, " +
+                    "DEVICE_IDENTIFICATION, " +
+                    "DESCRIPTION, " +
+                    "NAME, " +
+                    "DATE_OF_ENROLMENT, " +
+                    "STATUS, " +
+                    "DATE_OF_LAST_UPDATE, " +
+                    "TIMESTAMPDIFF(DAY, ?, ?) as DAYS_SINCE_ENROLLED " +
+                    "from DM_DEVICE d, DM_ENROLMENT e " +
+                    "where " +
+                    "e.TENANT_ID=? and " +
+                    "d.ID=e.DEVICE_ID and " +
+                    "STATUS !='REMOVED' and " +
+                    "(" +
+                    "DATE_OF_ENROLMENT < ? " +
+                    ")";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, String.valueOf(endDate));
+                stmt.setString(2, String.valueOf(startDate));
+                stmt.setInt(3, tenantId);
+                stmt.setString(4, String.valueOf(startDate));
+                ResultSet rs = stmt.executeQuery();
+
+                while (rs.next()) {
+                    devices.add(DeviceManagementDAOUtil.loadDeviceBilling(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while fetching the list of NonRemovedPriorYears device billing ", e);
+        }
+        return devices;
+    }
+
+    @Override
+    public List<Device> getRemovedPriorYearsDeviceList(int tenantId,  Timestamp startDate, Timestamp endDate)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        List<Device> devices = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            String sql = "select d.ID AS DEVICE_ID, " +
+                    "DEVICE_IDENTIFICATION, " +
+                    "DESCRIPTION, " +
+                    "NAME, " +
+                    "DATE_OF_ENROLMENT, " +
+                    "DATE_OF_LAST_UPDATE, " +
+                    "STATUS, " +
+                    "TIMESTAMPDIFF(DAY, DATE_OF_LAST_UPDATE,  ?) AS DAYS_USED " +
+                    "from DM_DEVICE d, DM_ENROLMENT e " +
+                    "where " +
+                    "e.TENANT_ID=? and d.ID=e.DEVICE_ID and " +
+                    "STATUS ='REMOVED' and " +
+                    "(" +
+                    "DATE_OF_ENROLMENT < ? " +
+                    ") and " +
+                    "(" +
+                    "DATE_OF_LAST_UPDATE >= ? " +
+                    ")";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, String.valueOf(startDate));
+                stmt.setInt(2, tenantId);
+                stmt.setString(3, String.valueOf(startDate));
+                stmt.setString(4, String.valueOf(startDate));
+                ResultSet rs = stmt.executeQuery();
+
+                while (rs.next()) {
+                    devices.add(DeviceManagementDAOUtil.loadDeviceBilling(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while fetching the list of RemovedPriorYears device billing ", e);
+        }
+        return devices;
+    }
+
     //Return only not removed id list
     @Override
     public List<Device> getDeviceListWithoutPagination(int tenantId)
@@ -197,10 +359,26 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         List<Device> devices = new ArrayList<>();
         try {
             conn = this.getConnection();
-            String sql = "SELECT DM_DEVICE.ID AS DEVICE_ID, DEVICE_IDENTIFICATION, DESCRIPTION, DM_DEVICE.NAME AS DEVICE_NAME, DM_DEVICE_TYPE.NAME AS DEVICE_TYPE,\n" +
-                    "DM_ENROLMENT.ID AS ENROLMENT_ID, DATE_OF_ENROLMENT,OWNER, OWNERSHIP,IS_TRANSFERRED, STATUS, DATE_OF_LAST_UPDATE, LAST_BILLED_DATE,\n" +
-                    "TIMESTAMPDIFF(DAY, DATE_OF_ENROLMENT, CURDATE()) as DAYS_SINCE_ENROLLED FROM DM_DEVICE JOIN DM_ENROLMENT\n" +
-                    "ON (DM_DEVICE.ID = DM_ENROLMENT.DEVICE_ID) JOIN DM_DEVICE_TYPE ON (DM_DEVICE.DEVICE_TYPE_ID = DM_DEVICE_TYPE.ID) WHERE DM_ENROLMENT.TENANT_ID=?";
+            String sql = "SELECT " +
+                    "DM_DEVICE.ID AS DEVICE_ID, " +
+                    "DEVICE_IDENTIFICATION, " +
+                    "DESCRIPTION, " +
+                    "DM_DEVICE.NAME AS DEVICE_NAME, " +
+                    "DM_DEVICE_TYPE.NAME AS DEVICE_TYPE, " +
+                    "DM_ENROLMENT.ID AS ENROLMENT_ID, " +
+                    "DATE_OF_ENROLMENT, " +
+                    "OWNER, " +
+                    "OWNERSHIP, " +
+                    "IS_TRANSFERRED, " +
+                    "STATUS, " +
+                    "DATE_OF_LAST_UPDATE, " +
+                    "TIMESTAMPDIFF(DAY, DATE_OF_ENROLMENT, CURDATE()) as DAYS_SINCE_ENROLLED " +
+                    "FROM " +
+                    "DM_DEVICE " +
+                    "JOIN DM_ENROLMENT ON (DM_DEVICE.ID = DM_ENROLMENT.DEVICE_ID) " +
+                    "JOIN DM_DEVICE_TYPE ON (DM_DEVICE.DEVICE_TYPE_ID = DM_DEVICE_TYPE.ID) " +
+                    "WHERE " +
+                    "DM_ENROLMENT.TENANT_ID = ? ";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             ResultSet rs = stmt.executeQuery();

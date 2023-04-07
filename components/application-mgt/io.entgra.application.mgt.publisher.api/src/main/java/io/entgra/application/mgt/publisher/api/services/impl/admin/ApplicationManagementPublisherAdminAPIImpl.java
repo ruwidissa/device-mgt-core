@@ -155,6 +155,10 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
             applicationManager.updateCategory(oldCategoryName, newCategoryName);
             return Response.status(Response.Status.OK)
                     .entity("Category is updated from " + oldCategoryName + " to " + newCategoryName).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
             String msg = e.getMessage();
             log.error(msg, e);
@@ -181,6 +185,10 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
             String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = e.getMessage();
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error Occurred while deleting registered category.";
             log.error(msg, e);

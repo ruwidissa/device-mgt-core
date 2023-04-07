@@ -38,6 +38,7 @@ public class GrafanaPreparedQueryBuilder {
     private static final String VAR_PARAM_TEMPLATE = "$param";
     private static final String GRAFANA_QUOTED_VAR_REGEX = "('\\$(\\d|\\w|_)+')|('\\$\\{.*?\\}')|(\"\\$(\\d|\\w|_)+\")|(\"\\$\\{.*?\\}\")";
     private static final String GRAFANA_VAR_REGEX = "(\\$(\\d|\\w|_)+)|(\\$\\{.*?\\})";
+    private static final String ENCODED_QUERY_TENANT_ID_REGEX = "TENANT_ID\\s=\\s('[^']+'|-?[1-9]\\d*|0)";
 
 
     public static PreparedQuery build(String queryTemplate, String rawQuery) throws QueryMisMatch {
@@ -125,6 +126,60 @@ public class GrafanaPreparedQueryBuilder {
         return new PreparedQuery(preparedQueryBuilder.toString(), parameters);
     }
 
+    /**
+     * Get the tenant ID used in the cached query with the matching regex pattern which are integers that
+     * may or may not have surrounding single quotes and could have a minus sign (e.g., '-1234')
+     * @param encodedQuery the cached query
+     * @return returns the tenant ID extracted from the cached query
+     */
+    public static String getEncodedQueryTenantId(String encodedQuery) {
+        Pattern pattern = Pattern.compile(ENCODED_QUERY_TENANT_ID_REGEX);
+        Matcher matcher = pattern.matcher(encodedQuery);
+        String encodedQueryTenantId = "";
+        while (matcher.find()) {
+            encodedQueryTenantId = matcher.group(1);
+            if (encodedQueryTenantId != null && !encodedQueryTenantId.isEmpty()) {
+                break;
+            }
+        }
+        return unQuoteString(encodedQueryTenantId);
+    }
+
+    /**
+     * Checks if passed tenant ID is matching with tenant ID from Carbon Context
+     * @param encodedQueryTenantId the tenant ID
+     * @return true if tenant IDs match otherwise false
+     */
+    public static boolean isMatchingTenantId(String encodedQueryTenantId) {
+        if (encodedQueryTenantId != null && !encodedQueryTenantId.isEmpty()) {
+            return GrafanaUtil.getTenantId() == Integer.parseInt(encodedQueryTenantId);
+        }
+        return false;
+    }
+
+    /**
+     * Modify the tenant ID used in the cached query to the current tenant ID taken from Carbon Context
+     * with the matching regex pattern which are integers that may or may not have surrounding single quotes and
+     * could have a minus sign (e.g., '-1234')
+     * @param encodedQuery the cached query
+     * @return returns the modified query with the current tenant ID
+     */
+    public static String modifyEncodedQuery(String encodedQuery) {
+        Pattern pattern = Pattern.compile(ENCODED_QUERY_TENANT_ID_REGEX);
+        Matcher matcher = pattern.matcher(encodedQuery);
+        StringBuffer stringBuffer = new StringBuffer(encodedQuery.length());
+        String encodedQueryTenantId = "";
+        while (matcher.find()) {
+            encodedQueryTenantId = matcher.group(1);
+            if (encodedQueryTenantId != null && !encodedQueryTenantId.isEmpty()) {
+                matcher.appendReplacement(stringBuffer, Matcher.quoteReplacement(
+                        GrafanaConstants.ENCODED_QUERY_TENANT_ID_KEY + " " + GrafanaUtil.getTenantId()));
+            }
+        }
+        matcher.appendTail(stringBuffer);
+        return stringBuffer.toString();
+    }
+
     private static String[] splitByComma(String str) {
         // Using regex to avoid splitting by comma inside quotes
         return str.split("(\\s|\\t)*,(\\s|\\t)*(?=(?:[^'\"]*['|\"][^'\"]*['|\"])*[^'\"]*$)");
@@ -194,5 +249,4 @@ public class GrafanaPreparedQueryBuilder {
     private static String singleQuoteString(String str) {
         return "'" + str + "'";
     }
-
 }

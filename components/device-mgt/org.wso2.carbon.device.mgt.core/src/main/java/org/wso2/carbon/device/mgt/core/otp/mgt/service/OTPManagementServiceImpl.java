@@ -35,6 +35,7 @@ import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentType;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
 import org.wso2.carbon.device.mgt.common.otp.mgt.OTPEmailTypes;
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
+import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.DownloadURLDetails;
 import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
@@ -107,6 +108,31 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
+    }
+
+    @Override
+    public void shareProductDownloadUrl(DownloadURLDetails downloadURLDetails) throws OTPManagementException {
+        if (StringUtils.isBlank(downloadURLDetails.getURL())) {
+            String msg = "Couldn't find the download URL with the request.";
+            log.error(msg);
+            throw new OTPManagementException(msg);
+        }
+        if (StringUtils.isBlank(downloadURLDetails.getFirstName())) {
+            String msg = "Couldn't find the First Name with the request.";
+            log.error(msg);
+            throw new OTPManagementException(msg);
+        }
+        if (StringUtils.isBlank(downloadURLDetails.getEmail())) {
+            String msg = "Couldn't find the e-mail address with the request.";
+            log.error(msg);
+            throw new OTPManagementException(msg);
+        }
+
+        Properties props = new Properties();
+        props.setProperty("first-name", downloadURLDetails.getFirstName());
+        props.setProperty("download-url", downloadURLDetails.getURL());
+        sendMail(props, downloadURLDetails.getEmail(),
+                    DeviceManagementConstants.EmailAttributes.PRODUCT_DOWNLOAD_LINK_SHARING_TEMPLATE);
     }
 
     @Override

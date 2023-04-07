@@ -35,8 +35,11 @@ public class DeviceList extends BasePaginatedResult {
     @ApiModelProperty(name = "message", value = "Send information text to the billing UI", required = false)
     private String message;
 
-    @ApiModelProperty(name = "billedDateIsValid", value = "Check if user entered date is valid", required = false)
-    private boolean billedDateIsValid;
+    @ApiModelProperty(name = "deviceCount", value = "Total count of all devices per tenant", required = false)
+    private double deviceCount;
+
+    @ApiModelProperty(name = "billPeriod", value = "Billed period", required = false)
+    private String billPeriod;
 
     @ApiModelProperty(value = "List of devices returned")
     @JsonProperty("devices")
@@ -48,12 +51,20 @@ public class DeviceList extends BasePaginatedResult {
         this.devices = devices;
     }
 
-    public boolean isBilledDateIsValid() {
-        return billedDateIsValid;
+    public String getBillPeriod() {
+        return billPeriod;
     }
 
-    public void setBilledDateIsValid(boolean billedDateIsValid) {
-        this.billedDateIsValid = billedDateIsValid;
+    public void setBillPeriod(String billPeriod) {
+        this.billPeriod = billPeriod;
+    }
+
+    public double getDeviceCount() {
+        return deviceCount;
+    }
+
+    public void setDeviceCount(double deviceCount) {
+        this.deviceCount = deviceCount;
     }
 
     public String getMessage() {

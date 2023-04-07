@@ -144,14 +144,6 @@ public final class DeviceManagementDAOUtil {
 
     public static EnrolmentInfo loadEnrolment(ResultSet rs) throws SQLException {
         EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
-        String columnName = "LAST_BILLED_DATE";
-        ResultSetMetaData rsmd = rs.getMetaData();
-        int columns = rsmd.getColumnCount();
-        for (int x = 1; x <= columns; x++) {
-            if (columnName.equals(rsmd.getColumnName(x))) {
-                enrolmentInfo.setLastBilledDate(rs.getLong("LAST_BILLED_DATE"));
-            }
-        }
         enrolmentInfo.setId(rs.getInt("ENROLMENT_ID"));
         enrolmentInfo.setOwner(rs.getString("OWNER"));
         enrolmentInfo.setOwnership(EnrolmentInfo.OwnerShip.valueOf(rs.getString("OWNERSHIP")));
@@ -162,15 +154,12 @@ public final class DeviceManagementDAOUtil {
         return enrolmentInfo;
     }
 
+    /* This is used to set the enrollment data of the billing query */
     public static EnrolmentInfo loadEnrolmentBilling(ResultSet rs) throws SQLException {
         EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
-        enrolmentInfo.setId(rs.getInt("ENROLMENT_ID"));
         enrolmentInfo.setDateOfEnrolment(rs.getTimestamp("DATE_OF_ENROLMENT").getTime());
-        enrolmentInfo.setLastBilledDate(rs.getLong("LAST_BILLED_DATE"));
+        enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
         enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
-        if (EnrolmentInfo.Status.valueOf(rs.getString("STATUS")).equals("REMOVED")) {
-            enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
-        }
         return enrolmentInfo;
     }
 
@@ -245,29 +234,23 @@ public final class DeviceManagementDAOUtil {
         return device;
     }
 
+    /* This is used to set the device data of the billing query */
+    public static Device loadDeviceBilling(ResultSet rs) throws SQLException {
+        Device device = new Device();
+        device.setId(rs.getInt("DEVICE_ID"));
+        device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
+        device.setName(rs.getString("DESCRIPTION"));
+        device.setDescription(rs.getString("NAME"));
+        device.setEnrolmentInfo(loadEnrolmentBilling(rs));
+        return device;
+    }
+
     public static Device loadDeviceIds(ResultSet rs) throws SQLException {
         Device device = new Device();
         device.setId(rs.getInt("DEVICE_ID"));
         device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
         device.setEnrolmentInfo(loadEnrolmentStatus(rs));
         return device;
-    }
-
-        public static DeviceBilling loadDeviceBilling(ResultSet rs) throws SQLException {
-        DeviceBilling device = new DeviceBilling();
-        device.setId(rs.getInt("ID"));
-        device.setName(rs.getString("DEVICE_NAME"));
-        device.setDescription(rs.getString("DESCRIPTION"));
-        device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
-        device.setDaysUsed((int) rs.getLong("DAYS_SINCE_ENROLLED"));
-        device.setEnrolmentInfo(loadEnrolmentBilling(rs));
-        return device;
-//        if (removedDevices) {
-//            device.setDaysUsed((int) rs.getLong("DAYS_USED"));
-//        } else {
-//            device.setDaysSinceEnrolled((int) rs.getLong("DAYS_SINCE_ENROLLED"));
-//        }
-
     }
 
     public static DeviceMonitoringData loadDevice(ResultSet rs, String deviceTypeName) throws SQLException {

@@ -211,23 +211,11 @@ public interface DeviceManagementProviderService {
     /**
      * Method to retrieve all the devices with pagination support.
      *
-     * @param request PaginationRequest object holding the data for pagination
-     * @return PaginationResult - Result including the required parameters necessary to do pagination.
-     * @throws DeviceManagementException If some unusual behaviour is observed while fetching billing of
-     *                                   devices.
-     */
-    PaginationResult getAllDevicesBillings(PaginationRequest request, int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
-
-    /**
-     * Method to retrieve all the devices with pagination support.
-     *
      * @return PaginationResult - Result including the device bill list without pagination.
      * @throws DeviceManagementException If some unusual behaviour is observed while fetching billing of
      *                                   devices.
      */
-    PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate, boolean generateBill) throws DeviceManagementException;
-
-
+    PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate) throws DeviceManagementException;
 
     /**
      * Method to retrieve all the devices with pagination support.
@@ -657,6 +645,8 @@ public interface DeviceManagementProviderService {
     void sendEnrolmentInvitation(String templateName, EmailMetaInfo metaInfo) throws DeviceManagementException,
             ConfigurationManagementException;
 
+    void sendEnrolmentGuide(String enrolmentGuide) throws DeviceManagementException;
+
     void sendRegistrationEmail(EmailMetaInfo metaInfo) throws DeviceManagementException, ConfigurationManagementException;
 
     FeatureManager getFeatureManager(String deviceType) throws DeviceTypeNotFoundException;
@@ -1042,4 +1032,6 @@ public interface DeviceManagementProviderService {
      */
     PaginationResult getDevicesDetails(PaginationRequest request, List<Integer> devicesIds, String groupName)
             throws DeviceManagementException;
+
+    Boolean sendDeviceNameChangedNotification(Device device) throws DeviceManagementException;
 }

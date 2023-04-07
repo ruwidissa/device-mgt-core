@@ -21,10 +21,13 @@ import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotif
 import org.wso2.carbon.device.mgt.common.roles.config.DefaultRoles;
 import org.wso2.carbon.device.mgt.core.config.analytics.OperationAnalyticsConfiguration;
 import org.wso2.carbon.device.mgt.core.config.archival.ArchivalConfiguration;
+import org.wso2.carbon.device.mgt.core.config.cache.BillingCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.CertificateCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.DeviceCacheConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.GeoFenceCacheConfiguration;
+import org.wso2.carbon.device.mgt.core.config.enrollment.guide.EnrollmentGuideConfiguration;
 import org.wso2.carbon.device.mgt.core.config.operation.timeout.OperationTimeoutConfiguration;
+import org.wso2.carbon.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
 import org.wso2.carbon.device.mgt.core.event.config.EventOperationTaskConfiguration;
 import org.wso2.carbon.device.mgt.core.config.geo.location.GeoLocationConfiguration;
 import org.wso2.carbon.device.mgt.core.config.identity.IdentityConfigurations;
@@ -58,6 +61,7 @@ public final class DeviceManagementConfig {
     private DeviceStatusTaskConfig deviceStatusTaskConfig;
     private DeviceCacheConfiguration deviceCacheConfiguration;
     private GeoFenceCacheConfiguration geoFenceCacheConfiguration;
+    private BillingCacheConfiguration billingCacheConfiguration;
     private EventOperationTaskConfiguration eventOperationTaskConfiguration;
     private CertificateCacheConfiguration certificateCacheConfiguration;
     private OperationAnalyticsConfiguration operationAnalyticsConfiguration;
@@ -68,6 +72,8 @@ public final class DeviceManagementConfig {
     private EnrollmentNotificationConfiguration enrollmentNotificationConfiguration;
     private DefaultRoles defaultRoles;
     private OperationTimeoutConfiguration operationTimeoutConfiguration;
+    private MetaDataConfiguration metaDataConfiguration;
+    private EnrollmentGuideConfiguration enrollmentGuideConfiguration;
 
     @XmlElement(name = "ManagementRepository", required = true)
     public DeviceManagementConfigRepository getDeviceManagementConfigRepository() {
@@ -169,6 +175,15 @@ public final class DeviceManagementConfig {
         this.geoFenceCacheConfiguration = geoFenceCacheConfiguration;
     }
 
+    @XmlElement(name = "BillingCacheConfiguration", required = true)
+    public BillingCacheConfiguration getBillingCacheConfiguration() {
+        return billingCacheConfiguration;
+    }
+
+    public void setBillingCacheConfiguration(BillingCacheConfiguration billingCacheConfiguration) {
+        this.billingCacheConfiguration = billingCacheConfiguration;
+    }
+
     @XmlElement(name = "EventOperationTaskConfiguration", required = true)
     public EventOperationTaskConfiguration getEventOperationTaskConfiguration() {
         return eventOperationTaskConfiguration;
@@ -253,6 +268,24 @@ public final class DeviceManagementConfig {
 
     public void setOperationTimeoutConfiguration(OperationTimeoutConfiguration operationTimeoutConfiguration) {
         this.operationTimeoutConfiguration = operationTimeoutConfiguration;
+    }
+
+    @XmlElement(name = "MetaDataConfiguration", required = true)
+    public MetaDataConfiguration getMetaDataConfiguration() {
+        return metaDataConfiguration;
+    }
+
+    public void setMetaDataConfiguration(MetaDataConfiguration metaDataConfiguration) {
+        this.metaDataConfiguration = metaDataConfiguration;
+    }
+
+    @XmlElement(name = "EnrollmentGuideConfiguration", required = true)
+    public EnrollmentGuideConfiguration getEnrollmentGuideConfiguration() {
+        return enrollmentGuideConfiguration;
+    }
+
+    public void setEnrollmentGuideConfiguration(EnrollmentGuideConfiguration enrollmentGuideConfiguration) {
+        this.enrollmentGuideConfiguration = enrollmentGuideConfiguration;
     }
 }
 

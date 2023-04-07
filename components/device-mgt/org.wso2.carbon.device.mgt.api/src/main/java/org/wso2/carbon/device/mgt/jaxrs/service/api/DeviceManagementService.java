@@ -188,6 +188,13 @@ import java.util.List;
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/add"}
                 ),
+                @Scope(
+                        name = "Viewing Enrollment Guide",
+                        description = "Show enrollment guide to users",
+                        key = "perm:devices:enrollment-guide:view",
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/device-mgt/devices/enrollment-guide/view"}
+                ),
         }
 )
 @Path("/devices")
@@ -343,179 +350,6 @@ public interface DeviceManagementService {
                     defaultValue = "5")
             @QueryParam("limit")
                     int limit);
-
-
-    @GET
-    @Path("/billing")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "Getting Cost details of devices in a tenant",
-            notes = "Provides individual cost and total cost of all devices per tenant.",
-            tags = "Device Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
-                    })
-            }
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of devices.",
-                    response = DeviceList.class,
-                    responseHeaders = {
-                            @ResponseHeader(
-                                    name = "Content-Type",
-                                    description = "The content type of the body"),
-                            @ResponseHeader(
-                                    name = "ETag",
-                                    description = "Entity Tag of the response resource.\n" +
-                                            "Used by caches, or in conditional requests."),
-                            @ResponseHeader(
-                                    name = "Last-Modified",
-                                    description = "Date and time the resource was last modified.\n" +
-                                            "Used by caches, or in conditional requests."),
-                    }),
-            @ApiResponse(
-                    code = 304,
-                    message = "Not Modified. \n Empty body because the client already has the latest version of " +
-                            "the requested resource.\n"),
-            @ApiResponse(
-                    code = 400,
-                    message = "The incoming request has more than one selection criteria defined via the query parameters.",
-                    response = ErrorResponse.class),
-            @ApiResponse(
-                    code = 404,
-                    message = "The search criteria did not match any device registered with the server.",
-                    response = ErrorResponse.class),
-            @ApiResponse(
-                    code = 406,
-                    message = "Not Acceptable.\n The requested media type is not supported."),
-            @ApiResponse(
-                    code = 500,
-                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
-                    response = ErrorResponse.class)
-    })
-    Response getDevicesBilling(
-            @ApiParam(
-                    name = "tenantDomain",
-                    value = "The tenant domain.",
-                    required = false)
-            @QueryParam("tenantDomain")
-                    String tenantDomain,
-            @ApiParam(
-                    name = "startDate",
-                    value = "The start date.",
-                    required = false)
-            @QueryParam("startDate")
-                    Timestamp startDate,
-            @ApiParam(
-                    name = "endDate",
-                    value = "The end date.",
-                    required = false)
-            @QueryParam("endDate")
-                    Timestamp endDate,
-            @ApiParam(
-                    name = "generateBill",
-                    value = "The generate bill boolean.",
-                    required = false)
-            @QueryParam("generateBill")
-                    boolean generateBill,
-            @ApiParam(
-                    name = "offset",
-                    value = "The starting pagination index for the complete list of qualified items.",
-                    required = false,
-                    defaultValue = "0")
-            @QueryParam("offset")
-                    int offset,
-            @ApiParam(
-                    name = "limit",
-                    value = "Provide how many device details you require from the starting pagination index/offset.",
-                    required = false,
-                    defaultValue = "10")
-            @QueryParam("limit")
-                    int limit);
-
-
-    @GET
-    @Path("/billing/file")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "Getting Cost details of devices in a tenant",
-            notes = "Provides individual cost and total cost of all devices per tenant.",
-            tags = "Device Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
-                    })
-            }
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of devices.",
-                    response = DeviceList.class,
-                    responseHeaders = {
-                            @ResponseHeader(
-                                    name = "Content-Type",
-                                    description = "The content type of the body"),
-                            @ResponseHeader(
-                                    name = "Content-Disposition",
-                                    description = "The content disposition of the body"),
-                            @ResponseHeader(
-                                    name = "ETag",
-                                    description = "Entity Tag of the response resource.\n" +
-                                            "Used by caches, or in conditional requests."),
-                            @ResponseHeader(
-                                    name = "Last-Modified",
-                                    description = "Date and time the resource was last modified.\n" +
-                                            "Used by caches, or in conditional requests."),
-                    }),
-            @ApiResponse(
-                    code = 304,
-                    message = "Not Modified. \n Empty body because the client already has the latest version of " +
-                            "the requested resource.\n"),
-            @ApiResponse(
-                    code = 400,
-                    message = "The incoming request has more than one selection criteria defined via the query parameters.",
-                    response = ErrorResponse.class),
-            @ApiResponse(
-                    code = 404,
-                    message = "The search criteria did not match any device registered with the server.",
-                    response = ErrorResponse.class),
-            @ApiResponse(
-                    code = 406,
-                    message = "Not Acceptable.\n The requested media type is not supported."),
-            @ApiResponse(
-                    code = 500,
-                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
-                    response = ErrorResponse.class)
-    })
-    Response exportBilling(
-            @ApiParam(
-                    name = "tenantDomain",
-                    value = "The tenant domain.",
-                    required = false)
-            @QueryParam("tenantDomain")
-                    String tenantDomain,
-            @ApiParam(
-                    name = "startDate",
-                    value = "The start date.",
-                    required = false)
-            @QueryParam("startDate")
-                    Timestamp startDate,
-            @ApiParam(
-                    name = "endDate",
-                    value = "The end date.",
-                    required = false)
-            @QueryParam("endDate")
-                    Timestamp endDate,
-            @ApiParam(
-                    name = "generateBill",
-                    value = "The generate bill boolean.",
-                    required = false)
-            @QueryParam("generateBill")
-                    boolean generateBill);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -726,12 +560,12 @@ public interface DeviceManagementService {
                     required = false,
                     defaultValue = "0")
             @QueryParam("offset") int offset,
-             @ApiParam(
-                     name = "limit",
-                     value = "Provide how many device details you require from the starting pagination index/offset.",
-                     required = false,
-                     defaultValue = "100")
-             @QueryParam("limit") int limit
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many device details you require from the starting pagination index/offset.",
+                    required = false,
+                    defaultValue = "100")
+            @QueryParam("limit") int limit
     );
 
     @GET
@@ -974,6 +808,59 @@ public interface DeviceManagementService {
                     required = false)
             @QueryParam("requireDeviceInfo")
                     boolean requireDeviceInfo);
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("/enrollment/guide")
+    @ApiOperation(
+            consumes = MediaType.MULTIPART_FORM_DATA,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Sending Enrollment Mode chosen by customer",
+            notes = "Enrollment mode selected and path is sent as parameters",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:enrollment-guide:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully mailed the Enrollment Guide of customer.",
+                            response = Device.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred while sending mail of the Enrollment Guide.",
+                            response = ErrorResponse.class)
+            })
+    Response sendEnrollmentGuide(
+            @ApiParam(
+                    name = "enrolmentGuide",
+                    value = "The details of the enrolment path suggested.",
+                    required = true)
+                    String enrolmentGuide);
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -1232,6 +1119,82 @@ public interface DeviceManagementService {
             @HeaderParam("If-Modified-Since")
                     String ifModifiedSince);
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{type}/{id}/config")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting the Configuration of a Device",
+            notes = "Get the configuration of a device by specifying the device type and device identifier.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the configuration of the device.",
+                            response = DeviceInfo.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 304,
+                            message = "Not Modified. Empty body because the client already has the latest version" +
+                                    " of the requested resource.\n"),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n Location data for the specified device was not found.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred while retrieving the device details.",
+                            response = ErrorResponse.class)
+            })
+    Response getDeviceConfiguration(
+            @ApiParam(
+                    name = "type",
+                    value = "The device type name, such as ios, android, windows, or fire-alarm.",
+                    required = true)
+            @PathParam("type")
+            @Size(max = 45)
+            String type,
+            @ApiParam(
+                    name = "id",
+                    value = "The device identifier of the device you want ot get details.",
+                    required = true)
+            @PathParam("id")
+            @Size(max = 45)
+            String id,
+            @ApiParam(
+                    name = "If-Modified-Since",
+                    value = "Checks if the requested variant was modified, since the specified date-time. \n" +
+                            "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z. \n" +
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
+                    required = false)
+            @HeaderParam("If-Modified-Since")
+            String ifModifiedSince);
+
     //device rename request would looks like follows
     //POST devices/type/virtual_firealarm/id/us06ww93auzp/rename
     @POST
@@ -1382,7 +1345,7 @@ public interface DeviceManagementService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{type}/{id}/features")
+    @Path("/device-type/{type}/features")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -1453,14 +1416,6 @@ public interface DeviceManagementService {
             @PathParam("type")
             @Size(max = 45)
                     String type,
-            @ApiParam(
-                    name = "id",
-                    value = "The device identifier of the device.\n" +
-                            "INFO: Make sure to add the ID of a device that is already registered with WSO2 IoTS.",
-                    required = true)
-            @PathParam("id")
-            @Size(max = 45)
-                    String id,
             @ApiParam(
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time. \n" +
@@ -1580,15 +1535,15 @@ public interface DeviceManagementService {
                                     @ResponseHeader(
                                             name = "ETag",
                                             description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
+                                                    "Used by caches, or in conditional requests."),
                                     @ResponseHeader(
                                             name = "Last-Modified",
                                             description = "Date and time the resource was last modified. \n" +
-                                                          "Used by caches, or in conditional requests.")}),
+                                                    "Used by caches, or in conditional requests.")}),
                     @ApiResponse(
                             code = 304,
                             message = "Not Modified. \n " +
-                                      "Empty body because the client already has the latest version of the requested resource.\n"),
+                                    "Empty body because the client already has the latest version of the requested resource.\n"),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n Invalid request or validation error.",
@@ -1606,7 +1561,7 @@ public interface DeviceManagementService {
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n " +
-                                      "Server error occurred while getting the device details.",
+                                    "Server error occurred while getting the device details.",
                             response = ErrorResponse.class)
             })
     Response queryDevicesByProperties(
@@ -1628,7 +1583,7 @@ public interface DeviceManagementService {
                     name = "device property map",
                     value = "properties by which devices need filtered",
                     required = true)
-            PropertyMap map);
+                    PropertyMap map);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -2054,140 +2009,141 @@ public interface DeviceManagementService {
             @Size(max = 45)
                     String id);
 
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("/{type}/{id}/getstatushistory")
-  @ApiOperation(
-          produces = MediaType.APPLICATION_JSON,
-          httpMethod = "GET",
-          value = "Get Device status history",
-          notes = "Get a list of status history associated with the device type and id",
-          tags = "Device Management",
-          extensions = {
-                  @Extension(properties = {
-                          @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
-                  })
-          }
-  )
-  @ApiResponses(
-          value = {
-                  @ApiResponse(
-                          code = 200,
-                          message = "OK. \n Successfully fetched the status history of matching devices.",
-                          response = List.class,
-                          responseHeaders = {
-                                  @ResponseHeader(
-                                          name = "Content-Type",
-                                          description = "The content type of the body"),
-                                  @ResponseHeader(
-                                          name = "ETag",
-                                          description = "Entity Tag of the response resource.\n" +
-                                                  "Used by caches, or in conditional requests."),
-                                  @ResponseHeader(
-                                          name = "Last-Modified",
-                                          description = "Date and time the resource was last modified.\n" +
-                                                  "Used by caches, or in conditional requests."),
-                          }),
-                  @ApiResponse(
-                          code = 304,
-                          message = "Not Modified. Empty body because the client already has the latest version" +
-                                  " of the requested resource.\n"),
-                  @ApiResponse(
-                          code = 400,
-                          message = "Bad Request. \n Invalid request or validation error.",
-                          response = ErrorResponse.class),
-                  @ApiResponse(
-                          code = 404,
-                          message = "Not Found. \n A device with the specified device type and id was not found.",
-                          response = ErrorResponse.class),
-                  @ApiResponse(
-                          code = 500,
-                          message = "Internal Server Error. \n " +
-                                  "Server error occurred while retrieving the device details.",
-                          response = ErrorResponse.class)
-          })
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{type}/{id}/status-history")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Get Device status history",
+            notes = "Get a list of status history associated with the device type and id",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the status history of matching devices.",
+                            response = List.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 304,
+                            message = "Not Modified. Empty body because the client already has the latest version" +
+                                    " of the requested resource.\n"),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n A device with the specified device type and id was not found.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred while retrieving the device details.",
+                            response = ErrorResponse.class)
+            })
     Response getDeviceStatusHistory(
-          @ApiParam(
-                  name = "type",
-                  value = "The device type, such as ios, android, or windows.",
-                  required = true)
-          @PathParam("type")
-          @Size(max = 45)
-                  String type,
-          @ApiParam(
-                  name = "id",
-                  value = "Device ID.",
-                  required = true)
-          @PathParam("id")
-          @Size(max = 45)
-                  String id);
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("/{type}/{id}/getenrolmentstatushistory")
-  @ApiOperation(
-          produces = MediaType.APPLICATION_JSON,
-          httpMethod = "GET",
-          value = "Get Device Current Enrolment status history",
-          notes = "Get a list of status history associated with the device type and id for the current enrolment",
-          tags = "Device Management",
-          extensions = {
-                  @Extension(properties = {
-                          @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
-                  })
-          }
-  )
-  @ApiResponses(
-          value = {
-                  @ApiResponse(
-                          code = 200,
-                          message = "OK. \n Successfully fetched the status history of matching devices.",
-                          response = List.class,
-                          responseHeaders = {
-                                  @ResponseHeader(
-                                          name = "Content-Type",
-                                          description = "The content type of the body"),
-                                  @ResponseHeader(
-                                          name = "ETag",
-                                          description = "Entity Tag of the response resource.\n" +
-                                                  "Used by caches, or in conditional requests."),
-                                  @ResponseHeader(
-                                          name = "Last-Modified",
-                                          description = "Date and time the resource was last modified.\n" +
-                                                  "Used by caches, or in conditional requests."),
-                          }),
-                  @ApiResponse(
-                          code = 304,
-                          message = "Not Modified. Empty body because the client already has the latest version" +
-                                  " of the requested resource.\n"),
-                  @ApiResponse(
-                          code = 400,
-                          message = "Bad Request. \n Invalid request or validation error.",
-                          response = ErrorResponse.class),
-                  @ApiResponse(
-                          code = 404,
-                          message = "Not Found. \n A device with the specified device type and id was not found.",
-                          response = ErrorResponse.class),
-                  @ApiResponse(
-                          code = 500,
-                          message = "Internal Server Error. \n " +
-                                  "Server error occurred while retrieving the device details.",
-                          response = ErrorResponse.class)
-          })
+            @ApiParam(
+                    name = "type",
+                    value = "The device type, such as ios, android, or windows.",
+                    required = true)
+            @PathParam("type")
+            @Size(max = 45)
+                    String type,
+            @ApiParam(
+                    name = "id",
+                    value = "Device ID.",
+                    required = true)
+            @PathParam("id")
+            @Size(max = 45)
+                    String id);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{type}/{id}/enrolment-status-history")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Get Device Current Enrolment status history",
+            notes = "Get a list of status history associated with the device type and id for the current enrolment",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the status history of matching devices.",
+                            response = List.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 304,
+                            message = "Not Modified. Empty body because the client already has the latest version" +
+                                    " of the requested resource.\n"),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n A device with the specified device type and id was not found.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred while retrieving the device details.",
+                            response = ErrorResponse.class)
+            })
     Response getCurrentEnrolmentDeviceStatusHistory(
-          @ApiParam(
-                  name = "type",
-                  value = "The device type, such as ios, android, or windows.",
-                  required = true)
-          @PathParam("type")
-          @Size(max = 45)
-                  String type,
-          @ApiParam(
-                  name = "id",
-                  value = "Device ID.",
-                  required = true)
-          @PathParam("id")
-          @Size(max = 45)
-                  String id);
+            @ApiParam(
+                    name = "type",
+                    value = "The device type, such as ios, android, or windows.",
+                    required = true)
+            @PathParam("type")
+            @Size(max = 45)
+                    String type,
+            @ApiParam(
+                    name = "id",
+                    value = "Device ID.",
+                    required = true)
+            @PathParam("id")
+            @Size(max = 45)
+                    String id);
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
@@ -2352,16 +2308,16 @@ public interface DeviceManagementService {
                                     @ResponseHeader(
                                             name = "ETag",
                                             description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
+                                                    "Used by caches, or in conditional requests."),
                                     @ResponseHeader(
                                             name = "Last-Modified",
                                             description = "Date and time the resource was last modified.\n" +
-                                                          "Used by caches, or in conditional requests."),
+                                                    "Used by caches, or in conditional requests."),
                             }),
                     @ApiResponse(
                             code = 304,
                             message = "Not Modified. Empty body because the client already has the latest version" +
-                                      " of the requested resource.\n"),
+                                    " of the requested resource.\n"),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n Invalid request or validation error.",
@@ -2373,7 +2329,7 @@ public interface DeviceManagementService {
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n " +
-                                      "Server error occurred while retrieving the device details.",
+                                    "Server error occurred while retrieving the device details.",
                             response = ErrorResponse.class)
             })
     Response getDeviceCountByStatus(
@@ -2421,16 +2377,16 @@ public interface DeviceManagementService {
                                     @ResponseHeader(
                                             name = "ETag",
                                             description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
+                                                    "Used by caches, or in conditional requests."),
                                     @ResponseHeader(
                                             name = "Last-Modified",
                                             description = "Date and time the resource was last modified.\n" +
-                                                          "Used by caches, or in conditional requests."),
+                                                    "Used by caches, or in conditional requests."),
                             }),
                     @ApiResponse(
                             code = 304,
                             message = "Not Modified. Empty body because the client already has the latest version" +
-                                      " of the requested resource.\n"),
+                                    " of the requested resource.\n"),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n Invalid request or validation error.",
@@ -2442,7 +2398,7 @@ public interface DeviceManagementService {
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n " +
-                                      "Server error occurred while retrieving the device details.",
+                                    "Server error occurred while retrieving the device details.",
                             response = ErrorResponse.class)
             })
     Response getDeviceIdentifiersByStatus(
@@ -2491,16 +2447,16 @@ public interface DeviceManagementService {
                                     @ResponseHeader(
                                             name = "ETag",
                                             description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
+                                                    "Used by caches, or in conditional requests."),
                                     @ResponseHeader(
                                             name = "Last-Modified",
                                             description = "Date and time the resource has been modified the last time.\n" +
-                                                          "Used by caches, or in conditional requests."),
+                                                    "Used by caches, or in conditional requests."),
                             }),
                     @ApiResponse(
                             code = 304,
                             message = "Not Modified. Empty body because the client already has the latest " +
-                                      "version of the requested resource."),
+                                    "version of the requested resource."),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n Invalid request or validation error.",
@@ -2512,7 +2468,7 @@ public interface DeviceManagementService {
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n " +
-                                      "Server error occurred while retrieving information requested device.",
+                                    "Server error occurred while retrieving information requested device.",
                             response = ErrorResponse.class)
             })
     Response bulkUpdateDeviceStatus(
@@ -2823,11 +2779,11 @@ public interface DeviceManagementService {
                                     @ResponseHeader(
                                             name = "ETag",
                                             description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
+                                                    "Used by caches, or in conditional requests."),
                                     @ResponseHeader(
                                             name = "Last-Modified",
                                             description = "Date and time the resource was last modified.\n" +
-                                                          "Used by caches, or in conditional requests."),
+                                                    "Used by caches, or in conditional requests."),
                             }),
                     @ApiResponse(
                             code = 500,

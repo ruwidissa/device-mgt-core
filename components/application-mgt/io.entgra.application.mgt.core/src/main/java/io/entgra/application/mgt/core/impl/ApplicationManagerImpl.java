@@ -17,7 +17,7 @@
 
 package io.entgra.application.mgt.core.impl;
 
-import io.entgra.application.mgt.common.Base64File;
+import org.wso2.carbon.device.mgt.common.Base64File;
 import io.entgra.application.mgt.core.dao.SPApplicationDAO;
 import io.entgra.application.mgt.core.util.ApplicationManagementUtil;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -86,7 +86,7 @@ import io.entgra.application.mgt.core.internal.DataHolder;
 import io.entgra.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
 import io.entgra.application.mgt.core.util.Constants;
-import io.entgra.application.mgt.core.util.StorageManagementUtil;
+import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
@@ -402,7 +402,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      */
     private void validateRemoveAppFromFavouritesRequest(int appId) throws ApplicationManagementException {
         if (!isFavouriteApp(appId)) {
-            String msg = "Provided appId " + appId + " is not a favourite app in order remove from favourites";
+            String msg = "Provided application is not a favourite app in order remove from favourites";
             throw new BadRequestException(msg);
         }
     }
@@ -417,11 +417,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             getApplication(appId);
         } catch (NotFoundException e) {
-            String msg = " No application exists for the provided appId " + appId;
+            String msg = "Requested application does not exists for add to favourites.";
             throw new BadRequestException(msg);
         }
         if (isFavouriteApp(appId)) {
-            String msg = "Provided appId " + appId + " is already a favourite app";
+            String msg = "Requested application is already in favourites list.";
             throw new BadRequestException(msg);
         }
     }
@@ -600,16 +600,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
      */
     private String generateMD5OfApp(ApplicationArtifact applicationArtifact, byte[] content) throws ApplicationManagementException {
         try {
-            String md5OfApp = StorageManagementUtil.getMD5(new ByteArrayInputStream(content));
+            ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
+            String md5OfApp = applicationStorageManager.getMD5(new ByteArrayInputStream(content));
             if (md5OfApp == null) {
                 String msg = "Error occurred while generating md5sum value of " + applicationArtifact.getInstallerName();
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
             return md5OfApp;
-        } catch( ApplicationStorageManagementException e) {
+        } catch(StorageManagementException e) {
             String msg = "Error occurred while generating md5sum value of " + applicationArtifact.getInstallerName();
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
     }
@@ -689,7 +690,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         log.error(msg);
                         throw new ApplicationManagementException(msg);
                     }
-                    String md5OfApp = StorageManagementUtil.getMD5(new ByteArrayInputStream(content));
+                    String md5OfApp = applicationStorageManager.getMD5(new ByteArrayInputStream(content));
                     if (md5OfApp == null) {
                         String msg = "Error occurred while md5sum value retrieving process: application UUID "
                                 + applicationReleaseDTO.getUuid();
@@ -708,6 +709,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         applicationStorageManager
                                 .uploadReleaseArtifact(applicationReleaseDTO, deviceType, binaryDuplicate, tenantId);
                     }
+                } catch (StorageManagementException e) {
+                    String msg = "Error occurred while md5sum value retrieving process: application UUID "
+                            + applicationReleaseDTO.getUuid();
+                    log.error(msg, e);
+                    throw new ApplicationStorageManagementException(msg, e);
                 } catch (DBConnectionException e) {
                     String msg = "Error occurred when getting database connection for verifying app release data.";
                     log.error(msg, e);
@@ -752,7 +758,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
 
             try (ByteArrayInputStream binaryClone = new ByteArrayInputStream(content)) {
-                String md5OfApp = StorageManagementUtil.getMD5(binaryClone);
+                String md5OfApp = applicationStorageManager.getMD5(binaryClone);
 
                 if (md5OfApp == null) {
                     String msg = "Error occurred while retrieving md5sum value from the binary file for application "
@@ -818,6 +824,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     }
                 }
             }
+        } catch (StorageManagementException e) {
+            String msg = "Error occurred while retrieving md5sum value from the binary file for application "
+                    + "release UUID " + applicationReleaseDTO.getUuid();
+            log.error(msg, e);
+            throw new ApplicationStorageManagementException(msg, e);
         } catch (IOException e) {
             String msg = "Error occurred when getting byte array of binary file. Installer name: " + applicationArtifact
                     .getInstallerName();
@@ -1494,7 +1505,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
-            String msg = "Error occured when getting, either application tags or application categories";
+            String msg = "Error occurred when getting, either application tags or application categories";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
@@ -1768,7 +1779,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured while deleting life-cycle state data of application releases of the application"
+            String msg = "Error occurred while deleting life-cycle state data of application releases of the application"
                     + " which has application ID: " + applicationDTO.getId();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
@@ -1885,7 +1896,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     throw new ApplicationManagementException(msg, e);
                 } catch (ApplicationManagementDAOException e) {
                     ConnectionManagerUtil.rollbackDBTransaction();
-                    String msg = "Error occurred while verifying whether application relase has an subscription or "
+                    String msg = "Error occurred while verifying whether application release has an subscription or "
                             + "not. Application release UUID: " + releaseUuid;
                     log.error(msg, e);
                     throw new ApplicationManagementException(msg, e);
@@ -1934,7 +1945,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
             String msg =
-                    "Error occured when getting DB connection to update image artifacts of the application release "
+                    "Error occurred when getting DB connection to update image artifacts of the application release "
                             + "which has  uuid " + uuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
@@ -1946,13 +1957,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg =
-                    "Error occured while getting application release data for updating image artifacts of the application release uuid "
+                    "Error occurred while getting application release data for updating image artifacts of the application release uuid "
                             + uuid + ".";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ResourceManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured while updating image artifacts of the application release uuid " + uuid + ".";
+            String msg = "Error occurred while updating image artifacts of the application release uuid " + uuid + ".";
             log.error(msg, e);
             throw new ApplicationManagementException(msg , e);
         } finally {
@@ -1981,7 +1992,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new BadRequestException(msg);
             }
         } catch (DeviceManagementException e) {
-            String msg = "Error occured while getting supported device types in IoTS";
+            String msg = "Error occurred while getting supported device types in IoTS";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
@@ -2023,16 +2034,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured while getting/updating APPM DB for updating application Installer.";
+            String msg = "Error occurred while getting/updating APPM DB for updating application Installer.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
-            String msg = "Error occured while starting the transaction to update application release artifact which has "
+            String msg = "Error occurred while starting the transaction to update application release artifact which has "
                     + "application uuid " + releaseUuid + ".";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg = "Error occured when getting DB connection to update application release artifact of the "
+            String msg = "Error occurred when getting DB connection to update application release artifact of the "
                     + "application release uuid " + releaseUuid + ".";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
@@ -2043,7 +2054,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (ResourceManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured when updating application installer.";
+            String msg = "Error occurred when updating application installer.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
@@ -2162,9 +2173,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
-    
+
     public ApplicationRelease changeLifecycleState(ApplicationReleaseDTO applicationReleaseDTO, LifecycleChanger lifecycleChanger) throws ApplicationManagementException {
-    
+
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (lifecycleChanger == null || StringUtils.isEmpty(lifecycleChanger.getAction())) {
@@ -2172,7 +2183,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new BadRequestException(msg);
         }
-        
+
         try{
             if (lifecycleStateManager
                     .isValidStateChange(applicationReleaseDTO.getCurrentState(), lifecycleChanger.getAction(), userName,
@@ -2241,7 +2252,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured when getting existing categories or when inserting new application categories.";
+            String msg = "Error occurred when getting existing categories or when inserting new application categories.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
@@ -2563,7 +2574,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 applicationDAO.deleteApplicationTag(tag.getId(), applicationDTO.getId(), tenantId);
                 ConnectionManagerUtil.commitDBTransaction();
             } else {
-                String msg = "Tag " + tagName + " is not an application tag. Application ID: " + appId;
+                String msg = "Tag " + tagName + " is not an application tag. Application name: " + applicationDTO.getName();
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
@@ -2771,7 +2782,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         .collect(Collectors.toList());
             } else {
                 String msg = "Tag list is either null or empty. In order to add new tags for application which has "
-                        + "application ID: " + appId +", tag list should be a list of Stings. Therefore please "
+                        + "application name: " + applicationDTO.getName() +", tag list should be a list of Stings. Therefore please "
                         + "verify the payload.";
                 log.error(msg);
                 throw new BadRequestException(msg);
@@ -2877,11 +2888,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @Override
     public void updateCategory(String oldCategoryName, String newCategoryName) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        if (StringUtils.isEmpty(oldCategoryName) || StringUtils.isEmpty(newCategoryName)) {
+            String msg = "Either old category name or new category name contains empty/null value. Hence please verify the "
+                    + "request.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
         try {
             ConnectionManagerUtil.beginDBTransaction();
             CategoryDTO category = applicationDAO.getCategoryForCategoryName(oldCategoryName, tenantId);
             if (category == null){
-                String msg = "Couldn't found a category for tag name " + oldCategoryName + ".";
+                String msg = "Couldn't found a category for category name " + oldCategoryName + ".";
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
@@ -2893,7 +2910,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
-            String msg = "Database access error is occurred when updating categiry.";
+            String msg = "Database access error is occurred when updating category.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
@@ -3068,11 +3085,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured when updating Ent Application release of UUID: " + releaseUuid;
+            String msg = "Error occurred when updating Ent Application release of UUID: " + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ResourceManagementException e) {
-            String msg = "Error occured when updating application release artifact in the file system. Ent App release "
+            String msg = "Error occurred when updating application release artifact in the file system. Ent App release "
                     + "UUID:" + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
@@ -3137,11 +3154,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured when updating public app release of UUID: " + releaseUuid;
+            String msg = "Error occurred when updating public app release of UUID: " + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ResourceManagementException e) {
-            String msg = "Error occured when updating public app release artifact in the file system. Public app "
+            String msg = "Error occurred when updating public app release artifact in the file system. Public app "
                     + "release UUID:" + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
@@ -3202,11 +3219,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured when updating web app release for web app Release UUID: " + releaseUuid;
+            String msg = "Error occurred when updating web app release for web app Release UUID: " + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ResourceManagementException e) {
-            String msg = "Error occured when updating web app release artifact in the file system. Web app "
+            String msg = "Error occurred when updating web app release artifact in the file system. Web app "
                     + "release UUID:" + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
@@ -3254,7 +3271,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 try {
                     byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
                     try (ByteArrayInputStream binaryClone = new ByteArrayInputStream(content)) {
-                        String md5OfApp = StorageManagementUtil.getMD5(binaryClone);
+                        String md5OfApp = applicationStorageManager.getMD5(binaryClone);
                         if (md5OfApp == null) {
                             String msg = "Error occurred while retrieving md5sum value from the binary file for "
                                     + "application release UUID " + applicationReleaseDTO.get().getUuid();
@@ -3300,6 +3317,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             }
                         }
                     }
+                } catch (StorageManagementException e) {
+                    String msg = "Error occurred while retrieving md5sum value from the binary file for "
+                            + "application release UUID " + applicationReleaseDTO.get().getUuid();
+                    log.error(msg, e);
+                    throw new ApplicationStorageManagementException(msg, e);
                 } catch (IOException e) {
                     String msg = "Error occurred when getting byte array of binary file. Installer name: "
                             + applicationArtifact.getInstallerName();
@@ -3327,11 +3349,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured when updating Ent Application release of UUID: " + releaseUuid;
+            String msg = "Error occurred when updating Ent Application release of UUID: " + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ResourceManagementException e) {
-            String msg = "Error occured when updating application release artifact in the file system. Ent App release "
+            String msg = "Error occurred when updating application release artifact in the file system. Ent App release "
                     + "UUID:" + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
@@ -3434,6 +3456,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int deviceTypeId = -1;
         String appName;
+        int appNameLength = 20;
         List<String> appCategories;
         List<String> unrestrictedRoles;
 
@@ -3442,6 +3465,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             appName = applicationWrapper.getName();
             if (StringUtils.isEmpty(appName)) {
                 String msg = "Application name cannot be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (appName.length() > appNameLength) {
+                String msg = "Application name must be less than or equal to 20 characters in length.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
@@ -3474,6 +3502,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             appName = webAppWrapper.getName();
             if (StringUtils.isEmpty(appName)) {
                 String msg = "Web Clip name cannot be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (appName.length() > appNameLength) {
+                String msg = "Application name must be less than or equal to 20 characters in length.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
@@ -3510,6 +3543,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
+            if (appName.length() > appNameLength) {
+                String msg = "Application name must be less than or equal to 20 characters in length.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
             appCategories = publicAppWrapper.getCategories();
             if (appCategories == null) {
                 String msg = "Application category can't be null.";
@@ -3539,6 +3577,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             appName = customAppWrapper.getName();
             if (StringUtils.isEmpty(appName)) {
                 String msg = "Application name cannot be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (appName.length() > appNameLength) {
+                String msg = "Application name must be less than or equal to 20 characters in length.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
@@ -3684,7 +3727,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new BadRequestException(msg);
             }
             if (StringUtils.isEmpty(webAppReleaseWrapper.getUrl())) {
-                String msg = "URL should't be null for the application release creating request for application type "
+                String msg = "URL shouldn't be null for the application release creating request for application type "
                         + "WEB_CLIP";
                 log.error(msg);
                 throw new BadRequestException(msg);
@@ -3864,11 +3907,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
-            String msg = "Error occured while updating app subscription status of the device.";
+            String msg = "Error occurred while updating app subscription status of the device.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while obersving the database connection to update aoo subscription status of "
+            String msg = "Error occurred while observing the database connection to update aoo subscription status of "
                     + "device.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
@@ -3895,11 +3938,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
-            String msg = "Error occured while updating app subscription status of the device.";
+            String msg = "Error occurred while updating app subscription status of the device.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while obersving the database connection to update aoo subscription status of "
+            String msg = "Error occurred while observing the database connection to update aoo subscription status of "
                     + "device.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);

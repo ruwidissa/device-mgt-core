@@ -125,11 +125,6 @@ public class DeviceManagementDAOFactory {
         return new EnrollmentDAOImpl();
     }
 
-    public static BillingDAO getBillingDAO() {
-        return new BillingDAOImpl();
-    }
-
-
     public static TrackerDAO getTrackerDAO() {
         if (databaseEngine != null) {
             switch (databaseEngine) {

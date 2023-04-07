@@ -37,33 +37,26 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import com.google.gson.Gson;
+import io.entgra.application.mgt.common.ApplicationInstallResponse;
+import io.entgra.application.mgt.common.SubscriptionType;
+import io.entgra.application.mgt.common.exception.SubscriptionManagementException;
 import io.entgra.application.mgt.common.services.ApplicationManager;
+import io.entgra.application.mgt.common.services.SubscriptionManager;
+import io.entgra.application.mgt.core.util.HelperUtil;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.keymgt.extension.DCRResponse;
+import org.wso2.carbon.apimgt.keymgt.extension.TokenRequest;
+import org.wso2.carbon.apimgt.keymgt.extension.TokenResponse;
+import org.wso2.carbon.apimgt.keymgt.extension.exception.KeyMgtException;
+import org.wso2.carbon.apimgt.keymgt.extension.service.KeyMgtService;
+import org.wso2.carbon.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.application.mgt.common.ApplicationInstallResponse;
-import io.entgra.application.mgt.common.SubscriptionType;
-import io.entgra.application.mgt.common.exception.SubscriptionManagementException;
-import io.entgra.application.mgt.common.services.SubscriptionManager;
-import io.entgra.application.mgt.core.util.HelperUtil;
-import org.wso2.carbon.device.mgt.common.DeviceFilters;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.OperationLogFilters;
-import org.wso2.carbon.device.mgt.common.MDMAppConstants;
-import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
-import org.wso2.carbon.device.mgt.common.Feature;
-import org.wso2.carbon.device.mgt.common.FeatureManager;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.TrackerDeviceInfo;
-import org.wso2.carbon.device.mgt.common.TrackerPermissionInfo;
+import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
@@ -72,12 +65,8 @@ import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshotWrapper;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
-import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
-import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
-import org.wso2.carbon.device.mgt.common.exceptions.UnAuthorizedException;
+import org.wso2.carbon.device.mgt.common.exceptions.*;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
@@ -91,6 +80,8 @@ import org.wso2.carbon.device.mgt.common.search.PropertyMap;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceStatus;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
+import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.dao.TrackerManagementDAOException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
@@ -103,19 +94,10 @@ import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientService;
-import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import org.wso2.carbon.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceCompliance;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ComplianceDeviceList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OperationList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationUninstallation;
+import org.wso2.carbon.device.mgt.jaxrs.beans.*;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -128,29 +110,17 @@ import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerSer
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
 import javax.validation.constraints.Size;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -199,10 +169,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("limit") int limit) {
         try {
             if (!StringUtils.isEmpty(name) && !StringUtils.isEmpty(role)) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("Request contains both name and role " +
-                                "parameters. Only one is allowed " +
-                                "at once.").build()).build();
+                String msg = "Request contains both name and role parameters. Only one is allowed at once.";
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
 //            RequestValidationUtil.validateSelectionCriteria(type, user, roleName, ownership, status);
             RequestValidationUtil.validatePaginationParameters(offset, limit);
@@ -291,9 +259,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 try {
                     sinceDate = format.parse(ifModifiedSince);
                 } catch (ParseException e) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage("Invalid date " +
-                                    "string is provided in 'If-Modified-Since' header").build()).build();
+                    String msg = "Invalid date string is provided in [If-Modified-Since] header";
+                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
                 }
                 request.setSince(sinceDate);
                 if (requireDeviceInfo) {
@@ -312,9 +279,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 try {
                     sinceDate = format.parse(since);
                 } catch (ParseException e) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage("Invalid date " +
-                                    "string is provided in 'since' filter").build()).build();
+                    String msg = "Invalid date string is provided in [since] filter";
+                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
                 }
                 request.setSince(sinceDate);
                 if (requireDeviceInfo) {
@@ -353,105 +319,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
-    }
-
-    @GET
-    @Override
-    @Path("/billing")
-    public Response getDevicesBilling(
-            @QueryParam("tenantDomain") String tenantDomain,
-            @QueryParam("startDate") Timestamp startDate,
-            @QueryParam("endDate") Timestamp endDate,
-            @QueryParam("generateBill") boolean generateBill,
-            @QueryParam("offset") int offset,
-            @DefaultValue("10")
-            @QueryParam("limit") int limit) {
-        try {
-            RequestValidationUtil.validatePaginationParameters(offset, limit);
-            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
-            PaginationRequest request = new PaginationRequest(offset, limit);
-            PaginationResult result;
-            DeviceList devices = new DeviceList();
-            int tenantId = 0;
-            RealmService realmService = DeviceMgtAPIUtils.getRealmService();
-
-            if (!tenantDomain.isEmpty()) {
-                tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
-            } else {
-                tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            }
-
-            try {
-                result = dms.getAllDevicesBillings(request, tenantId, tenantDomain, startDate, endDate, generateBill);
-            } catch (Exception exception) {
-                String msg = "Error occurred when trying to retrieve billing data";
-                log.error(msg, exception);
-                return Response.serverError().entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-            }
-
-            int resultCount = result.getRecordsTotal();
-            if (resultCount == 0) {
-                Response.status(Response.Status.OK).entity(devices).build();
-            }
-
-            devices.setList((List<Device>) result.getData());
-            devices.setBilledDateIsValid(result.isBilledDateIsValid());
-            devices.setMessage(result.getMessage());
-            devices.setCount(result.getRecordsTotal());
-            devices.setTotalCost(result.getTotalCost());
-            return Response.status(Response.Status.OK).entity(devices).build();
-        } catch (Exception e) {
-            String msg = "Error occurred while retrieving billing data";
-            log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-        }
-    }
-
-    @GET
-    @Override
-    @Path("/billing/file")
-    public Response exportBilling(
-            @QueryParam("tenantDomain") String tenantDomain,
-            @QueryParam("startDate") Timestamp startDate,
-            @QueryParam("endDate") Timestamp endDate,
-            @QueryParam("generateBill") boolean generateBill) {
-
-        try {
-            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
-            PaginationResult result;
-            int tenantId = 0;
-            RealmService realmService = DeviceMgtAPIUtils.getRealmService();
-            DeviceList devices = new DeviceList();
-
-            if (!tenantDomain.isEmpty()) {
-                tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
-            } else {
-                tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            }
-
-            try {
-                result = dms.createBillingFile(tenantId, tenantDomain, startDate, endDate, generateBill);
-
-            } catch (Exception exception) {
-                String msg = "Error occurred when trying to retrieve billing data without pagination";
-                log.error(msg, exception);
-                return null;
-            }
-
-            devices.setList((List<Device>) result.getData());
-            devices.setBilledDateIsValid(result.isBilledDateIsValid());
-            devices.setMessage(result.getMessage());
-            devices.setCount(result.getRecordsTotal());
-            devices.setTotalCost(result.getTotalCost());
-            return Response.status(Response.Status.OK).entity(devices).build();
-        } catch (Exception e) {
-            String msg = "Error occurred while retrieving billing data without pagination";
-            log.error(msg, e);
-            return null;
-        }
-
     }
 
     @GET
@@ -646,6 +513,10 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 String msg = "Error occurred while retrieving role list of user '" + authorizedUser + "'";
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }catch (BadRequestException e){
+                String msg = "Error occurred while validating the device group.";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
 
             PaginationResult result = dms.getAllDevices(request, false);
@@ -662,7 +533,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             }
             return Response.status(Response.Status.OK).entity(devices).build();
         } catch (BadRequestException e) {
-            String msg = "Invalid type, use either 'path' or 'full'";
+            String msg = "Invalid type, use either [path] or [full]";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (UnAuthorizedException e) {
@@ -696,12 +567,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             boolean response = deviceManagementProviderService.disenrollDevice(deviceIdentifier);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (DeviceManagementException e) {
-            String msg = "Error encountered while deleting device of type : " + deviceType + " and " +
-                    "ID : " + deviceId;
+            String msg = "Error encountered while deleting requested device of type : " + deviceType ;
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()
-            ).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -715,15 +583,17 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             Device persistedDevice = deviceManagementProviderService.getDevice(new DeviceIdentifier
                     (deviceId, deviceType), true);
             persistedDevice.setName(device.getName());
-            boolean response = deviceManagementProviderService.modifyEnrollment(persistedDevice);
-            return Response.status(Response.Status.CREATED).entity(response).build();
+            System.out.println("This is rename device");
+            boolean responseOfmodifyEnrollment = deviceManagementProviderService.modifyEnrollment(persistedDevice);
+            boolean responseOfDeviceNameChanged = deviceManagementProviderService.sendDeviceNameChangedNotification(
+                    persistedDevice);
+            boolean response = responseOfmodifyEnrollment && responseOfDeviceNameChanged;
 
+            return Response.status(Response.Status.CREATED).entity(response).build();
         } catch (DeviceManagementException e) {
-            log.error("Error encountered while updating device of type : " + deviceType + " and " +
-                    "ID : " + deviceId);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage("Error while updating " +
-                            "device of type " + deviceType + " and ID : " + deviceId).build()).build();
+            String msg = "Error encountered while updating requested device of type : " + deviceType ;
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -764,10 +634,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     sinceDate = format.parse(ifModifiedSince);
                     deviceData.setLastModifiedDate(sinceDate);
                 } catch (ParseException e) {
-                    String msg = "Invalid date string is provided in 'If-Modified-Since' header";
+                    String msg = "Invalid date string is provided in [If-Modified-Since] header";
                     log.error(msg, e);
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
                 }
             }
 
@@ -794,9 +663,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 return Response.status(Response.Status.NOT_MODIFIED).entity("No device is modified " +
                         "after the timestamp provided in 'If-Modified-Since' header").build();
             }
-            return Response.status(Response.Status.NOT_FOUND).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_NOT_FOUND).setMessage("Requested device of type '" +
-                            type + "', which carries id '" + id + "' does not exist").build()).build();
+            String msg = "Requested device of type " + type + " does not exist";
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
         return Response.status(Response.Status.OK).entity(device).build();
     }
@@ -817,7 +685,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     dms);
             return Response.status(Response.Status.OK).entity(snapshotWrapper).build();
         } catch (BadRequestException e) {
-            String msg = "Invalid type, use either 'path' or 'full'";
+            String msg = "Invalid type, use either [path] or [full]";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (UnAuthorizedException e) {
@@ -863,12 +731,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 try {
                     sinceDate = format.parse(ifModifiedSince);
                 } catch (ParseException e) {
-                    String message = "Error occurred while parse the since date.Invalid date string is provided in " +
-                            "'If-Modified-Since' header";
+                    String message = "Invalid date string is provided in [If-Modified-Since] header";
                     log.error(message, e);
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage("Invalid date " +
-                                    "string is provided in 'If-Modified-Since' header").build()).build();
+                    return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
                 }
             }
             if (sinceDate != null) {
@@ -877,16 +742,15 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     String message = "No device is modified after the timestamp provided in 'If-Modified-Since' header";
                     log.error(message);
                     return Response.status(Response.Status.NOT_MODIFIED).entity("No device is modified " +
-                            "after the timestamp provided in 'If-Modified-Since' header").build();
+                            "after the timestamp provided in [If-Modified-Since] header").build();
                 }
             } else {
                 device = dms.getDevice(id, requireDeviceInfo);
             }
             if (device == null) {
-                String message = "Device does not exist with id '" + id + "'";
+                String message = "Device does not exist";
                 log.error(message);
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(404l).setMessage(message).build()).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(message).build();
             }
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(id, device.getType());
             // check whether the user is authorized
@@ -912,13 +776,39 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     }
 
     @POST
+    @Path("/enrollment/guide")
+    @Override
+    public Response sendEnrollmentGuide(String enrolmentGuide) {
+        if (log.isDebugEnabled()) {
+            log.debug("Sending enrollment invitation mail to existing user.");
+        }
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        if (!config.getEnrollmentGuideConfiguration().isEnabled()) {
+            String msg = "Sending enrollment guide config is not enabled.";
+            log.error(msg);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        }
+        DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+        try {
+            dms.sendEnrolmentGuide(enrolmentGuide);
+            return Response.status(Response.Status.OK).entity("Invitation mails have been sent.").build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred  sending mail to group in enrollment guide";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+
+    @POST
     @Path("/type/any/list")
     @Override
     public Response getDeviceByIdList(List<String> deviceIds) {
         DeviceManagementProviderService deviceManagementProviderService =
                 DeviceMgtAPIUtils.getDeviceManagementService();
         if (deviceIds == null || deviceIds.isEmpty()) {
-            String msg = "Required values of device identifiers are not set..";
+            String msg = "Required values of device identifiers are not set.";
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -983,33 +873,130 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         return Response.status(Response.Status.OK).entity(deviceInfo).build();
 
     }
+    @GET
+    @Path("/{type}/{id}/config")
+    @Override
+    public Response getDeviceConfiguration(
+            @PathParam("type") @Size(max = 45) String type,
+            @PathParam("id") @Size(max = 45) String id,
+            @HeaderParam("If-Modified-Since") String ifModifiedSince) {
+
+        DeviceConfig deviceConfig = new DeviceConfig();
+        deviceConfig.setDeviceId(id);
+        deviceConfig.setType(type);
+
+        // find token validity time
+        DeviceManagementProviderService deviceManagementProviderService =
+                DeviceMgtAPIUtils.getDeviceManagementService();
+        int validityTime = 3600;
+        // add scopes for event topics
+        List<String> mqttEventTopicStructure = new ArrayList<>();
+        try {
+            DeviceType deviceType = deviceManagementProviderService.getDeviceType(type);
+            if (deviceType != null) {
+                if (deviceType.getDeviceTypeMetaDefinition().isLongLivedToken()) {
+                    validityTime = Integer.MAX_VALUE;
+                }
+                mqttEventTopicStructure = deviceType.getDeviceTypeMetaDefinition().getMqttEventTopicStructures();
+            } else {
+                String msg = "Device not found, device id : " +  id + ", device type : " + type;
+                log.error(msg);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retrieving device, device id : " +  id + ", device type : " + type;
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        String applicationName = type.replace(" ", "").replace("_", "")
+                + "_" + tenantDomain;
+
+        KeyMgtService keyMgtService = new KeyMgtServiceImpl();
+        try {
+            DCRResponse dcrResponse = keyMgtService.dynamicClientRegistration(applicationName, username,
+                    "client_credentials", null, new String[] {"device_management"}, false, validityTime);
+            deviceConfig.setClientId(dcrResponse.getClientId());
+            deviceConfig.setClientSecret(dcrResponse.getClientSecret());
+
+            StringBuilder scopes = new StringBuilder("device_" + type.replace(" ", "")
+                    .replace("_", "") + "_" + id);
+            for (String topic : mqttEventTopicStructure) {
+                if (topic.contains("${deviceId}")) {
+                    topic = topic.replace("${deviceId}", id);
+                }
+                topic = topic.replace("/",":");
+//                scopes.append(" perm:topic:sub:".concat(topic));
+                scopes.append(" perm:topic:pub:".concat(topic));
+            }
+
+            // add scopes for retrieve operation topic /tenantDomain/deviceType/deviceId/operation/#
+            scopes.append(" perm:topic:sub:" + tenantDomain + ":" + type + ":" + id + ":operation");
+
+            // add scopes for update operation /tenantDomain/deviceType/deviceId/update/operation
+            scopes.append(" perm:topic:pub:" + tenantDomain + ":" + type + ":" + id + ":update:operation");
+
+            TokenRequest tokenRequest = new TokenRequest(dcrResponse.getClientId(), dcrResponse.getClientSecret(),
+                    null, scopes.toString(), "client_credentials", null,
+                    null, null, null,  validityTime);
+            TokenResponse tokenResponse = keyMgtService.generateAccessToken(tokenRequest);
+            deviceConfig.setAccessToken(tokenResponse.getAccessToken());
+            deviceConfig.setRefreshToken(tokenResponse.getRefreshToken());
+
+            try {
+                deviceConfig.setPlatformConfiguration(deviceManagementProviderService.getConfiguration(type));
+            } catch (DeviceManagementException e) {
+                String msg = "Error occurred while reading platform configurations token, device id : " +  id + ", device type : " + type;
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+
+            deviceConfig.setMqttGateway("tcp://" + System.getProperty("mqtt.broker.host") + ":" + System.getProperty("mqtt.broker.port"));
+            deviceConfig.setHttpGateway("http://" + System.getProperty("iot.gateway.host") + ":" + System.getProperty("iot.gateway.http.port"));
+            deviceConfig.setHttpsGateway("https://" + System.getProperty("iot.gateway.host") + ":" + System.getProperty("iot.gateway.https.port"));
+
+        } catch (KeyMgtException e) {
+            String msg = "Error occurred while creating oauth application, device id : " +  id + ", device type : " + type;
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (org.wso2.carbon.apimgt.keymgt.extension.exception.BadRequestException e) {
+            String msg = "Error occurred while generating token, device id : " +  id + ", device type : " + type;
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+        return Response.status(Response.Status.OK).entity(deviceConfig).build();
+
+    }
 
     @GET
-    @Path("/{type}/{id}/features")
+    @Path("/device-type/{type}/features")
     @Override
     public Response getFeaturesOfDevice(
             @PathParam("type") @Size(max = 45) String type,
-            @PathParam("id") @Size(max = 45) String id,
             @HeaderParam("If-Modified-Since") String ifModifiedSince) {
         List<Feature> features = new ArrayList<>();
         DeviceManagementProviderService dms;
         try {
-            RequestValidationUtil.validateDeviceIdentifier(type, id);
             dms = DeviceMgtAPIUtils.getDeviceManagementService();
             FeatureManager fm;
             try {
                 fm = dms.getFeatureManager(type);
             } catch (DeviceTypeNotFoundException e) {
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder()
-                                .setMessage("No device type found with name '" + type + "'").build()).build();
+                String msg = "No device type found with name : " + type ;
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
             if (fm != null) {
                 features = fm.getFeatures();
             }
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while retrieving the list of features of '" + type + "' device, which " +
-                    "carries the id '" + id + "'";
+            String msg = "Error occurred while retrieving the list of features of '" + type + "'";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -1224,8 +1211,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (InputValidationException e) {
-            String msg = "Error occurred while fetching the operations for the '" + type + "' device, which " +
-                    "carries the id '" + id + "'";
+            String msg = "Error occurred while fetching the operations for the type : " + type + " device";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (DeviceManagementException e) {
@@ -1234,7 +1220,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (DeviceTypeNotFoundException e) {
-            String msg = "No device type found with name '" + type + "'";
+            String msg = "No device type found with name : " + type ;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
@@ -1344,11 +1330,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             boolean response = deviceManagementProviderService.changeDeviceStatus(deviceIdentifier, newsStatus);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while changing device status of type : " + type + " and " +
-                    "device id : " + id;
+            String msg = "Error occurred while changing device status of device type : " + type ;
             log.error(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -1360,7 +1344,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
      * @return {@link Response} object
      */
     @GET
-    @Path("/{type}/{id}/getstatushistory")
+    @Path("/{type}/{id}/status-history")
     public Response getDeviceStatusHistory(@PathParam("type") @Size(max = 45) String type,
                                            @PathParam("id") @Size(max = 45) String id) {
         //TODO check authorization for this
@@ -1376,11 +1360,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             List<DeviceStatus> deviceStatusHistory = deviceManagementProviderService.getDeviceStatusHistory(persistedDevice);
             return Response.status(Response.Status.OK).entity(deviceStatusHistory).build();
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while retreiving device status history for device of type : " + type + " and " +
-                    "device id : " + id;
+            String msg = "Error occurred while retrieving device status history for device of type : " + type ;
             log.error(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -1392,7 +1374,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
      * @return {@link Response} object
      */
     @GET
-    @Path("/{type}/{id}/getenrolmentstatushistory")
+    @Path("/{type}/{id}/enrolment-status-history")
     public Response getCurrentEnrolmentDeviceStatusHistory(@PathParam("type") @Size(max = 45) String type,
                                                            @PathParam("id") @Size(max = 45) String id) {
         //TODO check authorization for this or current enrolment should be based on for the enrolment associated with the user
@@ -1408,11 +1390,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             List<DeviceStatus> deviceStatusHistory = deviceManagementProviderService.getDeviceCurrentEnrolmentStatusHistory(persistedDevice);
             return Response.status(Response.Status.OK).entity(deviceStatusHistory).build();
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while retreiving device status history for device of type : " + type + " and " +
-                    "device id : " + id;
+            String msg = "Error occurred while retrieving device status history for device of type : " + type;
             log.error(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -1489,7 +1469,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
         } catch (DeviceManagementException e) {
-            String errorMessage = "Issue in retrieving deivce management service instance";
+            String errorMessage = "Issue in retrieving device management service instance";
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
@@ -1689,7 +1669,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             DeviceType deviceTypeObj = DeviceManagerUtil.getDeviceType(
                     deviceType, tenantId);
             if (deviceTypeObj == null) {
-                String msg = "Error, device of type: " + deviceType + " does not exist";
+                String msg = "Device of type: " + deviceType + " does not exist";
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }

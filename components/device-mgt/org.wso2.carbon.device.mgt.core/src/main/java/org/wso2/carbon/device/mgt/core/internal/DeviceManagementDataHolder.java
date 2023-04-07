@@ -19,6 +19,7 @@
 package org.wso2.carbon.device.mgt.core.internal;
 
 import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
@@ -26,14 +27,18 @@ import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorization
 import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManager;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
+import org.wso2.carbon.device.mgt.common.spi.TraccarManagementService;
 import org.wso2.carbon.device.mgt.core.app.mgt.config.AppManagementConfig;
 import org.wso2.carbon.device.mgt.core.config.license.LicenseConfig;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import org.wso2.carbon.device.mgt.core.geo.task.GeoFenceEventOperationManager;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.operation.timeout.task.OperationTimeoutTaskManagerService;
 import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
 import org.wso2.carbon.device.mgt.core.push.notification.mgt.PushNotificationProviderRepository;
@@ -69,7 +74,7 @@ public class DeviceManagementDataHolder {
     private AppManagementConfig appManagerConfig;
     private OperationManager operationManager;
     private ConfigurationContextService configurationContextService;
-    private final HashMap<String,Boolean> requireDeviceAuthorization = new HashMap<>();
+    private final HashMap<String, Boolean> requireDeviceAuthorization = new HashMap<>();
     private DeviceAccessAuthorizationService deviceAccessAuthorizationService;
     private GroupManagementProviderService groupManagementProviderService;
     private TaskService taskService;
@@ -85,17 +90,21 @@ public class DeviceManagementDataHolder {
     private ExecutorService eventConfigExecutors;
     private OperationTimeoutTaskManagerService operationTimeoutTaskManagerService;
     private DeviceAPIClientService deviceAPIClientService;
+    private MetadataManagementService metadataManagementService;
+    private WhiteLabelManagementService whiteLabelManagementService;
+    private TraccarManagementService traccarManagementService;
 
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
 
     private final Map<String, OperationMonitoringTaskConfig> map = new HashMap<>();
 
-    public Map<String, OperationMonitoringTaskConfig> getMap(){
+    public Map<String, OperationMonitoringTaskConfig> getMap() {
         return this.map;
     }
 
-    private DeviceManagementDataHolder() {}
+    private DeviceManagementDataHolder() {
+    }
 
     public static DeviceManagementDataHolder getInstance() {
         return thisInstance;
@@ -204,7 +213,7 @@ public class DeviceManagementDataHolder {
     }
 
     public void setRequireDeviceAuthorization(String pluginType, boolean requireAuthentication) {
-        requireDeviceAuthorization.put(pluginType,requireAuthentication);
+        requireDeviceAuthorization.put(pluginType, requireAuthentication);
     }
 
     public boolean requireDeviceAuthorization(String pluginType) {
@@ -358,5 +367,37 @@ public class DeviceManagementDataHolder {
 
     public void setDeviceAPIClientService(DeviceAPIClientService deviceAPIClientService) {
         this.deviceAPIClientService = deviceAPIClientService;
+    }
+
+    public MetadataManagementService getMetadataManagementService() {
+        return metadataManagementService;
+    }
+
+    public void setMetadataManagementService(MetadataManagementService metadataManagementService) {
+        this.metadataManagementService = metadataManagementService;
+    }
+
+    public WhiteLabelManagementService getWhiteLabelManagementService() {
+        return whiteLabelManagementService;
+    }
+
+    public void setWhiteLabelManagementService(WhiteLabelManagementService whiteLabelManagementService) {
+        this.whiteLabelManagementService = whiteLabelManagementService;
+    }
+
+    public TraccarManagementService getTraccarManagementService() {
+        TraccarManagementService traccarManagementService;
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        traccarManagementService = (TraccarManagementService) ctx.getOSGiService(
+                TraccarManagementService.class, null);
+        if (traccarManagementService == null) {
+            String msg = "Traccar management service not initialized.";
+            throw new IllegalStateException(msg);
+        }
+        return traccarManagementService;
+    }
+
+    public void setTraccarManagementService(TraccarManagementService traccarManagementService) {
+        this.traccarManagementService = traccarManagementService;
     }
 }

@@ -256,10 +256,14 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         keyManagerId = keyManagerConfigurationDTO.getUuid();
                     }
                 }
+                String applicationAccessTokenExpiryTime = "N/A";
+                if (!StringUtils.isEmpty(validityTime)) {
+                    applicationAccessTokenExpiryTime = validityTime;
+                }
                 String jsonString = "{\"grant_types\":\"refresh_token,access_token," +
                         "urn:ietf:params:oauth:grant-type:saml2-bearer," +
                         "password,client_credentials,iwa:ntlm,urn:ietf:params:oauth:grant-type:jwt-bearer\"," +
-                        "\"additionalProperties\":\"{\\\"application_access_token_expiry_time\\\":\\\"N\\/A\\\"," +
+                        "\"additionalProperties\":\"{\\\"application_access_token_expiry_time\\\":\\\"" + applicationAccessTokenExpiryTime + "\\\"," +
                         "\\\"user_access_token_expiry_time\\\":\\\"N\\/A\\\"," +
                         "\\\"refresh_token_expiry_time\\\":\\\"N\\/A\\\"," +
                         "\\\"id_token_expiry_time\\\":\\\"N\\/A\\\"}\"," +

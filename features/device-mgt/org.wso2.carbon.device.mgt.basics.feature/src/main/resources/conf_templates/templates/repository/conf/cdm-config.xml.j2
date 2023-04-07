@@ -165,6 +165,17 @@
         <Capacity>10000</Capacity>
         {% endif %}
     </GeoFenceCacheConfiguration>
+    <BillingCacheConfiguration>
+        {% if device_mgt_conf.billing_cache_conf is defined %}
+        <Enable>{{device_mgt_conf.billing_cache_conf.enable}}</Enable>
+        <ExpiryTime>{{device_mgt_conf.billing_cache_conf.expiry_time}}</ExpiryTime>
+        <Capacity>{{device_mgt_conf.billing_cache_conf.capacity}}</Capacity>
+        {% else %}
+        <Enable>true</Enable>
+        <ExpiryTime>600</ExpiryTime>
+        <Capacity>10000</Capacity>
+        {% endif %}
+    </BillingCacheConfiguration>
     <EventOperationTaskConfiguration>
         {% if device_mgt_conf.event_operation_task_conf is defined %}
         <Enable>{{device_mgt_conf.event_operation_task_conf.enable}}</Enable>
@@ -311,7 +322,26 @@
             </Role>
         </Roles>
     </DefaultRoles>
-     <OperationTimeoutConfigurations>
+    <MetaDataConfiguration>
+        <WhiteLabelConfiguration>
+            <FooterText>
+            &lt;a href='https://entgra.io' target='_blank'&gt;
+              Entgra
+            &lt;/a&gt;
+            IoT Server 5.2.0 |  &#169; 2023
+            , All Rights Reserved.
+            </FooterText>
+            <AppTitle>Entgra</AppTitle>
+            <WhiteLabelImages>
+                <StoragePath>repository/resources/whitelabel</StoragePath>
+                <DefaultFaviconName>favicon.png</DefaultFaviconName>
+                <DefaultLogoName>logo.png</DefaultLogoName>
+                <DefaultLogoIconName>icon.png</DefaultLogoIconName>
+                <DefaultImagesLocation>default</DefaultImagesLocation>
+            </WhiteLabelImages>
+        </WhiteLabelConfiguration>
+    </MetaDataConfiguration>
+    <OperationTimeoutConfigurations>
             <OperationTimeouts>
             <!--<OperationTimeout>-->
                 <!--<DeviceTypes>-->
@@ -339,6 +369,15 @@
                 {% endfor %}
                 {% endif%}
             </OperationTimeouts>
-        </OperationTimeoutConfigurations>
+    </OperationTimeoutConfigurations>
+    <EnrollmentGuideConfiguration>
+            {% if device_mgt_conf.enrollment_guide_conf is defined %}
+            <Enable>{{device_mgt_conf.enrollment_guide_conf.enable}}</Enable>
+            <Mail>{{device_mgt_conf.enrollment_guide_conf.mail}}</Mail>
+            {% else %}
+            <Enable>false</Enable>
+            <Mail>Replace with mail</Mail>
+            {% endif %}
+    </EnrollmentGuideConfiguration>
 </DeviceMgtConfiguration>
 

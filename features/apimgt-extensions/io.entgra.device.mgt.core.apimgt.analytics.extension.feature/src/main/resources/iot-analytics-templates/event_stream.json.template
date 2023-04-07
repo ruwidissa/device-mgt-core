@@ -1,0 +1,26 @@
+{
+  "streamId": "$name:$version",
+  "name": "$name",
+  "version": "$version",
+  "nickName": "",
+  "description": "",
+  "metaData": [
+    {
+      "name": "${metaData.name}",
+      "type": "${metaData.type}"
+    }
+  ],
+  "correlationData": [],
+  "payloadData": [
+#foreach( $property in $properties )
+    {
+      "name": "${property.name}",
+      "type": "${property.value}"
+    },
+#end
+    {
+      "name": "ts",
+      "type": "LONG"
+    }
+  ]
+}

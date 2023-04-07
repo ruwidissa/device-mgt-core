@@ -19,6 +19,7 @@
 package org.wso2.carbon.policy.mgt.common;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Profile;
 
@@ -164,5 +165,12 @@ public interface PolicyAdministratorPoint {
      */
     List<Policy> getPolicies(String policyType) throws PolicyManagementException;
 
-    List<Policy> getPolicyList() throws PolicyManagementException;
+    /**
+     * Returns a list of policies filtered by offset and limit
+     * @param request {@link PaginationRequest} contains offset and limit
+     * @return {@link List<Policy>} - list of policies for current tenant
+     * @throws PolicyManagementException when there is an error while retrieving the policies from database or
+     * while retrieving device groups
+     */
+    List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException;
 }

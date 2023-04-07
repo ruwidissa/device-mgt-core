@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Profile;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
@@ -334,7 +335,7 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
     }
 
     @Override
-    public List<Policy> getPolicyList() throws PolicyManagementException {
-        return policyManager.getPolicyList();
+    public List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException {
+        return policyManager.getPolicyList(request);
     }
 }

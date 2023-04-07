@@ -44,6 +44,7 @@ public class PaginationRequest {
     private Map<String, Object> property = new HashMap<>();
     private List<String> statusList = new ArrayList<>();
     private OperationLogFilters operationLogFilters = new OperationLogFilters();
+    private List<SortColumn> sortColumn = new ArrayList<>();
     public OperationLogFilters getOperationLogFilters() {
         return operationLogFilters;
     }
@@ -172,11 +173,38 @@ public class PaginationRequest {
         this.filter = filter;
     }
 
+    public void setSortColumn(List<SortColumn> sortColumn) { this.sortColumn = sortColumn; }
+
+    public List<SortColumn> getSortColumn() { return sortColumn; }
+
+    /**
+     * Convert SortColumns field parameter and splitting string into columnName and sortType
+     *
+     * @param sortColumns which is separated by a colon(:) and first will be the columnNane and the second will be type ASC or DESC,
+     *                    if there is no colon(:) detected, ASC will be default
+     *                    (Ex: sort=col1:ASC&sort=col2:DESC, sort=col1&sort=col2:DESC)
+     * @return sortColumnList as a list of sortColumn
+     */
+    public void setSortColumns(List<String> sortColumns) {
+        List<SortColumn> sortColumnList = new ArrayList<>();
+        SortColumn sortColumn;
+        String[] sorting;
+        for (String sortBy: sortColumns) {
+            sortColumn = new SortColumn();
+            sorting = sortBy.split(":");
+            sortColumn.setName(sorting[0]);
+            sortColumn.setType(sorting.length >= 2 && (sorting[1].equalsIgnoreCase("desc"))
+                    ? SortColumn.types.DESC : SortColumn.types.ASC);
+            sortColumnList.add(sortColumn);
+        }
+        setSortColumn(sortColumnList);
+    }
+
     @Override
     public String toString() {
         return "Device type '" + this.deviceType + "' Device Name '" + this.deviceName + "' row count: " + this.rowCount
                 + " Owner role '" + this.ownerRole + "' owner pattern '" + this.ownerPattern + "' ownership "
                 + this.ownership + "' Status '" + this.statusList + "' owner '" + this.owner + "' groupId: " + this.groupId
-                + " start index: " + this.startIndex;
+                + " start index: " + this.startIndex + ", SortColumns: " + this.sortColumn;
     }
 }

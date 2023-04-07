@@ -58,7 +58,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             applicationManager.addAppToFavourites(appId);
             return Response.status(Response.Status.OK).build();
         } catch (BadRequestException e) {
-            String msg = "Invalid payload found in the request. Hence verify the request payload.";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -78,7 +78,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             applicationManager.removeAppFromFavourites(appId);
             return Response.status(Response.Status.OK).build();
         } catch (BadRequestException e) {
-            String msg = "Invalid payload found in the request. Hence verify the request payload.";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -147,7 +147,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 String msg = "Could not found an application release which is in " + applicationManager
                         .getInstallableLifecycleState() + " state.";
                 log.error(msg);
-                return Response.status(Response.Status.OK).entity(msg).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
             return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {

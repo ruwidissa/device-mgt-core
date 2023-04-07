@@ -37,7 +37,6 @@ import org.wso2.carbon.device.mgt.core.task.impl.DynamicPartitionedScheduleTask;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This implements the Task service which monitors the device activity periodically & update the device-status if
@@ -47,18 +46,7 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
 
     private static final Log log = LogFactory.getLog(DeviceStatusMonitoringTask.class);
     private String deviceType;
-    private DeviceStatusTaskPluginConfig deviceStatusTaskPluginConfig;
     private int deviceTypeId = -1;
-
-    @Override
-    public void setProperties(Map<String, String> properties) {
-        super.setProperties(properties);
-        deviceType = properties.get(DeviceStatusTaskManagerServiceImpl.DEVICE_TYPE);
-        deviceTypeId = Integer.parseInt(properties.get(DeviceStatusTaskManagerServiceImpl.DEVICE_TYPE_ID));
-        String deviceStatusTaskConfigStr = properties.get(DeviceStatusTaskManagerServiceImpl.DEVICE_STATUS_TASK_CONFIG);
-        Gson gson = new Gson();
-        deviceStatusTaskPluginConfig = gson.fromJson(deviceStatusTaskConfigStr, DeviceStatusTaskPluginConfig.class);
-    }
 
     @Override
     protected void setup() {
@@ -92,6 +80,11 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
 
     @Override
     public void executeDynamicTask() {
+        deviceType = getProperty(DeviceStatusTaskManagerServiceImpl.DEVICE_TYPE);
+        deviceTypeId = Integer.parseInt(getProperty(DeviceStatusTaskManagerServiceImpl.DEVICE_TYPE_ID));
+        String deviceStatusTaskConfigStr = getProperty(DeviceStatusTaskManagerServiceImpl.DEVICE_STATUS_TASK_CONFIG);
+        Gson gson = new Gson();
+        DeviceStatusTaskPluginConfig deviceStatusTaskPluginConfig = gson.fromJson(deviceStatusTaskConfigStr, DeviceStatusTaskPluginConfig.class);
         try {
             List<EnrolmentInfo> enrolmentInfoTobeUpdated = new ArrayList<>();
             List<DeviceMonitoringData> allDevicesForMonitoring = getAllDevicesForMonitoring();
@@ -102,10 +95,10 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
 
                 EnrolmentInfo enrolmentInfo = monitoringData.getDevice().getEnrolmentInfo();
                 EnrolmentInfo.Status status = null;
-                if (lastUpdatedTime >= this.deviceStatusTaskPluginConfig
+                if (lastUpdatedTime >= deviceStatusTaskPluginConfig
                         .getIdleTimeToMarkInactive()) {
                     status = EnrolmentInfo.Status.INACTIVE;
-                } else if (lastUpdatedTime >= this.deviceStatusTaskPluginConfig
+                } else if (lastUpdatedTime >= deviceStatusTaskPluginConfig
                         .getIdleTimeToMarkUnreachable()) {
                     status = EnrolmentInfo.Status.UNREACHABLE;
                 }
