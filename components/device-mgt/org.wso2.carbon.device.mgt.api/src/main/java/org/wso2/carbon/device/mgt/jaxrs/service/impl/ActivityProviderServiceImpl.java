@@ -74,9 +74,9 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                 dmService = DeviceMgtAPIUtils.getDeviceManagementService();
                 activity = dmService.getOperationByActivityId(id);
                 if (activity == null) {
-                    return Response.status(404).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage("No activity can be " +
-                                    "found upon the provided activity id '" + id + "'").build()).build();
+                    String msg = "No activity can be " +
+                            "found upon the provided activity id '" + id + "'";
+                    return Response.status(404).entity(msg).build();
                 }
                 return Response.status(Response.Status.OK).entity(activity).build();
             } catch (OperationManagementException e) {
@@ -98,10 +98,9 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
         List<String> idList;
         idList = activityIdList.getIdList();
         if (idList == null || idList.isEmpty()) {
-            String msg = "Activity Ids shouldn't be empty";
+            String msg = "Activities should not be empty";
             log.error(msg);
-            return Response.status(400).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(400).entity(msg).build();
         }
         Response validationFailedResponse = validateAdminPermission();
         if (validationFailedResponse == null) {
@@ -125,8 +124,7 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                 } else {
                     String msg = "No activity found with the given IDs.";
                     log.error(msg);
-                    return Response.status(404).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+                    return Response.status(404).entity(msg).build();
                 }
             } catch (OperationManagementException e) {
                 String msg = "ErrorResponse occurred while fetching the activity list for the supplied ids.";
@@ -162,9 +160,9 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
             dmService = DeviceMgtAPIUtils.getDeviceManagementService();
             activity = dmService.getOperationByActivityIdAndDevice(id, deviceIdentifier);
             if (activity == null) {
-                return Response.status(404).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("No activity can be " +
-                                "found upon the provided activity id '" + id + "'").build()).build();
+                String msg = "No activity can be " +
+                        "found upon the provided activity id '" + id + "'";
+                return Response.status(404).entity(msg).build();
             }
             return Response.status(Response.Status.OK).entity(activity).build();
         } catch (OperationManagementException e) {
@@ -247,9 +245,8 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
             try {
                 ifSinceDate = format.parse(ifModifiedSince);
             } catch (ParseException e) {
-                return Response.status(400).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage(
-                                "Invalid date string is provided in 'If-Modified-Since' header").build()).build();
+                String msg = "Invalid date string is provided in [If-Modified-Since] header.";
+                return Response.status(400).entity(msg).build();
             }
             ifModifiedSinceTimestamp = ifSinceDate.getTime();
             timestamp = ifModifiedSinceTimestamp / 1000;
@@ -259,9 +256,8 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
             try {
                 sinceDate = format.parse(since);
             } catch (ParseException e) {
-                return Response.status(400).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage(
-                                "Invalid date string is provided in 'since' filter").build()).build();
+                String msg = "Invalid date string is provided in [since] filter.";
+                return Response.status(400).entity(msg).build();
             }
             sinceTimestamp = sinceDate.getTime();
             timestamp = sinceTimestamp / 1000;

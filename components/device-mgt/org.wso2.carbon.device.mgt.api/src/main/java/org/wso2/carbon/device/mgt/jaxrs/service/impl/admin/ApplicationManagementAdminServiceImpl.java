@@ -81,9 +81,8 @@ public class ApplicationManagementAdminServiceImpl implements ApplicationManagem
                         applicationWrapper.getDeviceIdentifiers().size() > 0) {
                     activity = appManagerConnector.installApplicationForDevices(operation, applicationWrapper.getDeviceIdentifiers());
                 } else {
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage(
-                                    "No application installation criteria i.e. user/role/device is given").build()).build();
+                    String msg = "No application installation criteria i.e. user/role/device is given";
+                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
                 }
             }
             return Response.status(Response.Status.ACCEPTED).entity(activity).build();
@@ -131,9 +130,8 @@ public class ApplicationManagementAdminServiceImpl implements ApplicationManagem
                         applicationWrapper.getDeviceIdentifiers().size() > 0) {
                     activity = appManagerConnector.installApplicationForDevices(operation, applicationWrapper.getDeviceIdentifiers());
                 } else {
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage(
-                                    "No application un-installation criteria i.e. user/role/device is given").build()).build();
+                    String msg = "No application un-installation criteria i.e. user/role/device is given";
+                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
                 }
             }
             return Response.status(Response.Status.ACCEPTED).entity(activity).build();

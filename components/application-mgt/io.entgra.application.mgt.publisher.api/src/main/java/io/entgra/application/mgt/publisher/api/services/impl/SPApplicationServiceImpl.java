@@ -96,6 +96,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         } catch (NotFoundException e) {
             String msg = "Identity server with the id " + id + " does not exist.";
             log.error(msg, e);
+            // TODO : the correct way is to use the NOT_FOUND response here. In order to do it changes are needed for the UI code as well
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
@@ -115,6 +116,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         } catch (NotFoundException e) {
             String msg = "Identity server with the id " + id + " does not exist.";
             log.error(msg, e);
+            // TODO : the correct way is to use the NOT_FOUND response here. In order to do it changes are needed for the UI code as well
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
@@ -134,9 +136,10 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         } catch (NotFoundException e) {
             String msg = "Identity server with the id " + id + " does not exist.";
             log.error(msg, e);
+            // TODO : the correct way is to use the NOT_FOUND response here. In order to do it changes are needed for the UI code as well
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (BadRequestException e) {
-            String errMsg = "Identity server request payload is invalid";
+            String errMsg = e.getMessage();
             log.error(errMsg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (ApplicationManagementException e) {
@@ -156,8 +159,8 @@ public class SPApplicationServiceImpl implements SPApplicationService {
             IdentityServerResponse identityServer = spAppManager.createIdentityServer(identityServerDTO);
             return Response.status(Response.Status.CREATED).entity(identityServer).build();
         } catch (BadRequestException e) {
-            String errMsg = "Identity server request payload is invalid";
-            log.error(errMsg, e);
+            String errMsg = e.getMessage();
+                    log.error(errMsg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
@@ -232,6 +235,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         } catch (NotFoundException e) {
             String errMsg = "No Identity server exist with the id: " + identityServerId;
             log.error(errMsg, e);
+            // TODO : the correct way is to use the NOT_FOUND response here. In order to do it changes are needed for the UI code as well
             return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (ApplicationManagementException e) {
             String errMsg = "Error occurred while trying to merge identity server apps with existing apps";
@@ -252,6 +256,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         } catch (NotFoundException e) {
             String msg = "No identity server exist with the id " + identityServerId;
             log.error(msg, e);
+            // TODO : the correct way is to use the NOT_FOUND response here. In order to do it changes are needed for the UI code as well
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (BadRequestException e) {
             String msg = "Invalid appIds provided";
@@ -277,6 +282,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         } catch (NotFoundException e) {
             String msg = "No identity server exist with the id " + identityServerId;
             log.error(msg, e);
+            // TODO : the correct way is to use the NOT_FOUND response here. In order to do it changes are needed for the UI code as well
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (BadRequestException e) {
             String msg = "Invalid appIds provided";
@@ -343,6 +349,7 @@ public class SPApplicationServiceImpl implements SPApplicationService {
         } catch (NotFoundException e) {
             String msg = "No identity server exist with the id " + identityServerId;
             log.error(msg, e);
+            // TODO : the correct way is to use the NOT_FOUND response here. In order to do it changes are needed for the UI code as well
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (BadRequestException e) {
             String msg = "Found incompatible payload with create service provider app request.";

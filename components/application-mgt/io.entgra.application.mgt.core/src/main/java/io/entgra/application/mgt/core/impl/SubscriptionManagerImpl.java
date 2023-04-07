@@ -367,14 +367,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         try {
             device = DataHolder.getInstance().getDeviceManagementService().getDevice(deviceIdentifier, false);
             if (device == null) {
-                String msg = "Invalid device identifier is received and couldn't find an deveice for the requested "
+                String msg = "Invalid device identifier is received and couldn't find an device for the requested "
                         + "device identifier. Device UUID: " + deviceIdentifier.getId() + " Device Type: "
                         + deviceIdentifier.getType();
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
         } catch (DeviceManagementException e) {
-            String msg = "Error occured while getting device data for given device identifier.Device UUID: "
+            String msg = "Error occurred while getting device data for given device identifier.Device UUID: "
                     + deviceIdentifier.getId() + " Device Type: " + deviceIdentifier.getType();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);

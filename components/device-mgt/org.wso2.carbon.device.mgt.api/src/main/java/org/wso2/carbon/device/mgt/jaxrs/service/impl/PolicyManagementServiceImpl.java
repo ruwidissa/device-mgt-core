@@ -83,8 +83,9 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
                 .validatePolicyDetails(policyWrapper);
         // validation failure results;
         if (!features.isEmpty()) {
-            log.error("Policy feature/s validation failed.");
-            return Response.status(Response.Status.BAD_REQUEST).entity(features).build();
+            String msg = "Policy feature/s validation failed." ;
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg + " Features : " + features).build();
         }
         PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
 
@@ -212,9 +213,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             PolicyAdministratorPoint policyAdministratorPoint = policyManagementService.getPAP();
             policy = policyAdministratorPoint.getPolicy(id);
             if (policy == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage(
-                                "No policy found with the id '" + id + "'").build()).build();
+                String msg = "Policy not found.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
         } catch (PolicyManagementException e) {
             String msg = "Error occurred while retrieving policy corresponding to the id '" + id + "'";
@@ -233,8 +233,9 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
                 .validatePolicyDetails(policyWrapper);
         // validation failure results;
         if (!features.isEmpty()) {
-            log.error("Policy feature/s validation failed.");
-            return Response.status(Response.Status.BAD_REQUEST).entity(features).build();
+            String msg = "Policy feature/s validation failed." ;
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg + " Features : " + features).build();
         }
         PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
         try {
@@ -296,10 +297,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             //TODO:Check of this logic is correct
             String modifiedInvalidPolicyIds =
                     invalidPolicyIds.substring(0, invalidPolicyIds.length() - 1);
-            return Response.status(Response.Status.BAD_REQUEST).
-                    entity(new ErrorResponse.ErrorResponseBuilder().
-                            setMessage("Policies with the policy ID " + modifiedInvalidPolicyIds +
-                                       " doesn't exist").build()).build();
+            String msg = "Policies does not exist.";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -329,9 +328,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             return Response.status(Response.Status.OK).entity("Selected policies have been successfully activated")
                     .build();
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage("Selected policies have " +
-                            "not been activated").build()).build();
+            String msg = "Selected policies have not been activated.";
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
     }
 
@@ -361,9 +359,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             return Response.status(Response.Status.OK).entity("Selected policies have been successfully " +
                     "deactivated").build();
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage("Selected policies have " +
-                            "not been deactivated").build()).build();
+            String msg = "Selected policies have not been activated.";
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
     }
 
@@ -412,9 +409,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
                     + "updated.").build();
 
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Policy priorities did "
-                            + "not update. Bad Request.").build()).build();
+            String msg = "Policy priorities did not update. Bad Request.";
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
     }
 
@@ -440,9 +436,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             }
             policy = policyManagementService.getAppliedPolicyToDevice(device);
             if (policy == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage(
-                                "No policy found for device ID '" + deviceId + "'"+ deviceId).build()).build();
+                String msg = "Policy not found for the requested device.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
         } catch (PolicyManagementException e) {
             String msg = "Error occurred while retrieving policy corresponding to the id '" + deviceType + "'"+ deviceId;
@@ -491,8 +486,9 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
                 = RequestValidationUtil.validateProfileFeatures(profileFeaturesList);
         // validation failure results;
         if (!features.isEmpty()) {
-            log.error("Policy feature/s validation failed.");
-            return Response.status(Response.Status.BAD_REQUEST).entity(features).build();
+            String msg = "Policy feature/s validation failed." ;
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg + " Features : " +features).build();
         }
         return Response.status(Response.Status.OK).entity("Valid request").build();
 
