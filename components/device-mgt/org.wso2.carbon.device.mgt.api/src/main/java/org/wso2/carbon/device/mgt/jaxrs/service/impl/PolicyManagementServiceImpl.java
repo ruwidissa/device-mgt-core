@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
@@ -504,18 +505,13 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         RequestValidationUtil.validatePaginationParameters(offset, limit);
         PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
         List<Policy> policies;
-        List<Policy> filteredPolicies;
         PolicyList targetPolicies = new PolicyList();
+        PaginationRequest request = new PaginationRequest(offset, limit);
         try {
             PolicyAdministratorPoint policyAdministratorPoint = policyManagementService.getPAP();
-            policies = policyAdministratorPoint.getPolicyList();
-            targetPolicies.setCount(policies.size());
-            if (offset == 0 && limit == 0) {
-                targetPolicies.setList(policies);
-            } else {
-                filteredPolicies = FilteringUtil.getFilteredList(policies, offset, limit);
-                targetPolicies.setList(filteredPolicies);
-            }
+            policies = policyAdministratorPoint.getPolicyList(request);
+            targetPolicies.setCount(policyAdministratorPoint.getPolicyCount());
+            targetPolicies.setList(policies);
         } catch (PolicyManagementException e) {
             String msg = "Error occurred while retrieving all available policies";
             log.error(msg, e);
