@@ -79,4 +79,6 @@ public interface CertificateManagementService {
 
     List<CertificateResponse> searchCertificates(String serialNumber) throws CertificateManagementException;
 
+    X509Certificate generateAlteredCertificateFromCSR(String csr) throws KeystoreException;
+
 }
