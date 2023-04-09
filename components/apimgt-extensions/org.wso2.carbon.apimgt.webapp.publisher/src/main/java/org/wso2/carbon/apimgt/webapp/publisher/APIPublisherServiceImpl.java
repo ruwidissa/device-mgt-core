@@ -18,6 +18,11 @@
  */
 package org.wso2.carbon.apimgt.webapp.publisher;
 
+import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServices;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServicesImpl;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.PublisherRESTAPIServices;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.APIApplicationKey;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.AccessTokenInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,7 +55,6 @@ import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -357,13 +361,19 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         WebappPublisherConfig config = WebappPublisherConfig.getInstance();
         List<String> tenants = new ArrayList<>(Collections.singletonList(APIConstants.SUPER_TENANT_DOMAIN));
         tenants.addAll(config.getTenants().getTenant());
+        APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+        APIApplicationKey apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+        AccessTokenInfo accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
+                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+
         try {
             for (String tenantDomain : tenants) {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                APIProvider apiProvider = API_MANAGER_FACTORY.getAPIProvider(MultitenantUtils.getTenantAwareUsername(
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration()
-                                .getAdminUserName()));
+                PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServices();
+//                APIProvider apiProvider = API_MANAGER_FACTORY.getAPIProvider(MultitenantUtils.getTenantAwareUsername(
+//                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration()
+//                                .getAdminUserName()));
 
                 try {
                     String fileName =
@@ -409,8 +419,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             }
                             scope.setRoles(roleString);
 
-                            if (apiProvider.isSharedScopeNameExists(scope.getKey(), tenantDomain)) {
-                                apiProvider.updateSharedScope(scope, tenantDomain);
+//                            if (apiProvider.isSharedScopeNameExists(scope.getKey(), tenantDomain)) {
+//                                apiProvider.updateSharedScope(scope, tenantDomain);
+                            if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getKey())) {
+                                publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);
                             } else {
                                 // todo: come to this level means, that scope is removed from API, but haven't removed from the scope-role-permission-mappings list
                                 if (log.isDebugEnabled()) {
@@ -424,15 +436,18 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 }
 
             }
-        } catch (UserStoreException e) {
-            String msg = "Error occurred while reading tenant admin username";
-            log.error(msg, e);
-            throw new APIManagerPublisherException(e);
-        } catch (APIManagementException e) {
-            String msg = "Error occurred while loading api provider";
-            log.error(msg, e);
-            throw new APIManagerPublisherException(e);
-        } finally {
+        }
+//        catch (UserStoreException e) {
+//            String msg = "Error occurred while reading tenant admin username";
+//            log.error(msg, e);
+//            throw new APIManagerPublisherException(e);
+//        }
+//        catch (APIManagementException e) {
+//            String msg = "Error occurred while loading api provider";
+//            log.error(msg, e);
+//            throw new APIManagerPublisherException(e);
+//        }
+        finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }

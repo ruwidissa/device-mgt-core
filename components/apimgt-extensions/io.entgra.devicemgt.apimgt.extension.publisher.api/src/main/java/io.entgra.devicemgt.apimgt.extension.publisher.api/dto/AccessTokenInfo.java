@@ -1,5 +1,8 @@
 package io.entgra.devicemgt.apimgt.extension.publisher.api.dto;
 
+/**
+ * This holds the token information that return from the token endpoint.
+ */
 public class AccessTokenInfo {
 
     private String tokenType;

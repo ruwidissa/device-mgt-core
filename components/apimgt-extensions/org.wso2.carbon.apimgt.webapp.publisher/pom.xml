@@ -170,6 +170,7 @@
                             org.scannotation.archiveiterator;version="1.0",
                             org.w3c.dom,
                             io.entgra.devicemgt.apimgt.extension.publisher.api,
+                            io.entgra.devicemgt.apimgt.extension.publisher.api.dto,
                             org.wso2.carbon.apimgt.annotations.api,
                             org.wso2.carbon.apimgt.api,
                             org.wso2.carbon.apimgt.api.model,

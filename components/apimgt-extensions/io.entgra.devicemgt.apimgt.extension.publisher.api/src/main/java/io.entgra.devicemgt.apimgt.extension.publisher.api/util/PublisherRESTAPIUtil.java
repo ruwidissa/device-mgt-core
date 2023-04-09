@@ -19,14 +19,9 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
-public class PublisherAPIUtil {
-
-    private static final Log log = LogFactory.getLog(PublisherAPIUtil.class);
+public class PublisherRESTAPIUtil {
+    private static final Log log = LogFactory.getLog(PublisherRESTAPIUtil.class);
     private static final String HTTPS_PROTOCOL = "https";
-    private static final String TENANT_JWT_CONFIG_LOCATION = File.separator + "jwt-config" + File.separator + "jwt.properties";
-    private static final String JWT_CONFIG_FILE_NAME = "jwt.properties";
-    private static final String SUPERTENANT_JWT_CONFIG_LOCATION =
-            CarbonUtils.getEtcCarbonConfigDirPath() + File.separator + JWT_CONFIG_FILE_NAME;
 
     /**
      * Return a http client instance

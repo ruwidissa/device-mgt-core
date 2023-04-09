@@ -299,7 +299,7 @@ public class AnnotationProcessor {
 //                        if (scope != null) {
 //                            resource.setScope(scope);
 //                        } else {
-//                            log.warn("Scope is not defined for '" + makeContextURLReady(resourceRootContext) +
+//                            log.warn("ScopeUtils is not defined for '" + makeContextURLReady(resourceRootContext) +
 //                                    makeContextURLReady(subCtx) + "' endpoint, hence assigning the default scope");
 //                            scope = new ApiScope();
 //                            scope.setName(DEFAULT_SCOPE_NAME);
@@ -537,7 +537,7 @@ public class AnnotationProcessor {
                     if (scope != null) {
                         apiResource.setScope(scope);
                     } else {
-//                        log.warn("Scope is not defined for '" + makeContextURLReady(resourceRootContext) +
+//                        log.warn("ScopeUtils is not defined for '" + makeContextURLReady(resourceRootContext) +
 //                                makeContextURLReady(subCtx) + "' endpoint, hence assigning the default scope");
                         scope = new ApiScope();
                         scope.setName(DEFAULT_SCOPE_NAME);

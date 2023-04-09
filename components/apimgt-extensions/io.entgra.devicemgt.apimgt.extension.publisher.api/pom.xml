@@ -58,6 +58,22 @@
             <groupId>org.eclipse.osgi</groupId>
             <artifactId>org.eclipse.osgi.services</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -77,7 +93,11 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
                         <Bundle-Description>Publisher API Management Bundle</Bundle-Description>
+                        <Private-Package>
+                            io.entgra.devicemgt.apimgt.extension.publisher.api.internal
+                        </Private-Package>
                         <Export-Package>
+                            !io.entgra.devicemgt.apimgt.extension.publisher.api.internal,
                             io.entgra.devicemgt.apimgt.extension.publisher.api.*
                         </Export-Package>
                         <Import-Package>
@@ -95,8 +115,17 @@
 
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            com.sun.jndi.toolkit.ctx,
-                            org.wso2.carbon.utils
+                            org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
+                            org.wso2.carbon.utils,
+                            org.wso2.carbon.core,
+                            org.apache.commons.ssl,
+                            org.json.simple,
+                            org.json.simple.parser,
+                            org.apache.http.client.entity,
+                            org.apache.http.message,
+                            org.apache.commons.httpclient,
+                            org.wso2.carbon.apimgt.api.model,
+                            okhttp3.*
                         </Import-Package>
                     </instructions>
                 </configuration>
