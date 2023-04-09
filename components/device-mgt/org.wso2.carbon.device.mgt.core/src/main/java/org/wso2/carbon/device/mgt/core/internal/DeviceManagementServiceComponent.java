@@ -271,8 +271,8 @@ public class DeviceManagementServiceComponent {
             componentContext.getBundleContext().registerService(PrivacyComplianceProvider.class.getName(),
                     privacyComplianceProvider, null);
 
-            componentContext.getBundleContext()
-                    .registerService(TenantMgtListener.class.getName(), new DeviceMgtTenantMgtListener(), null);
+//            componentContext.getBundleContext()
+//                    .registerService(TenantMgtListener.class.getName(), new DeviceMgtTenantMgtListener(), null);
 
             if (log.isDebugEnabled()) {
                 log.debug("Device management core bundle has been successfully initialized");

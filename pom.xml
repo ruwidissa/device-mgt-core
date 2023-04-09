@@ -48,6 +48,7 @@
         <module>components/webapp-authenticator-framework</module>
         <module>components/logger</module>
         <module>components/task-mgt</module>
+        <module>components/tenant-mgt</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -62,7 +63,7 @@
         <module>features/webapp-authenticator-framework</module>
         <module>features/logger</module>
         <module>features/task-mgt</module>
-
+        <module>features/tenant-mgt</module>
     </modules>
 
     <dependencyManagement>
@@ -369,6 +370,18 @@
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <!-- Device Management dependencies -->
+
+            <!-- Tenant Management dependencies -->
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.tenant.mgt.common</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.devicemgt</groupId>
+                <artifactId>io.entgra.tenant.mgt.core</artifactId>
+                <version>${carbon.device.mgt.version}</version>
+            </dependency>
 
             <!-- Task Management dependencies -->
             <dependency>
