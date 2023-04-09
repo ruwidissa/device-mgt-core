@@ -74,6 +74,10 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -85,7 +89,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
+                <version>5.1.7</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -102,7 +106,7 @@
                         </Export-Package>
                         <Import-Package>
                             javax.net.ssl,
-                            javax.xml.bind,
+<!--                            javax.xml.bind,-->
                             org.apache.commons.logging,
                             org.apache.http;version="${httpclient.version.range}",
                             org.apache.http.client;version="${httpclient.version.range}",
@@ -115,14 +119,14 @@
 
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
-                            org.wso2.carbon.utils,
+<!--                            org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",-->
+<!--                            org.wso2.carbon.utils,-->
                             org.wso2.carbon.core,
                             org.apache.commons.ssl,
-                            org.json.simple,
-                            org.json.simple.parser,
-                            org.apache.http.client.entity,
-                            org.apache.http.message,
+<!--                            org.json.simple,-->
+<!--                            org.json.simple.parser,-->
+<!--                            org.apache.http.client.entity,-->
+<!--                            org.apache.http.message,-->
                             org.apache.commons.httpclient,
                             org.wso2.carbon.apimgt.api.model,
                             okhttp3.*

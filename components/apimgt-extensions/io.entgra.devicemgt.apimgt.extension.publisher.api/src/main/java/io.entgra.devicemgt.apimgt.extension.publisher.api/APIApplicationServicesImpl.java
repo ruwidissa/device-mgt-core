@@ -1,11 +1,12 @@
 package io.entgra.devicemgt.apimgt.extension.publisher.api;
 
+import com.google.gson.JsonObject;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.bean.RegistrationProfile;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.constants.Constants;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.APIApplicationKey;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.AccessTokenInfo;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.util.PublisherRESTAPIUtil;
-import okhttp3.OkHttpClient;
+import okhttp3.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.ssl.Base64;
@@ -22,71 +23,141 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class APIApplicationServicesImpl implements APIApplicationServices {
 
     private static final Log log = LogFactory.getLog(APIApplicationServicesImpl.class);
-    private final OkHttpClient client;
+    private static final OkHttpClient client = getOkHttpClient();
 
-    public APIApplicationServicesImpl() {
-        this.client = new OkHttpClient();
+    private static OkHttpClient getOkHttpClient() {
+        X509TrustManager trustAllCerts = new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[0];
+            }
+
+            public void checkClientTrusted(
+                    java.security.cert.X509Certificate[] certs, String authType) {
+            }
+
+            public void checkServerTrusted(
+                    java.security.cert.X509Certificate[] certs, String authType) {
+            }
+        };
+        return new OkHttpClient.Builder()
+                .sslSocketFactory(getSimpleTrustedSSLSocketFactory(), trustAllCerts)
+                .hostnameVerifier((hostname, sslSession) -> true).build();
     }
 
+    private static SSLSocketFactory getSimpleTrustedSSLSocketFactory() {
+        try {
+            TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+                        public void checkClientTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                        public void checkServerTrusted(
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                        }
+                    }
+            };
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            return sc.getSocketFactory();
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
+            return null;
+        }
+
+    }
     @Override
     public APIApplicationKey createAndRetrieveApplicationCredentials() {
 
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("callbackUrl",Constants.EMPTY_STRING);
+        jsonObject.addProperty("clientName",Constants.CLIENT_NAME);
+        jsonObject.addProperty("grantType",Constants.EMPTY_STRING);
+        jsonObject.addProperty("owner",Constants.OWNER);
+        jsonObject.addProperty("saasApp",true);
+
+        MediaType jsonMediaType = MediaType.parse("application/json; charset=utf-8");
+        RequestBody requestBody = RequestBody.create(jsonMediaType, jsonObject.toString());
+
+        String keyManagerEndpoint = "https://localhost:9443/client-registration/v0.17/register";
+
+        Request request = new Request.Builder()
+                .url(keyManagerEndpoint)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Credentials.basic("admin", "admin"))
+                .post(requestBody)
+                .build();
         try {
-            URL url = new URL("https://localhost:9443/client-registration/v0.17/register");
-            HttpClient httpclient = PublisherRESTAPIUtil.getHttpClient(url.getProtocol());
-            HttpPost request = new HttpPost(url.toString());
+            Response response = client.newCall(request).execute();
+            System.out.println(request);
+            System.out.println("---------------------------");
+            System.out.println(response);
 
-            RegistrationProfile registrationProfile = new RegistrationProfile();
-            registrationProfile.setCallbackUrl(Constants.EMPTY_STRING);
-            registrationProfile.setClientName(Constants.CLIENT_NAME);
-            registrationProfile.setGrantType(Constants.GRANT_TYPE);
-            registrationProfile.setOwner(Constants.OWNER);
-            registrationProfile.setIsSaasApp(true);
+//            JSONObject responseObj = new JSONObject(Objects.requireNonNull(response.body()).string());
 
-            String jsonString = registrationProfile.toJSON();
-            StringEntity entity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
-            request.setEntity(entity);
-
-            //ToDo: Remove hardcoded value
-            String basicAuth = getBase64Encode("admin", "admin");
-            request.setHeader(HttpHeaders.AUTHORIZATION, Constants.AUTHORIZATION_HEADER_VALUE_PREFIX + basicAuth);
-            request.setHeader(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON);
-
-            HttpResponse httpResponse = httpclient.execute(request);
-
-            if (httpResponse != null) {
-                String response = PublisherRESTAPIUtil.getResponseString(httpResponse);
-                try {
-                    if(response != null){
-                        JSONParser jsonParser = new JSONParser();
-                        JSONObject jsonPayload = (JSONObject) jsonParser.parse(response);
-                        APIApplicationKey apiApplicationKey = new APIApplicationKey();
-                        apiApplicationKey.setClientId((String) jsonPayload.get(Constants.CLIENT_ID));
-                        apiApplicationKey.setClientSecret((String) jsonPayload.get(Constants.CLIENT_SECRET));
-                        return apiApplicationKey;
-                    } else {
-                        return null;
-                    }
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-        } catch (IOException | NoSuchAlgorithmException | KeyStoreException |
-                 KeyManagementException e) {
-            log.error("failed to call http client.", e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
+//        try {
+//            URL url = new URL("https://localhost:9443/client-registration/v0.17/register");
+//            HttpClient httpclient = PublisherRESTAPIUtil.getHttpClient(url.getProtocol());
+//            HttpPost request = new HttpPost(url.toString());
+//
+//            RegistrationProfile registrationProfile = new RegistrationProfile();
+//            registrationProfile.setCallbackUrl(Constants.EMPTY_STRING);
+//            registrationProfile.setClientName(Constants.CLIENT_NAME);
+//            registrationProfile.setGrantType(Constants.GRANT_TYPE);
+//            registrationProfile.setOwner(Constants.OWNER);
+//            registrationProfile.setIsSaasApp(true);
+//
+//            String jsonString = registrationProfile.toJSON();
+//            StringEntity entity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
+//            request.setEntity(entity);
+//
+//            //ToDo: Remove hardcoded value
+//            String basicAuth = getBase64Encode("admin", "admin");
+//            request.setHeader(HttpHeaders.AUTHORIZATION, Constants.AUTHORIZATION_HEADER_VALUE_PREFIX + basicAuth);
+//            request.setHeader(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON);
+//
+//            HttpResponse httpResponse = httpclient.execute(request);
+//
+//            if (httpResponse != null) {
+//                String response = PublisherRESTAPIUtil.getResponseString(httpResponse);
+//                try {
+//                    if(response != null){
+//                        JSONParser jsonParser = new JSONParser();
+//                        JSONObject jsonPayload = (JSONObject) jsonParser.parse(response);
+//                        APIApplicationKey apiApplicationKey = new APIApplicationKey();
+//                        apiApplicationKey.setClientId((String) jsonPayload.get(Constants.CLIENT_ID));
+//                        apiApplicationKey.setClientSecret((String) jsonPayload.get(Constants.CLIENT_SECRET));
+//                        return apiApplicationKey;
+//                    } else {
+//                        return null;
+//                    }
+//                } catch (ParseException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//
+//        } catch (IOException | NoSuchAlgorithmException | KeyStoreException |
+//                 KeyManagementException e) {
+//            log.error("failed to call http client.", e);
+//        }
         return null;
     }
 
