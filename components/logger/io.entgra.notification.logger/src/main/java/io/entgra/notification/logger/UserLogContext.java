@@ -25,12 +25,18 @@ public class UserLogContext extends LogContext {
     private final String userEmail;
     private final String metaInfo;
     private final String tenantID;
+    private final boolean isUserRegistered;
+    private final boolean isDeviceRegisterged;
+    private final String tenantDomain;
 
     private UserLogContext(Builder builder) {
         this.userEmail = builder.userEmail;
         this.userName = builder.userName;
         this.metaInfo = builder.metaInfo;
         this.tenantID = builder.tenantID;
+        this.isUserRegistered = builder.isUserRegistered;
+        this.isDeviceRegisterged = builder.isDeviceRegisterged;
+        this.tenantDomain = builder.tenantDomain;
     }
 
     public String getTenantID() {
@@ -49,12 +55,26 @@ public class UserLogContext extends LogContext {
         return metaInfo;
     }
 
+    public boolean isUserRegistered() {
+        return isUserRegistered;
+    }
+
+    public boolean isDeviceRegisterged() {
+        return isDeviceRegisterged;
+    }
+
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
 
     public static class Builder {
         private String userName;
         private String userEmail;
         private String metaInfo;
         private String tenantID;
+        private boolean isUserRegistered;
+        private boolean isDeviceRegisterged;
+        private String tenantDomain;
 
         public Builder() {
         }
@@ -92,6 +112,33 @@ public class UserLogContext extends LogContext {
 
         public Builder setUserEmail(String userEmail) {
             this.userEmail = userEmail;
+            return this;
+        }
+
+        public boolean getIsUserRegistered() {
+            return isUserRegistered;
+        }
+
+        public Builder setUserRegistered(boolean userRegistered) {
+            isUserRegistered = userRegistered;
+            return this;
+        }
+
+        public boolean getIsDeviceRegisterged() {
+            return isDeviceRegisterged;
+        }
+
+        public Builder setDeviceRegisterged(boolean deviceRegisterged) {
+            isDeviceRegisterged = deviceRegisterged;
+            return this;
+        }
+
+        public String getTenantDomain() {
+            return tenantDomain;
+        }
+
+        public Builder setTenantDomain(String tenantDomain) {
+            this.tenantDomain = tenantDomain;
             return this;
         }
 
