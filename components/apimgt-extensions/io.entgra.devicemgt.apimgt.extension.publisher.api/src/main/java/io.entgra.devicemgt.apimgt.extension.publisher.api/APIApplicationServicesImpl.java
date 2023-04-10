@@ -5,6 +5,8 @@ import io.entgra.devicemgt.apimgt.extension.publisher.api.bean.RegistrationProfi
 import io.entgra.devicemgt.apimgt.extension.publisher.api.constants.Constants;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.APIApplicationKey;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.AccessTokenInfo;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.APIApplicationServicesException;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.BadRequestException;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.util.PublisherRESTAPIUtil;
 import okhttp3.*;
 import org.apache.commons.logging.Log;
@@ -37,6 +39,7 @@ import java.util.*;
 public class APIApplicationServicesImpl implements APIApplicationServices {
 
     private static final Log log = LogFactory.getLog(APIApplicationServicesImpl.class);
+<<<<<<< HEAD
     private static final OkHttpClient client = getOkHttpClient();
 
     private static OkHttpClient getOkHttpClient() {
@@ -57,6 +60,13 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
                 .sslSocketFactory(getSimpleTrustedSSLSocketFactory(), trustAllCerts)
                 .hostnameVerifier((hostname, sslSession) -> true).build();
     }
+=======
+//    private final OkHttpClient client;
+
+//    public APIApplicationServicesImpl() {
+//        this.client = new OkHttpClient();
+//    }
+>>>>>>> e76624c1de (Add exceptions)
 
     private static SSLSocketFactory getSimpleTrustedSSLSocketFactory() {
         try {
@@ -82,7 +92,8 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
 
     }
     @Override
-    public APIApplicationKey createAndRetrieveApplicationCredentials() {
+    public APIApplicationKey createAndRetrieveApplicationCredentials()
+            throws APIApplicationServicesException, BadRequestException {
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("callbackUrl",Constants.EMPTY_STRING);
@@ -109,6 +120,7 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
 
 //            JSONObject responseObj = new JSONObject(Objects.requireNonNull(response.body()).string());
 
+<<<<<<< HEAD
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -159,10 +171,54 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
 //            log.error("failed to call http client.", e);
 //        }
         return null;
+=======
+            String jsonString = registrationProfile.toJSON();
+            StringEntity entity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
+            request.setEntity(entity);
+
+            //ToDo: Remove hardcoded value
+            String basicAuth = getBase64Encode("admin", "admin");
+            request.setHeader(HttpHeaders.AUTHORIZATION, Constants.AUTHORIZATION_HEADER_VALUE_PREFIX + basicAuth);
+            request.setHeader(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON);
+
+            HttpResponse httpResponse = httpclient.execute(request);
+
+            if (httpResponse != null) {
+                String response = PublisherRESTAPIUtil.getResponseString(httpResponse);
+                try {
+                    if(response != null){
+                        JSONParser jsonParser = new JSONParser();
+                        JSONObject jsonPayload = (JSONObject) jsonParser.parse(response);
+                        APIApplicationKey apiApplicationKey = new APIApplicationKey();
+                        apiApplicationKey.setClientId((String) jsonPayload.get(Constants.CLIENT_ID));
+                        apiApplicationKey.setClientSecret((String) jsonPayload.get(Constants.CLIENT_SECRET));
+                        return apiApplicationKey;
+                    } else {
+                        String msg = "Request payload is null. Please verify the request payload.";
+                        log.error(msg);
+                        throw new BadRequestException(msg);
+                    }
+                } catch (ParseException e) {
+                    throw new APIApplicationServicesException("Error when parsing the response " + response, e);
+                }
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            throw new APIApplicationServicesException("Error when reading the response from buffer.", e);
+        } catch (KeyStoreException e) {
+            throw new APIApplicationServicesException("Failed loading the keystore.", e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new APIApplicationServicesException("No such algorithm found when loading the ssl socket", e);
+        } catch (KeyManagementException e) {
+            throw new APIApplicationServicesException("Failed setting up the ssl http client.", e);
+        }
+>>>>>>> e76624c1de (Add exceptions)
     }
 
     @Override
-    public AccessTokenInfo generateAccessTokenFromRegisteredApplication(String consumerKey, String consumerSecret) {
+    public AccessTokenInfo generateAccessTokenFromRegisteredApplication(String consumerKey, String consumerSecret)
+        throws APIApplicationServicesException {
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair(Constants.GRANT_TYPE_PARAM_NAME, Constants.PASSWORD_GRANT_TYPE));
         //ToDo: Remove hardcoded value
@@ -173,7 +229,8 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
     }
 
     @Override
-    public AccessTokenInfo generateAccessTokenFromRefreshToken(String refreshToken, String consumerKey, String consumerSecret) {
+    public AccessTokenInfo generateAccessTokenFromRefreshToken(String refreshToken, String consumerKey, String consumerSecret)
+            throws APIApplicationServicesException {
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair(Constants.GRANT_TYPE_PARAM_NAME, Constants.REFRESH_TOKEN_GRANT_TYPE));
         params.add(new BasicNameValuePair(Constants.REFRESH_TOKEN_GRANT_TYPE_PARAM_NAME, refreshToken));
@@ -181,8 +238,10 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
         return getToken(params, consumerKey, consumerSecret);
     }
 
-    public AccessTokenInfo getToken(List<NameValuePair> nameValuePairs, String clientId, String clientSecret) {
+    public AccessTokenInfo getToken(List<NameValuePair> nameValuePairs, String clientId, String clientSecret)
+            throws APIApplicationServicesException{
 
+        String response = null;
         try {
             URL url = new URL("https://localhost:9443/oauth2/token");
             HttpClient httpclient = PublisherRESTAPIUtil.getHttpClient(url.getProtocol());
@@ -193,7 +252,7 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
             HttpResponse httpResponse = httpclient.execute(request);
-            String response = PublisherRESTAPIUtil.getResponseString(httpResponse);
+            response = PublisherRESTAPIUtil.getResponseString(httpResponse);
             if (log.isDebugEnabled()) {
                 log.debug(response);
             }
@@ -210,9 +269,16 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             }
             return accessTokenInfo;
 
-        } catch (IOException | KeyStoreException | NoSuchAlgorithmException |
-                 KeyManagementException| ParseException e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new APIApplicationServicesException("Error when reading the response from buffer.", e);
+        } catch (KeyStoreException e) {
+            throw new APIApplicationServicesException("Failed loading the keystore.", e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new APIApplicationServicesException("No such algorithm found when loading the ssl socket", e);
+        } catch (ParseException e) {
+            throw new APIApplicationServicesException("Error when parsing the response " + response, e);
+        } catch (KeyManagementException e) {
+            throw new APIApplicationServicesException("Failed setting up the ssl http client.", e);
         }
     }
 

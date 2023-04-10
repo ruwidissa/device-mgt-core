@@ -23,6 +23,8 @@ import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServices
 import io.entgra.devicemgt.apimgt.extension.publisher.api.PublisherRESTAPIServices;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.APIApplicationKey;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.AccessTokenInfo;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.APIApplicationServicesException;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.BadRequestException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -361,10 +363,21 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         WebappPublisherConfig config = WebappPublisherConfig.getInstance();
         List<String> tenants = new ArrayList<>(Collections.singletonList(APIConstants.SUPER_TENANT_DOMAIN));
         tenants.addAll(config.getTenants().getTenant());
+
         APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
-        APIApplicationKey apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
-        AccessTokenInfo accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
-                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+        APIApplicationKey apiApplicationKey;
+        AccessTokenInfo accessTokenInfo;
+        try {
+            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+            accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
+                    apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+        } catch (BadRequestException e) {
+            String errorMsg = "Error while generating application";
+            log.error(errorMsg, e);
+            throw new APIManagerPublisherException(e);
+        } catch (APIApplicationServicesException e) {
+            throw new RuntimeException(e);
+        }
 
         try {
             for (String tenantDomain : tenants) {
@@ -433,6 +446,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     }
                 } catch (IOException | DirectoryIteratorException ex) {
                     log.error("failed to read scopes from file.", ex);
+                } catch (APIApplicationServicesException | BadRequestException e) {
+                    String errorMsg = "Error while generating an OAuth token";
+                    log.error(errorMsg, e);
+                    throw new APIManagerPublisherException(e);
                 }
 
             }
