@@ -79,5 +79,5 @@ public interface WhiteLabelManagementService {
      * This method is useful to get existing white label theme
      * @throws MetadataManagementException if error while getting existing white label theme
      */
-    WhiteLabelTheme getWhiteLabelTheme(String tenantDomain) throws MetadataManagementException, NotFoundException, DeviceManagementException;
+    WhiteLabelTheme getWhiteLabelTheme(String tenantDomain) throws MetadataManagementException, DeviceManagementException;
 }

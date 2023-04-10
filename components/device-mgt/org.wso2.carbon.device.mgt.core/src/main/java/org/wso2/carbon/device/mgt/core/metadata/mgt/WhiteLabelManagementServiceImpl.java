@@ -26,7 +26,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Base64File;
 import org.wso2.carbon.device.mgt.common.FileResponse;
@@ -329,10 +328,6 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
             } finally {
                 MetadataManagementDAOFactory.closeConnection();
             }
-        } catch (NotFoundException e) {
-            String msg = "Error occurred while retrieving existing white label theme";
-            log.error(msg, e);
-            throw new MetadataManagementException(msg, e);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while getting tenant details of white label";
             log.error(msg, e);
@@ -429,20 +424,36 @@ public class WhiteLabelManagementServiceImpl implements WhiteLabelManagementServ
     }
 
     @Override
-    public WhiteLabelTheme getWhiteLabelTheme(String tenantDomain) throws MetadataManagementException, NotFoundException, DeviceManagementException {
+    public WhiteLabelTheme getWhiteLabelTheme(String tenantDomain) throws MetadataManagementException, DeviceManagementException {
         int tenantId = DeviceManagerUtil.getTenantId(tenantDomain);
         if (log.isDebugEnabled()) {
             log.debug("Retrieving whitelabel theme for tenant: " + tenantId);
         }
+        Metadata metadata = getWhiteLabelMetaData(tenantId);
+        if (metadata == null) {
+            addDefaultWhiteLabelThemeIfNotExist(tenantId);
+            metadata = getWhiteLabelMetaData(tenantId);
+            if (metadata == null) {
+                String msg = "Whitelabel theme not found for tenant: " + tenantId + ". Further, Default White Label " +
+                        "Theming Adding step failed.";
+                log.error(msg);
+                throw new MetadataManagementException(msg);
+            }
+        }
+        return new Gson().fromJson(metadata.getMetaValue(), WhiteLabelTheme.class);
+    }
+
+    /**
+     * Load White label Meta Data for given tenant Id.
+     * @param tenantId Id of the tenant
+     * @return {@link Metadata}
+     * @throws MetadataManagementException if an error occurred while getting Meta-Data info from Database for a
+     * given tenant ID.
+     */
+    private Metadata getWhiteLabelMetaData (int tenantId) throws MetadataManagementException {
         try {
             MetadataManagementDAOFactory.openConnection();
-            Metadata metadata =  metadataDAO.getMetadata(tenantId, MetadataConstants.WHITELABEL_META_KEY);
-            if (metadata == null) {
-                String msg = "Whitelabel theme not found for tenant: " + tenantId;
-                log.error(msg);
-                throw new NotFoundException(msg);
-            }
-            return new Gson().fromJson(metadata.getMetaValue(), WhiteLabelTheme.class);
+            return metadataDAO.getMetadata(tenantId, MetadataConstants.WHITELABEL_META_KEY);
         } catch (MetadataManagementDAOException e) {
             String msg = "Error occurred while retrieving white label theme for tenant:" + tenantId;
             log.error(msg, e);
