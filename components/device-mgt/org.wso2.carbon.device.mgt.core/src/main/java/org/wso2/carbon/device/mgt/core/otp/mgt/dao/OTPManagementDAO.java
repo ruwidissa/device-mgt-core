@@ -54,6 +54,9 @@ public interface OTPManagementDAO {
      */
     void renewOneTimeToken(int id, String oneTimeToken) throws OTPManagementDAOException;
 
+    void restoreOneTimeToken(int id, String oneTimeToken) throws OTPManagementDAOException;
+
+
     /**
      * To veify whether email and email type exists or not
      * @param email email
@@ -62,4 +65,7 @@ public interface OTPManagementDAO {
      * @throws OTPManagementDAOException if error occurred while verify existance of the email and email type
      */
     boolean isEmailExist (String email, String emailType) throws OTPManagementDAOException;
+
+    OneTimePinDTO getOtpDataByEmailAndMailType(String email, String emailType) throws OTPManagementDAOException;
+
 }

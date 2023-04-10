@@ -22,20 +22,10 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
-import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.DownloadURLDetails;
-import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPWrapper;
 
 import java.util.Map;
 
 public interface OTPManagementService {
-
-    /**
-     * Create OTP token and store tenant details in the DB
-     * @param otpWrapper OTP Mail Wrapper object which contains tenant details of registering user
-     * @throws OTPManagementException if error occurs while creating OTP token and storing tenant details.
-     * @throws BadRequestException if found and incompatible payload to create OTP token.
-     */
-    String sendUserVerifyingMail(OTPWrapper otpWrapper) throws OTPManagementException, DeviceManagementException;
 
     /**
      * Check the validity of the OTP
@@ -64,12 +54,13 @@ public interface OTPManagementService {
     void sendDeviceEnrollmentInvitationMail(DeviceEnrollmentInvitation deviceEnrollmentInvitation)
             throws OTPManagementException;
 
-    /**
-     * Send an e-mail to the requesting e-mail address with a product download URL
-     * @param downloadURLDetails Contains the details to send product download e-mail
-     * @throws OTPManagementException if request payload doesn't contains required details to send the product
-     * download mail.
-     */
-    void shareProductDownloadUrl(DownloadURLDetails downloadURLDetails) throws OTPManagementException;
 
-    }
+    boolean hasEmailRegistered(String email, String emailDomain) throws OTPManagementException,
+            DeviceManagementException;
+
+    OneTimePinDTO generateOneTimePin(String email, String emailType, String userName, Object metaDataObj,
+                                     int tenantId, boolean persistPin) throws OTPManagementException;
+
+    OneTimePinDTO getRenewedOtpByEmailAndMailType(String email, String emailType) throws OTPManagementException;
+
+}
