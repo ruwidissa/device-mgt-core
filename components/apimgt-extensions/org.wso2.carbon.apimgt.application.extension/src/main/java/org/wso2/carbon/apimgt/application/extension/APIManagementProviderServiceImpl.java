@@ -104,7 +104,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (StringUtils.isEmpty(username)) {
-            username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+            username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + "@" + tenantDomain;
         }
         try {
             APIConsumer apiConsumer = API_MANAGER_FACTORY.getAPIConsumer(username);

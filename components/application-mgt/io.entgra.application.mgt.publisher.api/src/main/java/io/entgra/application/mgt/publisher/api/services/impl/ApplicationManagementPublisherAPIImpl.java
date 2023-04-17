@@ -89,11 +89,11 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             ApplicationList applications = applicationManager.getApplications(filter);
             return Response.status(Response.Status.OK).entity(applications).build();
         } catch (BadRequestException e) {
-            String msg = "Incompatible request payload is found. Please try with valid request payload.";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (UnexpectedServerErrorException e) {
-            String msg = "Error Occured when getting supported device types by Entgra IoTS";
+            String msg = "Error occurred when getting supported device types by Entgra IoTS";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -173,7 +173,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         try {
             return createApplication(applicationWrapper, isPublished);
         } catch (BadRequestException e) {
-            String msg = "Found incompatible payload with ent. app creating request.";
+            String msg = "Found incompatible payload with ent. app creating request. Please try with valid request payload.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -195,7 +195,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         try {
             return createApplication(webAppWrapper, isPublished);
         } catch (BadRequestException e) {
-            String msg = "Found incompatible payload with web app creating request.";
+            String msg = "Found incompatible payload with web app creating request. Please try with valid request payload.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -217,7 +217,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         try {
             return createApplication(publicAppWrapper, isPublished);
         } catch (BadRequestException e) {
-            String msg = "Found incompatible payload with pub app creating request.";
+            String msg = "Found incompatible payload with pub app creating request. Please try with valid request payload.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -239,7 +239,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         try {
             return createApplication(customAppWrapper, isPublished);
         } catch (BadRequestException e) {
-            String msg = "Found incompatible payload with custom app creating request.";
+            String msg = "Found incompatible payload with custom app creating request. Please try with valid request payload.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -267,7 +267,11 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             ApplicationRelease release = applicationManager.createEntAppRelease(appId, entAppReleaseWrapper, isPublished);
             return Response.status(Response.Status.CREATED).entity(release).build();
         } catch (RequestValidatingException e) {
-            String msg = "Error occurred while validating binaryArtifact";
+            String msg = e.getMessage();
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (BadRequestException e){
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -291,6 +295,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             applicationManager.validatePublicAppReleaseCreatingRequest(publicAppReleaseWrapper, deviceTypeName);
             ApplicationRelease applicationRelease = applicationManager.createPubAppRelease(appId, publicAppReleaseWrapper, isPublished);
             return Response.status(Response.Status.CREATED).entity(applicationRelease).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating application release for the application with the id " + appId;
             log.error(msg, e);
@@ -300,7 +308,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (RequestValidatingException e) {
-            String msg = "Invalid payload found in public app release create request";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
@@ -318,6 +326,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             applicationManager.validateWebAppReleaseCreatingRequest(webAppReleaseWrapper);
             ApplicationRelease applicationRelease= applicationManager.createWebAppRelease(appId, webAppReleaseWrapper, isPublished);
             return Response.status(Response.Status.CREATED).entity(applicationRelease).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ResourceManagementException e) {
             String msg = "Error occurred while uploading application release artifacts";
             log.error(msg, e);
@@ -327,7 +339,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (RequestValidatingException e) {
-            String msg = "Invalid payload found in web app release create request";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
@@ -346,8 +358,12 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             applicationManager.validateCustomAppReleaseCreatingRequest(customAppReleaseWrapper, deviceTypeName);
             ApplicationRelease release = applicationManager.createCustomAppRelease(appId, customAppReleaseWrapper, isPublished);
             return Response.status(Response.Status.CREATED).entity(release).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (RequestValidatingException e) {
-            String msg = "Error occurred while validating binaryArtifact";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ResourceManagementException e) {
@@ -386,7 +402,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             }
             return Response.status(Response.Status.OK).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid device type to check application existence.";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -460,6 +476,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             String msg = "Found an invalid device type: " + deviceType + " with the request";
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = e.getMessage();
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while updating the image artifacts of the application with the uuid "
                     + applicationReleaseUuid;
@@ -483,8 +503,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Error occurred while modifying the application. Found bad request payload for updating the "
-                    + "application";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -514,8 +533,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             }
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
-            String msg =
-                    "Invalid request to update ent app release for application release UUID " + applicationUUID;
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
@@ -555,7 +573,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             }
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
-            String msg = "Invalid request to update public app release for application release UUID " + applicationUUID;
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
@@ -595,7 +613,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             }
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
-            String msg = "Invalid request to update web app release for web app release UUID " + applicationUUID;
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
@@ -634,8 +652,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             }
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
-            String msg =
-                    "Invalid request to update ent app release for application release UUID " + applicationUUID;
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
@@ -685,7 +702,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                     .changeLifecycleState(applicationUuid, lifecycleChanger);
             return Response.status(Response.Status.CREATED).entity(applicationRelease).build();
         } catch (BadRequestException e) {
-            String msg = "Request payload contains invalid data, hence verify the request payload.";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (ForbiddenException e) {
@@ -847,6 +864,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         try {
             List<String> applicationTags = applicationManager.addApplicationTags(appId, tagNames);
             return Response.status(Response.Status.OK).entity(applicationTags).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
             String msg = e.getMessage();
             log.error(msg, e);

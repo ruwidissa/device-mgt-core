@@ -169,10 +169,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("limit") int limit) {
         try {
             if (!StringUtils.isEmpty(name) && !StringUtils.isEmpty(role)) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("Request contains both name and role " +
-                                "parameters. Only one is allowed " +
-                                "at once.").build()).build();
+                String msg = "Request contains both name and role parameters. Only one is allowed at once.";
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
 //            RequestValidationUtil.validateSelectionCriteria(type, user, roleName, ownership, status);
             RequestValidationUtil.validatePaginationParameters(offset, limit);
@@ -261,9 +259,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 try {
                     sinceDate = format.parse(ifModifiedSince);
                 } catch (ParseException e) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage("Invalid date " +
-                                    "string is provided in 'If-Modified-Since' header").build()).build();
+                    String msg = "Invalid date string is provided in [If-Modified-Since] header";
+                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
                 }
                 request.setSince(sinceDate);
                 if (requireDeviceInfo) {
@@ -282,9 +279,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 try {
                     sinceDate = format.parse(since);
                 } catch (ParseException e) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage("Invalid date " +
-                                    "string is provided in 'since' filter").build()).build();
+                    String msg = "Invalid date string is provided in [since] filter";
+                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
                 }
                 request.setSince(sinceDate);
                 if (requireDeviceInfo) {
@@ -357,103 +353,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         }
     }
 
-    @GET
-    @Override
-    @Path("/traccar-user-token")
-    public Response getTraccarUserToken() {
-
-        if (HttpReportingUtil.isTrackerEnabled()) {
-            String currentUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            DeviceAPIClientService deviceAPIClientService = DeviceMgtAPIUtils.getDeviceAPIClientService();
-            JSONObject obj = new JSONObject(deviceAPIClientService.returnUser(currentUser));
-
-            if (obj.has("error")) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(obj.getString("error")).build();
-            } else {
-                int userId = obj.getInt("id");
-                List<Integer> traccarValidIdList = new ArrayList<>();
-                /*Get Device Id List*/
-                try {
-                    DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
-                    DeviceAccessAuthorizationService deviceAccessAuthorizationService =
-                            DeviceMgtAPIUtils.getDeviceAccessAuthorizationService();
-                    PaginationRequest request = new PaginationRequest(0, 0);
-                    PaginationResult result;
-                    DeviceList devices = new DeviceList();
-                    List<String> status = new ArrayList<>();
-                    status.add("ACTIVE");
-                    status.add("INACTIVE");
-                    status.add("CREATED");
-                    status.add("UNREACHABLE");
-                    request.setStatusList(status);
-                    // this is the user who initiates the request
-                    String authorizedUser = MultitenantUtils.getTenantAwareUsername(currentUser);
-                    // check whether the user is device-mgt admin
-                    if (!deviceAccessAuthorizationService.isDeviceAdminUser()) {
-                        request.setOwner(authorizedUser);
-                    }
-
-                    result = dms.getAllDevicesIds(request);
-                    if (result == null || result.getData() == null || result.getData().isEmpty()) {
-                        devices.setList(new ArrayList<Device>());
-                        devices.setCount(0);
-                    } else {
-                        devices.setList((List<Device>) result.getData());
-                        devices.setCount(result.getRecordsTotal());
-                    }
-
-                    int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-                    TrackerDeviceInfo trackerDevice;
-                    for (Device device : devices.getList()) {
-                        trackerDevice = deviceAPIClientService.getTrackerDevice(device.getId(), tenantId);
-                        if(trackerDevice != null) {
-                            int traccarDeviceId = trackerDevice.getTraccarDeviceId();
-                            boolean getPermission = deviceAPIClientService.getUserIdofPermissionByDeviceIdNUserId(traccarDeviceId, userId);
-                            traccarValidIdList.add(traccarDeviceId);
-                            if (!getPermission) {
-                                deviceAPIClientService.addTrackerUserDevicePermission(userId, traccarDeviceId);
-                            }
-                        }
-                    }
-                    //Remove necessary
-                    List<TrackerPermissionInfo> getAllUserDevices =
-                            deviceAPIClientService.getUserIdofPermissionByUserIdNIdList(userId, traccarValidIdList);
-                    for (TrackerPermissionInfo getAllUserDevice : getAllUserDevices) {
-                        deviceAPIClientService.removeTrackerUserDevicePermission(
-                                getAllUserDevice.getTraccarUserId(),
-                                getAllUserDevice.getTraccarDeviceId(),
-                                TraccarHandlerConstants.Types.REMOVE_TYPE_SINGLE);
-                    }
-                } catch (DeviceManagementException e) {
-                    String msg = "Error occurred while fetching all enrolled devices. ";
-                    log.error(msg, e);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-                } catch (DeviceAccessAuthorizationException e) {
-                    String msg = "Error occurred while checking device access authorization. ";
-                    log.error(msg, e);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-                } catch (TrackerManagementDAOException e) {
-                    String msg = "Error occurred while mapping with deviceId .";
-                    log.error(msg, e);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-                } catch (ExecutionException e) {
-                    String msg = "Execution error occurred handling traccar device permissions";
-                    log.error(msg, e);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-                } catch (InterruptedException e) {
-                    String msg = "Interruption error occurred handling traccar device permissions";
-                    log.error(msg, e);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-                }
-
-                /*Get Device Id List*/
-                return Response.status(Response.Status.OK).entity(obj.getString("token")).build();
-            }
-        } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Traccar is not enabled").build();
-        }
-    }
-
     /**
      * Validate group Id and group Id greater than 0 and exist.
      *
@@ -517,6 +416,10 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 String msg = "Error occurred while retrieving role list of user '" + authorizedUser + "'";
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }catch (BadRequestException e){
+                String msg = "Error occurred while validating the device group.";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
 
             PaginationResult result = dms.getAllDevices(request, false);
@@ -533,7 +436,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             }
             return Response.status(Response.Status.OK).entity(devices).build();
         } catch (BadRequestException e) {
-            String msg = "Invalid type, use either 'path' or 'full'";
+            String msg = "Invalid type, use either [path] or [full]";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (UnAuthorizedException e) {
@@ -567,12 +470,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             boolean response = deviceManagementProviderService.disenrollDevice(deviceIdentifier);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (DeviceManagementException e) {
-            String msg = "Error encountered while deleting device of type : " + deviceType + " and " +
-                    "ID : " + deviceId;
+            String msg = "Error encountered while deleting requested device of type : " + deviceType ;
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()
-            ).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -594,11 +494,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
             return Response.status(Response.Status.CREATED).entity(response).build();
         } catch (DeviceManagementException e) {
-            log.error("Error encountered while updating device of type : " + deviceType + " and " +
-                    "ID : " + deviceId);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage("Error while updating " +
-                            "device of type " + deviceType + " and ID : " + deviceId).build()).build();
+            String msg = "Error encountered while updating requested device of type : " + deviceType ;
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -639,10 +537,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     sinceDate = format.parse(ifModifiedSince);
                     deviceData.setLastModifiedDate(sinceDate);
                 } catch (ParseException e) {
-                    String msg = "Invalid date string is provided in 'If-Modified-Since' header";
+                    String msg = "Invalid date string is provided in [If-Modified-Since] header";
                     log.error(msg, e);
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
                 }
             }
 
@@ -669,9 +566,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 return Response.status(Response.Status.NOT_MODIFIED).entity("No device is modified " +
                         "after the timestamp provided in 'If-Modified-Since' header").build();
             }
-            return Response.status(Response.Status.NOT_FOUND).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_NOT_FOUND).setMessage("Requested device of type '" +
-                            type + "', which carries id '" + id + "' does not exist").build()).build();
+            String msg = "Requested device of type " + type + " does not exist";
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
         return Response.status(Response.Status.OK).entity(device).build();
     }
@@ -692,7 +588,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     dms);
             return Response.status(Response.Status.OK).entity(snapshotWrapper).build();
         } catch (BadRequestException e) {
-            String msg = "Invalid type, use either 'path' or 'full'";
+            String msg = "Invalid type, use either [path] or [full]";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (UnAuthorizedException e) {
@@ -738,12 +634,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 try {
                     sinceDate = format.parse(ifModifiedSince);
                 } catch (ParseException e) {
-                    String message = "Error occurred while parse the since date.Invalid date string is provided in " +
-                            "'If-Modified-Since' header";
+                    String message = "Invalid date string is provided in [If-Modified-Since] header";
                     log.error(message, e);
-                    return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage("Invalid date " +
-                                    "string is provided in 'If-Modified-Since' header").build()).build();
+                    return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
                 }
             }
             if (sinceDate != null) {
@@ -752,16 +645,15 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     String message = "No device is modified after the timestamp provided in 'If-Modified-Since' header";
                     log.error(message);
                     return Response.status(Response.Status.NOT_MODIFIED).entity("No device is modified " +
-                            "after the timestamp provided in 'If-Modified-Since' header").build();
+                            "after the timestamp provided in [If-Modified-Since] header").build();
                 }
             } else {
                 device = dms.getDevice(id, requireDeviceInfo);
             }
             if (device == null) {
-                String message = "Device does not exist with id '" + id + "'";
+                String message = "Device does not exist";
                 log.error(message);
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(404l).setMessage(message).build()).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(message).build();
             }
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(id, device.getType());
             // check whether the user is authorized
@@ -819,7 +711,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         DeviceManagementProviderService deviceManagementProviderService =
                 DeviceMgtAPIUtils.getDeviceManagementService();
         if (deviceIds == null || deviceIds.isEmpty()) {
-            String msg = "Required values of device identifiers are not set..";
+            String msg = "Required values of device identifiers are not set.";
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -1000,9 +892,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             try {
                 fm = dms.getFeatureManager(type);
             } catch (DeviceTypeNotFoundException e) {
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder()
-                                .setMessage("No device type found with name '" + type + "'").build()).build();
+                String msg = "No device type found with name : " + type ;
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
             if (fm != null) {
                 features = fm.getFeatures();
@@ -1223,8 +1114,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (InputValidationException e) {
-            String msg = "Error occurred while fetching the operations for the '" + type + "' device, which " +
-                    "carries the id '" + id + "'";
+            String msg = "Error occurred while fetching the operations for the type : " + type + " device";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (DeviceManagementException e) {
@@ -1233,7 +1123,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (DeviceTypeNotFoundException e) {
-            String msg = "No device type found with name '" + type + "'";
+            String msg = "No device type found with name : " + type ;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
@@ -1343,11 +1233,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             boolean response = deviceManagementProviderService.changeDeviceStatus(deviceIdentifier, newsStatus);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while changing device status of type : " + type + " and " +
-                    "device id : " + id;
+            String msg = "Error occurred while changing device status of device type : " + type ;
             log.error(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -1375,11 +1263,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             List<DeviceStatus> deviceStatusHistory = deviceManagementProviderService.getDeviceStatusHistory(persistedDevice);
             return Response.status(Response.Status.OK).entity(deviceStatusHistory).build();
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while retreiving device status history for device of type : " + type + " and " +
-                    "device id : " + id;
+            String msg = "Error occurred while retrieving device status history for device of type : " + type ;
             log.error(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -1407,11 +1293,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             List<DeviceStatus> deviceStatusHistory = deviceManagementProviderService.getDeviceCurrentEnrolmentStatusHistory(persistedDevice);
             return Response.status(Response.Status.OK).entity(deviceStatusHistory).build();
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while retreiving device status history for device of type : " + type + " and " +
-                    "device id : " + id;
+            String msg = "Error occurred while retrieving device status history for device of type : " + type;
             log.error(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -1488,7 +1372,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
         } catch (DeviceManagementException e) {
-            String errorMessage = "Issue in retrieving deivce management service instance";
+            String errorMessage = "Issue in retrieving device management service instance";
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
@@ -1688,7 +1572,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             DeviceType deviceTypeObj = DeviceManagerUtil.getDeviceType(
                     deviceType, tenantId);
             if (deviceTypeObj == null) {
-                String msg = "Error, device of type: " + deviceType + " does not exist";
+                String msg = "Device of type: " + deviceType + " does not exist";
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }

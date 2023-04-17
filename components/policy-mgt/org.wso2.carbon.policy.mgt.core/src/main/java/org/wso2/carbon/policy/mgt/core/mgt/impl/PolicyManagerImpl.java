@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
@@ -1504,12 +1505,11 @@ public class PolicyManagerImpl implements PolicyManager {
     }
 
     @Override
-    public List<Policy> getPolicyList() throws PolicyManagementException {
-
+    public List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException {
         List<Policy> policyList;
         try {
             PolicyManagementDAOFactory.openConnection();
-            policyList = policyDAO.getAllPolicies();
+            policyList = policyDAO.getAllPolicies(request);
             for (Policy policy : policyList) {
                 policy.setRoles(policyDAO.getPolicyAppliedRoles(policy.getId()));
                 policy.setUsers(policyDAO.getPolicyAppliedUsers(policy.getId()));
@@ -1521,11 +1521,17 @@ public class PolicyManagerImpl implements PolicyManager {
             }
             Collections.sort(policyList);
         } catch (PolicyManagerDAOException e) {
-            throw new PolicyManagementException("Error occurred while getting all the policies.", e);
+            String msg = "Error occurred while getting all the policies.";
+            log.error(msg, e);
+            throw new PolicyManagementException(msg, e);
         } catch (SQLException e) {
-            throw new PolicyManagementException("Error occurred while opening a connection to the data source", e);
+            String msg = "Error occurred while opening a connection to the data source.";
+            log.error(msg, e);
+            throw new PolicyManagementException(msg, e);
         } catch (GroupManagementException e) {
-            throw new PolicyManagementException("Error occurred while getting device groups.", e);
+            String msg = "Error occurred while getting device groups.";
+            log.error(msg, e);
+            throw new PolicyManagementException(msg, e);
         } finally {
             PolicyManagementDAOFactory.closeConnection();
         }

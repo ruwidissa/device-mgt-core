@@ -20,7 +20,6 @@ import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
@@ -28,42 +27,32 @@ import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
-import org.wso2.carbon.device.mgt.common.exceptions.UnAuthorizedException;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentType;
-import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
 import org.wso2.carbon.device.mgt.common.otp.mgt.OTPEmailTypes;
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
-import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.DownloadURLDetails;
 import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
-import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
-import org.wso2.carbon.device.mgt.core.config.keymanager.KeyManagerConfigurations;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAO;
-import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPWrapper;
 import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
 import org.wso2.carbon.device.mgt.core.otp.mgt.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 
-import static org.wso2.carbon.device.mgt.common.DeviceManagementConstants.OTPProperties;
-
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.ArrayList;
-import java.util.Collections;
 
 public class OTPManagementServiceImpl implements OTPManagementService {
 
@@ -79,60 +68,61 @@ public class OTPManagementServiceImpl implements OTPManagementService {
     }
 
     @Override
-    public String sendUserVerifyingMail(OTPWrapper otpWrapper) throws OTPManagementException, DeviceManagementException {
-        Tenant tenant = validateTenantCreatingDetails(otpWrapper);
-        OneTimePinDTO oneTimePinDTO = createOneTimePin(otpWrapper.getEmail(), otpWrapper.getEmailType(),
-                otpWrapper.getUsername(), tenant, -1234);
+    public boolean hasEmailRegistered(String email, String emailDomain) throws OTPManagementException,
+            DeviceManagementException {
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            if (otpManagementDAO.isEmailExist(email, emailDomain)) {
+                return true;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting database connection to validate the given email and email type.";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        } catch (OTPManagementDAOException e) {
+            String msg = "Error occurred while executing SQL query to validate the given email and email type.";
+            log.error(msg);
+            throw new OTPManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+        return false;
+    }
+
+    public OneTimePinDTO getRenewedOtpByEmailAndMailType(String email, String emailType) throws OTPManagementException{
+        OneTimePinDTO oneTimePinDTO;
+        String newToken = UUID.randomUUID().toString();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            this.otpManagementDAO.addOTPData(Collections.singletonList(oneTimePinDTO));
-//            Properties props = new Properties();
-//            props.setProperty("first-name", tenant.getAdminFirstName());
-//            props.setProperty("otp-token", oneTimePinDTO.getOtpToken());
-//            sendMail(props, tenant.getEmail(), DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE);
+            oneTimePinDTO = otpManagementDAO.getOtpDataByEmailAndMailType(email, emailType);
+            if (oneTimePinDTO == null) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                String msg = "Can't find OTP data for email: " + email + " and email type: " + emailType;
+                log.error(msg);
+                throw new OTPManagementException(msg);
+            }
+            otpManagementDAO.restoreOneTimeToken(oneTimePinDTO.getId(), newToken);
             ConnectionManagerUtil.commitDBTransaction();
-            return oneTimePinDTO.getOtpToken();
-        } catch (TransactionManagementException e) {
-            String msg = "Error occurred while disabling AutoCommit.";
-            log.error(msg, e);
-            throw new OTPManagementException(msg, e);
+
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while getting database connection to add OPT data.";
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while getting database connection to validate the given email and email type.";
             log.error(msg, e);
             throw new OTPManagementException(msg, e);
         } catch (OTPManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred while saving the OTP data for given email" ;
+            String msg = "Error occurred while executing SQL query to validate the given email and email type.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while starting the DB transaction";
             log.error(msg, e);
             throw new OTPManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
-    }
-
-    @Override
-    public void shareProductDownloadUrl(DownloadURLDetails downloadURLDetails) throws OTPManagementException {
-        if (StringUtils.isBlank(downloadURLDetails.getURL())) {
-            String msg = "Couldn't find the download URL with the request.";
-            log.error(msg);
-            throw new OTPManagementException(msg);
-        }
-        if (StringUtils.isBlank(downloadURLDetails.getFirstName())) {
-            String msg = "Couldn't find the First Name with the request.";
-            log.error(msg);
-            throw new OTPManagementException(msg);
-        }
-        if (StringUtils.isBlank(downloadURLDetails.getEmail())) {
-            String msg = "Couldn't find the e-mail address with the request.";
-            log.error(msg);
-            throw new OTPManagementException(msg);
-        }
-
-        Properties props = new Properties();
-        props.setProperty("first-name", downloadURLDetails.getFirstName());
-        props.setProperty("download-url", downloadURLDetails.getURL());
-        sendMail(props, downloadURLDetails.getEmail(),
-                    DeviceManagementConstants.EmailAttributes.PRODUCT_DOWNLOAD_LINK_SHARING_TEMPLATE);
+        oneTimePinDTO.setOtpToken(newToken);
+        return oneTimePinDTO;
     }
 
     @Override
@@ -157,7 +147,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         Calendar calendar = Calendar.getInstance();
         Timestamp currentTimestamp = new Timestamp(calendar.getTime().getTime());
         Timestamp expiredTimestamp = new Timestamp(
-                oneTimePinDTO.getCreatedAt().getTime() + oneTimePinDTO.getExpiryTime() * 1000);
+                oneTimePinDTO.getCreatedAt().getTime() + oneTimePinDTO.getExpiryTime() * 1000L);
 
         if (currentTimestamp.after(expiredTimestamp)) {
             String renewedOTP = UUID.randomUUID().toString();
@@ -168,6 +158,8 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             Properties props = new Properties();
             props.setProperty("first-name", tenant.getAdminFirstName());
             props.setProperty("otp-token", renewedOTP);
+            props.setProperty("email", oneTimePinDTO.getEmail());
+            props.setProperty("type", oneTimePinDTO.getEmailType());
             sendMail(props, oneTimePinDTO.getEmail(), DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE);
             return null;
         }
@@ -233,7 +225,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             deviceEnrollmentInvitationDetails = dms.getDeviceEnrollmentInvitationDetails(
                     deviceEnrollmentType.getDeviceType());
             if (deviceEnrollmentInvitationDetails != null &&
-                deviceEnrollmentInvitationDetails.getEnrollmentDetails() != null) {
+                    deviceEnrollmentInvitationDetails.getEnrollmentDetails() != null) {
                 for (String enrollmentType : deviceEnrollmentType.getEnrollmentType()) {
                     deviceEnrollmentInvitationDetails.getEnrollmentDetails().stream()
                             .filter(details -> enrollmentType.equals(details.getEnrollmentType())).findFirst()
@@ -251,8 +243,8 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             for (String username : deviceEnrollmentInvitation.getUsernames()) {
                 String emailAddress = DeviceManagerUtil.getUserClaimValue(
                         username, DeviceManagementConstants.User.CLAIM_EMAIL_ADDRESS);
-                oneTimePinDTO = createOneTimePin(emailAddress, OTPEmailTypes.DEVICE_ENROLLMENT.toString(), username,
-                        null, tenantId);
+                oneTimePinDTO = generateOneTimePin(emailAddress, OTPEmailTypes.DEVICE_ENROLLMENT.toString(), username,
+                        null, tenantId, false);
                 oneTimePinDTOList.add(oneTimePinDTO);
                 props.setProperty("first-name", DeviceManagerUtil.
                         getUserClaimValue(username, DeviceManagementConstants.User.CLAIM_FIRST_NAME));
@@ -284,7 +276,6 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         }
     }
 
-
     /**
      * Create One Time Token
      * @param email email
@@ -294,8 +285,9 @@ public class OTPManagementServiceImpl implements OTPManagementService {
      * @param tenantId tenant Id
      * @return {@link OneTimePinDTO}
      */
-    private OneTimePinDTO createOneTimePin(String email, String emailType, String userName, Object metaDataObj,
-            int tenantId) {
+    @Override
+    public OneTimePinDTO generateOneTimePin(String email, String emailType, String userName, Object metaDataObj,
+                                            int tenantId, boolean persistPin) throws OTPManagementException {
 
         String otpValue = UUID.randomUUID().toString();
 
@@ -310,6 +302,28 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         oneTimePinDTO.setMetaInfo(metaInfo);
         oneTimePinDTO.setOtpToken(otpValue);
 
+        if (persistPin) {
+            try {
+                ConnectionManagerUtil.beginDBTransaction();
+                this.otpManagementDAO.addOTPData(Collections.singletonList(oneTimePinDTO));
+                ConnectionManagerUtil.commitDBTransaction();
+            } catch (TransactionManagementException e) {
+                String msg = "Error occurred while disabling AutoCommit.";
+                log.error(msg, e);
+                throw new OTPManagementException(msg, e);
+            } catch (DBConnectionException e) {
+                String msg = "Error occurred while getting database connection to add OPT data.";
+                log.error(msg, e);
+                throw new OTPManagementException(msg, e);
+            } catch (OTPManagementDAOException e) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                String msg = "Error occurred while saving the OTP data for given email" ;
+                log.error(msg, e);
+                throw new OTPManagementException(msg, e);
+            } finally {
+                ConnectionManagerUtil.closeDBConnection();
+            }
+        }
         return oneTimePinDTO;
     }
 
@@ -319,7 +333,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
      * @return {@link OneTimePinDTO}
      * @throws OTPManagementException if error occurred while getting OTP data for given OTP in DB
      */
-    private OneTimePinDTO getOTPDataByToken ( String oneTimeToken) throws OTPManagementException {
+    private OneTimePinDTO getOTPDataByToken (String oneTimeToken) throws OTPManagementException {
         try {
             ConnectionManagerUtil.openDBConnection();
             return otpManagementDAO.getOTPDataByToken(oneTimeToken);
@@ -334,121 +348,6 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
-    }
-
-    /**
-     * Validate Tenant details
-     * @param otpWrapper OTP-Wrapper
-     * @return {@link Tenant} if its valid payload otherwise throws {@link DeviceManagementException}
-     * @throws DeviceManagementException if invalid payload or unauthorized request received
-     */
-    private Tenant validateTenantCreatingDetails(OTPWrapper otpWrapper) throws DeviceManagementException {
-
-        DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance()
-                .getDeviceManagementConfig();
-        KeyManagerConfigurations kmConfig = deviceManagementConfig.getKeyManagerConfigurations();
-
-        if (StringUtils.isBlank(otpWrapper.getUsername())) {
-            String msg = "Received Blank username to create OTP. Username: " + otpWrapper.getUsername();
-            log.error(msg);
-            throw new BadRequestException(msg);
-        }
-
-        String[] superTenantDetails = otpWrapper.getUsername().split("@");
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(superTenantDetails[superTenantDetails.length - 1])
-                || !superTenantDetails[0].equals(kmConfig.getAdminUsername())) {
-            String msg = "You don't have required permission to create OTP";
-            log.error(msg);
-            throw new UnAuthorizedException(msg);
-        }
-
-        Tenant tenant = new Tenant();
-        List<Metadata> properties = otpWrapper.getProperties();
-        for (Metadata property : properties) {
-            if (property == null) {
-                String msg = "Received invalid property to create OTP.";
-                log.error(msg);
-                throw new BadRequestException(msg);
-            }
-            switch (property.getMetaKey()) {
-                case OTPProperties.FIRST_NAME:
-                    String firstName = property.getMetaValue();
-                    if (StringUtils.isBlank(firstName)) {
-                        String msg = "Received empty or blank first name field with OTP creating payload.";
-                        log.error(msg);
-                        throw new BadRequestException(msg);
-                    }
-                    tenant.setAdminFirstName(firstName);
-                    break;
-                case OTPProperties.LAST_NAME:
-                    String lastName = property.getMetaValue();
-                    if (StringUtils.isBlank(lastName)) {
-                        String msg = "Received empty or blank last name field with OTP creating payload.";
-                        log.error(msg);
-                        throw new BadRequestException(msg);
-                    }
-                    tenant.setAdminLastName(lastName);
-                    break;
-                case OTPProperties.TENANT_ADMIN_PASSWORD:
-                    String pwd = property.getMetaValue();
-                    if (StringUtils.isBlank(pwd)) {
-                        String msg = "Received empty or blank admin password field with OTP creating payload.";
-                        log.error(msg);
-                        throw new BadRequestException(msg);
-                    }
-                    tenant.setAdminPassword(pwd);
-                    break;
-                default:
-                    String msg = "Received invalid key with OTP properties for creating OTP.";
-                    log.error(msg);
-                    throw new BadRequestException(msg);
-            }
-        }
-
-        if (StringUtils.isBlank(otpWrapper.getEmail())) {
-            String msg = "Received empty or blank email field with OTP creating payload.";
-            log.error(msg);
-            throw new BadRequestException(msg);
-        }
-
-        EmailValidator validator = EmailValidator.getInstance();
-        if (!validator.isValid(otpWrapper.getEmail())) {
-            String msg = "Found invalid email. Hence please verify the email address and re-try. Email: " + otpWrapper
-                    .getEmail();
-            log.error(msg);
-            throw new BadRequestException(msg);
-        }
-
-        if (StringUtils.isBlank(otpWrapper.getEmailType())) {
-            String msg = "Received empty or blank email type field with OTP creating payload.";
-            log.error(msg);
-            throw new BadRequestException(msg);
-        }
-
-        try {
-            ConnectionManagerUtil.openDBConnection();
-            if (otpManagementDAO.isEmailExist(otpWrapper.getEmail(), otpWrapper.getEmailType())) {
-                String msg = "Email is registered to execute the same action. Hence can't proceed.";
-                log.error(msg);
-                throw new BadRequestException(msg);
-            }
-        } catch (DBConnectionException e) {
-            String msg = "Error occurred while getting database connection to validate the given email and email type.";
-            log.error(msg);
-            throw new DeviceManagementException(msg);
-        } catch (OTPManagementDAOException e) {
-            String msg = "Error occurred while executing SQL query to validate the given email and email type.";
-            log.error(msg);
-            throw new DeviceManagementException(msg);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
-        }
-
-        String[] tenantUsernameDetails = otpWrapper.getEmail().split("@");
-        tenant.setAdminName(tenantUsernameDetails[0]);
-        tenant.setDomain(tenantUsernameDetails[tenantUsernameDetails.length - 1]);
-        tenant.setEmail(otpWrapper.getEmail());
-        return tenant;
     }
 
     /**

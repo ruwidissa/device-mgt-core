@@ -51,6 +51,16 @@ public final class MDCContextUtil {
         if (mdcContext.getTenantID() != null) {
             MDC.put("TenantId", mdcContext.getTenantID());
         }
+        if (mdcContext.isUserRegistered()) {
+            MDC.put("IsUserRegistered", "Registered");
+        }
+        if (mdcContext.isDeviceRegisterged()) {
+            MDC.put("IsDeviceRegistered", mdcContext.isDeviceRegisterged());
+        }
+        if (mdcContext.getTenantDomain() != null) {
+            MDC.put("TenantDomain", mdcContext.getTenantDomain());
+        }
+
     }
 }
 

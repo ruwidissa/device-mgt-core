@@ -20,6 +20,7 @@ package org.wso2.carbon.policy.mgt.core.mgt;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.mgt.bean.UpdatedPolicyDeviceListBean;
@@ -90,5 +91,12 @@ public interface PolicyManager {
 
     List<Policy> getPolicies(String type) throws PolicyManagementException;
 
-    List<Policy> getPolicyList() throws PolicyManagementException;
+    /**
+     * Returns list of policies with users, roles and groups attached to that policy
+     * @param request {@link PaginationRequest} contains offset and limit
+     * @return {@link List<Policy>} - list of policies for current tenant
+     * @throws PolicyManagementException when there is an error while retrieving the policies from database or
+     * while retrieving device groups
+     */
+    List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException;
 }

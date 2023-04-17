@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 
@@ -84,6 +85,21 @@ public class HubspotHandler extends HttpServlet {
                 } catch (IOException e) {
                         log.error("Error occurred when processing GET request.", e);
                 }
+        }
+
+        @Override
+        protected void doDelete(HttpServletRequest req, HttpServletResponse resp){
+            try{
+                if(validateRequest(req, resp)){
+                    HttpDelete deleteRequest = new HttpDelete(HandlerUtil.generateBackendRequestURL(req,hubspotEndpoint));
+                    deleteRequest.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+                    deleteRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + chatConfig);
+                    ProxyResponse proxyResponse = HandlerUtil.execute(deleteRequest);
+                    HandlerUtil.handleSuccess(resp, proxyResponse);
+                }
+            } catch (IOException e){
+                log.error("Error occurred when processing DELETE request.", e);
+            }
         }
 
         /***

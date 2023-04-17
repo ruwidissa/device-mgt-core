@@ -167,7 +167,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (GroupAlreadyExistException e) {
-            String msg = "Group already exists with name " + group.getName() + ".";
+            String msg = "Group already exists with name : " + group.getName() + ".";
             log.warn(msg);
             return Response.status(Response.Status.CONFLICT).entity(msg).build();
         }
@@ -181,7 +181,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             if (deviceGroup != null) {
                 return Response.status(Response.Status.OK).entity(deviceGroup).build();
             } else {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                return Response.status(Response.Status.NOT_FOUND).entity("Group not found.").build();
             }
         } catch (GroupManagementException e) {
             String error = "Error occurred while getting the group.";
@@ -198,7 +198,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             if (deviceGroup != null) {
                 return Response.status(Response.Status.OK).entity(deviceGroup).build();
             } else {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                return Response.status(Response.Status.NOT_FOUND).entity("Group not found.").build();
             }
         } catch (GroupManagementException e) {
             String error = "Error occurred while getting the group.";
@@ -220,11 +220,11 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (GroupNotExistException e) {
-            String msg = "Group doesn't exist with ID '" + deviceGroup.getGroupId() + "'.";
+            String msg = "Group does not exist.";
             log.warn(msg);
             return Response.status(Response.Status.CONFLICT).entity(msg).build();
         } catch (GroupAlreadyExistException e) {
-            String msg = "Group already exists with name '" + deviceGroup.getName() + "'.";
+            String msg = "Group already exists with name : '" + deviceGroup.getName() + "'.";
             log.warn(msg);
             return Response.status(Response.Status.CONFLICT).entity(msg).build();
         }

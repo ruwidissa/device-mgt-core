@@ -141,16 +141,15 @@ public class DeviceTypeManagementServiceImpl implements DeviceTypeManagementServ
         DeviceManagementProviderService dms;
         try {
             if (StringUtils.isEmpty(type)) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("Type cannot be empty.").build()).build();
+                String msg = "Type cannot be empty.";
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
             dms = DeviceMgtAPIUtils.getDeviceManagementService();
             FeatureManager fm = dms.getFeatureManager(type);
 
             if (fm == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("No feature manager is " +
-                                "registered with the given type '" + type + "'").build()).build();
+                String msg = "No feature manager is registered with the given type : " + type ;
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
 
             if (StringUtils.isEmpty(hidden)) {
@@ -165,11 +164,9 @@ public class DeviceTypeManagementServiceImpl implements DeviceTypeManagementServ
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (DeviceTypeNotFoundException e) {
-            String msg = "No device type found with name '" + type + "'";
+            String msg = "No device type found with name : " + type ;
             log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(
-                    new ErrorResponse.ErrorResponseBuilder()
-                            .setMessage(msg).build()).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
         return Response.status(Response.Status.OK).entity(features).build();
     }

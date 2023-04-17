@@ -204,6 +204,41 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
         }
     }
 
+    public void restoreOneTimeToken(int id, String oneTimeToken) throws OTPManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to update an OTP data entry for OTP");
+            log.debug("OTP Details : OTP key : " + oneTimeToken );
+        }
+
+        String sql = "UPDATE DM_OTP_DATA "
+                + "SET "
+                + "OTP_TOKEN = ?, "
+                + "CREATED_AT = ?, "
+                + "IS_EXPIRED = false "
+                + "WHERE ID = ?";
+
+        try {
+            Connection conn = this.getDBConnection();
+            Calendar calendar = Calendar.getInstance();
+            Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, oneTimeToken);
+                stmt.setTimestamp(2, timestamp);
+                stmt.setInt(3, id);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to update the OTP token.";
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when executing sql query to update the OTP token.";
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        }
+    }
+
+
     @Override
     public boolean isEmailExist (String email, String emailType) throws OTPManagementDAOException {
 
@@ -226,6 +261,64 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
                 try (ResultSet rs = stmt.executeQuery()) {
                     return rs.next();
                 }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to verify email and email type exist in OTP."
+                    + " Email: " + email + "Email Type: " + emailType;
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to verify email and email type exist in OTP. Email: "
+                    + email + "Email Type: " + emailType;
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public OneTimePinDTO getOtpDataByEmailAndMailType(String email, String emailType) throws OTPManagementDAOException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to verify whether email was registed with emai type in OTP");
+            log.debug("OTP Details : email : " + email + " email type: " + emailType );
+        }
+
+        String sql = "SELECT "
+                + "ID, "
+                + "OTP_TOKEN, "
+                + "EMAIL, "
+                + "EMAIL_TYPE, "
+                + "META_INFO, "
+                + "CREATED_AT, "
+                + "EXPIRY_TIME, "
+                + "IS_EXPIRED, "
+                + "TENANT_ID, "
+                + "USERNAME "
+                + "FROM DM_OTP_DATA "
+                + "WHERE EMAIL = ? AND "
+                + "EMAIL_TYPE = ?";
+
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, email);
+                stmt.setString(2, emailType);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        OneTimePinDTO oneTimePinDTO = new OneTimePinDTO();
+                        oneTimePinDTO.setId(rs.getInt("ID"));
+                        oneTimePinDTO.setOtpToken(rs.getString("OTP_TOKEN"));
+                        oneTimePinDTO.setEmail(rs.getString("EMAIL"));
+                        oneTimePinDTO.setEmailType(rs.getString("EMAIL_TYPE"));
+                        oneTimePinDTO.setMetaInfo(rs.getString("META_INFO"));
+                        oneTimePinDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                        oneTimePinDTO.setExpiryTime(rs.getInt("EXPIRY_TIME"));
+                        oneTimePinDTO.setExpired(rs.getBoolean("IS_EXPIRED"));
+                        oneTimePinDTO.setTenantId(rs.getInt("TENANT_ID"));
+                        oneTimePinDTO.setUsername(rs.getString("USERNAME"));
+                        return oneTimePinDTO;
+                    }
+                    return null;                }
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to verify email and email type exist in OTP."

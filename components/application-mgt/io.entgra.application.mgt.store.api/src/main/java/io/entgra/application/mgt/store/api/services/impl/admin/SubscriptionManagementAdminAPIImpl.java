@@ -133,7 +133,7 @@ public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagemen
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "User requested details are not valid";
+            String msg = "User requested details are not valid. Please verify the request payload.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {

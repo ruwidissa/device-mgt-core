@@ -127,13 +127,9 @@ public class WhiteLabelServiceImpl implements WhiteLabelService {
             WhiteLabelTheme whiteLabelTheme = DeviceMgtAPIUtils.getWhiteLabelManagementService().getWhiteLabelTheme(tenantDomain);
             return Response.status(Response.Status.CREATED).entity(whiteLabelTheme).build();
         } catch (MetadataManagementException e) {
-            String msg = "Error occurred while deleting whitelabel for tenant";
+            String msg = "Error occurred while getting whitelabel for tenant";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (NotFoundException e) {
-            String msg = "Not white label theme configured for this tenant";
-            log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving tenant details of whitelabel";
             log.error(msg, e);
