@@ -24,6 +24,8 @@
  */
 package io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions;
 
+import okhttp3.Response;
+
 public class BadRequestException extends Exception {
 
     private static final long serialVersionUID = -2387103750774855056L;

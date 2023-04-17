@@ -5,111 +5,92 @@ import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.APIApplicationKey;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.AccessTokenInfo;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.APIApplicationServicesException;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.BadRequestException;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.util.PublisherRESTAPIUtil;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.util.ScopeUtils;
+import okhttp3.*;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.ssl.Base64;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.model.Scope;
 
 import java.io.IOException;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import static io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServicesImpl.getOkHttpClient;
 
 public class PublisherRESTAPIServices {
     private static final Log log = LogFactory.getLog(PublisherRESTAPIServices.class);
+    private static final OkHttpClient client = getOkHttpClient();
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public boolean isSharedScopeNameExists(APIApplicationKey apiApplicationKey,  AccessTokenInfo accessTokenInfo, String key)
             throws APIApplicationServicesException, BadRequestException {
 
         String keyValue = new String(Base64.encodeBase64((key).getBytes())).replace("=", "");
         String getScopeUrl = "https://localhost:9443/api/am/publisher/v2/scopes/" + keyValue;
+
+        Request request = new Request.Builder()
+                .url(getScopeUrl)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessTokenInfo.getAccessToken())
+                .head()
+                .build();
         try {
-            URL url = new URL(getScopeUrl);
-            HttpClient httpclient = PublisherRESTAPIUtil.getHttpClient(url.getProtocol());
-            HttpHead request = new HttpHead(url.toString());
-
-            request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessTokenInfo.getAccessToken());
-            HttpResponse httpResponse = httpclient.execute(request);
-
-            if (HttpStatus.SC_OK == httpResponse.getStatusLine().getStatusCode()){
+            Response response = client.newCall(request).execute();
+            if (response.code() == HttpStatus.SC_OK){
                 return true;
-            } else if(HttpStatus.SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {
+            }else if(HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefreshToken(), apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret() );
+                //max attempt count
                 return isSharedScopeNameExists(apiApplicationKey,refreshedAccessToken, key);
-            } else if (HttpStatus.SC_BAD_REQUEST == httpResponse.getStatusLine().getStatusCode()){
-                String response = httpResponse.toString();
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()){
                 log.info(response);
-                throw new BadRequestException(response);
+                throw new BadRequestException(response.toString());
             } else {
                 return false;
             }
-
         } catch (IOException e) {
-            throw new APIApplicationServicesException("Error when reading the response from buffer.", e);
-        } catch (KeyStoreException e) {
-            throw new APIApplicationServicesException("Failed loading the keystore.", e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new APIApplicationServicesException("No such algorithm found when loading the ssl socket", e);
-        } catch (KeyManagementException e) {
-            throw new APIApplicationServicesException("Failed setting up the ssl http client.", e);
+            String msg = "Error occurred while processing the response";
+            throw new APIApplicationServicesException(msg);
         }
     }
 
-    public void updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
+    public boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
             throws APIApplicationServicesException, BadRequestException {
 
         String updateScopeUrl = "https://localhost:9443/api/am/publisher/v2/scopes/" + scope.getId();
+
+        JSONObject setScope = new JSONObject();
+        setScope.put("name", scope.getKey());
+        setScope.put("displayName", scope.getName());
+        setScope.put("description", scope.getDescription());
+        setScope.put("bindings", scope.getRoles());
+
+
+        RequestBody requestBody = RequestBody.Companion.create(setScope.toString(), JSON);
+        Request request = new Request.Builder()
+                .url(updateScopeUrl)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessTokenInfo.getAccessToken())
+                .put(requestBody)
+                .build();
+
         try {
-            URL url = new URL(updateScopeUrl);
-            HttpClient httpclient = PublisherRESTAPIUtil.getHttpClient(url.getProtocol());
-            HttpPut request = new HttpPut(url.toString());
-
-            request.setHeader(HttpHeaders.AUTHORIZATION, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER +
-                    accessTokenInfo.getAccessToken());
-            request.setHeader(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON);
-
-            ScopeUtils setScope = new ScopeUtils();
-            setScope.setKey(scope.getKey());
-            setScope.setName(scope.getName());
-            setScope.setDescription(scope.getDescription());
-            setScope.setRoles(scope.getRoles());
-            String jsonString = setScope.toJSON();
-            StringEntity entity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
-            request.setEntity(entity);
-
-            HttpResponse httpResponse = httpclient.execute(request);
-            if (HttpStatus.SC_OK != httpResponse.getStatusLine().getStatusCode() && HttpStatus.SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()){
+            Response response = client.newCall(request).execute();
+            if (response.code() == HttpStatus.SC_OK) {
+                return true;
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
-                AccessTokenInfo accessTokenInfo1 = apiApplicationServices.
-                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefreshToken(), apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret() );
-                updateSharedScope(apiApplicationKey, accessTokenInfo1, scope);
-            } else if (HttpStatus.SC_BAD_REQUEST == httpResponse.getStatusLine().getStatusCode()){
-                String response = httpResponse.toString();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefreshToken(), apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                return updateSharedScope(apiApplicationKey, refreshedAccessToken, scope);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 log.info(response);
-                throw new BadRequestException(response);
+                throw new BadRequestException(response.toString());
+            } else {
+                return false;
             }
-
         } catch (IOException e) {
-            throw new APIApplicationServicesException("Error when reading the response from buffer.", e);
-        } catch (KeyStoreException e) {
-            throw new APIApplicationServicesException("Failed loading the keystore.", e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new APIApplicationServicesException("No such algorithm found when loading the ssl socket", e);
-        } catch (KeyManagementException e) {
-            throw new APIApplicationServicesException("Failed setting up the ssl http client.", e);
+            String msg = "Error occurred while processing the response";
+            throw new APIApplicationServicesException(msg);
         }
     }
 }

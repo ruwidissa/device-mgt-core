@@ -79,8 +79,13 @@
             <artifactId>feign-okhttp</artifactId>
         </dependency>
         <dependency>
+<<<<<<< HEAD
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+=======
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+>>>>>>> 2855ef0a30 (change http client to okhttp)
         </dependency>
     </dependencies>
 
@@ -110,7 +115,6 @@
                         </Export-Package>
                         <Import-Package>
                             javax.net.ssl,
-<!--                            javax.xml.bind,-->
                             org.apache.commons.logging,
                             org.apache.http;version="${httpclient.version.range}",
                             org.apache.http.client;version="${httpclient.version.range}",
@@ -123,17 +127,12 @@
 
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-<!--                            org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",-->
-<!--                            org.wso2.carbon.utils,-->
                             org.wso2.carbon.core,
                             org.apache.commons.ssl,
-<!--                            org.json.simple,-->
-<!--                            org.json.simple.parser,-->
-<!--                            org.apache.http.client.entity,-->
-<!--                            org.apache.http.message,-->
                             org.apache.commons.httpclient,
                             org.wso2.carbon.apimgt.api.model,
-                            okhttp3.*
+                            okhttp3.*,
+                            org.json
                         </Import-Package>
                     </instructions>
                 </configuration>

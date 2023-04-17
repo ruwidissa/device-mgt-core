@@ -371,12 +371,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
             accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
-        } catch (BadRequestException e) {
+        } catch (APIApplicationServicesException e) {
             String errorMsg = "Error while generating application";
             log.error(errorMsg, e);
             throw new APIManagerPublisherException(e);
-        } catch (APIApplicationServicesException e) {
-            throw new RuntimeException(e);
         }
 
         try {
@@ -384,9 +382,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServices();
-//                APIProvider apiProvider = API_MANAGER_FACTORY.getAPIProvider(MultitenantUtils.getTenantAwareUsername(
-//                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration()
-//                                .getAdminUserName()));
 
                 try {
                     String fileName =
@@ -447,7 +442,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 } catch (IOException | DirectoryIteratorException ex) {
                     log.error("failed to read scopes from file.", ex);
                 } catch (APIApplicationServicesException | BadRequestException e) {
-                    String errorMsg = "Error while generating an OAuth token";
+                    String errorMsg = "Error while Calling APIs";
                     log.error(errorMsg, e);
                     throw new APIManagerPublisherException(e);
                 }

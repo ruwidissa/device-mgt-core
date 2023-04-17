@@ -19,6 +19,11 @@
 
 package org.wso2.carbon.apimgt.webapp.publisher;
 
+import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServices;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServicesImpl;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.APIApplicationKey;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.AccessTokenInfo;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.APIApplicationServicesException;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.BadRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,10 +58,7 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
                     log.debug("Total number of unpublished APIs: "
                             + APIPublisherDataHolder.getInstance().getUnpublishedApis().size());
                 }
-                try {
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+
                 publisher = APIPublisherDataHolder.getInstance().getApiPublisherService();
                 int retryCount = 0;
                 while (retryCount < MAX_RETRY_COUNT && (!failedAPIsStack.isEmpty() || !currentAPIsStack.isEmpty())) {

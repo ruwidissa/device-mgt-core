@@ -1,13 +1,12 @@
 package io.entgra.devicemgt.apimgt.extension.publisher.api.internal;
 
+import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServices;
+import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServicesImpl;
 import io.entgra.devicemgt.apimgt.extension.publisher.api.PublisherRESTAPIServices;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.PublisherAPIServiceStartupHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.core.ServerShutdownHandler;
-import org.wso2.carbon.core.ServerStartupObserver;
 
 /**
  * @scr.component name="io.entgra.devicemgt.apimgt.extension.publisher.api.internal.PublisherRESTAPIServiceComponent"
@@ -24,17 +23,19 @@ public class PublisherRESTAPIServiceComponent {
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
 
-            PublisherAPIServiceStartupHandler publisherAPIServiceStartupHandler = new PublisherAPIServiceStartupHandler();
-            bundleContext.registerService(PublisherAPIServiceStartupHandler.class.getName(), publisherAPIServiceStartupHandler, null);
-            bundleContext.registerService(ServerStartupObserver.class.getName(), publisherAPIServiceStartupHandler, null);
-            bundleContext.registerService(ServerShutdownHandler.class.getName(), publisherAPIServiceStartupHandler, null);
+//            PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServices();
+//            bundleContext.registerService(PublisherRESTAPIServices.class.getName(), publisherRESTAPIServices, null);
+//            PublisherRESTAPIDataHolder.getInstance().setPublisherRESTAPIServices(publisherRESTAPIServices);
 
-            PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServices();
-            bundleContext.registerService(PublisherRESTAPIServices.class.getName(), publisherRESTAPIServices, null);
+            APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+            bundleContext.registerService(APIApplicationServices.class.getName(), apiApplicationServices, null);
+            PublisherRESTAPIDataHolder.getInstance().setApiApplicationServices(apiApplicationServices);
 
-
+            if (log.isDebugEnabled()) {
+                log.debug("API Application bundle has been successfully initialized");
+            }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while initializing API Application bundle", e);
         }
     }
 
