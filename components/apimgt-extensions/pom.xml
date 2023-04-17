@@ -25,6 +25,24 @@
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+    </dependencies>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>apimgt-extensions</artifactId>

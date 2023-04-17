@@ -22,7 +22,7 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <version>5.0.21-SNAPSHOT</version>
+        <version>5.0.25-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -79,13 +79,12 @@
             <artifactId>feign-okhttp</artifactId>
         </dependency>
         <dependency>
-<<<<<<< HEAD
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
-=======
+        </dependency>
+        <dependency>
             <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
->>>>>>> 2855ef0a30 (change http client to okhttp)
         </dependency>
     </dependencies>
 
