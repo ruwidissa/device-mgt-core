@@ -39,6 +39,7 @@ public final class CertificateManagementConstants {
     public static final String RSA_PRIVATE_KEY_END_TEXT = "-----END RSA PRIVATE KEY-----";
     public static final String EMPTY_TEXT = "";
     public static final int RSA_KEY_LENGTH = 2048;
+    public static final String SIGNING_ALGORITHM = "SHA256withRSA";
 
     public static final class DataBaseTypes {
         private DataBaseTypes() {
