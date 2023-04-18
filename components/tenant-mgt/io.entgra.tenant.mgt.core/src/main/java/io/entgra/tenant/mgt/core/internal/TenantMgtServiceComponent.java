@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.device.mgt.core.metadata.mgt.WhiteLabelManagementServiceImpl;
+import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
 
 /**
@@ -27,6 +28,7 @@ import org.wso2.carbon.user.core.service.RealmService;
  * unbind="unsetRealmService"
  */
 
+@SuppressWarnings("unused")
 public class TenantMgtServiceComponent {
 
     private static final Log log = LogFactory.getLog(TenantManagerService.class);
@@ -43,7 +45,7 @@ public class TenantMgtServiceComponent {
             TenantMgtDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
             DeviceMgtTenantListener deviceMgtTenantListener = new DeviceMgtTenantListener();
             componentContext.getBundleContext().
-                    registerService(DeviceMgtTenantListener.class.getName(), deviceMgtTenantListener, null);
+                    registerService(TenantMgtListener.class.getName(), deviceMgtTenantListener, null);
             log.info("Tenant management service activated");
         } catch (Throwable t) {
             String msg = "Error occurred while activating tenant management service";

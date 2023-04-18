@@ -46,7 +46,11 @@
                             org.wso2.carbon.stratos.common.exception,
                             org.wso2.carbon.stratos.common.listeners,
                             org.wso2.carbon.device.mgt.common.metadata.mgt,
+                            org.wso2.carbon.device.mgt.common.exceptions,
+                            org.wso2.carbon.device.mgt.common.permission.mgt,
+                            org.wso2.carbon.device.mgt.common.roles.config,
                             org.wso2.carbon.device.mgt.core.metadata.mgt,
+                            org.wso2.carbon.device.mgt.core.config,
                             org.wso2.carbon.user.core.service,
                             org.wso2.carbon.context
                         </Import-Package>
