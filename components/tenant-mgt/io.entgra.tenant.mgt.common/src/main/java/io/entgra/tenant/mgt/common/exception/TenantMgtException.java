@@ -18,6 +18,9 @@
 package io.entgra.tenant.mgt.common.exception;
 
 public class TenantMgtException extends Exception {
+
+    private static final long serialVersionUID = 4304028531230841553L;
+
     public TenantMgtException(String msg, Throwable ex) {
         super(msg, ex);
     }

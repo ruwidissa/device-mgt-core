@@ -61,9 +61,14 @@ public class TenantMgtServiceComponent {
                     whiteLabelManagementService, null);
             TenantMgtDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
             DeviceMgtTenantListener deviceMgtTenantListener = new DeviceMgtTenantListener();
+            if(log.isDebugEnabled()) {
+                log.info("Tenant management listener is registering");
+            }
             componentContext.getBundleContext().
                     registerService(TenantMgtListener.class.getName(), deviceMgtTenantListener, null);
-            log.info("Tenant management service activated");
+            if(log.isDebugEnabled()) {
+                log.info("Tenant management service activated");
+            }
         } catch (Throwable t) {
             String msg = "Error occurred while activating tenant management service";
             log.error(msg, t);
@@ -76,18 +81,30 @@ public class TenantMgtServiceComponent {
     }
 
     protected void setApplicationManager(ApplicationManager applicationManager) {
+        if(log.isDebugEnabled()) {
+            log.info("Application manager service is binding");
+        }
         TenantMgtDataHolder.getInstance().setApplicationManager(applicationManager);
     }
 
     protected void unsetApplicationManager(ApplicationManager applicationManager) {
+        if(log.isDebugEnabled()) {
+            log.info("Application manager service is unbinding");
+        }
         TenantMgtDataHolder.getInstance().setApplicationManager(null);
     }
 
     protected void setRealmService(RealmService realmService) {
+        if(log.isDebugEnabled()) {
+            log.info("Realm Service service is binding");
+        }
         TenantMgtDataHolder.getInstance().setRealmService(realmService);
     }
 
     protected void unsetRealmService(RealmService realmService) {
+        if(log.isDebugEnabled()) {
+            log.info("Realm Service service is unbinding");
+        }
         TenantMgtDataHolder.getInstance().setRealmService(null);
     }
 }
