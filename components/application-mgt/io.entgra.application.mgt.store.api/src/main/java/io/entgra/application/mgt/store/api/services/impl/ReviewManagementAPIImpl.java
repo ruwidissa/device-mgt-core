@@ -131,7 +131,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload data with the request. Hence, please verify the request payload.";
+            String msg = e.getMessage();
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
@@ -144,7 +144,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error occured while accessing application release for UUID: " + uuid;
+            String msg = "Error occurred while accessing application release for UUID: " + uuid;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
@@ -164,7 +164,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             if (isRepliedForReview) {
                 return Response.status(Response.Status.CREATED).entity(reviewWrapper).build();
             } else {
-                String msg = "Error occured when adding reply comment for the review. Please contact the administrator..";
+                String msg = "Error occurred when adding reply comment for the review. Please contact the administrator..";
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
@@ -173,7 +173,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload data with the request to add reply comment. Hence, please verify the "
+            String msg = "Invalid payload data found with the requested add reply comment. Hence, please verify the "
                     + "request payload.";
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
@@ -182,7 +182,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error occured while accessing application release for UUID: " + uuid;
+            String msg = "Error occurred while accessing application release for UUID: " + uuid;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
@@ -214,8 +214,12 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             String msg = "Couldn't found application release data for UUID " + uuid + " or Review for review ID: " + reviewId;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Invalid payload data found with the request. Hence, please verify the request payload.";
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
-            String msg = "You dont have permission to update application release review.";
+            String msg = "You don't have permission to update application release review.";
             log.error(msg, e);
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -267,7 +271,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ReviewManagementException | ApplicationManagementException e) {
-            String msg = "Error occured while getting review data for application release UUID: " + uuid;
+            String msg = "Error occurred while getting review data for application release UUID: " + uuid;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }

@@ -39,6 +39,7 @@ public class GrafanaConstants {
     public static final int IFRAME_URL_DASHBOARD_UID_INDEX = 1;
 
     public static final String TENANT_ID_VAR_NAME = "tenantId";
+    public static final String ENCODED_QUERY_TENANT_ID_KEY = "TENANT_ID =";
     public static final String VAR_PREFIX = "$";
     public static final String TENANT_ID_VAR = VAR_PREFIX + TENANT_ID_VAR_NAME;
     public static final String QUERY_PARAM_VAR_PREFIX = "var-";

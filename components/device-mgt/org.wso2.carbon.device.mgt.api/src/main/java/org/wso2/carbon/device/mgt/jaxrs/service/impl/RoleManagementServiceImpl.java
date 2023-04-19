@@ -169,8 +169,9 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         try {
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             if (!userRealm.getUserStoreManager().isExistingRole(roleName)) {
-                return Response.status(404).entity(new ErrorResponse.ErrorResponseBuilder().setMessage(
-                        "No role exists with the name '" + roleName + "'").build()).build();
+
+                String msg = "No role exists with the name : " + roleName ;
+                return Response.status(404).entity(msg).build();
             }
 
             final UIPermissionNode rolePermissions = this.getUIPermissionNode(roleName, userRealm);
@@ -249,9 +250,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             final UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             if (!userStoreManager.isExistingRole(roleName)) {
-                return Response.status(404).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("No role exists with the name '" +
-                                roleName + "'").build()).build();
+                String msg = "No role exists with the name : " + roleName ;
+                return Response.status(404).entity(msg).build();
             }
             roleInfo.setRoleName(roleName);
             roleInfo.setUsers(userStoreManager.getUserListOfRole(roleName));
@@ -325,7 +325,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             }
             if (ErrorMessages.ERROR_CODE_ROLE_ALREADY_EXISTS.getCode().equals(errorCode)) {
                 String roleName = roleInfo.getRoleName().split("/")[1];
-                String msg = "Role already exists with name " + roleName + ".";
+                String msg = "Role already exists with name : " + roleName + ". Try with another role name.";
                 log.warn(msg);
                 return Response.status(Response.Status.CONFLICT).entity(msg).build();
             } else {
@@ -354,10 +354,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             roleName = userStoreName + "/" + roleName;
         }
         if (roles.size() < 2) {
-            return Response.status(400).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage("Combining Roles requires at least two roles.")
-                            .build()
-            ).build();
+            String msg = "Combining Roles requires at least two roles.";
+            return Response.status(400).entity(msg).build();
         }
         for (String role : roles) {
             RequestValidationUtil.validateRoleName(role);
@@ -374,9 +372,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                     mergePermissions(new UIPermissionNode[]{getRolePermissions(role)}, permsSet);
                 }
             } catch (IllegalArgumentException e) {
-                return Response.status(404).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage(e.getMessage()).build()
-                ).build();
+                return Response.status(404).entity(e.getMessage()).build();
             }
 
             Permission[] permissions = permsSet.toArray(new Permission[permsSet.size()]);
@@ -424,9 +420,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             final UserStoreManager userStoreManager = userRealm.getUserStoreManager();
             if (!userStoreManager.isExistingRole(roleName)) {
-                return Response.status(404).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("No role exists with the name '" +
-                                roleName + "'").build()).build();
+                String msg = "No role exists with the name : " + roleName ;
+                return Response.status(404).entity(msg).build();
             }
 
             final AuthorizationManager authorizationManager = userRealm.getAuthorizationManager();
@@ -481,10 +476,23 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             return Response.status(Response.Status.OK).entity("Role '" + roleInfo.getRoleName() + "' has " +
                     "successfully been updated").build();
         } catch (UserStoreException e) {
-            String msg = "Error occurred while updating role '" + roleName + "'";
-            log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            String errorCode = "";
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && !errorMessage.isEmpty() &&
+                    errorMessage.contains(ErrorMessages.ERROR_CODE_ROLE_ALREADY_EXISTS.getCode())) {
+                errorCode = e.getMessage().split("-")[0].trim();
+            }
+            if (ErrorMessages.ERROR_CODE_ROLE_ALREADY_EXISTS.getCode().equals(errorCode)) {
+                String role = roleInfo.getRoleName().split("/")[1];
+                String msg = "Role already exists with name : " + role + ". Try with another role name.";
+                log.warn(msg);
+                return Response.status(Response.Status.CONFLICT).entity(msg).build();
+            }else{
+                String msg = "Error occurred while updating role '" + roleName + "'";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
         } catch (UserAdminException e) {
             String msg = "Error occurred while updating permissions of the role '" + roleName + "'";
             log.error(msg, e);
@@ -559,9 +567,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             final UserStoreManager userStoreManager = userRealm.getUserStoreManager();
             if (!userStoreManager.isExistingRole(roleName)) {
-                return Response.status(404).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("No role exists with the name '" +
-                                roleName + "'").build()).build();
+                String msg = "No role exists with the name : " + roleName ;
+                return Response.status(404).entity(msg).build();
             }
 
             final AuthorizationManager authorizationManager = userRealm.getAuthorizationManager();

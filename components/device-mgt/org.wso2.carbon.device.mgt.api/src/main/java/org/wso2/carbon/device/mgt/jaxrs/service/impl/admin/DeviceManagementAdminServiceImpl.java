@@ -169,7 +169,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (UserNotFoundException e) {
-            String msg = "Couldn't found the owner in user store to update the owner of devices.";
+            String msg = "Could not found the owner in user store to update the owner of devices.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
@@ -197,8 +197,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
         } catch (InvalidDeviceException e) {
             String msg = "Found Invalid devices";
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -222,7 +221,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Bad request, can't proceed. Hence verify the request and re-try";
+            String msg = "Bad request, cannot proceed. Hence verify the request and re-try";
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (DeviceManagementException e) {
@@ -230,7 +229,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (DeviceNotFoundException e) {
-            String msg = "Couldn't find an device for device identifier: " + deviceIdentifier;
+            String msg = "Could not find an device";
             log.error(msg);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }

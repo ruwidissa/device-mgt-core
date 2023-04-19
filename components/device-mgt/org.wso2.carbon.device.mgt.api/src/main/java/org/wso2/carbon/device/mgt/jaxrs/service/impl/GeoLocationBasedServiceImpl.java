@@ -63,6 +63,7 @@ import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.EventAction;
 import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
+import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.GeoLocationBasedService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -107,8 +108,9 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             @QueryParam("from") long from, @QueryParam("to") long to) {
         try {
             if (!DeviceManagerUtil.isPublishLocationResponseEnabled()) {
+                String msg = "Unable to retrieve Geo Device stats. Geo Data publishing does not enabled.";
                 return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-                        .entity("Unable to retrive Geo Device stats. Geo Data publishing does not enabled.").build();
+                        .entity(msg).build();
             }
         } catch (DeviceManagementException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(e.getMessage()).build();
@@ -277,7 +279,8 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                 if (log.isDebugEnabled()) {
                     log.debug("Device not found: " + identifier.toString());
                 }
-                return Response.status(Response.Status.NOT_FOUND.getStatusCode()).build();
+                String msg = "Device not found.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
 
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
@@ -288,12 +291,11 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             log.error(error, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
         } catch (AlertAlreadyExistException e) {
-            String error = "A geo alert with this name already exists.";
+            String error = "A geo alert with this name already exists. Try with another name.";
             log.error(error, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         } catch (DeviceManagementException e) {
-            String error = "Error occurred while retrieving the device enrollment info of " +
-                    deviceType + " with id: " + deviceId;
+            String error = "Error occurred while retrieving the device enrollment info of requested "+ deviceType + " device.";
             log.error(error, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         }
@@ -314,7 +316,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             log.error(error, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
         } catch (AlertAlreadyExistException e) {
-            String error = "A geo alert with this name already exists.";
+            String error = "A geo alert with this name already exists. Try with another name.";
             log.error(error, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         }
@@ -344,23 +346,23 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                 if (log.isDebugEnabled()) {
                     log.debug("Device not found: " + identifier.toString());
                 }
-                return Response.status(Response.Status.NOT_FOUND.getStatusCode()).build();
+                String msg = "Device not found.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
 
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
             geoService.updateGeoAlert(alert, identifier, alertType, device.getEnrolmentInfo().getOwner());
             return Response.ok().build();
         } catch (DeviceAccessAuthorizationException | GeoLocationBasedServiceException e) {
-            String error = "Error occurred while creating the geo alert for " + deviceType + " with id: " + deviceId;
+            String error = "Error occurred while updating the geo alert for " + deviceType + " with id: " + deviceId;
             log.error(error, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
         } catch (AlertAlreadyExistException e) {
-            String error = "A geo alert with this name already exists.";
+            String error = "A geo alert with this name already exists. Try with another name.";
             log.error(error, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         } catch (DeviceManagementException e) {
-            String error = "Error occurred while retrieving the device enrollment info of " +
-                    deviceType + " with id: " + deviceId;
+            String error = "Error occurred while retrieving the device enrollment info of requested " + deviceType + " device.";
             log.error(error, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         }
@@ -380,7 +382,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             log.error(error, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
         } catch (AlertAlreadyExistException e) {
-            String error = "A geo alert with this name already exists.";
+            String error = "A geo alert with this name already exists. Try with another name.";
             log.error(error, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         }
@@ -410,7 +412,8 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                 if (log.isDebugEnabled()) {
                     log.debug("Device not found: " + identifier.toString());
                 }
-                return Response.status(Response.Status.NOT_FOUND.getStatusCode()).build();
+                String msg = "Device not found.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
 
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
@@ -421,8 +424,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             log.error(error, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
         } catch (DeviceManagementException e) {
-            String error = "Error occurred while retrieving the device enrollment info of " +
-                    deviceType + " with id: " + deviceId;
+            String error = "Error occurred while retrieving the device enrollment info of requested " +deviceType + " device";
             log.error(error, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         }
@@ -467,7 +469,8 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                 if (log.isDebugEnabled()) {
                     log.debug("Device not found: " + identifier.toString());
                 }
-                return Response.status(Response.Status.NOT_FOUND.getStatusCode()).build();
+                String msg = "Device not found.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
 
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
@@ -497,8 +500,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             log.error(error, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
         } catch (DeviceManagementException e) {
-            String error = "Error occurred while retrieving the device enrollment info of " +
-                    deviceType + " with id: " + deviceId;
+            String error = "Error occurred while retrieving the device enrollment info of requested " + deviceType + " device";
             log.error(error, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         }
@@ -687,9 +689,9 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
     @Consumes("application/json")
     @Produces("application/json")
     public Response createGeofence(GeofenceWrapper geofenceWrapper) {
-        RequestValidationUtil.validateGeofenceData(geofenceWrapper);
-        RequestValidationUtil.validateEventConfigurationData(geofenceWrapper.getEventConfig());
         try {
+            RequestValidationUtil.validateGeofenceData(geofenceWrapper);
+            RequestValidationUtil.validateEventConfigurationData(geofenceWrapper.getEventConfig());
             GeofenceData geofenceData = mapRequestGeofenceData(geofenceWrapper);
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
             if (!geoService.createGeofence(geofenceData)) {
@@ -699,6 +701,8 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                         new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
             }
             return Response.status(Response.Status.CREATED).entity("Geo Fence record created successfully").build();
+        } catch (BadRequestException e){
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (GeoLocationBasedServiceException e) {
             String msg = "Failed to create geofence";
             log.error(msg, e);
@@ -895,9 +899,9 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
     public Response updateGeofence(GeofenceWrapper geofenceWrapper,
             @PathParam("fenceId") int fenceId,
             @QueryParam("eventIds") int[] eventIds) {
-        RequestValidationUtil.validateGeofenceData(geofenceWrapper);
-        RequestValidationUtil.validateEventConfigurationData(geofenceWrapper.getEventConfig());
         try {
+            RequestValidationUtil.validateGeofenceData(geofenceWrapper);
+            RequestValidationUtil.validateEventConfigurationData(geofenceWrapper.getEventConfig());
             GeofenceData geofenceData = mapRequestGeofenceData(geofenceWrapper);
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
             if (!geoService.updateGeofence(geofenceData, fenceId)) {
@@ -912,6 +916,8 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             geoService.updateGeoEventConfigurations(geofenceData, eventsToRemove,
                     geofenceData.getGroupIds(), fenceId);
             return Response.status(Response.Status.CREATED).entity("Geo Fence update successfully").build();
+        } catch (BadRequestException e){
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (GeoLocationBasedServiceException e) {
             String msg = "Failed to update geofence";
             log.error(msg, e);

@@ -23,7 +23,6 @@ import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataKeyNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
-
 import java.util.List;
 
 /**

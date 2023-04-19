@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.core.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
 import org.wso2.carbon.device.mgt.common.roles.config.Role;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
@@ -67,6 +68,12 @@ public class DeviceMgtTenantMgtListener implements TenantMgtListener {
             } finally {
                 PrivilegedCarbonContext.endTenantFlow();
             }
+        }
+        try {
+            DeviceManagementDataHolder.getInstance().getWhiteLabelManagementService().
+                    addDefaultWhiteLabelThemeIfNotExist(tenantInfoBean.getTenantId());
+        } catch (MetadataManagementException e) {
+            log.error("Error occurred while adding default white label theme to created tenant.", e);
         }
     }
 

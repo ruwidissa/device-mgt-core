@@ -15,35 +15,18 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.common.otp.mgt.wrapper;
+package org.wso2.carbon.device.mgt.core.common.exception;
 
-public class DownloadURLDetails {
-
-    private String firstName;
-    private String URL;
-    private String email;
-
-    public String getURL() {
-        return URL;
+/**
+ * Represents the exception thrown during storing and retrieving the artifacts.
+ */
+public class StorageManagementException extends Exception {
+    public StorageManagementException(String message, Throwable ex) {
+        super(message, ex);
     }
 
-    public void setURL(String URL) {
-        this.URL = URL;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public StorageManagementException(String message) {
+        super(message);
     }
 }
+

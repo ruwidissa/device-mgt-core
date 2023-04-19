@@ -48,6 +48,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HTTP;
+import org.opensaml.xmlsec.signature.P;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -198,6 +199,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private final ApplicationDAO applicationDAO;
     private MetadataDAO metadataDAO;
     private final DeviceStatusDAO deviceStatusDAO;
+    int count = 0;
 
     public DeviceManagementProviderServiceImpl() {
         this.pluginRepository = new DeviceManagementPluginRepository();
@@ -432,23 +434,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
         //enroll Traccar device
         if (HttpReportingUtil.isTrackerEnabled()) {
-            try {
-                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService().addDevice(device, tenantId);
-            } catch (ExecutionException e) {
-                log.error("ExecutionException : " + e);
-                //throw new RuntimeException(e);
-                //Exception was not thrown due to being conflicted with non-traccar features
-            } catch (InterruptedException e) {
-                log.error("InterruptedException : " + e);
-                //throw new RuntimeException(e);
-                //Exception was not thrown due to being conflicted with non-traccar features
-            }
+            DeviceManagementDataHolder.getInstance().getTraccarManagementService().addDevice(device);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Traccar is disabled");
             }
         }
-        //enroll Traccar device
 
         if (status) {
             addDeviceToGroups(deviceIdentifier, device.getEnrolmentInfo().getOwnership());
@@ -533,24 +524,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         extractDeviceLocationToUpdate(device);
         //enroll Traccar device
         if (HttpReportingUtil.isTrackerEnabled()) {
-            try {
-                int tenantId = this.getTenantId();
-                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService().modifyDevice(device, tenantId);
-            } catch (ExecutionException e) {
-                log.error("ExecutionException : " + e);
-                //throw new RuntimeException(e);
-                //Exception was not thrown due to being conflicted with non-traccar features
-            } catch (InterruptedException e) {
-                log.error("InterruptedException : " + e);
-                //throw new RuntimeException(e);
-                //Exception was not thrown due to being conflicted with non-traccar features
-            }
+            DeviceManagementDataHolder.getInstance().getTraccarManagementService().updateDevice(device);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Traccar is disabled");
             }
         }
-        //enroll Traccar device
+
         return status;
     }
 
@@ -634,8 +614,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
             //procees to dis-enroll a device from traccar starts
             if (HttpReportingUtil.isTrackerEnabled()) {
-                DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                        .disEnrollDevice(device.getId(), tenantId);
+                DeviceManagementDataHolder.getInstance().getTraccarManagementService().unLinkTraccarDevice(device.getEnrolmentInfo().getId());
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Traccar is disabled");
+                }
             }
             //procees to dis-enroll a device from traccar ends
 
@@ -754,6 +737,15 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             this.removeDevicesFromCache(deviceCacheKeyList);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully permanently deleted the details of devices : " + validDeviceIdentifiers);
+            }
+            if (HttpReportingUtil.isTrackerEnabled()) {
+                for (int enrollmentId : enrollmentIds) {
+                    DeviceManagementDataHolder.getInstance().getTraccarManagementService().removeDevice(enrollmentId);
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Traccar is disabled");
+                }
             }
             return true;
         } catch (TransactionManagementException e) {
@@ -1552,6 +1544,25 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred in setEnrollmentInvitation";
             log.error(msg, ex);
             throw new DeviceManagementException(msg, ex);
+        }
+    }
+
+    @Override
+    public void sendEnrolmentGuide(String enrolmentGuide) throws DeviceManagementException {
+
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        String recipientMail = config.getEnrollmentGuideConfiguration().getMail();
+        Properties props = new Properties();
+        props.setProperty("mail-subject", "[Enrollment Guide Triggered] (#" + ++count + ")");
+        props.setProperty("enrollment-guide", enrolmentGuide);
+
+        try {
+            EmailMetaInfo metaInfo = new EmailMetaInfo(recipientMail, props);
+            sendEnrolmentInvitation(DeviceManagementConstants.EmailAttributes.ENROLLMENT_GUIDE_TEMPLATE, metaInfo);
+        } catch (ConfigurationManagementException e) {
+            String msg = "Error occurred while sending the mail.";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
         }
     }
 

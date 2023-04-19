@@ -24,6 +24,14 @@
     <SessionTimeOut>3600</SessionTimeOut>
     <!--  maximum number of login cache entries  -->
     <LoginCacheCapacity>10000</LoginCacheCapacity>
+    <!-- hubspot account info for live chat -->
+    <HubspotChat>
+        <EnableHubspot>false</EnableHubspot>
+        <TrackingUrl>tracking_url</TrackingUrl>
+        <!--  access token - whenever the access token will be rotated, needs to be changed this with the new token  -->
+        <AccessToken>access_token</AccessToken>
+        <SenderActorId>sender_actorId</SenderActorId>
+    </HubspotChat>
     <Billing>
         <HideBillGenerationInSuperTenant>false</HideBillGenerationInSuperTenant>
         <HideBillGenerationInSubTenant>true</HideBillGenerationInSubTenant>
@@ -100,6 +108,7 @@
         <Scope>perm:devices:details</Scope>
         <Scope>perm:devices:update</Scope>
         <Scope>perm:devices:view</Scope>
+        <Scope>perm:devices:enrollment-guide:view</Scope>
         <Scope>perm:view-configuration</Scope>
         <Scope>perm:manage-configuration</Scope>
         <Scope>perm:policies:remove</Scope>
@@ -196,6 +205,8 @@
         <Scope>perm:android:upgrade-firmware</Scope>
         <Scope>perm:android:send-notification</Scope>
         <Scope>perm:geo-service:geo-fence</Scope>
+        <Scope>perm:whitelabel:view</Scope>
+        <Scope>perm:whitelabel:update</Scope>
         <Scope>perm:metadata:view</Scope>
         <Scope>perm:metadata:create</Scope>
         <Scope>perm:metadata:update</Scope>
@@ -213,6 +224,8 @@
         <Scope>perm:admin:tenant:view</Scope>
         <Scope>perm:admin:metadata:view</Scope>
         <Scope>perm:admin:usage:view</Scope>
+        <Scope>perm:android:clear-applicatio</Scope>
+        <Scope>perm:android:suspend-package</Scope>
         <Scope>perm:android:alternate-install</Scope>
     </Scopes>
     <SSOConfiguration>

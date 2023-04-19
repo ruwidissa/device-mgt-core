@@ -19,6 +19,8 @@
 package org.wso2.carbon.device.mgt.core.common.util;
 
 import org.apache.commons.io.FileUtils;
+import org.wso2.carbon.device.mgt.common.Base64File;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +56,7 @@ public class FileUtil {
     }
 
     /**
-     * Useful to convert input stream to base64 string
+     * Useful to convert file to base64 string
      *
      * @param file stream to be converted
      * @return base64 string of the provided input stream
@@ -62,6 +64,17 @@ public class FileUtil {
     public static String fileToBase64String(File file) throws IOException {
         byte[] fileContent = FileUtils.readFileToByteArray(file);
         return Base64.getEncoder().encodeToString(fileContent);
+    }
+
+    /**
+     * Useful to convert {@link File} to {@link Base64File}
+     *
+     * @param file to be converted
+     * @return {@link Base64File} of the provided input stream
+     */
+    public static Base64File fileToBase64File(File file) throws IOException {
+        String base64String = fileToBase64String(file);
+        return new Base64File(file.getName(), base64String);
     }
 
     /**
@@ -75,7 +88,7 @@ public class FileUtil {
         String suffix = generateDuplicateFileNameSuffix(fileNameCount);
         String fileNameWithoutExtension = extractFileNameWithoutExtension(fileName);
         String fileNameWithSuffix = fileNameWithoutExtension + suffix;
-        fileNameWithSuffix = fileNameWithSuffix + '.' + extractFileExtension(fileName);
+        fileNameWithSuffix = fileNameWithSuffix + '.' + extractFileExtensionFileName(fileName);
         return fileNameWithSuffix;
     }
 
@@ -99,12 +112,26 @@ public class FileUtil {
     }
 
     /**
+     * Use to extract file extension from file path
+     *
+     * @param filePath path of the file
+     * @return extension of the file
+     */
+    public static String extractFileExtensionFromFilePath(String filePath) {
+        File file = new File(filePath);
+        return extractFileExtensionFileName(file.getName());
+    }
+
+    /**
      * Use to extract file extension from file name
      *
      * @param fileName name of the file
      * @return extension of the file
      */
-    private static String extractFileExtension(String fileName) {
+    public static String extractFileExtensionFileName(String fileName) {
+        if (!fileName.contains(".")) {
+            return "";
+        }
         return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
 

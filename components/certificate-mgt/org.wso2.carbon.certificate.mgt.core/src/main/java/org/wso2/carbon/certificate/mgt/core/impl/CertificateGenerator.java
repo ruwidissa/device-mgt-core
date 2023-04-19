@@ -44,12 +44,17 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.util.Store;
-import org.jscep.message.*;
+import org.jscep.message.CertRep;
+import org.jscep.message.MessageDecodingException;
+import org.jscep.message.MessageEncodingException;
+import org.jscep.message.PkcsPkiEnvelopeDecoder;
+import org.jscep.message.PkcsPkiEnvelopeEncoder;
+import org.jscep.message.PkiMessage;
+import org.jscep.message.PkiMessageDecoder;
+import org.jscep.message.PkiMessageEncoder;
 import org.jscep.transaction.FailInfo;
 import org.jscep.transaction.Nonce;
 import org.jscep.transaction.TransactionId;
-import org.wso2.carbon.certificate.mgt.core.cache.CertificateCacheManager;
-import org.wso2.carbon.certificate.mgt.core.cache.impl.CertificateCacheManagerImpl;
 import org.wso2.carbon.certificate.mgt.core.dao.CertificateDAO;
 import org.wso2.carbon.certificate.mgt.core.dao.CertificateManagementDAOException;
 import org.wso2.carbon.certificate.mgt.core.dao.CertificateManagementDAOFactory;
@@ -72,13 +77,31 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
-import java.security.cert.*;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class CertificateGenerator {
 
@@ -757,4 +780,86 @@ public class CertificateGenerator {
         return generateCertificateFromCSR(privateKeyCA, certificationRequest,
                 certCA.getIssuerX500Principal().getName());
     }
+
+    public X509Certificate generateAlteredCertificateFromCSR(String csr)
+            throws KeystoreException {
+        byte[] byteArrayBst = DatatypeConverter.parseBase64Binary(csr);
+        PKCS10CertificationRequest certificationRequest;
+        KeyStoreReader keyStoreReader = new KeyStoreReader();
+        PrivateKey privateKeyCA = keyStoreReader.getCAPrivateKey();
+        X509Certificate certCA = (X509Certificate) keyStoreReader.getCACertificate();
+
+        X509Certificate issuedCert;
+        try {
+            certificationRequest = new PKCS10CertificationRequest(byteArrayBst);
+            JcaContentSignerBuilder csBuilder =
+                    new JcaContentSignerBuilder(CertificateManagementConstants.SIGNING_ALGORITHM);
+            ContentSigner signer = csBuilder.build(privateKeyCA);
+
+            BigInteger serialNumber = BigInteger.valueOf(System.currentTimeMillis());
+
+            X500Name issuerName = new X500Name(certCA.getSubjectDN().getName());
+
+            String commonName = certificationRequest.getSubject().getRDNs(BCStyle.CN)[0].getFirst()
+                    .getValue().toString();
+            X500Name subjectName = new X500Name("O=" + commonName + "O=AndroidDevice,CN=" +
+                    serialNumber);
+            Date startDate = new Date(System.currentTimeMillis());
+            Date endDate = new Date(System.currentTimeMillis()
+                    + TimeUnit.DAYS.toMillis(365 * 100));
+            PublicKey publicKey = getPublicKeyFromRequest(certificationRequest);
+
+            X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
+                    issuerName, serialNumber, startDate, endDate,
+                    subjectName, publicKey);
+
+            X509CertificateHolder certHolder = certBuilder.build(signer);
+
+            CertificateFactory certificateFactory = CertificateFactory.getInstance
+                    (CertificateManagementConstants.X_509);
+            byte[] encodedCertificate = certHolder.getEncoded();
+            issuedCert = (X509Certificate) certificateFactory
+                    .generateCertificate(new ByteArrayInputStream(encodedCertificate));
+
+            org.wso2.carbon.certificate.mgt.core.bean.Certificate certificate =
+                    new org.wso2.carbon.certificate.mgt.core.bean.Certificate();
+            List<org.wso2.carbon.certificate.mgt.core.bean.Certificate> certificates = new ArrayList<>();
+            certificate.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+            certificate.setCertificate(issuedCert);
+            certificates.add(certificate);
+            saveCertInKeyStore(certificates);
+
+        } catch (OperatorCreationException e) {
+            String errorMsg = "Error creating the content signer";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        } catch (CertificateException e) {
+            String errorMsg = "Error when opening the newly created certificate";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        } catch (InvalidKeySpecException e) {
+            String errorMsg = "Public key is having invalid specification";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        } catch (NoSuchAlgorithmException e) {
+            String errorMsg = "Could not find RSA algorithm";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        } catch (IOException e) {
+            String errorMsg = "Error while reading the csr";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        }
+        return issuedCert;
+    }
+
+    private static PublicKey getPublicKeyFromRequest(PKCS10CertificationRequest request)
+            throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        byte[] publicKeyBytes = request.getSubjectPublicKeyInfo().getEncoded();
+        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
+        return publicKey;
+    }
+
 }

@@ -93,12 +93,11 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
                         SubAction.valueOf(action.toUpperCase()), timestamp, properties);
             }
         } catch (NotFoundException e) {
-            String msg = "Couldn't found an application release for UUI: " + uuid;
+            String msg = "Couldn't found an application release for UUID: " + uuid;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload for installing application which has UUID: " + uuid + ". Hence verify "
-                    + "the payload";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
@@ -147,8 +146,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload for installing application which has UUID: " + uuid + ". Hence verify "
-                    + "the payload";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
@@ -187,13 +185,12 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
                         SubAction.valueOf(SubAction.INSTALL.toString().toUpperCase()), timestamp, null);
             }
         } catch (NotFoundException e) {
-            String msg = "Couldn't found an application release for UUI: " + uuid + " to perform ent app installation "
+            String msg = "Couldn't found an application release for UUID: " + uuid + " to perform ent app installation "
                     + "on subscriber's devices";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload when performing ent app installation on application which has UUID: "
-                    + uuid + ". Hence verify the payload of the request.";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
@@ -237,8 +234,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload when performing ent app installation on application which has UUID: "
-                    + uuid + ". Hence verify the payload of the request.";
+            String msg = e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
@@ -360,7 +356,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "User requested details are not valid";
+            String msg = "User requested details are not valid. Please verify the payload of the request.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
@@ -424,8 +420,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload for getting application which has UUID: " + uuid
-                    + ". Hence verify the payload";
+            String msg = "Invalid payload found when getting application. Hence verify the payload";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
@@ -502,6 +497,10 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             String msg = "Application with application release UUID: " + uuid + " is not found";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Invalid payload found with the request. Please verify the payload.";
+            log.error(msg,e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting application with the application " +
                     "release uuid: " + uuid;

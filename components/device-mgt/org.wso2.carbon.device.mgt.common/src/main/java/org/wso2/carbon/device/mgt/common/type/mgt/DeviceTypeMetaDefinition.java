@@ -5,6 +5,7 @@ import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DeviceTypeMetaDefinition {
@@ -18,6 +19,10 @@ public class DeviceTypeMetaDefinition {
     private License license;
     private String description;
     private boolean isSharedWithAllTenants;
+
+    private List<String> mqttEventTopicStructures;
+
+    private boolean longLivedToken = false;
 
     public String getDescription() {
         return description;
@@ -82,5 +87,21 @@ public class DeviceTypeMetaDefinition {
 
     public void setSharedWithAllTenants(boolean sharedWithAllTenants) {
         isSharedWithAllTenants = sharedWithAllTenants;
+    }
+
+    public List<String> getMqttEventTopicStructures() {
+        return mqttEventTopicStructures;
+    }
+
+    public void setMqttEventTopicStructures(List<String> mqttEventTopicStructures) {
+        this.mqttEventTopicStructures = mqttEventTopicStructures;
+    }
+
+    public boolean isLongLivedToken() {
+        return longLivedToken;
+    }
+
+    public void setLongLivedToken(boolean longLivedToken) {
+        this.longLivedToken = longLivedToken;
     }
 }

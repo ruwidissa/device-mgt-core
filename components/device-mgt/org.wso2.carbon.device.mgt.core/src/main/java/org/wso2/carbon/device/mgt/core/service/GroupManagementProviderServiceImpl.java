@@ -132,27 +132,8 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                     this.groupDAO.addGroupProperties(deviceGroup, updatedGroupID, tenantId);
                 }
                 GroupManagementDAOFactory.commitTransaction();
-
-                //add new group in traccar
-                if (HttpReportingUtil.isTrackerEnabled()) {
-                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                            .addGroup(deviceGroup, updatedGroupID, tenantId);
-                }
-                //add new group in traccar
             } else {
-                // add a group if not exist in traccar starts
-                if (HttpReportingUtil.isTrackerEnabled()){
-                    existingGroup = this.groupDAO.getGroup(deviceGroup.getName(), tenantId);
-                    int groupId = existingGroup.getGroupId();
-                    try {
-                        DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                                .addGroup(deviceGroup, groupId, tenantId);
-                    } catch (TrackerAlreadyExistException e) {
-                        throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
-                    }
-                } else {
-                    throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
-                }
+                throw new GroupAlreadyExistException("Group exist with name " + deviceGroup.getName());
             }
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();
@@ -234,13 +215,6 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                     this.groupDAO.updateGroupProperties(deviceGroup, groupId, tenantId);
                 }
 
-                //procees to update a group in traccar starts
-                if (HttpReportingUtil.isTrackerEnabled()) {
-                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                            .updateGroup(deviceGroup, groupId, tenantId);
-                }
-                //procees to update a group in traccar starts
-
                 GroupManagementDAOFactory.commitTransaction();
             } else {
                 throw new GroupNotExistException("Group with ID - '" + groupId + "' doesn't exists!");
@@ -299,21 +273,6 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                     }
                 }
             }
-
-            //procees to delete a group from traccar starts
-            if (HttpReportingUtil.isTrackerEnabled()) {
-                try {
-                    DeviceManagementDataHolder.getInstance().getDeviceAPIClientService()
-                            .deleteGroup(groupId, tenantId);
-                } catch (TrackerManagementDAOException e) {
-                    String msg = "Failed while deleting traccar group " + groupId;
-                    log.error(msg, e);
-                } catch (ExecutionException | InterruptedException e) {
-                    String msg = "Failed while deleting traccar group "+groupId+" due to concurrent execution failure";
-                    log.error(msg, e);
-                }
-            }
-            //procees to delete a group from traccar ends
 
             if (isDeleteChildren) {
                 groupIdsToDelete.add(groupId);

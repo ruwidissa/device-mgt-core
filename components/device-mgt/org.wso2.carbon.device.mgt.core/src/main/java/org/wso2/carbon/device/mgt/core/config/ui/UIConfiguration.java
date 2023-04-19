@@ -34,6 +34,7 @@ public class UIConfiguration {
     private int sessionTimeOut;
     private int loginCacheCapacity;
     private Billing billing;
+    private HubspotChat hubspotChat;
 
     @XmlElement(name = "AppRegistration", required=true)
     public AppRegistration getAppRegistration() {
@@ -63,6 +64,14 @@ public class UIConfiguration {
         isSsoEnable = ssoEnable;
     }
 
+    @XmlElement(name = "HubspotChat", required = true)
+    public HubspotChat getHubspotChat() {
+        return hubspotChat;
+    }
+
+    public void setHubspotChat(HubspotChat hubspotChat) {
+        this.hubspotChat = hubspotChat;
+    }
     @XmlElement(name = "Billing", required=true)
     public Billing getBilling() {
         return billing;

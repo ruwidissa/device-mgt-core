@@ -224,7 +224,7 @@ public class ReviewManagerImpl implements ReviewManager {
             throw new ReviewManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured while verifying whether application release is exists or not for UUID " + uuid;
+            String msg = "Error occurred while verifying whether application release is exists or not for UUID " + uuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } finally {
@@ -360,7 +360,7 @@ public class ReviewManagerImpl implements ReviewManager {
             return null;
         } catch (ReviewManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured while  getting reviewTmp with reviewTmp id " + reviewId + ".";
+            String msg = "Error occurred while  getting reviewTmp with reviewTmp id " + reviewId + ".";
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } catch (DBConnectionException e) {
@@ -393,11 +393,11 @@ public class ReviewManagerImpl implements ReviewManager {
             }
             return getReviewTree(this.reviewDAO.getAllReleaseReviews(releaseDTO.getId(), request, tenantId));
         } catch (ReviewManagementDAOException e) {
-            String msg = "Error occured while getting all reviews for application uuid: " + uuid;
+            String msg = "Error occurred while getting all reviews for application uuid: " + uuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg ="Error occured while getting the DB connection to get all reviews for application release which"
+            String msg ="Error occurred while getting the DB connection to get all reviews for application release which"
                     + " has UUID " + uuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
@@ -423,12 +423,12 @@ public class ReviewManagerImpl implements ReviewManager {
             ConnectionManagerUtil.openDBConnection();
             return getReviewTree(this.reviewDAO.getAllActiveAppReviews(applicationReleaseIds, request, tenantId));
         } catch (ReviewManagementDAOException e) {
-            String msg = "Error occured while getting all reviews for application which has an "
+            String msg = "Error occurred while getting all reviews for application which has an "
                     + "application release of uuid: " + uuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg = "Error occured while getting the DB connection to get app app reviews.";
+            String msg = "Error occurred while getting the DB connection to get app app reviews.";
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } finally {
@@ -458,12 +458,12 @@ public class ReviewManagerImpl implements ReviewManager {
             }
             return getReviewTree(reviewDtos);
         } catch (ReviewManagementDAOException e) {
-            String msg = "Error occured while getting all " + username + "'s reviews for application which has an "
+            String msg = "Error occurred while getting all " + username + "'s reviews for application which has an "
                     + "application release of uuid: " + uuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg =  "Error occured while getting DB connection to get all " + username + "'s reviews for "
+            String msg =  "Error occurred while getting DB connection to get all " + username + "'s reviews for "
                     + "application which has an application release of uuid: " + uuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
@@ -486,7 +486,7 @@ public class ReviewManagerImpl implements ReviewManager {
                     .collect(Collectors.toList());
         } catch (DBConnectionException e) {
             String msg =
-                    "Error occured while getting the DB connection to get application which has application release"
+                    "Error occurred while getting the DB connection to get application which has application release"
                             + " of UUID: " + uuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
@@ -526,7 +526,7 @@ public class ReviewManagerImpl implements ReviewManager {
             paginationResult.setRecordsTotal(numOfReviews);
             return paginationResult;
         } catch (ReviewManagementDAOException e) {
-            String msg = "Error occured while getting all reply comments for given review list";
+            String msg = "Error occurred while getting all reply comments for given review list";
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         }
@@ -635,11 +635,11 @@ public class ReviewManagerImpl implements ReviewManager {
             throw new ReviewManagementException(msg, e);
         } catch (ReviewManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured while deleting review with review id " + reviewId + ".";
+            String msg = "Error occurred while deleting review with review id " + reviewId + ".";
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } catch (TransactionManagementException e) {
-            String msg = "Error occurred when handleing transaction to delete application reviews.";
+            String msg = "Error occurred when handling transaction to delete application reviews.";
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } finally {
@@ -663,16 +663,16 @@ public class ReviewManagerImpl implements ReviewManager {
             return rating;
         } catch (ApplicationManagementDAOException e) {
             String msg =
-                    "Error occured while getting the rating value of the application release uuid: " + appReleaseUuid;
+                    "Error occurred while getting the rating value of the application release uuid: " + appReleaseUuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg = "DB Connection error occured while getting the rating value of the application release uuid: "
+            String msg = "DB Connection error occurred while getting the rating value of the application release uuid: "
                     + appReleaseUuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } catch (ReviewManagementDAOException e) {
-            String msg = "Error occured while getting all rating values for the application release UUID: "
+            String msg = "Error occurred while getting all rating values for the application release UUID: "
                     + appReleaseUuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
@@ -704,18 +704,18 @@ public class ReviewManagerImpl implements ReviewManager {
             return rating;
         } catch (DBConnectionException e) {
             String msg =
-                    "DB Connection error occured while getting app rating of the application which has application "
+                    "DB Connection error occurred while getting app rating of the application which has application "
                             + "release for uuid: " + appReleaseUuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
-            String msg = "Error occured while getting the application DTO for the application release uuid: "
+            String msg = "Error occurred while getting the application DTO for the application release uuid: "
                     + appReleaseUuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
         } catch (ReviewManagementDAOException e) {
             String msg =
-                    "Error occured while getting all rating values of application which has the application release "
+                    "Error occurred while getting all rating values of application which has the application release "
                             + "for UUID: " + appReleaseUuid;
             log.error(msg, e);
             throw new ReviewManagementException(msg, e);
