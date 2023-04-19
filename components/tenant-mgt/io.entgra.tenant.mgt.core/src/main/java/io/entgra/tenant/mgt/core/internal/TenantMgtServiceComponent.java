@@ -19,6 +19,8 @@ package io.entgra.tenant.mgt.core.internal;
 
 import io.entgra.application.mgt.common.services.ApplicationManager;
 import io.entgra.tenant.mgt.common.spi.TenantManagerService;
+import io.entgra.tenant.mgt.core.TenantManager;
+import io.entgra.tenant.mgt.core.impl.TenantManagerImpl;
 import io.entgra.tenant.mgt.core.impl.TenantManagerServiceImpl;
 import io.entgra.tenant.mgt.core.listener.DeviceMgtTenantListener;
 import org.apache.commons.logging.Log;
@@ -56,6 +58,8 @@ public class TenantMgtServiceComponent {
             TenantManagerService tenantManagerService = new TenantManagerServiceImpl();
             componentContext.getBundleContext().
                     registerService(TenantManagerServiceImpl.class.getName(), tenantManagerService, null);
+            TenantManager tenantManager = new TenantManagerImpl();
+            TenantMgtDataHolder.getInstance().setTenantManager(tenantManager);
             WhiteLabelManagementService whiteLabelManagementService = new WhiteLabelManagementServiceImpl();
             componentContext.getBundleContext().registerService(WhiteLabelManagementServiceImpl.class.getName(),
                     whiteLabelManagementService, null);

@@ -21,7 +21,19 @@ import io.entgra.tenant.mgt.common.exception.TenantMgtException;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 
 public interface TenantManager {
+
+    /**
+     * Add default roles to a tenant described by the tenant info bean
+     * @param tenantInfoBean The info bean that provides tenant info
+     * @throws TenantMgtException Throws when error occurred while adding
+     *                            a role into user store or adding default white label theme to created tenant
+     */
     void addDefaultRoles(TenantInfoBean tenantInfoBean) throws TenantMgtException;
 
+    /**
+     * Add default application categories to a tenant described by the tenant info bean
+     * @param tenantInfoBean The info bean that provides tenant info
+     * @throws TenantMgtException Throws when error occurred while adding default application categories
+     */
     void addDefaultAppCategories(TenantInfoBean tenantInfoBean) throws TenantMgtException;
 }

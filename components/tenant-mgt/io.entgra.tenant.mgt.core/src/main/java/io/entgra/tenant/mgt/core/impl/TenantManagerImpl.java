@@ -18,7 +18,6 @@
 package io.entgra.tenant.mgt.core.impl;
 
 import io.entgra.application.mgt.common.exception.ApplicationManagementException;
-import io.entgra.application.mgt.common.exception.InvalidConfigurationException;
 import io.entgra.application.mgt.core.config.ConfigurationManager;
 import io.entgra.application.mgt.common.services.ApplicationManager;
 import io.entgra.tenant.mgt.core.TenantManager;
@@ -90,9 +89,6 @@ public class TenantManagerImpl implements TenantManager {
             ApplicationManager applicationManager = TenantMgtDataHolder.getInstance().getApplicationManager();
             applicationManager
                     .addApplicationCategories(ConfigurationManager.getInstance().getConfiguration().getAppCategories());
-        } catch (InvalidConfigurationException e) {
-            String msg = "Error occurred while getting application manager";
-            throw new TenantMgtException(msg, e);
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting default application categories";
             log.error(msg, e);
@@ -100,7 +96,6 @@ public class TenantManagerImpl implements TenantManager {
         } finally {
             endTenantFlow();
         }
-
     }
 
     private void initTenantFlow(TenantInfoBean tenantInfoBean) {
