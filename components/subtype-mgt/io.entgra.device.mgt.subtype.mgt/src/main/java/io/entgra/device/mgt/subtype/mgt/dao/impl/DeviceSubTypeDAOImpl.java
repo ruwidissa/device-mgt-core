@@ -38,15 +38,14 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     private static final Log log = LogFactory.getLog(DeviceSubTypeDAOImpl.class);
 
     @Override
-    public boolean addDeviceSubType(DeviceSubType deviceSubType)
-            throws SubTypeMgtDAOException {
+    public boolean addDeviceSubType(DeviceSubType deviceSubType) throws SubTypeMgtDAOException {
         try {
             String sql = "INSERT INTO DM_DEVICE_SUB_TYPE (SUB_TYPE_ID, TENANT_ID, DEVICE_TYPE, SUB_TYPE_NAME, " +
                     "TYPE_DEFINITION) VALUES (?, ?, ?, ?, ?)";
 
             Connection conn = ConnectionManagerUtil.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, deviceSubType.getSubTypeId());
+                stmt.setString(1, deviceSubType.getSubTypeId());
                 stmt.setInt(2, deviceSubType.getTenantId());
                 stmt.setString(3, deviceSubType.getDeviceType().toString());
                 stmt.setString(4, deviceSubType.getSubTypeName());
@@ -68,7 +67,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     }
 
     @Override
-    public boolean updateDeviceSubType(int subTypeId, int tenantId, DeviceSubType.DeviceType deviceType,
+    public boolean updateDeviceSubType(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType,
                                        String subTypeName, String typeDefinition)
             throws SubTypeMgtDAOException {
         try {
@@ -79,7 +78,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, typeDefinition);
                 stmt.setString(2, subTypeName);
-                stmt.setInt(3, subTypeId);
+                stmt.setString(3, subTypeId);
                 stmt.setInt(4, tenantId);
                 stmt.setString(5, deviceType.toString());
                 return stmt.executeUpdate() > 0;
@@ -99,14 +98,14 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     }
 
     @Override
-    public DeviceSubType getDeviceSubType(int subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
+    public DeviceSubType getDeviceSubType(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
             throws SubTypeMgtDAOException {
         try {
             String sql = "SELECT * FROM DM_DEVICE_SUB_TYPE WHERE SUB_TYPE_ID = ? AND TENANT_ID = ? AND DEVICE_TYPE = ?";
 
             Connection conn = ConnectionManagerUtil.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, subTypeId);
+                stmt.setString(1, subTypeId);
                 stmt.setInt(2, tenantId);
                 stmt.setString(3, deviceType.toString());
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -189,29 +188,30 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     }
 
     @Override
-    public int getMaxSubTypeId(DeviceSubType.DeviceType deviceType) throws SubTypeMgtDAOException {
+    public boolean checkDeviceSubTypeExist(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
+            throws SubTypeMgtDAOException {
         try {
-            String sql = "SELECT COALESCE(MAX(SUB_TYPE_ID),0) as MAX_ID FROM DM_DEVICE_SUB_TYPE WHERE DEVICE_TYPE = ? ";
+            String sql = "SELECT * FROM DM_DEVICE_SUB_TYPE WHERE SUB_TYPE_ID = ? AND TENANT_ID = ? AND DEVICE_TYPE " +
+                    "= ? ";
 
             Connection conn = ConnectionManagerUtil.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, deviceType.toString());
+                stmt.setString(1, subTypeId);
+                stmt.setInt(2, tenantId);
+                stmt.setString(3, deviceType.toString());
                 try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt("MAX_ID");
-                    }
-                    return 0;
+                    return rs.next();
                 }
             }
 
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while obtaining DB connection to retrieve max device subtype id for " +
-                    deviceType + " subtype";
+            String msg = "Error occurred while obtaining DB connection to check device subtype exist for " + deviceType
+                    + " subtype & subtype id: " + subTypeId;
             log.error(msg);
             throw new SubTypeMgtDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "Error occurred while processing SQL to retrieve max device subtype id for " + deviceType
-                    + " subtype";
+            String msg = "Error occurred while processing SQL to check device subtype exist for " + deviceType + " " +
+                    "subtype & subtype id: " + subTypeId;
             log.error(msg);
             throw new SubTypeMgtDAOException(msg, e);
         }

@@ -38,7 +38,7 @@ public class DAOUtil {
             public String parseSubTypeToJson(Object objType) { return null; }
         };
         deviceSubType.setTenantId(rs.getInt("TENANT_ID"));
-        deviceSubType.setSubTypeId(rs.getInt("SUB_TYPE_ID"));
+        deviceSubType.setSubTypeId(rs.getString("SUB_TYPE_ID"));
         deviceSubType.setSubTypeName(rs.getString("SUB_TYPE_NAME"));
         deviceSubType.setDeviceType(DeviceSubType.DeviceType.valueOf(rs.getString("DEVICE_TYPE")));
         deviceSubType.setTypeDefinition(rs.getString("TYPE_DEFINITION"));

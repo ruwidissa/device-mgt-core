@@ -46,7 +46,7 @@ public class GetDeviceSubTypeCacheLoader extends CacheLoader<String, DeviceSubTy
     public DeviceSubType load(String key) throws SubTypeMgtPluginException {
         DeviceSubTypeCacheKey deviceSubTypeCacheKey = DeviceSubTypeMgtUtil.getDeviceSubTypeCacheKey(key);
         int tenantId = deviceSubTypeCacheKey.getTenantId();
-        int subTypeId = deviceSubTypeCacheKey.getSubTypeId();
+        String subTypeId = deviceSubTypeCacheKey.getSubTypeId();
         DeviceSubType.DeviceType deviceType = deviceSubTypeCacheKey.getDeviceType();
 
         if (log.isTraceEnabled()) {

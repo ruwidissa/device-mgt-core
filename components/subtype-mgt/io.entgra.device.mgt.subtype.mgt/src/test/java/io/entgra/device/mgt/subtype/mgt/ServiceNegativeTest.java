@@ -15,6 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package io.entgra.device.mgt.subtype.mgt;
 
 import io.entgra.device.mgt.subtype.mgt.dto.DeviceSubType;
@@ -62,6 +63,7 @@ public class ServiceNegativeTest extends BaseDeviceSubTypePluginTest {
             expectedExceptionsMessageRegExp = "Error occurred in the database level while adding device subtype for " +
                     "SIM subtype & subtype Id: 1")
     public void testAddDeviceSubTypes() throws SubTypeMgtPluginException {
+        String subTypeId = "1";
         String subTypeName = "TestSubType";
         DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.SIM;
 
@@ -76,6 +78,7 @@ public class ServiceNegativeTest extends BaseDeviceSubTypePluginTest {
                 return null;
             }
         };
+        deviceSubType.setSubTypeId(subTypeId);
         deviceSubType.setSubTypeName(subTypeName);
         deviceSubType.setDeviceType(deviceType);
         deviceSubTypeService.addDeviceSubType(deviceSubType);
@@ -86,7 +89,7 @@ public class ServiceNegativeTest extends BaseDeviceSubTypePluginTest {
             expectedExceptions = {SubTypeMgtPluginException.class},
             expectedExceptionsMessageRegExp = "Cannot find device subtype for SIM subtype & subtype Id: 15")
     public void testUpdateDeviceSubTypes() throws SubTypeMgtPluginException {
-        int subTypeId = 15;
+        String subTypeId = "15";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.SIM;
         String subTypeName = "TestSubType";

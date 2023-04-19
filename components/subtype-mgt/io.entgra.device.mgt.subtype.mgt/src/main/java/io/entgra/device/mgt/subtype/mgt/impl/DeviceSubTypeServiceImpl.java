@@ -51,27 +51,22 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
     }
 
     @Override
-    public boolean addDeviceSubType(DeviceSubType deviceSubType)
-            throws SubTypeMgtPluginException {
+    public boolean addDeviceSubType(DeviceSubType deviceSubType) throws SubTypeMgtPluginException {
         String msg = "";
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         deviceSubType.setTenantId(tenantId);
 
         try {
             ConnectionManagerUtil.beginDBTransaction();
-
-            //TODO This is done as a temporary... we need to implement addDeviceSubType method either with uuid
-            // or auto incrementing subtype id. In order to that we have to fix hardcoded subtype id in code level..
-            // ex: transport code level
-
-            int maxSubTypeId = deviceSubTypeDAO.getMaxSubTypeId(deviceSubType.getDeviceType());
-            deviceSubType.setSubTypeId(maxSubTypeId + 1);
             boolean result = deviceSubTypeDAO.addDeviceSubType(deviceSubType);
             if (result) {
                 msg = "Device subtype added successfully,for " + deviceSubType.getDeviceType() + " subtype & subtype " +
-                        "Id: "
-                        + deviceSubType.getSubTypeId();
+                        "Id: " + deviceSubType.getSubTypeId();
+                if (log.isDebugEnabled()) {
+                    log.debug(msg);
+                }
             } else {
+                ConnectionManagerUtil.rollbackDBTransaction();
                 msg = "Device subtype failed to add,for " + deviceSubType.getDeviceType() + " subtype & subtype Id: " +
                         deviceSubType.getSubTypeId();
                 throw new SubTypeMgtPluginException(msg);
@@ -80,9 +75,6 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
             String key = DeviceSubTypeMgtUtil.setDeviceSubTypeCacheKey(tenantId, deviceSubType.getSubTypeId(),
                     deviceSubType.getDeviceType());
             deviceSubTypeCache.put(key, deviceSubType);
-            if (log.isDebugEnabled()) {
-                log.debug(msg);
-            }
             return true;
         } catch (DBConnectionException e) {
             msg = "Error occurred while obtaining the database connection to add device subtype for " +
@@ -90,6 +82,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
             log.error(msg);
             throw new SubTypeMgtPluginException(msg, e);
         } catch (SubTypeMgtDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
             msg = "Error occurred in the database level while adding device subtype for " +
                     deviceSubType.getDeviceType() + " subtype & subtype Id: " + deviceSubType.getSubTypeId();
             log.error(msg);
@@ -100,9 +93,9 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
     }
 
     @Override
-    public boolean updateDeviceSubType(int subTypeId, int tenantId, DeviceSubType.DeviceType deviceType,
-                                       String subTypeName,
-                                       String typeDefinition) throws SubTypeMgtPluginException {
+    public boolean updateDeviceSubType(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType,
+                                       String subTypeName, String typeDefinition)
+            throws SubTypeMgtPluginException {
         String msg = "";
         DeviceSubType deviceSubTypeOld = getDeviceSubType(subTypeId, tenantId, deviceType);
 
@@ -117,14 +110,15 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
                     typeDefinition);
             if (result) {
                 msg = "Device subtype updated successfully,for " + deviceType + " subtype & subtype Id: " + subTypeId;
+                if (log.isDebugEnabled()) {
+                    log.debug(msg);
+                }
             } else {
+                ConnectionManagerUtil.rollbackDBTransaction();
                 msg = "Device subtype failed to update,for " + deviceType + " subtype & subtype Id: " + subTypeId;
                 throw new SubTypeMgtPluginException(msg);
             }
             ConnectionManagerUtil.commitDBTransaction();
-            if (log.isDebugEnabled()) {
-                log.debug(msg);
-            }
             return true;
         } catch (DBConnectionException e) {
             msg = "Error occurred while obtaining the database connection to update device subtype for " + deviceType
@@ -132,6 +126,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
             log.error(msg);
             throw new SubTypeMgtPluginException(msg, e);
         } catch (SubTypeMgtDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
             msg = "Error occurred in the database level while updating device subtype for " + deviceType +
                     " subtype & subtype Id: " + subTypeId;
             log.error(msg);
@@ -144,7 +139,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
     }
 
     @Override
-    public DeviceSubType getDeviceSubType(int subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
+    public DeviceSubType getDeviceSubType(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
             throws SubTypeMgtPluginException {
         try {
             String key = DeviceSubTypeMgtUtil.setDeviceSubTypeCacheKey(tenantId, subTypeId, deviceType);
@@ -188,7 +183,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
             int result = deviceSubTypeDAO.getDeviceSubTypeCount(deviceType);
             if (result <= 0) {
                 String msg = "There are no any subtypes for device type: " + deviceType;
-                log.info(msg);
+                log.error(msg);
             }
             return result;
         } catch (DBConnectionException e) {
@@ -228,5 +223,24 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
         }
     }
 
-
+    @Override
+    public boolean checkDeviceSubTypeExist(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
+            throws SubTypeMgtPluginException {
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return deviceSubTypeDAO.checkDeviceSubTypeExist(subTypeId, tenantId, deviceType);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the database connection to check device subtype exist for " +
+                    deviceType + " subtype & subtype id: " + subTypeId;
+            log.error(msg);
+            throw new SubTypeMgtPluginException(msg, e);
+        } catch (SubTypeMgtDAOException e) {
+            String msg = "Error occurred in the database level while checking device subtype exist  for " + deviceType
+                    + " subtype & subtype id: " + subTypeId;
+            log.error(msg);
+            throw new SubTypeMgtPluginException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
 }

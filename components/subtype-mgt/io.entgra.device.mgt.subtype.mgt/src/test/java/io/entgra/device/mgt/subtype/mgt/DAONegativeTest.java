@@ -81,7 +81,7 @@ public class DAONegativeTest extends BaseDeviceSubTypePluginTest {
             expectedExceptionsMessageRegExp = "Error occurred while processing SQL to insert device subtype"
     )
     public void testAddDeviceSubTypes() throws SubTypeMgtDAOException {
-        int subTypeId = 1;
+        String subTypeId = "1";
         String subTypeName = "TestSubType";
         DeviceSubType deviceSubType = new DeviceSubType() {
             @Override
@@ -121,7 +121,7 @@ public class DAONegativeTest extends BaseDeviceSubTypePluginTest {
             expectedExceptionsMessageRegExp = "Error occurred while processing SQL to insert device subtype"
     )
     public void testAddDeviceSubtypes() throws SubTypeMgtDAOException {
-        int subTypeId = 1;
+        String subTypeId = "1";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         String subTypeName = "TestSubType";
         String typeDefinition = TestUtils.createNewDeviceSubType(subTypeId);

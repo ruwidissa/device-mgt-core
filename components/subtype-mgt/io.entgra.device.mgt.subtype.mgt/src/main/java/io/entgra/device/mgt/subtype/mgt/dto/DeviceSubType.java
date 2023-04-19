@@ -24,17 +24,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 public abstract class DeviceSubType {
 
-    private int subTypeId;
+    private String subTypeId;
     private int tenantId;
     private DeviceType deviceType;
     private String subTypeName;
     private String typeDefinition;
 
-    public int getSubTypeId() {
+    public String getSubTypeId() {
         return subTypeId;
     }
 
-    public void setSubTypeId(int subTypeId) {
+    public void setSubTypeId(String subTypeId) {
         this.subTypeId = subTypeId;
     }
 

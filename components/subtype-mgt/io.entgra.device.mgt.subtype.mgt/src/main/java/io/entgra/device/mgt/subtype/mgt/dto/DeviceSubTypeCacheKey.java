@@ -20,7 +20,7 @@ package io.entgra.device.mgt.subtype.mgt.dto;
 
 public class DeviceSubTypeCacheKey {
     int tenantId;
-    int subTypeId;
+    String subTypeId;
     DeviceSubType.DeviceType deviceType;
 
     public int getTenantId() {
@@ -31,11 +31,11 @@ public class DeviceSubTypeCacheKey {
         this.tenantId = tenantId;
     }
 
-    public int getSubTypeId() {
+    public String getSubTypeId() {
         return subTypeId;
     }
 
-    public void setSubTypeId(int subTypeId) {
+    public void setSubTypeId(String subTypeId) {
         this.subTypeId = subTypeId;
     }
 

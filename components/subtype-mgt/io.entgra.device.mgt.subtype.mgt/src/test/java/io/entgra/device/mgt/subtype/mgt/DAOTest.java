@@ -49,7 +49,7 @@ public class DAOTest extends BaseDeviceSubTypePluginTest {
     public void testGetDeviceSubType() throws DBConnectionException, SubTypeMgtDAOException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         ConnectionManagerUtil.openDBConnection();
-        DeviceSubType subTypeActual = deviceSubTypeDAO.getDeviceSubType(1, tenantId,
+        DeviceSubType subTypeActual = deviceSubTypeDAO.getDeviceSubType("1", tenantId,
                 DeviceSubType.DeviceType.COM);
         ConnectionManagerUtil.closeDBConnection();
         Assert.assertNotNull(subTypeActual, "Should not be null");
@@ -68,7 +68,7 @@ public class DAOTest extends BaseDeviceSubTypePluginTest {
 
     @Test
     public void testAddDeviceSubType() throws DBConnectionException, SubTypeMgtDAOException {
-        int subTypeId = 1;
+        String subTypeId = "1";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         String subTypeName = "TestSubType";
         DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
@@ -102,7 +102,7 @@ public class DAOTest extends BaseDeviceSubTypePluginTest {
 
     @Test(dependsOnMethods = "testAddDeviceSubType")
     public void testUpdateDeviceSubType() throws DBConnectionException, SubTypeMgtDAOException {
-        int subTypeId = 1;
+        String subTypeId = "1";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
         String subTypeName = "TestSubType";
@@ -116,6 +116,17 @@ public class DAOTest extends BaseDeviceSubTypePluginTest {
 
         Assert.assertNotNull(subTypeActual, "Cannot be null");
         TestUtils.verifyUpdatedDeviceSubTypeDAO(subTypeActual);
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceSubType")
+    public void testGetDeviceTypeByProvider() throws DBConnectionException, SubTypeMgtDAOException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
+        String subTypeName = "TestSubType";
+        ConnectionManagerUtil.openDBConnection();
+        DeviceSubType subTypeActual = deviceSubTypeDAO.getDeviceSubTypeByProvider(subTypeName, tenantId, deviceType);
+        ConnectionManagerUtil.closeDBConnection();
+        Assert.assertNotNull(subTypeActual, "Should not be null");
     }
 
     @Test(dependsOnMethods = "testAddDeviceSubType")

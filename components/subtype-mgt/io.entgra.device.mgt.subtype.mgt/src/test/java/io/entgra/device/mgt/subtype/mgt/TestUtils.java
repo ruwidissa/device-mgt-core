@@ -32,45 +32,45 @@ import java.sql.Statement;
 public class TestUtils {
     private static final Log log = LogFactory.getLog(TestUtils.class);
 
-    public static String createNewDeviceSubType(int subtypeId) {
+    public static String createNewDeviceSubType(String subtypeId) {
         return "{\"make\": \"TestSubType\", \"model\": \"ATx-Mega SIM800\", " +
                 "\"subTypeId\": " + subtypeId + ", \"hasSMSSupport\": true, \"hasICMPSupport\": true, " +
                 "\"socketServerPort\": 8071}";
     }
 
-    public static String createUpdateDeviceSubType(int subtypeId) {
+    public static String createUpdateDeviceSubType(String subtypeId) {
         return "{\"make\": \"TestSubType\", \"model\": \"ATx-Mega SIM900\", " +
                 "\"subTypeId\": " + subtypeId + ", \"hasSMSSupport\": false, \"hasICMPSupport\": true, " +
                 "\"socketServerPort\": 8071}";
     }
 
     public static void verifyDeviceSubType(DeviceSubType deviceSubType) {
-        String typeDefExpected = TestUtils.createNewDeviceSubType(1);
-        Assert.assertEquals(deviceSubType.getSubTypeId(), 1);
+        String typeDefExpected = TestUtils.createNewDeviceSubType("1");
+        Assert.assertEquals(deviceSubType.getSubTypeId(), "1");
         Assert.assertEquals(deviceSubType.getDeviceType(), DeviceSubType.DeviceType.valueOf("METER"));
         Assert.assertEquals(deviceSubType.getSubTypeName(), "TestSubType");
         Assert.assertEquals(deviceSubType.getTypeDefinition(), typeDefExpected);
     }
 
     public static void verifyDeviceSubTypeDAO(DeviceSubType deviceSubType) {
-        String typeDefExpected = TestUtils.createNewDeviceSubType(1);
-        Assert.assertEquals(deviceSubType.getSubTypeId(), 1);
+        String typeDefExpected = TestUtils.createNewDeviceSubType("1");
+        Assert.assertEquals(deviceSubType.getSubTypeId(), "1");
         Assert.assertEquals(deviceSubType.getDeviceType(), DeviceSubType.DeviceType.valueOf("COM"));
         Assert.assertEquals(deviceSubType.getSubTypeName(), "TestSubType");
         Assert.assertEquals(deviceSubType.getTypeDefinition(), typeDefExpected);
     }
 
     public static void verifyUpdatedDeviceSubType(DeviceSubType deviceSubType) {
-        String typeDefExpected = TestUtils.createUpdateDeviceSubType(1);
-        Assert.assertEquals(deviceSubType.getSubTypeId(), 1);
+        String typeDefExpected = TestUtils.createUpdateDeviceSubType("1");
+        Assert.assertEquals(deviceSubType.getSubTypeId(), "1");
         Assert.assertEquals(deviceSubType.getDeviceType(), DeviceSubType.DeviceType.valueOf("METER"));
         Assert.assertEquals(deviceSubType.getSubTypeName(), "TestSubType");
         Assert.assertEquals(deviceSubType.getTypeDefinition(), typeDefExpected);
     }
 
     public static void verifyUpdatedDeviceSubTypeDAO(DeviceSubType deviceSubType) {
-        String typeDefExpected = TestUtils.createUpdateDeviceSubType(1);
-        Assert.assertEquals(deviceSubType.getSubTypeId(), 1);
+        String typeDefExpected = TestUtils.createUpdateDeviceSubType("1");
+        Assert.assertEquals(deviceSubType.getSubTypeId(), "1");
         Assert.assertEquals(deviceSubType.getDeviceType(), DeviceSubType.DeviceType.valueOf("COM"));
         Assert.assertEquals(deviceSubType.getSubTypeName(), "TestSubType");
         Assert.assertEquals(deviceSubType.getTypeDefinition(), typeDefExpected);

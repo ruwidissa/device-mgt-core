@@ -22,14 +22,14 @@ import io.entgra.device.mgt.subtype.mgt.dto.DeviceSubType;
 import io.entgra.device.mgt.subtype.mgt.dto.DeviceSubTypeCacheKey;
 
 public class DeviceSubTypeMgtUtil {
-    public static String setDeviceSubTypeCacheKey(int tenantId, int subTypeId, DeviceSubType.DeviceType deviceType) {
+    public static String setDeviceSubTypeCacheKey(int tenantId, String subTypeId, DeviceSubType.DeviceType deviceType) {
         return tenantId + "|" + subTypeId + "|" + deviceType.toString();
     }
 
     public static DeviceSubTypeCacheKey getDeviceSubTypeCacheKey(String key) {
         String[] keys = key.split("\\|");
         int tenantId = Integer.parseInt(keys[0]);
-        int subTypeId = Integer.parseInt(keys[1]);
+        String subTypeId = keys[1];
         DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.valueOf(keys[2]);
 
         DeviceSubTypeCacheKey deviceSubTypesCacheKey = new DeviceSubTypeCacheKey();

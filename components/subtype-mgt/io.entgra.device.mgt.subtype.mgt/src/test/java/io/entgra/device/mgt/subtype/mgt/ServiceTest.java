@@ -47,7 +47,7 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
     @Test(dependsOnMethods = "testAddDeviceSubType")
     public void testGetDeviceType() throws SubTypeMgtPluginException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        DeviceSubType subTypeActual = deviceSubTypeService.getDeviceSubType(1, tenantId,
+        DeviceSubType subTypeActual = deviceSubTypeService.getDeviceSubType("1", tenantId,
                 DeviceSubType.DeviceType.METER);
         TestUtils.verifyDeviceSubType(subTypeActual);
     }
@@ -63,7 +63,7 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
 
     @Test
     public void testAddDeviceSubType() throws SubTypeMgtPluginException {
-        int subTypeId = 1;
+        String subTypeId = "1";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         String subTypeName = "TestSubType";
         DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.METER;
@@ -80,6 +80,7 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
                 return null;
             }
         };
+        deviceSubType.setSubTypeId(subTypeId);
         deviceSubType.setSubTypeName(subTypeName);
         deviceSubType.setDeviceType(deviceType);
         deviceSubType.setTenantId(tenantId);
@@ -93,7 +94,7 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
 
     @Test(dependsOnMethods = "testAddDeviceSubType")
     public void testUpdateDeviceSubType() throws SubTypeMgtPluginException {
-        int subTypeId = 1;
+        String subTypeId = "1";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.METER;
         String subTypeName = "TestSubType";
@@ -105,6 +106,16 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
 
         Assert.assertNotNull(subTypeActual, "Cannot be null");
         TestUtils.verifyUpdatedDeviceSubType(subTypeActual);
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceSubType")
+    public void testGetDeviceTypeByProvider() throws SubTypeMgtPluginException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.METER;
+        String subTypeName = "TestSubType";
+        DeviceSubType subTypeActual = deviceSubTypeService.getDeviceSubTypeByProvider(subTypeName, tenantId,
+                deviceType);
+        TestUtils.verifyDeviceSubType(subTypeActual);
     }
 
     @Test(dependsOnMethods = "testAddDeviceSubType")
