@@ -19,12 +19,6 @@
 
 package org.wso2.carbon.apimgt.webapp.publisher;
 
-import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServices;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServicesImpl;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.APIApplicationKey;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.AccessTokenInfo;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.APIApplicationServicesException;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.BadRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.webapp.publisher.exception.APIManagerPublisherException;

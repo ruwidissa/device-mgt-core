@@ -1,4 +1,4 @@
-package io.entgra.devicemgt.apimgt.extension.publisher.api.constants;
+package io.entgra.devicemgt.apimgt.extension.rest.api.constants;
 
 public final class Constants {
 

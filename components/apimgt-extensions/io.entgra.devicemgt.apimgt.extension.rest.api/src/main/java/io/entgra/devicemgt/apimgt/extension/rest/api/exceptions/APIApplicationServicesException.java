@@ -1,4 +1,4 @@
-package io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions;
+package io.entgra.devicemgt.apimgt.extension.rest.api.exceptions;
 
 public class APIApplicationServicesException extends Exception{
 

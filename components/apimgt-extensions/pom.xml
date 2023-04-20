@@ -31,16 +31,24 @@
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-okhttp</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.osgi</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.osgi</groupId>
+            <artifactId>org.eclipse.osgi.services</artifactId>
         </dependency>
     </dependencies>
 
@@ -58,7 +66,7 @@
         <module>org.wso2.carbon.apimgt.keymgt.extension</module>
         <module>org.wso2.carbon.apimgt.keymgt.extension.api</module>
         <module>io.entgra.device.mgt.core.apimgt.analytics.extension</module>
-        <module>io.entgra.devicemgt.apimgt.extension.publisher.api</module>
+        <module>io.entgra.devicemgt.apimgt.extension.rest.api</module>
     </modules>
 
     <build>

@@ -22,9 +22,7 @@
 /**
  * Custom exception class for handling bad request exceptions.
  */
-package io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions;
-
-import okhttp3.Response;
+package io.entgra.devicemgt.apimgt.extension.rest.api.exceptions;
 
 public class BadRequestException extends Exception {
 

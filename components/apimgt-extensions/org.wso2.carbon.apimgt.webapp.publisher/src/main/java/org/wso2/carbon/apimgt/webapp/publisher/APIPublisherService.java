@@ -18,8 +18,6 @@
  */
 package org.wso2.carbon.apimgt.webapp.publisher;
 
-
-import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.BadRequestException;
 import org.wso2.carbon.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 
 /**

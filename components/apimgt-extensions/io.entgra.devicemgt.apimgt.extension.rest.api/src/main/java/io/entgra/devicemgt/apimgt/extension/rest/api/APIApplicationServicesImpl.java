@@ -1,12 +1,18 @@
-package io.entgra.devicemgt.apimgt.extension.publisher.api;
+package io.entgra.devicemgt.apimgt.extension.rest.api;
 
 import com.google.gson.Gson;
+import io.entgra.devicemgt.apimgt.extension.rest.api.dto.APIApplicationKey;
 import org.json.JSONObject;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.constants.Constants;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.APIApplicationKey;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.AccessTokenInfo;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.APIApplicationServicesException;
-import okhttp3.*;
+import io.entgra.devicemgt.apimgt.extension.rest.api.constants.Constants;
+import io.entgra.devicemgt.apimgt.extension.rest.api.dto.AccessTokenInfo;
+import io.entgra.devicemgt.apimgt.extension.rest.api.exceptions.APIApplicationServicesException;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.RequestBody;
+import okhttp3.Credentials;
+import okhttp3.ConnectionPool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,6 +23,7 @@ import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeUnit;
 
 public class APIApplicationServicesImpl implements APIApplicationServices {
 
@@ -33,16 +40,16 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
-        jsonObject.put("clientName",Constants.CLIENT_NAME);
-        jsonObject.put("grantType",Constants.GRANT_TYPE);
-        jsonObject.put("owner",Constants.OWNER);
-        jsonObject.put("saasApp",true);
+        jsonObject.put("clientName", Constants.CLIENT_NAME);
+        jsonObject.put("grantType", Constants.GRANT_TYPE);
+        jsonObject.put("owner", Constants.OWNER);
+        jsonObject.put("saasApp", true);
 
         RequestBody requestBody = RequestBody.Companion.create(jsonObject.toString(), JSON);
-        String keyManagerEndpoint = "https://localhost:9443/client-registration/v0.17/register";
+        String applicationEndpoint = "https://localhost:9443/client-registration/v0.17/register";
 
         Request request = new Request.Builder()
-                .url(keyManagerEndpoint)
+                .url(applicationEndpoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Credentials.basic("admin", "admin"))
                 .post(requestBody)
                 .build();
@@ -58,13 +65,13 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
 
     @Override
     public AccessTokenInfo generateAccessTokenFromRegisteredApplication(String consumerKey, String consumerSecret)
-        throws APIApplicationServicesException {
+            throws APIApplicationServicesException {
         JSONObject params = new JSONObject();
-        params.put(Constants.GRANT_TYPE_PARAM_NAME,Constants.PASSWORD_GRANT_TYPE);
+        params.put(Constants.GRANT_TYPE_PARAM_NAME, Constants.PASSWORD_GRANT_TYPE);
         //ToDo: Remove hardcoded value
-        params.put(Constants.PASSWORD_GRANT_TYPE_USERNAME,"admin");
-        params.put(Constants.PASSWORD_GRANT_TYPE_PASSWORD,"admin");
-        params.put(Constants.SCOPE_PARAM_NAME,Constants.SCOPES);
+        params.put(Constants.PASSWORD_GRANT_TYPE_USERNAME, "admin");
+        params.put(Constants.PASSWORD_GRANT_TYPE_PASSWORD, "admin");
+        params.put(Constants.SCOPE_PARAM_NAME, Constants.SCOPES);
         return getToken(params, consumerKey, consumerSecret);
     }
 
@@ -73,18 +80,17 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             throws APIApplicationServicesException {
 
         JSONObject params = new JSONObject();
-        params.put(Constants.GRANT_TYPE_PARAM_NAME,Constants.REFRESH_TOKEN_GRANT_TYPE);
+        params.put(Constants.GRANT_TYPE_PARAM_NAME, Constants.REFRESH_TOKEN_GRANT_TYPE);
         //ToDo: Remove hardcoded value
         params.put(Constants.REFRESH_TOKEN_GRANT_TYPE_PARAM_NAME, refreshToken);
-        params.put(Constants.SCOPE_PARAM_NAME,Constants.SCOPES);
+        params.put(Constants.SCOPE_PARAM_NAME, Constants.SCOPES);
         return getToken(params, consumerKey, consumerSecret);
     }
 
     public AccessTokenInfo getToken(JSONObject nameValuePairs, String clientId, String clientSecret)
-            throws APIApplicationServicesException{
+            throws APIApplicationServicesException {
 
         RequestBody requestBody = RequestBody.Companion.create(nameValuePairs.toString(), JSON);
-        //application/x-www-form-urlencoded
         String tokenEndPoint = "https://localhost:9443/oauth2/token";
 
         Request request = new Request.Builder()
@@ -117,9 +123,14 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
                     java.security.cert.X509Certificate[] certs, String authType) {
             }
         };
-        return new OkHttpClient.Builder()
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(300, TimeUnit.SECONDS)
+                .writeTimeout(300, TimeUnit.SECONDS)
+                .readTimeout(300, TimeUnit.SECONDS)
+                .connectionPool(new ConnectionPool(500, 500, TimeUnit.SECONDS))
                 .sslSocketFactory(getSimpleTrustedSSLSocketFactory(), trustAllCerts)
                 .hostnameVerifier((hostname, sslSession) -> true).build();
+        return okHttpClient;
     }
 
     private static SSLSocketFactory getSimpleTrustedSSLSocketFactory() {
@@ -129,9 +140,11 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
                         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                             return null;
                         }
+
                         public void checkClientTrusted(
                                 java.security.cert.X509Certificate[] certs, String authType) {
                         }
+
                         public void checkServerTrusted(
                                 java.security.cert.X509Certificate[] certs, String authType) {
                         }

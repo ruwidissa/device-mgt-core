@@ -1,4 +1,4 @@
-package io.entgra.devicemgt.apimgt.extension.publisher.api.dto;
+package io.entgra.devicemgt.apimgt.extension.rest.api.dto;
 
 /**
  * This holds api application consumer id and secret.

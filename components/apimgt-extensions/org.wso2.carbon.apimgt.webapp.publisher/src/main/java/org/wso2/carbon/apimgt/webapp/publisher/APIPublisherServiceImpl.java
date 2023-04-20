@@ -18,18 +18,20 @@
  */
 package org.wso2.carbon.apimgt.webapp.publisher;
 
-import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServices;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServicesImpl;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.PublisherRESTAPIServices;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.APIApplicationKey;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.AccessTokenInfo;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.APIApplicationServicesException;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.BadRequestException;
+import io.entgra.devicemgt.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.devicemgt.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.devicemgt.apimgt.extension.rest.api.PublisherRESTAPIServices;
+import io.entgra.devicemgt.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.devicemgt.apimgt.extension.rest.api.dto.AccessTokenInfo;
+import io.entgra.devicemgt.apimgt.extension.rest.api.exceptions.APIApplicationServicesException;
+import io.entgra.devicemgt.apimgt.extension.rest.api.exceptions.BadRequestException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -382,6 +384,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServices();
+                JSONObject scopeObject = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
 
                 try {
                     String fileName =
@@ -427,8 +430,18 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             }
                             scope.setRoles(roleString);
 
-//                            if (apiProvider.isSharedScopeNameExists(scope.getKey(), tenantDomain)) {
-//                                apiProvider.updateSharedScope(scope, tenantDomain);
+                            //Set scope id which related to the scope key
+                            JSONArray scopeList = (JSONArray) scopeObject.get("list");
+                            JSONObject object = null;
+                            for (int i = 0; i < scopeList.length(); i++) {
+                                JSONObject obj = null;
+                                obj = scopeList.getJSONObject(i);
+                                if (obj.getString("name").equals(scopeMapping[2] != null ? StringUtils.trim(scopeMapping[2]) : StringUtils.EMPTY)) {
+                                    object = obj;
+                                }
+                            }
+                            scope.setId(object.getString("id"));
+
                             if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getKey())) {
                                 publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);
                             } else {
@@ -449,17 +462,13 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
             }
         }
-//        catch (UserStoreException e) {
-//            String msg = "Error occurred while reading tenant admin username";
-//            log.error(msg, e);
-//            throw new APIManagerPublisherException(e);
-//        }
-//        catch (APIManagementException e) {
-//            String msg = "Error occurred while loading api provider";
-//            log.error(msg, e);
-//            throw new APIManagerPublisherException(e);
-//        }
-        finally {
+        catch (APIApplicationServicesException e) {
+            log.error(e);
+            throw new RuntimeException(e);
+        } catch (BadRequestException e) {
+            log.error(e);
+            throw new RuntimeException(e);
+        } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }

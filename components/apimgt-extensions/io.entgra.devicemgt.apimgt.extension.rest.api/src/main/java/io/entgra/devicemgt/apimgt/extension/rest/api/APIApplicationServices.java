@@ -1,8 +1,8 @@
-package io.entgra.devicemgt.apimgt.extension.publisher.api;
+package io.entgra.devicemgt.apimgt.extension.rest.api;
 
-import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.APIApplicationKey;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.dto.AccessTokenInfo;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions.APIApplicationServicesException;
+import io.entgra.devicemgt.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.devicemgt.apimgt.extension.rest.api.dto.AccessTokenInfo;
+import io.entgra.devicemgt.apimgt.extension.rest.api.exceptions.APIApplicationServicesException;
 
 public interface APIApplicationServices {
 

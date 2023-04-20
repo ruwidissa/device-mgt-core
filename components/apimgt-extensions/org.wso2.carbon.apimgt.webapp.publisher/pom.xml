@@ -124,8 +124,12 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>io.entgra.devicemgt.apimgt.extension.publisher.api</artifactId>
+            <artifactId>io.entgra.devicemgt.apimgt.extension.rest.api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
         </dependency>
     </dependencies>
 
@@ -170,9 +174,9 @@
                             org.scannotation;version="1.0",
                             org.scannotation.archiveiterator;version="1.0",
                             org.w3c.dom,
-                            io.entgra.devicemgt.apimgt.extension.publisher.api,
-                            io.entgra.devicemgt.apimgt.extension.publisher.api.dto,
-                            io.entgra.devicemgt.apimgt.extension.publisher.api.exceptions,
+                            io.entgra.devicemgt.apimgt.extension.rest.api,
+                            io.entgra.devicemgt.apimgt.extension.rest.api.dto,
+                            io.entgra.devicemgt.apimgt.extension.rest.api.exceptions,
                             org.wso2.carbon.apimgt.annotations.api,
                             org.wso2.carbon.apimgt.api,
                             org.wso2.carbon.apimgt.api.model,
@@ -195,7 +199,8 @@
                             org.wso2.carbon.utils;version="4.6",
                             org.wso2.carbon.utils.multitenancy;version="4.6",
                             org.wso2.carbon.apimgt.impl.definitions,
-                            org.apache.commons.lang
+                            org.apache.commons.lang,
+                            org.json
                         </Import-Package>
                         <Embed-Dependency>
                             jsr311-api;scope=compile|runtime;inline=false

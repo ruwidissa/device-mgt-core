@@ -1,15 +1,14 @@
-package io.entgra.devicemgt.apimgt.extension.publisher.api.internal;
+package io.entgra.devicemgt.apimgt.extension.rest.api.internal;
 
-import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServices;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.APIApplicationServicesImpl;
-import io.entgra.devicemgt.apimgt.extension.publisher.api.PublisherRESTAPIServices;
+import io.entgra.devicemgt.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.devicemgt.apimgt.extension.rest.api.APIApplicationServicesImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
 /**
- * @scr.component name="io.entgra.devicemgt.apimgt.extension.publisher.api.internal.PublisherRESTAPIServiceComponent"
+ * @scr.component name="io.entgra.devicemgt.apimgt.extension.rest.api.internal.PublisherRESTAPIServiceComponent"
  * immediate="true"
  */
 public class PublisherRESTAPIServiceComponent {
@@ -22,10 +21,6 @@ public class PublisherRESTAPIServiceComponent {
         }
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
-
-//            PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServices();
-//            bundleContext.registerService(PublisherRESTAPIServices.class.getName(), publisherRESTAPIServices, null);
-//            PublisherRESTAPIDataHolder.getInstance().setPublisherRESTAPIServices(publisherRESTAPIServices);
 
             APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
             bundleContext.registerService(APIApplicationServices.class.getName(), apiApplicationServices, null);

@@ -1,4 +1,4 @@
-package io.entgra.devicemgt.apimgt.extension.publisher.api.bean;
+package io.entgra.devicemgt.apimgt.extension.rest.api.bean;
 
 /**
  * This class represents the data that are required to register
