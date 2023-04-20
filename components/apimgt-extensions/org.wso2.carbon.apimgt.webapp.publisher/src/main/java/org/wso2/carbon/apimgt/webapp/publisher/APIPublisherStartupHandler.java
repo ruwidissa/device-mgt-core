@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import org.wso2.carbon.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
 import org.wso2.carbon.core.ServerStartupObserver;
+
 import java.util.Stack;
 
 public class APIPublisherStartupHandler implements ServerStartupObserver {
@@ -34,10 +35,12 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
     private static final int MAX_RETRY_COUNT = 5;
     private static Stack<APIConfig> failedAPIsStack = new Stack<>();
     private static Stack<APIConfig> currentAPIsStack;
+
     private APIPublisherService publisher;
 
     @Override
     public void completingServerStartup() {
+
     }
 
     @Override
@@ -52,7 +55,6 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
                     log.debug("Total number of unpublished APIs: "
                             + APIPublisherDataHolder.getInstance().getUnpublishedApis().size());
                 }
-
                 publisher = APIPublisherDataHolder.getInstance().getApiPublisherService();
                 int retryCount = 0;
                 while (retryCount < MAX_RETRY_COUNT && (!failedAPIsStack.isEmpty() || !currentAPIsStack.isEmpty())) {
