@@ -826,7 +826,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             deviceConfig.setClientId(dcrResponse.getClientId());
             deviceConfig.setClientSecret(dcrResponse.getClientSecret());
 
-            StringBuilder scopes = new StringBuilder("device_" + type.replace(" ", "") + "_" + id);
+            StringBuilder scopes = new StringBuilder("device:" + type.replace(" ", "") + ":" + id);
             for (String topic : mqttEventTopicStructure) {
                 if (topic.contains("${deviceId}")) {
                     topic = topic.replace("${deviceId}", id);
