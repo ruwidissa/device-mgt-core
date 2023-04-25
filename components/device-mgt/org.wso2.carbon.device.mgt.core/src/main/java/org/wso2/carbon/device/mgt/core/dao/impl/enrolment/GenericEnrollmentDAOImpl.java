@@ -1,5 +1,5 @@
 /*
- *   Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2023, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.core.dao.impl;
+package org.wso2.carbon.device.mgt.core.dao.impl.enrolment;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
@@ -24,20 +24,15 @@ import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.dao.EnrollmentDAO;
+import org.wso2.carbon.device.mgt.core.dao.impl.AbstractEnrollmentDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class EnrollmentDAOImpl implements EnrollmentDAO {
+public class GenericEnrollmentDAOImpl extends AbstractEnrollmentDAOImpl {
 
     @Override
     public EnrolmentInfo addEnrollment(int deviceId, EnrolmentInfo enrolmentInfo,

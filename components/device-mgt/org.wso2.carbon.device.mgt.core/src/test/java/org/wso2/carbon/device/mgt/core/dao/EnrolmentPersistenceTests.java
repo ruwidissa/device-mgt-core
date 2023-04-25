@@ -33,7 +33,14 @@ import java.sql.SQLException;
 public class EnrolmentPersistenceTests extends BaseDeviceManagementTest {
 
     private static final Log log = LogFactory.getLog(EnrolmentPersistenceTests.class);
-    private EnrollmentDAO enrollmentDAO = DeviceManagementDAOFactory.getEnrollmentDAO();
+    EnrollmentDAO enrollmentDAO;
+
+    @BeforeClass
+    @Override
+    public void init() throws Exception {
+        this.initDataSource();
+        enrollmentDAO = DeviceManagementDAOFactory.getEnrollmentDAO();
+    }
 
     @Test
     public void testAddEnrolment() {
@@ -85,11 +92,5 @@ public class EnrolmentPersistenceTests extends BaseDeviceManagementTest {
             DeviceManagementDAOFactory.closeConnection();
         }
         return enrolmentInfo;
-    }
-
-    @BeforeClass
-    @Override
-    public void init() throws Exception {
-        this.initDataSource();
     }
 }
