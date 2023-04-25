@@ -24,7 +24,6 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.ScopeUtils;
-
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -67,7 +66,8 @@ public class PublisherRESTAPIServices {
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
-                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(), apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
                 return getScopes(apiApplicationKey, refreshedAccessToken);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
@@ -103,7 +103,8 @@ public class PublisherRESTAPIServices {
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
-                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(), apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
                 return isSharedScopeNameExists(apiApplicationKey, refreshedAccessToken, key);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
@@ -147,7 +148,8 @@ public class PublisherRESTAPIServices {
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
-                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(), apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
                 return updateSharedScope(apiApplicationKey, refreshedAccessToken, scope);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
