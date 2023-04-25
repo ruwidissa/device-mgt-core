@@ -39,8 +39,14 @@ import static org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status.*;
 public class DeviceStatusPersistenceTests extends BaseDeviceManagementTest {
 
     private static final Log log = LogFactory.getLog(DeviceStatusPersistenceTests.class);
-    private EnrollmentDAO enrollmentDAO = DeviceManagementDAOFactory.getEnrollmentDAO();
+    EnrollmentDAO enrollmentDAO;
     private DeviceStatusDAO deviceStatusDAO = DeviceManagementDAOFactory.getDeviceStatusDAO();
+
+    @BeforeClass
+    @Override
+    public void init() throws Exception {
+        enrollmentDAO = DeviceManagementDAOFactory.getEnrollmentDAO();
+    }
 
     /**
      * Validate that the list of statuses received match the statuses
@@ -244,11 +250,5 @@ public class DeviceStatusPersistenceTests extends BaseDeviceManagementTest {
             DeviceManagementDAOFactory.closeConnection();
         }
         return false;
-    }
-
-    @BeforeClass
-    @Override
-    public void init() throws Exception {
-
     }
 }
