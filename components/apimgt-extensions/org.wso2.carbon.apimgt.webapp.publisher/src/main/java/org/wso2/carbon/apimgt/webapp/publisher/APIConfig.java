@@ -28,17 +28,16 @@ import java.util.Set;
 /**
  * This bean class carries the properties used by some API that needs to be published within the underlying
  * API-Management infrastructure.
- *
  * A sample API configuration accepted by this particular bean class would look like what's shown below.
  * e.g.
  *
  * <API>
- *      <Name>enrollment</Name>
- *      <Owner>admin</Owner>
- *      <Context>/enrol</Context>
- *      <Version>1.0.0</Version>
- *      <Endpoint>http://localhost:9763/</Endpoint>
- *      <Transports>http,https</Transports>
+ * <Name>enrollment</Name>
+ * <Owner>admin</Owner>
+ * <Context>/enrol</Context>
+ * <Version>1.0.0</Version>
+ * <Endpoint>http://localhost:9763/</Endpoint>
+ * <Transports>http,https</Transports>
  * </API>
  */
 @XmlRootElement(name = "API")
@@ -47,6 +46,9 @@ public class APIConfig {
     private String name;
     private String owner;
     private String context;
+    private String apiDocumentationName;
+    private String apiDocumentationSummary;
+    private String apiDocumentationSourceFile;
     private String endpoint;
     private String version;
     private String policy;
@@ -80,6 +82,33 @@ public class APIConfig {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @XmlElement(name = "ApiDocumentationName", required = false)
+    public String getApiDocumentationName() {
+        return apiDocumentationName;
+    }
+
+    public void setApiDocumentationName(String apiDocumentationName) {
+        this.apiDocumentationName = apiDocumentationName;
+    }
+
+    @XmlElement(name = "ApiDocumentationSummary", required = false)
+    public String getApiDocumentationSummary() {
+        return apiDocumentationSummary;
+    }
+
+    public void setApiDocumentationSummary(String apiDocumentationSummary) {
+        this.apiDocumentationSummary = apiDocumentationSummary;
+    }
+
+    @XmlElement(name = "ApiDocumentationSourceFile", required = false)
+    public String getApiDocumentationSourceFile() {
+        return apiDocumentationSourceFile;
+    }
+
+    public void setApiDocumentationSourceFile(String apiDocumentationSourceFile) {
+        this.apiDocumentationSourceFile = apiDocumentationSourceFile;
     }
 
     @XmlElement(name = "Owner", required = true)
