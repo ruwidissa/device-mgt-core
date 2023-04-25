@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.entgra.devicemgt.apimgt.extension.rest.api.util;
+package io.entgra.device.mgt.core.apimgt.extension.rest.api.util;
 
 /**
  * This class represents the scope data.

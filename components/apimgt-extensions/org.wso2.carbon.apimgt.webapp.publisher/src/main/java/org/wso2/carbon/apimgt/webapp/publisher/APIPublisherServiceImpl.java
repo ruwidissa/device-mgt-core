@@ -18,13 +18,13 @@
  */
 package org.wso2.carbon.apimgt.webapp.publisher;
 
-import io.entgra.devicemgt.apimgt.extension.rest.api.APIApplicationServices;
-import io.entgra.devicemgt.apimgt.extension.rest.api.APIApplicationServicesImpl;
-import io.entgra.devicemgt.apimgt.extension.rest.api.PublisherRESTAPIServices;
-import io.entgra.devicemgt.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.devicemgt.apimgt.extension.rest.api.dto.AccessTokenInfo;
-import io.entgra.devicemgt.apimgt.extension.rest.api.exceptions.APIApplicationServicesException;
-import io.entgra.devicemgt.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -373,7 +373,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
             accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
-        } catch (APIApplicationServicesException e) {
+        } catch (APIServicesException e) {
             String errorMsg = "Error while generating application";
             log.error(errorMsg, e);
             throw new APIManagerPublisherException(e);
@@ -436,7 +436,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             for (int i = 0; i < scopeList.length(); i++) {
                                 JSONObject scopeObj = null;
                                 scopeObj = scopeList.getJSONObject(i);
-                                if (scopeObj.getString("name").equals(scopeMapping[2] != null ? StringUtils.trim(scopeMapping[2]) : StringUtils.EMPTY)) {
+                                if (scopeObj.getString("name").equals(scopeMapping[2] != null ?
+                                        StringUtils.trim(scopeMapping[2]) : StringUtils.EMPTY)) {
                                     jsonObject = scopeObj;
                                 }
                             }
@@ -454,20 +455,22 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     }
                 } catch (IOException | DirectoryIteratorException ex) {
                     log.error("failed to read scopes from file.", ex);
-                } catch (APIApplicationServicesException | BadRequestException e) {
-                    String errorMsg = "Error while Calling APIs";
+                } catch (APIServicesException | BadRequestException e) {
+                    String errorMsg = "Error while calling APIs";
                     log.error(errorMsg, e);
                     throw new APIManagerPublisherException(e);
                 }
 
             }
         }
-        catch (APIApplicationServicesException e) {
-            log.error(e);
-            throw new RuntimeException(e);
+        catch (APIServicesException e) {
+            String errorMsg = "Error while processing Publisher REST API response";
+            log.error(errorMsg, e);
+            throw new APIManagerPublisherException(e);
         } catch (BadRequestException e) {
-            log.error(e);
-            throw new RuntimeException(e);
+            String errorMsg = "Error while calling Publisher REST APIs";
+            log.error(errorMsg, e);
+            throw new APIManagerPublisherException(e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

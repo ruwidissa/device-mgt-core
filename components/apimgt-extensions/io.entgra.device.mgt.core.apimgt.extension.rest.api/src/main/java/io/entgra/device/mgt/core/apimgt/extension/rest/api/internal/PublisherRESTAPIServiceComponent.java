@@ -16,18 +16,25 @@
  * under the License.
  */
 
-package io.entgra.devicemgt.apimgt.extension.rest.api.internal;
+package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 
-import io.entgra.devicemgt.apimgt.extension.rest.api.APIApplicationServices;
-import io.entgra.devicemgt.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 /**
- * @scr.component name="io.entgra.devicemgt.apimgt.extension.rest.api.internal.PublisherRESTAPIServiceComponent"
+ * @scr.component name="internal.io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServiceComponent"
  * immediate="true"
+ * @scr.reference name="user.apimanagerconfigurationservice.default"
+ * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setAPIManagerConfigurationService"
+ * unbind="unsetAPIManagerConfigurationService"
  */
 public class PublisherRESTAPIServiceComponent {
 
@@ -54,5 +61,19 @@ public class PublisherRESTAPIServiceComponent {
 
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
+    }
+
+    protected void setAPIManagerConfigurationService(APIManagerConfigurationService apiManagerConfigurationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting API Manager Configuration Service");
+        }
+        PublisherRESTAPIDataHolder.getInstance().setAPIManagerConfiguration(apiManagerConfigurationService);
+    }
+
+    protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService apiManagerConfigurationService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting API Manager Configuration Service");
+        }
+        PublisherRESTAPIDataHolder.getInstance().setAPIManagerConfiguration(null);
     }
 }

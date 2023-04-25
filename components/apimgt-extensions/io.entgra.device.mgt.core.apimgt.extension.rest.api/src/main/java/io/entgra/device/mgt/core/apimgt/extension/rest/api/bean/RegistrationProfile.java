@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.entgra.devicemgt.apimgt.extension.rest.api.bean;
+package io.entgra.device.mgt.core.apimgt.extension.rest.api.bean;
 
 /**
  * This class represents the data that are required to register

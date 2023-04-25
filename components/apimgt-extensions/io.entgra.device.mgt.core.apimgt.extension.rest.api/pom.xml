@@ -27,21 +27,13 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>io.entgra.devicemgt.apimgt.extension.rest.api</artifactId>
+    <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
     <packaging>bundle</packaging>
-    <name>Entgra - Device API Management Extension Publisher API</name>
-    <description>Entgra - Device API Management Extension Publisher API</description>
+    <name>Entgra - Device Management Extension for APIM REST API</name>
+    <description>Entgra - Device Management Extension for APIM REST API</description>
     <url>https://entgra.io</url>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.httpcomponents.wso2</groupId>
-            <artifactId>httpcore</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
@@ -90,6 +82,11 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -110,31 +107,23 @@
                         <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
                         <Bundle-Description>Publisher API Management Bundle</Bundle-Description>
                         <Private-Package>
-                            io.entgra.devicemgt.apimgt.extension.rest.api.internal
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.internal
                         </Private-Package>
                         <Export-Package>
-                            !io.entgra.devicemgt.apimgt.extension.rest.api.internal,
-                            io.entgra.devicemgt.apimgt.extension.rest.api.*
+                            !io.entgra.device.mgt.core.apimgt.extension.rest.api.internal,
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.*
                         </Export-Package>
                         <Import-Package>
                             javax.net.ssl,
-                            org.apache.commons.logging,
-                            org.apache.http;version="${httpclient.version.range}",
-                            org.apache.http.client;version="${httpclient.version.range}",
-                            org.apache.http.client.methods;version="${httpclient.version.range}",
-                            org.apache.http.conn.socket,
-                            org.apache.http.conn.ssl,
-                            org.apache.http.entity,
-                            org.apache.http.impl.client,
-                            org.apache.http.util;version="${httpclient.version.range}",
-
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.wso2.carbon.core,
-                            org.apache.commons.ssl,
-                            org.apache.commons.httpclient,
+                            org.wso2.carbon.core;version="4.6",
+                            org.wso2.carbon.core.util;version="4.6",
                             org.wso2.carbon.apimgt.api.model,
                             okhttp3.*,
+                            org.wso2.carbon.apimgt.impl;version="${carbon.api.mgt.version.range}",
+                            org.wso2.carbon.apimgt.impl.utils;version="${carbon.api.mgt.version.range}",
+                            org.wso2.carbon.apimgt.impl.internal;version="${carbon.api.mgt.version.range}",
                             org.json
                         </Import-Package>
                     </instructions>
@@ -166,22 +155,7 @@
                     </execution>
                 </executions>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-surefire-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <systemPropertyVariables>-->
-<!--                        <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>-->
-<!--                    </systemPropertyVariables>-->
-<!--                    <suiteXmlFiles>-->
-<!--                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>-->
-<!--                    </suiteXmlFiles>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
         </plugins>
     </build>
-    <properties>
-        <maven.test.skip>true</maven.test.skip>
-    </properties>
 
 </project>

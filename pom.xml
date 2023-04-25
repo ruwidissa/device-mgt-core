@@ -240,7 +240,7 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.devicemgt</groupId>
-                <artifactId>io.entgra.devicemgt.apimgt.extension.rest.api</artifactId>
+                <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>

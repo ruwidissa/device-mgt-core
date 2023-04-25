@@ -16,23 +16,16 @@
  * under the License.
  */
 
-package io.entgra.devicemgt.apimgt.extension.rest.api.exceptions;
+/**
+ * Custom exception class for handling bad request exceptions.
+ */
+package io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions;
 
-public class APIApplicationServicesException extends Exception {
+public class BadRequestException extends Exception {
 
-    public APIApplicationServicesException() {
-        super();
-    }
+    private static final long serialVersionUID = -2387103750774855056L;
 
-    public APIApplicationServicesException(String message) {
-        super();
-    }
-
-    public APIApplicationServicesException(String message, Throwable cause) {
-        super();
-    }
-
-    public APIApplicationServicesException(Throwable cause) {
-        super();
+    public BadRequestException(String errorMessage) {
+        super(errorMessage);
     }
 }

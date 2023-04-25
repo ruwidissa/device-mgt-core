@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.entgra.devicemgt.apimgt.extension.rest.api.dto;
+package io.entgra.device.mgt.core.apimgt.extension.rest.api.dto;
 
 /**
  * This holds the consumer application information that return from the register application endpoint

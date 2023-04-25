@@ -16,18 +16,18 @@
  * under the License.
  */
 
-package io.entgra.devicemgt.apimgt.extension.rest.api;
+package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
-import io.entgra.devicemgt.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.devicemgt.apimgt.extension.rest.api.dto.AccessTokenInfo;
-import io.entgra.devicemgt.apimgt.extension.rest.api.exceptions.APIApplicationServicesException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 
 public interface APIApplicationServices {
 
-    APIApplicationKey createAndRetrieveApplicationCredentials() throws APIApplicationServicesException;
+    APIApplicationKey createAndRetrieveApplicationCredentials() throws APIServicesException;
 
-    AccessTokenInfo generateAccessTokenFromRegisteredApplication(String clientId, String clientSecret) throws APIApplicationServicesException;
+    AccessTokenInfo generateAccessTokenFromRegisteredApplication(String clientId, String clientSecret) throws APIServicesException;
 
-    AccessTokenInfo generateAccessTokenFromRefreshToken(String refreshToken, String clientId, String clientSecret) throws APIApplicationServicesException;
+    AccessTokenInfo generateAccessTokenFromRefreshToken(String refreshToken, String clientId, String clientSecret) throws APIServicesException;
 
 }

@@ -16,17 +16,22 @@
  * under the License.
  */
 
-package io.entgra.devicemgt.apimgt.extension.rest.api.internal;
+package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 
-import io.entgra.devicemgt.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 public class PublisherRESTAPIDataHolder {
 
-    private static final PublisherRESTAPIDataHolder thisInstance = new PublisherRESTAPIDataHolder();
-
     private APIApplicationServices apiApplicationServices;
+    private APIManagerConfigurationService apiManagerConfigurationService;
 
-    public static PublisherRESTAPIDataHolder getInstance() {
+    private static PublisherRESTAPIDataHolder thisInstance = new PublisherRESTAPIDataHolder();
+
+    private PublisherRESTAPIDataHolder() {
+    }
+
+    static PublisherRESTAPIDataHolder getInstance() {
         return thisInstance;
     }
 
@@ -36,6 +41,17 @@ public class PublisherRESTAPIDataHolder {
 
     public void setApiApplicationServices(APIApplicationServices apiApplicationServices) {
         this.apiApplicationServices = apiApplicationServices;
+    }
+
+    public void setAPIManagerConfiguration(APIManagerConfigurationService apiManagerConfigurationService) {
+        this.apiManagerConfigurationService = apiManagerConfigurationService;
+    }
+
+    public APIManagerConfigurationService getAPIManagerConfigurationService() {
+        if (apiManagerConfigurationService == null) {
+            throw new IllegalStateException("API Manager Configuration service is not initialized properly");
+        }
+        return apiManagerConfigurationService;
     }
 
 }

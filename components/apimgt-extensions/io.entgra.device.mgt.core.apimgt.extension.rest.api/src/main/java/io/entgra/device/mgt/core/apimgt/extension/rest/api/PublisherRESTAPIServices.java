@@ -16,14 +16,14 @@
  * under the License.
  */
 
-package io.entgra.devicemgt.apimgt.extension.rest.api;
+package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
-import io.entgra.devicemgt.apimgt.extension.rest.api.constants.Constants;
-import io.entgra.devicemgt.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.devicemgt.apimgt.extension.rest.api.dto.AccessTokenInfo;
-import io.entgra.devicemgt.apimgt.extension.rest.api.exceptions.APIApplicationServicesException;
-import io.entgra.devicemgt.apimgt.extension.rest.api.exceptions.BadRequestException;
-import io.entgra.devicemgt.apimgt.extension.rest.api.util.ScopeUtils;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.ScopeUtils;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -39,26 +39,31 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 
 import java.io.IOException;
 
-import static io.entgra.devicemgt.apimgt.extension.rest.api.APIApplicationServicesImpl.getOkHttpClient;
+import static io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl.getOkHttpClient;
 
 public class PublisherRESTAPIServices {
     private static final Log log = LogFactory.getLog(PublisherRESTAPIServices.class);
     private static final OkHttpClient client = getOkHttpClient();
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    public JSONObject getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
-            throws APIApplicationServicesException, BadRequestException {
+    private static final String host = System.getProperty(Constants.IOT_CORE_HOST);
+    private static final String port = System.getProperty(Constants.IOT_CORE_HTTPS_PORT);
 
-        String getScopesUrl = "https://localhost:9443/api/am/publisher/v2/scopes?limit=1000";
+    public JSONObject getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+            throws APIServicesException, BadRequestException {
+
+
+        String getAllScopesUrl = "https://" + "://" + host + ":" + port + Constants.GET_ALL_SCOPES;
         Request request = new Request.Builder()
-                .url(getScopesUrl)
-                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessTokenInfo.getAccess_token())
+                .url(getAllScopesUrl)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
                 .get()
                 .build();
 
         try {
             Response response = client.newCall(request).execute();
-            if (response.code() == HttpStatus.SC_OK) {
+            if (HttpStatus.SC_OK == response.code()) {
                 JSONObject jsonObject = new JSONObject(response.body().string());
                 return jsonObject;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
@@ -68,22 +73,24 @@ public class PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return getScopes(apiApplicationKey, refreshedAccessToken);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                log.info(response);
-                throw new BadRequestException(response.toString());
+                String msg = "Bad Request, Invalid request";
+                log.error(msg);
+                throw new BadRequestException(msg);
             } else {
                 return null;
             }
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
-            throw new APIApplicationServicesException(msg);
+            log.error(msg, e);
+            throw new APIServicesException(e);
         }
     }
 
     public boolean isSharedScopeNameExists(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String key)
-            throws APIApplicationServicesException, BadRequestException {
+            throws APIServicesException, BadRequestException {
 
         String keyValue = new String(Base64.encodeBase64((key).getBytes())).replace("=", "");
-        String getScopeUrl = "https://localhost:9443/api/am/publisher/v2/scopes/" + keyValue;
+        String getScopeUrl = "https://" + "://" + host + ":" + port + Constants.GET_SCOPE + keyValue;
 
         Request request = new Request.Builder()
                 .url(getScopeUrl)
@@ -101,21 +108,23 @@ public class PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return isSharedScopeNameExists(apiApplicationKey, refreshedAccessToken, key);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                log.info(response);
-                throw new BadRequestException(response.toString());
+                String msg = "Bad Request, Invalid request";
+                log.error(msg);
+                throw new BadRequestException(msg);
             } else {
                 return false;
             }
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
-            throw new APIApplicationServicesException(msg);
+            log.error(msg, e);
+            throw new APIServicesException(e);
         }
     }
 
     public boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
-            throws APIApplicationServicesException, BadRequestException {
+            throws APIServicesException, BadRequestException {
 
-        String updateScopeUrl = "https://localhost:9443/api/am/publisher/v2/scopes/" + scope.getId();
+        String updateScopeUrl = "https://" + "://" + host + ":" + port + Constants.GET_SCOPE + scope.getId();
 
         ScopeUtils scopeUtil = new ScopeUtils();
         scopeUtil.setKey(scope.getKey());
@@ -142,14 +151,16 @@ public class PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return updateSharedScope(apiApplicationKey, refreshedAccessToken, scope);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                log.info(response);
-                throw new BadRequestException(response.toString());
+                String msg = "Bad Request, Invalid scope object";
+                log.error(msg);
+                throw new BadRequestException(msg);
             } else {
                 return false;
             }
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
-            throw new APIApplicationServicesException(msg);
+            log.error(msg, e);
+            throw new APIServicesException(e);
         }
     }
 }
