@@ -31,6 +31,8 @@ import org.wso2.carbon.device.mgt.core.dao.impl.device.GenericDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.OracleDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.PostgreSQLDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.SQLServerDeviceDAOImpl;
+import org.wso2.carbon.device.mgt.core.dao.impl.enrolment.GenericEnrollmentDAOImpl;
+import org.wso2.carbon.device.mgt.core.dao.impl.enrolment.SQLServerEnrollmentDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.tracker.TrackerDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
@@ -41,7 +43,6 @@ import org.wso2.carbon.device.mgt.core.privacy.dao.impl.PrivacyComplianceDAOImpl
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -122,7 +123,20 @@ public class DeviceManagementDAOFactory {
     }
 
     public static EnrollmentDAO getEnrollmentDAO() {
-        return new EnrollmentDAOImpl();
+        if (databaseEngine != null) {
+            switch (databaseEngine) {
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerEnrollmentDAOImpl();
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_ORACLE:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MYSQL:
+                    return new GenericEnrollmentDAOImpl();
+                default:
+                    throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
+            }
+        }
+        throw new IllegalStateException("Database engine has not initialized properly.");
     }
 
     public static TrackerDAO getTrackerDAO() {
