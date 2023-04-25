@@ -64,7 +64,7 @@ public class APIPublisherUtil {
     }
 
     public static String getWsServerBaseUrl() {
-        return getServerBaseUrl().replace("https","wss");
+        return getServerBaseUrl().replace("https", "wss");
     }
 
     public static String getApiEndpointUrl(String context) {
@@ -104,7 +104,32 @@ public class APIPublisherUtil {
         }
         apiConfig.setVersion(version);
 
+        String apiDocumentationName = apiDef.getApiDocumentationName();
+        if (apiDocumentationName == null || apiDocumentationName.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("'API Documentation not set in @SwaggerDefinition Annotation'");
+            }
+        } else {
+            apiConfig.setApiDocumentationName(apiDef.getApiDocumentationName());
+        }
 
+        String apiDocumentationSummary = apiDef.getApiDocumentationSummary();
+        if (apiDocumentationSummary == null || apiDocumentationSummary.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("'API Documentation summary not set in @SwaggerDefinition Annotation'");
+            }
+        } else {
+            apiConfig.setApiDocumentationSummary(apiDef.getApiDocumentationSummary());
+        }
+
+        String apiDocumentationSourceFile = apiDef.getApiDocumentationSourceFile();
+        if (apiDocumentationSourceFile == null || apiDocumentationSourceFile.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("'API Documentation source file not set in @SwaggerDefinition Annotation'");
+            }
+        } else {
+            apiConfig.setApiDocumentationSourceFile(apiDef.getApiDocumentationSourceFile());
+        }
         String context = apiDef.getContext();
         if (context == null || context.isEmpty()) {
             if (log.isDebugEnabled()) {
@@ -302,20 +327,20 @@ public class APIPublisherUtil {
     public static void setResourceAuthTypes(ServletContext servletContext, APIConfig apiConfig) {
         List<String> resourcesList = null;
         String nonSecuredResources = servletContext.getInitParameter(NON_SECURED_RESOURCES);
-        if(null != nonSecuredResources){
+        if (null != nonSecuredResources) {
             resourcesList = Arrays.asList(nonSecuredResources.split(","));
         }
         Set<ApiUriTemplate> templates = apiConfig.getUriTemplates();
-        if(null != resourcesList) {
+        if (null != resourcesList) {
             for (ApiUriTemplate template : templates) {
                 String fullPaath = "";
                 if (!template.getUriTemplate().equals(AnnotationProcessor.WILD_CARD)) {
                     fullPaath = apiConfig.getContext() + template.getUriTemplate();
                 }
-                else{
+                else {
                     fullPaath = apiConfig.getContext();
                 }
-                for(String context : resourcesList) {
+                for (String context : resourcesList) {
                     if (context.trim().equals(fullPaath)) {
                         template.setAuthType(AUTH_TYPE_NON_SECURED);
                     }

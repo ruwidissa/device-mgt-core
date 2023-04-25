@@ -3244,7 +3244,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             AtomicReference<ApplicationReleaseDTO> applicationReleaseDTO = new AtomicReference<>(
                     applicationDTO.getApplicationReleaseDTOs().get(0));
             validateAppReleaseUpdating(customAppReleaseWrapper, applicationDTO, applicationArtifact,
-                    ApplicationType.ENTERPRISE.toString());
+                    ApplicationType.CUSTOM.toString());
             applicationReleaseDTO.get().setPrice(customAppReleaseWrapper.getPrice());
             applicationReleaseDTO.get()
                     .setIsSharedWithAllTenants(applicationReleaseDTO.get().getIsSharedWithAllTenants());
