@@ -60,19 +60,20 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             throws APIServicesException {
 
         String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);
-        String owner = config.getFirstProperty(Constants.SERVER_USER);
+        String serverUser = config.getFirstProperty(Constants.SERVER_USER);
+        String serverPassword = config.getFirstProperty(Constants.SERVER_PASSWORD);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
         jsonObject.put("clientName", Constants.CLIENT_NAME);
         jsonObject.put("grantType", Constants.GRANT_TYPE);
-        jsonObject.put("owner", owner);
+        jsonObject.put("owner", serverUser);
         jsonObject.put("saasApp", true);
 
         RequestBody requestBody = RequestBody.Companion.create(jsonObject.toString(), JSON);
         Request request = new Request.Builder()
                 .url(applicationEndpoint)
-                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Credentials.basic("admin", "admin"))
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Credentials.basic(serverUser, serverPassword))
                 .post(requestBody)
                 .build();
         try {

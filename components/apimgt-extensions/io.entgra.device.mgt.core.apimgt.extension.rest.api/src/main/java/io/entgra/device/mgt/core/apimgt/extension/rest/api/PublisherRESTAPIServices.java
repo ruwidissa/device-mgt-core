@@ -45,15 +45,13 @@ public class PublisherRESTAPIServices {
     private static final Log log = LogFactory.getLog(PublisherRESTAPIServices.class);
     private static final OkHttpClient client = getOkHttpClient();
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-
     private static final String host = System.getProperty(Constants.IOT_CORE_HOST);
     private static final String port = System.getProperty(Constants.IOT_CORE_HTTPS_PORT);
 
     public JSONObject getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException {
 
-
-        String getAllScopesUrl = "https://" + "://" + host + ":" + port + Constants.GET_ALL_SCOPES;
+        String getAllScopesUrl = "https://" + host + ":" + port + Constants.GET_ALL_SCOPES;
         Request request = new Request.Builder()
                 .url(getAllScopesUrl)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -90,16 +88,17 @@ public class PublisherRESTAPIServices {
             throws APIServicesException, BadRequestException {
 
         String keyValue = new String(Base64.encodeBase64((key).getBytes())).replace("=", "");
-        String getScopeUrl = "https://" + "://" + host + ":" + port + Constants.GET_SCOPE + keyValue;
+        String getScopeUrl = "https://" + host + ":" + port + Constants.GET_SCOPE + keyValue;
 
         Request request = new Request.Builder()
                 .url(getScopeUrl)
-                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessTokenInfo.getAccess_token())
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
                 .head()
                 .build();
         try {
             Response response = client.newCall(request).execute();
-            if (response.code() == HttpStatus.SC_OK) {
+            if (HttpStatus.SC_OK == response.code()) {
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -124,7 +123,7 @@ public class PublisherRESTAPIServices {
     public boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
             throws APIServicesException, BadRequestException {
 
-        String updateScopeUrl = "https://" + "://" + host + ":" + port + Constants.GET_SCOPE + scope.getId();
+        String updateScopeUrl = "https://" + host + ":" + port + Constants.GET_SCOPE + scope.getId();
 
         ScopeUtils scopeUtil = new ScopeUtils();
         scopeUtil.setKey(scope.getKey());
@@ -136,13 +135,14 @@ public class PublisherRESTAPIServices {
         RequestBody requestBody = RequestBody.create(JSON, scopeString);
         Request request = new Request.Builder()
                 .url(updateScopeUrl)
-                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, "Bearer " + accessTokenInfo.getAccess_token())
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
                 .put(requestBody)
                 .build();
 
         try {
             Response response = client.newCall(request).execute();
-            if (response.code() == HttpStatus.SC_OK) {
+            if (HttpStatus.SC_OK == response.code()) {
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
