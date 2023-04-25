@@ -25,7 +25,6 @@ import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
 import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.EventManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GeofenceDAO;
 import org.wso2.carbon.device.mgt.core.dto.event.config.GeoFenceGroupMap;
@@ -45,8 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class GeofenceDAOImpl implements GeofenceDAO {
-    private static final Log log = LogFactory.getLog(GeofenceDAOImpl.class);
+public abstract class AbstractGeofenceDAOImpl implements GeofenceDAO {
+    private static final Log log = LogFactory.getLog(AbstractGeofenceDAOImpl.class);
     @Override
     public GeofenceData saveGeofence(GeofenceData geofenceData) throws DeviceManagementDAOException {
         try {

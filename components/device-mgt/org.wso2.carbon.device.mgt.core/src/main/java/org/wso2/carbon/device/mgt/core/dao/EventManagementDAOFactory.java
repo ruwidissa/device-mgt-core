@@ -29,6 +29,8 @@ import org.wso2.carbon.device.mgt.core.config.datasource.JNDILookupDefinition;
 import org.wso2.carbon.device.mgt.core.dao.impl.*;
 import org.wso2.carbon.device.mgt.core.dao.impl.event.GenericEventConfigDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.event.H2EventConfigDAOImpl;
+import org.wso2.carbon.device.mgt.core.dao.impl.geofence.GenericGeofenceDAOImpl;
+import org.wso2.carbon.device.mgt.core.dao.impl.geofence.SQLServerGeofenceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 
 import javax.sql.DataSource;
@@ -45,7 +47,20 @@ public class EventManagementDAOFactory {
 
 
     public static GeofenceDAO getGeofenceDAO() {
-        return new GeofenceDAOImpl();
+        if (databaseEngine != null) {
+            switch (databaseEngine) {
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerGeofenceDAOImpl();
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_ORACLE:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MYSQL:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2:
+                    return new GenericGeofenceDAOImpl();
+                default:
+                    throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
+            }
+        }
+        throw new IllegalStateException("Database engine has not initialized properly.");
     }
 
     public static EventConfigDAO getEventConfigDAO() {
