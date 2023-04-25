@@ -53,6 +53,11 @@ public final class Constants {
     public static final String PASSWORD_GRANT_TYPE_SCOPES = "scopes";
     public static final String ACCESS_TOKEN_GRANT_TYPE_PARAM_NAME = "access_token";
     public static final String GRANT_TYPE_PARAM_NAME = "grant_type";
+    public static final String HTTPS_PROTOCOL = "https";
+    public static final String HTTP_PROTOCOL = "http";
+    public static final String SCHEME_SEPARATOR = "://";
+    public static final String COLON = ":";
+    public static final String QUERY_KEY_VALUE_SEPARATOR = "=";
     public static final String IOT_CORE_HOST = "iot.core.host";
     public static final String IOT_CORE_HTTPS_PORT = "iot.core.https.port";
     public static final String GET_ALL_SCOPES = "/api/am/publisher/v2/scopes?limit=1000";

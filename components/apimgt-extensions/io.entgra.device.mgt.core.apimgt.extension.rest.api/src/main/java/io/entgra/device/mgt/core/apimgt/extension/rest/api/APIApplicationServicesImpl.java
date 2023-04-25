@@ -179,6 +179,7 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             return sc.getSocketFactory();
         } catch (KeyManagementException | NoSuchAlgorithmException e) {
+            log.error("Error while creating the SSL socket factory due to " + e.getMessage(), e);
             return null;
         }
 

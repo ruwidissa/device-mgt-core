@@ -50,7 +50,8 @@ public class PublisherRESTAPIServices {
     public JSONObject getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException {
 
-        String getAllScopesUrl = "https://" + host + ":" + port + Constants.GET_ALL_SCOPES;
+        String getAllScopesUrl = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host + Constants.COLON
+                + port + Constants.GET_ALL_SCOPES;
         Request request = new Request.Builder()
                 .url(getAllScopesUrl)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -87,8 +88,10 @@ public class PublisherRESTAPIServices {
     public boolean isSharedScopeNameExists(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String key)
             throws APIServicesException, BadRequestException {
 
-        String keyValue = new String(Base64.encodeBase64((key).getBytes())).replace("=", "");
-        String getScopeUrl = "https://" + host + ":" + port + Constants.GET_SCOPE + keyValue;
+        String keyValue = new String(Base64.encodeBase64((key).getBytes())).replace(Constants.QUERY_KEY_VALUE_SEPARATOR,
+                Constants.EMPTY_STRING);
+        String getScopeUrl = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host + Constants.COLON
+                + port + Constants.GET_SCOPE + keyValue;
 
         Request request = new Request.Builder()
                 .url(getScopeUrl)
@@ -124,7 +127,8 @@ public class PublisherRESTAPIServices {
     public boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
             throws APIServicesException, BadRequestException {
 
-        String updateScopeUrl = "https://" + host + ":" + port + Constants.GET_SCOPE + scope.getId();
+        String updateScopeUrl = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
+                + Constants.COLON + port + Constants.GET_SCOPE + scope.getId();
 
         ScopeUtils scopeUtil = new ScopeUtils();
         scopeUtil.setKey(scope.getKey());

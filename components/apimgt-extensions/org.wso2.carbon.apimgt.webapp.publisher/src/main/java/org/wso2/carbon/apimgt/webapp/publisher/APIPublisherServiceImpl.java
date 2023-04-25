@@ -433,8 +433,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             //Set scope id which related to the scope key
                             JSONArray scopeList = (JSONArray) scopeObject.get("list");
                             for (int i = 0; i < scopeList.length(); i++) {
-                                JSONObject scopeObj = null;
-                                scopeObj = scopeList.getJSONObject(i);
+                                JSONObject scopeObj = scopeList.getJSONObject(i);
                                 if (scopeObj.getString("name").equals(scopeMapping[2] != null ?
                                         StringUtils.trim(scopeMapping[2]) : StringUtils.EMPTY)) {
                                     scope.setId(scopeObj.getString("id"));
