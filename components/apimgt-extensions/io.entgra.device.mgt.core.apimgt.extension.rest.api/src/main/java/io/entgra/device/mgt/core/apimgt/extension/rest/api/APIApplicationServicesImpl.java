@@ -19,8 +19,8 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
 import org.json.JSONObject;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
@@ -31,20 +31,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.RequestBody;
 import okhttp3.Credentials;
-import okhttp3.ConnectionPool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.TimeUnit;
 
 public class APIApplicationServicesImpl implements APIApplicationServices {
 

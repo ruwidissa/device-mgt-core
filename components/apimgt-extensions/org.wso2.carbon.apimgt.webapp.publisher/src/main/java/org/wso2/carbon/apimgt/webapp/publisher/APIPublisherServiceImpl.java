@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.webapp.publisher;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
@@ -384,7 +385,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             for (String tenantDomain : tenants) {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServices();
+                PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
                 JSONObject scopeObject = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
 
                 try {
