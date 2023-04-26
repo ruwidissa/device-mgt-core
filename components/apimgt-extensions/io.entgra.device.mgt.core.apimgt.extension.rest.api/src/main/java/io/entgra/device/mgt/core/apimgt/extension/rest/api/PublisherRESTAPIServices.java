@@ -23,6 +23,8 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.ScopeUtils;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -38,17 +40,15 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 
 import java.io.IOException;
 
-import static io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl.getOkHttpClient;
-
 public class PublisherRESTAPIServices {
     private static final Log log = LogFactory.getLog(PublisherRESTAPIServices.class);
-    private static final OkHttpClient client = getOkHttpClient();
+    private static final OkHttpClient client = new OkHttpClient(HttpsTrustManagerUtils.getSSLClient().newBuilder());
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final String host = System.getProperty(Constants.IOT_CORE_HOST);
     private static final String port = System.getProperty(Constants.IOT_CORE_HTTPS_PORT);
 
     public JSONObject getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
-            throws APIServicesException, BadRequestException {
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllScopesUrl = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host + Constants.COLON
                 + port + Constants.GET_ALL_SCOPES;
@@ -76,7 +76,8 @@ public class PublisherRESTAPIServices {
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
-                return null;
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
@@ -86,7 +87,7 @@ public class PublisherRESTAPIServices {
     }
 
     public boolean isSharedScopeNameExists(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String key)
-            throws APIServicesException, BadRequestException {
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String keyValue = new String(Base64.encodeBase64((key).getBytes())).replace(Constants.QUERY_KEY_VALUE_SEPARATOR,
                 Constants.EMPTY_STRING);
@@ -115,7 +116,8 @@ public class PublisherRESTAPIServices {
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
-                return false;
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
@@ -125,7 +127,7 @@ public class PublisherRESTAPIServices {
     }
 
     public boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
-            throws APIServicesException, BadRequestException {
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String updateScopeUrl = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
                 + Constants.COLON + port + Constants.GET_SCOPE + scope.getId();
@@ -161,7 +163,8 @@ public class PublisherRESTAPIServices {
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
-                return false;
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";

@@ -19,6 +19,7 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
 import org.json.JSONObject;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
@@ -48,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 public class APIApplicationServicesImpl implements APIApplicationServices {
 
     private static final Log log = LogFactory.getLog(APIApplicationServicesImpl.class);
-    private static final OkHttpClient client = getOkHttpClient();
+    private static final OkHttpClient client = new OkHttpClient(HttpsTrustManagerUtils.getSSLClient().newBuilder());
     private static final Gson gson = new Gson();
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     String msg = null;
@@ -132,56 +133,5 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             log.error(msg, e);
             throw new APIServicesException(e);
         }
-    }
-
-    protected static OkHttpClient getOkHttpClient() {
-        X509TrustManager trustAllCerts = new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return new java.security.cert.X509Certificate[0];
-            }
-
-            public void checkClientTrusted(
-                    java.security.cert.X509Certificate[] certs, String authType) {
-            }
-
-            public void checkServerTrusted(
-                    java.security.cert.X509Certificate[] certs, String authType) {
-            }
-        };
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(300, TimeUnit.SECONDS)
-                .writeTimeout(300, TimeUnit.SECONDS)
-                .readTimeout(300, TimeUnit.SECONDS)
-                .connectionPool(new ConnectionPool(500, 500, TimeUnit.SECONDS))
-                .sslSocketFactory(getSimpleTrustedSSLSocketFactory(), trustAllCerts)
-                .hostnameVerifier((hostname, sslSession) -> true).build();
-        return okHttpClient;
-    }
-
-    private static SSLSocketFactory getSimpleTrustedSSLSocketFactory() {
-        try {
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
-
-                        public void checkClientTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-
-                        public void checkServerTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {
-                        }
-                    }
-            };
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            return sc.getSocketFactory();
-        } catch (KeyManagementException | NoSuchAlgorithmException e) {
-            log.error("Error while creating the SSL socket factory due to " + e.getMessage(), e);
-            return null;
-        }
-
     }
 }

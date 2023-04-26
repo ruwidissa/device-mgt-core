@@ -25,6 +25,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -468,7 +469,11 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             String errorMsg = "Error while calling Publisher REST APIs";
             log.error(errorMsg, e);
             throw new APIManagerPublisherException(e);
-        } finally {
+        } catch (UnexpectedResponseException e) {
+            String errorMsg = "Unexpected response from the server";
+            log.error(errorMsg, e);
+            throw new APIManagerPublisherException(e);
+        }finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
