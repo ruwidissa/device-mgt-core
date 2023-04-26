@@ -19,8 +19,8 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import org.json.JSONObject;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
