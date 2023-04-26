@@ -53,7 +53,6 @@ import java.util.*;
 public class AnnotationProcessor {
 
     private static final Log log = LogFactory.getLog(AnnotationProcessor.class);
-
     private static final String AUTH_TYPE = "Application & Application User";
     private static final String STRING_ARR = "string_arr";
     private static final String STRING = "string";
@@ -61,7 +60,6 @@ public class AnnotationProcessor {
     private static final String PACKAGE_ORG_CODEHAUS = "org.codehaus";
     private static final String PACKAGE_ORG_SPRINGFRAMEWORK = "org.springframework";
     public static final String WILD_CARD = "/*";
-
     private static final String SWAGGER_ANNOTATIONS_INFO = "info";
     private static final String SWAGGER_ANNOTATIONS_TAGS = "tags";
     private static final String SWAGGER_ANNOTATIONS_EXTENSIONS = "extensions";
@@ -73,6 +71,9 @@ public class AnnotationProcessor {
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_ROLES = "roles";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_VERSION = "version";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_CONTEXT = "context";
+    private static final String SWAGGER_ANNOTATIONS_PROPERTIES_API_DOCUMENTATION_NAME = "apiDocumentationName";
+    private static final String SWAGGER_ANNOTATIONS_PROPERTIES_API_DOCUMENTATION_SUMMARY = "apiDocumentationSummary";
+    private static final String SWAGGER_ANNOTATIONS_PROPERTIES_API_DOCUMENTATION_SOURCE_FILE = "apiDocumentationSourceFile";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_ENDPOINT_TYPE = "endpointType";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_IN_SEQUENCE_NAME = "inSequenceName";
     private static final String SWAGGER_ANNOTATIONS_PROPERTIES_IN_SEQUENCE_CONFIG = "inSequenceConfig";
@@ -112,26 +113,25 @@ public class AnnotationProcessor {
             pathClazz = (Class<Path>) classLoader.loadClass(Path.class.getName());
             consumesClass = (Class<Consumes>) classLoader.loadClass(Consumes.class.getName());
             producesClass = (Class<Produces>) classLoader.loadClass(Produces.class.getName());
-            apiClazz= (Class<SwaggerDefinition>)classLoader.loadClass((SwaggerDefinition.class.getName()));
-            infoClass = (Class<io.swagger.annotations.Info>)classLoader
+            apiClazz = (Class<SwaggerDefinition>) classLoader.loadClass((SwaggerDefinition.class.getName()));
+            infoClass = (Class<io.swagger.annotations.Info>) classLoader
                     .loadClass((io.swagger.annotations.Info.class.getName()));
-            tagClass = (Class<io.swagger.annotations.Tag>)classLoader
+            tagClass = (Class<io.swagger.annotations.Tag>) classLoader
                     .loadClass((io.swagger.annotations.Tag.class.getName()));
-            extensionClass = (Class<io.swagger.annotations.Extension>)classLoader
+            extensionClass = (Class<io.swagger.annotations.Extension>) classLoader
                     .loadClass((io.swagger.annotations.Extension.class.getName()));
-            extensionPropertyClass = (Class<io.swagger.annotations.ExtensionProperty>)classLoader
+            extensionPropertyClass = (Class<io.swagger.annotations.ExtensionProperty>) classLoader
                     .loadClass(io.swagger.annotations.ExtensionProperty.class.getName());
             scopeClass = (Class<org.wso2.carbon.apimgt.annotations.api.Scope>) classLoader
                     .loadClass(org.wso2.carbon.apimgt.annotations.api.Scope.class.getName());
             scopesClass = (Class<org.wso2.carbon.apimgt.annotations.api.Scopes>) classLoader
                     .loadClass(org.wso2.carbon.apimgt.annotations.api.Scopes.class.getName());
-            apiOperation = (Class<ApiOperation>)classLoader
+            apiOperation = (Class<ApiOperation>) classLoader
                     .loadClass((ApiOperation.class.getName()));
         } catch (ClassNotFoundException e) {
             log.error("An error has occurred while loading classes ", e);
         }
     }
-
     public Set<String> scanStandardContext(String className) throws IOException {
         ExtendedAnnotationDB db = new ExtendedAnnotationDB();
         db.addIgnoredPackages(PACKAGE_ORG_APACHE);
@@ -166,7 +166,7 @@ public class AnnotationProcessor {
                                             if (Scopes != null) {
                                                 apiScopes = processAPIScopes(Scopes);
                                             }
-                                            if(apiResourceConfig != null){
+                                            if (apiResourceConfig != null) {
                                                 String rootContext = servletContext.getContextPath();
                                                 pathClazzMethods = pathClazz.getMethods();
                                                 Annotation rootContectAnno = clazz.getAnnotation(pathClazz);
@@ -199,21 +199,21 @@ public class AnnotationProcessor {
                                             " This API will not be published.";
                                     log.error(msg, e1);
                                 } catch (RuntimeException e) {
-                                    log.error("Unexpected error has been occurred while publishing "+ className
-                                            +"hence, this API will not be published.");
+                                    log.error("Unexpected error has been occurred while publishing " + className
+                                            + "hence, this API will not be published.");
                                     throw new RuntimeException(e);
                                 }
                                 return apiResourceConfig;
                             }
                         });
-                if(apiResourceConfiguration !=null)
+                if (apiResourceConfiguration != null)
                     apiResourceConfigs.add(apiResourceConfiguration);
             }
         }
         return apiResourceConfigs;
     }
 
-    private Map<String,ApiScope> processAPIScopes(Annotation annotation) throws Throwable {
+    private Map<String, ApiScope> processAPIScopes(Annotation annotation) throws Throwable {
         Map<String, ApiScope> scopes = new HashMap<>();
 
         InvocationHandler methodHandler = Proxy.getInvocationHandler(annotation);
@@ -225,7 +225,7 @@ public class AnnotationProcessor {
         StringBuilder aggregatedPermissions;
         String roles[];
         StringBuilder aggregatedRoles;
-        for(int i=0; i<annotatedScopes.length; i++){
+        for (int i = 0; i < annotatedScopes.length; i++) {
             aggregatedPermissions = new StringBuilder();
             aggregatedRoles = new StringBuilder();
             methodHandler = Proxy.getInvocationHandler(annotatedScopes[i]);
@@ -236,16 +236,16 @@ public class AnnotationProcessor {
                     .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_DESCRIPTION), annotatedScopes[i], STRING));
             scope.setKey(invokeMethod(scopeClass
                     .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_KEY), annotatedScopes[i], STRING));
-            permissions = (String[])methodHandler.invoke(annotatedScopes[i], scopeClass
-                    .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_PERMISSIONS, null),null);
+            permissions = (String[]) methodHandler.invoke(annotatedScopes[i], scopeClass
+                    .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_PERMISSIONS, null), null);
             for (String permission : permissions) {
                 aggregatedPermissions.append(PERMISSION_PREFIX);
                 aggregatedPermissions.append(permission);
                 aggregatedPermissions.append(" ");
             }
             scope.setPermissions(aggregatedPermissions.toString().trim());
-            roles = (String[])methodHandler.invoke(annotatedScopes[i], scopeClass
-                    .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_ROLES, null),null);
+            roles = (String[]) methodHandler.invoke(annotatedScopes[i], scopeClass
+                    .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_ROLES, null), null);
             for (String role : roles) {
                 aggregatedRoles.append(role);
                 aggregatedRoles.append(",");
@@ -369,30 +369,30 @@ public class AnnotationProcessor {
      * Iterate API annotation and build API Configuration
      *
      * @param annotation reading @SwaggerDefinition annotation
-     * @return APIResourceConfiguration which compose with an API information which has its name, context,version,and tags
+     * @return APIResourceConfiguration which compose with an API information which has its name, context, version, api-documentation, and tags
      * @throws Throwable
      */
     private APIResourceConfiguration processAPIAnnotation(Annotation annotation) throws Throwable {
         InvocationHandler methodHandler = Proxy.getInvocationHandler(annotation);
         Annotation info = (Annotation) methodHandler.invoke(annotation, apiClazz
-                .getMethod(SWAGGER_ANNOTATIONS_INFO,null),null);
+                .getMethod(SWAGGER_ANNOTATIONS_INFO, null), null);
         Annotation[] tags = (Annotation[]) methodHandler.invoke(annotation, apiClazz
-                .getMethod(SWAGGER_ANNOTATIONS_TAGS,null),null);
+                .getMethod(SWAGGER_ANNOTATIONS_TAGS, null), null);
         String[] tagNames = new String[tags.length];
-        for(int i=0; i<tags.length; i++){
+        for (int i = 0; i < tags.length; i++) {
             methodHandler = Proxy.getInvocationHandler(tags[i]);
-            tagNames[i]=(String)methodHandler.invoke(tags[i], tagClass
-                    .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_NAME, null),null);
+            tagNames[i] = (String) methodHandler.invoke(tags[i], tagClass
+                    .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_NAME, null), null);
         }
         methodHandler = Proxy.getInvocationHandler(info);
-        String version = (String)methodHandler.invoke(info, infoClass
-                .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_VERSION,null),null);
-        if("".equals(version))return null;
-        Annotation[] apiInfo = (Annotation[])methodHandler.invoke(info, infoClass
-                .getMethod(SWAGGER_ANNOTATIONS_EXTENSIONS,null),null);
+        String version = (String) methodHandler.invoke(info, infoClass
+                .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_VERSION, null), null);
+        if ("".equals(version)) return null;
+        Annotation[] apiInfo = (Annotation[]) methodHandler.invoke(info, infoClass
+                .getMethod(SWAGGER_ANNOTATIONS_EXTENSIONS, null), null);
         methodHandler = Proxy.getInvocationHandler(apiInfo[0]);
-        Annotation[] properties =  (Annotation[])methodHandler.invoke(apiInfo[0], extensionClass
-                        .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES,null), null);
+        Annotation[] properties = (Annotation[]) methodHandler.invoke(apiInfo[0], extensionClass
+                .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES, null), null);
         APIResourceConfiguration apiResourceConfig = new APIResourceConfiguration();
         for (Annotation property : properties) {
             methodHandler = Proxy.getInvocationHandler(property);
@@ -400,7 +400,7 @@ public class AnnotationProcessor {
                             .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_NAME, null),
                     null);
             String value = (String) methodHandler.invoke(property, extensionPropertyClass
-                            .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_VALUE, null),null);
+                    .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_VALUE, null), null);
             if ("".equals(key)) return null;
             switch (key) {
                 case SWAGGER_ANNOTATIONS_PROPERTIES_NAME:
@@ -410,6 +410,18 @@ public class AnnotationProcessor {
                 case SWAGGER_ANNOTATIONS_PROPERTIES_CONTEXT:
                     if ("".equals(value)) return null;
                     apiResourceConfig.setContext(value);
+                    break;
+                case SWAGGER_ANNOTATIONS_PROPERTIES_API_DOCUMENTATION_NAME:
+                    if ("".equals(value)) return null;
+                    apiResourceConfig.setApiDocumentationName(value);
+                    break;
+                case SWAGGER_ANNOTATIONS_PROPERTIES_API_DOCUMENTATION_SUMMARY:
+                    if ("".equals(value)) return null;
+                    apiResourceConfig.setApiDocumentationSummary(value);
+                    break;
+                case SWAGGER_ANNOTATIONS_PROPERTIES_API_DOCUMENTATION_SOURCE_FILE:
+                    if ("".equals(value)) return null;
+                    apiResourceConfig.setApiDocumentationSourceFile(value);
                     break;
                 case SWAGGER_ANNOTATIONS_PROPERTIES_ENDPOINT_TYPE:
                     if ("".equals(value))
@@ -485,19 +497,15 @@ public class AnnotationProcessor {
      * @param servletContext
      * @return null if cannot determin /WEB-INF/classes
      */
-    private static URL findWebInfClassesPath(ServletContext servletContext)
-    {
+    private static URL findWebInfClassesPath(ServletContext servletContext) {
         String path = servletContext.getRealPath("/WEB-INF/classes");
         if (path == null) return null;
         File fp = new File(path);
         if (fp.exists() == false) return null;
-        try
-        {
+        try {
             URI uri = fp.toURI();
             return uri.toURL();
-        }
-        catch (MalformedURLException e)
-        {
+        } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
