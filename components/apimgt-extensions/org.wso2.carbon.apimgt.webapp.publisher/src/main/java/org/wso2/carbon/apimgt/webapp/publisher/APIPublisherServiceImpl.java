@@ -18,9 +18,22 @@
  */
 package org.wso2.carbon.apimgt.webapp.publisher;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -48,7 +61,6 @@ import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -66,18 +78,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Date;
 
 /**
  * This class represents the concrete implementation of the APIPublisherService that corresponds to providing all
  * API publishing related operations.
  */
 public class APIPublisherServiceImpl implements APIPublisherService {
+    public static final APIManagerFactory API_MANAGER_FACTORY = APIManagerFactory.getInstance();
     private static final String UNLIMITED_TIER = "Unlimited";
     private static final String WS_UNLIMITED_TIER = "AsyncUnlimited";
     private static final String API_PUBLISH_ENVIRONMENT = "Default";
     private static final String CREATED_STATUS = "CREATED";
     private static final String PUBLISH_ACTION = "Publish";
-    public static final APIManagerFactory API_MANAGER_FACTORY = APIManagerFactory.getInstance();
     private static final Log log = LogFactory.getLog(APIPublisherServiceImpl.class);
 
     @Override
@@ -293,7 +306,45 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 }
                             }
                         }
-                    } catch (FaultGatewaysException | APIManagementException e) {
+                        if (apiConfig.getApiDocumentationSourceFile() != null) {
+                            API api = getAPI(apiConfig, true);
+
+                            String fileName =
+                                    CarbonUtils.getCarbonHome() + File.separator + "repository" +
+                                            File.separator + "resources" + File.separator + "api-docs" + File.separator +
+                                            apiConfig.getApiDocumentationSourceFile();
+
+                            BufferedReader br = new BufferedReader(new FileReader(fileName));
+                            StringBuilder stringBuilder = new StringBuilder();
+                            String line = null;
+                            String ls = System.lineSeparator();
+                            while ((line = br.readLine()) != null) {
+                                stringBuilder.append(line);
+                                stringBuilder.append(ls);
+                            }
+                            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+                            br.close();
+                            String docContent = stringBuilder.toString();
+
+                            Documentation apiDocumentation = new Documentation(DocumentationType.HOWTO, apiConfig.getApiDocumentationName());
+                            apiDocumentation.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
+                            apiDocumentation.setSourceType(Documentation.DocumentSourceType.MARKDOWN);
+                            apiDocumentation.setCreatedDate(new Date());
+                            apiDocumentation.setLastUpdated(new Date());
+                            apiDocumentation.setSummary(apiConfig.getApiDocumentationSummary());
+                            apiDocumentation.setOtherTypeName(null);
+
+                            try {
+                                //Including below code lines inside the try block because  'getDocumentation' method returns an APIManagementException exception when it doesn't have any existing doc
+                                Documentation existingDoc = apiProvider.getDocumentation(api.getId(), DocumentationType.HOWTO, apiConfig.getApiDocumentationName());
+                                apiProvider.removeDocumentation(api.getId(), existingDoc.getId(), null);
+                            } catch (APIManagementException e) {
+                                log.info("There is no any existing api documentation.");
+                            }
+                            apiProvider.addDocumentation(api.getId(), apiDocumentation);
+                            apiProvider.addDocumentationContent(api, apiConfig.getApiDocumentationName(), docContent);
+                        }
+                    } catch (FaultGatewaysException | APIManagementException | IOException e) {
                         String msg = "Error occurred while publishing api";
                         log.error(msg, e);
                         throw new APIManagerPublisherException(e);
@@ -316,18 +367,31 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         WebappPublisherConfig config = WebappPublisherConfig.getInstance();
         List<String> tenants = new ArrayList<>(Collections.singletonList(APIConstants.SUPER_TENANT_DOMAIN));
         tenants.addAll(config.getTenants().getTenant());
+
+        APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+        APIApplicationKey apiApplicationKey;
+        AccessTokenInfo accessTokenInfo;
+        try {
+            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+            accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
+                    apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+        } catch (APIServicesException e) {
+            String errorMsg = "Error while generating application";
+            log.error(errorMsg, e);
+            throw new APIManagerPublisherException(e);
+        }
+
         try {
             for (String tenantDomain : tenants) {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                APIProvider apiProvider = API_MANAGER_FACTORY.getAPIProvider(MultitenantUtils.getTenantAwareUsername(
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration()
-                                .getAdminUserName()));
+                PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
+                JSONObject scopeObject = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
 
                 try {
                     String fileName =
                             CarbonUtils.getCarbonConfigDirPath() + File.separator + "etc"
-                            + File.separator + tenantDomain + ".csv";
+                                    + File.separator + tenantDomain + ".csv";
                     if (Files.exists(Paths.get(fileName))) {
                         BufferedReader br = new BufferedReader(new FileReader(fileName));
                         int lineNumber = 0;
@@ -368,8 +432,18 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             }
                             scope.setRoles(roleString);
 
-                            if (apiProvider.isSharedScopeNameExists(scope.getKey(), tenantDomain)) {
-                                apiProvider.updateSharedScope(scope, tenantDomain);
+                            //Set scope id which related to the scope key
+                            JSONArray scopeList = (JSONArray) scopeObject.get("list");
+                            for (int i = 0; i < scopeList.length(); i++) {
+                                JSONObject scopeObj = scopeList.getJSONObject(i);
+                                if (scopeObj.getString("name").equals(scopeMapping[2] != null ?
+                                        StringUtils.trim(scopeMapping[2]) : StringUtils.EMPTY)) {
+                                    scope.setId(scopeObj.getString("id"));
+                                }
+                            }
+
+                            if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getKey())) {
+                                publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);
                             } else {
                                 // todo: come to this level means, that scope is removed from API, but haven't removed from the scope-role-permission-mappings list
                                 if (log.isDebugEnabled()) {
@@ -380,18 +454,27 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     }
                 } catch (IOException | DirectoryIteratorException ex) {
                     log.error("failed to read scopes from file.", ex);
+                } catch (APIServicesException | BadRequestException e) {
+                    String errorMsg = "Error while calling APIs";
+                    log.error(errorMsg, e);
+                    throw new APIManagerPublisherException(e);
                 }
 
             }
-        } catch (UserStoreException e) {
-            String msg = "Error occurred while reading tenant admin username";
-            log.error(msg, e);
+        }
+        catch (APIServicesException e) {
+            String errorMsg = "Error while processing Publisher REST API response";
+            log.error(errorMsg, e);
             throw new APIManagerPublisherException(e);
-        } catch (APIManagementException e) {
-            String msg = "Error occurred while loading api provider";
-            log.error(msg, e);
+        } catch (BadRequestException e) {
+            String errorMsg = "Error while calling Publisher REST APIs";
+            log.error(errorMsg, e);
             throw new APIManagerPublisherException(e);
-        } finally {
+        } catch (UnexpectedResponseException e) {
+            String errorMsg = "Unexpected response from the server";
+            log.error(errorMsg, e);
+            throw new APIManagerPublisherException(e);
+        }finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
