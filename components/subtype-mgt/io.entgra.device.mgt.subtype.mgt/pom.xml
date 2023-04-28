@@ -82,7 +82,8 @@
                             com.google.gson.*,
                             com.fasterxml.jackson.core.*,
                             com.fasterxml.jackson.databind.*,
-                            com.fasterxml.jackson.annotation.*
+                            com.fasterxml.jackson.annotation.*,
+                            com.google.common.cache.*,
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.subtype.mgt.internal,
@@ -339,6 +340,8 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>

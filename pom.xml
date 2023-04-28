@@ -2170,6 +2170,7 @@
         <!-- Subtype Management -->
         <json.version>20220924</json.version>
         <fasterxml.jackson.version>2.4.5</fasterxml.jackson.version>
+        <guava.version>27.0.1-jre</guava.version>
 
         <!-- BouncyCastle -->
         <bcprov.wso2.version>1.60.0.wso2v1</bcprov.wso2.version>
