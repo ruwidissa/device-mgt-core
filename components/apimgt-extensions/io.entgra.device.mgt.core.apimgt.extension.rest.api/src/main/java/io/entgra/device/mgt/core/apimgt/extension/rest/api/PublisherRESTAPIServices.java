@@ -24,7 +24,9 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIService
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.*;
+
+import java.util.List;
 
 public interface PublisherRESTAPIServices {
 
@@ -34,6 +36,53 @@ public interface PublisherRESTAPIServices {
     boolean isSharedScopeNameExists(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String key)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
+    boolean addNewSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
+        throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
     boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    API getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    JSONObject getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+        throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    API createAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
+    throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
+        throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    boolean saveAsyncApiDefinition(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid, String asyncApiDefinition)
+        throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    JSONObject getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    boolean addApiSpecificMediationPolicy (APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                           String uuid, Mediation mediation)
+        throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    boolean updateApiSpecificMediationPolicyContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                                    String uuid, Mediation mediation)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    boolean changeLifeCycleStatus(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                  String uuid, String action)
+        throws  APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    JSONObject getAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
+        throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    JSONObject getAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    APIRevision addAPIRevision (APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                APIRevision apiRevision)
+        throws  APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    boolean deployAPIRevision (APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
+                               String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeploymentList)
+        throws APIServicesException, BadRequestException, UnexpectedResponseException;
 }
