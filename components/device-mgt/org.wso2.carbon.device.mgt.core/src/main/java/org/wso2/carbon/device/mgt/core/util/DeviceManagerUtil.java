@@ -697,6 +697,14 @@ public final class DeviceManagerUtil {
     }
 
     /**
+     * Enable Billing caching according to the configurations provided by cdm-config.xml
+     */
+    public static void removeBillingCache() {
+        CacheManager manager = getCacheManager();
+        manager.removeCache(DeviceManagementConstants.BILLING_CACHE);
+    }
+
+    /**
      * Enable Geofence caching according to the configurations proviced by cdm-config.xml
      */
     public static void initializeGeofenceCache() {

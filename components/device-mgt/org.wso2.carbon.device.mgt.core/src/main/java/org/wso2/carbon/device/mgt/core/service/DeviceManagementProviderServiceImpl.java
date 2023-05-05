@@ -48,7 +48,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HTTP;
-import org.opensaml.xmlsec.signature.P;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -98,6 +97,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoQuery;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
@@ -107,6 +107,7 @@ import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitati
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
@@ -183,7 +184,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
@@ -1044,8 +1044,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         double totalCost = 0.0;
 
         try {
-            MetadataManagementDAOFactory.openConnection();
-            Metadata metadata = metadataDAO.getMetadata(MultitenantConstants.SUPER_TENANT_ID, DeviceManagementConstants.META_KEY);
+            MetadataManagementService meta = DeviceManagementDataHolder
+                    .getInstance().getMetadataManagementService();
+            Metadata metadata = meta.retrieveMetadata(DeviceManagementConstants.META_KEY);
 
             Gson g = new Gson();
             Collection<Cost> costData = null;
@@ -1061,19 +1062,19 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             device.setDeviceStatusInfo(getDeviceStatusHistory(device, null, endDate, true));
                             List<DeviceStatus> deviceStatus = device.getDeviceStatusInfo();
                             if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
-                                if (!deviceStatus.isEmpty() && deviceStatus.get(0).getStatus().equals("REMOVED")) {
+                                if (!deviceStatus.isEmpty() && String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")) {
                                     if (deviceStatus.get(0).getUpdateTime().getTime() >= startDate.getTime()) {
                                         dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - startDate.getTime();
                                     }
-                                } else if (!deviceStatus.isEmpty() && !deviceStatus.get(0).getStatus().equals("REMOVED")) {
+                                } else if (!deviceStatus.isEmpty() && !String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")) {
                                     dateDiff = endDate.getTime() - startDate.getTime();
                                 }
                             } else {
-                                if (!deviceStatus.isEmpty() && deviceStatus.get(0).getStatus().equals("REMOVED")) {
+                                if (!deviceStatus.isEmpty() && String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")) {
                                     if (deviceStatus.get(0).getUpdateTime().getTime() >= device.getEnrolmentInfo().getDateOfEnrolment()) {
                                         dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
                                     }
-                                } else if (!deviceStatus.isEmpty() && !deviceStatus.get(0).getStatus().equals("REMOVED")) {
+                                } else if (!deviceStatus.isEmpty() && !String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")) {
                                     dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
                                 }
                             }
@@ -1095,16 +1096,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred calculating cost of devices";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
-        } catch (SQLException e) {
-            String msg = "Error when retrieving data";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (MetadataManagementDAOException e) {
+        } catch (MetadataManagementException e) {
             String msg = "Error when retrieving metadata of billing feature";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
-        } finally {
-            MetadataManagementDAOFactory.closeConnection();
         }
 
         if (!deviceStatusNotAvailable.isEmpty()) {

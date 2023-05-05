@@ -239,8 +239,8 @@ public final class DeviceManagementDAOUtil {
         Device device = new Device();
         device.setId(rs.getInt("DEVICE_ID"));
         device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
-        device.setName(rs.getString("DESCRIPTION"));
-        device.setDescription(rs.getString("NAME"));
+        device.setName(rs.getString("NAME"));
+        device.setDescription(rs.getString("DESCRIPTION"));
         device.setEnrolmentInfo(loadEnrolmentBilling(rs));
         return device;
     }
