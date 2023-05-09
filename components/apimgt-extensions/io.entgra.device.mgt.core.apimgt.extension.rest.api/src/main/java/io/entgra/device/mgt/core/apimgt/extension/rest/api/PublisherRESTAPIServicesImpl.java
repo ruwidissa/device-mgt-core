@@ -49,13 +49,13 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     private static final Gson gson = new Gson();
     private static final String host = System.getProperty(Constants.IOT_CORE_HOST);
     private static final String port = System.getProperty(Constants.IOT_CORE_HTTPS_PORT);
+    private static final String endPointPrefix = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host + Constants.COLON + port;
 
     @Override
     public JSONObject getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getAllScopesUrl = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host + Constants.COLON
-                + port + Constants.GET_ALL_SCOPES;
+        String getAllScopesUrl = endPointPrefix + Constants.GET_ALL_SCOPES;
         Request request = new Request.Builder()
                 .url(getAllScopesUrl)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -96,8 +96,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         String keyValue = new String(Base64.encodeBase64((key).getBytes())).replace(Constants.QUERY_KEY_VALUE_SEPARATOR,
                 Constants.EMPTY_STRING);
-        String getScopeUrl = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host + Constants.COLON
-                + port + Constants.SCOPE_API_ENDPOINT + keyValue;
+        String getScopeUrl = endPointPrefix + Constants.SCOPE_API_ENDPOINT + keyValue;
 
         Request request = new Request.Builder()
                 .url(getScopeUrl)
@@ -139,8 +138,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     public boolean addNewSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewSharedScopeEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.SCOPE_API_ENDPOINT + scope.getId();
+        String addNewSharedScopeEndPoint = endPointPrefix + Constants.SCOPE_API_ENDPOINT + scope.getId();
 
         ScopeUtils scopeUtil = new ScopeUtils();
         scopeUtil.setKey(scope.getKey());
@@ -187,8 +185,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     public boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String updateScopeUrl = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.SCOPE_API_ENDPOINT + scope.getId();
+        String updateScopeUrl = endPointPrefix + Constants.SCOPE_API_ENDPOINT + scope.getId();
 
         ScopeUtils scopeUtil = new ScopeUtils();
         scopeUtil.setKey(scope.getKey());
@@ -235,8 +232,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     public API getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getAllApis = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host + Constants.COLON
-                + port + Constants.API_ENDPOINT + apiIdentifier.getUUID();
+        String getAllApis = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID();
         Request request = new Request.Builder()
                 .url(getAllApis)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -274,8 +270,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     public JSONObject getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getAllApis = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host + Constants.COLON
-                + port + Constants.GET_ALL_APIS;
+        String getAllApis = endPointPrefix + Constants.GET_ALL_APIS;
         Request request = new Request.Builder()
                 .url(getAllApis)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -314,12 +309,11 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     public API createAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String updateScopeUrl = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT;
+        String creatAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT;
 
         RequestBody requestBody = RequestBody.create(JSON, String.valueOf(api));
         Request request = new Request.Builder()
-                .url(updateScopeUrl)
+                .url(creatAPIEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -356,12 +350,11 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     public boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String updateScopeUrl = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + api.getUuid();
+        String updateAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getUuid();
 
         RequestBody requestBody = RequestBody.create(JSON, String.valueOf(api));
         Request request = new Request.Builder()
-                .url(updateScopeUrl)
+                .url(updateAPIEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -399,9 +392,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                           String uuid, String asyncApiDefinition)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + uuid;
-
+        String addNewScope = endPointPrefix + Constants.API_ENDPOINT + uuid;
 
         RequestBody requestBody = RequestBody.create(JSON, asyncApiDefinition);
         Request request = new Request.Builder()
@@ -413,7 +404,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_OK == response.code()) {
+            if (HttpStatus.SC_OK == response.code()) { //Check the response
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -439,14 +430,14 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+    public JSONObject getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                                         APIIdentifier apiIdentifier)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/mediation-policies";
+        String getAPIMediationEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/mediation-policies";
 
         Request request = new Request.Builder()
-                .url(addNewScope)
+                .url(getAPIMediationEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .get()
@@ -484,14 +475,12 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                                  String uuid, Mediation mediation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/mediation-policies/" + mediation.getUuid()
+        String addAPIMediation = endPointPrefix + Constants.API_ENDPOINT + uuid + "/mediation-policies/" + mediation.getUuid()
                 + "/content";
-
 
         RequestBody requestBody = RequestBody.create(JSON, String.valueOf(mediation));
         Request request = new Request.Builder()
-                .url(addNewScope)
+                .url(addAPIMediation)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -499,7 +488,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_OK == response.code()) {
+            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -530,13 +519,12 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                                            String uuid, Mediation mediation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String updateApiSpecificMediationPolicyContentAPI = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/mediation-policies/" + mediation.getUuid()
+        String updateApiMediationEndPOint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/mediation-policies/" + mediation.getUuid()
                 + "/content";
 
         RequestBody requestBody = RequestBody.create(JSON, String.valueOf(mediation));
         Request request = new Request.Builder()
-                .url(updateApiSpecificMediationPolicyContentAPI)
+                .url(updateApiMediationEndPOint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .put(requestBody)
@@ -544,7 +532,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_CREATED == response.code()) {
+            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -574,14 +562,11 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                          String uuid, String action)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + "change-lifecycle?apiId=" + uuid
-                + "&action=" + action;
-
+        String changeStatusEndPoint = endPointPrefix + Constants.API_ENDPOINT + "change-lifecycle?apiId=" + uuid + "&action=" + action;
 
         RequestBody requestBody = RequestBody.create(JSON, Constants.EMPTY_STRING);
         Request request = new Request.Builder()
-                .url(addNewScope)
+                .url(changeStatusEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -589,7 +574,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_OK == response.code()) {
+            if (HttpStatus.SC_OK == response.code()) { // Check response status
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -618,8 +603,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                       String deploymentStatus)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getAPIRevisionsEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/revisions" + deploymentStatus;
+        String getAPIRevisionsEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions" + deploymentStatus;
 
         Request request = new Request.Builder()
                 .url(getAPIRevisionsEndPoint)
@@ -659,8 +643,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     public JSONObject getAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getLatestRevisionUUIDEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/deployments";
+        String getLatestRevisionUUIDEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/deployments";
 
         Request request = new Request.Builder()
                 .url(getLatestRevisionUUIDEndPoint)
@@ -697,12 +680,10 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public APIRevision addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                      APIRevision apiRevision)
+    public APIRevision addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIRevision apiRevision)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + apiRevision.getApiUUID() + "/revisions";
+        String addNewScope = endPointPrefix + Constants.API_ENDPOINT + apiRevision.getApiUUID() + "/revisions";
 
         String apiRevisionDescription = "{\n" +
                 "   \"description\":\" " + apiRevision.getDescription() + "\",\n" +
@@ -718,7 +699,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_OK == response.code()) {
+            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
                 return gson.fromJson(response.body().string(), APIRevision.class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -747,13 +728,11 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                      String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeploymentList)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/deploy-revision?revisionId="
-                + apiRevisionId;
+        String deployAPIRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/deploy-revision?revisionId=" + apiRevisionId;
 
         RequestBody requestBody = RequestBody.create(JSON, String.valueOf(apiRevisionDeploymentList));
         Request request = new Request.Builder()
-                .url(addNewScope)
+                .url(deployAPIRevisionEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -761,7 +740,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_OK == response.code()) {
+            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -791,13 +770,12 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                                  APIRevisionDeployment apiRevisionDeployment, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String apiRevisionEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/revisions/"
+        String undeployAPIRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions/"
                 + apiRevisionDeployment.getRevisionUUID();
 
         RequestBody requestBody = RequestBody.create(JSON, String.valueOf(apiRevisionDeployment));
         Request request = new Request.Builder()
-                .url(apiRevisionEndPoint)
+                .url(undeployAPIRevisionEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -805,7 +783,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_CREATED == response.code()) {
+            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -834,9 +812,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                      APIRevision apiRevision, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String apiRevisionEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/revisions/"
-                + apiRevision.getRevisionUUID();
+        String apiRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions/" + apiRevision.getRevisionUUID();
 
         Request request = new Request.Builder()
                 .url(apiRevisionEndPoint)
@@ -847,7 +823,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_OK == response.code()) {
+            if (HttpStatus.SC_OK == response.code()) { // Check response status
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -875,8 +851,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     public JSONObject getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getDocumentationsEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents?limit=1000";
+        String getDocumentationsEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents?limit=1000";
 
         Request request = new Request.Builder()
                 .url(getDocumentationsEndPoint)
@@ -917,8 +892,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                         APIIdentifier apiIdentifier, String documentID)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getDocumentationsEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents/" + documentID;
+        String getDocumentationsEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents/" + documentID;
 
         Request request = new Request.Builder()
                 .url(getDocumentationsEndPoint)
@@ -958,8 +932,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                           APIIdentifier apiIdentifier, Documentation documentation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents";
+        String addNewScope = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents";
 
         String document = "{\n" +
                 "  \"name\": \" " + documentation.getName() + " \",\n" +
@@ -981,7 +954,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_CREATED == response.code()) {
+            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
                 return gson.fromJson(response.body().string(), Documentation.class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -1010,12 +983,11 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                           API api, String docId, String docContent)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + api.getUuid() + "/documents/" + docId;
+        String addDocumentationContentEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getUuid() + "/documents/" + docId;
 
         RequestBody requestBody = RequestBody.create(JSON, docContent);
         Request request = new Request.Builder()
-                .url(addNewScope)
+                .url(addDocumentationContentEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -1023,7 +995,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_OK == response.code()) {
+            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
