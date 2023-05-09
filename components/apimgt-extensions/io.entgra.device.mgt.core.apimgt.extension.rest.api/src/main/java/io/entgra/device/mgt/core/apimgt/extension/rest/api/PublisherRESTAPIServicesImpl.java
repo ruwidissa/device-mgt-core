@@ -139,7 +139,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     public boolean addNewSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
+        String addNewSharedScopeEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
                 + Constants.COLON + port + Constants.SCOPE_API_ENDPOINT + scope.getId();
 
         ScopeUtils scopeUtil = new ScopeUtils();
@@ -151,7 +151,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         RequestBody requestBody = RequestBody.create(JSON, scopeString);
         Request request = new Request.Builder()
-                .url(addNewScope)
+                .url(addNewSharedScopeEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -167,7 +167,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return updateSharedScope(apiApplicationKey, refreshedAccessToken, scope);
+                return addNewSharedScope(apiApplicationKey, refreshedAccessToken, scope);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid scope object";
                 log.error(msg);
@@ -552,7 +552,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return addApiSpecificMediationPolicy(apiApplicationKey, refreshedAccessToken, uuid, mediation);
+                return updateApiSpecificMediationPolicyContent(apiApplicationKey, refreshedAccessToken, uuid, mediation);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid scope object";
                 log.error(msg);
@@ -614,14 +614,15 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
-        throws APIServicesException, BadRequestException, UnexpectedResponseException {
+    public JSONObject getAPIRevisions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
+                                      String deploymentStatus)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getLatestRevisionUUIDEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
-                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/revisions?query=deployed:true";
+        String getAPIRevisionsEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
+                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/revisions" + deploymentStatus;
 
         Request request = new Request.Builder()
-                .url(getLatestRevisionUUIDEndPoint)
+                .url(getAPIRevisionsEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .get()
@@ -638,7 +639,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return getAPIRevision(apiApplicationKey, refreshedAccessToken, uuid);
+                return getAPIRevisions(apiApplicationKey, refreshedAccessToken, uuid, deploymentStatus);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid scope object";
                 log.error(msg);
@@ -784,4 +785,266 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
             throw new APIServicesException(e);
         }
     }
+
+    @Override
+    public boolean undeployAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                                 APIRevisionDeployment apiRevisionDeployment, String uuid)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        String apiRevisionEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
+                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/revisions/"
+                + apiRevisionDeployment.getRevisionUUID();
+
+        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(apiRevisionDeployment));
+        Request request = new Request.Builder()
+                .url(apiRevisionEndPoint)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
+                .post(requestBody)
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_CREATED == response.code()) {
+                return true;
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                //TODO: max attempt count
+                return undeployAPIRevisionDeployment(apiApplicationKey, refreshedAccessToken, apiRevisionDeployment, uuid);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid scope object";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(e);
+        }
+    }
+
+    @Override
+    public boolean deleteAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                     APIRevision apiRevision, String uuid)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        String apiRevisionEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
+                + Constants.COLON + port + Constants.API_ENDPOINT + uuid + "/revisions/"
+                + apiRevision.getRevisionUUID();
+
+        Request request = new Request.Builder()
+                .url(apiRevisionEndPoint)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
+                .delete()
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                return true;
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                //TODO: max attempt count
+                return deleteAPIRevision(apiApplicationKey, refreshedAccessToken, apiRevision, uuid);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid scope object";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(e);
+        }
+    }
+
+    @Override
+    public JSONObject getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        String getDocumentationsEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
+                + Constants.COLON + port + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents?limit=1000";
+
+        Request request = new Request.Builder()
+                .url(getDocumentationsEndPoint)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
+                .get()
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                JSONObject jsonObject = new JSONObject(response.body().string());
+                return jsonObject;
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                //TODO: max attempt count
+                return getDocumentations(apiApplicationKey, refreshedAccessToken, apiIdentifier);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid scope object";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(e);
+        }
+    }
+
+    @Override
+    public boolean deleteDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                        APIIdentifier apiIdentifier, String documentID)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        String getDocumentationsEndPoint = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
+                + Constants.COLON + port + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents/" + documentID;
+
+        Request request = new Request.Builder()
+                .url(getDocumentationsEndPoint)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
+                .delete()
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                return true;
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                //TODO: max attempt count
+                return deleteDocumentations(apiApplicationKey, refreshedAccessToken, apiIdentifier, documentID);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid scope object";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(e);
+        }
+    }
+
+    @Override
+    public Documentation addDocumentation(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                          APIIdentifier apiIdentifier, Documentation documentation)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
+                + Constants.COLON + port + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents";
+
+        String document = "{\n" +
+                "  \"name\": \" " + documentation.getName() + " \",\n" +
+                "  \"type\": \" " + documentation.getType() + " \",\n" +
+                "  \"summary\": \" " + documentation.getSummary() + " \",\n" +
+                "  \"sourceType\": \" " + documentation.getSourceType() + " \",\n" +
+                "  \"inlineContent\": \" " + documentation.getSourceType() + " \",\n" +
+                "  \"visibility\": \" " + documentation.getVisibility() + " \",\n" +
+                "  \"createdBy\": \" admin \"\n" +
+                "}";
+
+        RequestBody requestBody = RequestBody.create(JSON, document);
+        Request request = new Request.Builder()
+                .url(addNewScope)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
+                .post(requestBody)
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_CREATED == response.code()) {
+                return gson.fromJson(response.body().string(), Documentation.class);
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                //TODO: max attempt count
+                return addDocumentation(apiApplicationKey, refreshedAccessToken, apiIdentifier, documentation);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid scope object";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(e);
+        }
+    }
+
+    @Override
+    public boolean addDocumentationContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                          API api, String docId, String docContent)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        String addNewScope = Constants.HTTPS_PROTOCOL + Constants.SCHEME_SEPARATOR + host
+                + Constants.COLON + port + Constants.API_ENDPOINT + api.getUuid() + "/documents/" + docId;
+
+        RequestBody requestBody = RequestBody.create(JSON, docContent);
+        Request request = new Request.Builder()
+                .url(addNewScope)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
+                .post(requestBody)
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                return true;
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                //TODO: max attempt count
+                return addDocumentationContent(apiApplicationKey, refreshedAccessToken, api,docId ,docContent);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid scope object";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(e);
+        }
+    }
+
 }

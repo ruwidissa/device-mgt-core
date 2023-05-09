@@ -242,10 +242,9 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 //                                Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain); //get all scopes
                                 Set<ApiScope> scopesToMoveAsSharedScopes = new HashSet<>();
                                 for (ApiScope apiScope : apiConfig.getScopes()) {
-                                    // if the scope is not available as shared scope and it is assigned to an API as a local scope
+                                    // if the scope is not available as shared scope, and it is assigned to an API as a local scope
                                     // need remove the local scope and add as a shared scope
                                     if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, apiScope.getKey())) {
-//                                        if (apiProvider.isScopeKeyAssignedLocally(apiIdentifier, apiScope.getKey(), tenantId)) {
                                         if (apiProvider.isScopeKeyAssignedLocally(apiIdentifier, apiScope.getKey(), tenantId)) {
                                             // collect scope to move as shared scopes
                                             scopesToMoveAsSharedScopes.add(apiScope);
@@ -315,8 +314,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     for (Mediation m : mediationList) {
                                         if (apiConfig.getInSequenceName().equals(m.getName())) {
                                             m.setConfig(apiConfig.getInSequenceConfig());
-//                                            apiProvider
-//                                                    .updateApiSpecificMediationPolicyContent(existingAPI.getUuid(), m,
+//                                            apiProvider.updateApiSpecificMediationPolicyContent(existingAPI.getUuid(), m,
 //                                                            tenantDomain);
                                             publisherRESTAPIServices.
                                                     updateApiSpecificMediationPolicyContent(apiApplicationKey,
@@ -334,36 +332,59 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 }
 
                                 // Assumption: Assume the latest revision is the published one
-                                String latestRevisionUUID = apiProvider.getLatestRevisionUUID(existingAPI.getUuid());
-//                                List<APIRevisionDeployment> latestRevisionDeploymentList =
+//                                String latestRevisionUUID = apiProvider.getLatestRevisionUUID(existingAPI.getUuid());
+//                                List<APIRevisionDeployment> revisionDeploymentList =
 //                                        apiProvider.getAPIRevisionDeploymentList(latestRevisionUUID);
-                                List<APIRevisionDeployment> latestRevisionDeploymentList = (List<APIRevisionDeployment>)
+
+                                // This will retrieve the deployed revision list
+                                List<APIRevisionDeployment> revisionDeploymentList = (List<APIRevisionDeployment>)
                                         publisherRESTAPIServices.getAPIRevisionDeployment(apiApplicationKey, accessTokenInfo, existingAPI.getUuid());
+                                // This will retrieve the un deployed revision list
+                                List<APIRevision> undeployedRevisionList = (List<APIRevision>)
+                                        publisherRESTAPIServices.getAPIRevisions(apiApplicationKey, accessTokenInfo,
+                                                existingAPI.getUuid(), "?query=deployed:false").get("list");
 
 //                                List<APIRevision> apiRevisionList = apiProvider.getAPIRevisions(existingAPI.getUuid());
-                                List<APIRevision> apiRevisionList = (List<APIRevision>) publisherRESTAPIServices.getAPIRevision(apiApplicationKey,
-                                        accessTokenInfo, existingAPI.getUuid()).get("list");
+//                                List<APIRevision> apiRevisionList = (List<APIRevision>) publisherRESTAPIServices.getAPIRevision(apiApplicationKey,
+//                                        accessTokenInfo, existingAPI.getUuid()).get("list");
+                                int apiRevisionCount = (int) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
+                                        accessTokenInfo, existingAPI.getUuid(), "").get("count");
 
-                                if (apiRevisionList.size() >= 5) {
-                                    String earliestRevisionUUID = apiProvider.getEarliestRevisionUUID(existingAPI.getUuid());
-//                                    List<APIRevisionDeployment> earliestRevisionDeploymentList =
+                                if (apiRevisionCount >= 5) {
+//                                    String earliestRevisionUUID = apiProvider.getEarliestRevisionUUID(existingAPI.getUuid());
+//                                    List<APIRevisionDeployment> undeployedRevisionList =
 //                                            apiProvider.getAPIRevisionDeploymentList(earliestRevisionUUID);
-                                    List<APIRevisionDeployment> earliestRevisionDeploymentList = (List<APIRevisionDeployment>)
-                                            publisherRESTAPIServices.getAPIRevisionDeployment(apiApplicationKey, accessTokenInfo, existingAPI.getUuid());
-                                    apiProvider.undeployAPIRevisionDeployment(existingAPI.getUuid(), earliestRevisionUUID, earliestRevisionDeploymentList);
-                                    apiProvider.deleteAPIRevision(existingAPI.getUuid(), earliestRevisionUUID, tenantDomain);
+//                                    List<APIRevisionDeployment> undeployedRevisionList = (List<APIRevisionDeployment>)
+//                                            publisherRESTAPIServices.getAPIRevisionDeployment(apiApplicationKey, accessTokenInfo, existingAPI.getUuid());
+
+                                    APIRevisionDeployment latestRevisionDeployment = revisionDeploymentList.get(0);
+                                    APIRevision earliestUndeployRevision = undeployedRevisionList.get(0);
+
+//                                    apiProvider.undeployAPIRevisionDeployment(existingAPI.getUuid(), earliestRevisionUUID, undeployedRevisionList);
+                                    publisherRESTAPIServices.undeployAPIRevisionDeployment(apiApplicationKey,
+                                            accessTokenInfo, latestRevisionDeployment, existingAPI.getUuid());
+
+//                                    apiProvider.deleteAPIRevision(existingAPI.getUuid(), earliestRevisionUUID, tenantDomain);
+                                    publisherRESTAPIServices.deleteAPIRevision(apiApplicationKey, accessTokenInfo,
+                                            earliestUndeployRevision, existingAPI.getUuid());
                                 }
 
                                 // create new revision
                                 APIRevision apiRevision = new APIRevision();
                                 apiRevision.setApiUUID(existingAPI.getUuid());
                                 apiRevision.setDescription("Updated Revision");
-                                String apiRevisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
+//                                String apiRevisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
+                                String apiRevisionId = publisherRESTAPIServices.addAPIRevision(apiApplicationKey,
+                                        accessTokenInfo, apiRevision).getRevisionUUID();
 
-                                apiProvider.deployAPIRevision(existingAPI.getUuid(), apiRevisionId, latestRevisionDeploymentList);
+//                                apiProvider.deployAPIRevision(existingAPI.getUuid(), apiRevisionId, revisionDeploymentList);
+                                publisherRESTAPIServices.deployAPIRevision(apiApplicationKey, accessTokenInfo,
+                                        existingAPI.getUuid(), apiRevisionId, revisionDeploymentList);
 
                                 if (CREATED_STATUS.equals(existingAPI.getStatus())) {
-                                    apiProvider.changeLifeCycleStatus(tenantDomain, existingAPI.getUuid(), PUBLISH_ACTION, null);
+//                                    apiProvider.changeLifeCycleStatus(tenantDomain, existingAPI.getUuid(), PUBLISH_ACTION, null);
+                                    publisherRESTAPIServices.changeLifeCycleStatus(apiApplicationKey,accessTokenInfo,
+                                            existingAPI.getUuid(), PUBLISH_ACTION);
                                 }
                             }
                         }
@@ -395,17 +416,33 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             apiDocumentation.setSummary(apiConfig.getApiDocumentationSummary());
                             apiDocumentation.setOtherTypeName(null);
 
-                            try {
-                                //Including below code lines inside the try block because  'getDocumentation' method returns an APIManagementException exception when it doesn't have any existing doc
-                                Documentation existingDoc = apiProvider.getDocumentation(api.getId(), DocumentationType.HOWTO, apiConfig.getApiDocumentationName());
-                                apiProvider.removeDocumentation(api.getId(), existingDoc.getId(), null);
-                            } catch (APIManagementException e) {
+                            //Including below code lines inside the try block because  'getDocumentation' method returns an APIManagementException exception when it doesn't have any existing doc
+//                                Documentation existingDoc = apiProvider.getDocumentation(api.getId(), DocumentationType.HOWTO, apiConfig.getApiDocumentationName());
+                            JSONArray documentList = (JSONArray) publisherRESTAPIServices.getDocumentations(apiApplicationKey,
+                                    accessTokenInfo, api.getId()).get("list");
+
+                            if (!(documentList.length() == 0)) {
+                                for (int i = 0; i < documentList.length(); i++) {
+                                    JSONObject existingDoc = documentList.getJSONObject(i);
+                                    if (existingDoc.getString("name").equals(apiConfig.getApiDocumentationName())
+                                            && existingDoc.getString("type").equals(DocumentationType.HOWTO)) {
+                                        //apiProvider.removeDocumentation(api.getId(), existingDoc.getId(), null);
+                                        publisherRESTAPIServices.deleteDocumentations(apiApplicationKey, accessTokenInfo,
+                                                api.getId(), existingDoc.getString("documentId"));
+                                    }
+                                }
+                            } else {
                                 log.info("There is no any existing api documentation.");
                             }
-                            apiProvider.addDocumentation(api.getId(), apiDocumentation);
-                            apiProvider.addDocumentationContent(api, apiConfig.getApiDocumentationName(), docContent);
+//                            apiProvider.addDocumentation(api.getId(), apiDocumentation);
+                            Documentation createdDoc = publisherRESTAPIServices.addDocumentation(apiApplicationKey, accessTokenInfo,
+                                    api.getId(), apiDocumentation);
+
+//                            apiProvider.addDocumentationContent(api, apiConfig.getApiDocumentationName(), docContent);
+                            publisherRESTAPIServices.addDocumentationContent(apiApplicationKey, accessTokenInfo, api,
+                                    createdDoc.getId(), docContent);
                         }
-                    } catch (FaultGatewaysException | APIManagementException | IOException | APIServicesException |
+                    } catch (APIManagementException | IOException | APIServicesException |
                              BadRequestException | UnexpectedResponseException e) {
                         String msg = "Error occurred while publishing api";
                         log.error(msg, e);
