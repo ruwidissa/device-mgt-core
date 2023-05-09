@@ -36,7 +36,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
@@ -168,23 +167,19 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                         if (!apiFound) {
                             // add new scopes as shared scopes
                             for (ApiScope apiScope : apiConfig.getScopes()) {
-//                                if (!allSharedScopeKeys.contains(apiScope.getKey())) {
                                 if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, apiScope.getKey())) {
                                     Scope scope = new Scope();
                                     scope.setName(apiScope.getName());
                                     scope.setDescription(apiScope.getDescription());
                                     scope.setKey(apiScope.getKey());
                                     scope.setRoles(apiScope.getRoles());
-//                                    apiProvider.addSharedScope(scope, tenantDomain); //add scope
                                     publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
                                 }
                             }
                             API api = getAPI(apiConfig, true);
                             api.setId(apiIdentifier);
-//                            API createdAPI = apiProvider.addAPI(api); // add api
                             API createdAPI = publisherRESTAPIServices.createAPI(apiApplicationKey, accessTokenInfo , api); // add api
                             if (apiConfig.getEndpointType() != null && "WS".equals(apiConfig.getEndpointType())) {
-//                                apiProvider.saveAsyncApiDefinition(api, apiConfig.getAsyncApiDefinition()); //Update Topics of an Async API
                                 publisherRESTAPIServices.saveAsyncApiDefinition(apiApplicationKey, accessTokenInfo,
                                         api.getUuid(), apiConfig.getAsyncApiDefinition());
                             }
@@ -196,18 +191,14 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     mediation.setConfig(apiConfig.getInSequenceConfig());
                                     mediation.setType("in");
                                     mediation.setGlobal(false);
-//                                    apiProvider.addApiSpecificMediationPolicy(createdAPI.getUuid(), mediation,
-//                                            tenantDomain); //Update an API Specific Mediation Policy
                                     publisherRESTAPIServices.addApiSpecificMediationPolicy(apiApplicationKey,
                                             accessTokenInfo, createdAPI.getUuid(), mediation);
                                 }
-//                                apiProvider.changeLifeCycleStatus(tenantDomain, createdAPI.getUuid(), PUBLISH_ACTION, null); //Change API Status
                                 publisherRESTAPIServices.changeLifeCycleStatus(apiApplicationKey, accessTokenInfo, createdAPI.getUuid(), PUBLISH_ACTION);
 
                                 APIRevision apiRevision = new APIRevision();
                                 apiRevision.setApiUUID(createdAPI.getUuid());
                                 apiRevision.setDescription("Initial Revision");
-//                                String apiRevisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain); //Create API Revision
                                 String apiRevisionId = publisherRESTAPIServices.addAPIRevision(apiApplicationKey,
                                         accessTokenInfo, apiRevision).getRevisionUUID();
 
@@ -218,7 +209,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
                                 List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
                                 apiRevisionDeploymentList.add(apiRevisionDeployment);
-//                                apiProvider.deployAPIRevision(createdAPI.getUuid(), apiRevisionId, apiRevisionDeploymentList); //Deploy Revision
                                 publisherRESTAPIServices.deployAPIRevision(apiApplicationKey, accessTokenInfo,
                                         createdAPI.getUuid(), apiRevisionId, apiRevisionDeploymentList);
                             }
@@ -239,7 +229,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 // 1. add new scopes as shared scopes
                                 // 2. update the API adding scopes for the URI Templates
 
-//                                Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain); //get all scopes
                                 Set<ApiScope> scopesToMoveAsSharedScopes = new HashSet<>();
                                 for (ApiScope apiScope : apiConfig.getScopes()) {
                                     // if the scope is not available as shared scope, and it is assigned to an API as a local scope
@@ -255,7 +244,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                             scope.setDescription(apiScope.getDescription());
                                             scope.setKey(apiScope.getKey());
                                             scope.setRoles(apiScope.getRoles());
-//                                            apiProvider.addSharedScope(scope, tenantDomain); //add scope
                                             publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
 
                                         }
@@ -264,13 +252,11 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
                                 // Get existing API
                                 API existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo , apiIdentifier);
-//                                API existingAPI = apiProvider.getAPI(apiIdentifier);
 
                                 if (scopesToMoveAsSharedScopes.size() > 0) {
                                     // update API to remove local scopes
                                     API api = getAPI(apiConfig, false);
                                     api.setStatus(existingAPI.getStatus());
-//                                    apiProvider.updateAPI(api);
                                     publisherRESTAPIServices.updateApi(apiApplicationKey, accessTokenInfo, api);
 
                                     for (ApiScope apiScope : scopesToMoveAsSharedScopes) {
@@ -279,20 +265,16 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                         scope.setDescription(apiScope.getDescription());
                                         scope.setKey(apiScope.getKey());
                                         scope.setRoles(apiScope.getRoles());
-//                                        apiProvider.addSharedScope(scope, tenantDomain);
                                         publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
                                     }
                                 }
 
-//                                existingAPI = apiProvider.getAPI(apiIdentifier);
                                 existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo , apiIdentifier);;
                                 API api = getAPI(apiConfig, true);
                                 api.setStatus(existingAPI.getStatus());
-//                                apiProvider.updateAPI(api);
                                 publisherRESTAPIServices.updateApi(apiApplicationKey, accessTokenInfo, api);
 
                                 if (apiConfig.getEndpointType() != null && "WS".equals(apiConfig.getEndpointType())) {
-//                                    apiProvider.saveAsyncApiDefinition(api, apiConfig.getAsyncApiDefinition());
                                     publisherRESTAPIServices.saveAsyncApiDefinition(apiApplicationKey, accessTokenInfo,
                                             api.getUuid(), apiConfig.getAsyncApiDefinition());
                                 }
@@ -305,8 +287,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     mediation.setType("in");
                                     mediation.setGlobal(false);
 
-//                                    List<Mediation> mediationList = apiProvider
-//                                            .getAllApiSpecificMediationPolicies(apiIdentifier);
                                     List<Mediation> mediationList = (List) publisherRESTAPIServices
                                             .getAllApiSpecificMediationPolicies(apiApplicationKey, accessTokenInfo, apiIdentifier).get("list");
 
@@ -314,8 +294,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     for (Mediation m : mediationList) {
                                         if (apiConfig.getInSequenceName().equals(m.getName())) {
                                             m.setConfig(apiConfig.getInSequenceConfig());
-//                                            apiProvider.updateApiSpecificMediationPolicyContent(existingAPI.getUuid(), m,
-//                                                            tenantDomain);
                                             publisherRESTAPIServices.
                                                     updateApiSpecificMediationPolicyContent(apiApplicationKey,
                                                             accessTokenInfo, existingAPI.getUuid(), m);
@@ -324,19 +302,11 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                         }
                                     }
                                     if (!isMediationPolicyFound) {
-//                                        apiProvider.addApiSpecificMediationPolicy(existingAPI.getUuid(), mediation,
-//                                                tenantDomain);
                                         publisherRESTAPIServices.addApiSpecificMediationPolicy(apiApplicationKey,
                                                 accessTokenInfo, existingAPI.getUuid(), mediation);
                                     }
                                 }
 
-                                // Assumption: Assume the latest revision is the published one
-//                                String latestRevisionUUID = apiProvider.getLatestRevisionUUID(existingAPI.getUuid());
-//                                List<APIRevisionDeployment> revisionDeploymentList =
-//                                        apiProvider.getAPIRevisionDeploymentList(latestRevisionUUID);
-
-                                // This will retrieve the deployed revision list
                                 List<APIRevisionDeployment> revisionDeploymentList = (List<APIRevisionDeployment>)
                                         publisherRESTAPIServices.getAPIRevisionDeployment(apiApplicationKey, accessTokenInfo, existingAPI.getUuid());
                                 // This will retrieve the un deployed revision list
@@ -344,27 +314,16 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                         publisherRESTAPIServices.getAPIRevisions(apiApplicationKey, accessTokenInfo,
                                                 existingAPI.getUuid(), "?query=deployed:false").get("list");
 
-//                                List<APIRevision> apiRevisionList = apiProvider.getAPIRevisions(existingAPI.getUuid());
-//                                List<APIRevision> apiRevisionList = (List<APIRevision>) publisherRESTAPIServices.getAPIRevision(apiApplicationKey,
-//                                        accessTokenInfo, existingAPI.getUuid()).get("list");
                                 int apiRevisionCount = (int) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
                                         accessTokenInfo, existingAPI.getUuid(), "").get("count");
 
                                 if (apiRevisionCount >= 5) {
-//                                    String earliestRevisionUUID = apiProvider.getEarliestRevisionUUID(existingAPI.getUuid());
-//                                    List<APIRevisionDeployment> undeployedRevisionList =
-//                                            apiProvider.getAPIRevisionDeploymentList(earliestRevisionUUID);
-//                                    List<APIRevisionDeployment> undeployedRevisionList = (List<APIRevisionDeployment>)
-//                                            publisherRESTAPIServices.getAPIRevisionDeployment(apiApplicationKey, accessTokenInfo, existingAPI.getUuid());
-
                                     APIRevisionDeployment latestRevisionDeployment = revisionDeploymentList.get(0);
                                     APIRevision earliestUndeployRevision = undeployedRevisionList.get(0);
 
-//                                    apiProvider.undeployAPIRevisionDeployment(existingAPI.getUuid(), earliestRevisionUUID, undeployedRevisionList);
                                     publisherRESTAPIServices.undeployAPIRevisionDeployment(apiApplicationKey,
                                             accessTokenInfo, latestRevisionDeployment, existingAPI.getUuid());
 
-//                                    apiProvider.deleteAPIRevision(existingAPI.getUuid(), earliestRevisionUUID, tenantDomain);
                                     publisherRESTAPIServices.deleteAPIRevision(apiApplicationKey, accessTokenInfo,
                                             earliestUndeployRevision, existingAPI.getUuid());
                                 }
@@ -373,16 +332,13 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 APIRevision apiRevision = new APIRevision();
                                 apiRevision.setApiUUID(existingAPI.getUuid());
                                 apiRevision.setDescription("Updated Revision");
-//                                String apiRevisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
                                 String apiRevisionId = publisherRESTAPIServices.addAPIRevision(apiApplicationKey,
                                         accessTokenInfo, apiRevision).getRevisionUUID();
 
-//                                apiProvider.deployAPIRevision(existingAPI.getUuid(), apiRevisionId, revisionDeploymentList);
                                 publisherRESTAPIServices.deployAPIRevision(apiApplicationKey, accessTokenInfo,
                                         existingAPI.getUuid(), apiRevisionId, revisionDeploymentList);
 
                                 if (CREATED_STATUS.equals(existingAPI.getStatus())) {
-//                                    apiProvider.changeLifeCycleStatus(tenantDomain, existingAPI.getUuid(), PUBLISH_ACTION, null);
                                     publisherRESTAPIServices.changeLifeCycleStatus(apiApplicationKey,accessTokenInfo,
                                             existingAPI.getUuid(), PUBLISH_ACTION);
                                 }
@@ -416,8 +372,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             apiDocumentation.setSummary(apiConfig.getApiDocumentationSummary());
                             apiDocumentation.setOtherTypeName(null);
 
-                            //Including below code lines inside the try block because  'getDocumentation' method returns an APIManagementException exception when it doesn't have any existing doc
-//                                Documentation existingDoc = apiProvider.getDocumentation(api.getId(), DocumentationType.HOWTO, apiConfig.getApiDocumentationName());
                             JSONArray documentList = (JSONArray) publisherRESTAPIServices.getDocumentations(apiApplicationKey,
                                     accessTokenInfo, api.getId()).get("list");
 
@@ -426,7 +380,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     JSONObject existingDoc = documentList.getJSONObject(i);
                                     if (existingDoc.getString("name").equals(apiConfig.getApiDocumentationName())
                                             && existingDoc.getString("type").equals(DocumentationType.HOWTO)) {
-                                        //apiProvider.removeDocumentation(api.getId(), existingDoc.getId(), null);
                                         publisherRESTAPIServices.deleteDocumentations(apiApplicationKey, accessTokenInfo,
                                                 api.getId(), existingDoc.getString("documentId"));
                                     }
@@ -434,11 +387,9 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             } else {
                                 log.info("There is no any existing api documentation.");
                             }
-//                            apiProvider.addDocumentation(api.getId(), apiDocumentation);
                             Documentation createdDoc = publisherRESTAPIServices.addDocumentation(apiApplicationKey, accessTokenInfo,
                                     api.getId(), apiDocumentation);
 
-//                            apiProvider.addDocumentationContent(api, apiConfig.getApiDocumentationName(), docContent);
                             publisherRESTAPIServices.addDocumentationContent(apiApplicationKey, accessTokenInfo, api,
                                     createdDoc.getId(), docContent);
                         }
