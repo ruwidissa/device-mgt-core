@@ -1,18 +1,17 @@
 /*
- * Copyright (C) 2018 - 2023 Entgra (Pvt) Ltd, Inc - All Rights Reserved.
+ * Copyright (c) 2023, Entgra Pvt Ltd. (http://www.wso2.org) All Rights Reserved.
  *
- * Unauthorised copying/redistribution of this file, via any medium is strictly prohibited.
- *
- * Licensed under the Entgra Commercial License, Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Entgra Pvt Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://entgra.io/licenses/entgra-commercial/1.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -63,7 +62,7 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
                 int index = 1;
                 stmt.setObject(index++, new Gson().toJson(operationTemplate.getOperationDefinition()));
                 stmt.setString(index++, operationTemplate.getCode());
-                stmt.setInt(index++, operationTemplate.getSubTypeId());
+                stmt.setString(index++, operationTemplate.getSubTypeId());
                 stmt.setString(index++, operationTemplate.getDeviceType());
                 stmt.setTimestamp(index++, new Timestamp(System.currentTimeMillis()));
                 stmt.setTimestamp(index++, null);
@@ -98,7 +97,7 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, operationTemplate.getOperationDefinition());
                 stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-                stmt.setInt(3, operationTemplate.getSubTypeId());
+                stmt.setString(3, operationTemplate.getSubTypeId());
                 stmt.setString(4, operationTemplate.getDeviceType());
                 stmt.setString(5, operationTemplate.getCode());
                 stmt.executeUpdate();
@@ -123,13 +122,13 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
      * @throws OperationTemplateManagementDAOException
      */
     @Override
-    public OperationTemplate getOperationTemplate(int subTypeId, String deviceType, String operationCode)
+    public OperationTemplate getOperationTemplate(String subTypeId, String deviceType, String operationCode)
             throws OperationTemplateManagementDAOException {
         try {
             String sql = "SELECT * FROM SUB_OPERATION_TEMPLATE WHERE SUB_TYPE_ID = ? AND DEVICE_TYPE = ? AND OPERATION_CODE = ?";
             Connection conn = ConnectionManagerUtils.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, subTypeId);
+                stmt.setString(1, subTypeId);
                 stmt.setString(2, deviceType);
                 stmt.setString(3, operationCode);
 
@@ -158,13 +157,13 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
      * @throws OperationTemplateManagementDAOException
      */
     @Override
-    public void deleteOperationTemplate(int subTypeId, String deviceType, String operationCode)
+    public void deleteOperationTemplate(String subTypeId, String deviceType, String operationCode)
             throws OperationTemplateManagementDAOException {
         String sql = "DELETE FROM SUB_OPERATION_TEMPLATE WHERE SUB_TYPE_ID = ? AND DEVICE_TYPE = ? AND OPERATION_CODE = ?";
         try {
             Connection conn = ConnectionManagerUtils.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, subTypeId);
+                stmt.setString(1, subTypeId);
                 stmt.setString(2, deviceType);
                 stmt.setString(3, operationCode);
                 stmt.executeUpdate();

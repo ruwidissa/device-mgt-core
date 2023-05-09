@@ -1,18 +1,17 @@
 /*
- * Copyright (C) 2018 - 2023 Entgra (Pvt) Ltd, Inc - All Rights Reserved.
+ * Copyright (c) 2023, Entgra Pvt Ltd. (http://www.wso2.org) All Rights Reserved.
  *
- * Unauthorised copying/redistribution of this file, via any medium is strictly prohibited.
- *
- * Licensed under the Entgra Commercial License, Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Entgra Pvt Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     https://entgra.io/licenses/entgra-commercial/1.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -132,7 +131,7 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
      * @throws OperationTemplateMgtPluginException
      */
     @Override
-    public OperationTemplate getOperationTemplate(int subTypeId, String deviceType, String operationCode)
+    public OperationTemplate getOperationTemplate(String subTypeId, String deviceType, String operationCode)
             throws OperationTemplateMgtPluginException {
         try {
 
@@ -158,7 +157,7 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
      * @throws OperationTemplateMgtPluginException
      */
     @Override
-    public void deleteOperationTemplate(int subTypeId, String deviceType, String operationCode)
+    public void deleteOperationTemplate(String subTypeId, String deviceType, String operationCode)
             throws OperationTemplateMgtPluginException {
 
         String msg = "Operation Template does not exist for subtype id : " + subTypeId
@@ -195,10 +194,11 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
      * @param operationCode
      * @throws OperationTemplateMgtPluginException
      */
-    private void validateGetOperationTemplate(int subTypeId, String deviceType, String operationCode)
+    private void validateGetOperationTemplate(String subTypeId, String deviceType, String operationCode)
             throws OperationTemplateMgtPluginException {
 
-        AssertUtils.isTrue(subTypeId > 0, "Invalid meter device subtype id: " + subTypeId);
+        AssertUtils.hasText(subTypeId, "Invalid meter device subtype id: " + subTypeId);
+        AssertUtils.isTrue(Integer.valueOf(subTypeId)>0, "Invalid meter device subtype id: " + subTypeId);
         AssertUtils.hasText(operationCode, "Validation failed due to invalid operation code: " + operationCode);
         AssertUtils.hasText(deviceType, "Invalid device type.");
         AssertUtils.isTrue(deviceType.equals("METER"), "Invalid device type. ");
