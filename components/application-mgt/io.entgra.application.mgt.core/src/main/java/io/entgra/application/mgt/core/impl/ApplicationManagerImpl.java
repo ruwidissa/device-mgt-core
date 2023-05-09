@@ -3186,8 +3186,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (!StringUtils.isEmpty(webAppReleaseWrapper.getVersion())) {
                 applicationReleaseDTO.get().setVersion(webAppReleaseWrapper.getVersion());
             }
-            if (!StringUtils.isEmpty(webAppReleaseWrapper.getVersion())) {
-                applicationReleaseDTO.get().setVersion(webAppReleaseWrapper.getVersion());
+            if (!StringUtils.isEmpty(webAppReleaseWrapper.getUrl())) {
+                applicationReleaseDTO.get().setInstallerName(webAppReleaseWrapper.getUrl());
             }
             if (!StringUtils.isEmpty(webAppReleaseWrapper.getDescription())) {
                 applicationReleaseDTO.get().setDescription(webAppReleaseWrapper.getDescription());
