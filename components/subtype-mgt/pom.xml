@@ -31,7 +31,7 @@
     <url>http://entgra.io</url>
 
     <modules>
-        <module>io.entgra.device.mgt.subtype.mgt</module>
+        <module>io.entgra.device.mgt.core.subtype.mgt</module>
     </modules>
 
 </project>

@@ -38,7 +38,7 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.subtype.mgt</artifactId>
+            <artifactId>io.entgra.device.mgt.core.subtype.mgt</artifactId>
         </dependency>
     </dependencies>
 
@@ -93,7 +93,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.subtype.mgt:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.subtype.mgt:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>
