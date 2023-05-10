@@ -20,7 +20,7 @@
 
     <parent>
         <artifactId>identity-extensions</artifactId>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
 

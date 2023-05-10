@@ -22,7 +22,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>operation-template-mgt-plugin-feature</artifactId>
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -39,7 +39,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.operation.template</artifactId>
         </dependency>
     </dependencies>
@@ -95,7 +95,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon.devicemgt:io.entgra.device.mgt.operation.template:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.operation.template:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>

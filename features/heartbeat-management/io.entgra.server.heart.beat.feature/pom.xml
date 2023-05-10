@@ -20,7 +20,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>heart-beat-feature</artifactId>
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -41,11 +41,11 @@
             <artifactId>h2-database-engine</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
             <scope>provided</scope>
             <exclusions>
@@ -128,7 +128,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon.devicemgt:io.entgra.server.bootup.heartbeat.beacon:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.server.bootup.heartbeat.beacon:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>

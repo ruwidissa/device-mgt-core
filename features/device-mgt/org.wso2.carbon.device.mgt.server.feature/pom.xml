@@ -20,7 +20,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>device-mgt-feature</artifactId>
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -36,20 +36,20 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.api.feature</artifactId>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.url.printer</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.extensions.pull.notification</artifactId>
         </dependency>
         <dependency>
@@ -107,18 +107,18 @@
                             </adviceFile>
                             <includedFeatures>
                                 <includedFeatureDef>
-                                    org.wso2.carbon.devicemgt:org.wso2.carbon.device.mgt.basics.feature:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.basics.feature:${carbon.device.mgt.version}
                                 </includedFeatureDef>
                                 <includedFeatureDef>
-                                    org.wso2.carbon.devicemgt:org.wso2.carbon.device.mgt.api.feature:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.api.feature:${carbon.device.mgt.version}
                                 </includedFeatureDef>
                             </includedFeatures>
                             <bundles>
 								<bundleDef>
-									org.wso2.carbon.devicemgt:org.wso2.carbon.device.mgt.url.printer:${carbon.device.mgt.version}
+									io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.url.printer:${carbon.device.mgt.version}
 								</bundleDef>
 								<bundleDef>
-									org.wso2.carbon.devicemgt:org.wso2.carbon.device.mgt.extensions.pull.notification:${carbon.device.mgt.version}
+									io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.extensions.pull.notification:${carbon.device.mgt.version}
 								</bundleDef>
                             </bundles>
                             <importBundles>

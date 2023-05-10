@@ -21,7 +21,7 @@
 
     <parent>
         <artifactId>device-mgt-extensions</artifactId>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -35,11 +35,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
         </dependency>
 		<dependency>
@@ -51,11 +51,11 @@
 			<artifactId>org.eclipse.osgi.services</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.wso2.carbon.devicemgt</groupId>
+			<groupId>io.entgra.device.mgt.core</groupId>
 			<artifactId>org.wso2.carbon.policy.mgt.core</artifactId>
 		</dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.application.mgt.common</artifactId>
             <scope>provided</scope>
         </dependency>

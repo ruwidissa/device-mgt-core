@@ -19,7 +19,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
-		<groupId>org.wso2.carbon.devicemgt</groupId>
+		<groupId>io.entgra.device.mgt.core</groupId>
 		<artifactId>apimgt-extensions-feature</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
@@ -34,11 +34,11 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.wso2.carbon.devicemgt</groupId>
+			<groupId>io.entgra.device.mgt.core</groupId>
 			<artifactId>org.wso2.carbon.apimgt.integration.client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.wso2.carbon.devicemgt</groupId>
+			<groupId>io.entgra.device.mgt.core</groupId>
 			<artifactId>org.wso2.carbon.apimgt.integration.generated.client</artifactId>
 		</dependency>
 	</dependencies>
@@ -104,10 +104,10 @@
 									io.github.openfeign:feign-slf4j:${io.github.openfeign.version}
 								</bundleDef>
 								<bundleDef>
-									org.wso2.carbon.devicemgt:org.wso2.carbon.apimgt.integration.client:${project.version}
+									io.entgra.device.mgt.core:org.wso2.carbon.apimgt.integration.client:${project.version}
 								</bundleDef>
 								<bundleDef>
-									org.wso2.carbon.devicemgt:org.wso2.carbon.apimgt.integration.generated.client:${project.version}
+									io.entgra.device.mgt.core:org.wso2.carbon.apimgt.integration.generated.client:${project.version}
 								</bundleDef>
 							</bundles>
 						</configuration>

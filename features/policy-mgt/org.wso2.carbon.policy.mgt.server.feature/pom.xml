@@ -21,7 +21,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>policy-mgt-feature</artifactId>
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -37,19 +37,19 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.policy.mgt.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.policy.mgt.common</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.policy.decision.point</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.policy.information.point</artifactId>
         </dependency>
         <dependency>
@@ -107,16 +107,16 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon.devicemgt:org.wso2.carbon.policy.mgt.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:org.wso2.carbon.policy.mgt.core:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon.devicemgt:org.wso2.carbon.policy.mgt.common:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:org.wso2.carbon.policy.mgt.common:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon.devicemgt:org.wso2.carbon.policy.decision.point:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:org.wso2.carbon.policy.decision.point:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon.devicemgt:org.wso2.carbon.policy.information.point:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:org.wso2.carbon.policy.information.point:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                             <importBundles>

@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>policy-mgt</artifactId>
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -9,7 +9,7 @@
 
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.devicemgt</groupId>
+    <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>org.wso2.carbon.policy.information.point</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Policy Information Point</name>
@@ -84,7 +84,7 @@
             <artifactId>org.wso2.carbon.logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.policy.mgt.common</artifactId>
         </dependency>
     </dependencies>

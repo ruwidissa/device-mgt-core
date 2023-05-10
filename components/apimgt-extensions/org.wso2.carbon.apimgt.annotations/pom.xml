@@ -21,7 +21,7 @@
 
     <parent>
         <artifactId>apimgt-extensions</artifactId>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>

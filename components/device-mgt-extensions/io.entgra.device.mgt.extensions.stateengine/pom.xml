@@ -22,7 +22,7 @@
 
     <parent>
         <artifactId>device-mgt-extensions</artifactId>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -119,7 +119,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
             <scope>provided</scope>
             <exclusions>
@@ -148,7 +148,7 @@
                     <artifactId>wstx-asl</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>org.wso2.carbon.devicemgt</groupId>
+                    <groupId>io.entgra.device.mgt.core</groupId>
                     <artifactId>org.wso2.carbon.device.mgt.analytics.data.publisher</artifactId>
                 </exclusion>
                 <exclusion>

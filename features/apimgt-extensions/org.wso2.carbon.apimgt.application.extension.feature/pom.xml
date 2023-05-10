@@ -19,7 +19,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>apimgt-extensions-feature</artifactId>
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -36,7 +36,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.apimgt.application.extension</artifactId>
         </dependency>
     </dependencies>
@@ -81,7 +81,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.wso2.carbon.devicemgt</groupId>
+                                    <groupId>io.entgra.device.mgt.core</groupId>
                                     <artifactId>org.wso2.carbon.apimgt.application.extension.api</artifactId>
                                     <type>war</type>
                                     <overWrite>true</overWrite>
@@ -115,7 +115,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon.devicemgt:org.wso2.carbon.apimgt.application.extension:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:org.wso2.carbon.apimgt.application.extension:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>

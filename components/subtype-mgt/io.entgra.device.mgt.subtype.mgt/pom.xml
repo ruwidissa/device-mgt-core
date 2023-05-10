@@ -18,7 +18,7 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.wso2.carbon.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>subtype-mgt</artifactId>
         <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -136,7 +136,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
             <scope>provided</scope>
             <exclusions>
@@ -165,7 +165,7 @@
                     <artifactId>wstx-asl</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>org.wso2.carbon.devicemgt</groupId>
+                    <groupId>io.entgra.device.mgt.core</groupId>
                     <artifactId>org.wso2.carbon.device.mgt.analytics.data.publisher</artifactId>
                 </exclusion>
                 <exclusion>
@@ -175,7 +175,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.extensions</artifactId>
             <scope>provided</scope>
             <exclusions>
@@ -253,7 +253,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -308,7 +308,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.identity.jwt.client.extension</artifactId>
             <scope>provided</scope>
         </dependency>
