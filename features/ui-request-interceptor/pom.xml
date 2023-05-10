@@ -35,6 +35,6 @@
     </description>
     <packaging>pom</packaging>
     <modules>
-        <module>io.entgra.ui.request.interceptor.feature</module>
+        <module>io.entgra.device.mgt.core.ui.request.interceptor.feature</module>
     </modules>
 </project>

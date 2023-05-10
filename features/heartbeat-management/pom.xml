@@ -34,7 +34,7 @@
     <url>http://entgra.io</url>
 
     <modules>
-        <module>io.entgra.server.heart.beat.feature</module>
+        <module>io.entgra.device.mgt.core.server.heart.beat.feature</module>
     </modules>
 
 </project>

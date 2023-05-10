@@ -31,6 +31,6 @@
     <name>Entgra IoT - Tenant Management Feature</name>
 
     <modules>
-        <module>io.entgra.tenant.mgt.server.feature</module>
+        <module>io.entgra.device.mgt.core.tenant.mgt.server.feature</module>
     </modules>
 </project>

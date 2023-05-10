@@ -33,9 +33,9 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.certificate.mgt.server.feature</module>
-        <module>org.wso2.carbon.certificate.mgt.api.feature</module>
-        <module>org.wso2.carbon.certificate.mgt.cert.admin.api.feature</module>
+        <module>io.entgra.device.mgt.core.certificate.mgt.server.feature</module>
+        <module>io.entgra.device.mgt.core.certificate.mgt.api.feature</module>
+        <module>io.entgra.device.mgt.core.certificate.mgt.cert.admin.api.feature</module>
     </modules>
 
 </project>

@@ -286,12 +286,6 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.v09.api.feature</artifactId>
-                <type>zip</type>
-                <version>${carbon.device.mgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>org.wso2.carbon.apimgt.application.extension</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
@@ -310,30 +304,7 @@
                 <artifactId>org.wso2.carbon.apimgt.application.extension.api</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.analytics.mgt.grafana.proxy.api.feature</artifactId>
-                <type>zip</type>
-                <version>${carbon.device.mgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.analytics.mgt.grafana.proxy.server.feature</artifactId>
-                <type>zip</type>
-                <version>${carbon.device.mgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.application.mgt.server.feature</artifactId>
-                <type>zip</type>
-                <version>${carbon.device.mgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.application.mgt.api.feature</artifactId>
-                <type>zip</type>
-                <version>${carbon.device.mgt.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
@@ -409,12 +380,7 @@
                 <artifactId>io.entgra.task.mgt.watcher</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.task.mgt.feature</artifactId>
-                <type>zip</type>
-                <version>${carbon.device.mgt.version}</version>
-            </dependency>
+
 
             <!-- SubType Management dependencies -->
             <dependency>
@@ -422,12 +388,7 @@
                 <artifactId>io.entgra.device.mgt.subtype.mgt</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.device.mgt.subtype.mgt.feature</artifactId>
-                <type>zip</type>
-                <version>${carbon.device.mgt.version}</version>
-            </dependency>
+
             <!-- End of SubType Management dependencies -->
 
             <!-- Operation Template Management dependencies -->

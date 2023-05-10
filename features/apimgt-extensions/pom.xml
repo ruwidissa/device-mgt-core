@@ -34,9 +34,9 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.apimgt.webapp.publisher.feature</module>
-        <module>org.wso2.carbon.apimgt.application.extension.feature</module>
-        <module>org.wso2.carbon.apimgt.keymgt.extension.feature</module>
+        <module>io.entgra.device.mgt.core.apimgt.webapp.publisher.feature</module>
+        <module>io.entgra.device.mgt.core.apimgt.application.extension.feature</module>
+        <module>io.entgra.device.mgt.core.apimgt.keymgt.extension.feature</module>
         <module>io.entgra.device.mgt.core.apimgt.analytics.extension.feature</module>
     </modules>
 

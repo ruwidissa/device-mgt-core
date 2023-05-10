@@ -1,0 +1,2 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.device.mgt.core.identity.jwt.client.extension_${feature.version}/jwt.properties,target:${installFolder}/../../conf/etc/jwt.properties,overwrite:true);\

@@ -33,8 +33,8 @@
     <url>http://entgra.io</url>
 
     <modules>
-        <module>io.entgra.analytics.mgt.grafana.proxy.server.feature</module>
-        <module>io.entgra.analytics.mgt.grafana.proxy.api.feature</module>
+        <module>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.server.feature</module>
+        <module>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api.feature</module>
     </modules>
 
 </project>

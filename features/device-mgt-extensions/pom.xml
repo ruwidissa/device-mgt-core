@@ -33,14 +33,14 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.device.mgt.extensions.device.type.deployer.feature</module>
-        <module>org.wso2.carbon.device.mgt.extensions.push.notification.provider.fcm.feature</module>
-        <module>org.wso2.carbon.device.mgt.extensions.push.notification.provider.mqtt.feature</module>
-        <module>org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp.feature</module>
-		<module>org.wso2.carbon.device.mgt.extensions.push.notification.provider.http.feature</module>
-        <module>io.entgra.device.mgt.extensions.defaultrole.manager.feature</module>
-        <module>io.entgra.device.mgt.extensions.logger.feature</module>
-        <module>io.entgra.device.mgt.extensions.stateengine.feature</module>
+        <module>io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.feature</module>
+        <module>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.feature</module>
+        <module>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.feature</module>
+        <module>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp.feature</module>
+		<module>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http.feature</module>
+        <module>io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.feature</module>
+        <module>io.entgra.device.mgt.core.device.mgt.extensions.logger.feature</module>
+        <module>io.entgra.device.mgt.core.device.mgt.extensions.stateengine.feature</module>
     </modules>
 
 </project>
