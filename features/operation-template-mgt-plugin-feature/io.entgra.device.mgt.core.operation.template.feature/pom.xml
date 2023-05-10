@@ -40,7 +40,7 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.operation.template</artifactId>
+            <artifactId>io.entgra.device.mgt.core.operation.template</artifactId>
         </dependency>
     </dependencies>
 
@@ -95,7 +95,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.operation.template:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.operation.template:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>
