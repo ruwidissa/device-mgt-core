@@ -21,11 +21,11 @@ package org.wso2.carbon.device.mgt.core.operation.mgt.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.ConfigOperation;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,6 +39,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
@@ -47,24 +48,32 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
 
     @Override
     public int addOperation(Operation operation) throws OperationManagementDAOException {
-        int operationId = 0;
-        PreparedStatement stmt = null;
         try {
-            operationId = super.addOperation(operation);
-            operation.setCreatedTimeStamp(new Timestamp(new java.util.Date().getTime()).toString());
-            Connection conn = OperationManagementDAOFactory.getConnection();
-            stmt = conn.prepareStatement("INSERT INTO DM_CONFIG_OPERATION(OPERATION_ID, OPERATION_CONFIG) VALUES(?, ?)");
-            stmt.setInt(1, operationId);
-            stmt.setBinaryStream(2, toByteArrayInputStream(operation));
-            stmt.executeUpdate();
+            operation.setCreatedTimeStamp(new Timestamp(new Date().getTime()).toString());
+            Connection connection = OperationManagementDAOFactory.getConnection();
+            String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
+                    "INITIATED_BY, OPERATION_DETAILS) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"id"})) {
+                stmt.setString(1, operation.getType().toString());
+                stmt.setLong(2, DeviceManagementDAOUtil.getCurrentUTCTime());
+                stmt.setLong(3, 0);
+                stmt.setString(4, operation.getCode());
+                stmt.setString(5, operation.getInitiatedBy());
+                stmt.setObject(6, operation);
+                stmt.executeUpdate();
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    int id = -1;
+                    if (rs.next()) {
+                        id = rs.getInt(1);
+                    }
+                    return id;
+                }
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while adding command operation " + operationId;
+            String msg = "Error occurred while adding command operation" + operation.getId();
             log.error(msg, e);
             throw new OperationManagementDAOException(msg, e);
-        } finally {
-            OperationManagementDAOUtil.cleanupResources(stmt);
         }
-        return operationId;
     }
 
     private ByteArrayInputStream toByteArrayInputStream(Operation operation) throws OperationManagementDAOException {
@@ -111,30 +120,41 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
 
     @Override
     public Operation getOperation(int operationId) throws OperationManagementDAOException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         ConfigOperation configOperation = null;
-
+        ByteArrayInputStream bais;
+        ObjectInputStream ois;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT OPERATION_ID, ENABLED, OPERATION_CONFIG FROM DM_CONFIG_OPERATION WHERE OPERATION_ID = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, operationId);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                InputStream operationDetails = rs.getBinaryStream("OPERATION_CONFIG");
-                configOperation = (ConfigOperation) fromByteArrayInputStream(operationDetails);
-                configOperation.setId(rs.getInt("OPERATION_ID"));
-                configOperation.setEnabled(rs.getBoolean("ENABLED"));
+            String sql = "SELECT ID, ENABLED, OPERATION_DETAILS FROM DM_OPERATION WHERE ID = ? AND TYPE='CONFIG'";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, operationId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        byte[] operationDetails = rs.getBytes("OPERATION_DETAILS");
+                        bais = new ByteArrayInputStream(operationDetails);
+                        ois = new ObjectInputStream(bais);
+                        configOperation = (ConfigOperation) ois.readObject();
+                        configOperation.setId(rs.getInt("ID"));
+                        configOperation.setEnabled(rs.getBoolean("ENABLED"));
+                    }
+                }
             }
+        } catch (IOException e) {
+            String msg = "IO Error occurred while de serialize the policy operation " +
+                    "object";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
+        } catch (ClassNotFoundException e) {
+            String msg = "Class not found error occurred while de serialize the policy " +
+                    "operation object";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "SQL Error occurred while retrieving the policy operation object available for the id '"
+            String msg = "SQL Error occurred while retrieving the policy operation " +
+                    "object available for the id '"
                     + operationId;
             log.error(msg, e);
             throw new OperationManagementDAOException(msg, e);
-        } finally {
-            OperationManagementDAOUtil.cleanupResources(stmt, rs);
         }
         return configOperation;
     }
@@ -142,36 +162,60 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
     @Override
     public List<? extends Operation> getOperationsByDeviceAndStatus(int enrolmentId, Operation.Status status)
             throws OperationManagementDAOException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         ConfigOperation configOperation;
         List<Operation> operations = new ArrayList<>();
-
+        ByteArrayInputStream bais = null;
+        ObjectInputStream ois = null;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT co.OPERATION_ID, co.OPERATION_CONFIG FROM DM_CONFIG_OPERATION co " +
+            String sql = "SELECT co.ID, co.OPERATION_DETAILS FROM DM_OPERATION co " +
                     "INNER JOIN (SELECT * FROM DM_ENROLMENT_OP_MAPPING WHERE ENROLMENT_ID = ? " +
-                    "AND STATUS = ?) dm ON dm.OPERATION_ID = co.OPERATION_ID";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, enrolmentId);
-            stmt.setString(2, status.toString());
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                InputStream operationDetails = rs.getBinaryStream("OPERATION_CONFIG");
-                configOperation = (ConfigOperation) fromByteArrayInputStream(operationDetails);
-                configOperation.setStatus(status);
-                configOperation.setId(rs.getInt("OPERATION_ID"));
-                operations.add(configOperation);
+                    "AND STATUS = ?) dm ON dm.OPERATION_ID = co.ID WHERE co.TYPE = 'CONFIG'";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, enrolmentId);
+                stmt.setString(2, status.toString());
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        byte[] operationDetails = rs.getBytes("OPERATION_DETAILS");
+                        bais = new ByteArrayInputStream(operationDetails);
+                        ois = new ObjectInputStream(bais);
+                        configOperation = (ConfigOperation) ois.readObject();
+                        configOperation.setStatus(status);
+                        configOperation.setId(rs.getInt("ID"));
+                        operations.add(configOperation);
+                    }
+                }
             }
+        } catch (IOException e) {
+            String msg = "IO Error occurred while de serialize the configuration " +
+                    "operation object";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
+        } catch (ClassNotFoundException e) {
+            String msg = "Class not found error occurred while de serialize the " +
+                    "configuration operation object";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL error occurred while retrieving the operation available " +
                     "for the device'" + enrolmentId + "' with status '" + status.toString();
             log.error(msg, e);
             throw new OperationManagementDAOException(msg, e);
         } finally {
-            OperationManagementDAOUtil.cleanupResources(stmt, rs);
+            if (bais != null) {
+                try {
+                    bais.close();
+                } catch (IOException e) {
+                    log.warn("Error occurred while closing ByteArrayOutputStream", e);
+                }
+            }
+            if (ois != null) {
+                try {
+                    ois.close();
+                } catch (IOException e) {
+                    log.warn("Error occurred while closing ObjectOutputStream", e);
+                }
+            }
         }
         return operations;
     }
