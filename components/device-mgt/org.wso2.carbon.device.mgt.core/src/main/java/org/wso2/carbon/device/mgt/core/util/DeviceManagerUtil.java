@@ -701,7 +701,8 @@ public final class DeviceManagerUtil {
      */
     public static void removeBillingCache() {
         CacheManager manager = getCacheManager();
-        manager.removeCache(DeviceManagementConstants.BILLING_CACHE);
+        Cache cache = manager.getCache(DeviceManagementConstants.BILLING_CACHE);
+        cache.removeAll();
     }
 
     /**

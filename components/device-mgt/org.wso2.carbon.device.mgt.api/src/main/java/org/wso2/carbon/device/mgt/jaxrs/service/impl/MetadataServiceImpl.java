@@ -110,6 +110,7 @@ public class MetadataServiceImpl implements MetadataService {
         RequestValidationUtil.validateMetadata(metadata);
         try {
             Metadata createdMetadata = DeviceMgtAPIUtils.getMetadataManagementService().createMetadata(metadata);
+            DeviceManagerUtil.removeBillingCache();
             return Response.status(Response.Status.CREATED).entity(createdMetadata).build();
         } catch (MetadataKeyAlreadyExistsException e) {
             String msg = "Metadata entry metaKey:" + metadata.getMetaKey() + " is already exist.";
