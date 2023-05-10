@@ -32,8 +32,8 @@
     <url>http://entgra.io</url>
 
     <modules>
-        <module>io.entgra.task.mgt.core</module>
-        <module>io.entgra.task.mgt.common</module>
+        <module>io.entgra.device.mgt.core.task.mgt.core</module>
+        <module>io.entgra.device.mgt.core.task.mgt.common</module>
     </modules>
 
 </project>
