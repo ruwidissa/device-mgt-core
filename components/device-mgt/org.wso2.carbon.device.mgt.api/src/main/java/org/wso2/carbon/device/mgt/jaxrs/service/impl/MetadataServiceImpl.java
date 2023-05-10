@@ -31,6 +31,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelTheme;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
+import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.jaxrs.beans.MetadataList;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.MetadataService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -127,6 +128,7 @@ public class MetadataServiceImpl implements MetadataService {
         RequestValidationUtil.validateMetadata(metadata);
         try {
             Metadata updatedMetadata = DeviceMgtAPIUtils.getMetadataManagementService().updateMetadata(metadata);
+            DeviceManagerUtil.removeBillingCache();
             return Response.status(Response.Status.OK).entity(updatedMetadata).build();
         } catch (MetadataManagementException e) {
             String msg = "Error occurred while updating the metadata entry for metaKey:" + metadata.getMetaKey();

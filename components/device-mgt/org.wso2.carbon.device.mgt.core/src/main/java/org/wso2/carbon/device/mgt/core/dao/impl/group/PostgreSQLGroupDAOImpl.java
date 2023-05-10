@@ -70,7 +70,7 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
                       "VALUES (?, ?, ?, ?) RETURNING ID";
             } else {
                 sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, PARENT_PATH, STATUS) " +
-                      "VALUES (?, ?, ?, ?, ?) RETURNING ID";
+                      "VALUES (?, ?, ?, ?, ?, ?) RETURNING ID";
                 hasStatus = true;
             }
             stmt = conn.prepareStatement(sql);

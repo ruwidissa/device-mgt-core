@@ -16,12 +16,11 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>subtype-mgt</artifactId>
-        <version>5.0.25-SNAPSHOT</version>
+        <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -83,7 +82,8 @@
                             com.google.gson.*,
                             com.fasterxml.jackson.core.*,
                             com.fasterxml.jackson.databind.*,
-                            com.fasterxml.jackson.annotation.*
+                            com.fasterxml.jackson.annotation.*,
+                            com.google.common.cache.*,
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.subtype.mgt.internal,
@@ -340,6 +340,8 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
