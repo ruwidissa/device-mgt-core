@@ -23,9 +23,9 @@
 
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <artifactId>carbon-devicemgt</artifactId>
-        <version>5.0.21-SNAPSHOT</version>
-        <relativePath>../../../pom.xml</relativePath>
+        <artifactId>operation-template-mgt-plugin-feature</artifactId>
+        <version>5.0.26-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>

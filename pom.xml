@@ -436,12 +436,6 @@
                 <artifactId>io.entgra.device.mgt.operation.template</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.devicemgt</groupId>
-                <artifactId>io.entgra.device.mgt.subtype.mgt.feature</artifactId>
-                <type>zip</type>
-                <version>${carbon.device.mgt.version}</version>
-            </dependency>
             <!-- End of Operation Template Management dependencies -->
             <!-- Governance dependencies -->
             <dependency>
