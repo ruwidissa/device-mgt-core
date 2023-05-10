@@ -31,8 +31,8 @@
     <description>Entgra IoT - Tenant Management Component</description>
 
     <modules>
-        <module>io.entgra.tenant.mgt.core</module>
-        <module>io.entgra.tenant.mgt.common</module>
+        <module>io.entgra.device.mgt.core.tenant.mgt.core</module>
+        <module>io.entgra.device.mgt.core.tenant.mgt.common</module>
     </modules>
 
 </project>
