@@ -42,7 +42,7 @@
 <!--        <module>components/application-mgt</module>-->
 <!--        <module>components/policy-mgt</module>-->
 <!--        <module>components/certificate-mgt</module>-->
-<!--        <module>components/ui-request-interceptor</module>-->
+        <module>components/ui-request-interceptor</module>
         <module>components/transport-mgt</module>
         <module>components/analytics-mgt</module>
         <module>components/webapp-authenticator-framework</module>
@@ -57,7 +57,7 @@
 <!--        <module>features/policy-mgt</module>-->
 <!--        <module>features/certificate-mgt</module>-->
 <!--        <module>features/heartbeat-management</module>-->
-<!--        <module>features/ui-request-interceptor</module>-->
+        <module>features/ui-request-interceptor</module>
 <!--        <module>features/jwt-client</module>-->
 <!--        <module>features/device-mgt-extensions</module>-->
         <module>features/transport-mgt</module>

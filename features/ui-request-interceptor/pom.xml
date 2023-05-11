@@ -26,7 +26,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.entgra.devicemgt</groupId>
     <artifactId>ui-request-interceptor-feature</artifactId>
     <name>Entgra - UI Request Interceptor Feature</name>
     <description>

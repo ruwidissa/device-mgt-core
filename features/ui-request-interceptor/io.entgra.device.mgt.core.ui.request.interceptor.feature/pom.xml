@@ -20,7 +20,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>ui-request-interceptor-feature</artifactId>
-        <groupId>io.entgra.devicemgt</groupId>
+        <groupId>io.entgra.device.mgt.core</groupId>
         <version>5.0.26-SNAPSHOT</version>
     </parent>
 
@@ -47,8 +47,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>io.entgra.devicemgt</groupId>
-                                    <artifactId>io.entgra.ui.request.interceptor</artifactId>
+                                    <groupId>io.entgra.device.mgt.core</groupId>
+                                    <artifactId>io.entgra.device.mgt.core.ui.request.interceptor</artifactId>
                                     <version>${project.version}</version>
                                     <type>war</type>
                                     <overWrite>true</overWrite>

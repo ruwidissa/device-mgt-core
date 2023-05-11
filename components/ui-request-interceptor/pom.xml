@@ -26,7 +26,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.entgra.devicemgt</groupId>
     <artifactId>ui-request-interceptor</artifactId>
     <name>Entgra - UI Request Interceptor Servlet</name>
     <description>
@@ -35,7 +34,7 @@
     </description>
     <packaging>pom</packaging>
     <modules>
-        <module>io.entgra.ui.request.interceptor</module>
+        <module>io.entgra.device.mgt.core.ui.request.interceptor</module>
     </modules>
 
 
