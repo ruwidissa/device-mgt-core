@@ -76,22 +76,22 @@
         <!-- device-mgt extensions component related properties -->
         <device.extensions>device-mgt-extensions</device.extensions>
         <device.extensions.deployer>
-            ${basedir}/../${device.extensions}/org.wso2.carbon.device.mgt.extensions.device.type.deployer
+            ${basedir}/../${device.extensions}/io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer
         </device.extensions.deployer>
         <device.extensions.pull>
-            ${basedir}/../${device.extensions}/org.wso2.carbon.device.mgt.extensions.pull.notification
+            ${basedir}/../${device.extensions}/io.entgra.device.mgt.core.device.mgt.extensions.pull.notification
         </device.extensions.pull>
         <device.extensions.fcm>
-            ${basedir}/../${device.extensions}/org.wso2.carbon.device.mgt.extensions.push.notification.provider.fcm
+            ${basedir}/../${device.extensions}/io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm
         </device.extensions.fcm>
         <device.extensions.http>
-            ${basedir}/../${device.extensions}/org.wso2.carbon.device.mgt.extensions.push.notification.provider.http
+            ${basedir}/../${device.extensions}/io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http
         </device.extensions.http>
         <device.extensions.mqtt>
-            ${basedir}/../${device.extensions}/org.wso2.carbon.device.mgt.extensions.push.notification.provider.mqtt
+            ${basedir}/../${device.extensions}/io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt
         </device.extensions.mqtt>
         <device.extensions.xmpp>
-            ${basedir}/../${device.extensions}/org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp
+            ${basedir}/../${device.extensions}/io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp
         </device.extensions.xmpp>
 
         <!-- Email Sender component related properties -->
@@ -325,7 +325,7 @@
                                                     </group>
                                                 </group>
                                                 <group name="device-mgt-extensions">
-                                                    <group name="org.wso2.carbon.device.mgt.extensions.device.type.deployer">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer">
                                                         <classfiles>
                                                             <fileset dir="${device.extensions.deployer}/${target}/${classes}" />
                                                         </classfiles>
@@ -333,7 +333,7 @@
                                                             <fileset dir="${device.extensions.deployer}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.device.mgt.extensions.push.notification.provider.fcm">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm">
                                                         <classfiles>
                                                             <fileset dir="${device.extensions.fcm}/${target}/${classes}" />
                                                         </classfiles>
@@ -341,7 +341,7 @@
                                                             <fileset dir="${device.extensions.fcm}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.device.mgt.extensions.push.notification.provider.http">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http">
                                                         <classfiles>
                                                             <fileset dir="${device.extensions.http}/${target}/${classes}" />
                                                         </classfiles>
@@ -349,7 +349,7 @@
                                                             <fileset dir="${device.extensions.http}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.device.mgt.extensions.push.notification.provider.mqtt">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt">
                                                         <classfiles>
                                                             <fileset dir="${device.extensions.mqtt}/${target}/${classes}" />
                                                         </classfiles>
@@ -357,7 +357,7 @@
                                                             <fileset dir="${device.extensions.mqtt}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp">
                                                         <classfiles>
                                                             <fileset dir="${device.extensions.xmpp}/${target}/${classes}" />
                                                         </classfiles>
@@ -365,7 +365,7 @@
                                                             <fileset dir="${device.extensions.xmpp}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.device.mgt.extensions.pull.notification">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.extensions.pull.notification">
                                                         <classfiles>
                                                             <fileset dir="${device.extensions.pull}/${target}/${classes}" />
                                                         </classfiles>

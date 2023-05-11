@@ -603,7 +603,7 @@
         <FileBasedProperties>false</FileBasedProperties>
     </PushNotificationProviderConfig>
 
-    <PullNotificationSubscriberConfig className="org.wso2.carbon.device.mgt.extensions.pull.notification.PullNotificationSubscriberImpl">
+    <PullNotificationSubscriberConfig className="io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.PullNotificationSubscriberImpl">
         <ConfigProperties>
             <Property Name="example">admin</Property>
         </ConfigProperties>

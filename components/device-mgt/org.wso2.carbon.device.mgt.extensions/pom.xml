@@ -78,7 +78,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.extensions.pull.notification</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.pull.notification</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -188,8 +188,8 @@
                             org.wso2.carbon.device.mgt.core.service,
                             com.google.gson
                         </Import-Package>
-						<DynamicImport-Package>org.wso2.carbon.device.mgt.extensions.pull.notification,
-							org.wso2.carbon.device.mgt.extensions.pull.notification.*</DynamicImport-Package>
+						<DynamicImport-Package>io.entgra.device.mgt.core.device.mgt.extensions.pull.notification,
+							io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

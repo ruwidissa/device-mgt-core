@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.notification.mgt;
 
-import io.entgra.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.notification.logger.DeviceLogContext;
 import io.entgra.notification.logger.impl.EntgraDeviceLoggerImpl;
 import org.wso2.carbon.device.mgt.common.Device;

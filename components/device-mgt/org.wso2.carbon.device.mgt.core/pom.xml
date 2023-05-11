@@ -114,7 +114,7 @@
                             org.wso2.carbon.identity.jwt.client.extension.service,
                             org.apache.commons.codec.binary,
                             io.entgra.server.bootup.heartbeat.beacon,
-                            io.entgra.device.mgt.extensions.logger.*,
+                            io.entgra.device.mgt.core.device.mgt.extensions.logger.*,
                             io.entgra.notification.logger.*
                         </Import-Package>
                         <Export-Package>
@@ -353,6 +353,10 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.task.mgt.common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.logger</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>

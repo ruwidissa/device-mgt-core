@@ -18,7 +18,7 @@
 
 package io.entgra.notification.logger;
 
-import io.entgra.device.mgt.extensions.logger.LogContext;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.LogContext;
 
 public class UserLogContext extends LogContext {
     private final String userName;

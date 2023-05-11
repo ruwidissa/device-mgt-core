@@ -36,7 +36,7 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.extensions.push.notification.provider.http</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http</artifactId>
         </dependency>
     </dependencies>
 
@@ -89,7 +89,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.extensions.push.notification.provider.http:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>

@@ -26,7 +26,7 @@ import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
-import io.entgra.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.notification.logger.UserLogContext;
 import io.entgra.notification.logger.impl.EntgraUserLoggerImpl;
 import org.apache.http.HttpHeaders;

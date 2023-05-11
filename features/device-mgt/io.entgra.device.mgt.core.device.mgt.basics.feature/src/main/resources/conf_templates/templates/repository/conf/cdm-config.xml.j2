@@ -38,10 +38,10 @@
         <SchedulerTaskEnabled>true</SchedulerTaskEnabled>
         {% endif %}
         <PushNotificationProviders>
-            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.fcm.FCMBasedPushNotificationProvider</Provider>
-            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.mqtt.MQTTBasedPushNotificationProvider</Provider>
-            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.http.HTTPBasedPushNotificationProvider</Provider>
-            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider</Provider>
+            <Provider>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.FCMBasedPushNotificationProvider</Provider>
+            <Provider>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.MQTTBasedPushNotificationProvider</Provider>
+            <Provider>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http.HTTPBasedPushNotificationProvider</Provider>
+            <Provider>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider</Provider>
         {% if device_mgt_conf.push_notification_conf.push_notification_providers is defined %}
             {%- for push_notification_provider in device_mgt_conf.push_notification_conf.push_notification_providers -%}
             <Provider>{{push_notification_provider}}</Provider>

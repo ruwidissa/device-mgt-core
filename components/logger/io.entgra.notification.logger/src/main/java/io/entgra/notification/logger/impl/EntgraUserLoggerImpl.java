@@ -18,8 +18,8 @@
 package io.entgra.notification.logger.impl;
 
 
-import io.entgra.device.mgt.extensions.logger.LogContext;
-import io.entgra.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.LogContext;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.notification.logger.UserLogContext;
 import io.entgra.notification.logger.util.MDCContextUtil;
 import org.apache.commons.logging.Log;

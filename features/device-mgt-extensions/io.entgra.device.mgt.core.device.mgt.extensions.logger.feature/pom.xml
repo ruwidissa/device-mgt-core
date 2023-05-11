@@ -39,7 +39,7 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.extensions.logger</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.logger</artifactId>
         </dependency>
     </dependencies>
 
@@ -94,7 +94,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.extensions.logger:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.extensions.logger:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>

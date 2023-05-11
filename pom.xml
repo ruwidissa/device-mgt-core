@@ -36,7 +36,7 @@
     <modules>
 <!--        <module>components/heartbeat-management</module>-->
 <!--        <module>components/device-mgt</module>-->
-<!--        <module>components/device-mgt-extensions</module>-->
+        <module>components/device-mgt-extensions</module>
 <!--        <module>components/identity-extensions</module>-->
         <module>components/apimgt-extensions</module>
         <module>components/application-mgt</module>
@@ -59,7 +59,7 @@
 <!--        <module>features/heartbeat-management</module>-->
         <module>features/ui-request-interceptor</module>
 <!--        <module>features/jwt-client</module>-->
-<!--        <module>features/device-mgt-extensions</module>-->
+        <module>features/device-mgt-extensions</module>
         <module>features/transport-mgt</module>
         <module>features/analytics-mgt</module>
         <module>features/webapp-authenticator-framework</module>
@@ -1643,47 +1643,47 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.device.mgt.extensions.defaultrole.manager</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.device.mgt.extensions.logger</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.logger</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.device.mgt.extensions.stateengine</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.stateengine</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.extensions.device.type.deployer</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.extensions.push.notification.provider.fcm</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.extensions.push.notification.provider.mqtt</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.extensions.push.notification.provider.http</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.extensions.pull.notification</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.pull.notification</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>

@@ -46,7 +46,7 @@ import java.util.Map;
 public class HTTPDeviceTypeManagerService extends DeviceTypeManagerService implements DeviceTypeDefinitionProvider {
 
     private DeviceTypeMetaDefinition deviceTypeMetaDefinition;
-    private static final String DEFAULT_PULL_NOTIFICATION_CLASS_NAME = "org.wso2.carbon.device.mgt.extensions.pull.notification.PullNotificationSubscriberImpl";
+    private static final String DEFAULT_PULL_NOTIFICATION_CLASS_NAME = "io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.PullNotificationSubscriberImpl";
 
     public HTTPDeviceTypeManagerService(String deviceTypeName, DeviceTypeMetaDefinition deviceTypeMetaDefinition) {
         super(getDeviceTypeConfigIdentifier(deviceTypeName), getDeviceTypeConfiguration(

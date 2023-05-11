@@ -33,16 +33,16 @@
         <SchedulerTaskEnabled>true</SchedulerTaskEnabled>
         <PushNotificationProviders>
             <Provider>
-                org.wso2.carbon.device.mgt.extensions.push.notification.provider.fcm.FCMBasedPushNotificationProvider
+                io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.FCMBasedPushNotificationProvider
             </Provider>
             <Provider>
-                org.wso2.carbon.device.mgt.extensions.push.notification.provider.mqtt.MQTTBasedPushNotificationProvider
+                io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.MQTTBasedPushNotificationProvider
             </Provider>
             <Provider>
-                org.wso2.carbon.device.mgt.extensions.push.notification.provider.http.HTTPBasedPushNotificationProvider
+                io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http.HTTPBasedPushNotificationProvider
             </Provider>
             <Provider>
-                org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider
+                io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider
             </Provider>
         </PushNotificationProviders>
     </PushNotificationConfiguration>
