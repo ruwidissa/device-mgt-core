@@ -44,7 +44,7 @@
 <!--        <module>components/certificate-mgt</module>-->
 <!--        <module>components/ui-request-interceptor</module>-->
 <!--        <module>components/transport-mgt</module>-->
-<!--        <module>components/analytics-mgt</module>-->
+        <module>components/analytics-mgt</module>
         <module>components/webapp-authenticator-framework</module>
 <!--        <module>components/logger</module>-->
         <module>components/task-mgt</module>
@@ -61,7 +61,7 @@
 <!--        <module>features/jwt-client</module>-->
 <!--        <module>features/device-mgt-extensions</module>-->
 <!--        <module>features/transport-mgt</module>-->
-<!--        <module>features/analytics-mgt</module>-->
+        <module>features/analytics-mgt</module>
         <module>features/webapp-authenticator-framework</module>
 <!--        <module>features/logger</module>-->
         <module>features/task-mgt</module>
@@ -322,17 +322,17 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.analytics.mgt.grafana.proxy.api</artifactId>
+                <artifactId>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.analytics.mgt.grafana.proxy.core</artifactId>
+                <artifactId>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.analytics.mgt.grafana.proxy.common</artifactId>
+                <artifactId>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>

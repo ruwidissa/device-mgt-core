@@ -18,9 +18,9 @@
 
 package io.entgra.ui.request.interceptor;
 
-import io.entgra.analytics.mgt.grafana.proxy.common.exception.GrafanaManagementException;
-import io.entgra.analytics.mgt.grafana.proxy.core.exception.GrafanaEnvVariablesNotDefined;
-import io.entgra.analytics.mgt.grafana.proxy.core.util.GrafanaUtil;
+import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.exception.GrafanaManagementException;
+import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.exception.GrafanaEnvVariablesNotDefined;
+import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.util.GrafanaUtil;
 import io.entgra.ui.request.interceptor.beans.AuthData;
 import io.entgra.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.ui.request.interceptor.util.GrafanaHandlerUtil;

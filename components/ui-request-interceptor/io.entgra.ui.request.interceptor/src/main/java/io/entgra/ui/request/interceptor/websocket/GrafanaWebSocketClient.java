@@ -18,8 +18,8 @@
 
 package io.entgra.ui.request.interceptor.websocket;
 
-import io.entgra.analytics.mgt.grafana.proxy.common.exception.GrafanaManagementException;
-import io.entgra.analytics.mgt.grafana.proxy.core.util.GrafanaUtil;
+import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.exception.GrafanaManagementException;
+import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.util.GrafanaUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

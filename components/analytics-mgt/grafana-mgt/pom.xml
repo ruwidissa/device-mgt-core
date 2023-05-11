@@ -34,9 +34,9 @@
 
 
     <modules>
-        <module>io.entgra.analytics.mgt.grafana.proxy.core</module>
-        <module>io.entgra.analytics.mgt.grafana.proxy.common</module>
-        <module>io.entgra.analytics.mgt.grafana.proxy.api</module>
+        <module>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core</module>
+        <module>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common</module>
+        <module>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api</module>
     </modules>
 
 </project>

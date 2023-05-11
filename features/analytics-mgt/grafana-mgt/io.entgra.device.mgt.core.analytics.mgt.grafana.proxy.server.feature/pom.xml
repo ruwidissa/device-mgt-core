@@ -38,11 +38,11 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.analytics.mgt.grafana.proxy.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.analytics.mgt.grafana.proxy.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.googlecode.plist</groupId>
@@ -114,10 +114,10 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.analytics.mgt.grafana.proxy.common:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.analytics.mgt.grafana.proxy.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
                                     com.googlecode.plist:dd-plist:${googlecode.plist.version}
