@@ -99,7 +99,7 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.apimgt.application.extension</artifactId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.application.extension</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -18,8 +18,8 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.api;
 
 import io.swagger.annotations.ApiParam;
-import org.wso2.carbon.apimgt.annotations.api.Scope;
-import org.wso2.carbon.apimgt.annotations.api.Scopes;
+import io.entgra.device.mgt.core.apimgt.annotations.Scope;
+import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Adapter;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventStream;

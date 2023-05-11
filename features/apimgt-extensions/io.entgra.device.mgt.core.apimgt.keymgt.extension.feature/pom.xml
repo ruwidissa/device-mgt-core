@@ -35,7 +35,7 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.apimgt.keymgt.extension</artifactId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension</artifactId>
             <version>${carbon.device.mgt.version}</version>
         </dependency>
     </dependencies>
@@ -81,7 +81,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>io.entgra.device.mgt.core</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.keymgt.extension.api</artifactId>
+                                    <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension.api</artifactId>
                                     <type>war</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/maven-shared-archive-resources/webapps/</outputDirectory>
@@ -114,7 +114,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.apimgt.keymgt.extension:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.keymgt.extension:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                             <importBundles>

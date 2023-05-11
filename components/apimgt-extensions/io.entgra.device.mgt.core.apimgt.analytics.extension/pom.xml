@@ -70,7 +70,7 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
                         <Bundle-Description>API Management Application Bundle</Bundle-Description>
-                        <Private-Package>org.wso2.carbon.apimgt.application.extension.internal</Private-Package>
+                        <Private-Package>io.entgra.device.mgt.core.apimgt.application.extension.internal</Private-Package>
                         <Import-Packages>
                             io.entgra.device.mgt.core.apimgt.analytics.extension.dto,
                             org.apache.velocity,

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.config.permission;
 
+import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.swagger.annotations.SwaggerDefinition;
 import org.apache.catalina.core.StandardContext;
 import org.apache.commons.logging.Log;
@@ -87,8 +88,8 @@ public class AnnotationProcessor {
     private Class<io.swagger.annotations.AuthorizationScope> authorizationScopeClass;
     private Class<io.swagger.annotations.Extension> extensionClass;
     private Class<io.swagger.annotations.ExtensionProperty> extensionPropertyClass;
-    private Class<org.wso2.carbon.apimgt.annotations.api.Scope> scopeClass;
-    private Class<org.wso2.carbon.apimgt.annotations.api.Scopes> scopesClass;
+    private Class<io.entgra.device.mgt.core.apimgt.annotations.Scope> scopeClass;
+    private Class<Scopes> scopesClass;
     private Map<String, Scope> apiScopes;
 
 
@@ -110,10 +111,10 @@ public class AnnotationProcessor {
                     .loadClass((io.swagger.annotations.Extension.class.getName()));
             extensionPropertyClass = (Class<io.swagger.annotations.ExtensionProperty>)classLoader
                     .loadClass(io.swagger.annotations.ExtensionProperty.class.getName());
-            scopeClass = (Class<org.wso2.carbon.apimgt.annotations.api.Scope>) classLoader
-                    .loadClass(org.wso2.carbon.apimgt.annotations.api.Scope.class.getName());
-            scopesClass = (Class<org.wso2.carbon.apimgt.annotations.api.Scopes>) classLoader
-                    .loadClass(org.wso2.carbon.apimgt.annotations.api.Scopes.class.getName());
+            scopeClass = (Class<io.entgra.device.mgt.core.apimgt.annotations.Scope>) classLoader
+                    .loadClass(io.entgra.device.mgt.core.apimgt.annotations.Scope.class.getName());
+            scopesClass = (Class<Scopes>) classLoader
+                    .loadClass(Scopes.class.getName());
 
         } catch (ClassNotFoundException e) {
             log.error("An error has occurred while loading classes ", e);

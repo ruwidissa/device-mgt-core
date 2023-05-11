@@ -54,7 +54,7 @@ utility = function () {
     };
 
     publicMethods.getAPIManagementProviderService = function () {
-        return getOsgiService('org.wso2.carbon.apimgt.application.extension.APIManagementProviderService');
+        return getOsgiService('io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService');
     };
 
     publicMethods.getUserManagementService = function () {

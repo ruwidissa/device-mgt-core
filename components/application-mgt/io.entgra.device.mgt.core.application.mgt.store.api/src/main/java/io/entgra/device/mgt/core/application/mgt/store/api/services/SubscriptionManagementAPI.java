@@ -27,8 +27,8 @@ import io.swagger.annotations.ExtensionProperty;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
-import org.wso2.carbon.apimgt.annotations.api.Scope;
-import org.wso2.carbon.apimgt.annotations.api.Scopes;
+import io.entgra.device.mgt.core.apimgt.annotations.Scope;
+import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 

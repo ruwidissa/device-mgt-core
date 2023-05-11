@@ -48,12 +48,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.keymgt.extension.DCRResponse;
-import org.wso2.carbon.apimgt.keymgt.extension.TokenRequest;
-import org.wso2.carbon.apimgt.keymgt.extension.TokenResponse;
-import org.wso2.carbon.apimgt.keymgt.extension.exception.KeyMgtException;
-import org.wso2.carbon.apimgt.keymgt.extension.service.KeyMgtService;
-import org.wso2.carbon.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.DCRResponse;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.*;
@@ -867,7 +867,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-        } catch (org.wso2.carbon.apimgt.keymgt.extension.exception.BadRequestException e) {
+        } catch (io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.BadRequestException e) {
             String msg = "Error occurred while generating token, device id : " +  id + ", device type : " + type;
             log.error(msg, e);
             return Response.serverError().entity(

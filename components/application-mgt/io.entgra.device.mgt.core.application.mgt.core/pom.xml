@@ -80,7 +80,7 @@
                             org.wso2.carbon.base,
                             com.dd.*,
                             org.wso2.carbon.identity.jwt.client.extension.*,
-                            org.wso2.carbon.apimgt.application.extension.*,
+                            io.entgra.device.mgt.core.apimgt.application.extension.*,
                             org.apache.commons.httpclient,
                             org.apache.commons.httpclient.methods,
                             org.apache.commons.validator.routines
@@ -284,7 +284,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.apimgt.application.extension</artifactId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.application.extension</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>org.wso2.carbon.registry.servlet</artifactId>
@@ -355,6 +355,12 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>org.wso2.carbon.identity.jwt.client.extension</artifactId>
+        </dependency>
+        <!--nTask dependencies-->
+        <dependency>
+            <groupId>org.wso2.carbon.commons</groupId>
+            <artifactId>org.wso2.carbon.ntask.core</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

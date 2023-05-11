@@ -2,8 +2,8 @@ package io.entgra.device.mgt.core.certificate.mgt.api;
 
 import io.swagger.annotations.*;
 
-import org.wso2.carbon.apimgt.annotations.api.Scope;
-import org.wso2.carbon.apimgt.annotations.api.Scopes;
+import io.entgra.device.mgt.core.apimgt.annotations.Scope;
+import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.certificate.mgt.api.beans.ErrorResponse;
 
 import javax.ws.rs.Consumes;

@@ -37,11 +37,11 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.apimgt.webapp.publisher</artifactId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.webapp.publisher</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.apimgt.annotations</artifactId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.scannotation</groupId>
@@ -98,7 +98,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>io.entgra.device.mgt.core</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.application.extension.api</artifactId>
+                                    <artifactId>io.entgra.device.mgt.core.apimgt.application.extension.api</artifactId>
                                     <type>war</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>
@@ -133,13 +133,13 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.apimgt.webapp.publisher:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.webapp.publisher:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.apimgt.application.extension:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.application.extension:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.apimgt.annotations:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.annotations:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
                                     org.wso2.orbit.org.scannotation:scannotation:${scannotation.version}

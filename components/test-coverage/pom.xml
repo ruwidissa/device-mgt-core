@@ -60,17 +60,17 @@
         <!-- api-mgt extensions component related properties -->
         <api.extensions>apimgt-extensions</api.extensions>
         <api.extension.application>
-            ${basedir}/../${api.extensions}/org.wso2.carbon.apimgt.application.extension
+            ${basedir}/../${api.extensions}/io.entgra.device.mgt.core.apimgt.application.extension
         </api.extension.application>
         <api.extension.application.api>
-            ${basedir}/../${api.extensions}/org.wso2.carbon.apimgt.application.extension.api
+            ${basedir}/../${api.extensions}/io.entgra.device.mgt.core.apimgt.application.extension.api
         </api.extension.application.api>
         <api.extension.handlers>${basedir}/../${api.extensions}/org.wso2.carbon.apimgt.handlers</api.extension.handlers>
         <api.extension.client>
             ${basedir}/../${api.extensions}/org.wso2.carbon.apimgt.integration.client
         </api.extension.client>
         <api.extension.webapp>
-            ${basedir}/../${api.extensions}/org.wso2.carbon.apimgt.webapp.publisher
+            ${basedir}/../${api.extensions}/io.entgra.device.mgt.core.apimgt.webapp.publisher
         </api.extension.webapp>
 
         <!-- device-mgt extensions component related properties -->
@@ -291,7 +291,7 @@
                                                             <fileset dir="${api.extension.client}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.apimgt.application.extension">
+                                                    <group name="io.entgra.device.mgt.core.apimgt.application.extension">
                                                         <classfiles>
                                                             <fileset dir="${api.extension.application}/${target}/${classes}" />
                                                         </classfiles>
@@ -299,7 +299,7 @@
                                                             <fileset dir="${api.extension.application}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.apimgt.application.extension.api">
+                                                    <group name="io.entgra.device.mgt.core.apimgt.application.extension.api">
                                                         <classfiles>
                                                             <fileset dir="${api.extension.application.api}/${target}/${classes}" />
                                                         </classfiles>
@@ -315,7 +315,7 @@
                                                             <fileset dir="${api.extension.handlers}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.apimgt.webapp.publisher">
+                                                    <group name="io.entgra.device.mgt.core.apimgt.webapp.publisher">
                                                         <classfiles>
                                                             <fileset dir="${api.extension.webapp}/${target}/${classes}" />
                                                         </classfiles>
