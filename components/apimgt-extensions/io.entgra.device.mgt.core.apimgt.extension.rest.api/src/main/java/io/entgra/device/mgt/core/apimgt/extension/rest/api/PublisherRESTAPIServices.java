@@ -24,7 +24,13 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIService
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.Documentation;
 
 import java.util.List;
 
@@ -54,10 +60,12 @@ public interface PublisherRESTAPIServices {
     boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean saveAsyncApiDefinition(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid, String asyncApiDefinition)
+    boolean saveAsyncApiDefinition(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
+                                   String asyncApiDefinition)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+    JSONObject getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                                  APIIdentifier apiIdentifier)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean addApiSpecificMediationPolicy(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
@@ -95,7 +103,8 @@ public interface PublisherRESTAPIServices {
                               APIRevision apiRevision, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+    JSONObject getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                 APIIdentifier apiIdentifier)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean deleteDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
@@ -103,7 +112,7 @@ public interface PublisherRESTAPIServices {
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     Documentation addDocumentation(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                         APIIdentifier apiIdentifier, Documentation documentation)
+                                   APIIdentifier apiIdentifier, Documentation documentation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean addDocumentationContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
