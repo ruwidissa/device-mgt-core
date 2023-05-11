@@ -38,11 +38,11 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.application.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.application.mgt.common</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.application.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.application.mgt.core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.googlecode.plist</groupId>
@@ -147,10 +147,10 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.application.mgt.common:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.application.mgt.common:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.application.mgt.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.application.mgt.core:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
                                     com.googlecode.plist:dd-plist:${googlecode.plist.version}

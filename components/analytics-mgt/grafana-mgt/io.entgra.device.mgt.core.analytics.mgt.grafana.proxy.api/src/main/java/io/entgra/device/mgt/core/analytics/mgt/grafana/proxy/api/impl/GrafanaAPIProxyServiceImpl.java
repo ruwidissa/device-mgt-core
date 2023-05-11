@@ -50,7 +50,7 @@ public class GrafanaAPIProxyServiceImpl implements GrafanaAPIProxyService {
         } catch (RefererNotValid e) {
             return GrafanaRequestHandlerUtil.constructInvalidReferer();
         } catch (SQLException | IOException | DBConnectionException |
-                io.entgra.application.mgt.common.exception.DBConnectionException e) {
+                 io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException e) {
             log.error(e);
             return GrafanaRequestHandlerUtil.constructInternalServerError(e, e.getMessage());
         }

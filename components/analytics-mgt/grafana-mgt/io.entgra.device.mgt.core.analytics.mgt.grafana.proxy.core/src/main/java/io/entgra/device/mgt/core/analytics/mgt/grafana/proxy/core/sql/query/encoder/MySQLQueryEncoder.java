@@ -41,7 +41,7 @@ public class MySQLQueryEncoder implements QueryEncoder {
 
     @Override
     public String encode(PreparedQuery preparedQuery) throws SQLException, DBConnectionException,
-            io.entgra.application.mgt.common.exception.DBConnectionException {
+            io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException {
         try {
             Connection con = GrafanaDatasourceConnectionFactory.getConnection(databaseName);
             PreparedStatement stmt = con.prepareStatement(preparedQuery.getPreparedSQL());

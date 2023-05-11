@@ -35,8 +35,8 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.util;
 
-import io.entgra.application.mgt.common.services.ApplicationManager;
-import io.entgra.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.java.security.SSLProtocolSocketFactory;

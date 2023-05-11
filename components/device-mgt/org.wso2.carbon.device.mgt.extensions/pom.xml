@@ -83,7 +83,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.application.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.application.mgt.common</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

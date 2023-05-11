@@ -17,7 +17,7 @@
  */
 package io.entgra.device.mgt.core.tenant.mgt.core.internal;
 
-import io.entgra.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerService;
 import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
 import io.entgra.device.mgt.core.tenant.mgt.core.impl.TenantManagerImpl;
@@ -34,7 +34,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 /**
  * @scr.component name="io.entgra.device.mgt.core.tenant.manager" immediate="true"
  * @scr.reference name="org.wso2.carbon.application.mgt.service"
- * interface="io.entgra.application.mgt.common.services.ApplicationManager"
+ * interface="io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setApplicationManager"

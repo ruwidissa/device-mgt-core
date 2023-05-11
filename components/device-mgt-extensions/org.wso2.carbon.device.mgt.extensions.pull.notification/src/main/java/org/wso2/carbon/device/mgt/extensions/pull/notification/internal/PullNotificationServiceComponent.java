@@ -21,7 +21,7 @@ package org.wso2.carbon.device.mgt.extensions.pull.notification.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import io.entgra.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 
@@ -40,7 +40,7 @@ import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
  * bind="setPolicyManagerService"
  * unbind="unsetPolicyManagerService"
  * @scr.reference name="org.wso2.carbon.application.mgt.service"
- * interface="io.entgra.application.mgt.common.services.ApplicationManager"
+ * interface="io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setApplicationManagerService"

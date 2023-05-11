@@ -17,7 +17,7 @@
  */
 package io.entgra.device.mgt.core.tenant.mgt.core.internal;
 
-import io.entgra.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.user.core.service.RealmService;

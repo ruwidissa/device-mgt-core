@@ -39,25 +39,21 @@
 <!--        <module>components/device-mgt-extensions</module>-->
 <!--        <module>components/identity-extensions</module>-->
 <!--        <module>components/apimgt-extensions</module>-->
-<!--        <module>components/application-mgt</module>-->
-
+        <module>components/application-mgt</module>
         <module>components/policy-mgt</module>
         <module>components/certificate-mgt</module>
         <module>components/ui-request-interceptor</module>
         <module>components/transport-mgt</module>
         <module>components/analytics-mgt</module>
         <module>components/webapp-authenticator-framework</module>
-
 <!--        <module>components/logger</module>-->
-
         <module>components/task-mgt</module>
         <module>components/subtype-mgt</module>
         <module>components/tenant-mgt</module>
         <module>components/operation-template-mgt</module>
-
 <!--        <module>features/device-mgt</module>-->
 <!--        <module>features/apimgt-extensions</module>-->
-<!--        <module>features/application-mgt</module>-->
+        <module>features/application-mgt</module>
         <module>features/policy-mgt</module>
         <module>features/certificate-mgt</module>
 <!--        <module>features/heartbeat-management</module>-->
@@ -192,27 +188,27 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.application.mgt.addons</artifactId>
+                <artifactId>io.entgra.device.mgt.core.application.mgt.addons</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.application.mgt.core</artifactId>
+                <artifactId>io.entgra.device.mgt.core.application.mgt.core</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.application.mgt.common</artifactId>
+                <artifactId>io.entgra.device.mgt.core.application.mgt.common</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.application.mgt.publisher.api</artifactId>
+                <artifactId>io.entgra.device.mgt.core.application.mgt.publisher.api</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.application.mgt.store.api</artifactId>
+                <artifactId>io.entgra.device.mgt.core.application.mgt.store.api</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>

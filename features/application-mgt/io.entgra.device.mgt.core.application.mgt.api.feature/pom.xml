@@ -49,7 +49,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>io.entgra.device.mgt.core</groupId>
-                                    <artifactId>io.entgra.application.mgt.publisher.api
+                                    <artifactId>io.entgra.device.mgt.core.application.mgt.publisher.api
                                     </artifactId>
                                     <version>${project.version}</version>
                                     <type>war</type>
@@ -72,7 +72,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>io.entgra.device.mgt.core</groupId>
-                                    <artifactId>io.entgra.application.mgt.store.api
+                                    <artifactId>io.entgra.device.mgt.core.application.mgt.store.api
                                     </artifactId>
                                     <version>${project.version}</version>
                                     <type>war</type>
@@ -95,7 +95,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>io.entgra.device.mgt.core</groupId>
-                                    <artifactId>io.entgra.application.mgt.api
+                                    <artifactId>io.entgra.device.mgt.core.application.mgt.api
                                     </artifactId>
                                     <version>${project.version}</version>
                                     <type>war</type>

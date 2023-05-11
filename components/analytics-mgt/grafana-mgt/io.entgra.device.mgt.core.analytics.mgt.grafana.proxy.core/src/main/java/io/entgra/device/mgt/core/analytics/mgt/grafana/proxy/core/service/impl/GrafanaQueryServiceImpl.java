@@ -51,7 +51,7 @@ public class GrafanaQueryServiceImpl implements GrafanaQueryService {
     }
 
     public void buildSafeQuery(JsonObject queryRequestBody, String dashboardUID, String panelId, URI requestUri)
-            throws IOException, SQLException, GrafanaManagementException, DBConnectionException, io.entgra.application.mgt.common.exception.DBConnectionException {
+            throws IOException, SQLException, GrafanaManagementException, DBConnectionException, io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException {
         JsonArray queries = queryRequestBody.getAsJsonArray(GrafanaConstants.QUERY_BODY_QUERIES_KEY);
         for (int i = 0; i < queries.size(); i++) {
             JsonObject queryObj = queries.get(i).getAsJsonObject();
@@ -118,7 +118,7 @@ public class GrafanaQueryServiceImpl implements GrafanaQueryService {
 
     private void encodeQuery(JsonObject queryObj, Datasource datasource, String queryTemplate, String rawSql)
             throws SQLException, GrafanaManagementException, DBConnectionException,
-            io.entgra.application.mgt.common.exception.DBConnectionException {
+            io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException {
         PreparedQuery pq = GrafanaPreparedQueryBuilder.build(queryTemplate, rawSql);
         String encodedQuery = QueryEncoderFactory.createEncoder(datasource.getType(), datasource.getName()).encode(pq);
         CacheManager.getInstance().getEncodedQueryCache().put(rawSql, encodedQuery);

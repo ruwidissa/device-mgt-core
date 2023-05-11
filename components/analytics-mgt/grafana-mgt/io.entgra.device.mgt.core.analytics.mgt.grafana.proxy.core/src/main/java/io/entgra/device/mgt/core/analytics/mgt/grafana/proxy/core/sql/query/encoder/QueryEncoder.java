@@ -24,6 +24,6 @@ import java.sql.SQLException;
 
 public interface QueryEncoder {
 
-    String encode(PreparedQuery preparedQuery) throws SQLException, DBConnectionException, io.entgra.application.mgt.common.exception.DBConnectionException;
+    String encode(PreparedQuery preparedQuery) throws SQLException, DBConnectionException, io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
 
 }

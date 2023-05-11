@@ -37,12 +37,12 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import com.google.gson.Gson;
-import io.entgra.application.mgt.common.ApplicationInstallResponse;
-import io.entgra.application.mgt.common.SubscriptionType;
-import io.entgra.application.mgt.common.exception.SubscriptionManagementException;
-import io.entgra.application.mgt.common.services.ApplicationManager;
-import io.entgra.application.mgt.common.services.SubscriptionManager;
-import io.entgra.application.mgt.core.util.HelperUtil;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
+import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
+import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -1045,7 +1045,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (SubscriptionManagementException |
-                io.entgra.application.mgt.common.exception.ApplicationManagementException
+                io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException
                 e) {
             String msg = "Error occurred while getting the " + type + "application is of device " + id + "subscribed " +
                     "at entgra store";
@@ -1598,7 +1598,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             String msg = "Error occurred when updating operation of device " + deviceIdentifier;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (io.entgra.application.mgt.common.exception.ApplicationManagementException e) {
+        } catch (io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException e) {
             String msg = "Error occurred when updating the application subscription status of the operation. " +
                     "The device identifier is: " + deviceIdentifier;
             log.error(msg, e);

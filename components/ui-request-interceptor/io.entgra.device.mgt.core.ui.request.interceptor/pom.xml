@@ -165,7 +165,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.application.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.application.mgt.core</artifactId>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>

@@ -26,35 +26,35 @@
         {% if application_mgt_conf.extension.isapplication_manager is defined %}
             <ClassName>{{application_mgt_conf.extension.isapplication_manager}}</ClassName>
         {% else %}
-            <ClassName>io.entgra.application.mgt.core.impl.SPApplicationManagerImpl</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.impl.SPApplicationManagerImpl</ClassName>
         {% endif %}
         </Extension>
         <Extension name="ApplicationManager">
         {% if application_mgt_conf.extension.application_manager is defined %}
             <ClassName>{{application_mgt_conf.extension.application_manager}}</ClassName>
         {% else %}
-            <ClassName>io.entgra.application.mgt.core.impl.ApplicationManagerImpl</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.impl.ApplicationManagerImpl</ClassName>
         {% endif %}
         </Extension>
         <Extension name="ReviewManager">
         {% if application_mgt_conf.extension.review_manager is defined %}
             <ClassName>{{application_mgt_conf.extension.review_manager}}</ClassName>
         {% else %}
-            <ClassName>io.entgra.application.mgt.core.impl.ReviewManagerImpl</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.impl.ReviewManagerImpl</ClassName>
         {% endif %}
         </Extension>
         <Extension name="LifecycleStateManager">
         {% if application_mgt_conf.extension.life_cycle_state_manager is defined %}
             <ClassName>{{application_mgt_conf.extension.life_cycle_state_manager}}</ClassName>
         {% else %}
-            <ClassName>io.entgra.application.mgt.core.lifecycle.LifecycleStateManager</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager</ClassName>
         {% endif %}
         </Extension>
         <Extension name="SubscriptionManager">
          {% if application_mgt_conf.extension.subscription_manager is defined %}
             <ClassName>{{application_mgt_conf.extension.subscription_manager}}</ClassName>
          {% else %}
-            <ClassName>io.entgra.application.mgt.core.impl.SubscriptionManagerImpl</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.impl.SubscriptionManagerImpl</ClassName>
          {% endif %}
         </Extension>
         <Extension name="ApplicationStorageManager">
@@ -68,7 +68,7 @@
             </Parameters>
             {% endif %}
          {% else %}
-            <ClassName>io.entgra.application.mgt.core.impl.ApplicationStorageManagerImpl</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.impl.ApplicationStorageManagerImpl</ClassName>
             <Parameters>
                 <Parameter name="StoragePath">repository/resources/apps/</Parameter>
                 <Parameter name="MaxScreenShotCount">6</Parameter>

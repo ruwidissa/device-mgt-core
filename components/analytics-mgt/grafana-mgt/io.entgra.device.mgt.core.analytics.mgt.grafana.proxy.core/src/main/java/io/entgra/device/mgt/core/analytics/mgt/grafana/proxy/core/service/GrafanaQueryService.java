@@ -29,6 +29,6 @@ public interface GrafanaQueryService {
 
     void buildSafeQuery(JsonObject queryRequestBody, String dashboardUID, String panelId,
                                URI requestUri) throws IOException, SQLException, GrafanaManagementException,
-            DBConnectionException, io.entgra.application.mgt.common.exception.DBConnectionException;
+            DBConnectionException, io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
 
 }

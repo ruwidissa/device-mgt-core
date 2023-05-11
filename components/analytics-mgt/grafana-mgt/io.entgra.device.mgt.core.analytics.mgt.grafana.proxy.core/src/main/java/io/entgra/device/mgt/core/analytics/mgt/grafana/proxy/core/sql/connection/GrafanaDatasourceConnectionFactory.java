@@ -1,8 +1,8 @@
 package io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.sql.connection;
 
-import io.entgra.application.mgt.core.config.Configuration;
-import io.entgra.application.mgt.core.config.ConfigurationManager;
-import io.entgra.application.mgt.core.util.ConnectionManagerUtil;
+import io.entgra.device.mgt.core.application.mgt.core.config.Configuration;
+import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
+import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
@@ -24,7 +24,7 @@ public class GrafanaDatasourceConnectionFactory {
     private static final Configuration applicationMgtConfig = ConfigurationManager.getInstance().getConfiguration();
 
     public static Connection getConnection(String databaseName) throws SQLException, DBConnectionException,
-            io.entgra.application.mgt.common.exception.DBConnectionException {
+            io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException {
         if(databaseName.equals(getReportManagementDatasourceName())) {
             ReportMgtConnectionManager.openDBConnection();
             return ReportMgtConnectionManager.getDBConnection();

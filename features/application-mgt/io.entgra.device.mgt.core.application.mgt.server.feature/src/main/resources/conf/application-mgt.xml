@@ -23,22 +23,22 @@
 
     <Extensions>
         <Extension name="SPApplicationManager">
-            <ClassName>io.entgra.application.mgt.core.impl.SPApplicationManagerImpl</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.impl.SPApplicationManagerImpl</ClassName>
         </Extension>
         <Extension name="ApplicationManager">
-            <ClassName>io.entgra.application.mgt.core.impl.ApplicationManagerImpl</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.impl.ApplicationManagerImpl</ClassName>
         </Extension>
         <Extension name="ReviewManager">
-            <ClassName>io.entgra.application.mgt.core.impl.ReviewManagerImpl</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.impl.ReviewManagerImpl</ClassName>
         </Extension>
         <Extension name="LifecycleStateManager">
-            <ClassName>io.entgra.application.mgt.core.lifecycle.LifecycleStateManager</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager</ClassName>
         </Extension>
         <Extension name="SubscriptionManager">
-            <ClassName>io.entgra.application.mgt.core.impl.SubscriptionManagerImpl</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.impl.SubscriptionManagerImpl</ClassName>
         </Extension>
         <Extension name="ApplicationStorageManager">
-            <ClassName>io.entgra.application.mgt.core.impl.ApplicationStorageManagerImpl</ClassName>
+            <ClassName>io.entgra.device.mgt.core.application.mgt.core.impl.ApplicationStorageManagerImpl</ClassName>
             <Parameters>
                 <Parameter name="StoragePath">repository/resources/apps/</Parameter>
                 <Parameter name="MaxScreenShotCount">6</Parameter>

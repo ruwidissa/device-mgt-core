@@ -17,9 +17,9 @@
  */
 package io.entgra.device.mgt.core.tenant.mgt.core.impl;
 
-import io.entgra.application.mgt.common.exception.ApplicationManagementException;
-import io.entgra.application.mgt.core.config.ConfigurationManager;
-import io.entgra.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
 import io.entgra.device.mgt.core.tenant.mgt.common.exception.TenantMgtException;
 import io.entgra.device.mgt.core.tenant.mgt.core.internal.TenantMgtDataHolder;
