@@ -52,7 +52,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.entgra.device.mgt.core</groupId>
-			<artifactId>org.wso2.carbon.policy.mgt.core</artifactId>
+			<artifactId>io.entgra.device.mgt.core.policy.mgt.core</artifactId>
 		</dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
@@ -87,8 +87,8 @@
                             org.apache.commons.logging,
                             org.wso2.carbon.device.mgt.common.*,
                             org.wso2.carbon.device.mgt.core.service
-                            org.wso2.carbon.policy.mgt.core.*,
-                            org.wso2.carbon.policy.mgt.core,
+                            io.entgra.device.mgt.core.policy.mgt.core.*,
+                            io.entgra.device.mgt.core.policy.mgt.core,
                             com.google.gson,
                             org.wso2.carbon.device.mgt.core.service.*,
                             io.entgra.application.mgt.common.*,

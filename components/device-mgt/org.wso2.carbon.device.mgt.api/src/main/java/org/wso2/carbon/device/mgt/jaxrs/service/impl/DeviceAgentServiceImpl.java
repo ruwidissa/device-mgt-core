@@ -49,8 +49,8 @@ import org.wso2.carbon.event.stream.stub.EventStreamAdminServiceStub;
 import org.wso2.carbon.event.stream.stub.types.EventStreamAttributeDto;
 import org.wso2.carbon.event.stream.stub.types.EventStreamDefinitionDto;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
-import org.wso2.carbon.policy.mgt.common.PolicyAdministratorPoint;
-import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyAdministratorPoint;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.validation.Valid;

@@ -19,7 +19,7 @@
 package org.wso2.carbon.policy.evaluator;
 
 import org.wso2.carbon.policy.evaluator.spi.PDPService;
-import org.wso2.carbon.policy.mgt.common.Feature;
+import io.entgra.device.mgt.core.policy.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 
 import java.util.List;

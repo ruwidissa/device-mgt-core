@@ -63,7 +63,7 @@ import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceToGroupsAssignment;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.GroupManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
-import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
+import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;

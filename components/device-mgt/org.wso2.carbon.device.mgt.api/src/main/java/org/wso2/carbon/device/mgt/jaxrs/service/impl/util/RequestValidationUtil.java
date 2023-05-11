@@ -52,7 +52,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
 import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
-import org.wso2.carbon.policy.mgt.common.PolicyPayloadValidator;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyPayloadValidator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -336,7 +336,7 @@ public class RequestValidationUtil {
         }
     }
 
-    public static List<org.wso2.carbon.policy.mgt.common.ProfileFeature> validatePolicyDetails(
+    public static List<io.entgra.device.mgt.core.policy.mgt.common.ProfileFeature> validatePolicyDetails(
             PolicyWrapper policyWrapper) {
         if (policyWrapper == null) {
             String msg = "Found an empty policy";
@@ -348,7 +348,7 @@ public class RequestValidationUtil {
         return validateProfileFeatures(policyWrapper.getProfile().getProfileFeaturesList());
     }
 
-    public static List<org.wso2.carbon.policy.mgt.common.ProfileFeature> validateProfileFeatures
+    public static List<io.entgra.device.mgt.core.policy.mgt.common.ProfileFeature> validateProfileFeatures
             (List<ProfileFeature> profileFeatures) {
 
         if (profileFeatures.isEmpty()) {
@@ -357,7 +357,7 @@ public class RequestValidationUtil {
             throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
                     .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         } else {
-            List<org.wso2.carbon.policy.mgt.common.ProfileFeature> features = new ArrayList<>();
+            List<io.entgra.device.mgt.core.policy.mgt.common.ProfileFeature> features = new ArrayList<>();
             String deviceType = null;
             for (ProfileFeature profileFeature : profileFeatures) {
                 if (StringUtils.isBlank(profileFeature.getDeviceTypeId())) {
@@ -373,7 +373,7 @@ public class RequestValidationUtil {
                             .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
                 }
                 deviceType = profileFeature.getDeviceTypeId();
-                org.wso2.carbon.policy.mgt.common.ProfileFeature feature = new org.wso2.carbon.policy.mgt.common.ProfileFeature();
+                io.entgra.device.mgt.core.policy.mgt.common.ProfileFeature feature = new io.entgra.device.mgt.core.policy.mgt.common.ProfileFeature();
                 feature.setContent(profileFeature.getContent());
                 feature.setDeviceType(profileFeature.getDeviceTypeId());
                 feature.setFeatureCode(profileFeature.getFeatureCode());

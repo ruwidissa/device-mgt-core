@@ -62,7 +62,7 @@ utility = function () {
     };
 
     publicMethods.getPolicyManagementService = function () {
-        return getOsgiService("org.wso2.carbon.policy.mgt.core.PolicyManagerService");
+        return getOsgiService("io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService");
     };
 
     publicMethods.getDeviceTypeConfig = function (deviceType) {

@@ -115,13 +115,13 @@
             ${basedir}/../${policy.mgt}/org.wso2.carbon.complex.policy.decision.point
         </policy.mgt.complex.point>
         <policy.mgt.decision.point>
-            ${basedir}/../${policy.mgt}/org.wso2.carbon.policy.decision.point
+            ${basedir}/../${policy.mgt}/io.entgra.device.mgt.core.policy.decision.point
         </policy.mgt.decision.point>
         <policy.mgt.information.point>
-            ${basedir}/../${policy.mgt}/org.wso2.carbon.policy.information.point
+            ${basedir}/../${policy.mgt}/io.entgra.device.mgt.core.policy.information.point
         </policy.mgt.information.point>
-        <policy.mgt.common>${basedir}/../${policy.mgt}/org.wso2.carbon.policy.mgt.common</policy.mgt.common>
-        <policy.mgt.core>${basedir}/../${policy.mgt}/org.wso2.carbon.policy.mgt.core</policy.mgt.core>
+        <policy.mgt.common>${basedir}/../${policy.mgt}/io.entgra.device.mgt.core.policy.mgt.common</policy.mgt.common>
+        <policy.mgt.core>${basedir}/../${policy.mgt}/io.entgra.device.mgt.core.policy.mgt.core</policy.mgt.core>
 
         <!-- Webapp authenticator framework component related properties -->
         <webapp.authenticatore.frmework>
@@ -418,7 +418,7 @@
                                                             <fileset dir="${policy.mgt.complex.point}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.policy.decision.point">
+                                                    <group name="io.entgra.device.mgt.core.policy.decision.point">
                                                         <classfiles>
                                                             <fileset dir="${policy.mgt.decision.point}/${target}/${classes}" />
                                                         </classfiles>
@@ -426,7 +426,7 @@
                                                             <fileset dir="${policy.mgt.decision.point}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.policy.information.point">
+                                                    <group name="io.entgra.device.mgt.core.policy.information.point">
                                                         <classfiles>
                                                             <fileset dir="${policy.mgt.information.point}/${target}/${classes}" />
                                                         </classfiles>
@@ -435,7 +435,7 @@
 
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.policy.mgt.common">
+                                                    <group name="io.entgra.device.mgt.core.policy.mgt.common">
                                                         <classfiles>
                                                             <fileset dir="${policy.mgt.common}/${target}/${classes}" />
                                                         </classfiles>
@@ -443,7 +443,7 @@
                                                             <fileset dir="${policy.mgt.common}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.policy.mgt.core">
+                                                    <group name="io.entgra.device.mgt.core.policy.mgt.core">
                                                         <classfiles>
                                                             <fileset dir="${policy.mgt.core}/${target}/${classes}" />
                                                         </classfiles>

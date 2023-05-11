@@ -38,19 +38,19 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.policy.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.policy.mgt.core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.policy.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.policy.mgt.common</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.policy.decision.point</artifactId>
+            <artifactId>io.entgra.device.mgt.core.policy.decision.point</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.policy.information.point</artifactId>
+            <artifactId>io.entgra.device.mgt.core.policy.information.point</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.registry</groupId>
@@ -107,16 +107,16 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.policy.mgt.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.policy.mgt.core:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.policy.mgt.common:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.policy.mgt.common:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.policy.decision.point:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.policy.decision.point:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.policy.information.point:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.policy.information.point:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                             <importBundles>

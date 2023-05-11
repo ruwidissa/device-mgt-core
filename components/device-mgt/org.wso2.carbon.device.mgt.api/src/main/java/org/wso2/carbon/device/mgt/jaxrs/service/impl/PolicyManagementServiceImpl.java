@@ -56,9 +56,9 @@ import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtUtil;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
-import org.wso2.carbon.policy.mgt.common.PolicyAdministratorPoint;
-import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
-import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyAdministratorPoint;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
+import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -80,7 +80,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
     @POST
     @Override
     public Response addPolicy(@Valid PolicyWrapper policyWrapper) {
-        List<org.wso2.carbon.policy.mgt.common.ProfileFeature> features = RequestValidationUtil
+        List<io.entgra.device.mgt.core.policy.mgt.common.ProfileFeature> features = RequestValidationUtil
                 .validatePolicyDetails(policyWrapper);
         // validation failure results;
         if (!features.isEmpty()) {
@@ -230,7 +230,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
     @Path("/{id}")
     @Override
     public Response updatePolicy(@PathParam("id") int id, @Valid PolicyWrapper policyWrapper) {
-        List<org.wso2.carbon.policy.mgt.common.ProfileFeature> features = RequestValidationUtil
+        List<io.entgra.device.mgt.core.policy.mgt.common.ProfileFeature> features = RequestValidationUtil
                 .validatePolicyDetails(policyWrapper);
         // validation failure results;
         if (!features.isEmpty()) {
@@ -483,7 +483,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
     @Path("/validate")
     @Override
     public Response validatePolicy(List<ProfileFeature> profileFeaturesList) {
-        List<org.wso2.carbon.policy.mgt.common.ProfileFeature> features
+        List<io.entgra.device.mgt.core.policy.mgt.common.ProfileFeature> features
                 = RequestValidationUtil.validateProfileFeatures(profileFeaturesList);
         // validation failure results;
         if (!features.isEmpty()) {
