@@ -30,9 +30,9 @@ import org.wso2.carbon.apimgt.handlers.invoker.RESTInvoker;
 import org.wso2.carbon.apimgt.handlers.invoker.RESTResponse;
 import org.wso2.carbon.apimgt.handlers.utils.AuthConstants;
 import org.wso2.carbon.apimgt.handlers.utils.Utils;
-import org.wso2.carbon.certificate.mgt.core.dto.CertificateResponse;
-import org.wso2.carbon.certificate.mgt.core.exception.KeystoreException;
-import org.wso2.carbon.certificate.mgt.core.impl.CertificateGenerator;
+import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
+import io.entgra.device.mgt.core.certificate.mgt.core.impl.CertificateGenerator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.security.cert.CertificateEncodingException;

@@ -37,12 +37,12 @@
 
         <!-- certificate mgt component related properties -->
         <certificate.mgt>certificate-mgt</certificate.mgt>
-        <certificate.mgt.api>${basedir}/../${certificate.mgt}/org.wso2.carbon.certificate.mgt.api</certificate.mgt.api>
+        <certificate.mgt.api>${basedir}/../${certificate.mgt}/io.entgra.device.mgt.core.certificate.mgt.api</certificate.mgt.api>
         <certificate.mgt.cert.admin>
-            ${basedir}/../${certificate.mgt}/org.wso2.carbon.certificate.mgt.cert.admin.api
+            ${basedir}/../${certificate.mgt}/io.entgra.device.mgt.core.certificate.mgt.cert.admin.api
         </certificate.mgt.cert.admin>
         <certificate.mgt.core>
-            ${basedir}/../${certificate.mgt}/org.wso2.carbon.certificate.mgt.core
+            ${basedir}/../${certificate.mgt}/io.entgra.device.mgt.core.certificate.mgt.core
         </certificate.mgt.core>
 
         <!-- Device mgt component related properties -->
@@ -206,7 +206,7 @@
                                             </executiondata>
                                             <structure name="Carbon Device Management Component Coverage Report">
                                                 <group name="certificate-mgt">
-                                                    <group name="org.wso2.carbon.certificate.mgt.core">
+                                                    <group name="io.entgra.device.mgt.core.certificate.mgt.core">
                                                         <classfiles>
                                                             <fileset dir="${certificate.mgt.core}/${target}/${classes}" />
                                                         </classfiles>
@@ -214,7 +214,7 @@
                                                             <fileset dir="${certificate.mgt.core}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.certificate.mgt.api">
+                                                    <group name="io.entgra.device.mgt.core.certificate.mgt.api">
                                                         <classfiles>
                                                             <fileset dir="${certificate.mgt.api}/${target}/${classes}" />
                                                         </classfiles>
@@ -222,7 +222,7 @@
                                                             <fileset dir="${certificate.mgt.api}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.certificate.mgt.cert.admin.api">
+                                                    <group name="io.entgra.device.mgt.core.certificate.mgt.cert.admin.api">
                                                         <classfiles>
                                                             <fileset dir="${certificate.mgt.cert.admin}/${target}/${classes}" />
                                                         </classfiles>

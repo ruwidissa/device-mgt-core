@@ -49,7 +49,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>io.entgra.device.mgt.core</groupId>
-                                    <artifactId>org.wso2.carbon.certificate.mgt.api
+                                    <artifactId>io.entgra.device.mgt.core.certificate.mgt.api
                                     </artifactId>
                                     <version>${project.version}</version>
                                     <type>war</type>

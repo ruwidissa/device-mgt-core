@@ -181,7 +181,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.certificate.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.certificate.mgt.core</artifactId>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>

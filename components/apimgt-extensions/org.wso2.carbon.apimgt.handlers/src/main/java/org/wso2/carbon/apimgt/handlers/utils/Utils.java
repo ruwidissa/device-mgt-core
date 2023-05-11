@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.handlers.beans.DCR;
 import org.wso2.carbon.apimgt.handlers.config.IOTServerConfiguration;
 import org.wso2.carbon.apimgt.handlers.invoker.RESTInvoker;
 import org.wso2.carbon.apimgt.handlers.invoker.RESTResponse;
-import org.wso2.carbon.certificate.mgt.core.service.CertificateManagementService;
+import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.CarbonUtils;
 

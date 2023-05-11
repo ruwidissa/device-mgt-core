@@ -26,11 +26,11 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.wso2.carbon.certificate.mgt.core.bean.Certificate;
-import org.wso2.carbon.certificate.mgt.core.exception.KeystoreException;
-import org.wso2.carbon.certificate.mgt.core.impl.CertificateGenerator;
-import org.wso2.carbon.certificate.mgt.core.util.CertificateManagementConstants;
-import org.wso2.carbon.certificate.mgt.core.util.CommonUtil;
+import io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
+import io.entgra.device.mgt.core.certificate.mgt.core.impl.CertificateGenerator;
+import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
+import io.entgra.device.mgt.core.certificate.mgt.core.util.CommonUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.security.auth.x500.X500Principal;
@@ -80,8 +80,8 @@ public class TestCertificateGenerator extends CertificateGenerator {
                     .getCertificate(certificateBuilder.build(contentSigner));
             certificate.verify(certificate.getPublicKey());
             List<Certificate> certificates = new ArrayList<>();
-            org.wso2.carbon.certificate.mgt.core.bean.Certificate certificateToStore =
-                    new org.wso2.carbon.certificate.mgt.core.bean.Certificate();
+            Certificate certificateToStore =
+                    new Certificate();
             certificateToStore.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             certificateToStore.setCertificate(certificate);
             certificates.add(certificateToStore);
