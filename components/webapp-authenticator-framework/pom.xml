@@ -34,7 +34,7 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.webapp.authenticator.framework</module>
+        <module>io.entgra.device.mgt.core.webapp.authenticator.framework</module>
     </modules>
 
     <build>

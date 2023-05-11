@@ -125,7 +125,7 @@
 
         <!-- Webapp authenticator framework component related properties -->
         <webapp.authenticatore.frmework>
-            ${basedir}/../webapp-authenticator-framework/org.wso2.carbon.webapp.authenticator.framework
+            ${basedir}/../webapp-authenticator-framework/io.entgra.device.mgt.core.webapp.authenticator.framework
         </webapp.authenticatore.frmework>
     </properties>
 

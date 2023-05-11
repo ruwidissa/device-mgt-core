@@ -1,0 +1,32 @@
+<WebappAuthenticatorConfig>
+	<Authenticators>
+		<Authenticator>
+			<Name>OAuth</Name>
+			<ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.OAuthAuthenticator</ClassName>
+            <Parameters>
+                <Parameter Name="TokenValidationEndpointUrl">https://localhost:9443</Parameter>
+                <Parameter Name="Username">admin</Parameter>
+                <Parameter Name="Password">admin</Parameter>
+                <Parameter Name="IsRemote">true</Parameter>
+                <Parameter Name="MaxConnectionsPerHost">10000</Parameter>
+                <Parameter Name="MaxTotalConnections">10000</Parameter>
+            </Parameters>
+		</Authenticator>
+        <Authenticator>
+            <Name>BasicAuth</Name>
+            <ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.BasicAuthAuthenticator</ClassName>
+        </Authenticator>
+        <Authenticator>
+            <Name>JWT</Name>
+            <ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.JWTAuthenticator</ClassName>
+        </Authenticator>
+        <Authenticator>
+            <Name>CertificateAuth</Name>
+            <ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.CertificateAuthenticator</ClassName>
+        </Authenticator>
+        <Authenticator>
+            <Name>OTPAuth</Name>
+            <ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.OneTimeTokenAuthenticator</ClassName>
+        </Authenticator>
+	</Authenticators>
+</WebappAuthenticatorConfig>

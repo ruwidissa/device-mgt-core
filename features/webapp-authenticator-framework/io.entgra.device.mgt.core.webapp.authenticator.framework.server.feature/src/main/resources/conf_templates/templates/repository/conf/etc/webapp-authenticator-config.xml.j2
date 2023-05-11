@@ -10,7 +10,7 @@
                 {% endfor %}
             </Parameters>
 			{% else %}
-			<ClassName>org.wso2.carbon.webapp.authenticator.framework.authenticator.OAuthAuthenticator</ClassName>
+			<ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.OAuthAuthenticator</ClassName>
             <Parameters>
                 <Parameter Name="IsRemote">false</Parameter>
                 <Parameter Name="TokenValidationEndpointUrl">https://${iot.keymanager.host}:${iot.keymanager.https.port}</Parameter>
@@ -31,7 +31,7 @@
                 {% endfor %}
             </Parameters>
             {% else %}
-            <ClassName>org.wso2.carbon.webapp.authenticator.framework.authenticator.BasicAuthAuthenticator</ClassName>
+            <ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.BasicAuthAuthenticator</ClassName>
             {% endif %}
         </Authenticator>
         <Authenticator>
@@ -44,7 +44,7 @@
                 {% endfor %}
             </Parameters>
             {% else %}
-            <ClassName>org.wso2.carbon.webapp.authenticator.framework.authenticator.JWTAuthenticator</ClassName>
+            <ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.JWTAuthenticator</ClassName>
             <Parameters>
 				<!--Issuers list and corresponding cert alias-->
 				<Parameter Name="default">wso2carbon</Parameter>
@@ -64,7 +64,7 @@
                 {% endfor %}
             </Parameters>
             {% else %}
-            <ClassName>org.wso2.carbon.webapp.authenticator.framework.authenticator.CertificateAuthenticator</ClassName>
+            <ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.CertificateAuthenticator</ClassName>
             {% endif %}
         </Authenticator>
         <Authenticator>
@@ -77,7 +77,7 @@
                 {% endfor %}
             </Parameters>
             {% else %}
-            <ClassName>org.wso2.carbon.webapp.authenticator.framework.authenticator.OneTimeTokenAuthenticator</ClassName>
+            <ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.OneTimeTokenAuthenticator</ClassName>
             {% endif %}
         </Authenticator>
         <Authenticator>
@@ -90,7 +90,7 @@
                 {% endfor %}
             </Parameters>
             {% else %}
-            <ClassName>org.wso2.carbon.webapp.authenticator.framework.authenticator.BSTAuthenticator</ClassName>
+            <ClassName>io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.BSTAuthenticator</ClassName>
             <Parameters>
                 <Parameter Name="IsRemote">false</Parameter>
                 <Parameter Name="TokenValidationEndpointUrl">https://${iot.keymanager.host}:${iot.keymanager.https.port}</Parameter>

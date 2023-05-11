@@ -45,7 +45,7 @@
 <!--        <module>components/ui-request-interceptor</module>-->
 <!--        <module>components/transport-mgt</module>-->
 <!--        <module>components/analytics-mgt</module>-->
-<!--        <module>components/webapp-authenticator-framework</module>-->
+        <module>components/webapp-authenticator-framework</module>
 <!--        <module>components/logger</module>-->
         <module>components/task-mgt</module>
         <module>components/subtype-mgt</module>
@@ -62,7 +62,7 @@
 <!--        <module>features/device-mgt-extensions</module>-->
 <!--        <module>features/transport-mgt</module>-->
 <!--        <module>features/analytics-mgt</module>-->
-<!--        <module>features/webapp-authenticator-framework</module>-->
+        <module>features/webapp-authenticator-framework</module>
 <!--        <module>features/logger</module>-->
         <module>features/task-mgt</module>
         <module>features/subtype-mgt</module>
