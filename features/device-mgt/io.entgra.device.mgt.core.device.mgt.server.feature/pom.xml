@@ -107,18 +107,18 @@
                             </adviceFile>
                             <includedFeatures>
                                 <includedFeatureDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.basics.feature:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.basics.feature:${io.entgra.device.mgt.core.version}
                                 </includedFeatureDef>
                                 <includedFeatureDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.api.feature:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.api.feature:${io.entgra.device.mgt.core.version}
                                 </includedFeatureDef>
                             </includedFeatures>
                             <bundles>
 								<bundleDef>
-									io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.url.printer:${carbon.device.mgt.version}
+									io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.url.printer:${io.entgra.device.mgt.core.version}
 								</bundleDef>
 								<bundleDef>
-									io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.extensions.pull.notification:${carbon.device.mgt.version}
+									io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.extensions.pull.notification:${io.entgra.device.mgt.core.version}
 								</bundleDef>
                             </bundles>
                             <importBundles>
@@ -127,7 +127,7 @@
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
-                               	<importFeatureDef>io.entgra.device.mgt.core.device.mgt.extensions:${carbon.device.mgt.version}</importFeatureDef>
+                               	<importFeatureDef>io.entgra.device.mgt.core.device.mgt.extensions:${io.entgra.device.mgt.core.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

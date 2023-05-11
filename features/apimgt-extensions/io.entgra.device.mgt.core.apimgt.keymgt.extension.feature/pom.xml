@@ -36,7 +36,7 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension</artifactId>
-            <version>${carbon.device.mgt.version}</version>
+            <version>${io.entgra.device.mgt.core.version}</version>
         </dependency>
     </dependencies>
 
@@ -114,7 +114,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.keymgt.extension:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.keymgt.extension:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                             <importBundles>

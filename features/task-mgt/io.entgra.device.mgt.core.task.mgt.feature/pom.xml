@@ -91,13 +91,13 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.task.mgt.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.task.mgt.core:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.task.mgt.common:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.task.mgt.common:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.task.mgt.watcher:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.task.mgt.watcher:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>

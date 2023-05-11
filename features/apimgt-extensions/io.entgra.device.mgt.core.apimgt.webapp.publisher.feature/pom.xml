@@ -133,13 +133,13 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.webapp.publisher:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.webapp.publisher:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.application.extension:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.application.extension:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.annotations:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.annotations:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
                                     org.wso2.orbit.org.scannotation:scannotation:${scannotation.version}
@@ -148,7 +148,7 @@
 									io.swagger:swagger-annotations:${swagger.version}
 								</bundleDef>
 								<bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.extension.rest.api:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.extension.rest.api:${io.entgra.device.mgt.core.version}
 								</bundleDef>
                             </bundles>
                             <importFeatures>

@@ -95,7 +95,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.operation.template:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.operation.template:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>

@@ -45,7 +45,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
+                        <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Application Management Add-Ons Bundle</Bundle-Description>
                         <Import-Package>
                             com.google.gson,

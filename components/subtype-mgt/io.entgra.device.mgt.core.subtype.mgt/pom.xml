@@ -49,7 +49,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
+                        <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Subtype Management Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.subtype.mgt.internal</Private-Package>
                         <Import-Package>

@@ -76,10 +76,10 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.extensions:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.extensions:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.common:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.common:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>com.sun.jersey:jersey-core</bundleDef>
                             </bundles>

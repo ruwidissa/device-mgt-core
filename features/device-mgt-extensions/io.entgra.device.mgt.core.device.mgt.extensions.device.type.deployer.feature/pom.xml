@@ -89,12 +89,12 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.device.mgt.server:${carbon.device.mgt.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.device.mgt.server:${io.entgra.device.mgt.core.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

@@ -27,14 +27,13 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>oauth-extensions-feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Device Management OAuth Extensions Feature</name>
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.device.mgt.oauth.extensions.feature</module>
+        <module>io.entgra.device.mgt.core.device.mgt.oauth.extensions.feature</module>
     </modules>
 
 </project>

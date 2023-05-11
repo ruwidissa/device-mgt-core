@@ -147,10 +147,10 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.application.mgt.common:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.application.mgt.common:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.application.mgt.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.application.mgt.core:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
                                     com.googlecode.plist:dd-plist:${googlecode.plist.version}

@@ -86,7 +86,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.analytics.extension:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.analytics.extension:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>

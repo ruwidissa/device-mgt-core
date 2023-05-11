@@ -95,7 +95,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.transport.mgt.email.sender.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.transport.mgt.email.sender.core:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
                                     org.wso2.orbit.org.apache.velocity:velocity:${velocity.version}

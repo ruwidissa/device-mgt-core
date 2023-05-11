@@ -52,7 +52,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
+                        <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>IoT Device Management State Engine Bundle</Bundle-Description>
                         <Import-Package>
                             org.wso2.carbon.context,

@@ -41,7 +41,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
+                        <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Task Management Common Bundle</Bundle-Description>
                         <Export-Package>
                             io.entgra.device.mgt.core.task.mgt.common.*

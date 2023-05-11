@@ -99,12 +99,12 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
+                        <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Data Publisher</Bundle-Description>
                         <Private-Package>org.wso2.carbon.device.mgt.analytics.data.publisher.internal</Private-Package>
                         <Export-Package>
                             !org.wso2.carbon.device.mgt.analytics.data.publisher.internal,
-                            org.wso2.carbon.device.mgt.analytics.data.publisher.*;version="${carbon.device.mgt.version}"
+                            org.wso2.carbon.device.mgt.analytics.data.publisher.*;version="${io.entgra.device.mgt.core.version}"
                         </Export-Package>
                         <Import-Package>
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",

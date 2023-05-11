@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ you may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>io.entgra.device.mgt.core</groupId>
+        <artifactId>identity-extensions</artifactId>
+        <version>5.0.26-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>io.entgra.device.mgt.core.device.mgt.oauth.extensions</artifactId>
+    <packaging>bundle</packaging>
+    <name>WSO2 Carbon - OAuth Extensions</name>
+    <url>http://wso2.org</url>
+
+    <dependencies>
+		<dependency>
+			<groupId>commons-codec.wso2</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
+            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.user.core</artifactId>
+        </dependency>
+		<dependency>
+			<groupId>com.googlecode.json-simple.wso2</groupId>
+			<artifactId>json-simple</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon.identity.framework</groupId>
+			<artifactId>org.wso2.carbon.user.mgt</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon.extension.identity.oauth2.grantType.jwt</groupId>
+			<artifactId>org.wso2.carbon.identity.oauth2.grant.jwt</artifactId>
+		</dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>1.4.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
+                        <Bundle-Description>OAuth Extensions Bundle</Bundle-Description>
+                        <Private-Package>io.entgra.device.mgt.core.device.mgt.oauth.extensions.internal</Private-Package>
+                        <Export-Package>
+                            !io.entgra.device.mgt.core.device.mgt.oauth.extensions.internal,
+                            io.entgra.device.mgt.core.device.mgt.oauth.extensions.*
+                        </Export-Package>
+                        <Import-Package>
+							org.wso2.carbon.identity.oauth2.grant.jwt;version="${carbon.identity.jwt.grant.version.range}",
+                            org.apache.commons.lang,
+                            org.apache.commons.logging,
+                            org.osgi.service.component,
+                            org.wso2.carbon.identity.application.common.model;version="${carbon.identity.framework.version.range}",
+                            org.wso2.carbon.identity.application.common;version="${carbon.identity.framework.version.range}",
+                            org.wso2.carbon.identity.application.mgt.*;version="${carbon.identity.framework.version.range}",
+                            org.wso2.carbon.user.api,
+                            org.wso2.carbon.user.core.service,
+                            org.wso2.carbon.user.core.tenant,
+                            org.wso2.carbon.user.core.util,
+                            org.json.simple,
+                            javax.cache,
+                            org.wso2.carbon.identity.core.util;version="${carbon.identity.framework.version.range}",
+                            org.wso2.carbon.utils,
+                            org.wso2.carbon.context,
+                            org.wso2.carbon.identity.oauth.*;version="${carbon.identity.framework.version.range}",
+							<!--org.wso2.carbon.apimgt.keymgt.*;version="${carbon.api.mgt.version.range}",-->
+							org.wso2.carbon.base,
+							org.wso2.carbon.identity.application.authentication.framework.model;version="${carbon.identity.framework.version.range}",
+							org.wso2.carbon.identity.base;version="${carbon.identity.framework.version.range}",
+							org.wso2.carbon.identity.oauth2.*;version="${carbon.identity.framework.version.range}",
+							org.wso2.carbon.utils.multitenancy,
+                            org.apache.oltu.oauth2.common.validators,
+                            org.apache.commons.lang3.tuple,
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>jacoco-initialize</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-site</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+                            <outputDirectory>${basedir}/target/coverage-reports/site</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

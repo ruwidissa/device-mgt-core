@@ -104,7 +104,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.notification.logger:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.notification.logger:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>

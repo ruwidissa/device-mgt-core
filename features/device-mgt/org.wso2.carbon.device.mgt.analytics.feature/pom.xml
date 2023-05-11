@@ -125,7 +125,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.analytics.data.publisher:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.analytics.data.publisher:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>

@@ -33,7 +33,7 @@
     <url>http://wso2.org</url>
 
     <modules>
-<!--        <module>org.wso2.carbon.device.mgt.oauth.extensions</module>-->
+        <module>io.entgra.device.mgt.core.device.mgt.oauth.extensions</module>
         <module>io.entgra.device.mgt.core.identity.jwt.client.extension</module>
     </modules>
 

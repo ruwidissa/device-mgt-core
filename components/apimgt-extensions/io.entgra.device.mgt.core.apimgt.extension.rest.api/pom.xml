@@ -96,7 +96,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
+                        <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Publisher API Management Bundle</Bundle-Description>
                         <Private-Package>
                             io.entgra.device.mgt.core.apimgt.extension.rest.api.internal

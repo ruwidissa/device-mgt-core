@@ -44,7 +44,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
+                        <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Tenant Management Core Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.tenant.mgt.core.internal</Private-Package>
                         <Import-Package>

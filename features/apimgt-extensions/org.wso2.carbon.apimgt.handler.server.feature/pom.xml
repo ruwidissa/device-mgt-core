@@ -90,7 +90,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.apimgt.handlers:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:org.wso2.carbon.apimgt.handlers:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <!--<bundleDef>-->
                                     <!--org.apache.ws.security.wso2:wss4j:${org.apache.ws.security.wso2.version}-->

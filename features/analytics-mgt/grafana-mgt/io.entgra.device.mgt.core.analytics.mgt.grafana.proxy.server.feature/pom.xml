@@ -114,10 +114,10 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
                                     com.googlecode.plist:dd-plist:${googlecode.plist.version}

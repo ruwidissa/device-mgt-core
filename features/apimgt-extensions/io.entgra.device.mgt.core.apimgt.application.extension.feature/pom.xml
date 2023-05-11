@@ -115,7 +115,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.application.extension:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.application.extension:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>

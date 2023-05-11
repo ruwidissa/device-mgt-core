@@ -93,10 +93,10 @@
                             <bundles>
                                 <!--<bundleDef>{groupId}:{artifactId}:{version}</bundleDef>-->
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.tenant.mgt.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.tenant.mgt.core:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.tenant.mgt.common:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.tenant.mgt.common:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                         </configuration>

@@ -100,7 +100,7 @@
         <!-- identity extensions component related properties -->
         <identity.extensions>identity-extensions</identity.extensions>
         <identity.oauth.extension>
-            ${basedir}/../${identity.extensions}/org.wso2.carbon.device.mgt.oauth.extensions
+            ${basedir}/../${identity.extensions}/io.entgra.device.mgt.core.device.mgt.oauth.extensions
         </identity.oauth.extension>
         <identity.backend.extension>
             ${basedir}/../${identity.extensions}/org.wso2.carbon.identity.authenticator.backend.oauth
@@ -384,7 +384,7 @@
                                                 </group>
 
                                                 <group name="identity-extensions">
-                                                    <group name="org.wso2.carbon.device.mgt.oauth.extensions">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.oauth.extensions">
                                                         <classfiles>
                                                             <fileset dir="${identity.oauth.extension}/${target}/${classes}" />
                                                         </classfiles>

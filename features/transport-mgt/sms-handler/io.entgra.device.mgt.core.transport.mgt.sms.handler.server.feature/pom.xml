@@ -94,10 +94,10 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.transport.mgt.sms.handler.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.transport.mgt.sms.handler.core:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.transport.mgt.sms.handler.common:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.transport.mgt.sms.handler.common:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                             <importBundles>

@@ -43,7 +43,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
+                        <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>SMS Management Common Bundle</Bundle-Description>
                         <Export-Package>
                             io.entgra.device.mgt.core.transport.mgt.sms.handler.common.*

@@ -78,7 +78,7 @@
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>io.entgra.device.mgt.core</groupId>
@@ -169,87 +169,87 @@
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.url.printer</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.certificate.mgt.core</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.application.mgt.addons</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.application.mgt.core</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.application.mgt.common</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.application.mgt.publisher.api</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.application.mgt.store.api</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.policy.mgt.common</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.policy.mgt.core</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.policy.decision.point</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.policy.information.point</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.apimgt.webapp.publisher</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.apimgt.annotations</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.oauth.extensions</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.oauth.extensions</artifactId>
+                <version>${io.entgra.device.mgt.core.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.wso2.carbon.identity</groupId>
@@ -260,95 +260,95 @@
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>org.wso2.carbon.identity.authenticator.backend.oauth</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.transport.mgt.email.sender.core</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>org.wso2.carbon.device.mgt.analytics.data.publisher</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.server.feature</artifactId>
                 <type>zip</type>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.api.feature</artifactId>
                 <type>zip</type>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.apimgt.application.extension</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.apimgt.analytics.extension</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.apimgt.application.extension.api</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.transport.mgt.sms.handler.core</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.transport.mgt.sms.handler.common</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension.api</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <!-- Device Management dependencies -->
 
@@ -356,29 +356,29 @@
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.tenant.mgt.common</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.tenant.mgt.core</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
 
             <!-- Task Management dependencies -->
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.task.mgt.common</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.task.mgt.core</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.task.mgt.watcher</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
 
 
@@ -386,7 +386,7 @@
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.subtype.mgt</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
 
             <!-- End of SubType Management dependencies -->
@@ -395,7 +395,7 @@
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.operation.template</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <!-- End of Operation Template Management dependencies -->
             <!-- Governance dependencies -->
@@ -1644,47 +1644,47 @@
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.logger</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.stateengine</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.pull.notification</artifactId>
-                <version>${carbon.device.mgt.version}</version>
+                <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>
@@ -2106,7 +2106,7 @@
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <carbon.device.mgt.version>5.0.26-SNAPSHOT</carbon.device.mgt.version>
+        <io.entgra.device.mgt.core.version>5.0.26-SNAPSHOT</io.entgra.device.mgt.core.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.7.35</carbon.commons.version>

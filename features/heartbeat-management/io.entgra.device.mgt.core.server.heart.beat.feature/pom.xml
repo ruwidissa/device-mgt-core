@@ -128,7 +128,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.server.bootup.heartbeat.beacon:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.server.bootup.heartbeat.beacon:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>

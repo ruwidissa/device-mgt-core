@@ -75,7 +75,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
+                        <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Pull Notification Provider Bundle</Bundle-Description>
                         <Export-Package>
                             !io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.internal,

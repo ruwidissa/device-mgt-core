@@ -50,7 +50,7 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension</artifactId>
-            <version>${carbon.device.mgt.version}</version>
+            <version>${io.entgra.device.mgt.core.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

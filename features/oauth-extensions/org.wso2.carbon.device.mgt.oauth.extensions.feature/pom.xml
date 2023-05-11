@@ -28,7 +28,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.device.mgt.oauth.extensions.feature</artifactId>
+    <artifactId>io.entgra.device.mgt.core.device.mgt.oauth.extensions.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Device Mgt OAuth Extensions Feature</name>
     <url>http://wso2.org</url>
@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.oauth.extensions</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.oauth.extensions</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
@@ -67,7 +67,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.device.mgt.oauth.extensions</id>
+                            <id>io.entgra.device.mgt.core.device.mgt.oauth.extensions</id>
                             <propertiesFile>../../../features/etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
@@ -77,10 +77,10 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.oauth.extensions:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.oauth.extensions:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
 								<bundleDef>
-									io.entgra.device.mgt.core:org.wso2.carbon.identity.authenticator.backend.oauth:${carbon.device.mgt.version}
+									io.entgra.device.mgt.core:org.wso2.carbon.identity.authenticator.backend.oauth:${io.entgra.device.mgt.core.version}
 								</bundleDef>
                             </bundles>
                             <importFeatures>
