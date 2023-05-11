@@ -105,7 +105,7 @@
                             org.wso2.carbon.ntask.common,
                             io.entgra.device.mgt.core.task.mgt.common.*,
                             org.apache.commons.collections;version="${commons-collections.version.range}",
-                            org.wso2.carbon.email.sender.*,
+                            io.entgra.device.mgt.core.email.sender.*,
                             io.swagger.annotations.*;resolution:=optional,
                             org.wso2.carbon,
                             org.wso2.carbon.base,
