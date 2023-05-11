@@ -3,13 +3,13 @@ package io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.sql.connectio
 import io.entgra.device.mgt.core.application.mgt.core.config.Configuration;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
-import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
-import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.report.mgt.config.ReportMgtConfiguration;
-import org.wso2.carbon.device.mgt.core.report.mgt.config.ReportMgtConfigurationManager;
-import org.wso2.carbon.device.mgt.core.report.mgt.dao.common.ReportMgtConnectionManager;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.report.mgt.config.ReportMgtConfiguration;
+import io.entgra.device.mgt.core.device.mgt.core.report.mgt.config.ReportMgtConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.report.mgt.dao.common.ReportMgtConnectionManager;
 
 import java.sql.Connection;
 import java.sql.SQLException;

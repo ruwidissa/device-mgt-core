@@ -1,0 +1,66 @@
+/*
+ *   Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ *
+ */
+package io.entgra.device.mgt.core.device.mgt.core.dao;
+
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo.Status;
+
+import java.sql.Timestamp;
+import java.util.List;
+
+public interface EnrollmentDAO {
+
+    EnrolmentInfo addEnrollment(int deviceId, EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException;
+
+    int updateEnrollment(EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException;
+
+    boolean updateEnrollmentStatus(List<EnrolmentInfo> enrolmentInfos) throws DeviceManagementDAOException;
+
+    int removeEnrollment(int deviceId, String currentOwner, int tenantId) throws DeviceManagementDAOException;
+
+    @Deprecated
+    boolean setStatus(String currentOwner, Status status, int tenantId) throws DeviceManagementDAOException;
+
+    boolean setStatusAllDevices(String currentOwner, Status status, int tenantId) throws DeviceManagementDAOException;
+
+    boolean setStatus(int enrolmentId, Status status, int tenantId) throws DeviceManagementDAOException;
+
+    Status getStatus(int deviceId, String currentOwner, int tenantId) throws DeviceManagementDAOException;
+
+    EnrolmentInfo getEnrollment(int deviceId, String currentUser, int tenantId) throws DeviceManagementDAOException;
+
+    EnrolmentInfo getEnrollment(int deviceId, int tenantId) throws DeviceManagementDAOException;
+
+    List<EnrolmentInfo> getEnrollmentsOfUser(int deviceId, String user, int tenantId) throws
+                                                                                             DeviceManagementDAOException;
+
+    /***
+     *This method is used to update the owner of the enrollment for given set of devices to given user.
+     *
+     * @param devices List of devices.
+     * @param owner Username of the new device owner.
+     * @param tenantId tenant id.
+     * @return either (1) true, if device owner updating is succeed or false.
+     * @throws DeviceManagementDAOException if an error occurs when updating device owner.
+     */
+    boolean updateOwnerOfEnrollment(List<Device> devices, String owner, int tenantId)
+            throws DeviceManagementDAOException;
+
+}

@@ -35,7 +35,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;

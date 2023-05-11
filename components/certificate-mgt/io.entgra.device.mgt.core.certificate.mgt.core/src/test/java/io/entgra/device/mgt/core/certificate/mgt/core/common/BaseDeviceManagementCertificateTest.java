@@ -27,10 +27,10 @@ import org.testng.annotations.BeforeSuite;
 import org.w3c.dom.Document;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 
 import javax.sql.DataSource;
 import javax.xml.bind.JAXBContext;

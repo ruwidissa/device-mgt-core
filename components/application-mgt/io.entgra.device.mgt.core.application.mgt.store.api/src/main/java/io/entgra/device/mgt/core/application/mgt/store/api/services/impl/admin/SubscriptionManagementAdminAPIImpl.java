@@ -30,8 +30,8 @@ import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestExcept
 import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundException;
 import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
 import io.entgra.device.mgt.core.application.mgt.store.api.services.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;

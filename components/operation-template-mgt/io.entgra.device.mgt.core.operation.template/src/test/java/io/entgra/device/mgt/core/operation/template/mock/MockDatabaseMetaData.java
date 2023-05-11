@@ -18,7 +18,7 @@
 
 package io.entgra.device.mgt.core.operation.template.mock;
 
-import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

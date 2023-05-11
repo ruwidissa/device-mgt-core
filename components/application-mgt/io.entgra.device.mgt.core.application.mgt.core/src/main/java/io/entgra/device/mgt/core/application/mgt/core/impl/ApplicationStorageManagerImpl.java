@@ -32,13 +32,13 @@ import io.entgra.device.mgt.core.application.mgt.common.DeviceTypes;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationStorageManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
-import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
-import org.wso2.carbon.device.mgt.core.common.util.StorageManagementUtil;
+import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.StorageManagementUtil;
 
 import java.io.*;
 import java.util.List;
 
-import static org.wso2.carbon.device.mgt.core.common.util.StorageManagementUtil.saveFile;
+import static io.entgra.device.mgt.core.device.mgt.core.common.util.StorageManagementUtil.saveFile;
 
 /**
  * This class contains the default concrete implementation of ApplicationStorage Management.

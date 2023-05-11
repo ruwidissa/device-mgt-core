@@ -64,8 +64,8 @@
                             javax.xml.bind.annotation; version="${javax.xml.bind.imp.pkg.version}",
                             javax.xml.bind; version="${javax.xml.bind.imp.pkg.version}",
                             io.entgra.device.mgt.core.application.mgt.common.*,
-                            org.wso2.carbon.device.mgt.core.*,
-                            org.wso2.carbon.device.mgt.common.*,
+                            io.entgra.device.mgt.core.device.mgt.core.*,
+                            io.entgra.device.mgt.core.device.mgt.common.*,
                             org.wso2.carbon.user.core.*,
                             org.wso2.carbon.user.api.*,
                             org.wso2.carbon.ntask.*,
@@ -168,7 +168,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>objenesis</artifactId>
@@ -178,7 +178,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>org.wso2.securevault</artifactId>

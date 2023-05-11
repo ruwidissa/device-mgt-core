@@ -29,8 +29,8 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartB
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal.HeartBeatBeaconDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.ServerCtxInfo;
-import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.ServerCtxInfo;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;

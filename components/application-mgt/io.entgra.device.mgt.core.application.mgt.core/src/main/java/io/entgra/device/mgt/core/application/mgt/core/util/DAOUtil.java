@@ -32,7 +32,7 @@ import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDT
 import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ReviewDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

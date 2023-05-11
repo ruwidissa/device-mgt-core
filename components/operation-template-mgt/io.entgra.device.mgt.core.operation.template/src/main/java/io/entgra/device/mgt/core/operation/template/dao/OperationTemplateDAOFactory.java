@@ -24,7 +24,7 @@ import io.entgra.device.mgt.core.operation.template.dao.impl.config.datasource.D
 import io.entgra.device.mgt.core.operation.template.util.ConnectionManagerUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 
 
 public class OperationTemplateDAOFactory {

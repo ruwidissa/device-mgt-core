@@ -31,12 +31,12 @@ import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import org.wso2.carbon.ntask.common.TaskException;
 
 import java.util.Collections;

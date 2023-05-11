@@ -28,10 +28,10 @@ import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationMana
 import io.entgra.device.mgt.core.application.mgt.core.dto.ApplicationsDTO;
 import io.entgra.device.mgt.core.application.mgt.core.dto.DeviceTypeCreator;
 import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
-import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
-import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
-import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceTypeDAO;
 
 public class ApplicationManagementDAOTest extends BaseTestCase {
 

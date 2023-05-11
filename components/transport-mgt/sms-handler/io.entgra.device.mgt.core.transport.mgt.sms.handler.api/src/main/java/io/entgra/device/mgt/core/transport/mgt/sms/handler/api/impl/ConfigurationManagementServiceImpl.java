@@ -22,7 +22,7 @@ import io.entgra.device.mgt.core.transport.mgt.sms.handler.api.ConfigurationMana
 import io.entgra.device.mgt.core.transport.mgt.sms.handler.core.config.SMSConfigurationManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

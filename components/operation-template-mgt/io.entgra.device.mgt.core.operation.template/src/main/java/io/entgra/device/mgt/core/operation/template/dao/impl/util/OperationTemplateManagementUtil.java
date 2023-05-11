@@ -20,7 +20,7 @@ package io.entgra.device.mgt.core.operation.template.dao.impl.util;
 
 import io.entgra.device.mgt.core.operation.template.dto.OperationTemplateCacheKey;
 import org.w3c.dom.Document;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;

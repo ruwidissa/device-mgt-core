@@ -18,7 +18,7 @@
 package io.entgra.device.mgt.core.application.mgt.common;
 
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ public class InstallationDetails {
             name = "deviceIdentifiers",
             value = "List of device identifiers.",
             required = true,
-            dataType = "List[org.wso2.carbon.device.mgt.common.DeviceIdentifier]"
+            dataType = "List[io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier]"
     )
     private List<DeviceIdentifier> deviceIdentifiers;
 

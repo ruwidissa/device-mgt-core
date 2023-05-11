@@ -60,11 +60,11 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.extensions</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.extensions</artifactId>
         </dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
@@ -104,7 +104,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -144,8 +144,8 @@
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.w3c.dom,
                             org.wso2.carbon.context,
-                            org.wso2.carbon.device.mgt.common.*,
-							org.wso2.carbon.device.mgt.extensions.device.type.template.*,
+                            io.entgra.device.mgt.core.device.mgt.common.*,
+							io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.*,
                             org.wso2.carbon.registry.api,
                             org.wso2.carbon.registry.core,
                             org.wso2.carbon.registry.core.*,

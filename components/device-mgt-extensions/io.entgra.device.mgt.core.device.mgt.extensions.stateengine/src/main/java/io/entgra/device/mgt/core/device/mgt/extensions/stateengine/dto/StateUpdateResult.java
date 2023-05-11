@@ -19,7 +19,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.stateengine.dto;
 
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 
 public class StateUpdateResult {
 

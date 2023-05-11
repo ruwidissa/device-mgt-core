@@ -37,16 +37,16 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.api.feature</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.api.feature</artifactId>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.url.printer</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.url.printer</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
@@ -107,15 +107,15 @@
                             </adviceFile>
                             <includedFeatures>
                                 <includedFeatureDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.basics.feature:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.basics.feature:${carbon.device.mgt.version}
                                 </includedFeatureDef>
                                 <includedFeatureDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.api.feature:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.api.feature:${carbon.device.mgt.version}
                                 </includedFeatureDef>
                             </includedFeatures>
                             <bundles>
 								<bundleDef>
-									io.entgra.device.mgt.core:org.wso2.carbon.device.mgt.url.printer:${carbon.device.mgt.version}
+									io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.url.printer:${carbon.device.mgt.version}
 								</bundleDef>
 								<bundleDef>
 									io.entgra.device.mgt.core:io.entgra.device.mgt.core.device.mgt.extensions.pull.notification:${carbon.device.mgt.version}
@@ -127,7 +127,7 @@
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
-                               	<importFeatureDef>org.wso2.carbon.device.mgt.extensions:${carbon.device.mgt.version}</importFeatureDef>
+                               	<importFeatureDef>io.entgra.device.mgt.core.device.mgt.extensions:${carbon.device.mgt.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

@@ -17,7 +17,7 @@
  */
 package io.entgra.device.mgt.core.certificate.mgt.core.scep;
 
-import org.wso2.carbon.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
 
 public class TenantedDeviceWrapper {
     Device device;

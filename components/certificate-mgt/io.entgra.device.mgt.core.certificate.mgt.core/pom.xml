@@ -107,9 +107,9 @@
                             javax.xml.bind.annotation,
                             javax.xml.bind,
                             org.wso2.carbon.utils.*,
-                            org.wso2.carbon.device.mgt.common.*,
+                            io.entgra.device.mgt.core.device.mgt.common.*,
                             io.swagger.annotations.*;resolution:=optional,
-                            org.wso2.carbon.device.mgt.core.*,
+                            io.entgra.device.mgt.core.device.mgt.core.*,
                             org.wso2.carbon.registry.indexing.*,
                             javax.cache.*,
                             javax.naming.ldap
@@ -246,11 +246,11 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>

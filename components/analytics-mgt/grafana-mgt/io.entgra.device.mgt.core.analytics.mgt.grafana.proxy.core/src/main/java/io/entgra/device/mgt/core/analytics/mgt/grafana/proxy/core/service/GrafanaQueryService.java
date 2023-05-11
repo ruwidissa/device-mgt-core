@@ -19,7 +19,7 @@ package io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.service;
 
 import com.google.gson.JsonObject;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.exception.GrafanaManagementException;
-import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
 
 import java.io.IOException;
 import java.net.URI;

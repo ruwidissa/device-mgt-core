@@ -29,7 +29,7 @@ import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplication
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.POST;

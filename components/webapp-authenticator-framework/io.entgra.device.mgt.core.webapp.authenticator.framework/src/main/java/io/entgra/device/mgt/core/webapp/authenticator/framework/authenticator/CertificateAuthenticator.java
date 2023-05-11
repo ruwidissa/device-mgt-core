@@ -28,9 +28,9 @@ import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreExceptio
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPException;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.TenantedDeviceWrapper;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;

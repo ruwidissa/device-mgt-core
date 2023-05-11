@@ -32,8 +32,8 @@ import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptio
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.core.task.impl.RandomlyAssignedScheduleTask;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.core.task.impl.RandomlyAssignedScheduleTask;
 
 import java.util.List;
 import java.util.Map;

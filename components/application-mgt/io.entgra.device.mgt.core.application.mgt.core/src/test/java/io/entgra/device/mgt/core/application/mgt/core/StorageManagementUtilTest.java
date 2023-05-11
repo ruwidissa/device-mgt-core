@@ -23,8 +23,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
-import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
-import org.wso2.carbon.device.mgt.core.common.util.StorageManagementUtil;
+import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.StorageManagementUtil;
 
 import java.io.File;
 import java.io.FileInputStream;

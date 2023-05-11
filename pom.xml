@@ -77,12 +77,12 @@
             <!-- Device Management dependencies -->
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
                 <version>${carbon.device.mgt.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>io.entgra.device.mgt.core</groupId>
-                        <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+                        <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.wso2.carbon</groupId>
@@ -168,17 +168,17 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.extensions</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.url.printer</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.url.printer</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
@@ -274,13 +274,13 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.server.feature</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.server.feature</artifactId>
                 <type>zip</type>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.device.mgt.api.feature</artifactId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.api.feature</artifactId>
                 <type>zip</type>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>

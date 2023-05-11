@@ -22,8 +22,8 @@ package io.entgra.device.mgt.core.policy.mgt.core.dao.impl.policy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagerDAOException;
 

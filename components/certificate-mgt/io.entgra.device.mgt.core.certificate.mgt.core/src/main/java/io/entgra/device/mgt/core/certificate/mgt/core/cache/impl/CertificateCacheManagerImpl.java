@@ -21,8 +21,8 @@ package io.entgra.device.mgt.core.certificate.mgt.core.cache.impl;
 
 import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
 import io.entgra.device.mgt.core.certificate.mgt.core.cache.CertificateCacheManager;
-import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;

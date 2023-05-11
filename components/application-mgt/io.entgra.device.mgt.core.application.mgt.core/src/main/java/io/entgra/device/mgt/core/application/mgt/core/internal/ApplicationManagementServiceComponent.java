@@ -34,7 +34,7 @@ import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationMana
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -44,7 +44,7 @@ import java.util.List;
 /**
  * @scr.component name="org.wso2.carbon.application.mgt.service" immediate="true"
  * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService"
+ * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setDeviceManagementService"

@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.mgt.core.task.impl.RandomlyAssignedScheduleTask;
+import io.entgra.device.mgt.core.device.mgt.core.task.impl.RandomlyAssignedScheduleTask;
 
 import java.util.Map;
 

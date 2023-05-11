@@ -24,7 +24,7 @@ import io.entgra.device.mgt.core.application.mgt.common.response.Application;
 import io.entgra.device.mgt.core.application.mgt.common.response.ApplicationRelease;
 import io.entgra.device.mgt.core.application.mgt.common.response.Category;
 import io.entgra.device.mgt.core.application.mgt.common.response.Tag;
-import org.wso2.carbon.device.mgt.common.Base64File;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;

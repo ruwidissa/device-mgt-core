@@ -17,11 +17,11 @@
  */
 
 package io.entgra.device.mgt.core.policy.mgt.common;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Profile;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 
 import java.util.List;
 

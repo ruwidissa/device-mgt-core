@@ -19,7 +19,7 @@
 package io.entgra.device.mgt.core.subtype.mgt.internal;
 
 import io.entgra.device.mgt.core.subtype.mgt.spi.DeviceSubTypeService;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
 public class DeviceSubTypeMgtDataHolder {

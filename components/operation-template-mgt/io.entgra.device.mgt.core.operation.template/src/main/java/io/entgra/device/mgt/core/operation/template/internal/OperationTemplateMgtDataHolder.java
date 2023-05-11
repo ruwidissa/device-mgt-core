@@ -19,7 +19,7 @@
 package io.entgra.device.mgt.core.operation.template.internal;
 
 import io.entgra.device.mgt.core.operation.template.spi.OperationTemplateService;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
 /**

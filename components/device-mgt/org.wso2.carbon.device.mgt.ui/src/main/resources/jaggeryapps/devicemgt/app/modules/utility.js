@@ -50,7 +50,7 @@ utility = function () {
     };
 
     publicMethods.getDeviceManagementService = function () {
-        return getOsgiService('org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService');
+        return getOsgiService('io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService');
     };
 
     publicMethods.getAPIManagementProviderService = function () {

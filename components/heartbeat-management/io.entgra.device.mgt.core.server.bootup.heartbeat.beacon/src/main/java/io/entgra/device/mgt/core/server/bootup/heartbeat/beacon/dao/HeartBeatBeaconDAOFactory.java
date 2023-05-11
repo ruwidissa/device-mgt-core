@@ -24,10 +24,10 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.datasourc
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao.impl.GenericHeartBeatDAOImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
-import org.wso2.carbon.device.mgt.common.exceptions.IllegalTransactionStateException;
-import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
-import org.wso2.carbon.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

@@ -18,13 +18,13 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.mgt;
 
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 
 import java.util.List;
 

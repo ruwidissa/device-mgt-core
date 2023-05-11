@@ -22,13 +22,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 
 /**
  * @scr.component name="io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.internal.PullNotificationServiceComponent" immediate="true"
  * @scr.reference name="carbon.device.mgt.provider"
- * interface="org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService"
+ * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setDeviceManagementProviderService"

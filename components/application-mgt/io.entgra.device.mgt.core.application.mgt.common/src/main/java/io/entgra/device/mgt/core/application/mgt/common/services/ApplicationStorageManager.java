@@ -21,7 +21,7 @@ import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstaller;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationStorageManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
-import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
 
 import java.io.InputStream;
 import java.util.List;

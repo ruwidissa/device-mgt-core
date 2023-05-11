@@ -18,9 +18,9 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http;
 
-import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
-import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
-import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationProvider;
+import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationStrategy;
+import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationProvider;
 
 public class HTTPBasedPushNotificationProvider implements PushNotificationProvider {
 

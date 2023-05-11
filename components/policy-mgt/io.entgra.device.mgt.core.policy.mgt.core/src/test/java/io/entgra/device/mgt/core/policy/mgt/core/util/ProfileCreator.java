@@ -18,8 +18,8 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.util;
 
-import org.wso2.carbon.device.mgt.common.Feature;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Profile;
+import io.entgra.device.mgt.core.device.mgt.common.Feature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.List;

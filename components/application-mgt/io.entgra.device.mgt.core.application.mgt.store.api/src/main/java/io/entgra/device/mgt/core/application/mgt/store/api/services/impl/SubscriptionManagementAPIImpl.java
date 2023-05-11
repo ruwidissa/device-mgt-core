@@ -40,11 +40,11 @@ import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundExceptio
 import io.entgra.device.mgt.core.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
 import io.entgra.device.mgt.core.application.mgt.store.api.services.SubscriptionManagementAPI;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.MDMAppConstants;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 
 import javax.validation.Valid;
 import javax.ws.rs.Path;
@@ -255,7 +255,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
      *
      * @param applicationUUID UUID of the application to install
      * @param subscribers     list of subscribers. This list can be of
-     *                        either {@link org.wso2.carbon.device.mgt.common.DeviceIdentifier} if {@param subType} is
+     *                        either {@link io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier} if {@param subType} is
      *                        equal to DEVICE or {@link String} if {@param subType} is USER, ROLE or GROUP
      * @param subType         subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code>
      *                        {@see {@link io.entgra.device.mgt.core.application.mgt.common.SubscriptionType}}
@@ -277,7 +277,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
      *
      * @param applicationUUID UUID of the application to install
      * @param subscribers     list of subscribers. This list can be of
-     *                        either {@link org.wso2.carbon.device.mgt.common.DeviceIdentifier} if {@param subType} is
+     *                        either {@link io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier} if {@param subType} is
      *                        equal to DEVICE or {@link String} if {@param subType} is USER, ROLE or GROUP
      * @param subType         subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code>
      *                        {@see {@link io.entgra.device.mgt.core.application.mgt.common.SubscriptionType}}

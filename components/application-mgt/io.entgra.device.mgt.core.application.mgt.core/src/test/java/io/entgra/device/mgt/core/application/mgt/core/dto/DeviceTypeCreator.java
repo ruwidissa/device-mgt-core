@@ -18,7 +18,7 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.dto;
 
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 
 public class DeviceTypeCreator {
 

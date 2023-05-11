@@ -18,7 +18,7 @@
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
-import org.wso2.carbon.device.mgt.common.Base64File;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.core.dao.SPApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -86,11 +86,11 @@ import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
-import org.wso2.carbon.device.mgt.core.common.exception.StorageManagementException;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 

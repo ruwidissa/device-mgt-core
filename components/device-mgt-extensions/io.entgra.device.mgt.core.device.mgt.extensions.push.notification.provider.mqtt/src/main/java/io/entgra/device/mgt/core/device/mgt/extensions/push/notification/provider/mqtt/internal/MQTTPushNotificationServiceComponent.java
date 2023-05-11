@@ -21,13 +21,13 @@ package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provid
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 
 /**
  * @scr.component name="io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal.MQTTPushNotificationServiceComponent" immediate="true"
  * @scr.reference name="carbon.device.mgt.provider"
- * interface="org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService"
+ * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setDeviceManagementProviderService"

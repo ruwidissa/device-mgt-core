@@ -69,14 +69,14 @@
                             org.wso2.carbon.context,
                             org.wso2.carbon.base,
                             org.wso2.carbon.utils.*,
-                            org.wso2.carbon.device.mgt.common.*,
-                            org.wso2.carbon.device.mgt.core.*,
+                            io.entgra.device.mgt.core.device.mgt.common.*,
+                            io.entgra.device.mgt.core.device.mgt.core.*,
                             org.wso2.carbon.ndatasource.core,
                             org.wso2.carbon.registry.core,
                             org.wso2.carbon.registry.core.session,
                             org.wso2.carbon.registry.core.service,
                             org.wso2.carbon.registry.api,
-                            org.wso2.carbon.device.mgt.extensions.license.mgt.registry,
+                            io.entgra.device.mgt.core.device.mgt.extensions.license.mgt.registry,
                             javax.net.ssl,
                             org.wso2.carbon.core.util,
                             okhttp3
@@ -132,7 +132,7 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -181,7 +181,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.extensions</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.extensions</artifactId>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -264,7 +264,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

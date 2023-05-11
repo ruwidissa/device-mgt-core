@@ -31,7 +31,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.exceptions.IllegalTransactionStateException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
 
 /**
  * Connection Manager Utils class.

@@ -53,8 +53,8 @@
                         <Import-Package>
                             javax.xml.bind.annotation,
                             io.swagger.annotations.*;resolution:=optional,
-                            org.wso2.carbon.device.mgt.common.*,
-                            org.wso2.carbon.device.mgt.core.dto.*,
+                            io.entgra.device.mgt.core.device.mgt.common.*,
+                            io.entgra.device.mgt.core.device.mgt.core.dto.*,
                             javax.xml.bind.*,
                         </Import-Package>
                         <Export-Package>
@@ -111,11 +111,11 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>

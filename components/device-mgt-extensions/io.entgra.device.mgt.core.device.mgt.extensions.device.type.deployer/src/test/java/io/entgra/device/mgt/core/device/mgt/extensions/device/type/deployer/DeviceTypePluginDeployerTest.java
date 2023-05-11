@@ -27,7 +27,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.extensions.device.type.template.DeviceTypeConfigIdentifier;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypeConfigIdentifier;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import java.io.File;
 import java.io.IOException;

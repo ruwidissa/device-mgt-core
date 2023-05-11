@@ -22,9 +22,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.exception.LifecycleManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
-import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
-import org.wso2.carbon.device.mgt.core.permission.mgt.PermissionUtils;
-import org.wso2.carbon.device.mgt.core.search.mgt.Constants;
+import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionUtils;
+import io.entgra.device.mgt.core.device.mgt.core.search.mgt.Constants;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 

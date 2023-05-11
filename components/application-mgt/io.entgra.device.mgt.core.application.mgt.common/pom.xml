@@ -49,8 +49,8 @@
                         <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
                         <Bundle-Description>Application Management Common Bundle</Bundle-Description>
                         <Import-Package>
-                            org.wso2.carbon.device.mgt.common.*;version="${carbon.device.mgt.version}",
-                            org.wso2.carbon.device.mgt.core.dto;version="${carbon.device.mgt.version}",
+                            io.entgra.device.mgt.core.device.mgt.common.*;version="${carbon.device.mgt.version}",
+                            io.entgra.device.mgt.core.device.mgt.core.dto;version="${carbon.device.mgt.version}",
                             com.google.gson,
                             io.swagger.annotations.*;resolution:=optional,
                             com.fasterxml.jackson.annotation,
@@ -102,11 +102,11 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>

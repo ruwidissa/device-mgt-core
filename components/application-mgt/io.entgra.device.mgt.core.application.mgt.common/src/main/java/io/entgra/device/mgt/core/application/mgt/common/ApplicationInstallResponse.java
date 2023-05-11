@@ -18,8 +18,8 @@
 package io.entgra.device.mgt.core.application.mgt.common;
 
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 
 import java.util.List;
 
@@ -27,14 +27,14 @@ public class ApplicationInstallResponse {
     @ApiModelProperty(
             name = "ignoredDeviceIdentifiers",
             value = "List of devices that application release is already installed.",
-            dataType = "List[org.wso2.carbon.device.mgt.common.DeviceIdentifier]"
+            dataType = "List[io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier]"
     )
     private List<DeviceIdentifier> ignoredDeviceIdentifiers;
 
     @ApiModelProperty(
             name = "errorDevices",
             value = "List of devices that either device identity is not exist or device type doesn't compatible with the supported device type of the .",
-            dataType = "List[org.wso2.carbon.device.mgt.common.DeviceIdentifier]"
+            dataType = "List[io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier]"
     )
     private List<DeviceIdentifier> errorDeviceIdentifiers;
 

@@ -24,7 +24,7 @@ import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationMa
 import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
 

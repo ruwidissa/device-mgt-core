@@ -35,8 +35,8 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.scep;
 
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 public interface SCEPManager {

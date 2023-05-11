@@ -36,8 +36,8 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
-import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
+import io.entgra.device.mgt.core.device.mgt.core.report.mgt.Constants;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;

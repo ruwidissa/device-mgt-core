@@ -164,7 +164,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>io.entgra.device.mgt.core</groupId>
-                    <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+                    <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -304,12 +304,12 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.extensions</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.extensions</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -325,7 +325,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

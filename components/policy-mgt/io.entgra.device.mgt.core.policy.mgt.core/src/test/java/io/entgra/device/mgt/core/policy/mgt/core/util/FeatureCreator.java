@@ -18,7 +18,7 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.util;
 
-import org.wso2.carbon.device.mgt.common.Feature;
+import io.entgra.device.mgt.core.device.mgt.common.Feature;
 
 import java.util.ArrayList;
 import java.util.HashMap;

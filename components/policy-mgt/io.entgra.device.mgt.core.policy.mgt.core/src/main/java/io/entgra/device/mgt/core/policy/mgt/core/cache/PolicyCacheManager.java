@@ -19,8 +19,8 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.cache;
 
-import org.wso2.carbon.device.mgt.common.DynamicTaskContext;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 
 import java.util.List;

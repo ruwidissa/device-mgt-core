@@ -33,12 +33,12 @@
     <url>http://wso2.org</url>
 
     <modules>
-        <module>org.wso2.carbon.device.mgt.core</module>
-        <module>org.wso2.carbon.device.mgt.common</module>
-        <module>org.wso2.carbon.device.mgt.extensions</module>
-        <module>org.wso2.carbon.device.mgt.api</module>
-        <module>org.wso2.carbon.device.mgt.url.printer</module>
-        <module>io.entgra.carbon.device.mgt.config.api</module>
+        <module>io.entgra.device.mgt.core.device.mgt.core</module>
+        <module>io.entgra.device.mgt.core.device.mgt.common</module>
+        <module>io.entgra.device.mgt.core.device.mgt.extensions</module>
+        <module>io.entgra.device.mgt.core.device.mgt.api</module>
+        <module>io.entgra.device.mgt.core.device.mgt.url.printer</module>
+        <module>io.entgra.device.mgt.core.device.mgt.config.api</module>
     </modules>
 
 </project>

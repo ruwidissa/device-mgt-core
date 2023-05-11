@@ -58,7 +58,7 @@ public class ScheduledSubscriptionDTO {
     /**
      * List of subscribers for the application release. The type of the list depends on the subscription type.
      * {@see {@link SubscriptionType}}. If the subscription type is {@code SubscriptionType.DEVICE} the type will be
-     * {@link org.wso2.carbon.device.mgt.common.DeviceIdentifier} and if not the type will be {@link String}.
+     * {@link io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier} and if not the type will be {@link String}.
      */
     private List<?> subscriberList;
 

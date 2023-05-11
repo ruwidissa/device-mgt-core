@@ -50,8 +50,8 @@ import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppReleaseWra
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppWrapper;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;

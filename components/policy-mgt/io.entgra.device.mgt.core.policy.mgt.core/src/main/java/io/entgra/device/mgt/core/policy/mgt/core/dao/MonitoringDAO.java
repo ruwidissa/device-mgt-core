@@ -19,10 +19,10 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.dao;
 
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceData;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceData;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import io.entgra.device.mgt.core.policy.mgt.common.monitor.PolicyDeviceWrapper;
 
 import java.util.List;

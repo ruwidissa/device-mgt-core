@@ -20,9 +20,9 @@ package io.entgra.device.mgt.core.policy.mgt.core.mgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.Feature;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Profile;
-import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
+import io.entgra.device.mgt.core.device.mgt.common.Feature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
 import io.entgra.device.mgt.core.policy.mgt.common.FeatureManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.FeatureDAO;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.FeatureManagerDAOException;

@@ -21,7 +21,7 @@ import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.config.Extension;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
-import org.wso2.carbon.device.mgt.common.Base64File;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.common.FileDataHolder;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
@@ -43,7 +43,7 @@ import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStor
 import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.mgt.core.common.util.FileUtil;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.FileUtil;
 
 import java.io.InputStream;
 import java.lang.reflect.Constructor;

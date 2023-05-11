@@ -48,11 +48,11 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.axiom.wso2</groupId>
@@ -138,13 +138,13 @@
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.wso2.carbon.context,
-                            org.wso2.carbon.device.mgt.common.operation.mgt,
-                            org.wso2.carbon.device.mgt.common.push.notification,
-                            org.wso2.carbon.device.mgt.core.*,
+                            io.entgra.device.mgt.core.device.mgt.common.operation.mgt,
+                            io.entgra.device.mgt.core.device.mgt.common.push.notification,
+                            io.entgra.device.mgt.core.device.mgt.core.*,
                             org.wso2.carbon.event.output.adapter.core,
                             org.wso2.carbon.event.output.adapter.core.exception,
                             org.wso2.carbon.core,
-							org.wso2.carbon.device.mgt.common.*
+							io.entgra.device.mgt.core.device.mgt.common.*
                         </Import-Package>
                     </instructions>
                 </configuration>

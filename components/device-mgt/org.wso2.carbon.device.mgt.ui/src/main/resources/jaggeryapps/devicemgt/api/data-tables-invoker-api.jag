@@ -26,7 +26,7 @@ var devicemgtProps = require("/app/modules/conf-reader/main.js")["conf"];
 var serviceInvokers = require("/app/modules/oauth/token-protected-service-invokers.js")["invokers"];
 var utility = require("/app/modules/utility.js")["utility"];
 var deviceModule = require("/app/modules/business-controllers/device.js")["deviceModule"];
-var EnrolmentInfo = Packages.org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+var EnrolmentInfo = Packages.io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 
 var DTYPE_CONF_DEVICE_TYPE_KEY = "deviceType";
 var DTYPE_CONF_DEVICE_TYPE_LABEL_KEY = "label";

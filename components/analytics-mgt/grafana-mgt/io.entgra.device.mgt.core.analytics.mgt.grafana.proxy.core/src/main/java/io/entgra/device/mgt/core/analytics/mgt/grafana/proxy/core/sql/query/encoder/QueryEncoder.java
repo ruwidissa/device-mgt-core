@@ -18,7 +18,7 @@
 package io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.sql.query.encoder;
 
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.sql.query.PreparedQuery;
-import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
 
 import java.sql.SQLException;
 

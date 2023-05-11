@@ -20,9 +20,9 @@ package io.entgra.device.mgt.core.policy.mgt.core.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
-import org.wso2.carbon.device.mgt.common.exceptions.IllegalTransactionStateException;
-import org.wso2.carbon.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
 import io.entgra.device.mgt.core.policy.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.policy.mgt.core.config.datasource.JNDILookupDefinition;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.impl.MonitoringDAOImpl;

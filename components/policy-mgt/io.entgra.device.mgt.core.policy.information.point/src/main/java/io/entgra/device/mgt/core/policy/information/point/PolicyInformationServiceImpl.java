@@ -18,10 +18,10 @@
 
 package io.entgra.device.mgt.core.policy.information.point;
 
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.Feature;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.Feature;
 import io.entgra.device.mgt.core.policy.mgt.common.PIPDevice;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyInformationPoint;
 
 import java.util.List;

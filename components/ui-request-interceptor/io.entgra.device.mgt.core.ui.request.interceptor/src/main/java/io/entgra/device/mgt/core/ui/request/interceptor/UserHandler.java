@@ -34,8 +34,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;

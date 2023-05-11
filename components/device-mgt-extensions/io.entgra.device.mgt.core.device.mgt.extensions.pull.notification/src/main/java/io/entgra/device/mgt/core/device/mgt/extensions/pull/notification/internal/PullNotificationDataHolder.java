@@ -19,7 +19,7 @@
 package io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.internal;
 
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 
 public class PullNotificationDataHolder {

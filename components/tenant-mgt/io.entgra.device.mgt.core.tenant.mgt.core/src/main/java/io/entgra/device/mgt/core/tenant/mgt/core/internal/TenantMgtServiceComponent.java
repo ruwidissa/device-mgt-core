@@ -26,8 +26,8 @@ import io.entgra.device.mgt.core.tenant.mgt.core.listener.DeviceMgtTenantListene
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
-import org.wso2.carbon.device.mgt.core.metadata.mgt.WhiteLabelManagementServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.WhiteLabelManagementServiceImpl;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
 

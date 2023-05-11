@@ -17,7 +17,7 @@
 */
 package io.entgra.device.mgt.core.policy.mgt.core.mgt.bean;
 
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 
 import java.util.List;
 

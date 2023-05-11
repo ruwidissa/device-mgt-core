@@ -21,7 +21,7 @@ package io.entgra.device.mgt.core.webapp.authenticator.framework.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;

@@ -34,17 +34,17 @@
  */
 package io.entgra.device.mgt.core.policy.mgt.core.mock;
 
-import org.wso2.carbon.device.mgt.common.*;
-import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.general.GeneralConfig;
-import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
-import org.wso2.carbon.device.mgt.common.license.mgt.License;
-import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
-import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
-import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
-import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
-import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
+import io.entgra.device.mgt.core.device.mgt.common.*;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManager;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.general.GeneralConfig;
+import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
+import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyMonitoringManager;
+import io.entgra.device.mgt.core.device.mgt.common.pull.notification.PullNotificationSubscriber;
+import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 
 import java.util.ArrayList;
 

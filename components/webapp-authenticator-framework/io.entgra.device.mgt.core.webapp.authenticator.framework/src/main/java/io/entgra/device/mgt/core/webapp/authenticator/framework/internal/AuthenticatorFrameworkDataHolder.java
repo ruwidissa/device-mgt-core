@@ -20,7 +20,7 @@ package io.entgra.device.mgt.core.webapp.authenticator.framework.internal;
 
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
-import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
+import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;

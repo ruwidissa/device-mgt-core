@@ -20,11 +20,11 @@
 package io.entgra.device.mgt.core.policy.mgt.common.monitor;
 
 
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 
 import java.util.List;
 

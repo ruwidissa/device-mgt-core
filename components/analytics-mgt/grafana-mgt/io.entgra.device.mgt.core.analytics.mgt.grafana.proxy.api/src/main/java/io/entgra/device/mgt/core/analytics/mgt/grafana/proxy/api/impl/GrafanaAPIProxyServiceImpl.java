@@ -11,7 +11,7 @@ import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.exception.Mali
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.internal.GrafanaMgtDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

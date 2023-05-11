@@ -25,17 +25,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
-import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
+import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceConfig;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
 /**
  * @scr.component name="io.entgra.device.mgt.core.subtype.mgt.internal.DeviceSubTypeMgtServiceComponent" immediate="true"
  * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService"
+ * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setDeviceManagementService"

@@ -40,7 +40,7 @@
                             io.entgra.device.mgt.core.policy.mgt.common.*,
                             io.entgra.device.mgt.core.policy.mgt.core.*,
                             org.wso2.carbon.user.core.*,
-                            org.wso2.carbon.device.mgt.common.*
+                            io.entgra.device.mgt.core.device.mgt.common.*
                         </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.policy.decision.point.*

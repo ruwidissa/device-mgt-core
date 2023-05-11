@@ -18,11 +18,11 @@
 
 package io.entgra.device.mgt.core.policy.decision.point.simple;
 
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationException;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationPoint;
-import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
 
 import java.util.List;
 

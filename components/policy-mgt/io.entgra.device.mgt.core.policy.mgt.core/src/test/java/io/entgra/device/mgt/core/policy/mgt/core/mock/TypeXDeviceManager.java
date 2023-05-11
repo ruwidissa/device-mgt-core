@@ -34,11 +34,11 @@
  */
 package io.entgra.device.mgt.core.policy.mgt.core.mock;
 
-import org.wso2.carbon.device.mgt.common.*;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.license.mgt.License;
-import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.*;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
+import io.entgra.device.mgt.core.device.mgt.common.license.mgt.LicenseManagementException;
 
 import java.util.List;
 

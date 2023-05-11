@@ -43,8 +43,8 @@ import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagem
 import io.entgra.device.mgt.core.certificate.mgt.core.service.PaginationResult;
 import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import sun.misc.BASE64Encoder;
 import java.io.ByteArrayInputStream;
 import java.io.File;

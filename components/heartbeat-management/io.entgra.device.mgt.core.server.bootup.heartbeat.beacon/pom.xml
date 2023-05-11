@@ -64,7 +64,7 @@
                             org.apache.commons.io,
                             org.apache.axis2.transport.mail,
                             org.apache.commons.collections,
-                            org.wso2.carbon.device.mgt.common.*
+                            io.entgra.device.mgt.core.device.mgt.common.*
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal,
@@ -157,7 +157,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>

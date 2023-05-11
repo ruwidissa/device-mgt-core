@@ -22,10 +22,10 @@ import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptio
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.app.mgt.App;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 
 import java.util.List;
 import java.util.Properties;
@@ -130,7 +130,7 @@ public interface SubscriptionManager {
      * Perform google enterprise app install
      * @param applicationUUID UUID of the application to subscribe/unsubscribe
      * @param params          list of subscribers. This list can be of either
-     *                        {@link org.wso2.carbon.device.mgt.common.DeviceIdentifier} if {@param subType} is equal
+     *                        {@link io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier} if {@param subType} is equal
      *                        to DEVICE or {@link String} if {@param subType} is USER, ROLE or GROUP
      * @param subType         subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code> {@see {
      * @param action          subscription action. E.g. <code>INSTALL/UNINSTALL</code> {@see {

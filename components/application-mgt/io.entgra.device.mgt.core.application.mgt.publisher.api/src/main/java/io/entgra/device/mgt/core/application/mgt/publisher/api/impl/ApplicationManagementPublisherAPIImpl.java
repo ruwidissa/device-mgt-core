@@ -18,7 +18,7 @@ package io.entgra.device.mgt.core.application.mgt.publisher.api.impl;
 
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
-import org.wso2.carbon.device.mgt.common.Base64File;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.common.Filter;
 import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;

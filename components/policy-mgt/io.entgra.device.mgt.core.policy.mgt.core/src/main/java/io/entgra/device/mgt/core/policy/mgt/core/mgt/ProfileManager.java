@@ -19,7 +19,7 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.mgt;
 
-import org.wso2.carbon.device.mgt.common.policy.mgt.Profile;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 import io.entgra.device.mgt.core.policy.mgt.common.ProfileManagementException;
 
 import java.util.List;

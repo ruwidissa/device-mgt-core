@@ -19,10 +19,10 @@
 package io.entgra.device.mgt.core.policy.mgt.core.internal;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.policy.PolicyConfiguration;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationPoint;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyInformationPoint;

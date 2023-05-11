@@ -62,7 +62,7 @@ public class ScheduledAppSubscriptionTaskManager {
      *
      * @param applicationUUID  UUID of the application to install
      * @param subscribers      list of subscribers. This list can be of
-     *                         either {@link org.wso2.carbon.device.mgt.common.DeviceIdentifier} if {@param subType} is
+     *                         either {@link io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier} if {@param subType} is
      *                         equal to DEVICE or {@link String} if {@param subType} is USER, ROLE or GROUP
      * @param subscriptionType subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code>
      *                         {@see {@link SubscriptionType}}

@@ -19,7 +19,7 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.dao;
 
-import org.wso2.carbon.device.mgt.common.policy.mgt.Profile;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 
 import java.util.List;
 

@@ -21,7 +21,7 @@ package io.entgra.device.mgt.core.policy.mgt.core.dao.impl.feature;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.FeatureManagerDAOException;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.util.PolicyManagementDAOUtil;

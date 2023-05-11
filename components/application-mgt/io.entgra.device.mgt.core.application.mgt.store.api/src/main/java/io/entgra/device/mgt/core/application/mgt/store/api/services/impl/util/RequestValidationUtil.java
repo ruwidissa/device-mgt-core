@@ -24,7 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.application.mgt.store.api.util.Constants;
-import org.wso2.carbon.device.mgt.common.operation.mgt.ActivityStatus;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityStatus;
 
 import java.util.List;
 

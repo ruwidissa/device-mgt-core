@@ -44,12 +44,12 @@ import io.entgra.device.mgt.core.application.mgt.core.dto.ApplicationsDTO;
 import io.entgra.device.mgt.core.application.mgt.core.impl.ApplicationManagerImpl;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.Base64File;
-import org.wso2.carbon.device.mgt.core.common.util.FileUtil;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
-import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.FileUtil;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeVersion;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 
 import java.io.File;
 import java.util.ArrayList;

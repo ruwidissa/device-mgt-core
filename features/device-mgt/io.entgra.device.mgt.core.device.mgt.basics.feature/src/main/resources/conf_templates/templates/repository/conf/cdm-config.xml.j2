@@ -228,7 +228,7 @@
                 <SourceDB>DM_DB</SourceDB>
                 <DestinationDB>ARCHIVAL_DB</DestinationDB>
             </DBConfig>
-            <TaskClass>org.wso2.carbon.device.mgt.core.task.impl.ArchivalTask</TaskClass>
+            <TaskClass>io.entgra.device.mgt.core.device.mgt.core.task.impl.ArchivalTask</TaskClass>
             <!-- Cron expression to run the task at specified time -->
             <CronExpression>0 0 0 1/1 * ? *</CronExpression>
             <!-- How many days of data should we keep in transactional tables? Must be in number of days -->
@@ -236,7 +236,7 @@
             <ExecutionBatchSize>1000</ExecutionBatchSize>
             <PurgingTask>
                 <Enabled>false</Enabled>
-                <TaskClass>org.wso2.carbon.device.mgt.core.task.impl.ArchivedDataDeletionTask</TaskClass>
+                <TaskClass>io.entgra.device.mgt.core.device.mgt.core.task.impl.ArchivedDataDeletionTask</TaskClass>
                 <!-- Cron expression to run the task at specified time -->
                 <CronExpression>0 0 3 1/1 * ? *</CronExpression>
                 <!-- After this number of days, data will be permanently deleted from archival tables.
@@ -303,7 +303,7 @@
         {% else %}
         <Enabled>false</Enabled>
         <NotifyThroughExtension>false</NotifyThroughExtension>
-        <ExtensionClass>org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifier</ExtensionClass>
+        <ExtensionClass>io.entgra.device.mgt.core.device.mgt.common.enrollment.notification.EnrollmentNotifier</ExtensionClass>
         <NotifyingInternalHost>http://localhost:8280</NotifyingInternalHost>
         {% endif %}
     </EnrolmentNotificationConfiguration>

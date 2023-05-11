@@ -36,8 +36,8 @@
 
 package io.entgra.device.mgt.core.policy.mgt.common;
 
-import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 
 import java.util.List;
 import java.util.Map;

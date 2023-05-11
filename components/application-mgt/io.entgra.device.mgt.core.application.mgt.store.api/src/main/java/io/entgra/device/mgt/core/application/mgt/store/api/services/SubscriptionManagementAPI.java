@@ -30,7 +30,7 @@ import io.swagger.annotations.Tag;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;

@@ -18,9 +18,9 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.util;
 
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -18,8 +18,8 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core;
 
-import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyMonitoringManager;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 
 public class TestDeviceManagementProviderService extends DeviceManagementProviderServiceImpl {
     private PolicyMonitoringManager policyMonitoringManager;

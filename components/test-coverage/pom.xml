@@ -47,14 +47,14 @@
 
         <!-- Device mgt component related properties -->
         <device.mgt>device-mgt</device.mgt>
-        <device.mgt.core>${basedir}/../${device.mgt}/org.wso2.carbon.device.mgt.core</device.mgt.core>
-        <device.mgt.common>${basedir}/../${device.mgt}/org.wso2.carbon.device.mgt.common</device.mgt.common>
-        <device.mgt.api>${basedir}/../${device.mgt}/org.wso2.carbon.device.mgt.api</device.mgt.api>
-        <device.mgt.extensions>${basedir}/../${device.mgt}/org.wso2.carbon.device.mgt.extensions</device.mgt.extensions>
+        <device.mgt.core>${basedir}/../${device.mgt}/io.entgra.device.mgt.core.device.mgt.core</device.mgt.core>
+        <device.mgt.common>${basedir}/../${device.mgt}/io.entgra.device.mgt.core.device.mgt.common</device.mgt.common>
+        <device.mgt.api>${basedir}/../${device.mgt}/io.entgra.device.mgt.core.device.mgt.api</device.mgt.api>
+        <device.mgt.extensions>${basedir}/../${device.mgt}/io.entgra.device.mgt.core.device.mgt.extensions</device.mgt.extensions>
         <device.mgt.analytics.data>${basedir}/../${device.mgt}/org.wso2.carbon.device.mgt.analytics.data.publisher
         </device.mgt.analytics.data>
         <device.mgt.url.printer>
-            ${basedir}/../${device.mgt}/org.wso2.carbon.device.mgt.url.printer
+            ${basedir}/../${device.mgt}/io.entgra.device.mgt.core.device.mgt.url.printer
         </device.mgt.url.printer>
 
         <!-- api-mgt extensions component related properties -->
@@ -240,7 +240,7 @@
                                                             <fileset dir="${device.mgt.analytics.data}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.device.mgt.api">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.api">
                                                         <classfiles>
                                                             <fileset dir="${device.mgt.api}/${target}/${classes}" />
                                                         </classfiles>
@@ -248,7 +248,7 @@
                                                             <fileset dir="${device.mgt.api}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.device.mgt.common">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.common">
                                                         <classfiles>
                                                             <fileset dir="${device.mgt.common}/${target}/${classes}" />
                                                         </classfiles>
@@ -256,7 +256,7 @@
                                                             <fileset dir="${device.mgt.common}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.device.mgt.core">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.core">
                                                         <classfiles>
                                                             <fileset dir="${device.mgt.core}/${target}/${classes}" />
                                                         </classfiles>
@@ -264,7 +264,7 @@
                                                             <fileset dir="${device.mgt.core}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.device.mgt.extensions">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.extensions">
                                                         <classfiles>
                                                             <fileset dir="${device.mgt.extensions}/${target}/${classes}" />
                                                         </classfiles>
@@ -272,7 +272,7 @@
                                                             <fileset dir="${device.mgt.extensions}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.device.mgt.url.printer">
+                                                    <group name="io.entgra.device.mgt.core.device.mgt.url.printer">
                                                         <classfiles>
                                                             <fileset dir="${device.mgt.url.printer}/${target}/${classes}" />
                                                         </classfiles>

@@ -19,12 +19,12 @@ package io.entgra.device.mgt.core.policy.mgt.core.mock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
-import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
-import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyMonitoringManager;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -29,8 +29,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
-import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
+import io.entgra.device.mgt.core.device.mgt.core.report.mgt.Constants;
 
 import java.net.URI;
 import java.util.List;

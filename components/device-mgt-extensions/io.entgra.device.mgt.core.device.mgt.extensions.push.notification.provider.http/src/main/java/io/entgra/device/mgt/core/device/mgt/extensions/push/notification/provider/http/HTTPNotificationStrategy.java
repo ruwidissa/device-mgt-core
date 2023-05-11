@@ -22,11 +22,11 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
-import org.wso2.carbon.device.mgt.common.push.notification.NotificationContext;
-import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
-import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
-import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationExecutionFailedException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidConfigurationException;
+import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationContext;
+import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationStrategy;
+import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationExecutionFailedException;
 
 import java.net.MalformedURLException;
 import java.net.URL;

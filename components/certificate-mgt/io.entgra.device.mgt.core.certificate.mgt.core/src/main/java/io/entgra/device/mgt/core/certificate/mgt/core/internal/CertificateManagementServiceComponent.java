@@ -33,12 +33,12 @@ import io.entgra.device.mgt.core.certificate.mgt.core.config.CertificateManageme
 import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 
 /**
  * @scr.component name="org.wso2.carbon.certificate.mgt" immediate="true"
  * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService"
+ * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setDeviceManagementService"

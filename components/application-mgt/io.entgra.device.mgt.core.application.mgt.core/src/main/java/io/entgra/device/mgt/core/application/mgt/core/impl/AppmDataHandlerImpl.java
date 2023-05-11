@@ -31,8 +31,8 @@ import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
 import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundException;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 
 import java.io.InputStream;
 import java.util.Map;

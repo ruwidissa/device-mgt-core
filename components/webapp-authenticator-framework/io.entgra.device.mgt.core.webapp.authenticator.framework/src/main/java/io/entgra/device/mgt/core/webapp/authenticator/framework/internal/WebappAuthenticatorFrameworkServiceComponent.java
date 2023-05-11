@@ -25,7 +25,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
-import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
+import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
@@ -82,7 +82,7 @@ import java.util.Properties;
  * bind="setTenantRegistryLoader"
  * unbind="unsetTenantRegistryLoader"
  * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="org.wso2.carbon.device.mgt.common.spi.OTPManagementService"
+ * interface="io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setOTPManagementService"

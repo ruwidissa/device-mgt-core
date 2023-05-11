@@ -36,11 +36,11 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.device.mgt.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
         </dependency>
 		<dependency>
 			<groupId>org.eclipse.osgi</groupId>
@@ -85,12 +85,12 @@
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging,
-                            org.wso2.carbon.device.mgt.common.*,
-                            org.wso2.carbon.device.mgt.core.service
+                            io.entgra.device.mgt.core.device.mgt.common.*,
+                            io.entgra.device.mgt.core.device.mgt.core.service
                             io.entgra.device.mgt.core.policy.mgt.core.*,
                             io.entgra.device.mgt.core.policy.mgt.core,
                             com.google.gson,
-                            org.wso2.carbon.device.mgt.core.service.*,
+                            io.entgra.device.mgt.core.device.mgt.core.service.*,
                             io.entgra.device.mgt.core.application.mgt.common.*,
                             io.entgra.device.mgt.core.application.mgt.common.services.*
                         </Import-Package>

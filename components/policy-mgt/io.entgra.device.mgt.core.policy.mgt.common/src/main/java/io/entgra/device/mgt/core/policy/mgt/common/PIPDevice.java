@@ -19,10 +19,10 @@
 package io.entgra.device.mgt.core.policy.mgt.common;
 
 
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 
 import java.sql.Timestamp;
 import java.util.List;

@@ -21,9 +21,9 @@ package io.entgra.device.mgt.core.policy.mgt.core.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.policy.PolicyConfiguration;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationPoint;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
@@ -52,7 +52,7 @@ import org.wso2.carbon.user.core.service.RealmService;
  * bind="setPEPService"
  * unbind="unsetPEPService"
  * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService"
+ * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setDeviceManagementService"

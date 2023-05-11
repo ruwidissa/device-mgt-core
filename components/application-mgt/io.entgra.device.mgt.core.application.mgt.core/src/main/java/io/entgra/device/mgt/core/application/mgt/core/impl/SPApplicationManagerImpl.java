@@ -49,7 +49,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.core.common.util.HttpUtil;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
 
 import java.util.ArrayList;
 import java.util.List;

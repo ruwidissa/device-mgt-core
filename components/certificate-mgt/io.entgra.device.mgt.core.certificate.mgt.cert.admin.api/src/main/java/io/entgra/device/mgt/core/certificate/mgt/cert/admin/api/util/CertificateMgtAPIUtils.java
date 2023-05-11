@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
+import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchManagerService;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 
 import javax.ws.rs.core.MediaType;

@@ -26,7 +26,7 @@ import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.BadRequestExc
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
-import org.wso2.carbon.device.mgt.common.exceptions.UnAuthorizedException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnAuthorizedException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
