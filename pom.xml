@@ -43,7 +43,7 @@
 <!--        <module>components/policy-mgt</module>-->
 <!--        <module>components/certificate-mgt</module>-->
 <!--        <module>components/ui-request-interceptor</module>-->
-<!--        <module>components/transport-mgt</module>-->
+        <module>components/transport-mgt</module>
         <module>components/analytics-mgt</module>
         <module>components/webapp-authenticator-framework</module>
 <!--        <module>components/logger</module>-->
@@ -60,7 +60,7 @@
 <!--        <module>features/ui-request-interceptor</module>-->
 <!--        <module>features/jwt-client</module>-->
 <!--        <module>features/device-mgt-extensions</module>-->
-<!--        <module>features/transport-mgt</module>-->
+        <module>features/transport-mgt</module>
         <module>features/analytics-mgt</module>
         <module>features/webapp-authenticator-framework</module>
 <!--        <module>features/logger</module>-->
@@ -264,7 +264,7 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.email.sender.core</artifactId>
+                <artifactId>io.entgra.device.mgt.core.transport.mgt.email.sender.core</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
@@ -312,12 +312,12 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.transport.mgt.sms.handler.core</artifactId>
+                <artifactId>io.entgra.device.mgt.core.transport.mgt.sms.handler.core</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.transport.mgt.sms.handler.common</artifactId>
+                <artifactId>io.entgra.device.mgt.core.transport.mgt.sms.handler.common</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>

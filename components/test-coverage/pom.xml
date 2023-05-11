@@ -95,7 +95,7 @@
         </device.extensions.xmpp>
 
         <!-- Email Sender component related properties -->
-        <email.sender.core>${basedir}/../email-sender/org.wso2.carbon.email.sender.core</email.sender.core>
+        <email.sender.core>${basedir}/../email-sender/io.entgra.device.mgt.core.transport.mgt.email.sender.core</email.sender.core>
 
         <!-- identity extensions component related properties -->
         <identity.extensions>identity-extensions</identity.extensions>

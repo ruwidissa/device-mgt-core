@@ -18,10 +18,10 @@
  */
 package org.wso2.carbon.device.mgt.core.common;
 
-import org.wso2.carbon.email.sender.core.EmailContext;
-import org.wso2.carbon.email.sender.core.EmailSendingFailedException;
-import org.wso2.carbon.email.sender.core.EmailTransportNotConfiguredException;
-import org.wso2.carbon.email.sender.core.service.EmailSenderService;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailContext;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailSendingFailedException;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailTransportNotConfiguredException;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
 
 public class TestEmailSenderService implements EmailSenderService {
     @Override

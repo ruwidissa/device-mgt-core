@@ -34,9 +34,9 @@
 
 
     <modules>
-        <module>io.entgra.transport.mgt.sms.handler.core</module>
-        <module>io.entgra.transport.mgt.sms.handler.common</module>
-        <module>io.entgra.transport.mgt.sms.handler.api</module>
+        <module>io.entgra.device.mgt.core.transport.mgt.sms.handler.core</module>
+        <module>io.entgra.device.mgt.core.transport.mgt.sms.handler.common</module>
+        <module>io.entgra.device.mgt.core.transport.mgt.sms.handler.api</module>
     </modules>
 
 </project>

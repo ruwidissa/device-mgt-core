@@ -37,7 +37,7 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.email.sender.core</artifactId>
+            <artifactId>io.entgra.device.mgt.core.transport.mgt.email.sender.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.apache.velocity</groupId>
@@ -95,7 +95,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.email.sender.core:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.transport.mgt.email.sender.core:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
                                     org.wso2.orbit.org.apache.velocity:velocity:${velocity.version}

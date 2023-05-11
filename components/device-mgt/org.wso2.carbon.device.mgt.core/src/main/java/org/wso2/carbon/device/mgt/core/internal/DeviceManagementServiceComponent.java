@@ -86,7 +86,7 @@ import org.wso2.carbon.device.mgt.core.traccar.api.service.DeviceAPIClientServic
 import org.wso2.carbon.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagementSchemaInitializer;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
-import org.wso2.carbon.email.sender.core.service.EmailSenderService;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -133,7 +133,7 @@ import java.util.concurrent.TimeUnit;
  * bind="setConfigurationContextService"
  * unbind="unsetConfigurationContextService"
  * @scr.reference name="email.sender.service"
- * interface="org.wso2.carbon.email.sender.core.service.EmailSenderService"
+ * interface="io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService"
  * cardinality="0..1"
  * policy="dynamic"
  * bind="setEmailSenderService"

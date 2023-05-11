@@ -49,7 +49,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>io.entgra.device.mgt.core</groupId>
-                                    <artifactId>io.entgra.transport.mgt.sms.handler.api</artifactId>
+                                    <artifactId>io.entgra.device.mgt.core.transport.mgt.sms.handler.api</artifactId>
                                     <version>${project.version}</version>
                                     <type>war</type>
                                     <overWrite>true</overWrite>
