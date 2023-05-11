@@ -27,7 +27,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>heart-beat-feature</artifactId>
     <packaging>pom</packaging>
     <name>Entgra - Heart Beat Feature</name>

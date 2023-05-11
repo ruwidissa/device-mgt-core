@@ -34,10 +34,10 @@
     </parent>
 
     <modules>
-<!--        <module>components/heartbeat-management</module>-->
-<!--        <module>components/device-mgt</module>-->
+        <module>components/heartbeat-management</module>
+        <module>components/device-mgt</module>
         <module>components/device-mgt-extensions</module>
-<!--        <module>components/identity-extensions</module>-->
+        <module>components/identity-extensions</module>
         <module>components/apimgt-extensions</module>
         <module>components/application-mgt</module>
         <module>components/policy-mgt</module>
@@ -46,24 +46,24 @@
         <module>components/transport-mgt</module>
         <module>components/analytics-mgt</module>
         <module>components/webapp-authenticator-framework</module>
-<!--        <module>components/logger</module>-->
+        <module>components/logger</module>
         <module>components/task-mgt</module>
         <module>components/subtype-mgt</module>
         <module>components/tenant-mgt</module>
         <module>components/operation-template-mgt</module>
-<!--        <module>features/device-mgt</module>-->
+        <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
         <module>features/policy-mgt</module>
         <module>features/certificate-mgt</module>
-<!--        <module>features/heartbeat-management</module>-->
+        <module>features/heartbeat-management</module>
         <module>features/ui-request-interceptor</module>
-<!--        <module>features/jwt-client</module>-->
+        <module>features/jwt-client</module>
         <module>features/device-mgt-extensions</module>
         <module>features/transport-mgt</module>
         <module>features/analytics-mgt</module>
         <module>features/webapp-authenticator-framework</module>
-<!--        <module>features/logger</module>-->
+        <module>features/logger</module>
         <module>features/task-mgt</module>
         <module>features/subtype-mgt</module>
         <module>features/tenant-mgt</module>
@@ -296,7 +296,7 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>org.wso2.carbon.identity.jwt.client.extension</artifactId>
+                <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
@@ -307,7 +307,7 @@
 
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
+                <artifactId>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <dependency>
@@ -347,7 +347,7 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
-                <artifactId>io.entgra.notification.logger</artifactId>
+                <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
                 <version>${carbon.device.mgt.version}</version>
             </dependency>
             <!-- Device Management dependencies -->

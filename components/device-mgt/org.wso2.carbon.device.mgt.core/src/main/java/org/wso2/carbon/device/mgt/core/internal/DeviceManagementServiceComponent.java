@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.core.internal;
 
-import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -145,7 +145,7 @@ import java.util.concurrent.TimeUnit;
  * bind="setDeviceTypeGeneratorService"
  * unbind="unsetDeviceTypeGeneratorService"
  * @scr.reference name="entgra.heart.beat.service"
- * interface="io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
+ * interface="io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
  * cardinality="0..1"
  * policy="dynamic"
  * bind="setHeartBeatService"

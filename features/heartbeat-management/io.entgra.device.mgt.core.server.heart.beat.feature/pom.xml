@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
+            <artifactId>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
@@ -128,7 +128,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.server.bootup.heartbeat.beacon:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.server.bootup.heartbeat.beacon:${carbon.device.mgt.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>

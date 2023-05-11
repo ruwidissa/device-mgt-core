@@ -290,7 +290,7 @@ var utils = function () {
 			}
 			var endUsername = ssoLoginUser.user.username + "@" + ssoLoginUser.user.domain;
 			var JWTClientManagerServicePackagePath =
-				"org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService";
+				"io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService";
 			//noinspection JSUnresolvedFunction, JSUnresolvedVariable
 			var JWTClientManagerService = carbon.server.osgiService(JWTClientManagerServicePackagePath);
 			//noinspection JSUnresolvedFunction
@@ -353,7 +353,7 @@ var utils = function () {
             return null;
         } else {
             var JWTClientManagerServicePackagePath =
-                "org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService";
+                "io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService";
             //noinspection JSUnresolvedFunction, JSUnresolvedVariable
             var JWTClientManagerService = carbon.server.osgiService(JWTClientManagerServicePackagePath);
             //noinspection JSUnresolvedFunction
@@ -370,7 +370,7 @@ var utils = function () {
             return null;
         } else {
             var JWTClientManagerServicePackagePath =
-                "org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService";
+                "io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService";
             //noinspection JSUnresolvedFunction, JSUnresolvedVariable
             var JWTClientManagerService = carbon.server.osgiService(JWTClientManagerServicePackagePath);
             //noinspection JSUnresolvedFunction

@@ -18,7 +18,7 @@
 package io.entgra.device.mgt.core.task.mgt.core.internal;
 
 import io.entgra.device.mgt.core.task.mgt.core.dao.common.TaskManagementDAOFactory;
-import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.device.mgt.core.task.mgt.core.config.TaskManagementConfig;
 import io.entgra.device.mgt.core.task.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.task.mgt.common.spi.TaskManagementService;
@@ -46,7 +46,7 @@ import org.wso2.carbon.ntask.core.service.TaskService;
  * bind="setTaskService"
  * unbind="unsetTaskService"
  * @scr.reference name="entgra.heart.beat.service"
- * interface="io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
+ * interface="io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
  * cardinality="0..1"
  * policy="dynamic"
  * bind="setHeartBeatService"

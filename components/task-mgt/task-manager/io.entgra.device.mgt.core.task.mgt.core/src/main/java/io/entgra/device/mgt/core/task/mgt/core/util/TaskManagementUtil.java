@@ -18,7 +18,7 @@
 package io.entgra.device.mgt.core.task.mgt.core.util;
 
 import com.google.gson.Gson;
-import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import io.entgra.device.mgt.core.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.device.mgt.core.task.mgt.common.exception.TaskManagementException;
 import io.entgra.device.mgt.core.task.mgt.core.internal.TaskManagerDataHolder;

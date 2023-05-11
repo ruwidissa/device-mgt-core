@@ -50,7 +50,7 @@
                         <Bundle-Description>Task Watcher Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.task.mgt.watcher.internal</Private-Package>
                         <Import-Package>
-                            io.entgra.server.bootup.heartbeat.beacon.*,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.*,
                             io.entgra.device.mgt.core.task.mgt.common.*,
                             io.entgra.device.mgt.core.task.mgt.core.*,
                             org.apache.commons.logging,
@@ -110,7 +110,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
+            <artifactId>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

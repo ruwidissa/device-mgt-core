@@ -30,7 +30,7 @@ import io.entgra.device.mgt.core.policy.mgt.core.mock.TypeXDeviceManagementServi
 import io.entgra.device.mgt.core.policy.mgt.core.task.MonitoringTask;
 import io.entgra.device.mgt.core.policy.mgt.core.task.TaskScheduleService;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
-import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;

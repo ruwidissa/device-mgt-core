@@ -109,13 +109,13 @@
                             io.swagger.annotations.*;resolution:=optional,
                             org.wso2.carbon,
                             org.wso2.carbon.base,
-							org.scannotation.*,
+                            org.scannotation.*,
                             org.wso2.carbon.event.processor.stub,
-                            org.wso2.carbon.identity.jwt.client.extension.service,
+                            io.entgra.device.mgt.core.identity.jwt.client.extension.service,
                             org.apache.commons.codec.binary,
-                            io.entgra.server.bootup.heartbeat.beacon,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon,
                             io.entgra.device.mgt.core.device.mgt.extensions.logger.*,
-                            io.entgra.notification.logger.*
+                            io.entgra.device.mgt.core.notification.logger.*
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.device.mgt.core.internal,
@@ -304,7 +304,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.identity.jwt.client.extension</artifactId>
+            <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -339,7 +339,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.server.bootup.heartbeat.beacon</artifactId>
+            <artifactId>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -360,7 +360,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.notification.logger</artifactId>
+            <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
         </dependency>
     </dependencies>
 

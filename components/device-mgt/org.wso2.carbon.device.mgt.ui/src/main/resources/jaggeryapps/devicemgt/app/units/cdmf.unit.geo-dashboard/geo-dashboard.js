@@ -25,7 +25,7 @@ function onRequest(context) {
     var constants = require("/app/modules/constants.js");
     var wsEndpoint = null;
     var jwtService = carbonServer.osgiService(
-        'org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService');
+        'io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService');
     var jwtClient = jwtService.getJWTClient();
     var encodedClientKeys = session.get(constants["ENCODED_TENANT_BASED_WEB_SOCKET_CLIENT_CREDENTIALS"]);
     var tokenPair = null;

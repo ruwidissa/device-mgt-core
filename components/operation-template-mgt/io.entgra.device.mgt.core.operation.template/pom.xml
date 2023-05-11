@@ -323,7 +323,7 @@
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.identity.jwt.client.extension</artifactId>
+            <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.core.task;
 
-import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.powermock.api.mockito.PowerMockito;

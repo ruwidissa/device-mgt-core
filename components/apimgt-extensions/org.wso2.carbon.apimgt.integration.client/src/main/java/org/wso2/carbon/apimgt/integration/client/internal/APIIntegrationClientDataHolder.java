@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.integration.client.internal;
 
 
-import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 
 /**
  * This holds the required service for this component

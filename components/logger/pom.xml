@@ -32,7 +32,7 @@
     <url>http://entgra.io</url>
 
     <modules>
-        <module>io.entgra.notification.logger</module>
+        <module>io.entgra.device.mgt.core.notification.logger</module>
     </modules>
 
     <properties>

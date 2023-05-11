@@ -21,7 +21,7 @@ import io.entgra.device.mgt.core.task.mgt.common.spi.TaskManagementService;
 import io.entgra.device.mgt.core.task.mgt.core.config.TaskConfigurationManager;
 import io.entgra.device.mgt.core.task.mgt.core.config.TaskManagementConfig;
 import io.entgra.device.mgt.core.task.mgt.watcher.IoTSStartupHandler;
-import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -46,7 +46,7 @@ import org.wso2.carbon.user.core.service.RealmService;
  * bind="setTaskMgtService"
  * unbind="unsetTaskMgtService"
  * @scr.reference name="entgra.heart.beat.service"
- * interface="io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
+ * interface="io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
  * cardinality="0..1"
  * policy="dynamic"
  * bind="setHeartBeatService"

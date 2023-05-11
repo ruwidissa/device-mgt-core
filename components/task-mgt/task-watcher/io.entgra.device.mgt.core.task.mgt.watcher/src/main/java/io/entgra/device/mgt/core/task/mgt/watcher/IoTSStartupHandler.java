@@ -18,7 +18,7 @@
 
 package io.entgra.device.mgt.core.task.mgt.watcher;
 
-import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import io.entgra.device.mgt.core.task.mgt.common.bean.DynamicTask;
 import io.entgra.device.mgt.core.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.device.mgt.core.task.mgt.common.exception.TaskManagementException;

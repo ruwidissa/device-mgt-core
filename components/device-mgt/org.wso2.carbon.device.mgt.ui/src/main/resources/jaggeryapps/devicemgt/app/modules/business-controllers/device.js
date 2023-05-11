@@ -402,7 +402,7 @@ deviceModule = function () {
 				config.clientSecret = app["client_secret"];
 				if (config.clientId && config.clientSecret) {
 					var JWTClientManagerServicePackagePath =
-						"org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService";
+						"io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService";
 					//noinspection JSUnresolvedFunction, JSUnresolvedVariable
 					var JWTClientManagerService = carbon.server.osgiService(JWTClientManagerServicePackagePath);
 					//noinspection JSUnresolvedFunction

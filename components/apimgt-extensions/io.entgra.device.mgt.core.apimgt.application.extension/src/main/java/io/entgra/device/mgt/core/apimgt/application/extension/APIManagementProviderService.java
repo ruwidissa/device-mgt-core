@@ -20,7 +20,7 @@ package io.entgra.device.mgt.core.apimgt.application.extension;
 
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
-import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
 
 /**
  * This comprise on operation that is been done with api manager from CDMF. This service needs to be implemented in APIM.

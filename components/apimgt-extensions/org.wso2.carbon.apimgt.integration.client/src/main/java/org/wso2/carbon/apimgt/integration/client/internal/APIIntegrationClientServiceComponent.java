@@ -25,12 +25,12 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.integration.client.IntegrationClientServiceImpl;
 import org.wso2.carbon.apimgt.integration.client.configs.APIMConfigReader;
 import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
-import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 
 /**
  * @scr.component name="org.wso2.carbon.api.integration.client" immediate="true"
  * @scr.reference name="api.integration.client.service"
- * interface="org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService"
+ * interface="io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService"
  * cardinality="1..1"
  * policy="dynamic"
  * bind="setJWTClientManagerService"

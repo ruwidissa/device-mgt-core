@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.task.impl;
 
-import io.entgra.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;

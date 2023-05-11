@@ -39,7 +39,7 @@
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>org.wso2.carbon.identity.jwt.client.extension</artifactId>
+            <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.com.nimbusds</groupId>
@@ -96,7 +96,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:org.wso2.carbon.identity.jwt.client.extension:${carbon.device.mgt.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.identity.jwt.client.extension:${carbon.device.mgt.version}
                                 </bundleDef>
                                 <bundleDef>
                                     org.wso2.orbit.com.nimbusds:nimbus-jose-jwt:${nimbus.orbit.version}

@@ -17,7 +17,7 @@
  */
 package io.entgra.device.mgt.core.task.mgt.watcher.internal;
 
-import io.entgra.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.device.mgt.core.task.mgt.common.spi.TaskManagementService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
