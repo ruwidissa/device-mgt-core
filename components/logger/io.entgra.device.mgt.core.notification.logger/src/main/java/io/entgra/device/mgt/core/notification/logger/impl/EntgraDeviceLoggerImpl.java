@@ -35,61 +35,22 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log = LogFactory.getLog(clazz);
     }
 
-    @Override
-    public void info(Object object, LogContext logContext) {
-    }
-
-    @Override
-    public void info(Object object, Throwable t, LogContext logContext) {
-    }
-
-    @Override
-    public void debug(Object object, LogContext logContext) {
-    }
-
-    @Override
-    public void debug(Object object, Throwable t, LogContext logContext) {
-    }
-
-    @Override
-    public void error(Object object, LogContext logContext) {
-    }
-
-    @Override
-    public void error(Object object, Throwable t, LogContext logContext) {
-    }
-
-    @Override
-    public void fatal(Object object, LogContext logContext) {
-    }
-
-    @Override
-    public void fatal(Object object, Throwable t, LogContext logContext) {
-    }
-
-    @Override
-    public void trace(Object object, LogContext logContext) {
-
-    }
-
-    @Override
-    public void trace(Object object, Throwable t, LogContext logContext) {
-
-    }
-
-    @Override
-    public void warn(Object object, LogContext logContext) {
-    }
-
-    @Override
-    public void warn(Object object, Throwable t, LogContext logContext) {
-    }
-
     public void info(String message) {
+        log.info(message);
     }
 
     public void info(String message, Throwable t) {
         log.info(message, t);
+    }
+
+    @Override
+    public void info(Object o) {
+        log.info(o);
+    }
+
+    @Override
+    public void info(Object o, Throwable throwable) {
+        log.info(o, throwable);
     }
 
     @Override
@@ -99,14 +60,37 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.info(message);
     }
 
+    @Override
+    public void info(Object object, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.info(object);
+    }
+
+    @Override
+    public void info(Object object, Throwable t, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.info(object, t);
+    }
+
 
     public void debug(String message) {
         log.debug(message);
     }
 
-
     public void debug(String message, Throwable t) {
         log.debug(message, t);
+    }
+
+    @Override
+    public void debug(Object o) {
+        log.debug(o);
+    }
+
+    @Override
+    public void debug(Object o, Throwable throwable) {
+        log.debug(o, throwable);
     }
 
     @Override
@@ -116,13 +100,37 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.debug(message);
     }
 
+    @Override
+    public void debug(Object object, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.debug(object);
+    }
+
+    @Override
+    public void debug(Object object, Throwable t, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.debug(object, t);
+    }
+
+
     public void error(String message) {
         log.error(message);
     }
 
-
     public void error(String message, Throwable t) {
         log.error(message, t);
+    }
+
+    @Override
+    public void error(Object o) {
+        log.error(o);
+    }
+
+    @Override
+    public void error(Object o, Throwable throwable) {
+        log.error(o, throwable);
     }
 
     @Override
@@ -139,14 +147,37 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.error(message, t);
     }
 
+    @Override
+    public void error(Object object, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.error(object);
+    }
+
+    @Override
+    public void error(Object object, Throwable t, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.error(object, t);
+    }
+
 
     public void warn(String message) {
         log.warn(message);
     }
 
-
     public void warn(String message, Throwable t) {
         log.warn(message, t);
+    }
+
+    @Override
+    public void warn(Object o) {
+        log.warn(o);
+    }
+
+    @Override
+    public void warn(Object o, Throwable throwable) {
+        log.warn(o, throwable);
     }
 
     @Override
@@ -163,14 +194,37 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.warn(message, t);
     }
 
+    @Override
+    public void warn(Object object, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.warn(object);
+    }
+
+    @Override
+    public void warn(Object object, Throwable t, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.warn(object, t);
+    }
+
 
     public void trace(String message) {
         log.trace(message);
     }
 
-
     public void trace(String message, Throwable t) {
         log.trace(message, t);
+    }
+
+    @Override
+    public void trace(Object o) {
+        log.trace(o);
+    }
+
+    @Override
+    public void trace(Object o, Throwable throwable) {
+        log.trace(o, throwable);
     }
 
     @Override
@@ -180,41 +234,27 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.trace(message);
     }
 
+    @Override
+    public void trace(Object object, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.trace(object);
+    }
+
+    @Override
+    public void trace(Object object, Throwable t, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.trace(object, t);
+    }
+
 
     public void fatal(String message) {
         log.fatal(message);
     }
 
-
     public void fatal(String message, Throwable t) {
         log.fatal(message, t);
-    }
-
-    @Override
-    public void fatal(String message, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
-        log.fatal(message);
-    }
-
-    @Override
-    public void debug(Object o) {
-        log.debug(o);
-    }
-
-    @Override
-    public void debug(Object o, Throwable throwable) {
-        log.debug(o, throwable);
-    }
-
-    @Override
-    public void error(Object o) {
-        log.error(o);
-    }
-
-    @Override
-    public void error(Object o, Throwable throwable) {
-        log.error(o, throwable);
     }
 
     @Override
@@ -228,13 +268,24 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
     }
 
     @Override
-    public void info(Object o) {
-        log.info(o);
+    public void fatal(String message, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.fatal(message);
     }
 
     @Override
-    public void info(Object o, Throwable throwable) {
-        log.info(o, throwable);
+    public void fatal(Object object, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.fatal(object);
+    }
+
+    @Override
+    public void fatal(Object object, Throwable t, LogContext logContext) {
+        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
+        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        log.fatal(object, t);
     }
 
     @Override
@@ -265,26 +316,6 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
     @Override
     public boolean isWarnEnabled() {
         return log.isWarnEnabled();
-    }
-
-    @Override
-    public void trace(Object o) {
-        log.trace(o);
-    }
-
-    @Override
-    public void trace(Object o, Throwable throwable) {
-        log.trace(o, throwable);
-    }
-
-    @Override
-    public void warn(Object o) {
-        log.warn(o);
-    }
-
-    @Override
-    public void warn(Object o, Throwable throwable) {
-        log.warn(o, throwable);
     }
 
     @Override
