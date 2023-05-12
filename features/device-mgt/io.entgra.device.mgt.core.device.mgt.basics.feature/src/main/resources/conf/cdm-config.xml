@@ -51,7 +51,7 @@
         <AdminPassword>${admin.username}</AdminPassword>
     </KeyManagerConfiguration>
     <PolicyConfiguration>
-        <MonitoringClass>org.wso2.carbon.policy.mgt</MonitoringClass>
+        <MonitoringClass>io.entgra.device.mgt.core.policy.mgt</MonitoringClass>
         <MonitoringEnable>true</MonitoringEnable>
         <MonitoringFrequency>60000</MonitoringFrequency>
         <MaxRetries>5</MaxRetries>

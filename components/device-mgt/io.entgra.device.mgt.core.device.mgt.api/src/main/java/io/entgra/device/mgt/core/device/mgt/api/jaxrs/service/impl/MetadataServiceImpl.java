@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -32,10 +32,10 @@ import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManageme
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelTheme;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
-import org.wso2.carbon.device.mgt.jaxrs.beans.MetadataList;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.MetadataService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.MetadataList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.MetadataService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

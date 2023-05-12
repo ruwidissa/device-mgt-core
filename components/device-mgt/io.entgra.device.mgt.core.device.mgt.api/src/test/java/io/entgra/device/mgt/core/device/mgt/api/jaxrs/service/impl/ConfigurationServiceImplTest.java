@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -33,8 +33,8 @@ import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.Configurati
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.ConfigurationManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.ConfigurationManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
 
 import javax.ws.rs.core.Response;
@@ -45,7 +45,7 @@ import java.util.List;
  * This is a test class for {@link ConfigurationServiceImpl}.
  */
 @PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
-@SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
+@SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, PolicyManagerUtil.class})
 public class ConfigurationServiceImplTest {

@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,11 +39,11 @@ import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManage
 import io.entgra.device.mgt.core.device.mgt.core.authorization.DeviceAccessAuthorizationServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
-import org.wso2.carbon.device.mgt.jaxrs.common.ActivityIdList;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.ActivityInfoProviderService;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.common.ActivityIdList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.ActivityInfoProviderService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
 
 import javax.ws.rs.core.Response;
@@ -56,7 +56,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * This is a test class for {@link ActivityProviderServiceImpl}.
  */
 @PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
-@SuppressStaticInitializationFor({ "org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
+@SuppressStaticInitializationFor({ "io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext", "org.wso2.carbon.context.PrivilegedCarbonContext" })
 @PrepareForTest({ DeviceMgtAPIUtils.class, PolicyManagerUtil.class, PrivilegedCarbonContext.class })
 public class ActivityProviderServiceImplTest {

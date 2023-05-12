@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl.admin;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,10 +25,10 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAuthorizationResult;
-import org.wso2.carbon.device.mgt.jaxrs.beans.AuthorizationRequest;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.DeviceAccessAuthorizationAdminService;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.AuthorizationRequest;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.DeviceAccessAuthorizationAdminService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;

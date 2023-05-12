@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * This creates an instance of the pull notification executor strategy with the given class name.
- * makes sure the class name starts with the package prefix org.wso2.carbon.device.mgt.pull.notification.*
+ * makes sure the class name starts with the package prefix io.entgra.device.mgt.core.pull.notification.*
  */
 public class PullNotificationSubscriberLoader {
 

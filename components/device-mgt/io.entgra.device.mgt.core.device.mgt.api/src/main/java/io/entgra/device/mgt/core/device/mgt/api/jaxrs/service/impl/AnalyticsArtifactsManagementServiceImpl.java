@@ -15,25 +15,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Attribute;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AdapterMappingConfiguration;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.MappingProperty;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AdapterConfiguration;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AdapterProperty;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.MessageFormat;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.SiddhiExecutionPlan;
-import org.wso2.carbon.device.mgt.jaxrs.exception.ArtifactAlreadyExistsException;
-import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
-import org.wso2.carbon.device.mgt.jaxrs.exception.ErrorDTO;
-import org.wso2.carbon.device.mgt.jaxrs.exception.InvalidExecutionPlanException;
-import org.wso2.carbon.device.mgt.jaxrs.exception.NotFoundException;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.AnalyticsArtifactsManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Adapter;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventStream;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.Attribute;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.AdapterMappingConfiguration;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.MappingProperty;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.AdapterConfiguration;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.AdapterProperty;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.MessageFormat;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.SiddhiExecutionPlan;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.ArtifactAlreadyExistsException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.ErrorDTO;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.InvalidExecutionPlanException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.NotFoundException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.AnalyticsArtifactsManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.Adapter;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventStream;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceStub;
 import org.wso2.carbon.event.publisher.stub.types.BasicOutputAdapterPropertyDto;

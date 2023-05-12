@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,11 +25,11 @@ import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.notification.mgt.Notification;
 import io.entgra.device.mgt.core.device.mgt.common.notification.mgt.NotificationManagementException;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.NotificationList;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.NotificationManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.NotificationList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.NotificationManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;

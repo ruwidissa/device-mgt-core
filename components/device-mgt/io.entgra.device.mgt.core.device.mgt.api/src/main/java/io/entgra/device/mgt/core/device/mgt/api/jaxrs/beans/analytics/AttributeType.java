@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics;
 
 /**
  * Attribute data types

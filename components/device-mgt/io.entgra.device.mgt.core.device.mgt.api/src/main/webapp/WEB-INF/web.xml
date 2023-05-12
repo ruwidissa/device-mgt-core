@@ -82,7 +82,7 @@
 
     <filter>
         <filter-name>ApiOriginFilter</filter-name>
-        <filter-class>org.wso2.carbon.device.mgt.jaxrs.ApiOriginFilter</filter-class>
+        <filter-class>io.entgra.device.mgt.core.device.mgt.api.jaxrs.ApiOriginFilter</filter-class>
     </filter>
 
     <filter>

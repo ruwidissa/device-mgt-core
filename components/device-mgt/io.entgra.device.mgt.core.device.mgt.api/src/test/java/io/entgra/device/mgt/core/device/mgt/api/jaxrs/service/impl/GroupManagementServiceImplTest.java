@@ -33,7 +33,7 @@
  *   under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -60,9 +60,9 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistExcept
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceToGroupsAssignment;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.GroupManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceToGroupsAssignment;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.GroupManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 
 import javax.ws.rs.core.Response;
@@ -73,7 +73,7 @@ import java.util.List;
  * This is a test case for {@link GroupManagementServiceImpl}.
  */
 @PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "javax.xml.parsers"})
-@SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
+@SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.PrivilegedCarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, CarbonContext.class})
 public class GroupManagementServiceImplTest {

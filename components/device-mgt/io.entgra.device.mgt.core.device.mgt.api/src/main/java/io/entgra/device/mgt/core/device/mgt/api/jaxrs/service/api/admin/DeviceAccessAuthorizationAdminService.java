@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.api.admin;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,9 +30,9 @@ import io.swagger.annotations.Tag;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAuthorizationResult;
-import org.wso2.carbon.device.mgt.jaxrs.beans.AuthorizationRequest;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.AuthorizationRequest;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;

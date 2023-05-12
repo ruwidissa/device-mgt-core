@@ -34,7 +34,7 @@
  *
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl.admin;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,10 +47,10 @@ import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDefini
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeVersion;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeVersionWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.DeviceTypeManagementAdminService;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceTypeVersionWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.DeviceTypeManagementAdminService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;

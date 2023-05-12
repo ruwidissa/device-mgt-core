@@ -60,11 +60,11 @@
 
     <bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
     <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
-    <bean id="ValidationInterceptor" class="org.wso2.carbon.device.mgt.jaxrs.exception.ValidationInterceptor"/>
-    <bean id="GlobalExceptionMapper" class="org.wso2.carbon.device.mgt.jaxrs.exception.GlobalThrowableMapper"/>
+    <bean id="ValidationInterceptor" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.ValidationInterceptor"/>
+    <bean id="GlobalExceptionMapper" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.GlobalThrowableMapper"/>
 
     <bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
-        <property name="resourcePackage" value="org.wso2.carbon.device.mgt.jaxrs"/>
+        <property name="resourcePackage" value="io.entgra.device.mgt.core.device.mgt.api.jaxrs"/>
         <property name="version" value="1.0"/>
         <property name="host" value="localhost:9443"/>
         <property name="schemes" value="https" />
@@ -76,33 +76,33 @@
         <property name="scan" value="true"/>
     </bean>
 
-    <bean id="deviceManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.DeviceManagementServiceImpl"/>
-    <bean id="deviceTypeManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.DeviceTypeManagementServiceImpl"/>
-	<bean id="configurationManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.ConfigurationServiceImpl"/>
-    <bean id="activityProviderService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.ActivityProviderServiceImpl"/>
-    <bean id="notificationManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.NotificationManagementServiceImpl"/>
-    <bean id="reportManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.ReportManagementServiceImpl"/>
-    <bean id="policyManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.PolicyManagementServiceImpl"/>
-    <bean id="roleManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.RoleManagementServiceImpl"/>
-    <bean id="userManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.UserManagementServiceImpl"/>
-    <bean id="groupManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.GroupManagementServiceImpl"/>
-    <bean id="geoService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.GeoLocationBasedServiceImpl"/>
-    <bean id="remoteSessionService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.RemoteSessionServiceImpl"/>
-    <bean id="deviceManagementAdminService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.admin.DeviceManagementAdminServiceImpl"/>
-    <bean id="applicationManagementAdminService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.admin.ApplicationManagementAdminServiceImpl"/>
-    <bean id="groupManagementAdminService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.admin.GroupManagementAdminServiceImpl"/>
-    <bean id="userManagementAdminService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.admin.UserManagementAdminServiceImpl"/>
-    <bean id="deviceTypeManagementAdminService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.admin.DeviceTypeManagementAdminServiceImpl"/>
-	<bean id="deviceAccessAuthorizationAdminService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.admin.DeviceAccessAuthorizationAdminServiceImpl"/>
-	<bean id="deviceAnalyticsArtifactUploaderAdminService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.admin.DeviceAnalyticsArtifactUploaderAdminServiceImpl"/>
-	<bean id="deviceEventManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.DeviceEventManagementServiceImpl"/>
-	<bean id="deviceAgentService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.DeviceAgentServiceImpl"/>
-	<bean id="jsonProvider" class="org.wso2.carbon.device.mgt.jaxrs.common.GsonMessageBodyHandler"/>
-    <bean id="analyticsArtifactsManagementService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.AnalyticsArtifactsManagementServiceImpl"/>
-    <bean id="metadataService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.MetadataServiceImpl"/>
-    <bean id="whitelabelService" class="org.wso2.carbon.device.mgt.jaxrs.service.impl.WhiteLabelServiceImpl"/>
+    <bean id="deviceManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.DeviceManagementServiceImpl"/>
+    <bean id="deviceTypeManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.DeviceTypeManagementServiceImpl"/>
+	<bean id="configurationManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.ConfigurationServiceImpl"/>
+    <bean id="activityProviderService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.ActivityProviderServiceImpl"/>
+    <bean id="notificationManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.NotificationManagementServiceImpl"/>
+    <bean id="reportManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.ReportManagementServiceImpl"/>
+    <bean id="policyManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.PolicyManagementServiceImpl"/>
+    <bean id="roleManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.RoleManagementServiceImpl"/>
+    <bean id="userManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.UserManagementServiceImpl"/>
+    <bean id="groupManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.GroupManagementServiceImpl"/>
+    <bean id="geoService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.GeoLocationBasedServiceImpl"/>
+    <bean id="remoteSessionService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.RemoteSessionServiceImpl"/>
+    <bean id="deviceManagementAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.DeviceManagementAdminServiceImpl"/>
+    <bean id="applicationManagementAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.ApplicationManagementAdminServiceImpl"/>
+    <bean id="groupManagementAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.GroupManagementAdminServiceImpl"/>
+    <bean id="userManagementAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.UserManagementAdminServiceImpl"/>
+    <bean id="deviceTypeManagementAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.DeviceTypeManagementAdminServiceImpl"/>
+	<bean id="deviceAccessAuthorizationAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.DeviceAccessAuthorizationAdminServiceImpl"/>
+	<bean id="deviceAnalyticsArtifactUploaderAdminService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin.DeviceAnalyticsArtifactUploaderAdminServiceImpl"/>
+	<bean id="deviceEventManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.DeviceEventManagementServiceImpl"/>
+	<bean id="deviceAgentService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.DeviceAgentServiceImpl"/>
+	<bean id="jsonProvider" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.common.GsonMessageBodyHandler"/>
+    <bean id="analyticsArtifactsManagementService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.AnalyticsArtifactsManagementServiceImpl"/>
+    <bean id="metadataService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.MetadataServiceImpl"/>
+    <bean id="whitelabelService" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.WhiteLabelServiceImpl"/>
 
-    <!--<bean id="errorHandler" class="org.wso2.carbon.device.mgt.jaxrs.common.ErrorHandler"/>-->
+    <!--<bean id="errorHandler" class="io.entgra.device.mgt.core.device.mgt.api.jaxrs.common.ErrorHandler"/>-->
     <cxf:bus>
         <cxf:inInterceptors>
             <ref bean="ValidationInterceptor"/>

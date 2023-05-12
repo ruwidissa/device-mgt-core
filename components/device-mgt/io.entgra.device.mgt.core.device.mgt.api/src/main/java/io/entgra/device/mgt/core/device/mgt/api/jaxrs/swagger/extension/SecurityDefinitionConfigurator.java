@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.swagger.extension;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.swagger.extension;
 
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.jaxrs.Reader;
@@ -24,7 +24,7 @@ import io.swagger.jaxrs.config.ReaderListener;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
-import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Scope;
 
 import java.util.ArrayList;
 import java.util.HashMap;

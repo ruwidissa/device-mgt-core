@@ -34,7 +34,7 @@
  *   under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,9 +70,9 @@ import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchMgtException;
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.impl.SearchManagerServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -91,7 +91,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * This class includes unit tests for testing the functionality of {@link DeviceManagementServiceImpl}
  */
 @PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
-@SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
+@SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext", "org.wso2.carbon.user.core.service.RealmService"})
 @PrepareForTest({DeviceMgtAPIUtils.class, MultitenantUtils.class, CarbonContext.class, RealmService.class})
 public class DeviceManagementServiceImplTest {

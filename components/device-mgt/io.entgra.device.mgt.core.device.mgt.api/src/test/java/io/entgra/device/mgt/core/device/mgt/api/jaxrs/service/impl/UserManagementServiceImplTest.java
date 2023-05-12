@@ -34,7 +34,7 @@
  *
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -57,12 +57,12 @@ import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.otp.mgt.service.OTPManagementServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
-import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfo;
-import org.wso2.carbon.device.mgt.jaxrs.beans.EnrollmentInvitation;
-import org.wso2.carbon.device.mgt.jaxrs.beans.UserInfo;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.UserManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.BasicUserInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EnrollmentInvitation;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.UserInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.UserManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -80,7 +80,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * This is a test case for {@link UserManagementService}.
  */
 @PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
-@SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
+@SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, MultitenantUtils.class, CarbonContext.class})
 public class UserManagementServiceImplTest {

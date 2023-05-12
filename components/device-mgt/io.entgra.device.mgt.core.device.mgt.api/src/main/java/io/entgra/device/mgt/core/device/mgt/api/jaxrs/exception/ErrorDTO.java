@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.exception;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception;
 
 import java.util.ArrayList;
 import java.util.List;

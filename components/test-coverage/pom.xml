@@ -51,8 +51,8 @@
         <device.mgt.common>${basedir}/../${device.mgt}/io.entgra.device.mgt.core.device.mgt.common</device.mgt.common>
         <device.mgt.api>${basedir}/../${device.mgt}/io.entgra.device.mgt.core.device.mgt.api</device.mgt.api>
         <device.mgt.extensions>${basedir}/../${device.mgt}/io.entgra.device.mgt.core.device.mgt.extensions</device.mgt.extensions>
-        <device.mgt.analytics.data>${basedir}/../${device.mgt}/org.wso2.carbon.device.mgt.analytics.data.publisher
-        </device.mgt.analytics.data>
+<!--        <device.mgt.analytics.data>${basedir}/../${device.mgt}/org.wso2.carbon.device.mgt.analytics.data.publisher-->
+<!--        </device.mgt.analytics.data>-->
         <device.mgt.url.printer>
             ${basedir}/../${device.mgt}/io.entgra.device.mgt.core.device.mgt.url.printer
         </device.mgt.url.printer>
@@ -65,10 +65,10 @@
         <api.extension.application.api>
             ${basedir}/../${api.extensions}/io.entgra.device.mgt.core.apimgt.application.extension.api
         </api.extension.application.api>
-        <api.extension.handlers>${basedir}/../${api.extensions}/org.wso2.carbon.apimgt.handlers</api.extension.handlers>
-        <api.extension.client>
-            ${basedir}/../${api.extensions}/org.wso2.carbon.apimgt.integration.client
-        </api.extension.client>
+<!--        <api.extension.handlers>${basedir}/../${api.extensions}/org.wso2.carbon.apimgt.handlers</api.extension.handlers>-->
+<!--        <api.extension.client>-->
+<!--            ${basedir}/../${api.extensions}/org.wso2.carbon.apimgt.integration.client-->
+<!--        </api.extension.client>-->
         <api.extension.webapp>
             ${basedir}/../${api.extensions}/io.entgra.device.mgt.core.apimgt.webapp.publisher
         </api.extension.webapp>
@@ -102,18 +102,18 @@
         <identity.oauth.extension>
             ${basedir}/../${identity.extensions}/io.entgra.device.mgt.core.device.mgt.oauth.extensions
         </identity.oauth.extension>
-        <identity.backend.extension>
-            ${basedir}/../${identity.extensions}/org.wso2.carbon.identity.authenticator.backend.oauth
-        </identity.backend.extension>
+<!--        <identity.backend.extension>-->
+<!--            ${basedir}/../${identity.extensions}/org.wso2.carbon.identity.authenticator.backend.oauth-->
+<!--        </identity.backend.extension>-->
         <identity.jwt.extension>
             ${basedir}/../${identity.extensions}/io.entgra.device.mgt.core.identity.jwt.client.extension
         </identity.jwt.extension>
 
         <!-- Policy Management component related properties -->
         <policy.mgt>policy-mgt</policy.mgt>
-        <policy.mgt.complex.point>
-            ${basedir}/../${policy.mgt}/org.wso2.carbon.complex.policy.decision.point
-        </policy.mgt.complex.point>
+<!--        <policy.mgt.complex.point>-->
+<!--            ${basedir}/../${policy.mgt}/org.wso2.carbon.complex.policy.decision.point-->
+<!--        </policy.mgt.complex.point>-->
         <policy.mgt.decision.point>
             ${basedir}/../${policy.mgt}/io.entgra.device.mgt.core.policy.decision.point
         </policy.mgt.decision.point>
@@ -183,15 +183,15 @@
                                                 <fileset dir="${api.extension.webapp}/${target}/${coverge-report}">
                                                     <include name="${individual.test.report.name}" />
                                                 </fileset>
-                                                <fileset dir="${device.mgt.analytics.data}/${target}/${coverge-report}">
-                                                    <include name="${individual.test.report.name}" />
-                                                </fileset>
+<!--                                                <fileset dir="${device.mgt.analytics.data}/${target}/${coverge-report}">-->
+<!--                                                    <include name="${individual.test.report.name}" />-->
+<!--                                                </fileset>-->
                                                 <fileset dir="${identity.jwt.extension}/${target}/${coverge-report}">
                                                     <include name="${individual.test.report.name}" />
                                                 </fileset>
-                                                <fileset dir="${api.extension.handlers}/${target}/${coverge-report}">
-                                                    <include name="${individual.test.report.name}" />
-                                                </fileset>
+<!--                                                <fileset dir="${api.extension.handlers}/${target}/${coverge-report}">-->
+<!--                                                    <include name="${individual.test.report.name}" />-->
+<!--                                                </fileset>-->
                                                 <fileset dir="${device.extensions.deployer}/${target}/${coverge-report}">
                                                     <include name="${individual.test.report.name}" />
                                                 </fileset>
@@ -232,14 +232,14 @@
                                                     </group>
                                                 </group>
                                                 <group name="device-mgt">
-                                                    <group name="org.wso2.carbon.device.mgt.analytics.data.publisher">
-                                                        <classfiles>
-                                                            <fileset dir="${device.mgt.analytics.data}/${target}/${classes}" />
-                                                        </classfiles>
-                                                        <sourcefiles encoding="UTF-8">
-                                                            <fileset dir="${device.mgt.analytics.data}/${source}" />
-                                                        </sourcefiles>
-                                                    </group>
+<!--                                                    <group name="org.wso2.carbon.device.mgt.analytics.data.publisher">-->
+<!--                                                        <classfiles>-->
+<!--                                                            <fileset dir="${device.mgt.analytics.data}/${target}/${classes}" />-->
+<!--                                                        </classfiles>-->
+<!--                                                        <sourcefiles encoding="UTF-8">-->
+<!--                                                            <fileset dir="${device.mgt.analytics.data}/${source}" />-->
+<!--                                                        </sourcefiles>-->
+<!--                                                    </group>-->
                                                     <group name="io.entgra.device.mgt.core.device.mgt.api">
                                                         <classfiles>
                                                             <fileset dir="${device.mgt.api}/${target}/${classes}" />
@@ -283,14 +283,14 @@
                                                     </group>
                                                 </group>
                                                 <group name="apimgt-extensions">
-                                                    <group name="org.wso2.carbon.apimgt.integration.client">
-                                                        <classfiles>
-                                                            <fileset dir="${api.extension.client}/${target}/${classes}" />
-                                                        </classfiles>
-                                                        <sourcefiles encoding="UTF-8">
-                                                            <fileset dir="${api.extension.client}/${source}" />
-                                                        </sourcefiles>
-                                                    </group>
+<!--                                                    <group name="org.wso2.carbon.apimgt.integration.client">-->
+<!--                                                        <classfiles>-->
+<!--                                                            <fileset dir="${api.extension.client}/${target}/${classes}" />-->
+<!--                                                        </classfiles>-->
+<!--                                                        <sourcefiles encoding="UTF-8">-->
+<!--                                                            <fileset dir="${api.extension.client}/${source}" />-->
+<!--                                                        </sourcefiles>-->
+<!--                                                    </group>-->
                                                     <group name="io.entgra.device.mgt.core.apimgt.application.extension">
                                                         <classfiles>
                                                             <fileset dir="${api.extension.application}/${target}/${classes}" />
@@ -307,14 +307,14 @@
                                                             <fileset dir="${api.extension.application.api}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.apimgt.handlers">
-                                                        <classfiles>
-                                                            <fileset dir="${api.extension.handlers}/${target}/${classes}" />
-                                                        </classfiles>
-                                                        <sourcefiles encoding="UTF-8">
-                                                            <fileset dir="${api.extension.handlers}/${source}" />
-                                                        </sourcefiles>
-                                                    </group>
+<!--                                                    <group name="org.wso2.carbon.apimgt.handlers">-->
+<!--                                                        <classfiles>-->
+<!--                                                            <fileset dir="${api.extension.handlers}/${target}/${classes}" />-->
+<!--                                                        </classfiles>-->
+<!--                                                        <sourcefiles encoding="UTF-8">-->
+<!--                                                            <fileset dir="${api.extension.handlers}/${source}" />-->
+<!--                                                        </sourcefiles>-->
+<!--                                                    </group>-->
                                                     <group name="io.entgra.device.mgt.core.apimgt.webapp.publisher">
                                                         <classfiles>
                                                             <fileset dir="${api.extension.webapp}/${target}/${classes}" />
@@ -392,14 +392,14 @@
                                                             <fileset dir="${identity.oauth.extension}/${source}" />
                                                         </sourcefiles>
                                                     </group>
-                                                    <group name="org.wso2.carbon.identity.authenticator.backend.oauth">
-                                                        <classfiles>
-                                                            <fileset dir="${identity.backend.extension}/${target}/${classes}" />
-                                                        </classfiles>
-                                                        <sourcefiles encoding="UTF-8">
-                                                            <fileset dir="${identity.backend.extension}/${source}" />
-                                                        </sourcefiles>
-                                                    </group>
+<!--                                                    <group name="org.wso2.carbon.identity.authenticator.backend.oauth">-->
+<!--                                                        <classfiles>-->
+<!--                                                            <fileset dir="${identity.backend.extension}/${target}/${classes}" />-->
+<!--                                                        </classfiles>-->
+<!--                                                        <sourcefiles encoding="UTF-8">-->
+<!--                                                            <fileset dir="${identity.backend.extension}/${source}" />-->
+<!--                                                        </sourcefiles>-->
+<!--                                                    </group>-->
                                                     <group name="io.entgra.device.mgt.core.identity.jwt.client.extension">
                                                         <classfiles>
                                                             <fileset dir="${identity.jwt.extension}/${target}/${classes}" />
@@ -410,14 +410,14 @@
                                                     </group>
                                                 </group>
                                                 <group name="policy-mgt">
-                                                    <group name="org.wso2.carbon.complex.policy.decision.point">
-                                                        <classfiles>
-                                                            <fileset dir="${policy.mgt.complex.point}/${target}/${classes}" />
-                                                        </classfiles>
-                                                        <sourcefiles encoding="UTF-8">
-                                                            <fileset dir="${policy.mgt.complex.point}/${source}" />
-                                                        </sourcefiles>
-                                                    </group>
+<!--                                                    <group name="org.wso2.carbon.complex.policy.decision.point">-->
+<!--                                                        <classfiles>-->
+<!--                                                            <fileset dir="${policy.mgt.complex.point}/${target}/${classes}" />-->
+<!--                                                        </classfiles>-->
+<!--                                                        <sourcefiles encoding="UTF-8">-->
+<!--                                                            <fileset dir="${policy.mgt.complex.point}/${source}" />-->
+<!--                                                        </sourcefiles>-->
+<!--                                                    </group>-->
                                                     <group name="io.entgra.device.mgt.core.policy.decision.point">
                                                         <classfiles>
                                                             <fileset dir="${policy.mgt.decision.point}/${target}/${classes}" />

@@ -16,7 +16,7 @@
  *  under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,9 +27,9 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagement
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.NotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelTheme;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.WhiteLabelService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.WhiteLabelService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;

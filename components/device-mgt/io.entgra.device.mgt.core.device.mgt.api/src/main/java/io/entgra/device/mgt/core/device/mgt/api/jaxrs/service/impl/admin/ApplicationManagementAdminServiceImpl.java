@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl.admin;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,14 +26,14 @@ import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagement
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManager;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnknownApplicationTypeException;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.ApplicationManagementAdminService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.ApplicationManagementAdminService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.core.util.MDMAndroidOperationUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.MDMIOSOperationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ApplicationWrapper;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 
 import javax.ws.rs.Consumes;

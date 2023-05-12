@@ -17,7 +17,7 @@
  */
 
 
-package org.wso2.carbon.apimgt.handlers;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs..carbon.apimgt.handlers;
 
 /**
  * Error handling class for the apimgt handler.

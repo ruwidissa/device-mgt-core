@@ -33,7 +33,7 @@
  * under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,16 +45,16 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementEx
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.PolicyList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.PolicyWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.PriorityUpdatedPolicyWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ProfileFeature;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.PolicyManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.FilteringUtil;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PolicyList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PolicyWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PriorityUpdatedPolicyWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ProfileFeature;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.PolicyManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.FilteringUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtUtil;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyAdministratorPoint;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;

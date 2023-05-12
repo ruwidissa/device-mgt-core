@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;

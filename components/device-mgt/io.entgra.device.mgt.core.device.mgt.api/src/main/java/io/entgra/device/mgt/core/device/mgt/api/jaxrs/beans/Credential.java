@@ -15,13 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.beans;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.http.util.TextUtils;
-import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
 
 public class Credential {
 

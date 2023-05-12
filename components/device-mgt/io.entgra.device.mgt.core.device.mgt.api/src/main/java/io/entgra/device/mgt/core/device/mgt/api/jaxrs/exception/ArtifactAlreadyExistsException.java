@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.exception;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception;
 
 public class ArtifactAlreadyExistsException extends Exception {
     private static final long serialVersionUID = 6459451028947683202L;

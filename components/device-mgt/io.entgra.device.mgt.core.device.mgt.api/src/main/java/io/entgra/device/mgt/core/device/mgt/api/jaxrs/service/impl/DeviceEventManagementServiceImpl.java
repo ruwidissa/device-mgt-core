@@ -1,4 +1,4 @@
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import io.entgra.device.mgt.core.apimgt.analytics.extension.AnalyticsArtifactsDeployer;
 import io.entgra.device.mgt.core.apimgt.analytics.extension.dto.*;
@@ -15,14 +15,14 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.StreamDefinition;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Attribute;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AttributeType;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.DeviceTypeEvent;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.TransportType;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceEventManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.Attribute;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.AttributeType;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.DeviceTypeEvent;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventAttributeList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.TransportType;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceEventManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.event.input.adapter.core.InputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;

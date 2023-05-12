@@ -33,7 +33,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.util;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
 /**
  * Holds the constants used by DeviceImpl Management Admin web application.

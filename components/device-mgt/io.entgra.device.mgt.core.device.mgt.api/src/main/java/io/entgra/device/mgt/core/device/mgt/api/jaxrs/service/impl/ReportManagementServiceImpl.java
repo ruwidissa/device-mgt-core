@@ -16,7 +16,7 @@
  *   under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
@@ -29,12 +29,12 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.BadRequestExceptio
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.ReportManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.report.mgt.Constants;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceList;
 import io.entgra.device.mgt.core.device.mgt.common.ReportFiltersList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.ReportManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.ReportManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;

@@ -15,7 +15,7 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.api;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
 import com.google.gson.JsonObject;
 import io.swagger.annotations.Api;
@@ -32,9 +32,9 @@ import io.swagger.annotations.Tag;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.ReportManagementException;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

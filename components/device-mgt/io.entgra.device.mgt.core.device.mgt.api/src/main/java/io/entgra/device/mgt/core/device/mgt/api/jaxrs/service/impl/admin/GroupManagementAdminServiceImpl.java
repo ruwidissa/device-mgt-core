@@ -32,7 +32,7 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl.admin;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,10 +42,10 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceGroupList;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.GroupManagementAdminService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.GroupManagementAdminService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;

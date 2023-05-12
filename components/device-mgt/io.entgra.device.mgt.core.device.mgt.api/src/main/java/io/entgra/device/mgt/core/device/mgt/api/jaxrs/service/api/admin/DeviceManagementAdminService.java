@@ -32,7 +32,7 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.api.admin;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,9 +49,9 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;

@@ -16,12 +16,12 @@
    under the License.
 *#
 <EmailConfig>
-    <Subject>You have successfully been registered in WSO2 IoT Server</Subject>
+    <Subject>You have successfully been registered in Engtra IoT Server</Subject>
     <Body>
     <![CDATA[
     <html>
     <head>
-        <title>WSO2 IoT Server</title>
+        <title>Entgra IoT Server</title>
     </head>
     <body style="color: #666666; background-color:#cdcdcd; padding: 0px; margin: 0px;">
     <div style="background-color:#cdcdcd; font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; padding: 20px 0px; margin: 0px;">
@@ -37,11 +37,11 @@
                 </p>
 
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
-                    You have been registered in WSO2 IoT Server and invited to enrol your device.
-                    Click <a href="$base-url-https/devicemgt/device/enroll">here</a> to enrol the WSO2 IoT Server devices to begin.</p>
+                    You have been registered in Entgra IoT Server and invited to enrol your device.
+                    Click <a href="$base-url-https/devicemgt/device/enroll">here</a> to enrol the Entgra IoT Server devices to begin.</p>
 
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
-                    Use following credentials to log in to WSO2 IoT Server.
+                    Use following credentials to log in to Entgra IoT Server.
                 </p>
 
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">

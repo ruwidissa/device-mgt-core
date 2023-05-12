@@ -1,4 +1,4 @@
-package org.wso2.carbon.device.mgt.jaxrs.service.api;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -13,10 +13,10 @@ import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.DeviceTypeEvent;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventRecords;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.DeviceTypeEvent;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventRecords;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;

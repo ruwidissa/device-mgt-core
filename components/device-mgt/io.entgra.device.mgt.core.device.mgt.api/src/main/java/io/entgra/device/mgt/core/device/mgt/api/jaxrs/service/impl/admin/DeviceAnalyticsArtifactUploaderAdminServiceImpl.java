@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl.admin;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
@@ -37,8 +37,8 @@ import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.Utils;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.DeviceAnalyticsArtifactUploaderAdminService;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.DeviceAnalyticsArtifactUploaderAdminService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;

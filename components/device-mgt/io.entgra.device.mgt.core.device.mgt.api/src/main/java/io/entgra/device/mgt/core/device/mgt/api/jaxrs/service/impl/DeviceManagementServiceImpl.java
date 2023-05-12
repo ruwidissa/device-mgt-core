@@ -34,7 +34,7 @@
  *   under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
@@ -97,12 +97,12 @@ import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.DeviceAPICl
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.HttpReportingUtil;
-import org.wso2.carbon.device.mgt.jaxrs.beans.*;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;

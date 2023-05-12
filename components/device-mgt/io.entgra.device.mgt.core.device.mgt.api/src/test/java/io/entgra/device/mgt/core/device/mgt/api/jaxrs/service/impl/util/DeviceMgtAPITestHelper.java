@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl.util;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util;
 
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;

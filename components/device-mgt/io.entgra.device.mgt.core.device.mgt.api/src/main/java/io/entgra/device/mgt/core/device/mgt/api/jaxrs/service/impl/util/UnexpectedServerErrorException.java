@@ -16,9 +16,9 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl.util;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util;
 
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;

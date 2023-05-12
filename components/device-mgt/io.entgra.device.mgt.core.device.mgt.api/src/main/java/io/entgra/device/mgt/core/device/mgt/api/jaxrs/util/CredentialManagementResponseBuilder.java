@@ -16,15 +16,15 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.util;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.PasswordResetWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OldPasswordResetWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PasswordResetWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 

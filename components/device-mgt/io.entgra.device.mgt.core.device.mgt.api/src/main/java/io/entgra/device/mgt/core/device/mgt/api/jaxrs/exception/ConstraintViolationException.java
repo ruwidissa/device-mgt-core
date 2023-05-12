@@ -16,10 +16,10 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.exception;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception;
 
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtUtil;
 
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.WebApplicationException;

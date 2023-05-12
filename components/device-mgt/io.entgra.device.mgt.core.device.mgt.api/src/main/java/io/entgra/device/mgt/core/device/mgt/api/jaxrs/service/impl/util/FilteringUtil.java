@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl.util;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util;
 
 
 

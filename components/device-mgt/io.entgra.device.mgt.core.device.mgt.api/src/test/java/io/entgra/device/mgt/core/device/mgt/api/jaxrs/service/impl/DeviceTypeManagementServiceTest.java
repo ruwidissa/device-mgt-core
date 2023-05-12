@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,9 +34,9 @@ import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceTypeManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceTypeManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.ws.rs.core.Response;
 import java.lang.reflect.InvocationTargetException;
@@ -49,7 +49,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * This class holds the unit tests for the class {@link DeviceTypeManagementService}
  */
 @PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
-@SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils"})
+@SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils"})
 @PrepareForTest({DeviceMgtAPIUtils.class, DeviceManagementProviderService.class})
 public class DeviceTypeManagementServiceTest {
 

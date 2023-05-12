@@ -16,13 +16,13 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.util;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
 import io.entgra.device.mgt.core.device.mgt.core.config.permission.Scope;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorListItem;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ProfileFeature;
-import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorListItem;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ProfileFeature;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 
 import javax.validation.ConstraintViolation;
@@ -32,7 +32,7 @@ import java.util.Set;
 
 public class DeviceMgtUtil {
 
-    public static Profile convertProfile(org.wso2.carbon.device.mgt.jaxrs.beans.Profile mdmProfile) {
+    public static Profile convertProfile(io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Profile mdmProfile) {
         Profile profile = new Profile();
         profile.setTenantId(mdmProfile.getTenantId());
         profile.setCreatedDate(mdmProfile.getCreatedDate());
@@ -77,11 +77,11 @@ public class DeviceMgtUtil {
         return convertedScopes;
     }
 
-    public static List<org.wso2.carbon.device.mgt.jaxrs.beans.Scope> convertAPIScopestoScopes(List<Scope> scopes) {
-        List<org.wso2.carbon.device.mgt.jaxrs.beans.Scope> convertedScopes = new ArrayList<>();
-        org.wso2.carbon.device.mgt.jaxrs.beans.Scope convertedScope;
+    public static List<io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Scope> convertAPIScopestoScopes(List<Scope> scopes) {
+        List<io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Scope> convertedScopes = new ArrayList<>();
+        io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Scope convertedScope;
         for (Scope scope : scopes) {
-            convertedScope = new org.wso2.carbon.device.mgt.jaxrs.beans.Scope();
+            convertedScope = new io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Scope();
             convertedScope.setKey(scope.getKey());
             convertedScope.setName(scope.getName());
             convertedScope.setDescription(scope.getDescription());

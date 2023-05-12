@@ -34,7 +34,7 @@
  *   under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.api;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,12 +60,12 @@ import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import io.entgra.device.mgt.core.device.mgt.common.search.PropertyMap;
 import io.entgra.device.mgt.core.device.mgt.common.search.SearchContext;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ApplicationList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationRequest;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationStatusBean;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;

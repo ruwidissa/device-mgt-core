@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -34,7 +34,7 @@ import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.notification.mgt.Notification;
 import io.entgra.device.mgt.core.device.mgt.common.notification.mgt.NotificationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.notification.mgt.NotificationManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.ws.rs.core.Response;
@@ -47,12 +47,12 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * This is a test class for {@link NotificationManagementServiceImpl}.
  */
 @PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
-@SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
+@SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, MultitenantUtils.class, CarbonContext.class})
 public class NotificationManagementServiceImplTest {
     private NotificationManagementService notificationManagementService;
-    private org.wso2.carbon.device.mgt.jaxrs.service.api.NotificationManagementService notificationManagement;
+    private io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.NotificationManagementService notificationManagement;
 
     @ObjectFactory
     public IObjectFactory getObjectFactory() {

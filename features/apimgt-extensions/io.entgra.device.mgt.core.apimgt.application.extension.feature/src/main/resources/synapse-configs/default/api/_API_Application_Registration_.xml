@@ -1,4 +1,4 @@
-<api xmlns="http://ws.apache.org/ns/synapse" name="_WSO2APIRegistrationApplication_" context="/api-application-registration">
+<api xmlns="http://ws.apache.org/ns/synapse" name="_APIRegistrationApplication_" context="/api-application-registration">
     <resource methods="POST" url-mapping="/register/tenants" faultSequence="_api_registration_fault_">
         <inSequence>
             <property name="uri.var.portnum" expression="get-property('system','iot.core.https.port')"/>

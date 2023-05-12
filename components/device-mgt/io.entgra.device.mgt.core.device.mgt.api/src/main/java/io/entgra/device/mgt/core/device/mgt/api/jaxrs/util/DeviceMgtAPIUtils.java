@@ -33,7 +33,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.util;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
@@ -87,12 +87,12 @@ import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchManagerService
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.DeviceAPIClientService;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeVersionWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceTypeVersionWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationStatusBean;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventAttributeList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceStub;

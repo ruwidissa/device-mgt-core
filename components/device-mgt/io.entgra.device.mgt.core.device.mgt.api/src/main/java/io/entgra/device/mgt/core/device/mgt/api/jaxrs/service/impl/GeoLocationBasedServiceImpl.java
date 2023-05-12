@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,16 +60,16 @@ import io.entgra.device.mgt.core.device.mgt.core.geo.geoHash.geoHashStrategy.Geo
 import io.entgra.device.mgt.core.device.mgt.core.geo.geoHash.geoHashStrategy.ZoomGeoHashLengthStrategy;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.EventAction;
-import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.GeoLocationBasedService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EventAction;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.GeofenceWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.GeoLocationBasedService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -179,11 +179,11 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         if (deviceType != null) {
             geoQuery.setDeviceTypes(Collections.singletonList(deviceType));
         }
-        List<org.wso2.carbon.device.mgt.jaxrs.beans.GeoCluster> geoClusters = new ArrayList<>();
+        List<io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.GeoCluster> geoClusters = new ArrayList<>();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
         try {
             List<GeoCluster> newClusters = deviceManagementService.findGeoClusters(geoQuery);
-            org.wso2.carbon.device.mgt.jaxrs.beans.GeoCluster geoCluster;
+            io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.GeoCluster geoCluster;
             String deviceIdentification = null;
             String deviceName = null;
             String lastSeen = null;
@@ -195,7 +195,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
                     lastSeen = simpleDateFormat.format(new Date(gc.getDevice()
                             .getEnrolmentInfo().getDateOfLastUpdate()));
                 }
-                geoCluster = new org.wso2.carbon.device.mgt.jaxrs.beans.GeoCluster(gc.getCoordinates(),
+                geoCluster = new io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.GeoCluster(gc.getCoordinates(),
                         gc.getSouthWestBound(), gc.getNorthEastBound(), gc.getCount(), gc.getGeohashPrefix(),
                         deviceIdentification, deviceName, deviceType, lastSeen);
                 geoClusters.add(geoCluster);
@@ -721,9 +721,9 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
      * @param eventConfig request event payload
      * @return generated event beans list according to the payload data
      */
-    private List<EventConfig> mapRequestEvent(List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> eventConfig) {
+    private List<EventConfig> mapRequestEvent(List<io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EventConfig> eventConfig) {
         List<EventConfig> savingEventList = new ArrayList<>();
-        for (org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig event : eventConfig) {
+        for (io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EventConfig event : eventConfig) {
             EventConfig savingConfig = new EventConfig();
             if (event.getId() > 0) {
                 savingConfig.setEventId(event.getId());
@@ -796,11 +796,11 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
      * @param eventConfig event list retrieved
      * @return list of response event beans
      */
-    private List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> getEventConfigBean(List<EventConfig> eventConfig) {
-        List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> eventList = new ArrayList<>();
-        org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig eventData;
+    private List<io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EventConfig> getEventConfigBean(List<EventConfig> eventConfig) {
+        List<io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EventConfig> eventList = new ArrayList<>();
+        io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EventConfig eventData;
         for (EventConfig event : eventConfig) {
-            eventData = new org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig();
+            eventData = new io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EventConfig();
             eventData.setId(event.getEventId());
             eventData.setEventLogic(event.getEventLogic());
             ObjectMapper mapper = new ObjectMapper();

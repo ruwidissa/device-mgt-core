@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -46,10 +46,10 @@ import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComp
 import io.entgra.device.mgt.core.device.mgt.core.authorization.DeviceAccessAuthorizationServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceAgentService;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.DeviceTypeManagementAdminService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceAgentService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.DeviceTypeManagementAdminService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.event.stream.stub.EventStreamAdminServiceStub;
 import org.wso2.carbon.event.stream.stub.types.EventStreamAttributeDto;
 import org.wso2.carbon.event.stream.stub.types.EventStreamDefinitionDto;
@@ -72,7 +72,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * This class holds the unit tests for the class {@link DeviceAgentServiceImpl}
  */
 @PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
-@SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
+@SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext", "org.wso2.carbon.context.internal.CarbonContextDataHolder"})
 @PrepareForTest({DeviceMgtAPIUtils.class, DeviceManagementProviderService.class,
         DeviceAccessAuthorizationService.class, EventStreamAdminServiceStub.class, PrivilegedCarbonContext.class,

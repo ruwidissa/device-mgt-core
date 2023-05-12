@@ -32,7 +32,7 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.api;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
 import com.google.gson.JsonArray;
 import io.swagger.annotations.SwaggerDefinition;
@@ -50,18 +50,18 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ActivityList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfo;
-import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.Credential;
-import org.wso2.carbon.device.mgt.jaxrs.beans.EnrollmentInvitation;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.PermissionList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.RoleList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.UserInfo;
-import org.wso2.carbon.device.mgt.jaxrs.beans.UserStoreList;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ActivityList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.BasicUserInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.BasicUserInfoList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Credential;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EnrollmentInvitation;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OldPasswordResetWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PermissionList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.UserInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.UserStoreList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;

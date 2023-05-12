@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.beans;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans;
 
 import io.swagger.annotations.ApiModel;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;

@@ -16,16 +16,16 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl.admin;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.PrivacyComplianceException;
-import org.wso2.carbon.device.mgt.jaxrs.beans.PasswordResetWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.UserManagementAdminService;
-import org.wso2.carbon.device.mgt.jaxrs.util.CredentialManagementResponseBuilder;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PasswordResetWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.UserManagementAdminService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.CredentialManagementResponseBuilder;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.validation.constraints.Size;
 import javax.ws.rs.*;

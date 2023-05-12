@@ -31,7 +31,7 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -53,24 +53,24 @@ import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.EmailMetaInfo;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ActivityList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfo;
-import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.Credential;
-import org.wso2.carbon.device.mgt.jaxrs.beans.EnrollmentInvitation;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.PermissionList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.RoleList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.UserInfo;
-import org.wso2.carbon.device.mgt.jaxrs.beans.UserStoreList;
-import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.UserManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-import org.wso2.carbon.device.mgt.jaxrs.util.CredentialManagementResponseBuilder;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ActivityList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.BasicUserInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.BasicUserInfoList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.BasicUserInfoWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Credential;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EnrollmentInvitation;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OldPasswordResetWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PermissionList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.UserInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.UserStoreList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.UserManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.CredentialManagementResponseBuilder;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataManagementAdminService;
 import org.wso2.carbon.identity.claim.metadata.mgt.dto.AttributeMappingDTO;
 import org.wso2.carbon.identity.claim.metadata.mgt.dto.ClaimPropertyDTO;

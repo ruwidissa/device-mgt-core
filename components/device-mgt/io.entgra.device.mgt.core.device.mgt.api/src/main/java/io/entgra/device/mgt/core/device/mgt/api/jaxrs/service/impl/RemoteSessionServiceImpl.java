@@ -16,15 +16,15 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.remote.session.RemoteSessionConfiguration;
-import org.wso2.carbon.device.mgt.jaxrs.beans.RemoteSessionInfo;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.RemoteSessionService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RemoteSessionInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.RemoteSessionService;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

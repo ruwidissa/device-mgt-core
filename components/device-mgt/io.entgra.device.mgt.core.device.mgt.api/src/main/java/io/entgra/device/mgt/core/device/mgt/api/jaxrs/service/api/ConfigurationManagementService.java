@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.api;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Info;
@@ -34,8 +34,8 @@ import io.swagger.annotations.ResponseHeader;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

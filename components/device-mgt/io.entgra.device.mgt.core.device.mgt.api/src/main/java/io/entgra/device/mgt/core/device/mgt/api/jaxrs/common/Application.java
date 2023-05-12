@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.common;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.common;
 
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 

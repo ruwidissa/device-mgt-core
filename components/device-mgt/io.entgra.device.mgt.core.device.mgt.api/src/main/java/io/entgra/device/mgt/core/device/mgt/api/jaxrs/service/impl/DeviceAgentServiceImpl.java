@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -38,13 +38,13 @@ import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManage
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OperationList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Attribute;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AttributeType;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceAgentService;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.Attribute;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.AttributeType;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventAttributeList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceAgentService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.event.stream.stub.EventStreamAdminServiceStub;
 import org.wso2.carbon.event.stream.stub.types.EventStreamAttributeDto;
 import org.wso2.carbon.event.stream.stub.types.EventStreamDefinitionDto;

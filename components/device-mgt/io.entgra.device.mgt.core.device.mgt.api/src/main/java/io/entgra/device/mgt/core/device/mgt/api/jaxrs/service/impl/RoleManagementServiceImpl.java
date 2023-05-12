@@ -32,7 +32,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,15 +40,15 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.RoleInfo;
-import org.wso2.carbon.device.mgt.jaxrs.beans.RoleList;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.RoleManagementService;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.FilteringUtil;
-import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
-import org.wso2.carbon.device.mgt.jaxrs.util.SetReferenceTransformer;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.RoleManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.FilteringUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.SetReferenceTransformer;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.services.utils.ChangeRolePermissionsUtil;
@@ -68,7 +68,7 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.*;
 
-import static org.wso2.carbon.device.mgt.jaxrs.util.Constants.PRIMARY_USER_STORE;
+import static io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants.PRIMARY_USER_STORE;
 
 @Path("/roles")
 @Produces(MediaType.APPLICATION_JSON)

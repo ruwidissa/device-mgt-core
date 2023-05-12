@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.service.impl.util;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -40,18 +40,18 @@ import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig;
-import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.PolicyWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ProfileFeature;
-import org.wso2.carbon.device.mgt.jaxrs.beans.RoleInfo;
-import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
-import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
-import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ApplicationWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EventConfig;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.GeofenceWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OldPasswordResetWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PolicyWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ProfileFeature;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Scope;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyPayloadValidator;
 
 import java.lang.reflect.InvocationTargetException;

@@ -1,4 +1,4 @@
-package org.wso2.carbon.device.mgt.jaxrs.service.impl;
+package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -11,7 +11,7 @@ import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCoordinate;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.GeoLocationBasedService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.GeoLocationBasedService;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
