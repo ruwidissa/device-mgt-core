@@ -358,15 +358,31 @@ public class CertificateGenerator {
         CertificateResponse lookUpCertificate = null;
         KeyStoreReader keyStoreReader = new KeyStoreReader();
         if (distinguishedName != null && !distinguishedName.isEmpty()) {
-            if (distinguishedName.contains("/CN=")) {
-                String[] dnSplits = distinguishedName.split("/");
-                for (String dnPart : dnSplits) {
-                    if (dnPart.contains("CN=")) {
-                        String commonNameExtracted = dnPart.replace("CN=", "");
-                        lookUpCertificate = keyStoreReader.getCertificateBySerial(commonNameExtracted);
-                        break;
+            if (distinguishedName.contains("CN=")) {
+                String[] dnSplits = null;
+                if (distinguishedName.contains("/")) {
+                    dnSplits = distinguishedName.split("/");
+                } else if (distinguishedName.contains(",")) {
+                    //some older versions of nginx will forward the client certificate subject dn separated with commas
+                    dnSplits = distinguishedName.split(",");
+                }
+                String commonNameExtracted = null;
+                int tenantId = 0;
+                if (dnSplits != null && dnSplits.length >= 1) {
+                    for (String dnPart : dnSplits) {
+                        if (dnPart.contains("CN=")) {
+                            commonNameExtracted = dnPart.replace("CN=", "");
+                        } else if (dnPart.contains("OU=")) {
+                            //the OU of the certificate will be like OU=tenant_<TENANT_ID> ex: OU=tenant_-1234
+                            //splitting by underscore to extract the tenant domain
+                            String[] orgUnitSplits = dnPart.split("_");
+                            tenantId = Integer.parseInt(orgUnitSplits[1]);
+                        }
                     }
                 }
+
+                lookUpCertificate = keyStoreReader.getCertificateBySerial(commonNameExtracted, tenantId);
+
             } else {
                 LdapName ldapName;
                 try {
@@ -807,8 +823,9 @@ public class CertificateGenerator {
             X500Name issuerName = new X500Name(subjectDn);
             String commonName = certificationRequest.getSubject().getRDNs(BCStyle.CN)[0].getFirst()
                     .getValue().toString();
-            X500Name subjectName = new X500Name("O=" + commonName + "O=AndroidDevice,CN=" +
-                    serialNumber);
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            X500Name subjectName = new X500Name("O=" + commonName + ",CN=" +
+                    serialNumber + ", OU=tenant_"+tenantId);
             Date startDate = new Date(System.currentTimeMillis());
             Date endDate = new Date(System.currentTimeMillis()
                     + TimeUnit.DAYS.toMillis(365 * 100));
@@ -826,6 +843,10 @@ public class CertificateGenerator {
             issuedCert = (X509Certificate) certificateFactory
                     .generateCertificate(new ByteArrayInputStream(encodedCertificate));
 
+            io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate certificate =
+                    new io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate();
+            List<io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate> certificates = new ArrayList<>();
+            certificate.setTenantId(tenantId);
             org.wso2.carbon.certificate.mgt.core.bean.Certificate certificate =
                     new org.wso2.carbon.certificate.mgt.core.bean.Certificate();
             List<org.wso2.carbon.certificate.mgt.core.bean.Certificate> certificates = new ArrayList<>();

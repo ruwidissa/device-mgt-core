@@ -52,6 +52,16 @@ public interface CertificateDAO {
     CertificateResponse retrieveCertificate(String serialNumber) throws CertificateManagementDAOException;
 
     /**
+     * Obtain a certificated stored in the database by providing the common name and the tenant ID
+     *
+     * @param serialNumber Serial number (Common name) of the certificate
+     * @param tenantId ID of the certificate owning tenant
+     * @return representation of the certificate.
+     * @throws CertificateManagementDAOException if fails to read the certificate from the database
+     */
+    CertificateResponse retrieveCertificate(String serialNumber, int tenantId) throws CertificateManagementDAOException;
+
+    /**
      * Get all the certificates in a paginated manner.
      *
      * @param rowNum Stating index of the paginated result.
