@@ -34,7 +34,7 @@ public final class Constants {
     public static final String OAUTH_TOKEN_TYPE = "token_type";
     public static final String REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
     public static final String SCOPE_PARAM_NAME = "scope";
-    public static final String SCOPES = "apim:api_create apim:api_view apim:shared_scope_manage";
+    public static final String SCOPES = "apim:api_create apim:api_view apim:shared_scope_manage apim:api_import_export apim:api_publish";
     public static final String DCR_END_POINT = "WorkflowConfigurations.DCREndPoint";
     public static final String TOKE_END_POINT = "WorkflowConfigurations.TokenEndPoint";
     public static final String ADAPTER_CONF_KEEP_ALIVE = "keepAlive";
@@ -58,6 +58,7 @@ public final class Constants {
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";
     public static final String QUERY_KEY_VALUE_SEPARATOR = "=";
+    public static final String SPACE = " ";
     public static final String IOT_CORE_HOST = "iot.core.host";
     public static final String IOT_CORE_HTTPS_PORT = "iot.core.https.port";
     public static final String GET_ALL_SCOPES = "/api/am/publisher/v2/scopes?limit=1000";

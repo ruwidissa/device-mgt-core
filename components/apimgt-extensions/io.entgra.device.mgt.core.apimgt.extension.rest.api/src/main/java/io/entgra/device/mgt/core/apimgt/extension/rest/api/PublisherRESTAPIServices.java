@@ -54,7 +54,7 @@ public interface PublisherRESTAPIServices {
     JSONObject getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    API createAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
+    JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)

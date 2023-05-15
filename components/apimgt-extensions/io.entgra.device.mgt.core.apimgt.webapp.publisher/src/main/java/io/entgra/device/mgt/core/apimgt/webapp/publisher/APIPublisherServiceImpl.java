@@ -167,7 +167,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                         if (!apiFound) {
                             // add new scopes as shared scopes
                             for (ApiScope apiScope : apiConfig.getScopes()) {
-                                if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, apiScope.getKey())) {
+                                if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
+                                        apiScope.getKey())) {
                                     Scope scope = new Scope();
                                     scope.setName(apiScope.getName());
                                     scope.setDescription(apiScope.getDescription());
@@ -178,12 +179,12 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             }
                             API api = getAPI(apiConfig, true);
                             api.setId(apiIdentifier);
-                            API createdAPI = publisherRESTAPIServices.createAPI(apiApplicationKey, accessTokenInfo , api); // add api
+                            JSONObject createdAPI = publisherRESTAPIServices.addAPI(apiApplicationKey, accessTokenInfo, api); // add api
                             if (apiConfig.getEndpointType() != null && "WS".equals(apiConfig.getEndpointType())) {
                                 publisherRESTAPIServices.saveAsyncApiDefinition(apiApplicationKey, accessTokenInfo,
                                         api.getUuid(), apiConfig.getAsyncApiDefinition());
                             }
-                            if (CREATED_STATUS.equals(createdAPI.getStatus())) {
+                            if (CREATED_STATUS.equals(createdAPI.getString("lifeCycleStatus"))) {
                                 // if endpoint type "dynamic" and then add in sequence
                                 if ("dynamic".equals(apiConfig.getEndpointType())) {
                                     Mediation mediation = new Mediation();
@@ -192,12 +193,13 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     mediation.setType("in");
                                     mediation.setGlobal(false);
                                     publisherRESTAPIServices.addApiSpecificMediationPolicy(apiApplicationKey,
-                                            accessTokenInfo, createdAPI.getUuid(), mediation);
+                                            accessTokenInfo, createdAPI.getString("id"), mediation);
                                 }
-                                publisherRESTAPIServices.changeLifeCycleStatus(apiApplicationKey, accessTokenInfo, createdAPI.getUuid(), PUBLISH_ACTION);
+                                publisherRESTAPIServices.changeLifeCycleStatus(apiApplicationKey, accessTokenInfo,
+                                        createdAPI.getString("id"), PUBLISH_ACTION);
 
                                 APIRevision apiRevision = new APIRevision();
-                                apiRevision.setApiUUID(createdAPI.getUuid());
+                                apiRevision.setApiUUID(createdAPI.getString("id"));
                                 apiRevision.setDescription("Initial Revision");
                                 String apiRevisionId = publisherRESTAPIServices.addAPIRevision(apiApplicationKey,
                                         accessTokenInfo, apiRevision).getRevisionUUID();
@@ -210,7 +212,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
                                 apiRevisionDeploymentList.add(apiRevisionDeployment);
                                 publisherRESTAPIServices.deployAPIRevision(apiApplicationKey, accessTokenInfo,
-                                        createdAPI.getUuid(), apiRevisionId, apiRevisionDeploymentList);
+                                        createdAPI.getString("id"), apiRevisionId, apiRevisionDeploymentList);
                             }
                         } else {
                             if (WebappPublisherConfig.getInstance().isEnabledUpdateApi()) {

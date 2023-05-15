@@ -84,6 +84,11 @@
             <artifactId>okhttp</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

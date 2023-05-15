@@ -62,11 +62,11 @@ public class ScopeUtils {
 
     public String toJSON() {
         String jsonString = "{\n" +
-                "   \"name\":\" " + key + "\",\n" +
-                "   \"displayName\":\" " + name + "\",\n" +
-                "   \"description\":\" " + description + " \",\n" +
+                "   \"name\":\"" + key + "\",\n" +
+                "   \"displayName\":\"" + name + "\",\n" +
+                "   \"description\":\"" + description + "\",\n" +
                 "   \"bindings\":[\n" +
-                "      \" " + roles + " \"\n" +
+                "      \"" + roles + "\"\n" +
                 "   ]\n" +
                 "}";
         return jsonString;
