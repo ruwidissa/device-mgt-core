@@ -108,7 +108,7 @@
                                 <property name="db.dir" value="target/maven-shared-archive-resources/database" />
                                 <property name="userid" value="wso2carbon" />
                                 <property name="password" value="wso2carbon" />
-                                <property name="dbURL" value="jdbc:h2:file:${basedir}/${db.dir}/WSO2DM_APPM_DB;DB_CLOSE_ON_EXIT=FALSE" />
+                                <property name="dbURL" value="jdbc:h2:file:${basedir}/${db.dir}/DM_APPM_DB;DB_CLOSE_ON_EXIT=FALSE" />
 
                                 <mkdir dir="${basedir}/${db.dir}" />
 

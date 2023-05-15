@@ -54,7 +54,7 @@ public class Constants {
 	public static final int DEFAULT_PAGE_LIMIT = 50;
 	public static final String FORWARD_SLASH = "/";
 	public static final String ANDROID = "android";
-	public static final String ANDROID_POLICY_VALIDATOR = "io.entgra.proprietary.platform.android." +
+	public static final String ANDROID_POLICY_VALIDATOR = "io.entgra.proprietary.uem.platform.android." +
 			"core.polcy.AndroidPolicyPayloadValidator";
 	public static final String IOS = "ios";
 	public static final String WINDOWS = "windows";
