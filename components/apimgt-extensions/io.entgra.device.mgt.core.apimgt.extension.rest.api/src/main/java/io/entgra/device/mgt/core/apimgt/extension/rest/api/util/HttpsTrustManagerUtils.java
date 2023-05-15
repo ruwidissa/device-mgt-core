@@ -73,7 +73,7 @@ public class HttpsTrustManagerUtils {
     private static final String SSLV3 = "SSLv3";
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_HOST_IP = "127.0.0.1";
-    private static final int TIMEOUT = 300;
+    private static final int TIMEOUT = 1000;
 
     public static OkHttpClient getSSLClient() {
 
