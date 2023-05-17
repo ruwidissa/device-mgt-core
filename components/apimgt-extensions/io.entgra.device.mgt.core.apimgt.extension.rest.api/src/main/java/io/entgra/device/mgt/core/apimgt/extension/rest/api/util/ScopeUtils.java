@@ -27,6 +27,10 @@ public class ScopeUtils {
     private String name;
     private String roles;
     private String description;
+    private int id;
+
+    public ScopeUtils() {
+    }
 
     public String getKey() {
         return key;

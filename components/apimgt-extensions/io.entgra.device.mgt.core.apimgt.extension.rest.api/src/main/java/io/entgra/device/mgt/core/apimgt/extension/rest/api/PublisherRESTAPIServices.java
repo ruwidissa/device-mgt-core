@@ -23,8 +23,9 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.APIUtils.APIResponseUtil;
+import org.json.JSONArray;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -48,16 +49,16 @@ public interface PublisherRESTAPIServices {
     boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    API getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+    JSONObject getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     JSONObject getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
+    JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIResponseUtil api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
+    boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIResponseUtil api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean saveAsyncApiDefinition(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
@@ -84,11 +85,8 @@ public interface PublisherRESTAPIServices {
                                String deploymentStatus)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject getAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
-            throws APIServicesException, BadRequestException, UnexpectedResponseException;
-
-    APIRevision addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                               APIRevision apiRevision)
+    JSONObject addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                              APIRevision apiRevision)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean deployAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
@@ -96,26 +94,26 @@ public interface PublisherRESTAPIServices {
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     abstract boolean undeployAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                   APIRevisionDeployment apiRevisionDeployment, String uuid)
+                                                   JSONObject apiRevisionDeployment, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean deleteAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                              APIRevision apiRevision, String uuid)
+                              JSONObject apiRevision, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     JSONObject getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                 APIIdentifier apiIdentifier)
+                                 String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean deleteDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                 APIIdentifier apiIdentifier, String documentID)
+                                 String uuid, String documentID)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     Documentation addDocumentation(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                   APIIdentifier apiIdentifier, Documentation documentation)
+                                   String uuid, Documentation documentation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean addDocumentationContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                    API api, String docId, String docContent)
+                                    APIResponseUtil api, String docId, String docContent)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 }

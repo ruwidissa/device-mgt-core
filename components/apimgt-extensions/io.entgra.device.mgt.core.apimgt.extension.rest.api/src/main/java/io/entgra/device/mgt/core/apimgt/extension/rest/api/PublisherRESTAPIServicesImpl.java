@@ -25,6 +25,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.APIUtils.APIResponseUtil;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.ScopeUtils;
 import okhttp3.MediaType;
@@ -36,8 +37,8 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.ssl.Base64;
+import org.json.JSONArray;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -93,7 +94,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
@@ -137,7 +138,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
@@ -184,7 +185,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
@@ -231,17 +232,17 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
     @Override
-    public API getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+    public JSONObject getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getAllApis = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID();
+        String getAllApi = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID();
         Request request = new Request.Builder()
-                .url(getAllApis)
+                .url(getAllApi)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .get()
@@ -250,7 +251,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                return gson.fromJson(response.body().string(), API.class);
+                JSONObject jsonObject = new JSONObject(response.body().string());
+                return jsonObject;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -269,7 +271,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
@@ -308,22 +310,60 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
     @Override
-    public JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
+    public JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIResponseUtil api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String addAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT;
 
-        APIIdentifier apiIdentifier = api.getId();
         String apiString = "{\n" +
-                "   \"name\":\"" + apiIdentifier.getName().replace(Constants.SPACE, Constants.EMPTY_STRING) + "\",\n" +
+                "    \"name\": \"" + api.getName() + "\",\n" +
                 "   \"description\":\"" + api.getDescription() + "\",\n" +
                 "   \"context\":\"" + api.getContext() + "\",\n" +
-                "   \"version\":\"" + apiIdentifier.getVersion() + "\"\n" +
+                "   \"version\":\"" + api.getVersion() + "\",\n" +
+                "   \"provider\":\"" + api.getProvider() + "\",\n" +
+                "   \"lifeCycleStatus\":\"" + api.getLifeCycleStatus() + "\",\n" +
+                "    \"wsdlInfo\": " + api.getWsdlInfo() + ",\n" +
+                "   \"wsdlUrl\":" + api.getWsdlUrl() + ",\n" +
+                "    \"responseCachingEnabled\": " + api.isResponseCachingEnabled() + ",\n" +
+                "    \"cacheTimeout\": " + api.getCacheTimeout() + ",\n" +
+                "    \"hasThumbnail\": " + api.isHasThumbnail() + ",\n" +
+                "    \"isDefaultVersion\": " + api.isDefaultVersion() + ",\n" +
+                "    \"isRevision\": " + api.isRevision() + ",\n" +
+                "    \"revisionedApiId\": " + api.getRevisionedApiId() + ",\n" +
+                "    \"revisionId\": " + api.getRevisionId() + ",\n" +
+                "    \"enableSchemaValidation\": " + api.isEnableSchemaValidation() + ",\n" +
+                "    \"type\": \"" + api.getType() + "\",\n" +
+                "    \"transport\": " + gson.toJson(api.getTransport()) + ",\n" +
+                "    \"tags\": " + gson.toJson(api.getTags()) + ",\n" +
+                "    \"policies\": " + gson.toJson(api.getPolicies()) + ",\n" +
+                "    \"apiThrottlingPolicy\": " + api.getApiThrottlingPolicy() + ",\n" +
+                "    \"authorizationHeader\": \"" + api.getAuthorizationHeader() + "\",\n" +
+                "    \"visibility\": \"" + api.getVisibility() + "\",\n" +
+                "    \"subscriptionAvailability\": \"" + api.getSubscriptionAvailability() + "\",\n" +
+                "    \"subscriptionAvailableTenants\": [],\n" +
+                "    \"additionalProperties\": [],\n" +
+                "    \"monetization\": " + api.getMonetization() + ",\n" +
+                "    \"corsConfiguration\": " + gson.toJson(api.getCorsConfiguration()) + ",\n" +
+                "    \"websubSubscriptionConfiguration\": {\n" +
+                "        \"enable\": false,\n" +
+                "        \"secret\": \"\",\n" +
+                "        \"signingAlgorithm\": \"SHA1\",\n" +
+                "        \"signatureHeader\": \"x-hub-signature\"\n" +
+                "    },\n" +
+                "    \"workflowStatus\": null,\n" +
+                "    \"endpointConfig\": " + api.getEndpointConfig().toString() + ",\n" +
+                "    \"endpointImplementationType\": \"ENDPOINT\",\n" +
+                "    \"scopes\": " + api.getScopes().toString() + ",\n" +
+                "    \"operations\": " + api.getOperations().toString() + ",\n" +
+                "    \"threatProtectionPolicies\": null,\n" +
+                "    \"categories\": [],\n" +
+                "    \"keyManagers\": " + gson.toJson(api.getKeyManagers()) + ",\n" +
+                "    \"serviceInfo\": " + api.getServiceInfo() + "\n" +
                 "}";
 
         RequestBody requestBody = RequestBody.create(JSON, apiString);
@@ -347,7 +387,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return addAPI(apiApplicationKey, refreshedAccessToken, api);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid API request body";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -357,27 +397,73 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
     @Override
-    public boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, API api)
+    public boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIResponseUtil api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String updateAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getUuid();
+        String updateAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getId();
 
-        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(api));
+        String apiString = "{\n" +
+                "    \"name\": \"" + api.getName() + "\",\n" +
+                "   \"description\":\"" + api.getDescription() + "\",\n" +
+                "   \"context\":\"" + api.getContext() + "\",\n" +
+                "   \"version\":\"" + api.getVersion() + "\",\n" +
+                "   \"provider\":\"" + api.getProvider() + "\",\n" +
+                "   \"lifeCycleStatus\":\"" + api.getLifeCycleStatus() + "\",\n" +
+                "    \"wsdlInfo\": " + api.getWsdlInfo() + ",\n" +
+                "   \"wsdlUrl\":" + api.getWsdlUrl() + ",\n" +
+                "    \"responseCachingEnabled\": " + api.isResponseCachingEnabled() + ",\n" +
+                "    \"cacheTimeout\": " + api.getCacheTimeout() + ",\n" +
+                "    \"hasThumbnail\": " + api.isHasThumbnail() + ",\n" +
+                "    \"isDefaultVersion\": " + api.isDefaultVersion() + ",\n" +
+                "    \"isRevision\": " + api.isRevision() + ",\n" +
+                "    \"revisionedApiId\": " + api.getRevisionedApiId() + ",\n" +
+                "    \"revisionId\": " + api.getRevisionId() + ",\n" +
+                "    \"enableSchemaValidation\": " + api.isEnableSchemaValidation() + ",\n" +
+                "    \"type\": \"" + api.getType() + "\",\n" +
+                "    \"transport\": " + gson.toJson(api.getTransport()) + ",\n" +
+                "    \"tags\": " + gson.toJson(api.getTags()) + ",\n" +
+                "    \"policies\": " + gson.toJson(api.getPolicies()) + ",\n" +
+                "    \"apiThrottlingPolicy\": " + api.getApiThrottlingPolicy() + ",\n" +
+                "    \"authorizationHeader\": \"" + api.getAuthorizationHeader() + "\",\n" +
+                "    \"visibility\": \"" + api.getVisibility() + "\",\n" +
+                "    \"subscriptionAvailability\": \"" + api.getSubscriptionAvailability() + "\",\n" +
+                "    \"subscriptionAvailableTenants\": [],\n" +
+                "    \"additionalProperties\": [],\n" +
+                "    \"monetization\": " + api.getMonetization() + ",\n" +
+                "    \"corsConfiguration\": " + gson.toJson(api.getCorsConfiguration()) + ",\n" +
+                "    \"websubSubscriptionConfiguration\": {\n" +
+                "        \"enable\": false,\n" +
+                "        \"secret\": \"\",\n" +
+                "        \"signingAlgorithm\": \"SHA1\",\n" +
+                "        \"signatureHeader\": \"x-hub-signature\"\n" +
+                "    },\n" +
+                "    \"workflowStatus\": null,\n" +
+                "    \"endpointConfig\": " + api.getEndpointConfig().toString() + ",\n" +
+                "    \"endpointImplementationType\": \"ENDPOINT\",\n" +
+                "    \"scopes\": " + api.getScopes().toString() + ",\n" +
+                "    \"operations\": " + api.getOperations().toString() + ",\n" +
+                "    \"threatProtectionPolicies\": null,\n" +
+                "    \"categories\": [],\n" +
+                "    \"keyManagers\": " + gson.toJson(api.getKeyManagers()) + ",\n" +
+                "    \"serviceInfo\": " + api.getServiceInfo() + "\n" +
+                "}";
+
+        RequestBody requestBody = RequestBody.create(JSON, apiString);
         Request request = new Request.Builder()
                 .url(updateAPIEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
-                .post(requestBody)
+                .put(requestBody)
                 .build();
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_CREATED == response.code()) {
+            if (HttpStatus.SC_OK == response.code()) {
                 return true;
 
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
@@ -388,7 +474,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return updateApi(apiApplicationKey, refreshedAccessToken, api);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid API request body";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -398,7 +484,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
@@ -429,7 +515,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return saveAsyncApiDefinition(apiApplicationKey, refreshedAccessToken, uuid, asyncApiDefinition);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid API definition request body";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -439,7 +525,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
 
     }
@@ -450,7 +536,6 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAPIMediationEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/mediation-policies";
-
         Request request = new Request.Builder()
                 .url(getAPIMediationEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -471,7 +556,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return getAllApiSpecificMediationPolicies(apiApplicationKey, refreshedAccessToken, apiIdentifier);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid request";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -481,7 +566,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
@@ -513,7 +598,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return addApiSpecificMediationPolicy(apiApplicationKey, refreshedAccessToken, uuid, mediation);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid request";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -523,7 +608,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
 
     }
@@ -557,7 +642,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return updateApiSpecificMediationPolicyContent(apiApplicationKey, refreshedAccessToken, uuid, mediation);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid mediation policy";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -567,7 +652,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
 
     }
@@ -590,7 +675,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_OK == response.code()) { // Check response status
+            if (HttpStatus.SC_OK == response.code()) {
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -600,7 +685,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return changeLifeCycleStatus(apiApplicationKey, refreshedAccessToken, uuid, action);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid request";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -610,7 +695,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
@@ -641,7 +726,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return getAPIRevisions(apiApplicationKey, refreshedAccessToken, uuid, deploymentStatus);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid request";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -651,58 +736,18 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
     @Override
-    public JSONObject getAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
-            throws APIServicesException, BadRequestException, UnexpectedResponseException {
-
-        String getLatestRevisionUUIDEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/deployments";
-
-        Request request = new Request.Builder()
-                .url(getLatestRevisionUUIDEndPoint)
-                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
-                        + accessTokenInfo.getAccess_token())
-                .get()
-                .build();
-
-        try {
-            Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
-            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
-                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
-                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
-                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
-                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
-                //TODO: max attempt count
-                return getAPIRevisionDeployment(apiApplicationKey, refreshedAccessToken, uuid);
-            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
-                log.error(msg);
-                throw new BadRequestException(msg);
-            } else {
-                String msg = "Response : " + response.code() + response.body();
-                throw new UnexpectedResponseException(msg);
-            }
-        } catch (IOException e) {
-            String msg = "Error occurred while processing the response";
-            log.error(msg, e);
-            throw new APIServicesException(e);
-        }
-    }
-
-    @Override
-    public APIRevision addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIRevision apiRevision)
+    public JSONObject addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIRevision apiRevision)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String addNewScope = endPointPrefix + Constants.API_ENDPOINT + apiRevision.getApiUUID() + "/revisions";
 
         String apiRevisionDescription = "{\n" +
-                "   \"description\":\" " + apiRevision.getDescription() + "\",\n" +
+                "   \"description\":\"" + apiRevision.getDescription() + "\"\n" +
                 "}";
 
         RequestBody requestBody = RequestBody.create(JSON, apiRevisionDescription);
@@ -715,8 +760,9 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
-                return gson.fromJson(response.body().string(), APIRevision.class);
+            if (HttpStatus.SC_CREATED == response.code()) {
+                JSONObject jsonObject = new JSONObject(response.body().string());
+                return jsonObject;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -725,7 +771,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return addAPIRevision(apiApplicationKey, refreshedAccessToken, apiRevision);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid API revision request body";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -735,7 +781,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
@@ -745,8 +791,17 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String deployAPIRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/deploy-revision?revisionId=" + apiRevisionId;
+        APIRevisionDeployment apiRevisionDeployment = apiRevisionDeploymentList.get(0);
 
-        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(apiRevisionDeploymentList));
+        String revision = "[\n" +
+                "    {\n" +
+                "        \"name\": \"" + apiRevisionDeployment.getDeployment() + "\",\n" +
+                "        \"vhost\": \"" + apiRevisionDeployment.getVhost() + "\",\n" +
+                "        \"displayOnDevportal\": " + apiRevisionDeployment.isDisplayOnDevportal() + "\n" +
+                "    }\n" +
+                "]";
+
+        RequestBody requestBody = RequestBody.create(JSON, revision);
         Request request = new Request.Builder()
                 .url(deployAPIRevisionEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -756,7 +811,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
+            if (HttpStatus.SC_CREATED == response.code()) {
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -767,7 +822,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 return deployAPIRevision(apiApplicationKey, refreshedAccessToken, uuid, apiRevisionId,
                         apiRevisionDeploymentList);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid API revision request body";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -777,19 +832,29 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
     @Override
     public boolean undeployAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                 APIRevisionDeployment apiRevisionDeployment, String uuid)
+                                                 JSONObject apiRevisionDeployment, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String undeployAPIRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions/"
-                + apiRevisionDeployment.getRevisionUUID();
+        String undeployAPIRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/undeploy-revision?revisionId="
+                + apiRevisionDeployment.getString("id");
+        JSONArray array = apiRevisionDeployment.getJSONArray("deploymentInfo");
+        JSONObject obj = array.getJSONObject(0);
 
-        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(apiRevisionDeployment));
+        String revision = "[\n" +
+                "    {\n" +
+                "        \"name\": \"" + obj.getString("name") + "\",\n" +
+                "        \"vhost\": \"" + obj.getString("vhost") + "\",\n" +
+                "        \"displayOnDevportal\": " + obj.get("displayOnDevportal") + "\n" +
+                "    }\n" +
+                "]";
+
+        RequestBody requestBody = RequestBody.create(JSON, revision);
         Request request = new Request.Builder()
                 .url(undeployAPIRevisionEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -799,7 +864,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
+            if (HttpStatus.SC_CREATED == response.code()) {
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -809,7 +874,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return undeployAPIRevisionDeployment(apiApplicationKey, refreshedAccessToken, apiRevisionDeployment, uuid);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid API revision request body";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -819,16 +884,17 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
     @Override
     public boolean deleteAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                     APIRevision apiRevision, String uuid)
+                                     JSONObject apiRevision, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String apiRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions/" + apiRevision.getRevisionUUID();
+        String apiRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions/" +
+                apiRevision.getString("id");
 
         Request request = new Request.Builder()
                 .url(apiRevisionEndPoint)
@@ -839,7 +905,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_OK == response.code()) { // Check response status
+            if (HttpStatus.SC_OK == response.code()) {
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -849,7 +915,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return deleteAPIRevision(apiApplicationKey, refreshedAccessToken, apiRevision, uuid);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid request";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -859,15 +925,15 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
     @Override
-    public JSONObject getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+    public JSONObject getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getDocumentationsEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents?limit=1000";
+        String getDocumentationsEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/documents?limit=1000";
 
         Request request = new Request.Builder()
                 .url(getDocumentationsEndPoint)
@@ -887,9 +953,9 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return getDocumentations(apiApplicationKey, refreshedAccessToken, apiIdentifier);
+                return getDocumentations(apiApplicationKey, refreshedAccessToken, uuid);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid request body";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -899,16 +965,16 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
     @Override
     public boolean deleteDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                        APIIdentifier apiIdentifier, String documentID)
+                                        String uuid, String documentID)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getDocumentationsEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents/" + documentID;
+        String getDocumentationsEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/documents/" + documentID;
 
         Request request = new Request.Builder()
                 .url(getDocumentationsEndPoint)
@@ -927,9 +993,9 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return deleteDocumentations(apiApplicationKey, refreshedAccessToken, apiIdentifier, documentID);
+                return deleteDocumentations(apiApplicationKey, refreshedAccessToken, uuid, documentID);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid request body";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -939,16 +1005,16 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
     @Override
     public Documentation addDocumentation(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                          APIIdentifier apiIdentifier, Documentation documentation)
+                                          String uuid, Documentation documentation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/documents";
+        String addNewScope = endPointPrefix + Constants.API_ENDPOINT + uuid + "/documents";
 
         String document = "{\n" +
                 "  \"name\": \" " + documentation.getName() + " \",\n" +
@@ -978,9 +1044,9 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return addDocumentation(apiApplicationKey, refreshedAccessToken, apiIdentifier, documentation);
+                return addDocumentation(apiApplicationKey, refreshedAccessToken, uuid, documentation);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid documentation request body";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -990,16 +1056,16 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
     @Override
     public boolean addDocumentationContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                           API api, String docId, String docContent)
+                                           APIResponseUtil api, String docId, String docContent)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addDocumentationContentEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getUuid() + "/documents/" + docId;
+        String addDocumentationContentEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getId() + "/documents/" + docId;
 
         RequestBody requestBody = RequestBody.create(JSON, docContent);
         Request request = new Request.Builder()
@@ -1021,7 +1087,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 //TODO: max attempt count
                 return addDocumentationContent(apiApplicationKey, refreshedAccessToken, api, docId, docContent);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
-                String msg = "Bad Request, Invalid scope object";
+                String msg = "Bad Request, Invalid documentation request body";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {
@@ -1031,7 +1097,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         } catch (IOException e) {
             String msg = "Error occurred while processing the response";
             log.error(msg, e);
-            throw new APIServicesException(e);
+            throw new APIServicesException(msg, e);
         }
     }
 
