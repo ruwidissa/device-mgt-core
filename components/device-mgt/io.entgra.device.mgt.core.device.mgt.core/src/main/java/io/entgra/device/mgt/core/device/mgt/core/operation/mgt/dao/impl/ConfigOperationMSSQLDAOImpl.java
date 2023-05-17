@@ -54,12 +54,16 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
             String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
                     "INITIATED_BY, OPERATION_DETAILS) VALUES (?, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"id"})) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(operation);
+                byte[] operationBytes = baos.toByteArray();
                 stmt.setString(1, operation.getType().toString());
                 stmt.setLong(2, DeviceManagementDAOUtil.getCurrentUTCTime());
                 stmt.setLong(3, 0);
                 stmt.setString(4, operation.getCode());
                 stmt.setString(5, operation.getInitiatedBy());
-                stmt.setObject(6, operation);
+                stmt.setBytes(6, operationBytes);
                 stmt.executeUpdate();
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     int id = -1;
@@ -68,6 +72,10 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
                     }
                     return id;
                 }
+            } catch (IOException e) {
+                String msg = "Error when  converting operation id " + operation + " to input stream";
+                log.error(msg, e);
+                throw new OperationManagementDAOException(msg, e);
             }
         } catch (SQLException e) {
             String msg = "Error occurred while adding command operation" + operation.getId();
