@@ -56,13 +56,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
-import java.util.LinkedList;
+
 /**
  * This class holds the implementation of OperationDAO which can be used to support SQLServer db syntax.
  */
@@ -192,7 +194,7 @@ public class SQLServerOperationDAOImpl extends GenericOperationDAOImpl {
                         operation = new Operation();
                         operation.setId(rs.getInt("ID"));
                         operation.setType(Operation.Type.valueOf(rs.getString("TYPE")));
-                        operation.setCreatedTimeStamp(rs.getTimestamp("CREATED_TIMESTAMP").toString());
+                        operation.setCreatedTimeStamp(new Timestamp(rs.getLong("CREATED_TIMESTAMP") * 1000L).toString());
                         if (rs.getLong("UPDATED_TIMESTAMP") == 0) {
                             operation.setReceivedTimeStamp("");
                         } else {
