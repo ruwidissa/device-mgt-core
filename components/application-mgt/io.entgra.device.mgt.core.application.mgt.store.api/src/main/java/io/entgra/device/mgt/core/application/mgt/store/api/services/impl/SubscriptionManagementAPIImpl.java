@@ -314,6 +314,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @QueryParam("name") String name,
             @QueryParam("user") String user,
             @QueryParam("ownership") String ownership,
+            @QueryParam("serialNumber") String serialNumber,
             @PathParam("uuid") String uuid,
             @DefaultValue("0")
             @QueryParam("offset") int offset,
@@ -332,6 +333,9 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             if (ownership != null && !ownership.isEmpty()) {
                 RequestValidationUtil.validateOwnershipType(ownership);
                 request.setOwnership(ownership);
+            }
+            if (StringUtils.isNotBlank(serialNumber)) {
+                request.setSerialNumber(serialNumber);
             }
             if (status != null && !status.isEmpty()) {
                 boolean isStatusEmpty = true;

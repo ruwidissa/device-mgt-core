@@ -1184,6 +1184,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         String name = request.getDeviceName();
         String user = request.getOwner();
         String ownership = request.getOwnership();
+        String serial = request.getSerialNumber();
         String query = null;
         try {
             List<Device> devices = new ArrayList<>();
@@ -1197,6 +1198,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             boolean isDeviceNameProvided = false;
             boolean isOwnerProvided = false;
             boolean isOwnershipProvided = false;
+            boolean isSerialProvided = false;
 
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT "
@@ -1219,6 +1221,9 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                             + "DM_DEVICE.TENANT_ID = e.TENANT_ID "
                             + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
                             + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID "
+                            + "INNER JOIN DM_DEVICE_INFO i ON "
+                            + "DM_DEVICE.ID = i.DEVICE_ID "
+                            + "AND i.KEY_FIELD = 'serial' "
                             + "WHERE DM_DEVICE.ID IN (",
                     ") AND DM_DEVICE.TENANT_ID = ? AND e.STATUS != ?");
 
@@ -1232,6 +1237,10 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             if (ownership != null && !ownership.isEmpty()) {
                 query += " AND e.OWNERSHIP = ?";
                 isOwnershipProvided = true;
+            }
+            if (serial != null && !serial.isEmpty()) {
+                query += " AND i.VALUE_FIELD LIKE ?" ;
+                isSerialProvided = true;
             }
             if (user != null && !user.isEmpty()) {
                 query += " AND e.OWNER = ?";
@@ -1256,6 +1265,9 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
                 if (isOwnershipProvided) {
                     ps.setString(index++, ownership);
+                }
+                if (isSerialProvided) {
+                    ps.setString(index++, "%" + serial + "%");
                 }
                 if (isOwnerProvided) {
                     ps.setString(index++, user);
