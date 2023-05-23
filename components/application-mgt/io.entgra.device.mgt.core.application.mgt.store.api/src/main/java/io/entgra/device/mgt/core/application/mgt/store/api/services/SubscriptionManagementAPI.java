@@ -380,6 +380,12 @@ public interface SubscriptionManagementAPI {
             @Size(max = 45)
                     String ownership,
             @ApiParam(
+                    name = "serialNumber",
+                    value = "The serial number of the device.",
+                    required = false)
+            @QueryParam("serialNumber")
+                    String serialNumber,
+            @ApiParam(
                     name="uuid",
                     value="uuid of the application release.",
                     required = true)
