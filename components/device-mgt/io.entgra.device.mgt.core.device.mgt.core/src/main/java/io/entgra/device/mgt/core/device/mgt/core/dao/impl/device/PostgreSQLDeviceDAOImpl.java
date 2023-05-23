@@ -97,7 +97,7 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                         "WHERE DEVICE_TYPE_ID = t.ID " +
                         "AND d.ID= i.DEVICE_ID " +
                         "AND i.KEY_FIELD = 'serial' " +
-                        "AND i.VALUE_FIELD = ? " +
+                        "AND i.VALUE_FIELD LIKE ? " +
                         "AND d.TENANT_ID = ? ";
                 isSerialProvided = true;
             } else {
@@ -136,7 +136,7 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;
                 if (isSerialProvided) {
-                    stmt.setString(paramIdx++, serial);
+                    stmt.setString(paramIdx++, "%" + serial + "%");
                 }
                 stmt.setInt(paramIdx++, tenantId);
                 if (isDeviceTypeProvided) {
