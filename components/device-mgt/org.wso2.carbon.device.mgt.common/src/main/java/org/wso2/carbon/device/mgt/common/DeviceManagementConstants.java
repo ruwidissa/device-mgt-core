@@ -134,6 +134,8 @@ public final class DeviceManagementConstants {
         public static final String LAST_NAME = "last-name";
         public static final String TENANT_ADMIN_USERNAME = "tenant-admin-username";
         public static final String TENANT_ADMIN_PASSWORD = "tenant-admin-password";
+
+        public static final int OTP_DEFAULT_EXPIRY_SECONDS = 3600;
     }
 
     public static final class EventServices {
