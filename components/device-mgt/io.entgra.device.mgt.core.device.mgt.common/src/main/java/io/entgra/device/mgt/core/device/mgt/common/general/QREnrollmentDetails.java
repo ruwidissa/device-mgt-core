@@ -33,6 +33,7 @@ public class QREnrollmentDetails {
     public void setCustomValues(Map<String, String> customValues) {
         this.customValues = customValues;
     }
+    int tokenExpiry;
 
     public String getOwnershipType() { return ownershipType; }
 
@@ -45,4 +46,12 @@ public class QREnrollmentDetails {
     public String getEnrollmentMode() { return enrollmentMode; }
 
     public void setEnrollmentMode(String enrollmentMode) { this.enrollmentMode = enrollmentMode; }
+
+    public int getTokenExpiry() {
+        return tokenExpiry;
+    }
+
+    public void setTokenExpiry(int tokenExpiry) {
+        this.tokenExpiry = tokenExpiry;
+    }
 }

@@ -25,7 +25,12 @@ import io.entgra.device.mgt.core.device.mgt.core.otp.mgt.dao.OTPManagementDAO;
 import io.entgra.device.mgt.core.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
+import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
+import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
+import org.wso2.carbon.device.mgt.core.otp.mgt.dao.AbstractDAOImpl;
+import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAO;
+import org.wso2.carbon.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
 import java.sql.*;
 import java.util.Calendar;
 import java.util.List;
@@ -51,7 +56,8 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
                 + "META_INFO, "
                 + "CREATED_AT,"
                 + "TENANT_ID,"
-                + "USERNAME) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                + "USERNAME, "
+                + "EXPIRY_TIME) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conn = this.getDBConnection();
             Calendar calendar = Calendar.getInstance();
@@ -65,6 +71,8 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
                     stmt.setTimestamp(5, timestamp);
                     stmt.setInt(6, oneTimePinDTO.getTenantId());
                     stmt.setString(7, oneTimePinDTO.getUsername());
+                    stmt.setInt(8, oneTimePinDTO.getExpiryTime() == 0
+                            ? DeviceManagementConstants.OTPProperties.OTP_DEFAULT_EXPIRY_SECONDS : oneTimePinDTO.getExpiryTime());
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
