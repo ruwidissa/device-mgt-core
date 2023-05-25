@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.entgra.device.mgt.core.apimgt.extension.rest.api.util.APIUtils;
+package io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo;
 
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.model.APICategory;
@@ -31,7 +31,7 @@ import java.util.Set;
  * This class represents the API response.
  */
 
-public class APIResponseUtil {
+public class APIInfo {
 
     private String id;
     private String name;

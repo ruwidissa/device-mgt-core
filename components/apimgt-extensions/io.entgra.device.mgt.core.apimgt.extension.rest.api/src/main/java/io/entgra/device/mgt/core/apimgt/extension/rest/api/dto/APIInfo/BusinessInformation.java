@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.entgra.device.mgt.core.apimgt.extension.rest.api.util.APIUtils;
+package io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo;
 
 /**
  * This hold the business information of an API.

@@ -23,7 +23,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.APIUtils.APIResponseUtil;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -54,10 +54,10 @@ public interface PublisherRESTAPIServices {
     JSONObject getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIResponseUtil api)
+    JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIResponseUtil api)
+    boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean saveAsyncApiDefinition(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
@@ -113,6 +113,6 @@ public interface PublisherRESTAPIServices {
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean addDocumentationContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                    APIResponseUtil api, String docId, String docContent)
+                                    APIInfo api, String docId, String docContent)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 }

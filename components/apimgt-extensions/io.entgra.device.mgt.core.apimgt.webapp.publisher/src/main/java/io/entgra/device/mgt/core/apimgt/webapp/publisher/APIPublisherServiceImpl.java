@@ -28,7 +28,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.APIUtils.APIResponseUtil;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -180,7 +180,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
                                 }
                             }
-                            APIResponseUtil api = getAPI(apiConfig, true);
+                            APIInfo api = getAPI(apiConfig, true);
                             JSONObject createdAPI = publisherRESTAPIServices.addAPI(apiApplicationKey, accessTokenInfo, api);
                             if (apiConfig.getEndpointType() != null && "WS".equals(apiConfig.getEndpointType())) {
                                 publisherRESTAPIServices.saveAsyncApiDefinition(apiApplicationKey, accessTokenInfo,
@@ -260,7 +260,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                         apiIdentifier);
                                 if (scopesToMoveAsSharedScopes.size() > 0) {
                                     // update API to remove local scopes
-                                    APIResponseUtil api = getAPI(apiConfig, false);
+                                    APIInfo api = getAPI(apiConfig, false);
                                     api.setLifeCycleStatus(existingAPI.getString("lifeCycleStatus"));
                                     publisherRESTAPIServices.updateApi(apiApplicationKey, accessTokenInfo, api);
 
@@ -275,7 +275,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 }
 
                                 existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo, apiIdentifier);
-                                APIResponseUtil api = getAPI(apiConfig, true);
+                                APIInfo api = getAPI(apiConfig, true);
                                 api.setLastUpdatedTime(existingAPI.getString("lifeCycleStatus"));
                                 api.setId(existingAPI.getString("id"));
                                 publisherRESTAPIServices.updateApi(apiApplicationKey, accessTokenInfo, api);
@@ -357,7 +357,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             }
                         }
                         if (apiConfig.getApiDocumentationSourceFile() != null) {
-                            APIResponseUtil api = getAPI(apiConfig, true);
+                            APIInfo api = getAPI(apiConfig, true);
 
                             String fileName =
                                     CarbonUtils.getCarbonHome() + File.separator + "repository" +
@@ -541,28 +541,28 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         }
     }
 
-    private APIResponseUtil getAPI(APIConfig config, boolean includeScopes) {
+    private APIInfo getAPI(APIConfig config, boolean includeScopes) {
 
-        APIResponseUtil apiResponseUtil = new APIResponseUtil();
-        apiResponseUtil.setName(config.getName().replace(Constants.SPACE, Constants.EMPTY_STRING));
-        apiResponseUtil.setDescription("");
-        apiResponseUtil.setContext(config.getContext());
-        apiResponseUtil.setVersion(config.getVersion());
-        apiResponseUtil.setProvider(config.getOwner());
-        apiResponseUtil.setLifeCycleStatus(CREATED_STATUS);
-        apiResponseUtil.setWsdlInfo(null);
-        apiResponseUtil.setWsdlUrl(null);
-        apiResponseUtil.setResponseCachingEnabled(false);
-        apiResponseUtil.setCacheTimeout(0);
-        apiResponseUtil.setHasThumbnail(false);
-        apiResponseUtil.setDefaultVersion(config.isDefault());
-        apiResponseUtil.setRevision(false);
-        apiResponseUtil.setRevisionedApiId(null);
-        apiResponseUtil.setEnableSchemaValidation(false);
+        APIInfo apiInfo = new APIInfo();
+        apiInfo.setName(config.getName().replace(Constants.SPACE, Constants.EMPTY_STRING));
+        apiInfo.setDescription("");
+        apiInfo.setContext(config.getContext());
+        apiInfo.setVersion(config.getVersion());
+        apiInfo.setProvider(config.getOwner());
+        apiInfo.setLifeCycleStatus(CREATED_STATUS);
+        apiInfo.setWsdlInfo(null);
+        apiInfo.setWsdlUrl(null);
+        apiInfo.setResponseCachingEnabled(false);
+        apiInfo.setCacheTimeout(0);
+        apiInfo.setHasThumbnail(false);
+        apiInfo.setDefaultVersion(config.isDefault());
+        apiInfo.setRevision(false);
+        apiInfo.setRevisionedApiId(null);
+        apiInfo.setEnableSchemaValidation(false);
 
         Set<String> tags = new HashSet<>();
         tags.addAll(Arrays.asList(config.getTags()));
-        apiResponseUtil.setTags(tags);
+        apiInfo.setTags(tags);
 
         Set<String> availableTiers = new HashSet<>();
         if (config.getEndpointType() != null && "WS".equals(config.getEndpointType())) {
@@ -570,7 +570,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         } else {
             availableTiers.add(UNLIMITED_TIER);
         }
-        apiResponseUtil.setPolicies(availableTiers);
+        apiInfo.setPolicies(availableTiers);
 
         if (config.getEndpointType() == null) {
             List<JSONObject> operations = new ArrayList();
@@ -608,16 +608,16 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 }
                 operations.add(operation);
             }
-            apiResponseUtil.setScopes(scopeSet);
-            apiResponseUtil.setOperations(operations);
+            apiInfo.setScopes(scopeSet);
+            apiInfo.setOperations(operations);
         }
 
         if (config.isSharedWithAllTenants()) {
-            apiResponseUtil.setSubscriptionAvailability(SUBSCRIPTION_TO_ALL_TENANTS);
-            apiResponseUtil.setVisibility(API_GLOBAL_VISIBILITY);
+            apiInfo.setSubscriptionAvailability(SUBSCRIPTION_TO_ALL_TENANTS);
+            apiInfo.setVisibility(API_GLOBAL_VISIBILITY);
         } else {
-            apiResponseUtil.setSubscriptionAvailability(SUBSCRIPTION_TO_CURRENT_TENANT);
-            apiResponseUtil.setVisibility(API_PRIVATE_VISIBILITY);
+            apiInfo.setSubscriptionAvailability(SUBSCRIPTION_TO_CURRENT_TENANT);
+            apiInfo.setVisibility(API_PRIVATE_VISIBILITY);
         }
 
         String endpointConfig;
@@ -634,9 +634,9 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
         Set<String> transports = new HashSet<>();
         transports.addAll(Arrays.asList(config.getTransports()));
-        apiResponseUtil.setTransport(transports);
+        apiInfo.setTransport(transports);
 
-        apiResponseUtil.setType("HTTP");
+        apiInfo.setType("HTTP");
 
         if (config.getEndpointType() != null && "dynamic".equals(config.getEndpointType())) {
             endpointConfig = "{\n" +
@@ -650,7 +650,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     "    }";
             endPointConfig = new JSONObject(endpointConfig);
             //TODO: Will be used in dynamic endpoints
-//            apiResponseUtil.setInSequence(config.getInSequenceName());
+//            apiInfo.setInSequence(config.getInSequenceName());
         }
 
         // if ws endpoint
@@ -667,10 +667,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             endPointConfig = new JSONObject(endpointConfig);
 
             transports.addAll(Arrays.asList("wss,ws"));
-            apiResponseUtil.setTransport(transports);
-            apiResponseUtil.setType("WS");
+            apiInfo.setTransport(transports);
+            apiInfo.setType("WS");
         }
-        apiResponseUtil.setEndpointConfig(endPointConfig);
+        apiInfo.setEndpointConfig(endPointConfig);
 
         List<String> accessControlAllowOrigins = new ArrayList<>();
         accessControlAllowOrigins.add("*");
@@ -691,17 +691,17 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         accessControlAllowMethods.add("OPTIONS");
         CORSConfiguration corsConfiguration = new CORSConfiguration(false, accessControlAllowOrigins, false,
                 accessControlAllowHeaders, accessControlAllowMethods);
-        apiResponseUtil.setCorsConfiguration(corsConfiguration);
+        apiInfo.setCorsConfiguration(corsConfiguration);
 
-        apiResponseUtil.setAuthorizationHeader("Authorization");
+        apiInfo.setAuthorizationHeader("Authorization");
         List<String> keyManagers = new ArrayList<>();
         keyManagers.add("all");
-        apiResponseUtil.setKeyManagers(keyManagers);
-        apiResponseUtil.setEnableSchemaValidation(false);
-        apiResponseUtil.setMonetization(null);
-        apiResponseUtil.setServiceInfo(null);
+        apiInfo.setKeyManagers(keyManagers);
+        apiInfo.setEnableSchemaValidation(false);
+        apiInfo.setMonetization(null);
+        apiInfo.setServiceInfo(null);
 
-        return apiResponseUtil;
+        return apiInfo;
 
         //TODO: Will be used in WS or dynamic endpoints
 //        if (config.getEndpointType() != null && "WS".equals(config.getEndpointType())) {

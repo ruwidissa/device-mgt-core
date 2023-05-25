@@ -25,7 +25,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.APIUtils.APIResponseUtil;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.ScopeUtils;
 import okhttp3.MediaType;
@@ -315,7 +315,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIResponseUtil api)
+    public JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String addAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT;
@@ -402,7 +402,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIResponseUtil api)
+    public boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String updateAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getId();
@@ -1063,7 +1063,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public boolean addDocumentationContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                           APIResponseUtil api, String docId, String docContent)
+                                           APIInfo api, String docId, String docContent)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String addDocumentationContentEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getId() + "/documents/" + docId;
