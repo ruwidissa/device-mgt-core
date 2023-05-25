@@ -24,7 +24,6 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIService
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.APIUtils.APIResponseUtil;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -82,7 +81,7 @@ public interface PublisherRESTAPIServices {
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     JSONObject getAPIRevisions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
-                               String deploymentStatus)
+                               Boolean deploymentStatus)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     JSONObject addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,

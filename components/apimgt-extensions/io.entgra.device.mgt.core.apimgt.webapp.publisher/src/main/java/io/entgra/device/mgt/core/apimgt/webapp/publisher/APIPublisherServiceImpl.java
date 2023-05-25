@@ -237,7 +237,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 for (ApiScope apiScope : apiConfig.getScopes()) {
                                     // if the scope is not available as shared scope, and it is assigned to an API as a local scope
                                     // need remove the local scope and add as a shared scope
-                                    if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, apiScope.getKey())) {
+                                    if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
+                                            apiScope.getKey())) {
                                         if (apiProvider.isScopeKeyAssignedLocally(apiIdentifier, apiScope.getKey(), tenantId)) {
                                             // collect scope to move as shared scopes
                                             scopesToMoveAsSharedScopes.add(apiScope);
@@ -255,7 +256,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 }
 
                                 // Get existing API
-                                JSONObject existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo, apiIdentifier);
+                                JSONObject existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo,
+                                        apiIdentifier);
                                 if (scopesToMoveAsSharedScopes.size() > 0) {
                                     // update API to remove local scopes
                                     APIResponseUtil api = getAPI(apiConfig, false);
@@ -292,7 +294,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     mediation.setGlobal(false);
 
                                     List<Mediation> mediationList = (List) publisherRESTAPIServices
-                                            .getAllApiSpecificMediationPolicies(apiApplicationKey, accessTokenInfo, apiIdentifier).get("list");
+                                            .getAllApiSpecificMediationPolicies(apiApplicationKey, accessTokenInfo,
+                                                    apiIdentifier).get("list");
 
                                     boolean isMediationPolicyFound = false;
                                     for (Mediation m : mediationList) {
@@ -313,12 +316,12 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
                                 // This will retrieve the deployed revision
                                 JSONArray revisionDeploymentList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
-                                        accessTokenInfo, existingAPI.getString("id"), "?query=deployed:true").get("list");
+                                        accessTokenInfo, existingAPI.getString("id"), true).get("list");
                                 // This will retrieve the un deployed revision list
-                                JSONArray undeployedRevisionList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey, accessTokenInfo,
-                                                existingAPI.getString("id"), "?query=deployed:false").get("list");
+                                JSONArray undeployedRevisionList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
+                                        accessTokenInfo, existingAPI.getString("id"), false).get("list");
                                 int apiRevisionCount = (int) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
-                                        accessTokenInfo, existingAPI.getString("id"), "").get("count");
+                                        accessTokenInfo, existingAPI.getString("id"), null).get("count");
 
                                 if (apiRevisionCount >= 5) {
                                     JSONObject latestRevisionDeployment = revisionDeploymentList.getJSONObject(0);

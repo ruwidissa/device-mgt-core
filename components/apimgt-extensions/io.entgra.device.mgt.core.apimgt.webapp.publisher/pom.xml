@@ -179,7 +179,6 @@
                             io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions,
                             io.entgra.device.mgt.core.apimgt.extension.rest.api.constants,
                             io.entgra.device.mgt.core.apimgt.extension.rest.api.util.*,
-<!--                            io.entgra.device.mgt.core.apimgt.extension.rest.api.util.APIUtils-->
                             io.entgra.device.mgt.core.apimgt.annotations,
                             org.wso2.carbon.apimgt.api,
                             org.wso2.carbon.apimgt.api.model,

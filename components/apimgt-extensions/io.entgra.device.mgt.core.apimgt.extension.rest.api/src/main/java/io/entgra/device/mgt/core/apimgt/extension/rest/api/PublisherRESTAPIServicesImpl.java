@@ -701,10 +701,11 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public JSONObject getAPIRevisions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
-                                      String deploymentStatus)
+                                      Boolean deploymentStatus)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getAPIRevisionsEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions" + deploymentStatus;
+        String getAPIRevisionsEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions?query=deployed:"
+                + deploymentStatus;
 
         Request request = new Request.Builder()
                 .url(getAPIRevisionsEndPoint)
