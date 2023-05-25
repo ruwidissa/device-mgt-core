@@ -111,7 +111,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
         } catch (APIServicesException e) {
-            String errorMsg = "Error while generating application";
+            String errorMsg = "Error occurred while generating the API application";
             log.error(errorMsg, e);
             throw new APIManagerPublisherException(e);
         }
@@ -165,6 +165,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     Constants.EMPTY_STRING))){
                                 apiFound = true;
                                 apiIdentifier.setUuid(apiObj.getString("id"));
+                                break;
                             }
                         }
                         if (!apiFound) {
@@ -387,7 +388,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             JSONArray documentList = (JSONArray) publisherRESTAPIServices.getDocumentations(apiApplicationKey,
                                     accessTokenInfo, api.getId()).get("list");
 
-                            if (!(documentList.length() == 0)) {
+                            if (documentList.length() > 0) {
                                 for (int i = 0; i < documentList.length(); i++) {
                                     JSONObject existingDoc = documentList.getJSONObject(i);
                                     if (existingDoc.getString("name").equals(apiConfig.getApiDocumentationName())
@@ -438,7 +439,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
         } catch (APIServicesException e) {
-            String errorMsg = "Error while generating application";
+            String errorMsg = "Error occurred while generating the API application";
             log.error(errorMsg, e);
             throw new APIManagerPublisherException(e);
         }
