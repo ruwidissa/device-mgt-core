@@ -27,6 +27,10 @@ public class ScopeUtils {
     private String name;
     private String roles;
     private String description;
+    private int id;
+
+    public ScopeUtils() {
+    }
 
     public String getKey() {
         return key;
@@ -62,11 +66,11 @@ public class ScopeUtils {
 
     public String toJSON() {
         String jsonString = "{\n" +
-                "   \"name\":\" " + key + "\",\n" +
-                "   \"displayName\":\" " + name + "\",\n" +
-                "   \"description\":\" " + description + " \",\n" +
+                "   \"name\":\"" + key + "\",\n" +
+                "   \"displayName\":\"" + name + "\",\n" +
+                "   \"description\":\"" + description + "\",\n" +
                 "   \"bindings\":[\n" +
-                "      \" " + roles + " \"\n" +
+                "      \"" + roles + "\"\n" +
                 "   ]\n" +
                 "}";
         return jsonString;
