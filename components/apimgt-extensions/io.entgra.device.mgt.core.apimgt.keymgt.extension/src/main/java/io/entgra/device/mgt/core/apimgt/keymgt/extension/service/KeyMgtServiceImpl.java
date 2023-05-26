@@ -435,7 +435,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
         try {
             APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
             APIConsumer apiConsumer = apiManagerFactory.getAPIConsumer(owner);
-            return apiConsumer.getApplicationsByName(owner, applicationName, "");
+            return null; // todo:apim - apiConsumer.getApplicationsByName(owner, applicationName, "");
         } catch (APIManagementException e) {
             msg = "Error while trying to retrieve the application";
             log.error(msg);

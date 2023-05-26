@@ -54,7 +54,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.8</version>
                         <executions>
                             <execution>
                                 <phase>compile</phase>
@@ -84,7 +83,6 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.5.0</version>
                         <executions>
                             <execution>
                                 <phase>test</phase>
@@ -139,9 +137,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
+            <!--            <version>${pax.logging.api.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.json.wso2</groupId>
@@ -219,6 +218,10 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.application.mgt.addons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io.wso2</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
     </dependencies>
 </project>

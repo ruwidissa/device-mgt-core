@@ -58,7 +58,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -126,7 +125,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18</version>
                 <configuration>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
@@ -142,16 +140,22 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.maven.plugin.version}</version>
                 <executions>
+<!--                    <execution>-->
+<!--                        <id>default-instrument</id>-->
+<!--                        <goals>-->
+<!--                            <goal>instrument</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>default-restore-instrumented-classes</id>-->
+<!--                        <goals>-->
+<!--                            <goal>restore-instrumented-classes</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
                     <execution>
-                        <id>default-instrument</id>
+                        <id>jacoco-initialize</id>
                         <goals>
-                            <goal>instrument</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>default-restore-instrumented-classes</id>
-                        <goals>
-                            <goal>restore-instrumented-classes</goal>
+                            <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                     <execution>
@@ -165,12 +169,12 @@
                             <outputDirectory>${basedir}/target/coverage-reports/site</outputDirectory>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>default-report-integration</id>
-                        <goals>
-                            <goal>report-integration</goal>
-                        </goals>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>default-report-integration</id>-->
+<!--                        <goals>-->
+<!--                            <goal>report-integration</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
                 </executions>
             </plugin>
         </plugins>
@@ -196,8 +200,8 @@
             <artifactId>testng</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -217,8 +221,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+            <scope>provided</scope>
+            <!--            <version>${pax.logging.api.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.bouncycastle</groupId>
@@ -269,6 +275,10 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
         </dependency>
     </dependencies>
 </project>

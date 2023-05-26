@@ -240,7 +240,9 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     // need remove the local scope and add as a shared scope
                                     if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
                                             apiScope.getKey())) {
-                                        if (apiProvider.isScopeKeyAssignedLocally(apiIdentifier, apiScope.getKey(), tenantId)) {
+                                        //todo:apim
+                                        // if (apiProvider.isScopeKeyAssignedLocally(apiIdentifier, apiScope.getKey(), tenantId)) {
+                                        if (true) {
                                             // collect scope to move as shared scopes
                                             scopesToMoveAsSharedScopes.add(apiScope);
                                         } else {

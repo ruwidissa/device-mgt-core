@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -83,9 +83,9 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
         try {
             APIConsumer apiConsumer = API_MANAGER_FACTORY.getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationsByName(username, applicationName, "");
+            Application application = null; // todo:apim - apiConsumer.getApplicationsByName(username, applicationName, "");
             if (application != null) {
-                apiConsumer.removeApplication(application, username);
+                // todo:apim - apiConsumer.removeApplication(application, username);
             }
         } catch (APIManagementException e) {
             throw new APIManagerException("Failed to remove api application : " + applicationName, e);
@@ -108,30 +108,30 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         }
         try {
             APIConsumer apiConsumer = API_MANAGER_FACTORY.getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationsByName(username, applicationName, "");
+            Application application = null; // todo:apim - apiConsumer.getApplicationsByName(username, applicationName, "");
 
             int applicationId = 0;
             Subscriber subscriber = null;
             if (application == null) {
-                subscriber = apiConsumer.getSubscriber(username);
+                subscriber = null; // todo:apim - apiConsumer.getSubscriber(username);
                 if (subscriber == null) {
                     // create subscriber
-                    apiConsumer.addSubscriber(username, "");
-                    subscriber = apiConsumer.getSubscriber(username);
+                    // todo:apim - apiConsumer.addSubscriber(username, "");
+                    subscriber = null; // todo:apim - apiConsumer.getSubscriber(username);
                 }
                 //create application
                 application = new Application(applicationName, subscriber);
                 application.setTier(ApiApplicationConstants.DEFAULT_TIER);
                 application.setGroupId("");
                 application.setTokenType("OAUTH");
-                apiConsumer.addApplication(application, username);
-                application = apiConsumer.getApplicationsByName(username, applicationName, "");
+                // todo:apim - apiConsumer.addApplication(application, username);
+                application = null; // todo:apim - apiConsumer.getApplicationsByName(username, applicationName, "");
             } else {
-                subscriber = apiConsumer.getSubscriber(username);
+                subscriber = null; // todo:apim - apiConsumer.getSubscriber(username);
             }
 
             Set<SubscribedAPI> subscribedAPIs =
-                    apiConsumer.getSubscribedAPIs(subscriber, applicationName, "");
+                    null; // todo:apim - apiConsumer.getSubscribedAPIs(subscriber, applicationName, "");
 
             log.info("Already subscribed API count: " + subscribedAPIs.size());
 
@@ -141,7 +141,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             if (tags != null && tags.length > 0) {
                 for (String tag : tags) {
                     boolean startedTenantFlow = false;
-                    Set<API> apisWithTag = apiConsumer.getAPIsWithTag(tag, tenantDomain);
+                    Set<API> apisWithTag = null; // todo:apim - apiConsumer.getAPIsWithTag(tag, tenantDomain);
 
                     /**
                      * From APIM 4.0.0, APIs published in the super tenant can only be listed by
@@ -164,7 +164,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                                     ". Caused by to inability to get super tenant username", e);
                         }
 
-                        apisWithTag = apiConsumerAPIPublishedTenant.getAPIsWithTag(tag, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        apisWithTag = null; // todo:apim - apiConsumerAPIPublishedTenant.getAPIsWithTag(tag, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                         startedTenantFlow = true;
                     }
 
@@ -176,10 +176,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                             boolean subscriptionExist = false;
                             if (subscribedAPIs.size() > 0) {
                                 for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-                                    if (String.valueOf(subscribedAPI.getApiId().toString()).equals(id)) {
-                                        subscriptionExist = true;
-                                        break;
-                                    }
+                                    // todo:apim
+//                                    if (String.valueOf(subscribedAPI.getApiId().toString()).equals(id)) {
+//                                        subscriptionExist = true;
+//                                        break;
+//                                    }
                                 }
                             }
                             if (!subscriptionExist && !tempApiIds.contains(id)) {
@@ -218,7 +219,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                          * Oauth app for a child tenant.
                          */
                         for (ApiTypeWrapper apiTypeWrapper : apiTypeWrapperList) {
-                            apiConsumer.addSubscription(apiTypeWrapper, username, application);
+                            // todo:apim - apiConsumer.addSubscription(apiTypeWrapper, username, application);
                         }
                     }
                 }
@@ -249,8 +250,8 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             APIAdmin apiAdmin = new APIAdminImpl();
             String keyManagerId = null;
             try {
-                List<KeyManagerConfigurationDTO> keyManagerConfigurations = apiAdmin
-                        .getKeyManagerConfigurationsByTenant(tenantDomain);
+                List<KeyManagerConfigurationDTO> keyManagerConfigurations = null; // todo:apim - apiAdmin
+//                        .getKeyManagerConfigurationsByTenant(tenantDomain);
                 if (keyManagerConfigurations != null) {
                     for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurations) {
                         keyManagerId = keyManagerConfigurationDTO.getUuid();
@@ -269,10 +270,10 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         "\\\"id_token_expiry_time\\\":\\\"N\\/A\\\"}\"," +
                         "\"username\":\"" + username + "\"}";
 
-                Map<String, Object> keyDetails = apiConsumer
-                        .requestApprovalForApplicationRegistration(username, applicationName, keyType, "",
-                                allowedDomains.toArray(new String[allowedDomains.size()]), validityTime, "default", "",
-                                jsonString, keyManagerId, tenantDomain);
+                Map<String, Object> keyDetails = null; // todo:apim - apiConsumer
+//                        .requestApprovalForApplicationRegistration(username, applicationName, keyType, "",
+//                                allowedDomains.toArray(new String[allowedDomains.size()]), validityTime, "default", "",
+//                                jsonString, keyManagerId, tenantDomain);
 
                 if (keyDetails != null) {
                     ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
@@ -281,7 +282,9 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     return apiApplicationKey;
                 }
                 throw new APIManagerException("Failed to generate keys for tenant: " + tenantDomain);
-            } catch (APIManagementException e) {
+//            todo:apim - commected as it says never throw since we commented apim calls above
+//             } catch (APIManagementException e) {
+            } catch (Exception e) {
                 throw new APIManagerException("Failed to create api application for tenant: " + tenantDomain, e);
             }
         } catch (APIManagementException e) {

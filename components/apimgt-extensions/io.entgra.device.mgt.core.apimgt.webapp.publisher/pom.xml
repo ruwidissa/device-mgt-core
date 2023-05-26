@@ -64,8 +64,10 @@
             <artifactId>org.wso2.carbon.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+            <scope>provided</scope>
+            <!--            <version>${pax.logging.api.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -118,8 +120,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -143,7 +145,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>

@@ -22,7 +22,7 @@ import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 

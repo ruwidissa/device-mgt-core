@@ -43,23 +43,23 @@
         <module>io.entgra.device.mgt.core.apimgt.extension.rest.api</module>
     </modules>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.7.2</version>
-                    <executions>
-                        <execution>
-                            <id>generate-scr-scrdescriptor</id>
-                            <goals>
-                                <goal>scr</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
+<!--    <build>-->
+<!--        <pluginManagement>-->
+<!--            <plugins>-->
+<!--                <plugin>-->
+<!--                    <groupId>org.apache.felix</groupId>-->
+<!--                    <artifactId>maven-scr-plugin</artifactId>-->
+<!--&lt;!&ndash;                    <version>1.7.2</version>&ndash;&gt;-->
+<!--                    <executions>-->
+<!--                        <execution>-->
+<!--                            <id>generate-scr-scrdescriptor</id>-->
+<!--                            <goals>-->
+<!--                                <goal>scr</goal>-->
+<!--                            </goals>-->
+<!--                        </execution>-->
+<!--                    </executions>-->
+<!--                </plugin>-->
+<!--            </plugins>-->
+<!--        </pluginManagement>-->
+<!--    </build>-->
 </project>
