@@ -53,7 +53,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
@@ -416,6 +415,29 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             DeviceManagementDAOFactory.closeConnection();
         }
     }
+
+    @Override
+    public void deleteDeviceLocation(Device device) throws DeviceDetailsMgtException {
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            DeviceLocation deviceLocation = deviceDetailsDAO.getDeviceLocation(device.getId(),
+                    device.getEnrolmentInfo().getId());
+            if (deviceLocation != null) {
+                deviceDetailsDAO.deleteDeviceLocation(device.getId(), device.getEnrolmentInfo().getId());
+            } else {
+                throw new DeviceDetailsMgtException("Device location not found.");
+            }
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            throw new DeviceDetailsMgtException("Transactional error occurred while deleting the device location " + "information.", e);
+        } catch (DeviceDetailsMgtDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            throw new DeviceDetailsMgtException("Error occurred while deleting the device location information.", e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
 
     @Override
     public void addDeviceLocations(Device device, List<DeviceLocation> deviceLocations) throws DeviceDetailsMgtException {
