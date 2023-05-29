@@ -843,10 +843,6 @@ public class CertificateGenerator {
             issuedCert = (X509Certificate) certificateFactory
                     .generateCertificate(new ByteArrayInputStream(encodedCertificate));
 
-            io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate certificate =
-                    new io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate();
-            List<io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate> certificates = new ArrayList<>();
-            certificate.setTenantId(tenantId);
             org.wso2.carbon.certificate.mgt.core.bean.Certificate certificate =
                     new org.wso2.carbon.certificate.mgt.core.bean.Certificate();
             List<org.wso2.carbon.certificate.mgt.core.bean.Certificate> certificates = new ArrayList<>();
