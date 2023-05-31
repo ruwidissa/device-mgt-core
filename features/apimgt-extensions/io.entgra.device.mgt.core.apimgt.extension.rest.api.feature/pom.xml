@@ -17,7 +17,10 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>apimgt-extensions-feature</artifactId>
@@ -26,31 +29,18 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>io.entgra.device.mgt.core.apimgt.webapp.publisher.feature</artifactId>
+    <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - API Management Webapp Publisher Feature</name>
-    <url>http://wso2.org</url>
-    <description>This feature contains an implementation of a Tomcat lifecycle listener, which takes care of publishing
-        JAX-RS web applications as 'Managed APIs'
-    </description>
+    <name>Entgra - API management REST API feature</name>
+    <description>This feature contains an implementation of API manager REST API extension</description>
+    <url>http://entgra.io</url>
 
     <dependencies>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.core.apimgt.webapp.publisher</artifactId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
+            <version>${io.entgra.device.mgt.core.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.core.apimgt.annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.org.scannotation</groupId>
-            <artifactId>scannotation</artifactId>
-        </dependency>
-		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-annotations</artifactId>
-		</dependency>
     </dependencies>
 
     <build>
@@ -81,33 +71,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-jaxrs-war</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>io.entgra.device.mgt.core</groupId>
-                                    <artifactId>io.entgra.device.mgt.core.apimgt.application.extension.api</artifactId>
-                                    <type>war</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>
-                                        ${project.build.directory}/maven-shared-archive-resources/webapps/
-                                    </outputDirectory>
-                                    <destFileName>ApiApplicationRegistration.war</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
                 <version>${carbon.p2.plugin.version}</version>
@@ -119,7 +82,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>io.entgra.device.mgt.core.apimgt.webapp.publisher</id>
+                            <id>io.entgra.device.mgt.core.apimgt.extension.rest.api</id>
                             <propertiesFile>../../../features/etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
@@ -129,20 +92,8 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.webapp.publisher:${io.entgra.device.mgt.core.version}
+                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.extension.rest.api:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
-                                <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.application.extension:${io.entgra.device.mgt.core.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.annotations:${io.entgra.device.mgt.core.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.orbit.org.scannotation:scannotation:${scannotation.version}
-                                </bundleDef>
-								<bundleDef>
-									io.swagger:swagger-annotations:${swagger.version}
-								</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
@@ -153,5 +104,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>
