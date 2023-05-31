@@ -22,17 +22,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfig;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeofenceData;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.EventManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.dao.GeofenceDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.AbstractGeofenceDAOImpl;
-import io.entgra.device.mgt.core.device.mgt.core.dto.event.config.GeoFenceGroupMap;
 
-import java.sql.*;
-import java.util.Date;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SQLServerGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
     private static final Log log = LogFactory.getLog(SQLServerGeofenceDAOImpl.class);
@@ -105,5 +107,60 @@ public class SQLServerGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
             geofenceDataList.add(geofenceData);
         }
         return geofenceDataList;
+    }
+
+    @Override
+    public GeofenceData getGeofence(int fenceId, boolean requireGroupData) throws DeviceManagementDAOException {
+        if (!requireGroupData) {
+            return getGeofence(fenceId);
+        }
+
+        try {
+            Connection con = this.getConnection();
+            String sql = "SELECT " +
+                    "G.ID AS FENCE_ID, " +
+                    "FENCE_NAME, " +
+                    "G.DESCRIPTION, " +
+                    "LATITUDE, " +
+                    "LONGITUDE, " +
+                    "RADIUS, " +
+                    "GEO_JSON, " +
+                    "FENCE_SHAPE, " +
+                    "M.GROUP_ID AS GROUP_ID, " +
+                    "GR.GROUP_NAME " +
+                    "FROM DM_GEOFENCE G, DM_GEOFENCE_GROUP_MAPPING M, DM_GROUP GR " +
+                    "WHERE G.ID = M.FENCE_ID " +
+                    "AND M.GROUP_ID = GR.ID " +
+                    "AND G.ID = ?";
+            try (PreparedStatement stmt = con.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+                stmt.setInt(1, fenceId);
+                try (ResultSet rst = stmt.executeQuery()) {
+                    Map<Integer, String> groupMap = new HashMap<>();
+                    GeofenceData geofenceData = null;
+                    while (rst.next()) {
+                        groupMap.put(rst.getInt("GROUP_ID"), rst.getString("GROUP_NAME"));
+                    }
+                    if (!groupMap.isEmpty()) {
+                        rst.beforeFirst();
+                        rst.next();
+                        geofenceData = new GeofenceData();
+                        geofenceData.setId(rst.getInt("FENCE_ID"));
+                        geofenceData.setFenceName(rst.getString("FENCE_NAME"));
+                        geofenceData.setDescription(rst.getString("DESCRIPTION"));
+                        geofenceData.setLatitude(rst.getDouble("LATITUDE"));
+                        geofenceData.setLongitude(rst.getDouble("LONGITUDE"));
+                        geofenceData.setRadius(rst.getFloat("RADIUS"));
+                        geofenceData.setGeoJson(rst.getString("GEO_JSON"));
+                        geofenceData.setFenceShape(rst.getString("FENCE_SHAPE"));
+                        geofenceData.setGroupData(groupMap);
+                    }
+                    return geofenceData;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving Geo fence data " + fenceId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
     }
 }
