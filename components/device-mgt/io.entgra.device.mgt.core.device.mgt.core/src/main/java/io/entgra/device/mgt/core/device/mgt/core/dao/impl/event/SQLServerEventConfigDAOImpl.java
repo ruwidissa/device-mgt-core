@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ * Copyright (c) 2018-2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -51,8 +51,8 @@ public class SQLServerEventConfigDAOImpl extends AbstractEventConfigDAO {
                     "CREATED_TIMESTAMP, " +
                     "TENANT_ID) " +
                     "VALUES (?, ?, ?, ?, ?)";
+            List<Integer> generatedIds = new ArrayList<>();
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                List<Integer> generatedIds = new ArrayList<>();
                 for (EventConfig eventConfig : eventConfigList) {
                     stmt.setString(1, eventConfig.getEventSource());
                     stmt.setString(2, eventConfig.getEventLogic());
@@ -60,13 +60,15 @@ public class SQLServerEventConfigDAOImpl extends AbstractEventConfigDAO {
                     stmt.setTimestamp(4, timestamp);
                     stmt.setInt(5, tenantId);
                     stmt.executeUpdate();
-                    ResultSet generatedKeys = stmt.getGeneratedKeys();
-                    if (generatedKeys.next()) {
-                        generatedIds.add(generatedKeys.getInt(1));
+
+                    try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            generatedIds.add(generatedKeys.getInt(1));
+                        }
                     }
                 }
-                return generatedIds;
             }
+            return generatedIds;
         } catch (SQLException e) {
             String msg = "Error occurred while creating event configurations for the tenant id " + tenantId;
             log.error(msg, e);
