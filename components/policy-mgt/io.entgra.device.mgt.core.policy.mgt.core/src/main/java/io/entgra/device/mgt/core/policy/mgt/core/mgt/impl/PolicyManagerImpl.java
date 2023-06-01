@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.mgt.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1488,7 +1489,7 @@ public class PolicyManagerImpl implements PolicyManager {
     }
 
     @Override
-    public List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException {
+    public List<Policy> getPolicyList(PolicyPaginationRequest request) throws PolicyManagementException {
         List<Policy> policyList;
         try {
             PolicyManagementDAOFactory.openConnection();

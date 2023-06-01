@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.dao.impl.policy;
 
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -40,21 +41,57 @@ public class PostgreSQLPolicyDAOImpl extends AbstractPolicyDAOImpl {
     }
 
     @Override
-    public List<Policy> getAllPolicies(PaginationRequest request) throws PolicyManagerDAOException {
+    public List<Policy> getAllPolicies(PolicyPaginationRequest request) throws PolicyManagerDAOException {
         Connection conn;
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String name = request.getName();
+        String type = request.getType();
+        String status = request.getStatus();
+        int statusValue = 0;
+        boolean isPolicyNameProvided = false;
+        boolean isPolicyTypeProvided = false;
+        boolean isPolicyStatusProvided = false;
 
         try {
             conn = this.getConnection();
             String query = "SELECT * " +
                     "FROM DM_POLICY " +
-                    "WHERE TENANT_ID = ? " +
-                    "ORDER BY ID LIMIT ? OFFSET ?";
+                    "WHERE TENANT_ID = ? ";
+
+            if (name != null && !name.isEmpty()) {
+                query += "AND NAME LIKE ? " ;
+                isPolicyNameProvided = true;
+            }
+
+            if (type != null && !type.isEmpty()) {
+                query += "AND POLICY_TYPE = ? " ;
+                isPolicyTypeProvided = true;
+            }
+
+            if (status != null && !status.isEmpty()) {
+                if (status.equals("ACTIVE")) {
+                    statusValue = 1;
+                }
+                query += "AND ACTIVE = ? " ;
+                isPolicyStatusProvided = true;
+            }
+
+            query += "ORDER BY ID LIMIT ? OFFSET ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, tenantId);
-                stmt.setInt(2, request.getRowCount());
-                stmt.setInt(3, request.getStartIndex());
+                int paramIdx = 1;
+                stmt.setInt(paramIdx++, tenantId);
+                if (isPolicyNameProvided) {
+                    stmt.setString(paramIdx++, "%" + name + "%");
+                }
+                if (isPolicyTypeProvided) {
+                    stmt.setString(paramIdx++, type);
+                }
+                if (isPolicyStatusProvided) {
+                    stmt.setInt(paramIdx++, statusValue);
+                }
+                stmt.setInt(paramIdx++, request.getStartIndex());
+                stmt.setInt(paramIdx++, request.getRowCount());
                 try (ResultSet resultSet = stmt.executeQuery()) {
                     return this.extractPolicyListFromDbResult(resultSet, tenantId);
                 }

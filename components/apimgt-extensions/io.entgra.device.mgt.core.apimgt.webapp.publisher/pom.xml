@@ -127,7 +127,6 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.json.wso2</groupId>
