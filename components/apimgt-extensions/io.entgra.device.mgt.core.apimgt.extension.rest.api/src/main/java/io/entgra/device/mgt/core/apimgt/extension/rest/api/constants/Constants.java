@@ -24,6 +24,9 @@ public final class Constants {
     }
 
     public static final String EMPTY_STRING = "";
+    public static final String AMPERSAND = "&";
+    public static final String SLASH = "/";
+    public static final String EQUAL = "=";
     public static final String CLIENT_NAME = "rest_api_publisher_code";
     public static final String SERVER_USER = "WorkflowConfigurations.ServerUser";
     public static final String SERVER_PASSWORD = "WorkflowConfigurations.ServerPassword";
@@ -34,7 +37,9 @@ public final class Constants {
     public static final String OAUTH_TOKEN_TYPE = "token_type";
     public static final String REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
     public static final String SCOPE_PARAM_NAME = "scope";
-    public static final String SCOPES = "apim:api_create apim:api_view apim:shared_scope_manage apim:api_import_export apim:api_publish";
+    public static final String SCOPES = "apim:api_create apim:api_view apim:shared_scope_manage apim:api_import_export " +
+            "apim:api_publish apim:admin apim:api_key apim:app_import_export apim:app_manage apim:store_settings " +
+            "apim:sub_alert_manage apim:sub_manage apim:subscribe openid";
     public static final String DCR_END_POINT = "WorkflowConfigurations.DCREndPoint";
     public static final String TOKE_END_POINT = "WorkflowConfigurations.TokenEndPoint";
     public static final String ADAPTER_CONF_KEEP_ALIVE = "keepAlive";
@@ -65,6 +70,10 @@ public final class Constants {
     public static final String SCOPE_API_ENDPOINT = "/api/am/publisher/v2/scopes/";
     public static final String API_ENDPOINT = "/api/am/publisher/v2/apis/";
     public static final String GET_ALL_APIS = "/api/am/publisher/v2/apis?limit=1000";
+    public static final String APPLICATIONS_API = "/api/am/devportal/v3/applications";
+    public static final String SUBSCRIPTION_API = "/api/am/devportal/v3/subscriptions";
+    public static final String DEV_PORTAL_API = "/api/am/devportal/v3/apis?limit=1000";
+    public static final String KEY_MANAGERS_API = "/api/am/devportal/v2/key-managers";
 }
 
 

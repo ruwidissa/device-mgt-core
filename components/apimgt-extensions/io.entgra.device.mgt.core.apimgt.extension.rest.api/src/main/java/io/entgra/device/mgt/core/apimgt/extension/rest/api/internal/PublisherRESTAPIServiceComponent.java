@@ -20,6 +20,8 @@ package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServicesImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -50,6 +52,9 @@ public class PublisherRESTAPIServiceComponent {
             APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
             bundleContext.registerService(APIApplicationServices.class.getName(), apiApplicationServices, null);
             PublisherRESTAPIDataHolder.getInstance().setApiApplicationServices(apiApplicationServices);
+
+            ConsumerRESTAPIServices consumerRESTAPIServices = new ConsumerRESTAPIServicesImpl();
+            bundleContext.registerService(ConsumerRESTAPIServices.class.getName(), consumerRESTAPIServices, null);
 
             if (log.isDebugEnabled()) {
                 log.debug("API Application bundle has been successfully initialized");
