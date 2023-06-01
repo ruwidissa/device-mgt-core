@@ -4899,4 +4899,130 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throw new DeviceManagementException(msg, e);
         }
     }
+
+    @Override
+    public void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId) throws DeviceManagementException{
+        try{
+            DeviceManagementDAOFactory.beginTransaction();
+            if(applicationDAO.getApplicationPackageCount(packageName) == 0){
+                applicationDAO.saveApplicationIcon(iconPath, packageName, version, tenantId);
+            }
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while saving app icon. Icon Path: " + iconPath +
+                    " Package Name: " + packageName +
+                    " Version: " + version +
+                    " Tenant Id: " + tenantId;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public void updateApplicationIcon(String iconPath, String oldPackageName, String newPackageName, String version)
+            throws DeviceManagementException{
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            applicationDAO.updateApplicationIcon(iconPath, oldPackageName, newPackageName, version);
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while updating app icon info." +
+                    " Package Name: " + oldPackageName;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public void deleteApplicationIcon(String packageName)
+            throws DeviceManagementException {
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            applicationDAO.deleteApplicationIcon(packageName);
+            DeviceManagementDAOFactory.commitTransaction();
+        }  catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while deleting app icon info." +
+                    " Package Name: " + packageName ;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    private List<Application> getInstalledAppIconInfo(List<Application> applications) throws DeviceManagementException {
+        String iconPath;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            for (Application app : applications) {
+                iconPath = applicationDAO.getIconPath(app.getApplicationIdentifier());
+                app.setImageUrl(iconPath);
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving installed app icon info";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return applications;
+    }
+
+    @Override
+    public List<Application> getInstalledApplicationsOnDevice(Device device, int offset, int limit) throws DeviceManagementException {
+        List<Application> applications;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            applications = applicationDAO.getInstalledApplicationListOnDevice(device.getId(),
+                    device.getEnrolmentInfo().getId(), offset, limit, tenantId);
+            if (applications == null) {
+                String msg = "Couldn't found applications for device identifier '" + device.getId() + "'";
+                log.error(msg);
+                throw new DeviceManagementException(msg);
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving the application list of android device, " +
+                    "which carries the id '" + device.getId() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        List<Application> newApplicationList;
+        newApplicationList = this.getInstalledAppIconInfo(applications);
+        if (newApplicationList == null) {
+            String msg = "Error occurred while getting app icon info for device identifier '" + device.getId() + "'";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        return newApplicationList;
+    }
 }

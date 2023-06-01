@@ -510,4 +510,18 @@ public class APIUtil {
         return mdmConfig.getArtifactDownloadProtocol() + "://" + host + ":" + port
                 + artifactDownloadEndpoint + Constants.FORWARD_SLASH;
     }
+
+    /**
+     * To create the application icon path.
+     *
+     * @param applicationReleaseDTO {@link ApplicationReleaseDTO}
+     * @param tenantId tenant ID
+     * @return iconPath constructed icon path.
+     */
+    public static String createAppIconPath(ApplicationReleaseDTO applicationReleaseDTO, int tenantId) throws ApplicationManagementException {
+        String basePath = getArtifactDownloadBaseURL() + tenantId + Constants.FORWARD_SLASH + applicationReleaseDTO
+                .getAppHashValue() + Constants.FORWARD_SLASH;
+        String iconPath = basePath + Constants.ICON_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName();
+        return iconPath;
+    }
 }
