@@ -44,12 +44,17 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.util.Store;
-import org.jscep.message.*;
+import org.jscep.message.CertRep;
+import org.jscep.message.MessageDecodingException;
+import org.jscep.message.MessageEncodingException;
+import org.jscep.message.PkcsPkiEnvelopeDecoder;
+import org.jscep.message.PkcsPkiEnvelopeEncoder;
+import org.jscep.message.PkiMessage;
+import org.jscep.message.PkiMessageDecoder;
+import org.jscep.message.PkiMessageEncoder;
 import org.jscep.transaction.FailInfo;
 import org.jscep.transaction.Nonce;
 import org.jscep.transaction.TransactionId;
-import org.wso2.carbon.certificate.mgt.core.cache.CertificateCacheManager;
-import org.wso2.carbon.certificate.mgt.core.cache.impl.CertificateCacheManagerImpl;
 import org.wso2.carbon.certificate.mgt.core.dao.CertificateDAO;
 import org.wso2.carbon.certificate.mgt.core.dao.CertificateManagementDAOException;
 import org.wso2.carbon.certificate.mgt.core.dao.CertificateManagementDAOFactory;
@@ -72,13 +77,28 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
-import java.security.cert.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class CertificateGenerator {
 
@@ -338,15 +358,31 @@ public class CertificateGenerator {
         CertificateResponse lookUpCertificate = null;
         KeyStoreReader keyStoreReader = new KeyStoreReader();
         if (distinguishedName != null && !distinguishedName.isEmpty()) {
-            if (distinguishedName.contains("/CN=")) {
-                String[] dnSplits = distinguishedName.split("/");
-                for (String dnPart : dnSplits) {
-                    if (dnPart.contains("CN=")) {
-                        String commonNameExtracted = dnPart.replace("CN=", "");
-                        lookUpCertificate = keyStoreReader.getCertificateBySerial(commonNameExtracted);
-                        break;
+            if (distinguishedName.contains("CN=")) {
+                String[] dnSplits = null;
+                if (distinguishedName.contains("/")) {
+                    dnSplits = distinguishedName.split("/");
+                } else if (distinguishedName.contains(",")) {
+                    //some older versions of nginx will forward the client certificate subject dn separated with commas
+                    dnSplits = distinguishedName.split(",");
+                }
+                String commonNameExtracted = null;
+                int tenantId = 0;
+                if (dnSplits != null && dnSplits.length >= 1) {
+                    for (String dnPart : dnSplits) {
+                        if (dnPart.contains("CN=")) {
+                            commonNameExtracted = dnPart.replace("CN=", "");
+                        } else if (dnPart.contains("OU=")) {
+                            //the OU of the certificate will be like OU=tenant_<TENANT_ID> ex: OU=tenant_-1234
+                            //splitting by underscore to extract the tenant domain
+                            String[] orgUnitSplits = dnPart.split("_");
+                            tenantId = Integer.parseInt(orgUnitSplits[1]);
+                        }
                     }
                 }
+
+                lookUpCertificate = keyStoreReader.getCertificateBySerial(commonNameExtracted, tenantId);
+
             } else {
                 LdapName ldapName;
                 try {
@@ -757,4 +793,95 @@ public class CertificateGenerator {
         return generateCertificateFromCSR(privateKeyCA, certificationRequest,
                 certCA.getIssuerX500Principal().getName());
     }
+
+    public X509Certificate generateAlteredCertificateFromCSR(String csr)
+            throws KeystoreException {
+        byte[] byteArrayBst = DatatypeConverter.parseBase64Binary(csr);
+        PKCS10CertificationRequest certificationRequest;
+        KeyStoreReader keyStoreReader = new KeyStoreReader();
+        PrivateKey privateKeyCA = keyStoreReader.getCAPrivateKey();
+        X509Certificate certCA = (X509Certificate) keyStoreReader.getCACertificate();
+
+        X509Certificate issuedCert;
+        try {
+            certificationRequest = new PKCS10CertificationRequest(byteArrayBst);
+            JcaContentSignerBuilder csBuilder =
+                    new JcaContentSignerBuilder(CertificateManagementConstants.SIGNING_ALGORITHM);
+            ContentSigner signer = csBuilder.build(privateKeyCA);
+
+            BigInteger serialNumber = BigInteger.valueOf(System.currentTimeMillis());
+
+            //Reversing the order of components of the subject DN due to Nginx not verifying the client certificate
+            //generated by Java using this subject DN.
+            //Ref: https://stackoverflow.com/questions/33769978 & engineering mail SCEP implementation for Android
+            String[] dnParts = certCA.getSubjectDN().getName().split(",");
+            StringJoiner joiner = new StringJoiner(",");
+            for (int i = (dnParts.length - 1); i >= 0; i--) {
+                joiner.add(dnParts[i]);
+            }
+            String subjectDn = joiner.toString();
+            X500Name issuerName = new X500Name(subjectDn);
+            String commonName = certificationRequest.getSubject().getRDNs(BCStyle.CN)[0].getFirst()
+                    .getValue().toString();
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            X500Name subjectName = new X500Name("O=" + commonName + ",CN=" +
+                    serialNumber + ", OU=tenant_"+tenantId);
+            Date startDate = new Date(System.currentTimeMillis());
+            Date endDate = new Date(System.currentTimeMillis()
+                    + TimeUnit.DAYS.toMillis(365 * 100));
+            PublicKey publicKey = getPublicKeyFromRequest(certificationRequest);
+
+            X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
+                    issuerName, serialNumber, startDate, endDate,
+                    subjectName, publicKey);
+
+            X509CertificateHolder certHolder = certBuilder.build(signer);
+
+            CertificateFactory certificateFactory = CertificateFactory.getInstance
+                    (CertificateManagementConstants.X_509);
+            byte[] encodedCertificate = certHolder.getEncoded();
+            issuedCert = (X509Certificate) certificateFactory
+                    .generateCertificate(new ByteArrayInputStream(encodedCertificate));
+
+            org.wso2.carbon.certificate.mgt.core.bean.Certificate certificate =
+                    new org.wso2.carbon.certificate.mgt.core.bean.Certificate();
+            List<org.wso2.carbon.certificate.mgt.core.bean.Certificate> certificates = new ArrayList<>();
+            certificate.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+            certificate.setCertificate(issuedCert);
+            certificates.add(certificate);
+            saveCertInKeyStore(certificates);
+
+        } catch (OperatorCreationException e) {
+            String errorMsg = "Error creating the content signer";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        } catch (CertificateException e) {
+            String errorMsg = "Error when opening the newly created certificate";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        } catch (InvalidKeySpecException e) {
+            String errorMsg = "Public key is having invalid specification";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        } catch (NoSuchAlgorithmException e) {
+            String errorMsg = "Could not find RSA algorithm";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        } catch (IOException e) {
+            String errorMsg = "Error while reading the csr";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        }
+        return issuedCert;
+    }
+
+    private static PublicKey getPublicKeyFromRequest(PKCS10CertificationRequest request)
+            throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        byte[] publicKeyBytes = request.getSubjectPublicKeyInfo().getEncoded();
+        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
+        return publicKey;
+    }
+
 }

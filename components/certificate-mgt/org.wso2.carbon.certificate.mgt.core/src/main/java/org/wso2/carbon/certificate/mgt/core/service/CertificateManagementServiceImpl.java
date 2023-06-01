@@ -234,4 +234,9 @@ public class CertificateManagementServiceImpl implements CertificateManagementSe
         }
     }
 
+    @Override
+    public X509Certificate generateAlteredCertificateFromCSR(String csr) throws KeystoreException{
+        return certificateGenerator.generateAlteredCertificateFromCSR(csr);
+    }
+
 }
