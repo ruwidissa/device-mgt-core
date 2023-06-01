@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.apimgt.application.extension.internal;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -48,6 +49,12 @@ import org.wso2.carbon.user.core.service.RealmService;
  * policy="dynamic"
  * bind="setRealmService"
  * unbind="unsetRealmService"
+ * @scr.reference name="io.entgra.device.mgt.core.apimgt.extension.rest.api"
+ * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices"
+ * cardinality="0..1"
+ * policy="dynamic"
+ * bind="setConsumerRESTAPIServices"
+ * unbind="unsetConsumerRESTAPIServices"
  */
 public class APIApplicationManagerExtensionServiceComponent {
 
@@ -113,4 +120,29 @@ public class APIApplicationManagerExtensionServiceComponent {
         }
         APIApplicationManagerExtensionDataHolder.getInstance().setRealmService(null);
     }
+
+    /**
+     * Sets APIM Consumer REST API service.
+     *
+     * @param consumerRESTAPIServices An instance of ConsumerRESTAPIServices
+     */
+    protected void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting Realm Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setConsumerRESTAPIServices(consumerRESTAPIServices);
+    }
+
+    /**
+     * Unset APIM Consumer REST API service
+     *
+     * @param consumerRESTAPIServices An instance of ConsumerRESTAPIServices
+     */
+    protected void unsetConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting Realm Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setConsumerRESTAPIServices(null);
+    }
+
 }

@@ -74,6 +74,11 @@
             <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
+<!--            <scope>provided</scope>-->
+        </dependency>
     </dependencies>
 
     <build>
@@ -121,6 +126,7 @@
                             io.entgra.device.mgt.core.identity.jwt.client.extension.dto,
                             io.entgra.device.mgt.core.identity.jwt.client.extension.exception,
                             io.entgra.device.mgt.core.identity.jwt.client.extension.service,
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api,
                             org.wso2.carbon.registry.core.exceptions;version="[1.0,2)",
                             org.wso2.carbon.registry.core.service;version="[1.0,2)",
                             org.wso2.carbon.registry.indexing.service;version="${carbon.registry.imp.pkg.version.range}",

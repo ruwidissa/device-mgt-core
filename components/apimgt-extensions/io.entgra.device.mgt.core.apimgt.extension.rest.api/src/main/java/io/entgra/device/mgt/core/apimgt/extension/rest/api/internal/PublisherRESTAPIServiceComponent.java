@@ -40,7 +40,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
  */
 public class PublisherRESTAPIServiceComponent {
 
-    private static Log log = LogFactory.getLog(PublisherRESTAPIServiceComponent.class);
+    private static final Log log = LogFactory.getLog(PublisherRESTAPIServiceComponent.class);
 
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
@@ -55,6 +55,7 @@ public class PublisherRESTAPIServiceComponent {
 
             ConsumerRESTAPIServices consumerRESTAPIServices = new ConsumerRESTAPIServicesImpl();
             bundleContext.registerService(ConsumerRESTAPIServices.class.getName(), consumerRESTAPIServices, null);
+            PublisherRESTAPIDataHolder.getInstance().setConsumerRESTAPIServices(consumerRESTAPIServices);
 
             if (log.isDebugEnabled()) {
                 log.debug("API Application bundle has been successfully initialized");
