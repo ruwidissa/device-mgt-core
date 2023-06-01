@@ -84,8 +84,10 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         try {
             APIConsumer apiConsumer = API_MANAGER_FACTORY.getAPIConsumer(username);
             Application application = null; // todo:apim - apiConsumer.getApplicationsByName(username, applicationName, "");
+//            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v3/applications?query=CalculatorApp"
             if (application != null) {
                 // todo:apim - apiConsumer.removeApplication(application, username);
+                //curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -X DELETE "https://localhost:9443/api/am/devportal/v3/applications/896658a0-b4ee-4535-bbfa-806c894a4015"
             }
         } catch (APIManagementException e) {
             throw new APIManagerException("Failed to remove api application : " + applicationName, e);
@@ -102,6 +104,37 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             String keyType, String username, boolean isAllowedAllDomains, String validityTime)
             throws APIManagerException {
 
+
+/*
+
+todo - Modify generateAndRetrieveApplicationKeys
+
+Check the existence of the API application.
+
+if Application is not exists
+    Create the Application
+
+If super tenants
+    Get set of tagged APIs
+If the tenant domain is not super tenant
+    Get set of tagged APIs from super tenant space
+
+If new Application
+    Subscribed to tagged APIs
+Else
+    Get all subscribed APIs of application
+    Filter out APIs and subscribed to APIs which can be subscribed
+        Filter ->   Use set of tagged APis
+                    Remove already subscribed APIs from the set
+                    Subscribed to remaining APIs
+
+Get Application keys from application
+    If API keys are there return API keys
+
+Otherwise, Generate Application Keys and return them
+
+ */
+
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         if (StringUtils.isEmpty(username)) {
             username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername() + "@" + tenantDomain;
@@ -109,15 +142,20 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         try {
             APIConsumer apiConsumer = API_MANAGER_FACTORY.getAPIConsumer(username);
             Application application = null; // todo:apim - apiConsumer.getApplicationsByName(username, applicationName, "");
+//            cnt rm
+//            //            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v3/applications?query=CalculatorApp"
 
             int applicationId = 0;
             Subscriber subscriber = null;
             if (application == null) {
                 subscriber = null; // todo:apim - apiConsumer.getSubscriber(username);
+//                cnt rm
                 if (subscriber == null) {
                     // create subscriber
                     // todo:apim - apiConsumer.addSubscriber(username, "");
+//                    cnt rm
                     subscriber = null; // todo:apim - apiConsumer.getSubscriber(username);
+//                    cnt rm
                 }
                 //create application
                 application = new Application(applicationName, subscriber);
@@ -125,23 +163,30 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 application.setGroupId("");
                 application.setTokenType("OAUTH");
                 // todo:apim - apiConsumer.addApplication(application, username);
+//                cnt rm
                 application = null; // todo:apim - apiConsumer.getApplicationsByName(username, applicationName, "");
+//                cnt rm
             } else {
                 subscriber = null; // todo:apim - apiConsumer.getSubscriber(username);
+//                cnt rm
             }
 
             Set<SubscribedAPI> subscribedAPIs =
                     null; // todo:apim - apiConsumer.getSubscribedAPIs(subscriber, applicationName, "");
 
+            //curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v3/subscriptions?apiId=02e658e7-71c7-4b1d-a623-be145b789340"
+//            cnt rm
+
             log.info("Already subscribed API count: " + subscribedAPIs.size());
 
             // subscribe to apis.
-            Set<String> tempApiIds = new HashSet<>();
             APIConsumer apiConsumerAPIPublishedTenant = apiConsumer;
             if (tags != null && tags.length > 0) {
                 for (String tag : tags) {
                     boolean startedTenantFlow = false;
                     Set<API> apisWithTag = null; // todo:apim - apiConsumer.getAPIsWithTag(tag, tenantDomain);
+//                    curl -k "https://localhost:9443/api/am/devportal/v3/apis"
+//                    cnt rm
 
                     /**
                      * From APIM 4.0.0, APIs published in the super tenant can only be listed by
@@ -165,11 +210,13 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         }
 
                         apisWithTag = null; // todo:apim - apiConsumerAPIPublishedTenant.getAPIsWithTag(tag, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+//                        cnt rm
                         startedTenantFlow = true;
                     }
 
                     Set<ApiTypeWrapper>  apiTypeWrapperList = new HashSet<>();
                     if (apisWithTag != null && apisWithTag.size() > 0) {
+                        Set<String> tempApiIds = new HashSet<>();
                         for (API apiInfo : apisWithTag) {
                             String id = apiInfo.getId().getProviderName().replace("@", "-AT-")
                                     + "-" + apiInfo.getId().getName() + "-" + apiInfo.getId().getVersion();
@@ -177,6 +224,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                             if (subscribedAPIs.size() > 0) {
                                 for (SubscribedAPI subscribedAPI : subscribedAPIs) {
                                     // todo:apim
+//                                    cnt rm
 //                                    if (String.valueOf(subscribedAPI.getApiId().toString()).equals(id)) {
 //                                        subscriptionExist = true;
 //                                        break;
@@ -220,6 +268,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                          */
                         for (ApiTypeWrapper apiTypeWrapper : apiTypeWrapperList) {
                             // todo:apim - apiConsumer.addSubscription(apiTypeWrapper, username, application);
+//                            cnt rm
                         }
                     }
                 }
@@ -250,8 +299,8 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             APIAdmin apiAdmin = new APIAdminImpl();
             String keyManagerId = null;
             try {
-                List<KeyManagerConfigurationDTO> keyManagerConfigurations = null; // todo:apim - apiAdmin
-//                        .getKeyManagerConfigurationsByTenant(tenantDomain);
+                List<KeyManagerConfigurationDTO> keyManagerConfigurations = null; // todo:apim -
+                // apiAdmin.getKeyManagerConfigurationsByTenant(tenantDomain);
                 if (keyManagerConfigurations != null) {
                     for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurations) {
                         keyManagerId = keyManagerConfigurationDTO.getUuid();
@@ -283,6 +332,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 }
                 throw new APIManagerException("Failed to generate keys for tenant: " + tenantDomain);
 //            todo:apim - commected as it says never throw since we commented apim calls above
+//                cnt rm
 //             } catch (APIManagementException e) {
             } catch (Exception e) {
                 throw new APIManagerException("Failed to create api application for tenant: " + tenantDomain, e);

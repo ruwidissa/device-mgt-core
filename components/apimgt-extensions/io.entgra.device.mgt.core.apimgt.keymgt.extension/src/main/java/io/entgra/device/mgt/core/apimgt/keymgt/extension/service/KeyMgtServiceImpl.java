@@ -436,6 +436,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
             APIConsumer apiConsumer = apiManagerFactory.getAPIConsumer(owner);
             return null; // todo:apim - apiConsumer.getApplicationsByName(owner, applicationName, "");
+            //            //            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v3/applications?query=CalculatorApp"
+
         } catch (APIManagementException e) {
             msg = "Error while trying to retrieve the application";
             log.error(msg);
