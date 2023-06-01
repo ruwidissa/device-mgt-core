@@ -419,25 +419,31 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
     @Override
     public void deleteDeviceLocation(Device device) throws DeviceDetailsMgtException {
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting device location for device: " + device.getId());
+            }
             DeviceManagementDAOFactory.beginTransaction();
             DeviceLocation deviceLocation = deviceDetailsDAO.getDeviceLocation(device.getId(),
                     device.getEnrolmentInfo().getId());
             if (deviceLocation != null) {
                 deviceDetailsDAO.deleteDeviceLocation(device.getId(), device.getEnrolmentInfo().getId());
             } else {
-                throw new DeviceDetailsMgtException("Device location not found.");
+                log.error("Device location not found for device: " + device.getId());
+                throw new DeviceDetailsMgtException("Device location not found for device: " + device.getId());
             }
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
-            throw new DeviceDetailsMgtException("Transactional error occurred while deleting the device location " + "information.", e);
+            log.error("Transactional error occurred while deleting the device location information. Device ID: " + device.getId(), e);
+            throw new DeviceDetailsMgtException("Transactional error occurred while deleting the device location " +
+                    "information.", e);
         } catch (DeviceDetailsMgtDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
+            log.error("Error occurred while deleting the device location information. Device ID: " + device.getId(), e);
             throw new DeviceDetailsMgtException("Error occurred while deleting the device location information.", e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
     }
-
 
     @Override
     public void addDeviceLocations(Device device, List<DeviceLocation> deviceLocations) throws DeviceDetailsMgtException {
