@@ -26,6 +26,7 @@ import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeofenceData;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.EventManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.AbstractGeofenceDAOImpl;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -114,7 +115,7 @@ public class SQLServerGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
         if (!requireGroupData) {
             return getGeofence(fenceId);
         }
-
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             Connection con = this.getConnection();
             String sql = "SELECT " +
@@ -131,9 +132,11 @@ public class SQLServerGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
                     "FROM DM_GEOFENCE G, DM_GEOFENCE_GROUP_MAPPING M, DM_GROUP GR " +
                     "WHERE G.ID = M.FENCE_ID " +
                     "AND M.GROUP_ID = GR.ID " +
-                    "AND G.ID = ?";
+                    "AND G.ID = ? " +
+                    "AND G.TENANT_ID = ?";
             try (PreparedStatement stmt = con.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                 stmt.setInt(1, fenceId);
+                stmt.setInt(2, tenantId);
                 try (ResultSet rst = stmt.executeQuery()) {
                     Map<Integer, String> groupMap = new HashMap<>();
                     GeofenceData geofenceData = null;
