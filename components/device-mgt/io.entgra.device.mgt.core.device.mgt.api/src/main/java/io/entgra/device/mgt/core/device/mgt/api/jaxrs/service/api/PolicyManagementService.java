@@ -917,6 +917,24 @@ public interface PolicyManagementService {
             })
     Response getPolicyList(
             @ApiParam(
+                    name = "name",
+                    value = "The name of the policy that needs filtering.",
+                    required = false)
+            @QueryParam("name")
+                    String name,
+            @ApiParam(
+                    name = "type",
+                    value = "The type of the policy that needs filtering.",
+                    required = false)
+            @QueryParam("type")
+                    String type,
+            @ApiParam(
+                    name = "status",
+                    value = "The status of the policy that needs filtering.",
+                    required = false)
+            @QueryParam("status")
+                    String status,
+            @ApiParam(
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time. \n" +
                             "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +

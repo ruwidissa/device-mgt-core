@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.policy.mgt.common;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 
@@ -167,10 +168,10 @@ public interface PolicyAdministratorPoint {
 
     /**
      * Returns a list of policies filtered by offset and limit
-     * @param request {@link PaginationRequest} contains offset and limit
+     * @param request {@link PolicyPaginationRequest} contains offset and limit and filters
      * @return {@link List<Policy>} - list of policies for current tenant
      * @throws PolicyManagementException when there is an error while retrieving the policies from database or
      * while retrieving device groups
      */
-    List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException;
+    List<Policy> getPolicyList(PolicyPaginationRequest request) throws PolicyManagementException;
 }
