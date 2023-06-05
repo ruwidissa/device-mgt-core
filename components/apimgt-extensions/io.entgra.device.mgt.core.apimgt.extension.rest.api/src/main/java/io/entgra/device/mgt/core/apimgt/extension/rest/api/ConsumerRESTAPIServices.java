@@ -18,47 +18,48 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Subscription;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.KeyManager;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
-import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Map;
 
 public interface ConsumerRESTAPIServices {
-    JSONObject getAllApplications(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String appName)
+    Application[] getAllApplications(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String appName)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     Application createApplication(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                   Application application)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject getAllSubscriptions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                   String applicationId)
+    Subscription[] getAllSubscriptions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                       String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject getAllApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                          Map<String, String> queryParam)
+    APIInfo[] getAllApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                         Map<String, String> queryParam)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     Subscription createSubscription(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                  Subscription subscriptions)
+                                    Subscription subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Subscription createSubscriptions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                     List<Subscription> subscriptions)
+    Subscription[] createSubscriptions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                       List<Subscription> subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     APIKey generateApplicationKeys(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                    String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject getAllKeyManagers(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    KeyManager[] getAllKeyManagers(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 }

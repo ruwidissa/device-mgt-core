@@ -18,6 +18,10 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer;
 
+/**
+ * This class represents the Consumer API Key Information.
+ */
+
 public class APIKey {
 
     private String apikey;

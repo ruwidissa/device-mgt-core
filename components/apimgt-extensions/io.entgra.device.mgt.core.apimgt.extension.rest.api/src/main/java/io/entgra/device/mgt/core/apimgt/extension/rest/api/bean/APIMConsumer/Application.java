@@ -22,6 +22,10 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+/**
+ * This class represents the Consumer Application Information.
+ */
+
 public class Application {
     private String applicationId;
     private String name;
