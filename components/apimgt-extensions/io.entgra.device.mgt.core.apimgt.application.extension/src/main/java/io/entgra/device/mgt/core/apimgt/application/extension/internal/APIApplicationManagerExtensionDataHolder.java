@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.apimgt.application.extension.internal;
 
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
@@ -37,6 +38,7 @@ public class APIApplicationManagerExtensionDataHolder {
     private TenantIndexingLoader indexLoader;
     private JWTClientManagerService jwtClientManagerService;
     private ConsumerRESTAPIServices consumerRESTAPIServices;
+    private APIApplicationServices apiApplicationServices;
 
     private APIApplicationManagerExtensionDataHolder() {
     }
@@ -112,5 +114,13 @@ public class APIApplicationManagerExtensionDataHolder {
 
     public void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
         this.consumerRESTAPIServices = consumerRESTAPIServices;
+    }
+
+    public APIApplicationServices getApiApplicationServices() {
+        return apiApplicationServices;
+    }
+
+    public void setApiApplicationServices(APIApplicationServices apiApplicationServices) {
+        this.apiApplicationServices = apiApplicationServices;
     }
 }

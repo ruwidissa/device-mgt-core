@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.apimgt.application.extension.internal;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,12 +50,18 @@ import org.wso2.carbon.user.core.service.RealmService;
  * policy="dynamic"
  * bind="setRealmService"
  * unbind="unsetRealmService"
- * @scr.reference name="io.entgra.device.mgt.core.apimgt.extension.rest.api"
+ * @scr.reference name="apimgt.extension.ConsumerRESTAPIServices"
  * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices"
  * cardinality="0..1"
  * policy="dynamic"
  * bind="setConsumerRESTAPIServices"
  * unbind="unsetConsumerRESTAPIServices"
+ * @scr.reference name="apimgt.extension.APIApplicationService"
+ * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices"
+ * cardinality="0..1"
+ * policy="dynamic"
+ * bind="setAPIApplicationServices"
+ * unbind="unsetAPIApplicationServices"
  */
 public class APIApplicationManagerExtensionServiceComponent {
 
@@ -128,7 +135,7 @@ public class APIApplicationManagerExtensionServiceComponent {
      */
     protected void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
         if (log.isDebugEnabled()) {
-            log.debug("Setting Realm Service");
+            log.debug("Setting APIM Consumer REST API Service");
         }
         APIApplicationManagerExtensionDataHolder.getInstance().setConsumerRESTAPIServices(consumerRESTAPIServices);
     }
@@ -140,9 +147,34 @@ public class APIApplicationManagerExtensionServiceComponent {
      */
     protected void unsetConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
         if (log.isDebugEnabled()) {
-            log.debug("Unsetting Realm Service");
+            log.debug("Unsetting APIM Consumer REST API Service");
         }
         APIApplicationManagerExtensionDataHolder.getInstance().setConsumerRESTAPIServices(null);
+    }
+
+
+    /**
+     * Sets DCR REST API service.
+     *
+     * @param apiApplicationServices An instance of APIApplicationServices
+     */
+    protected void setAPIApplicationServices(APIApplicationServices apiApplicationServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting DCR REST API Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setApiApplicationServices(apiApplicationServices);
+    }
+
+    /**
+     * Unset DCR REST API service
+     *
+     * @param apiApplicationServices An instance of APIApplicationServices
+     */
+    protected void unsetAPIApplicationServices(APIApplicationServices apiApplicationServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting DCR REST API Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setApiApplicationServices(null);
     }
 
 }

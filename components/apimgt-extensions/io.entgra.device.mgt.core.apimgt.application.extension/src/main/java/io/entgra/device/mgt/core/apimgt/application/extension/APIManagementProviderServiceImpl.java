@@ -18,6 +18,11 @@
 
 package io.entgra.device.mgt.core.apimgt.application.extension;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.RegistrationProfile;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,6 +100,37 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
 
     }
+
+    @Override
+    public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
+                                                                             String keyType, String username,
+                                                                             boolean isAllowedAllDomains,
+                                                                             String validityTime, String password) throws APIManagerException {
+
+
+        ConsumerRESTAPIServices consumerRESTAPIServices =
+                APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
+
+
+        /*
+
+         */
+
+        try {
+            consumerRESTAPIServices.getAllApplications(null, null, null);
+        } catch (APIServicesException e) {
+            e.printStackTrace();
+        } catch (BadRequestException e) {
+            e.printStackTrace();
+        } catch (UnexpectedResponseException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+
+    }
+
 
     /**
      * {@inheritDoc}
