@@ -36,6 +36,10 @@ public interface ConsumerRESTAPIServices {
     Application[] getAllApplications(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String appName)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
+    Application getDetailsOfAnApplication(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                          String applicationId)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
     Application createApplication(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                   Application application)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;

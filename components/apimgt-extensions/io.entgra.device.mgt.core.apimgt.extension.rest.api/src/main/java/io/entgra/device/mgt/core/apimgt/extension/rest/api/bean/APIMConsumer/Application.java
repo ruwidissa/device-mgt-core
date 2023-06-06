@@ -37,7 +37,7 @@ public class Application {
     private int subscriptionCount;
     private List<String> keys;
     private JSONObject attributes;
-    private List<String> subscriptionScopes;
+    private List<Scopes> subscriptionScopes;
     private String owner;
     private boolean hashEnabled;
 
@@ -121,11 +121,11 @@ public class Application {
         this.attributes = attributes;
     }
 
-    public List<String> getSubscriptionScopes() {
+    public List<Scopes> getSubscriptionScopes() {
         return subscriptionScopes;
     }
 
-    public void setSubscriptionScopes(List<String> subscriptionScopes) {
+    public void setSubscriptionScopes(List<Scopes> subscriptionScopes) {
         this.subscriptionScopes = subscriptionScopes;
     }
 

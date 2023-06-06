@@ -93,6 +93,45 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
     }
 
     @Override
+    public Application getDetailsOfAnApplication(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                                 String applicationId)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        String getAllApplicationsUrl = endPointPrefix + Constants.APPLICATIONS_API + Constants.SLASH + applicationId;
+        Request request = new Request.Builder()
+                .url(getAllApplicationsUrl)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
+                .get()
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                return gson.fromJson(response.body().string(), Application.class);
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                //TODO: max attempt count
+                return getDetailsOfAnApplication(apiApplicationKey, refreshedAccessToken, applicationId);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid request";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(msg, e);
+        }
+    }
+
+    @Override
     public Application createApplication(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                          Application application)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
