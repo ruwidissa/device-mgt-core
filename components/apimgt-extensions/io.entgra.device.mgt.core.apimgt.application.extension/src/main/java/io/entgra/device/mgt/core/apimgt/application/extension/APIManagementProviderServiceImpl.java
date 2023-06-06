@@ -126,17 +126,36 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                                                                              boolean isAllowedAllDomains,
                                                                              String validityTime, String password) throws APIManagerException {
 
+        APIApplicationServices apiApplicationServices = APIApplicationManagerExtensionDataHolder.getInstance().getApiApplicationServices();
 
         ConsumerRESTAPIServices consumerRESTAPIServices =
                 APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
 
-
-        /*
-
-         */
-
         try {
-            consumerRESTAPIServices.getAllApplications(null, null, null);
+            consumerRESTAPIServices.getAllApplications(null, null, applicationName);
+
+            List<String> uniqueApiList = new ArrayList<String>();
+
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+
+            for (String tag: tags) {
+                Map<String, String> queryParams = new HashMap<>();
+                queryParams.put("tag", tag);
+                if ("carbon.super".equals(tenantDomain)) {
+                    consumerRESTAPIServices.getAllApis(null, null, queryParams);
+                } else {
+                    //call All API getting call with carbon super header param
+                }
+
+                uniqueApiList.add("Test");
+                Set<String> taggedAPISet = new HashSet<>(uniqueApiList);
+                uniqueApiList.clear();
+                uniqueApiList.addAll(taggedAPISet);
+            }
+
+            consumerRESTAPIServices.getAllSubscriptions(null, null, "1");
+
+
         } catch (APIServicesException e) {
             e.printStackTrace();
         } catch (BadRequestException e) {
