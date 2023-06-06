@@ -18,42 +18,27 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.NotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelTheme;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
-import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.MetadataList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.MetadataService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyNotFoundException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * This is the service class for metadata management.

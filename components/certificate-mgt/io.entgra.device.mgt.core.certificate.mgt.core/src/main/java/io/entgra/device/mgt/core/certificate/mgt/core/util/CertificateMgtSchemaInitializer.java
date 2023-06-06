@@ -18,9 +18,9 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.util;
 
+import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.DataSourceConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.DataSourceConfig;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.dbcreator.DatabaseCreator;
 

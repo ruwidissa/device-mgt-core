@@ -18,13 +18,13 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.archival.dao.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.core.archival.dao.ArchivalDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.archival.dao.ArchivalDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.archival.dao.ArchivalDestinationDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.archival.dao.DataDeletionDAO;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

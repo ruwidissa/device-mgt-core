@@ -18,39 +18,23 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.internal.PullNotificationServiceComponent" immediate="true"
- * @scr.reference name="carbon.device.mgt.provider"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementProviderService"
- * unbind="unsetDeviceManagementProviderService"
- * @scr.reference name="io.entgra.device.mgt.core.policy.mgt.core"
- * interface="io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setPolicyManagerService"
- * unbind="unsetPolicyManagerService"
- * @scr.reference name="org.wso2.carbon.application.mgt.service"
- * interface="io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setApplicationManagerService"
- * unbind="unsetApplicationManagerService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.internal.PullNotificationServiceComponent",
+        immediate = true)
 public class PullNotificationServiceComponent {
 
     private static final Log log = LogFactory.getLog(PullNotificationServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             //Do nothing
@@ -63,11 +47,17 @@ public class PullNotificationServiceComponent {
                     "implementation bundle", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //Do nothing
     }
 
+    @Reference(
+            name = "device.mgt.provider.service",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceManagementProviderService")
     protected void setDeviceManagementProviderService(DeviceManagementProviderService deviceManagementProviderService) {
         PullNotificationDataHolder.getInstance().setDeviceManagementProviderService(deviceManagementProviderService);
     }
@@ -76,6 +66,12 @@ public class PullNotificationServiceComponent {
         PullNotificationDataHolder.getInstance().setDeviceManagementProviderService(null);
     }
 
+    @Reference(
+            name = "policy.mgr.service",
+            service = io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPolicyManagerService")
     protected void setPolicyManagerService(PolicyManagerService policyManagerService) {
         PullNotificationDataHolder.getInstance().setPolicyManagerService(policyManagerService);
     }
@@ -84,6 +80,12 @@ public class PullNotificationServiceComponent {
         PullNotificationDataHolder.getInstance().setPolicyManagerService(null);
     }
 
+    @Reference(
+            name = "applcation.mgr",
+            service = io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetApplicationManagerService")
     protected void setApplicationManagerService(ApplicationManager applicationManagerService){
         PullNotificationDataHolder.getInstance().setApplicationManager(applicationManagerService);
     }

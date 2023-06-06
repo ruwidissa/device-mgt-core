@@ -17,13 +17,14 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.common.util;
 
+import io.entgra.device.mgt.core.device.mgt.core.common.Constants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
-import io.entgra.device.mgt.core.device.mgt.core.common.Constants;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;

@@ -18,6 +18,16 @@
 
 package io.entgra.device.mgt.core.apimgt.application.extension;
 
+import io.entgra.device.mgt.core.apimgt.application.extension.bean.APIRegistrationProfile;
+import io.entgra.device.mgt.core.apimgt.application.extension.constants.ApiApplicationConstants;
+import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
+import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
+import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
+import io.entgra.device.mgt.core.apimgt.application.extension.util.APIManagerUtil;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,35 +35,16 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import io.entgra.device.mgt.core.apimgt.application.extension.bean.APIRegistrationProfile;
-import io.entgra.device.mgt.core.apimgt.application.extension.constants.ApiApplicationConstants;
-import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
-import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
-import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
-import io.entgra.device.mgt.core.apimgt.application.extension.util.APIManagerUtil;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class represents an implementation of APIManagementProviderService.

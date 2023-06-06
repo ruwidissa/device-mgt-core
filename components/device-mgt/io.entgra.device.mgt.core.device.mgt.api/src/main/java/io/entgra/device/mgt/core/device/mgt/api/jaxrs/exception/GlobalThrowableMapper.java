@@ -19,9 +19,9 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception;
 
 import com.google.gson.JsonParseException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtUtil;
 
 import javax.naming.AuthenticationException;
 import javax.ws.rs.ClientErrorException;

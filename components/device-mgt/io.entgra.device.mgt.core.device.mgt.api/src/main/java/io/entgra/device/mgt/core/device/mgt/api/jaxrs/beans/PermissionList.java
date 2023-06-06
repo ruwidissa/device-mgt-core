@@ -21,6 +21,7 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.io.Serializable;
 import java.util.List;
 

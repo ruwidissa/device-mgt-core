@@ -90,7 +90,6 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <!--<bundleDef>{groupId}:{artifactId}:{version}</bundleDef>-->
                                 <bundleDef>
                                     io.entgra.device.mgt.core:io.entgra.device.mgt.core.tenant.mgt.core:${io.entgra.device.mgt.core.version}
                                 </bundleDef>

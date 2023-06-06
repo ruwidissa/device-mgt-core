@@ -17,6 +17,8 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.util;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.EventPublishingException;
+import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -27,8 +29,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONObject;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.EventPublishingException;
-import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
+
 import java.io.IOException;
 
 public class HttpReportingUtil {

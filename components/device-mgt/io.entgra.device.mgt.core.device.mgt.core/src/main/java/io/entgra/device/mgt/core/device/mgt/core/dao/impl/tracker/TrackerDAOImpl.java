@@ -18,18 +18,16 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl.tracker;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerDeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerGroupInfo;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerPermissionInfo;
-import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.TrackerManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.TraccarHandlerConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

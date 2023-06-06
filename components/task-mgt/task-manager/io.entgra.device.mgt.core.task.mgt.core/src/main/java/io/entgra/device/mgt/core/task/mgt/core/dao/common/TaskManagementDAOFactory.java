@@ -17,7 +17,6 @@
  */
 package io.entgra.device.mgt.core.task.mgt.core.dao.common;
 
-import io.entgra.device.mgt.core.task.mgt.core.dao.DynamicTaskPropDAO;
 import io.entgra.device.mgt.core.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.device.mgt.core.task.mgt.common.exception.IllegalTransactionStateException;
 import io.entgra.device.mgt.core.task.mgt.common.exception.TransactionManagementException;
@@ -25,6 +24,7 @@ import io.entgra.device.mgt.core.task.mgt.common.exception.UnsupportedDatabaseEn
 import io.entgra.device.mgt.core.task.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.task.mgt.core.config.datasource.JNDILookupDefinition;
 import io.entgra.device.mgt.core.task.mgt.core.dao.DynamicTaskDAO;
+import io.entgra.device.mgt.core.task.mgt.core.dao.DynamicTaskPropDAO;
 import io.entgra.device.mgt.core.task.mgt.core.dao.impl.DynamicTaskDAOImpl;
 import io.entgra.device.mgt.core.task.mgt.core.dao.impl.DynamicTaskPropDAOImpl;
 import io.entgra.device.mgt.core.task.mgt.core.dao.util.TaskManagementDAOUtil;

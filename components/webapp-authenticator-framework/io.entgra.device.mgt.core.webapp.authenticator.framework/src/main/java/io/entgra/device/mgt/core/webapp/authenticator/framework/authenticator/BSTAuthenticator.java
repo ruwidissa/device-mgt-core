@@ -18,6 +18,12 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.Utils;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuth2TokenValidator;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthTokenValidationException;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthValidationResponse;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXBuilder;
 import org.apache.axiom.om.util.StAXUtils;
@@ -30,12 +36,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.coyote.InputBuffer;
 import org.apache.tomcat.util.buf.ByteChunk;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.Utils;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuth2TokenValidator;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthTokenValidationException;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthValidationResponse;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;

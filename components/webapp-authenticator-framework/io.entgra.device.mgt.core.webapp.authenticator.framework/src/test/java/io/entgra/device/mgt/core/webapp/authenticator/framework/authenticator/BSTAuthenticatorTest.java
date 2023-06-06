@@ -19,6 +19,10 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuth2TokenValidator;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestInputBuffer;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.core.StandardContext;
@@ -33,10 +37,6 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuth2TokenValidator;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestInputBuffer;
 
 import java.io.File;
 import java.io.IOException;

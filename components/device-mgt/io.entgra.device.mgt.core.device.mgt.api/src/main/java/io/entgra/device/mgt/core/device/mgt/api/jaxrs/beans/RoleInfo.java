@@ -22,8 +22,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.user.mgt.common.UIPermissionNode;
 
-import java.util.List;
-
 @ApiModel(value = "RoleInfo", description = "Role details including permission and the users in the roles are " +
         "wrapped here.")
 public class RoleInfo {

@@ -19,6 +19,13 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.ConfigurationManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
+import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -29,13 +36,6 @@ import org.testng.IObjectFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.ConfigurationManagementService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
-import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;

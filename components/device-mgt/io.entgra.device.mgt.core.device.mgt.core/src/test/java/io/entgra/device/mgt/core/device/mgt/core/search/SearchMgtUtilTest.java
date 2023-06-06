@@ -17,13 +17,13 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.search;
 
-import org.junit.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.core.common.TestDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.impl.Utils;
+import org.junit.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;

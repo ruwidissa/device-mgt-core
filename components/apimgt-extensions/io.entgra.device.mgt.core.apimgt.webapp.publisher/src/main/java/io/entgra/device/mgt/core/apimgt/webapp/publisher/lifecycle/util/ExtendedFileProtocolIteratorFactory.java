@@ -16,7 +16,6 @@
 package io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.util;
 
 import org.scannotation.archiveiterator.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;

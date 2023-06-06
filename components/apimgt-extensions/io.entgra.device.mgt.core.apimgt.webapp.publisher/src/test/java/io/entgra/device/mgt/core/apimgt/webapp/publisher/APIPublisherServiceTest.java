@@ -17,6 +17,13 @@
 */
 package io.entgra.device.mgt.core.apimgt.webapp.publisher;
 
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.utils.MockAPICollectionApi;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.utils.MockAPIIndividualApi;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.utils.TestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mockito.Mockito;
@@ -32,13 +39,6 @@ import org.wso2.carbon.apimgt.integration.generated.client.publisher.api.APIIndi
 import org.wso2.carbon.apimgt.integration.generated.client.publisher.model.API;
 import org.wso2.carbon.apimgt.integration.generated.client.publisher.model.APIInfo;
 import org.wso2.carbon.apimgt.integration.generated.client.publisher.model.APIList;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.utils.MockAPICollectionApi;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.utils.MockAPIIndividualApi;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.utils.TestUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;

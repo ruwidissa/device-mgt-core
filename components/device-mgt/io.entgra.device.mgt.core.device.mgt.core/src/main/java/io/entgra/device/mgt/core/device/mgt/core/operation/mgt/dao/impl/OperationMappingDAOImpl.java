@@ -18,10 +18,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationEnrolmentMapping;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMapping;
@@ -29,15 +26,14 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationMana
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationMappingDAO;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class OperationMappingDAOImpl implements OperationMappingDAO {
 

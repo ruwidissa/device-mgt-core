@@ -34,12 +34,6 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.RegistryType;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleInfo;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
@@ -49,6 +43,12 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestV
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.SetReferenceTransformer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.resource.services.utils.ChangeRolePermissionsUtil;

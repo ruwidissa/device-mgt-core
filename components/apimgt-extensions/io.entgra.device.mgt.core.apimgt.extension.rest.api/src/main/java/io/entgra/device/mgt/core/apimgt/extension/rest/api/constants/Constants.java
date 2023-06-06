@@ -61,10 +61,10 @@ public final class Constants {
     public static final String SPACE = " ";
     public static final String IOT_CORE_HOST = "iot.core.host";
     public static final String IOT_CORE_HTTPS_PORT = "iot.core.https.port";
-    public static final String GET_ALL_SCOPES = "/api/am/publisher/v2/scopes?limit=1000";
-    public static final String SCOPE_API_ENDPOINT = "/api/am/publisher/v2/scopes/";
-    public static final String API_ENDPOINT = "/api/am/publisher/v2/apis/";
-    public static final String GET_ALL_APIS = "/api/am/publisher/v2/apis?limit=1000";
+    public static final String GET_ALL_SCOPES = "/api/am/publisher/v4/scopes?limit=1000";
+    public static final String SCOPE_API_ENDPOINT = "/api/am/publisher/v4/scopes/";
+    public static final String API_ENDPOINT = "/api/am/publisher/v4/apis/";
+    public static final String GET_ALL_APIS = "/api/am/publisher/v4/apis?limit=1000";
 }
 
 

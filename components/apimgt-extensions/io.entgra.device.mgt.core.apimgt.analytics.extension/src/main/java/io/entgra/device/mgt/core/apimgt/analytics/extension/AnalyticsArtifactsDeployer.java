@@ -27,16 +27,11 @@ import io.entgra.device.mgt.core.apimgt.analytics.extension.exception.EventStrea
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 public class AnalyticsArtifactsDeployer {
 

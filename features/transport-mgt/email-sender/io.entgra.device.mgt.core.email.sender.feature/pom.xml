@@ -30,7 +30,7 @@
     <artifactId>io.entgra.device.mgt.core.email.sender.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Email Sender Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains the core bundles required for email sender related functionality
     </description>
 
@@ -38,10 +38,6 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.transport.mgt.email.sender.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
         </dependency>
     </dependencies>
 
@@ -95,9 +91,6 @@
                             <bundles>
                                 <bundleDef>
                                     io.entgra.device.mgt.core:io.entgra.device.mgt.core.transport.mgt.email.sender.core:${io.entgra.device.mgt.core.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.orbit.org.apache.velocity:velocity:${velocity.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>

@@ -30,8 +30,8 @@ import io.entgra.device.mgt.core.operation.template.exception.DBConnectionExcept
 import io.entgra.device.mgt.core.operation.template.exception.OperationTemplateManagementDAOException;
 import io.entgra.device.mgt.core.operation.template.exception.OperationTemplateMgtPluginException;
 import io.entgra.device.mgt.core.operation.template.spi.OperationTemplateService;
-import io.entgra.device.mgt.core.operation.template.util.ConnectionManagerUtils;
 import io.entgra.device.mgt.core.operation.template.util.AssertUtils;
+import io.entgra.device.mgt.core.operation.template.util.ConnectionManagerUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

@@ -19,8 +19,6 @@
 package io.entgra.device.mgt.core.device.mgt.core.status.task.impl;
 
 import com.google.gson.Gson;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceStatusTaskPluginConfig;
 import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
@@ -33,6 +31,8 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOExceptio
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.status.task.DeviceStatusTaskException;
 import io.entgra.device.mgt.core.device.mgt.core.task.impl.DynamicPartitionedScheduleTask;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

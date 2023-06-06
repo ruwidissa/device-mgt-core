@@ -18,15 +18,15 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.JNDILookupDefinition;
-import io.entgra.device.mgt.core.device.mgt.core.dao.impl.*;
+import io.entgra.device.mgt.core.device.mgt.core.dao.impl.ApplicationDAOImpl;
+import io.entgra.device.mgt.core.device.mgt.core.dao.impl.DeviceStatusDAOImpl;
+import io.entgra.device.mgt.core.device.mgt.core.dao.impl.DeviceTypeDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.device.GenericDeviceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.device.OracleDeviceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.device.PostgreSQLDeviceDAOImpl;
@@ -39,6 +39,8 @@ import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.dao.DeviceDe
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.dao.impl.DeviceDetailsDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.privacy.dao.PrivacyComplianceDAO;
 import io.entgra.device.mgt.core.device.mgt.core.privacy.dao.impl.PrivacyComplianceDAOImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

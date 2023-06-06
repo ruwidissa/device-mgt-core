@@ -18,9 +18,9 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 
 import java.util.List;
 

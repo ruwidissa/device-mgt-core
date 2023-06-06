@@ -18,27 +18,14 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.traccar.api.service;
 
-import okhttp3.ConnectionPool;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerDeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerGroupInfo;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerPermissionInfo;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TrackerAlreadyExistException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.TraccarClient;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.beans.TraccarDevice;
@@ -49,6 +36,13 @@ import io.entgra.device.mgt.core.device.mgt.core.traccar.common.config.TraccarGa
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.util.TraccarUtil;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.core.config.TraccarConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.util.HttpReportingUtil;
+import okhttp3.*;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -58,12 +52,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 

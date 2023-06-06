@@ -16,12 +16,12 @@
  */
 package io.entgra.device.mgt.core.application.mgt.common.services;
 
-import io.entgra.device.mgt.core.application.mgt.common.Rating;
-import io.entgra.device.mgt.core.application.mgt.common.response.Review;
 import io.entgra.device.mgt.core.application.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.application.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.application.mgt.common.Rating;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ReviewManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.response.Review;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.ReviewWrapper;
 
 /**

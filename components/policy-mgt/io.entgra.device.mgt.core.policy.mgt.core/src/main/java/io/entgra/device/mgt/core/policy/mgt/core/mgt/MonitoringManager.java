@@ -22,8 +22,8 @@ import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 
 import java.util.List;

@@ -19,8 +19,18 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import io.entgra.device.mgt.core.device.mgt.extensions.common.DataSourceConfig;
+import io.entgra.device.mgt.core.device.mgt.extensions.internal.DeviceTypeExtensionDataHolder;
+import io.entgra.device.mgt.core.device.mgt.extensions.mock.TypeXDeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.extensions.utils.Utils;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.mockito.Mockito;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
@@ -30,20 +40,6 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.context.internal.OSGiDataHolder;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
-import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
-import io.entgra.device.mgt.core.device.mgt.extensions.common.DataSourceConfig;
-import io.entgra.device.mgt.core.device.mgt.extensions.internal.DeviceTypeExtensionDataHolder;
-import io.entgra.device.mgt.core.device.mgt.extensions.license.mgt.meta.data.MetaRepositoryBasedLicenseManager;
-import io.entgra.device.mgt.core.device.mgt.extensions.mock.TypeXDeviceManagementService;
-import io.entgra.device.mgt.core.device.mgt.extensions.utils.Utils;
 import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
@@ -62,7 +58,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Matchers.anyString;
 import static org.wso2.carbon.governance.api.util.GovernanceUtils.getGovernanceArtifactConfiguration;
 
 /**

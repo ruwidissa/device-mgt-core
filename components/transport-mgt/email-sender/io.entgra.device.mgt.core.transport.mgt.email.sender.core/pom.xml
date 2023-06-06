@@ -31,13 +31,17 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Email Sender Core</name>
     <description>WSO2 Carbon - Email Sender Core</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -51,27 +55,33 @@
                         <Bundle-Description>Email Management Core Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.transport.mgt.email.sender.core.internal</Private-Package>
                         <Import-Package>
-                            org.apache.axis2.*;version="${axis2.osgi.version.range}",
-                            org.apache.axiom.*; version="${axiom.osgi.version.range}",
+                            io.entgra.device.mgt.core.transport.mgt.email.sender.core,
+                            javax.xml.bind;version="[0.0,1)",
+                            javax.xml.bind.annotation;version="[0.0,1)",
+                            javax.xml.parsers,
+                            javax.xml.stream;version="[1.0,2)",
+                            org.apache.axiom.om;version="[1.2,2)",
+                            org.apache.axiom.om.impl.llom.util;version="[1.2,2)",
+                            org.apache.axis2;version="[1.6,2)",
+                            org.apache.axis2.addressing;version="[1.6,2)",
+                            org.apache.axis2.client;version="[1.6,2)",
+                            org.apache.axis2.context;version="[1.6,2)",
+                            org.apache.axis2.description;version="[1.6,2)",
+                            org.apache.axis2.engine;version="[1.6,2)",
+                            org.apache.commons.io;version="[2.4,3)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.apache.velocity;version="[2.3,3)",
+                            org.apache.velocity.app;version="[2.3,3)",
+                            org.apache.velocity.context;version="[2.3,3)",
+                            org.apache.velocity.exception;version="[2.3,3)",
+                            org.apache.velocity.runtime.resource;version="[2.3,3)",
+                            org.apache.velocity.runtime.resource.loader;version="[2.3,3)",
+                            org.apache.velocity.util;version="[2.3,3)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.logging,
-			                javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.utils.*,
-                            org.wso2.carbon.registry.api,
                             org.w3c.dom,
-                            org.apache.velocity;version="${velocity.version}",
-                            org.apache.velocity.app;version="${velocity.version}",
-                            org.apache.velocity.context;version="${velocity.version}",
-                            org.apache.velocity.exception;version="${velocity.version}",
-                            org.apache.velocity.runtime.resource;version="${velocity.version}",
-                            org.apache.velocity.runtime.resource.loader;version="${velocity.version}",
-                            org.apache.commons.io,
-                            org.apache.axis2.transport.mail,
-                            org.wso2.carbon.registry.core.service,
-                            org.wso2.carbon.registry.core.session,
-                            org.apache.commons.collections
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.utils;version="[4.8,5)"
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.transport.mgt.email.sender.core.internal,
@@ -80,61 +90,19 @@
                     </instructions>
                 </configuration>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-surefire-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <systemPropertyVariables>-->
-<!--                        <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>-->
-<!--                    </systemPropertyVariables>-->
-<!--                    <suiteXmlFiles>-->
-<!--                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>-->
-<!--                    </suiteXmlFiles>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-<!--            <plugin>-->
-<!--                <groupId>org.jacoco</groupId>-->
-<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>-->
-<!--                </configuration>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>jacoco-initialize</id>-->
-<!--                        <goals>-->
-<!--                            <goal>prepare-agent</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>jacoco-site</id>-->
-<!--                        <phase>test</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>report</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>-->
-<!--                            <outputDirectory>${basedir}/target/coverage-reports/site</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
         </plugins>
     </build>
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
-            <!--            <version>${pax.logging.api.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -146,10 +114,6 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.base</artifactId>
         </dependency>
         <dependency>
@@ -157,8 +121,8 @@
             <artifactId>axis2</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io.wso2</groupId>
@@ -167,10 +131,6 @@
         <dependency>
             <groupId>org.apache.axis2.transport</groupId>
             <artifactId>axis2-transport-mail</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.core</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-collections.wso2</groupId>

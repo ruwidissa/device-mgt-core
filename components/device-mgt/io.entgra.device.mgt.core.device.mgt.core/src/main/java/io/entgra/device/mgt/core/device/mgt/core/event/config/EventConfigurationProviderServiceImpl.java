@@ -19,27 +19,23 @@
 package io.entgra.device.mgt.core.device.mgt.core.event.config;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfig;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfigurationException;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfigurationProviderService;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventMetaData;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
-import io.entgra.device.mgt.core.device.mgt.core.dao.*;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.EventConfigDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.EventManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.EventManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.*;
 
 public class EventConfigurationProviderServiceImpl implements EventConfigurationProviderService {
     private static final Log log = LogFactory.getLog(EventConfigurationProviderServiceImpl.class);

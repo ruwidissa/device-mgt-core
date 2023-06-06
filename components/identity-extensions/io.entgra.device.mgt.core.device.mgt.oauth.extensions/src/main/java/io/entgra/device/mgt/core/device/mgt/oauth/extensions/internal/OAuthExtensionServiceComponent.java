@@ -22,33 +22,15 @@ import io.entgra.device.mgt.core.device.mgt.oauth.extensions.validators.Extended
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.validators.JDBCScopeValidator;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
 import org.wso2.carbon.user.core.service.RealmService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.device.mgt.oauth.extensions" immediate="true"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="identity.oauth2.validation.service"
- * interface="org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setOAuth2ValidationService"
- * unbind="unsetOAuth2ValidationService"
- * * @scr.reference name="scope.validator.service"
- * interface="org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator"
- * cardinality="0..n"
- * policy="dynamic"
- * bind="addScopeValidator"
- * unbind="removeScopeValidator"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.oauth.extensions.internal.OAuthExtensionServiceComponent",
+        immediate = true)
 public class OAuthExtensionServiceComponent {
 
     private static final Log log = LogFactory.getLog(OAuthExtensionServiceComponent.class);
@@ -60,6 +42,7 @@ public class OAuthExtensionServiceComponent {
 
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Starting OAuthExtensionBundle");
@@ -75,6 +58,7 @@ public class OAuthExtensionServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Stopping OAuthExtensionBundle");
@@ -86,6 +70,12 @@ public class OAuthExtensionServiceComponent {
      *
      * @param realmService An instance of RealmService
      */
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Realm Service");
@@ -110,6 +100,12 @@ public class OAuthExtensionServiceComponent {
      *
      * @param tokenValidationService An instance of OAuth2TokenValidationService
      */
+    @Reference(
+            name = "oauth2.token.validation.service",
+            service = org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOAuth2ValidationService")
     protected void setOAuth2ValidationService(OAuth2TokenValidationService tokenValidationService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting OAuth2TokenValidation Service");
@@ -133,6 +129,12 @@ public class OAuthExtensionServiceComponent {
      * Add scope validator to the map.
      * @param scopesValidator
      */
+    @Reference(
+            name = "oauth2.scope.validator",
+            service = org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeScopeValidator")
     protected void addScopeValidator(OAuth2ScopeValidator scopesValidator) {
         OAuthExtensionsDataHolder.getInstance().addScopeValidator(scopesValidator, DEFAULT_PREFIX);
     }

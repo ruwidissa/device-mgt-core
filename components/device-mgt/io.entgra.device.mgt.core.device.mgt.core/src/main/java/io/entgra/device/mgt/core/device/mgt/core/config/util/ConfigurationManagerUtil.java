@@ -17,9 +17,9 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.config.util;
 
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.Registry;

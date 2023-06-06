@@ -19,8 +19,6 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.services;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyMonitoringManager;
@@ -28,6 +26,8 @@ import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -31,22 +31,18 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - API Management Annotations</name>
     <description>WSO2 Carbon - API Management Custom Annotation Module</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
-            <!--            <version>${pax.logging.api.version}</version>-->
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -56,8 +52,12 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -72,15 +72,6 @@
                         <Export-Package>
                             io.entgra.device.mgt.core.apimgt.annotations.*
                         </Export-Package>
-                        <Import-Package>
-                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
-                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.logging,
-                            javax.servlet,
-                            javax.xml.*,
-			    javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
-                            org.apache.commons.lang
-                        </Import-Package>
                         <Embed-Dependency>
                             scribe;scope=compile|runtime;inline=false;
                         </Embed-Dependency>

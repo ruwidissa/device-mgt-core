@@ -18,10 +18,10 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework.util;
 
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.Response;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.WebappAuthenticator;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
 
 import java.util.Properties;
 

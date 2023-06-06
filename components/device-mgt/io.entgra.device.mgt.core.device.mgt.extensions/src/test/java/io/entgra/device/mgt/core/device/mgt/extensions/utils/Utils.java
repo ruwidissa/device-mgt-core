@@ -19,14 +19,14 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.utils;
 
-import org.h2.jdbcx.JdbcDataSource;
-import org.w3c.dom.Document;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceDetails;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Table;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.exception.DeviceTypeConfigurationException;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao.DeviceDAODefinition;
+import org.h2.jdbcx.JdbcDataSource;
+import org.w3c.dom.Document;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.internal.RegistryDataHolder;

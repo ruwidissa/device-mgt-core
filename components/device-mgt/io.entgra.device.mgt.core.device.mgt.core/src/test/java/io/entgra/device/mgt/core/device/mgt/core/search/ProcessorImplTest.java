@@ -17,9 +17,6 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.search;
 
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.search.Condition;
@@ -36,6 +33,9 @@ import io.entgra.device.mgt.core.device.mgt.core.search.util.ChangeEnumValues;
 import io.entgra.device.mgt.core.device.mgt.core.search.util.Utils;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;

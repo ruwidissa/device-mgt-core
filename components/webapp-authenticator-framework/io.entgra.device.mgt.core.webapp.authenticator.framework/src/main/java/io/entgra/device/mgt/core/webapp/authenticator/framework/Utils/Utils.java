@@ -18,14 +18,7 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework.Utils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
-import org.wso2.carbon.user.api.TenantManager;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.WebappAuthenticator;
@@ -33,6 +26,13 @@ import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oa
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthValidationResponse;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthValidatorFactory;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.TenantManager;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Properties;
 import java.util.regex.Matcher;

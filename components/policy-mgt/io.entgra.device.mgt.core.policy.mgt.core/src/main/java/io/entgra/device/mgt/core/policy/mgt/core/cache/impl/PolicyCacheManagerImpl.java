@@ -19,9 +19,6 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.cache.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.cache.PolicyCacheManager;
@@ -29,6 +26,8 @@ import io.entgra.device.mgt.core.policy.mgt.core.mgt.PolicyManager;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.impl.PolicyManagerImpl;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.cache.Cache;
 import java.util.ArrayList;

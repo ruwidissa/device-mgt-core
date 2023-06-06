@@ -17,27 +17,23 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.dao.impl.application;
 
+import io.entgra.device.mgt.core.application.mgt.common.AppLifecycleState;
+import io.entgra.device.mgt.core.application.mgt.common.Filter;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.CategoryDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.TagDTO;
+import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
 import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
+import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
 import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.application.mgt.common.AppLifecycleState;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.CategoryDTO;
-import io.entgra.device.mgt.core.application.mgt.common.Filter;
-import io.entgra.device.mgt.core.application.mgt.common.dto.TagDTO;
-import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
-import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;

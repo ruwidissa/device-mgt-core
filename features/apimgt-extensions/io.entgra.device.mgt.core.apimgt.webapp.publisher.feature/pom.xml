@@ -29,7 +29,7 @@
     <artifactId>io.entgra.device.mgt.core.apimgt.webapp.publisher.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - API Management Webapp Publisher Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains an implementation of a Tomcat lifecycle listener, which takes care of publishing
         JAX-RS web applications as 'Managed APIs'
     </description>
@@ -44,7 +44,7 @@
             <artifactId>io.entgra.device.mgt.core.apimgt.annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.scannotation</groupId>
+            <groupId>io.entgra.org.scannotation</groupId>
             <artifactId>scannotation</artifactId>
         </dependency>
 		<dependency>
@@ -141,7 +141,7 @@
                                     io.entgra.device.mgt.core:io.entgra.device.mgt.core.apimgt.annotations:${io.entgra.device.mgt.core.version}
                                 </bundleDef>
                                 <bundleDef>
-                                    org.wso2.orbit.org.scannotation:scannotation:${scannotation.version}
+                                    io.entgra.org.scannotation:scannotation:${scannotation.version}
                                 </bundleDef>
 								<bundleDef>
 									io.swagger:swagger-annotations:${swagger.version}

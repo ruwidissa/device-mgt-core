@@ -18,13 +18,13 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.cert.admin.api.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchManagerService;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.ws.rs.core.MediaType;
 

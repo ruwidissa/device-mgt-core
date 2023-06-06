@@ -16,7 +16,9 @@
  */
 package io.entgra.device.mgt.core.application.mgt.common.services;
 
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
+import io.entgra.device.mgt.core.application.mgt.common.*;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.RequestValidatingException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
@@ -24,20 +26,10 @@ import io.entgra.device.mgt.core.application.mgt.common.response.Application;
 import io.entgra.device.mgt.core.application.mgt.common.response.ApplicationRelease;
 import io.entgra.device.mgt.core.application.mgt.common.response.Category;
 import io.entgra.device.mgt.core.application.mgt.common.response.Tag;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.*;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
-import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
-import io.entgra.device.mgt.core.application.mgt.common.Filter;
-import io.entgra.device.mgt.core.application.mgt.common.LifecycleState;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.EntAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationUpdateWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppReleaseWrapper;
+
 import java.util.List;
 
 /**

@@ -27,9 +27,14 @@
     <artifactId>io.entgra.device.mgt.core.apimgt.analytics.extension</artifactId>
     <packaging>bundle</packaging>
     <name>Entgra - API mgt analytics extension</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
@@ -40,7 +45,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
+            <artifactId>velocity-engine-core</artifactId>
         </dependency>
     </dependencies>
 
@@ -56,8 +61,12 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -72,10 +81,11 @@
                         <Private-Package>io.entgra.device.mgt.core.apimgt.application.extension.internal</Private-Package>
                         <Import-Packages>
                             io.entgra.device.mgt.core.apimgt.analytics.extension.dto,
+                            io.entgra.device.mgt.core.apimgt.analytics.extension.exception,
                             org.apache.velocity,
                             org.apache.velocity.app,
                             org.apache.velocity.context,
-                            org.wso2.carbon.utils;version="[4.6,5)"
+                            org.wso2.carbon.utils;version="[4.8,5)"
                         </Import-Packages>
                         <Export-Package>
                             io.entgra.device.mgt.core.apimgt.analytics.extension.*

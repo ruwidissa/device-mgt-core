@@ -18,6 +18,11 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.Constants;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.Utils;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
@@ -27,11 +32,6 @@ import org.apache.tomcat.util.buf.MessageBytes;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationException;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.Constants;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.Utils;
 
 import java.nio.charset.Charset;
 import java.util.Base64;

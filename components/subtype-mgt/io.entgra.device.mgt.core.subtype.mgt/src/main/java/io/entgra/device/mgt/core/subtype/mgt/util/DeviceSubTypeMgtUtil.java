@@ -18,8 +18,8 @@
 
 package io.entgra.device.mgt.core.subtype.mgt.util;
 
-import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubTypeCacheKey;
 import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
+import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubTypeCacheKey;
 
 public class DeviceSubTypeMgtUtil {
     public static String setDeviceSubTypeCacheKey(int tenantId, String subTypeId, DeviceSubType.DeviceType deviceType) {

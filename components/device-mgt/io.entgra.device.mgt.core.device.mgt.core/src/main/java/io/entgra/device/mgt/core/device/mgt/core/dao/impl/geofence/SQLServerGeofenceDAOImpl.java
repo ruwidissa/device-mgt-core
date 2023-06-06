@@ -18,21 +18,21 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl.geofence;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfig;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeofenceData;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.EventManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.dao.GeofenceDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.AbstractGeofenceDAOImpl;
-import io.entgra.device.mgt.core.device.mgt.core.dto.event.config.GeoFenceGroupMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.sql.*;
-import java.util.Date;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SQLServerGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
     private static final Log log = LogFactory.getLog(SQLServerGeofenceDAOImpl.class);

@@ -18,8 +18,8 @@
 package io.entgra.device.mgt.core.apimgt.application.extension.internal;
 
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.service.RealmService;

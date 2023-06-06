@@ -18,10 +18,10 @@
 
 package io.entgra.device.mgt.core.device.mgt.url.printer;
 
+import io.entgra.device.mgt.core.device.mgt.url.printer.internal.UrlPrinterDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.ServerStartupObserver;
-import io.entgra.device.mgt.core.device.mgt.url.printer.internal.UrlPrinterDataHolder;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.NetworkUtils;

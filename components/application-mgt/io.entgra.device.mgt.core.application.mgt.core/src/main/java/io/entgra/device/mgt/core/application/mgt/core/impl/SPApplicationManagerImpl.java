@@ -18,10 +18,10 @@
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
 import io.entgra.device.mgt.core.application.mgt.common.IdentityServerResponse;
-import io.entgra.device.mgt.core.application.mgt.common.SPApplicationListResponse;
-import io.entgra.device.mgt.core.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.device.mgt.core.application.mgt.common.SPApplication;
+import io.entgra.device.mgt.core.application.mgt.common.SPApplicationListResponse;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.IdentityServiceProviderDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
@@ -38,18 +38,17 @@ import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationMana
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundException;
-import io.entgra.device.mgt.core.application.mgt.core.serviceprovider.ISServiceProviderApplicationService;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
+import io.entgra.device.mgt.core.application.mgt.core.serviceprovider.ISServiceProviderApplicationService;
 import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
 
 import java.util.ArrayList;
 import java.util.List;

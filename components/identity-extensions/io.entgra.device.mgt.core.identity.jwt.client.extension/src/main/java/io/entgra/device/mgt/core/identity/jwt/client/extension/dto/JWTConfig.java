@@ -1,7 +1,7 @@
 package io.entgra.device.mgt.core.identity.jwt.client.extension.dto;
 
-import org.wso2.carbon.core.util.Utils;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.constant.JWTConstants;
+import org.wso2.carbon.core.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;

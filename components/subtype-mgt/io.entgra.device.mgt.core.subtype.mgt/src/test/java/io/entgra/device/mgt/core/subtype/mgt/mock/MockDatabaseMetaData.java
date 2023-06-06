@@ -20,11 +20,7 @@ package io.entgra.device.mgt.core.subtype.mgt.mock;
 
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.RowIdLifetime;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class MockDatabaseMetaData implements DatabaseMetaData {
     private final String url;

@@ -30,7 +30,7 @@
     <artifactId>org.wso2.carbon.device.mgt.ui.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Device Management Base UI Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains the base UI required for Device Management</description>
 
     <build>

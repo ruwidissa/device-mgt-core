@@ -17,10 +17,10 @@
  */
 package io.entgra.device.mgt.core.application.mgt.common;
 
-import java.sql.Timestamp;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @ApiModel(value = "LifecycleState", description = "LifecycleState represents the Lifecycle state for an application release")

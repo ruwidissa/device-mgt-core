@@ -18,8 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
-import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceStatusTaskPluginConfig;
 import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManager;
@@ -46,7 +44,9 @@ import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProvider
 import io.entgra.device.mgt.core.device.mgt.core.status.task.DeviceStatusTaskManagerService;
 import io.entgra.device.mgt.core.device.mgt.core.task.DeviceTaskManagerService;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.DeviceAPIClientService;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;

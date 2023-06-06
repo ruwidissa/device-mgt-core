@@ -18,19 +18,15 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RemoteSessionInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.RemoteSessionService;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.remote.session.RemoteSessionConfiguration;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RemoteSessionInfo;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.RemoteSessionService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 /**

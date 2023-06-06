@@ -19,11 +19,11 @@
 package io.entgra.device.mgt.core.device.mgt.core.util;
 
 import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ios.AppStoreApplication;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ios.EnterpriseApplication;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ios.RemoveApplication;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ios.WebClip;
-import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
 

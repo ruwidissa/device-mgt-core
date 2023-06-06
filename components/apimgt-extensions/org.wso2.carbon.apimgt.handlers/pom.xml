@@ -30,7 +30,7 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - API Security Handler Component</name>
     <description>WSO2 Carbon - API Management Security Handler Module</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
 
     <dependencies>

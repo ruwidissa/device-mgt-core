@@ -17,8 +17,8 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.dao.impl.application.spapplication;
 
-import io.entgra.device.mgt.core.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
 import io.entgra.device.mgt.core.application.mgt.core.dao.SPApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
@@ -29,11 +29,7 @@ import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 
 public class GenericSPApplicationDAOImpl extends AbstractDAOImpl implements SPApplicationDAO {

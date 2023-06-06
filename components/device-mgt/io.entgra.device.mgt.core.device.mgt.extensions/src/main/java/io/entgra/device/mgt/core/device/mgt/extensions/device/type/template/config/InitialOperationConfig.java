@@ -1,6 +1,8 @@
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**

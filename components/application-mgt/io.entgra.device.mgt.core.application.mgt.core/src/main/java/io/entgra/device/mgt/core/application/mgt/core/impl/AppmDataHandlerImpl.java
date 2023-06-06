@@ -17,22 +17,22 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
-import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationStorageManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.LifecycleManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.AppmDataHandler;
-import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
+import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundException;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
+import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.util.Map;

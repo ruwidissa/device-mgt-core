@@ -18,7 +18,9 @@
  */
 package io.entgra.device.mgt.core.transport.mgt.email.sender.core;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 
 public class EmailContext {
 

@@ -19,13 +19,13 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.traccar.core.config;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.config.TraccarConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.bind.JAXBContext;

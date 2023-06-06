@@ -18,15 +18,14 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.dao.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.ProfileDAO;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.ProfileManagerDAOException;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.util.PolicyManagementDAOUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

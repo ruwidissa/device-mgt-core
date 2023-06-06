@@ -35,8 +35,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.service;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
@@ -44,6 +42,8 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistExc
 import io.entgra.device.mgt.core.device.mgt.core.TestUtils;
 import io.entgra.device.mgt.core.device.mgt.core.common.BaseDeviceManagementTest;
 import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;

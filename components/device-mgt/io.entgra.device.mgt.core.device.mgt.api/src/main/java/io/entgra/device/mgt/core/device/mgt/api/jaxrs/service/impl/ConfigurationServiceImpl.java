@@ -18,22 +18,19 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
-import io.entgra.device.mgt.core.device.mgt.core.config.ui.UIConfiguration;
-import io.entgra.device.mgt.core.device.mgt.core.config.ui.UIConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.ConfigurationManagementService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;

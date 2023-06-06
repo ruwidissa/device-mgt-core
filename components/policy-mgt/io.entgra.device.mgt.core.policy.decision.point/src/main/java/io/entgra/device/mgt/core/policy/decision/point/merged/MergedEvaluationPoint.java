@@ -18,16 +18,16 @@
 
 package io.entgra.device.mgt.core.policy.decision.point.merged;
 
-import io.entgra.device.mgt.core.policy.decision.point.internal.PolicyDecisionPointDataHolder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
+import io.entgra.device.mgt.core.policy.decision.point.internal.PolicyDecisionPointDataHolder;
 import io.entgra.device.mgt.core.policy.mgt.common.*;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.sql.Timestamp;
 import java.util.*;

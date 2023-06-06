@@ -23,20 +23,9 @@ import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.util.GrafanaUt
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.websocket.ClientEndpoint;
-import javax.websocket.ContainerProvider;
-import javax.websocket.Session;
-import javax.websocket.OnOpen;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.CloseReason;
-import javax.websocket.WebSocketContainer;
-import java.net.URI;
-
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
+import javax.websocket.*;
 import javax.ws.rs.core.HttpHeaders;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

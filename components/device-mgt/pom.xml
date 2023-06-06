@@ -30,7 +30,7 @@
     <artifactId>device-mgt</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Device Management Component</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <modules>
         <module>io.entgra.device.mgt.core.device.mgt.core</module>

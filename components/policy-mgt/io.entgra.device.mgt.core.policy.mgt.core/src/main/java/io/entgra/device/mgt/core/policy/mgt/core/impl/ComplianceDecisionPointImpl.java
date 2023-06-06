@@ -36,24 +36,26 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.*;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.PolicyOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import io.entgra.device.mgt.core.policy.mgt.common.monitor.ComplianceDecisionPoint;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;

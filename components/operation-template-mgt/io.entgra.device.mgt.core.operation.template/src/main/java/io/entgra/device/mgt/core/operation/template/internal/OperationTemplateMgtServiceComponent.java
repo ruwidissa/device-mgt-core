@@ -28,18 +28,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.operation.template.internal.OperationTemplateMgtServiceComponent" immediate="true"
- * immediate="true"
- * @scr.reference name="org.wso2.carbon.ndatasource"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.operation.template.internal.OperationTemplateMgtServiceComponent",
+        immediate = true)
 public class OperationTemplateMgtServiceComponent {
 
     private static final Log log = LogFactory.getLog(OperationTemplateMgtServiceComponent.class);
@@ -48,6 +42,7 @@ public class OperationTemplateMgtServiceComponent {
      *
      * @param componentContext
      */
+    @Activate
     protected void activate(ComponentContext componentContext) {
 
         if (log.isDebugEnabled()) {
@@ -77,6 +72,7 @@ public class OperationTemplateMgtServiceComponent {
      *
      * @param componentContext
      */
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Operation Template Management Service Component");
@@ -94,6 +90,12 @@ public class OperationTemplateMgtServiceComponent {
      *
      * @param dataSourceService
      */
+    @Reference(
+            name = "datasource.service",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         /* This is to avoid mobile device management component getting initialized before the underlying datasources
         are registered */

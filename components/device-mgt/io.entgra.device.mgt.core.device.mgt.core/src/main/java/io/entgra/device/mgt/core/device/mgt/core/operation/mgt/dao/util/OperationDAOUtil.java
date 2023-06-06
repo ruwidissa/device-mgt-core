@@ -18,21 +18,14 @@
 */
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.util;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.*;
+import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
+import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.*;
+import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
-import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityHolder;
-import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityMapper;
-import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityStatus;
-import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationResponse;
-import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
-import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation;
-import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.ConfigOperation;
-import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
-import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.PolicyOperation;
-import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.ProfileOperation;
-import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -18,9 +18,9 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.license.mgt.registry;
 
-import org.wso2.carbon.context.CarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.LicenseManagementException;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.api.Registry;

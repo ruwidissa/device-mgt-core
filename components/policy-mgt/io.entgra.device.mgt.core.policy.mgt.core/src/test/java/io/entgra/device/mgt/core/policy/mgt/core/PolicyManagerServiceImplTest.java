@@ -17,26 +17,6 @@
  */
 package io.entgra.device.mgt.core.policy.mgt.core;
 
-import io.entgra.device.mgt.core.policy.mgt.common.FeatureManagementException;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationException;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationPoint;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
-import io.entgra.device.mgt.core.policy.mgt.core.enforcement.DelegationTask;
-import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
-import io.entgra.device.mgt.core.policy.mgt.core.mgt.MonitoringManager;
-import io.entgra.device.mgt.core.policy.mgt.core.mgt.impl.MonitoringManagerImpl;
-import io.entgra.device.mgt.core.policy.mgt.core.mock.TestHeartBeatManagementService;
-import io.entgra.device.mgt.core.policy.mgt.core.mock.TypeXDeviceManagementService;
-import io.entgra.device.mgt.core.policy.mgt.core.task.MonitoringTask;
-import io.entgra.device.mgt.core.policy.mgt.core.task.TaskScheduleService;
-import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
-import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
@@ -59,6 +39,26 @@ import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHo
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationManagerImpl;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.PolicyOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
+import io.entgra.device.mgt.core.policy.mgt.common.FeatureManagementException;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationException;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationPoint;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
+import io.entgra.device.mgt.core.policy.mgt.core.enforcement.DelegationTask;
+import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
+import io.entgra.device.mgt.core.policy.mgt.core.mgt.MonitoringManager;
+import io.entgra.device.mgt.core.policy.mgt.core.mgt.impl.MonitoringManagerImpl;
+import io.entgra.device.mgt.core.policy.mgt.core.mock.TestHeartBeatManagementService;
+import io.entgra.device.mgt.core.policy.mgt.core.mock.TypeXDeviceManagementService;
+import io.entgra.device.mgt.core.policy.mgt.core.task.MonitoringTask;
+import io.entgra.device.mgt.core.policy.mgt.core.task.TaskScheduleService;
+import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;

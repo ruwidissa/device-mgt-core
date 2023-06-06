@@ -18,10 +18,10 @@
  */
 package io.entgra.device.mgt.core.transport.mgt.email.sender.core.internal;
 
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailSenderConfigurationFailedException;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailSenderConfigurationFailedException;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 class EmailSenderAxis2ConfigContextObserver implements Axis2ConfigurationContextObserver {

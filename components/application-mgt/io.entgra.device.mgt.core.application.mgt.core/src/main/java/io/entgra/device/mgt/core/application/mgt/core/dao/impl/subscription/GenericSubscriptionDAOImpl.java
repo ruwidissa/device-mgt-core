@@ -17,32 +17,22 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.dao.impl.subscription;
 
-import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
-import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
-import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
 import io.entgra.device.mgt.core.application.mgt.common.SubAction;
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
 import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
+import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
+import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
+import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.sql.*;
+import java.util.*;
 
 public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements SubscriptionDAO {
     private static final Log log = LogFactory.getLog(GenericSubscriptionDAOImpl.class);

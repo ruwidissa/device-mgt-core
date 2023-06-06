@@ -1,4 +1,4 @@
-<tasks-configuration xmlns:svns="http://org.wso2.securevault/configuration">
+<tasks-configuration>
 
     <!--
       The currently running server mode; possible values are:-

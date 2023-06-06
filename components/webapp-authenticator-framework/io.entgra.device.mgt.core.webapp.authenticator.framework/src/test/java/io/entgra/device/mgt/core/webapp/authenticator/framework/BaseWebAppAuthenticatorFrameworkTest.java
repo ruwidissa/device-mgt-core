@@ -19,12 +19,15 @@
 package io.entgra.device.mgt.core.webapp.authenticator.framework;
 
 
+import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionUtils;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestTenantIndexingLoader;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestTenantRegistryLoader;
 import org.testng.annotations.BeforeSuite;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.internal.CarbonCoreDataHolder;
-import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
-import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionUtils;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.internal.RegistryDataHolder;
@@ -35,9 +38,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestTenantIndexingLoader;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestTenantRegistryLoader;
 
 import java.io.File;
 import java.io.InputStream;

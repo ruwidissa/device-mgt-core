@@ -18,7 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer;
 
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.DeviceTypeCAppDeployer;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.util.DeviceTypePluginConstants;
 import org.apache.axis2.deployment.DeploymentException;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.mockito.Mockito;
@@ -29,8 +29,8 @@ import org.wso2.carbon.application.deployer.config.ApplicationConfiguration;
 import org.wso2.carbon.application.deployer.config.Artifact;
 import org.wso2.carbon.application.deployer.config.CappFile;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.util.DeviceTypePluginConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;

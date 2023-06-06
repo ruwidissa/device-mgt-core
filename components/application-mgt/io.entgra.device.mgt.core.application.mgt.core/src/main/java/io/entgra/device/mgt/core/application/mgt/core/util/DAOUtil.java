@@ -19,20 +19,14 @@ package io.entgra.device.mgt.core.application.mgt.core.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.entgra.device.mgt.core.application.mgt.common.dto.IdentityServerDTO;
+import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
+import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
+import io.entgra.device.mgt.core.application.mgt.common.dto.*;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
-import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
-
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ReviewDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

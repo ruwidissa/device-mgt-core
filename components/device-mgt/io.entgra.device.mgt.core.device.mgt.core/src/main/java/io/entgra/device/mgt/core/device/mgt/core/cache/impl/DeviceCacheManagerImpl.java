@@ -18,13 +18,13 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.cache.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.core.cache.DeviceCacheKey;
 import io.entgra.device.mgt.core.device.mgt.core.cache.DeviceCacheManager;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.cache.Cache;
 import java.util.List;

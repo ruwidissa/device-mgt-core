@@ -34,17 +34,10 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.task.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.base.ServerConfiguration;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.MonitoringOperation;
-import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
-import io.entgra.device.mgt.core.device.mgt.common.StartupOperationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.CommandOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
@@ -52,12 +45,11 @@ import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProvide
 import io.entgra.device.mgt.core.device.mgt.core.task.DeviceMgtTaskException;
 import io.entgra.device.mgt.core.device.mgt.core.task.DeviceTaskManager;
 import io.entgra.device.mgt.core.device.mgt.core.task.Utils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.ServerConfiguration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DeviceTaskManagerImpl implements DeviceTaskManager {
 

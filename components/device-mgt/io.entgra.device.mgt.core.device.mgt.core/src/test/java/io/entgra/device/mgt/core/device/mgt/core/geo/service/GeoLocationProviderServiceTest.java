@@ -19,10 +19,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.geo.service;
 
-import org.mockito.Mockito;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
@@ -34,6 +30,10 @@ import io.entgra.device.mgt.core.device.mgt.core.TestDeviceManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.common.TestDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;

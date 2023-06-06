@@ -18,11 +18,7 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 /**
  * Serialize/deserialize  a given object to and from a byte array.

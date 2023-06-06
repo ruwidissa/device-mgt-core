@@ -18,11 +18,8 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
+import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.cache.LoginCache;
 import io.entgra.device.mgt.core.ui.request.interceptor.cache.OAuthApp;
 import io.entgra.device.mgt.core.ui.request.interceptor.cache.OAuthAppCacheKey;
@@ -43,7 +40,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 

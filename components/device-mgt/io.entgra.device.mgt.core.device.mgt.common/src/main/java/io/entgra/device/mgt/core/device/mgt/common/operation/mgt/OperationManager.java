@@ -17,12 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.common.operation.mgt;
 
-import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationStrategy;

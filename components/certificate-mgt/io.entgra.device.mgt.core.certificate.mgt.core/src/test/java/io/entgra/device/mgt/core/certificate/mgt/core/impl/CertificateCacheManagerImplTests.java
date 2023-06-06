@@ -18,11 +18,11 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.impl;
 
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import io.entgra.device.mgt.core.certificate.mgt.core.cache.CertificateCacheManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.common.BaseDeviceManagementCertificateTest;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 
 /**
  * This class tests CertificateCache manager methods

@@ -18,24 +18,27 @@
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
 import com.dd.plist.NSDictionary;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstaller;
+import io.entgra.device.mgt.core.application.mgt.common.DeviceTypes;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
+import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationStorageManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ParsingException;
 import io.entgra.device.mgt.core.application.mgt.core.util.ArtifactsParser;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.StorageManagementUtil;
 import net.dongliu.apk.parser.bean.ApkMeta;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstaller;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
-import io.entgra.device.mgt.core.application.mgt.common.DeviceTypes;
-import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationStorageManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
-import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
-import io.entgra.device.mgt.core.device.mgt.core.common.util.StorageManagementUtil;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import static io.entgra.device.mgt.core.device.mgt.core.common.util.StorageManagementUtil.saveFile;

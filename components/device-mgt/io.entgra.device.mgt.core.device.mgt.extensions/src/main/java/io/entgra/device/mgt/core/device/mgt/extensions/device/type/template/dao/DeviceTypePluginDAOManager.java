@@ -19,8 +19,8 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao;
 
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceDetails;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class DeviceTypePluginDAOManager {

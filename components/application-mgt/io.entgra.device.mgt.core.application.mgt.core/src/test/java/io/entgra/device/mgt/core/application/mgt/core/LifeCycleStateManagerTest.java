@@ -17,8 +17,8 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core;
 
-import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
+import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 
 import java.util.HashMap;
 import java.util.List;

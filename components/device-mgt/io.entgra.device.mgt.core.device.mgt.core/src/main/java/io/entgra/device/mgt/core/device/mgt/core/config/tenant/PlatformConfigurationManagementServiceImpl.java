@@ -17,15 +17,15 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.config.tenant;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.config.ConfigurationManagerConstants;
 import io.entgra.device.mgt.core.device.mgt.core.config.util.ConfigurationManagerUtil;
-import org.wso2.carbon.registry.api.Resource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.registry.api.RegistryException;
+import org.wso2.carbon.registry.api.Resource;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

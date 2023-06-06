@@ -19,11 +19,11 @@
 package io.entgra.device.mgt.core.application.mgt.core;
 
 import com.dd.plist.NSDictionary;
+import io.entgra.device.mgt.core.application.mgt.core.exception.ParsingException;
+import io.entgra.device.mgt.core.application.mgt.core.util.ArtifactsParser;
 import net.dongliu.apk.parser.bean.ApkMeta;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import io.entgra.device.mgt.core.application.mgt.core.exception.ParsingException;
-import io.entgra.device.mgt.core.application.mgt.core.util.ArtifactsParser;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

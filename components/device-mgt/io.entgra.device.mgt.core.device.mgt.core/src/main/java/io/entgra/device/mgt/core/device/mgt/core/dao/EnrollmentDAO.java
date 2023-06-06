@@ -22,7 +22,6 @@ import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo.Status;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 public interface EnrollmentDAO {

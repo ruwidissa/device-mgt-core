@@ -19,6 +19,12 @@
 package io.entgra.device.mgt.core.application.mgt.core.task;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.application.mgt.common.SubAction;
+import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
+import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationOperationTaskException;
 import io.entgra.device.mgt.core.application.mgt.core.impl.SubscriptionManagerImpl;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
@@ -27,24 +33,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.CronExpression;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.application.mgt.common.SubAction;
-import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
-import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
-import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationOperationTaskException;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.service.TaskService;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ScheduledAppSubscriptionTaskManager {

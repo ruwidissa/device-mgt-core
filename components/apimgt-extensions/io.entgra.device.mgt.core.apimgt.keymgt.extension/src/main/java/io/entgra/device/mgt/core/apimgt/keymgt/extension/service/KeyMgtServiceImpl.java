@@ -19,13 +19,13 @@
 package io.entgra.device.mgt.core.apimgt.keymgt.extension.service;
 
 import com.google.gson.Gson;
-import okhttp3.Credentials;
-import okhttp3.FormBody;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.*;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
+import io.entgra.device.mgt.core.device.mgt.core.config.keymanager.KeyManagerConfigurations;
+import okhttp3.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
@@ -34,18 +34,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.DCRResponse;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.KeyManagerPayload;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.KeyMgtConstants;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.OAuthApplication;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.BadRequestException;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
-import io.entgra.device.mgt.core.device.mgt.core.config.keymanager.KeyManagerConfigurations;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -59,11 +48,7 @@ import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class KeyMgtServiceImpl implements KeyMgtService {
 

@@ -19,17 +19,6 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core;
 
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
-import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
-import io.entgra.device.mgt.core.policy.mgt.core.mgt.MonitoringManager;
-import io.entgra.device.mgt.core.policy.mgt.core.mgt.PolicyManager;
-import io.entgra.device.mgt.core.policy.mgt.core.mgt.impl.MonitoringManagerImpl;
-import io.entgra.device.mgt.core.policy.mgt.core.mgt.impl.PolicyManagerImpl;
-import io.entgra.device.mgt.core.policy.mgt.core.services.PolicyMonitoringManagerTest;
-import junit.framework.Assert;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
@@ -42,6 +31,17 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationManagerI
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
+import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
+import io.entgra.device.mgt.core.policy.mgt.core.mgt.MonitoringManager;
+import io.entgra.device.mgt.core.policy.mgt.core.mgt.PolicyManager;
+import io.entgra.device.mgt.core.policy.mgt.core.mgt.impl.MonitoringManagerImpl;
+import io.entgra.device.mgt.core.policy.mgt.core.mgt.impl.PolicyManagerImpl;
+import io.entgra.device.mgt.core.policy.mgt.core.services.PolicyMonitoringManagerTest;
+import junit.framework.Assert;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.testng.annotations.Test;
 
 import java.util.List;
 

@@ -5,7 +5,6 @@ import io.entgra.device.mgt.core.device.mgt.common.InitialOperationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DeviceTypeMetaDefinition {

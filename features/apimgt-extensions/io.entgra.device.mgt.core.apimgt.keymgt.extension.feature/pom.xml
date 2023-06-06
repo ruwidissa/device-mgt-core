@@ -29,7 +29,7 @@
     <artifactId>io.entgra.device.mgt.core.apimgt.keymgt.extension.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api Key Mgt Extensions Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains apimgt related key management extensions</description>
 
     <dependencies>

@@ -36,8 +36,12 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -51,20 +55,28 @@
                         <Bundle-Description>Server Startup Heart Beat Beacon Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal</Private-Package>
                         <Import-Package>
-                            org.apache.axis2.*;version="${axis2.osgi.version.range}",
-                            org.apache.axiom.*; version="${axiom.osgi.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.datasource,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao.exception,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao.impl,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao.util,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dto,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception,
+                            javax.naming,
+                            javax.sql,
+                            javax.xml.bind;version="[0.0,1)",
+                            javax.xml.bind.annotation;version="[0.0,1)",
+                            javax.xml.parsers,
+                            org.apache.commons.logging;version="[1.2,2)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.logging,
-			                javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.utils.*,
-                            org.wso2.carbon.ndatasource.core,
                             org.w3c.dom,
-                            org.apache.commons.io,
-                            org.apache.axis2.transport.mail,
-                            org.apache.commons.collections,
-                            io.entgra.device.mgt.core.device.mgt.common.*
+                            org.wso2.carbon.ndatasource.core;version="[4.8,5)",
+                            org.wso2.carbon.utils;version="[4.8,5)"
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal,
@@ -73,55 +85,14 @@
                     </instructions>
                 </configuration>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-surefire-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <systemPropertyVariables>-->
-<!--                        <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>-->
-<!--                    </systemPropertyVariables>-->
-<!--                    <suiteXmlFiles>-->
-<!--                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>-->
-<!--                    </suiteXmlFiles>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-<!--            <plugin>-->
-<!--                <groupId>org.jacoco</groupId>-->
-<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>-->
-<!--                </configuration>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>jacoco-initialize</id>-->
-<!--                        <goals>-->
-<!--                            <goal>prepare-agent</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>jacoco-site</id>-->
-<!--                        <phase>test</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>report</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>-->
-<!--                            <outputDirectory>${basedir}/target/coverage-reports/site</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
         </plugins>
     </build>
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>

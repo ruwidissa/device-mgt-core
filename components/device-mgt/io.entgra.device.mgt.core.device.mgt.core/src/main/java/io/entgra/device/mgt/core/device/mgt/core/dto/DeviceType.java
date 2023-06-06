@@ -18,9 +18,9 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dto;
 
+import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 
 import java.io.Serializable;
 

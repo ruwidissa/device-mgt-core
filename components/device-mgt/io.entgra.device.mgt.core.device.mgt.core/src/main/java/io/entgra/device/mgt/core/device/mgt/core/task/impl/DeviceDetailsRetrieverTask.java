@@ -35,10 +35,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.task.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
 import io.entgra.device.mgt.core.device.mgt.common.StartupOperationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
@@ -46,6 +42,10 @@ import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHo
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.task.DeviceMgtTaskException;
 import io.entgra.device.mgt.core.device.mgt.core.task.DeviceTaskManager;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.List;
 

@@ -19,15 +19,15 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
 import io.entgra.device.mgt.core.certificate.mgt.core.config.CertificateConfigurationManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.config.CertificateManagementConfig;
 import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.JNDILookupDefinition;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOUtil;
 import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
 
 import javax.sql.DataSource;
 import javax.xml.XMLConstants;

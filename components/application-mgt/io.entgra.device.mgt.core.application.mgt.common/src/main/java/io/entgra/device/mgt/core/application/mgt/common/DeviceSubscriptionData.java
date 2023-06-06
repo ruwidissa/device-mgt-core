@@ -19,8 +19,6 @@ package io.entgra.device.mgt.core.application.mgt.common;
 
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 
-import java.sql.Timestamp;
-
 public class DeviceSubscriptionData {
 
     private int subId;

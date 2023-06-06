@@ -34,6 +34,14 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -46,6 +54,10 @@
                         <Export-Package>
                             io.entgra.device.mgt.core.task.mgt.common.*
                         </Export-Package>
+                        <Import-Package>
+                            io.entgra.device.mgt.core.task.mgt.common.bean,
+                            io.entgra.device.mgt.core.task.mgt.common.exception
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

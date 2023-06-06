@@ -30,7 +30,7 @@
     <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Device Type Deployer Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>WSO2 Carbon - Device Type Deployer Feature</description>
 
     <dependencies>

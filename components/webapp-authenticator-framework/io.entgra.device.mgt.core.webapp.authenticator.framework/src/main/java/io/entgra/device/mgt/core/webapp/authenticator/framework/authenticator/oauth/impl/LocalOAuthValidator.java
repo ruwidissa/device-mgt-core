@@ -17,15 +17,15 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.impl;
 
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
-import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuth2TokenValidator;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthConstants;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthTokenValidationException;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.OAuthValidationResponse;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 /**
  * Handles the OAuth2 token validation from the same server using OSGi services.

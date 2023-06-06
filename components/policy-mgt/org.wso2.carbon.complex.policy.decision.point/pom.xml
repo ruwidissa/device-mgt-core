@@ -32,7 +32,7 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Policy Decision Point</name>
     <description>WSO2 Carbon - Policy Decision Point</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <build>
         <plugins>

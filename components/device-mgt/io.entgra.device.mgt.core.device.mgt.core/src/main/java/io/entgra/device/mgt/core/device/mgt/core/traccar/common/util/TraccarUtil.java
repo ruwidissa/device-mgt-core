@@ -19,9 +19,9 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.traccar.common.util;
 
-import org.json.JSONObject;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.beans.TraccarDevice;
 import io.entgra.device.mgt.core.device.mgt.core.traccar.common.beans.TraccarUser;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;

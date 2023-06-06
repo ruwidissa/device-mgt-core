@@ -18,8 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
@@ -31,6 +29,8 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.impl.group.OracleGroupDAOIm
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.group.PostgreSQLGroupDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.group.SQLServerGroupDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.GroupManagementDAOUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

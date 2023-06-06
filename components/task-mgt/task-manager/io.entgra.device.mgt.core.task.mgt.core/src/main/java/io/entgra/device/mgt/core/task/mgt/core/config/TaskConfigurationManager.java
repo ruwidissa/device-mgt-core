@@ -17,9 +17,9 @@
  */
 package io.entgra.device.mgt.core.task.mgt.core.config;
 
-import io.entgra.device.mgt.core.task.mgt.core.util.TaskManagementUtil;
 import io.entgra.device.mgt.core.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.device.mgt.core.task.mgt.common.exception.TaskManagementException;
+import io.entgra.device.mgt.core.task.mgt.core.util.TaskManagementUtil;
 import org.w3c.dom.Document;
 import org.wso2.carbon.utils.CarbonUtils;
 

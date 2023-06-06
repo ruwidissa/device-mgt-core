@@ -17,11 +17,11 @@
  */
 package io.entgra.device.mgt.core.task.mgt.watcher.internal;
 
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.device.mgt.core.task.mgt.common.spi.TaskManagementService;
 import io.entgra.device.mgt.core.task.mgt.core.config.TaskConfigurationManager;
 import io.entgra.device.mgt.core.task.mgt.core.config.TaskManagementConfig;
 import io.entgra.device.mgt.core.task.mgt.watcher.IoTSStartupHandler;
-import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -29,39 +29,16 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.osgi.service.component.annotations.*;
 
-/**
- * @scr.component
- * name="io.entgra.device.mgt.core.task.mgt.watcher" immediate="true"
- * @scr.reference name="app.mgt.ntask.component"
- * interface="org.wso2.carbon.ntask.core.service.TaskService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTaskService"
- * unbind="unsetTaskService"
- * @scr.reference name="io.entgra.task.mgt.service"
- * interface="io.entgra.device.mgt.core.task.mgt.common.spi.TaskManagementService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTaskMgtService"
- * unbind="unsetTaskMgtService"
- * @scr.reference name="entgra.heart.beat.service"
- * interface="io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setHeartBeatService"
- * unbind="unsetHeartBeatService"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.task.mgt.watcher.internal.TaskWatcherServiceComponent",
+        immediate = true)
 public class TaskWatcherServiceComponent {
 
     private static final Log log = LogFactory.getLog(TaskWatcherServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("Activating Task Watcher Service Component");
@@ -83,7 +60,7 @@ public class TaskWatcherServiceComponent {
             log.error("Error occurred while activating Task Watcher Service Component", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Task Watcher Service Component");
@@ -91,6 +68,12 @@ public class TaskWatcherServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "task.service",
+            service = org.wso2.carbon.ntask.core.service.TaskService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTaskService")
     public void setTaskService(TaskService taskService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting the task service to Task Watcher Service Component ");
@@ -107,6 +90,12 @@ public class TaskWatcherServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "task.mgt.service",
+            service = io.entgra.device.mgt.core.task.mgt.common.spi.TaskManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTaskMgtService")
     protected void setTaskMgtService(TaskManagementService taskManagementService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting the task service to Task Watcher Service Component ");
@@ -121,6 +110,12 @@ public class TaskWatcherServiceComponent {
         }
         TaskWatcherDataHolder.getInstance().setTaskManagementService(null);
     }
+    @Reference(
+            name = "heartbeat.service",
+            service = io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetHeartBeatService")
 
     @SuppressWarnings("unused")
     protected void setHeartBeatService(HeartBeatManagementService heartBeatService) {
@@ -144,6 +139,12 @@ public class TaskWatcherServiceComponent {
      * @param realmService An instance of RealmService
      */
     @SuppressWarnings("unused")
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Realm Service");

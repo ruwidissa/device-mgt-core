@@ -18,16 +18,15 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework;
 
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticatorFrameworkException;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.config.AuthenticatorConfig;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.config.AuthenticatorConfigService;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.config.WebappAuthenticatorConfig;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.config.impl.AuthenticatorConfigServiceImpl;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.utils.ServerConstants;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.config.AuthenticatorConfig;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.config.AuthenticatorConfigService;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.config.WebappAuthenticatorConfig;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.config.impl.AuthenticatorConfigServiceImpl;
 
 import java.util.List;
 

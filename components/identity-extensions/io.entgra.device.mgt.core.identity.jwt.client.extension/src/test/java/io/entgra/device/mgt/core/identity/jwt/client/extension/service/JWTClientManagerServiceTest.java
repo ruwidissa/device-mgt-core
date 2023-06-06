@@ -17,14 +17,14 @@
  */
 package io.entgra.device.mgt.core.identity.jwt.client.extension.service;
 
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientConfigurationException;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.service.common.BaseJWTClientManagerExtTest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientConfigurationException;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.service.common.BaseJWTClientManagerExtTest;
 
 import java.util.Properties;
 

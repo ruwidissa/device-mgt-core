@@ -15,18 +15,18 @@
 */
 package io.entgra.device.mgt.core.device.mgt.core.app.mgt;
 
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementPluginRepository;
+import io.entgra.device.mgt.core.device.mgt.core.TestDeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.common.TestDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
-import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementPluginRepository;
-import io.entgra.device.mgt.core.device.mgt.core.TestDeviceManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.common.TestDataHolder;
 
 import java.util.ArrayList;
 import java.util.List;

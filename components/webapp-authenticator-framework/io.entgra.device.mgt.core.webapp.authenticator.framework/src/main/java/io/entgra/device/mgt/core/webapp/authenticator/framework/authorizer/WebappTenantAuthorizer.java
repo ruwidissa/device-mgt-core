@@ -18,9 +18,9 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authorizer;
 
-import org.apache.catalina.connector.Request;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
 import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.WebappAuthenticator;
+import org.apache.catalina.connector.Request;
 
 /**
  * This class represents the methods that are used to authorize requests based on the tenant subscription.

@@ -22,15 +22,18 @@ import io.entgra.device.mgt.core.transport.mgt.sms.handler.core.config.SMSConfig
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 
-/**
- * @scr.component
- * name="io.entgra.device.mgt.core.transport.mgt.sms.handler.core.internal.SMSHandlerServiceComponent" immediate="true"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.transport.mgt.sms.handler.core.internal.SMSHandlerServiceComponent",
+        immediate = true)
 public class SMSHandlerServiceComponent {
 
     private static final Log log = LogFactory.getLog(SMSHandlerServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctx) {
 
         if (log.isDebugEnabled()) {
@@ -46,7 +49,7 @@ public class SMSHandlerServiceComponent {
             log.error("Error occurred while activating SMS Handler Service Component", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating SMS Handler Service Component");

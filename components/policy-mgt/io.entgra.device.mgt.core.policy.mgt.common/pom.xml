@@ -31,13 +31,17 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Policy Management Common</name>
     <description>WSO2 Carbon - Policy Management Common</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -50,11 +54,11 @@
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Policy Management Common Bundle</Bundle-Description>
                         <Import-Package>
-                            javax.xml.bind.annotation,
-                            io.swagger.annotations.*;resolution:=optional,
-                            io.entgra.device.mgt.core.device.mgt.common.*,
-                            io.entgra.device.mgt.core.device.mgt.core.dto.*,
-                            javax.xml.bind.*,
+                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.group.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.dto;version="[5.0,6)"
                         </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.policy.mgt.common.*
@@ -93,18 +97,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.equinox</groupId>
-            <artifactId>org.eclipse.equinox.common</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
-            <!--            <version>${pax.logging.api.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

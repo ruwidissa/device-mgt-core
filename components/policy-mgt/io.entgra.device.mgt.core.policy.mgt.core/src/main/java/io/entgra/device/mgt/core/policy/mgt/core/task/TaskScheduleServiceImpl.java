@@ -19,19 +19,19 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.task;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.policy.PolicyConfiguration;
-import org.wso2.carbon.ntask.common.TaskException;
-import org.wso2.carbon.ntask.core.TaskInfo;
-import org.wso2.carbon.ntask.core.TaskManager;
-import org.wso2.carbon.ntask.core.service.TaskService;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyMonitoringTaskException;
 import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.ntask.common.TaskException;
+import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskInfo.TriggerInfo;
+import org.wso2.carbon.ntask.core.TaskManager;
+import org.wso2.carbon.ntask.core.service.TaskService;
 
 import java.util.HashMap;
 import java.util.Map;

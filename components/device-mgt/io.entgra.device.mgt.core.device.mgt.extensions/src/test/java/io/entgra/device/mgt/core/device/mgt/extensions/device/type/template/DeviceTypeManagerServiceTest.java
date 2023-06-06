@@ -19,29 +19,24 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template;
 
-import org.mockito.Mockito;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.wso2.carbon.base.MultitenantConstants;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceStatusTaskPluginConfig;
 import io.entgra.device.mgt.core.device.mgt.common.InitialOperationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
 import io.entgra.device.mgt.core.device.mgt.common.ProvisioningConfig;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.LicenseManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceStatusTaskConfiguration;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.PolicyMonitoring;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.PullNotificationSubscriberConfig;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.PushNotificationProvider;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.TaskConfiguration;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.*;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.exception.DeviceTypeConfigurationException;
 import io.entgra.device.mgt.core.device.mgt.extensions.utils.Utils;
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.xml.sax.SAXException;
 

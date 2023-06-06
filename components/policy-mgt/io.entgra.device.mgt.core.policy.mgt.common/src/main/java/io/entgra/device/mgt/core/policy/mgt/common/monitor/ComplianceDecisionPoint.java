@@ -22,9 +22,9 @@ package io.entgra.device.mgt.core.policy.mgt.common.monitor;
 
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 
 import java.util.List;
 

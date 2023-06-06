@@ -27,23 +27,18 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBea
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.heartbeatBeaconComponent"
- * immediate="true"
- * @scr.reference name="org.wso2.carbon.ndatasource"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal.HeartBeatBeaconComponent",
+        immediate = true)
 public class HeartBeatBeaconComponent {
 
     private static Log log = LogFactory.getLog(HeartBeatBeaconComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -71,6 +66,7 @@ public class HeartBeatBeaconComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
@@ -84,6 +80,12 @@ public class HeartBeatBeaconComponent {
         componentContext.getBundleContext().registerService(HeartBeatManagementService.class, heartBeatServiceProvider, null);
     }
 
+    @Reference(
+            name = "datasource.service",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         /* This is to avoid mobile device management component getting initialized before the underlying datasources
         are registered */

@@ -17,17 +17,13 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
+import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants.User;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
-import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants.User;
-import org.wso2.carbon.user.api.AuthorizationManager;
-import org.wso2.carbon.user.api.Permission;
-import org.wso2.carbon.user.api.UserRealm;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.api.*;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 

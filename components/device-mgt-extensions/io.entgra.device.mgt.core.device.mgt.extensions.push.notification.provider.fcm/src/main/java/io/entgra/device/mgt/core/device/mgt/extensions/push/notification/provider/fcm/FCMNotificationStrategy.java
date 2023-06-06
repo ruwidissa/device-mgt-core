@@ -21,8 +21,6 @@ package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provid
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationContext;
@@ -30,6 +28,8 @@ import io.entgra.device.mgt.core.device.mgt.common.push.notification.Notificatio
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationExecutionFailedException;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.internal.FCMDataHolder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;

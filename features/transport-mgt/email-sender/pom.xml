@@ -31,7 +31,7 @@
     <artifactId>email-sender-feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Email Sender Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <modules>
         <module>io.entgra.device.mgt.core.email.sender.feature</module>

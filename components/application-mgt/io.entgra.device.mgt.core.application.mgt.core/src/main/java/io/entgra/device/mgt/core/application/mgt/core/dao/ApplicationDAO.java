@@ -17,7 +17,7 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.dao;
 
-import io.entgra.device.mgt.core.application.mgt.common.*;
+import io.entgra.device.mgt.core.application.mgt.common.Filter;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.CategoryDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.TagDTO;

@@ -22,7 +22,7 @@
 	<packaging>bundle</packaging>
 	<name>WSO2 Carbon - API Management Integration Client</name>
 	<description>WSO2 Carbon - API Management Integration Client</description>
-	<url>http://wso2.org</url>
+	<url>https://entgra.io</url>
 
 	<build>
 		<plugins>

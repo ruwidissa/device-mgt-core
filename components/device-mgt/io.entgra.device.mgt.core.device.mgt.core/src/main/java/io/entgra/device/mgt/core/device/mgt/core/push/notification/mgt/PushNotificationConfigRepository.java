@@ -18,8 +18,8 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.push.notification.mgt;
 
-import org.wso2.carbon.context.CarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -34,9 +34,9 @@
  */
 package io.entgra.device.mgt.core.device.mgt.common.policy.mgt;
 
+import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

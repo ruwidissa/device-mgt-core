@@ -23,7 +23,6 @@ import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 
 import java.util.List;
-import java.util.Map;
 
 public class DeviceDetailsWrapper {
 

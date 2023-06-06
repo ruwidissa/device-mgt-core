@@ -18,34 +18,29 @@
 package io.entgra.device.mgt.core.device.mgt.core.report.mgt;
 
 import com.google.gson.JsonObject;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Count;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.BadRequestException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.ReportManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.report.mgt.ReportManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.dao.GroupDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.dao.*;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 /**

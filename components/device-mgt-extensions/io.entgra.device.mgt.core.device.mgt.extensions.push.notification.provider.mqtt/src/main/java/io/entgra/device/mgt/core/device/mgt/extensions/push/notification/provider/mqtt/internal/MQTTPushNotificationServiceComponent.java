@@ -18,32 +18,22 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal;
 
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal.MQTTPushNotificationServiceComponent" immediate="true"
- * @scr.reference name="carbon.device.mgt.provider"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementProviderService"
- * unbind="unsetDeviceManagementProviderService"
- * @scr.reference name="event.output.adapter.service"
- * interface="org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setOutputEventAdapterService"
- * unbind="unsetOutputEventAdapterService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal.MQTTPushNotificationServiceComponent",
+        immediate = true)
 public class MQTTPushNotificationServiceComponent {
 
     private static final Log log = LogFactory.getLog(MQTTPushNotificationServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -59,11 +49,17 @@ public class MQTTPushNotificationServiceComponent {
                     "implementation bundle", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //Do nothing
     }
 
+    @Reference(
+            name = "device.mgt.provider.service",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceManagementProviderService")
     protected void setDeviceManagementProviderService(
             DeviceManagementProviderService deviceManagementProviderService) {
         MQTTDataHolder.getInstance().setDeviceManagementProviderService(deviceManagementProviderService);
@@ -74,6 +70,12 @@ public class MQTTPushNotificationServiceComponent {
         MQTTDataHolder.getInstance().setDeviceManagementProviderService(deviceManagementProviderService);
     }
 
+    @Reference(
+            name = "output.event.adaptor.service",
+            service = org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOutputEventAdapterService")
     protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
         MQTTDataHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
     }

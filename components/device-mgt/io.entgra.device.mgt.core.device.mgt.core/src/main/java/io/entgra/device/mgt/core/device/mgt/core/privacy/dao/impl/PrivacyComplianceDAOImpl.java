@@ -19,13 +19,13 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.privacy.dao.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.privacy.dao.PrivacyComplianceDAO;
 import io.entgra.device.mgt.core.device.mgt.core.privacy.dao.PrivacyComplianceDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.privacy.impl.DeviceEnrollmentMapping;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

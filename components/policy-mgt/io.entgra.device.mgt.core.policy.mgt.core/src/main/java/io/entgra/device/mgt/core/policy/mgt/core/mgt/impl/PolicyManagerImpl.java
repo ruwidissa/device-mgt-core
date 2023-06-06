@@ -35,12 +35,8 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.mgt.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
@@ -48,12 +44,7 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.CorrectiveAction;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.DeviceGroupWrapper;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyCriterion;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.*;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.policy.PolicyConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.CommandOperation;
@@ -64,28 +55,20 @@ import io.entgra.device.mgt.core.policy.mgt.common.Criterion;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.common.ProfileManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.cache.impl.PolicyCacheManagerImpl;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.FeatureDAO;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.FeatureManagerDAOException;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyDAO;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagerDAOException;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.ProfileDAO;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.ProfileManagerDAOException;
+import io.entgra.device.mgt.core.policy.mgt.core.dao.*;
 import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.PolicyManager;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.ProfileManager;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.bean.UpdatedPolicyDeviceListBean;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PolicyManagerImpl implements PolicyManager {
 

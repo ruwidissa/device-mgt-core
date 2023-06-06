@@ -18,12 +18,8 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt;
 
-import org.mockito.Mockito;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationContext;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationExecutionFailedException;
@@ -31,19 +27,19 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.PolicyOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal.MQTTDataHolder;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal.util.MQTTAdapterConstants;
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.event.output.adapter.core.internal.CarbonOutputEventAdapterService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
-import static io.entgra.device.mgt.core.device.mgt.core.operation.mgt.PolicyOperation.POLICY_OPERATION_CODE;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+
+import static io.entgra.device.mgt.core.device.mgt.core.operation.mgt.PolicyOperation.POLICY_OPERATION_CODE;
 
 /*
     Unit tests for MQTTNotificationStrategy class

@@ -18,7 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
 public class Option {

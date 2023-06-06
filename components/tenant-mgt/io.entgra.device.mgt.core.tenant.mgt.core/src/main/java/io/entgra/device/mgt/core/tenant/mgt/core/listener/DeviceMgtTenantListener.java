@@ -17,8 +17,8 @@
  */
 package io.entgra.device.mgt.core.tenant.mgt.core.listener;
 
-import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
 import io.entgra.device.mgt.core.tenant.mgt.common.exception.TenantMgtException;
+import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
 import io.entgra.device.mgt.core.tenant.mgt.core.internal.TenantMgtDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

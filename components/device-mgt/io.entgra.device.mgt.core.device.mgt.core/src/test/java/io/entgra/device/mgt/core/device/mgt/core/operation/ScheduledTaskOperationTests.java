@@ -17,11 +17,6 @@
 */
 package io.entgra.device.mgt.core.device.mgt.core.operation;
 
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
@@ -42,6 +37,11 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationManagerI
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.task.DeviceTaskManagerService;
 import io.entgra.device.mgt.core.device.mgt.core.task.impl.DeviceTaskManagerServiceImpl;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import org.wso2.carbon.ntask.core.internal.TasksDSComponent;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.ntask.core.service.impl.TaskServiceImpl;

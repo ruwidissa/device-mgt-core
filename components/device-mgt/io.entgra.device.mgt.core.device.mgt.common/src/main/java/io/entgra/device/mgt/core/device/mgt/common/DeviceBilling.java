@@ -18,10 +18,10 @@
 package io.entgra.device.mgt.core.device.mgt.common;
 
 import com.google.gson.Gson;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceStatus;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -18,8 +18,20 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.impl;
 
+import io.entgra.device.mgt.core.certificate.mgt.core.common.BaseDeviceManagementCertificateTest;
+import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
+import io.entgra.device.mgt.core.certificate.mgt.core.dto.CAStatus;
+import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
+import io.entgra.device.mgt.core.certificate.mgt.core.dto.SCEPResponse;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
+import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
+import io.entgra.device.mgt.core.certificate.mgt.core.service.PaginationResult;
 import io.entgra.device.mgt.core.certificate.mgt.core.util.CSRGenerator;
+import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
 import io.entgra.device.mgt.core.certificate.mgt.core.util.DummyCertificate;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,19 +44,8 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import io.entgra.device.mgt.core.certificate.mgt.core.common.BaseDeviceManagementCertificateTest;
-import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
-import io.entgra.device.mgt.core.certificate.mgt.core.dto.CAStatus;
-import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
-import io.entgra.device.mgt.core.certificate.mgt.core.dto.SCEPResponse;
-import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
-import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
-import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
-import io.entgra.device.mgt.core.certificate.mgt.core.service.PaginationResult;
-import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;

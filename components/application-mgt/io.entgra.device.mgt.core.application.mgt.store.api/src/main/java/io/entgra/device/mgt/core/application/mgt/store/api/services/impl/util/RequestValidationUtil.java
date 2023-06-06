@@ -18,13 +18,13 @@
  */
 package io.entgra.device.mgt.core.application.mgt.store.api.services.impl.util;
 
+import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.application.mgt.store.api.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityStatus;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
-import io.entgra.device.mgt.core.application.mgt.store.api.util.Constants;
-import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityStatus;
 
 import java.util.List;
 

@@ -17,11 +17,11 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core;
 
-import org.junit.Assert;
-import org.testng.annotations.Test;
+import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
 import io.entgra.device.mgt.core.application.mgt.core.config.Configuration;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
-import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
+import org.junit.Assert;
+import org.testng.annotations.Test;
 
 import java.util.List;
 

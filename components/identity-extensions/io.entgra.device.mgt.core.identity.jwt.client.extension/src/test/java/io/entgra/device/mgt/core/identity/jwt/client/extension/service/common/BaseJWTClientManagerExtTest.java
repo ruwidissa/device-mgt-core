@@ -18,13 +18,13 @@
  */
 package io.entgra.device.mgt.core.identity.jwt.client.extension.service.common;
 
+import io.entgra.device.mgt.core.identity.jwt.client.extension.internal.JWTClientExtensionDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.internal.JWTClientExtensionDataHolder;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.internal.RegistryDataHolder;

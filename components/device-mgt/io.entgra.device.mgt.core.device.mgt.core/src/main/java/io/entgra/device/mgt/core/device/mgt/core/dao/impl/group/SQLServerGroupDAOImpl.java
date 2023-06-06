@@ -35,7 +35,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl.group;
 
-import org.apache.commons.lang.StringUtils;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
@@ -44,6 +43,7 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.AbstractGroupDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.GroupManagementDAOUtil;
+import org.apache.commons.lang.StringUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -20,45 +20,33 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
-import io.entgra.device.mgt.core.device.mgt.common.Base64File;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.Feature;
-import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
-import io.entgra.device.mgt.core.device.mgt.common.OperationLogFilters;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelImageRequestPayload;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import io.entgra.device.mgt.core.device.mgt.common.notification.mgt.Notification;
 import io.entgra.device.mgt.core.device.mgt.core.common.util.HttpUtil;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
-import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelThemeCreateRequest;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ApplicationWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EventConfig;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.GeofenceWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OldPasswordResetWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PolicyWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ProfileFeature;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleInfo;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Scope;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyPayloadValidator;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 
 public class RequestValidationUtil {
 

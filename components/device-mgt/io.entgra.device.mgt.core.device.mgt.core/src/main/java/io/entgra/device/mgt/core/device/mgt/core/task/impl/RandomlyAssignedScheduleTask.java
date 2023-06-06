@@ -18,10 +18,10 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.task.impl;
 
+import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.ntask.core.Task;
 
 

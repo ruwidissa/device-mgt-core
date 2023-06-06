@@ -17,12 +17,12 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerDeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerGroupInfo;
 import io.entgra.device.mgt.core.device.mgt.common.TrackerPermissionInfo;
 import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerManagementDAOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;

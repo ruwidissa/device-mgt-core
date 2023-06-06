@@ -19,6 +19,7 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework;
 
+import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestRequest;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.connector.Request;
@@ -31,7 +32,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestRequest;
 
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;

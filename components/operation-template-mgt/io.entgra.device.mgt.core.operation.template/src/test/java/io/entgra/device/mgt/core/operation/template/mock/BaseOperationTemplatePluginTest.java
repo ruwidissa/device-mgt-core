@@ -18,10 +18,13 @@
 
 package io.entgra.device.mgt.core.operation.template.mock;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 import io.entgra.device.mgt.core.operation.template.DataSourceConfig;
+import io.entgra.device.mgt.core.operation.template.TestUtils;
 import io.entgra.device.mgt.core.operation.template.dao.OperationTemplateDAOFactory;
 import io.entgra.device.mgt.core.operation.template.util.ConnectionManagerUtils;
-import io.entgra.device.mgt.core.operation.template.TestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -32,9 +35,6 @@ import org.testng.annotations.Parameters;
 import org.w3c.dom.Document;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 
 import javax.sql.DataSource;
 import javax.xml.bind.JAXBContext;

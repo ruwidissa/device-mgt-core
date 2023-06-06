@@ -17,11 +17,11 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans;
 
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.http.util.TextUtils;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
 
 public class Credential {
 

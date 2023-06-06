@@ -18,15 +18,15 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http;
 
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidConfigurationException;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationContext;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationStrategy;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationExecutionFailedException;
+import org.apache.commons.httpclient.HostConfiguration;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;

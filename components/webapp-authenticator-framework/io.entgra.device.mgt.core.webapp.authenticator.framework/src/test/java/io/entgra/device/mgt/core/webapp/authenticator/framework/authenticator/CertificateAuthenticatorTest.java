@@ -19,6 +19,23 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 
+import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
+import io.entgra.device.mgt.core.certificate.mgt.core.impl.CertificateGenerator;
+import io.entgra.device.mgt.core.certificate.mgt.core.impl.KeyStoreReader;
+import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPException;
+import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
+import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManagerImpl;
+import io.entgra.device.mgt.core.certificate.mgt.core.scep.TenantedDeviceWrapper;
+import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
+import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestCertificateGenerator;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.core.StandardContext;
@@ -35,23 +52,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.base.MultitenantConstants;
-import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
-import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
-import io.entgra.device.mgt.core.certificate.mgt.core.impl.CertificateGenerator;
-import io.entgra.device.mgt.core.certificate.mgt.core.impl.KeyStoreReader;
-import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPException;
-import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
-import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManagerImpl;
-import io.entgra.device.mgt.core.certificate.mgt.core.scep.TenantedDeviceWrapper;
-import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
-import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.util.TestCertificateGenerator;
 
 import javax.sql.DataSource;
 import java.io.File;

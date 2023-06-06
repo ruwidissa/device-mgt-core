@@ -1,14 +1,14 @@
 package io.entgra.device.mgt.core.certificate.mgt.api.impl;
 
+import io.entgra.device.mgt.core.certificate.mgt.api.CertificateMgtService;
+import io.entgra.device.mgt.core.certificate.mgt.api.beans.ErrorResponse;
+import io.entgra.device.mgt.core.certificate.mgt.api.exception.Message;
+import io.entgra.device.mgt.core.certificate.mgt.api.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
+import io.entgra.device.mgt.core.certificate.mgt.core.impl.CertificateGenerator;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreException;
-import io.entgra.device.mgt.core.certificate.mgt.core.impl.CertificateGenerator;
-import io.entgra.device.mgt.core.certificate.mgt.api.beans.ErrorResponse;
-import io.entgra.device.mgt.core.certificate.mgt.api.exception.UnexpectedServerErrorException;
-import io.entgra.device.mgt.core.certificate.mgt.api.CertificateMgtService;
-import io.entgra.device.mgt.core.certificate.mgt.api.exception.Message;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

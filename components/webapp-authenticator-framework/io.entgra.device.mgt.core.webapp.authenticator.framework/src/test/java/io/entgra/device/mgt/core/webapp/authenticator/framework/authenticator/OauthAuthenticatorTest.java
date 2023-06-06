@@ -19,6 +19,9 @@
 
 package io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator;
 
+import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.BaseWebAppAuthenticatorFrameworkTest;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.impl.RemoteOAuthValidator;
 import org.apache.catalina.connector.Request;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.tomcat.util.buf.MessageBytes;
@@ -27,13 +30,9 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.core.security.AuthenticatorsConfiguration;
 import org.wso2.carbon.identity.oauth2.stub.OAuth2TokenValidationServiceStub;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.stub.dto.OAuth2TokenValidationResponseDTO;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.AuthenticationInfo;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.BaseWebAppAuthenticatorFrameworkTest;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth.impl.RemoteOAuthValidator;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

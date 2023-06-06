@@ -18,8 +18,6 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.enforcement;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
@@ -33,6 +31,8 @@ import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHo
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.PolicyManager;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.bean.UpdatedPolicyDeviceListBean;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.impl.PolicyManagerImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;

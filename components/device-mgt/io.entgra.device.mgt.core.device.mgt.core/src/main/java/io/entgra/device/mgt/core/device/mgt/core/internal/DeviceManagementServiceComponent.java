@@ -17,13 +17,6 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
-import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.ServerStartupObserver;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
@@ -86,7 +79,15 @@ import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.DeviceAPICl
 import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagementSchemaInitializer;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -100,57 +101,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @scr.component name="org.wso2.carbon.device.manager" immediate="true"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="device.manager.service"
- * interface="io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService"
- * cardinality="0..n"
- * policy="dynamic"
- * bind="setDeviceManagementService"
- * unbind="unsetDeviceManagementService"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRegistryService"
- * unbind="unsetRegistryService"
- * @scr.reference name="org.wso2.carbon.ndatasource"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- * @scr.reference name="email.sender.service"
- * interface="io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setEmailSenderService"
- * unbind="unsetEmailSenderService"
- * @scr.reference name="device.type.generator.service"
- * interface="io.entgra.device.mgt.core.device.mgt.common.spi.DeviceTypeGeneratorService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setDeviceTypeGeneratorService"
- * unbind="unsetDeviceTypeGeneratorService"
- * @scr.reference name="entgra.heart.beat.service"
- * interface="io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setHeartBeatService"
- * unbind="unsetHeartBeatService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementServiceComponent",
+        immediate = true)
 public class DeviceManagementServiceComponent {
 
     private static final Object LOCK = new Object();
@@ -179,6 +132,7 @@ public class DeviceManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -278,6 +232,7 @@ public class DeviceManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
@@ -442,6 +397,12 @@ public class DeviceManagementServiceComponent {
      *
      * @param deviceManagementService An instance of DeviceManagementService
      */
+    @Reference(
+            name = "device.mgt.service",
+            service = io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceManagementService")
     protected void setDeviceManagementService(DeviceManagementService deviceManagementService) {
         try {
             if (log.isDebugEnabled()) {
@@ -482,6 +443,12 @@ public class DeviceManagementServiceComponent {
      *
      * @param realmService An instance of RealmService
      */
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Realm Service");
@@ -506,6 +473,12 @@ public class DeviceManagementServiceComponent {
      *
      * @param registryService An instance of RegistryService
      */
+    @Reference(
+            name = "registry.service",
+            service = org.wso2.carbon.registry.core.service.RegistryService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Registry Service");
@@ -530,6 +503,12 @@ public class DeviceManagementServiceComponent {
      *
      * @param heartBeatService An instance of HeartBeatManagementService
      */
+    @Reference(
+            name = "heart.beat.service",
+            service = io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetHeartBeatService")
     protected void setHeartBeatService(HeartBeatManagementService heartBeatService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Heart Beat Service");
@@ -547,6 +526,12 @@ public class DeviceManagementServiceComponent {
         DeviceManagementDataHolder.getInstance().setHeartBeatService(null);
     }
 
+    @Reference(
+            name = "datasource.service",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         /* This is to avoid mobile device management component getting initialized before the underlying datasources
         are registered */
@@ -559,6 +544,12 @@ public class DeviceManagementServiceComponent {
         //do nothing
     }
 
+    @Reference(
+            name = "configuration.context.service",
+            service = org.wso2.carbon.utils.ConfigurationContextService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService configurationContextService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting ConfigurationContextService");
@@ -573,6 +564,12 @@ public class DeviceManagementServiceComponent {
         DeviceManagementDataHolder.getInstance().setConfigurationContextService(null);
     }
 
+    @Reference(
+            name = "email.sender.service",
+            service = io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetEmailSenderService")
     protected void setEmailSenderService(EmailSenderService emailSenderService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Email Sender Service");
@@ -588,6 +585,12 @@ public class DeviceManagementServiceComponent {
     }
 
 
+    @Reference(
+            name = "device.task.service",
+            service = io.entgra.device.mgt.core.device.mgt.core.task.DeviceTaskManagerService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceTaskManagerService")
     protected void setDeviceTaskManagerService(DeviceTaskManagerService deviceTaskManagerService) {
         if (log.isDebugEnabled()) {
         }
@@ -605,6 +608,12 @@ public class DeviceManagementServiceComponent {
      *
      * @param deviceTypeGeneratorService An Instance of DeviceTypeGeneratorService
      */
+    @Reference(
+            name = "device.type.generator.service",
+            service = io.entgra.device.mgt.core.device.mgt.common.spi.DeviceTypeGeneratorService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceTypeGeneratorService")
     protected void setDeviceTypeGeneratorService(DeviceTypeGeneratorService deviceTypeGeneratorService) {
         if (log.isDebugEnabled()) {
             log.debug("Un setting Device DeviceTypeGeneratorService");

@@ -36,13 +36,6 @@
 package io.entgra.device.mgt.core.policy.mgt.core.util;
 
 import com.google.gson.Gson;
-import org.apache.commons.lang.StringUtils;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
@@ -51,20 +44,24 @@ import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformCon
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.CorrectiveAction;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.policy.PolicyConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.tenant.PlatformConfigurationManagementServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.PolicyOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyAdministratorPoint;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyTransformException;
 import io.entgra.device.mgt.core.policy.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.policy.mgt.core.config.datasource.JNDILookupDefinition;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.util.PolicyManagementDAOUtil;
 import io.entgra.device.mgt.core.policy.mgt.core.impl.PolicyAdministratorPointImpl;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;

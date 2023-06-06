@@ -31,7 +31,7 @@
     <artifactId>apimgt-extensions-feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - API Management Extensions Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <modules>
         <module>io.entgra.device.mgt.core.apimgt.webapp.publisher.feature</module>

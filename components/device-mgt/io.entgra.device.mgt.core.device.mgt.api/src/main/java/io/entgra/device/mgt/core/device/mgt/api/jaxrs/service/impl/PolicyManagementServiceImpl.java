@@ -35,30 +35,26 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationException;
-import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
-import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PolicyList;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PolicyWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PriorityUpdatedPolicyWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ProfileFeature;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.PolicyManagementService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.FilteringUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtUtil;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationException;
+import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyAdministratorPoint;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;

@@ -20,11 +20,7 @@ package io.entgra.device.mgt.core.device.mgt.core.permission.mgt;
 
 import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.Permission;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class represents the node of a permission tree.

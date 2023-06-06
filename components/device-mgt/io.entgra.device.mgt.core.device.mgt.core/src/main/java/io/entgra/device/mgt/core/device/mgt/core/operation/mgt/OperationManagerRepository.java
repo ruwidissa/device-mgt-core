@@ -18,8 +18,8 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt;
 
-import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManager;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

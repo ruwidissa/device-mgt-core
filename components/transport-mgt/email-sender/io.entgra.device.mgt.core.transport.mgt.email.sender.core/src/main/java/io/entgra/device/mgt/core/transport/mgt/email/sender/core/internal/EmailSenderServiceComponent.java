@@ -17,37 +17,25 @@
  */
 package io.entgra.device.mgt.core.transport.mgt.email.sender.core.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailSenderConfig;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderServiceImpl;
-import org.wso2.carbon.registry.core.service.RegistryService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.email.sender.emailsendereervicecomponent"
- * immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRegistryService"
- * unbind="unsetRegistryService"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.transport.mgt.email.sender.core.internal.EmailSenderServiceComponent",
+        immediate = true)
 public class EmailSenderServiceComponent {
 
     private static Log log = LogFactory.getLog(EmailSenderServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -73,6 +61,7 @@ public class EmailSenderServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
@@ -86,30 +75,42 @@ public class EmailSenderServiceComponent {
         componentContext.getBundleContext().registerService(EmailSenderService.class, emailServiceProvider, null);
     }
 
-    /**
-     * Sets Registry Service.
-     *
-     * @param registryService An instance of RegistryService
-     */
-    protected void setRegistryService(RegistryService registryService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setting Registry Service");
-        }
-        EmailSenderDataHolder.getInstance().setRegistryService(registryService);
-    }
+//    /**
+//     * Sets Registry Service.
+//     *
+//     * @param registryService An instance of RegistryService
+//     */
+//    @Reference(
+//            name = "registry.service",
+//            service = org.wso2.carbon.registry.core.service.RegistryService.class,
+//            cardinality = ReferenceCardinality.MANDATORY,
+//            policy = ReferencePolicy.DYNAMIC,
+//            unbind = "unsetRegistryService")
+//    protected void setRegistryService(RegistryService registryService) {
+//        if (log.isDebugEnabled()) {
+//            log.debug("Setting Registry Service");
+//        }
+//        EmailSenderDataHolder.getInstance().setRegistryService(registryService);
+//    }
+//
+//    /**
+//     * Unsets Registry Service.
+//     *
+//     * @param registryService An instance of RegistryService
+//     */
+//    protected void unsetRegistryService(RegistryService registryService) {
+//        if (log.isDebugEnabled()) {
+//            log.debug("Un setting Registry Service");
+//        }
+//        EmailSenderDataHolder.getInstance().setRegistryService(null);
+//    }
 
-    /**
-     * Unsets Registry Service.
-     *
-     * @param registryService An instance of RegistryService
-     */
-    protected void unsetRegistryService(RegistryService registryService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Un setting Registry Service");
-        }
-        EmailSenderDataHolder.getInstance().setRegistryService(null);
-    }
-
+    @Reference(
+            name = "configuration.context.service",
+            service = org.wso2.carbon.utils.ConfigurationContextService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService configurationContextService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting ConfigurationContextService");

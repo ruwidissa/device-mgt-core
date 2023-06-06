@@ -18,6 +18,7 @@
  */
 package io.entgra.device.mgt.core.webapp.authenticator.framework;
 
+import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.OAuthTokenValidationStubFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.ObjectPool;
@@ -25,7 +26,6 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.identity.oauth2.stub.OAuth2TokenValidationServiceStub;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.Utils.OAuthTokenValidationStubFactory;
 
 import java.util.Properties;
 

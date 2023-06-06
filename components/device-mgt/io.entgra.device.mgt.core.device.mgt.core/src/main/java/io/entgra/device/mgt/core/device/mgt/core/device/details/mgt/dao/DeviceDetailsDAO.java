@@ -20,7 +20,6 @@
 package io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.dao;
 
 import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocation;
 

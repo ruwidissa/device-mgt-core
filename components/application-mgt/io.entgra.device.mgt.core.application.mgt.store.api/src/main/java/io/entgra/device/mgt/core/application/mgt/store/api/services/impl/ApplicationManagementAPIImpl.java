@@ -16,8 +16,6 @@
  */
 package io.entgra.device.mgt.core.application.mgt.store.api.services.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
 import io.entgra.device.mgt.core.application.mgt.common.Filter;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
@@ -28,14 +26,11 @@ import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundExceptio
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
 import io.entgra.device.mgt.core.application.mgt.store.api.services.ApplicationManagementAPI;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 

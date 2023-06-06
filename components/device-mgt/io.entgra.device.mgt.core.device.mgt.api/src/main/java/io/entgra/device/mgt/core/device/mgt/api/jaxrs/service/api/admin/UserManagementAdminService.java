@@ -18,14 +18,14 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin;
 
-import io.swagger.annotations.*;
-import org.apache.axis2.transport.http.HTTPConstants;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PasswordResetWrapper;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.swagger.annotations.*;
+import org.apache.axis2.transport.http.HTTPConstants;
 
 import javax.validation.constraints.Size;
 import javax.ws.rs.*;

@@ -17,8 +17,8 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.dao;
 
-import io.entgra.device.mgt.core.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.IdentityServerDTO;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
 
 import java.util.List;

@@ -19,11 +19,9 @@ package io.entgra.device.mgt.core.device.mgt.core;
 
 import io.entgra.device.mgt.core.device.mgt.core.task.TestTaskManagerImpl;
 import org.wso2.carbon.ntask.common.TaskException;
-import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.service.TaskService;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

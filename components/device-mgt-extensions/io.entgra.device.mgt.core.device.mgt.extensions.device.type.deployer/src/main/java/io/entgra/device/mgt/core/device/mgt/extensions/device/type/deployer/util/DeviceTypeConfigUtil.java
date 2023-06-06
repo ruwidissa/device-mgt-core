@@ -18,8 +18,8 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.deployer.util;
 
-import org.w3c.dom.Document;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.exception.DeviceTypeConfigurationException;
+import org.w3c.dom.Document;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;

@@ -18,12 +18,13 @@
  */
 package io.entgra.device.mgt.core.apimgt.webapp.publisher;
 
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.utils.MockAPIIndividualApi;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mockito.Mockito;
 import org.testng.annotations.BeforeSuite;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.utils.MockAPIIndividualApi;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.internal.OSGiDataHolder;
@@ -34,7 +35,6 @@ import org.wso2.carbon.registry.core.jdbc.realm.InMemoryRealmService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
 
 import java.io.File;
 import java.io.InputStream;

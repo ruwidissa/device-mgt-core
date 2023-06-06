@@ -17,17 +17,6 @@
  */
 package io.entgra.device.mgt.core.application.mgt.publisher.api;
 
-import io.entgra.device.mgt.core.device.mgt.common.Base64File;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Extension;
-import io.swagger.annotations.ExtensionProperty;
-import io.swagger.annotations.Info;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
@@ -37,29 +26,15 @@ import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
 import io.entgra.device.mgt.core.application.mgt.common.response.ApplicationRelease;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.EntAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationUpdateWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppWrapper;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.*;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
+import io.swagger.annotations.*;
 
-import java.util.List;
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * APIs to handle application management related tasks.

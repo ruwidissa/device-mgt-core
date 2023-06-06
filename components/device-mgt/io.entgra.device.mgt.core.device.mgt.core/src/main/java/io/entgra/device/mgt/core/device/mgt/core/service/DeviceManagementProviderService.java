@@ -35,22 +35,13 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.service;
 
-import org.apache.commons.collections.map.SingletonMap;
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.DeviceConfiguration;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.*;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceTypeNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UserNotFoundException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.*;
+import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
@@ -65,11 +56,10 @@ import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceStatus;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeVersion;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
+import org.apache.commons.collections.map.SingletonMap;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
