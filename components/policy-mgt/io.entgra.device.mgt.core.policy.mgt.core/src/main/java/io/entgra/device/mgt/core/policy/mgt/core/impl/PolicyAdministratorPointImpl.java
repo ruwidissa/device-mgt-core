@@ -18,6 +18,10 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
@@ -336,7 +340,7 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
     }
 
     @Override
-    public List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException {
+    public List<Policy> getPolicyList(PolicyPaginationRequest request) throws PolicyManagementException {
         return policyManager.getPolicyList(request);
     }
 }

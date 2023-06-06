@@ -20,7 +20,7 @@ package io.entgra.device.mgt.core.policy.mgt.core.mgt.impl;
 
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
@@ -1427,7 +1427,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return
      */
     private List<CorrectiveAction> getSingleCorrectiveAction
-            (List<CorrectiveAction> allCorrectiveActions, int policyId) {
+    (List<CorrectiveAction> allCorrectiveActions, int policyId) {
         List<CorrectiveAction> correctiveActionsOfPolicy = new ArrayList<>();
         for (CorrectiveAction correctiveAction : allCorrectiveActions) {
             if (correctiveAction.getAssociatedGeneralPolicyId() != null &&
@@ -1471,7 +1471,7 @@ public class PolicyManagerImpl implements PolicyManager {
     }
 
     @Override
-    public List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException {
+    public List<Policy> getPolicyList(PolicyPaginationRequest request) throws PolicyManagementException {
         List<Policy> policyList;
         try {
             PolicyManagementDAOFactory.openConnection();

@@ -517,4 +517,12 @@ public interface ApplicationManager {
     String getPlistArtifact(String uuid) throws ApplicationManagementException;
 
     List<ApplicationReleaseDTO> getReleaseByPackageNames(List<String> packageIds) throws ApplicationManagementException;
+
+    /**
+     * @param applicationRelease {@link ApplicationRelease}
+     * @param oldPackageName Old package name of the application
+     * @throws ApplicationManagementException Application management exception
+     */
+    void updateAppIconInfo(ApplicationRelease applicationRelease, String oldPackageName)
+            throws ApplicationManagementException;
 }

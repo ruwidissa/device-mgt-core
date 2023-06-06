@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.policy.mgt.core.dao;
 
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.CorrectiveAction;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.DeviceGroupWrapper;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
@@ -202,9 +203,9 @@ public interface PolicyDAO {
     /**
      * This method is used to retrieve policies from the database based on the offset and limit
      * sent through the PaginationRequest
-     * @param request {@link PaginationRequest} contains offset and limit
+     * @param request {@link PolicyPaginationRequest} contains offset and limit and filters
      * @return {@link List<Policy>} - list of policies for current tenant
      * @throws PolicyManagerDAOException when there is an error while retrieving the policies from database
      */
-    List<Policy> getAllPolicies(PaginationRequest request) throws PolicyManagerDAOException;
+    List<Policy> getAllPolicies(PolicyPaginationRequest request) throws PolicyManagerDAOException;
 }

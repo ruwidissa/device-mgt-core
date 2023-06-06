@@ -26,6 +26,7 @@ import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceCon
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.JNDILookupDefinition;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.event.GenericEventConfigDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.event.H2EventConfigDAOImpl;
+import io.entgra.device.mgt.core.device.mgt.core.dao.impl.event.SQLServerEventConfigDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.geofence.GenericGeofenceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.geofence.SQLServerGeofenceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
@@ -68,6 +69,7 @@ public class EventManagementDAOFactory {
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_ORACLE:
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerEventConfigDAOImpl();
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MYSQL:
                     return new GenericEventConfigDAOImpl();
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2:

@@ -18,6 +18,8 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.service;
 
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
+import org.apache.commons.collections.map.SingletonMap;
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.*;
@@ -43,6 +45,7 @@ import org.apache.commons.collections.map.SingletonMap;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -1007,4 +1010,42 @@ public interface DeviceManagementProviderService {
             throws DeviceManagementException;
 
     Boolean sendDeviceNameChangedNotification(Device device) throws DeviceManagementException;
+
+    /**
+     * This method is for saving application icon info
+     * @param iconPath Icon path of the application
+     * @param packageName Package name of the application
+     * @param version Version of the application
+     * @param tenantId Tenant ID of the application created user
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId)
+            throws DeviceManagementException;
+
+    /**
+     * This method is for updating application icon info
+     * @param iconPath Icon path of the application
+     * @param oldPackageName Old package name of the application
+     * @param newPackageName New package name of the application
+     * @param version Version of the application
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    void updateApplicationIcon(String iconPath, String oldPackageName, String newPackageName, String version)
+            throws DeviceManagementException;
+
+    /**
+     * This method is for deleting application icon info
+     * @param packageName Package name of the application
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    void deleteApplicationIcon(String packageName) throws DeviceManagementException;
+
+    /**
+     * This method is for getting the installed application list of a device
+     * @param device {@link Device}
+     * @return list of applications {@link Application}
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    List<Application> getInstalledApplicationsOnDevice(Device device, int offset, int limit)
+            throws DeviceManagementException;
 }

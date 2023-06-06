@@ -512,6 +512,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
+            String oldPackageName = applicationManager.getApplicationByUuid(applicationUUID).getPackageName();
+            applicationManager.updateAppIconInfo(applicationRelease, oldPackageName);
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
             String msg = e.getMessage();
@@ -552,6 +554,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
+            String oldPackageName = applicationManager.getApplicationByUuid(applicationUUID).getPackageName();
+            applicationManager.updateAppIconInfo(applicationRelease, oldPackageName);
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
             String msg = e.getMessage();

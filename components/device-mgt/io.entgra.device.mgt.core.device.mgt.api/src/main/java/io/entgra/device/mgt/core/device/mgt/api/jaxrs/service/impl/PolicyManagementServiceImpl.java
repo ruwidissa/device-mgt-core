@@ -17,6 +17,22 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationException;
+import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
+import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PolicyList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PolicyWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PriorityUpdatedPolicyWrapper;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ProfileFeature;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.PolicyManagementService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.FilteringUtil;
@@ -477,6 +493,9 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
     @Path("/list")
     @Override
     public Response getPolicyList(
+            @QueryParam("name") String name,
+            @QueryParam("type") String type,
+            @QueryParam("status") String status,
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
             @QueryParam("offset") int offset,
             @QueryParam("limit") int limit) {
@@ -484,7 +503,16 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
         List<Policy> policies;
         PolicyList targetPolicies = new PolicyList();
-        PaginationRequest request = new PaginationRequest(offset, limit);
+        PolicyPaginationRequest request = new PolicyPaginationRequest(offset, limit);
+        if (name != null){
+            request.setName(name);
+        }
+        if (type != null){
+            request.setType(type);
+        }
+        if (status != null){
+            request.setStatus(status);
+        }
         try {
             PolicyAdministratorPoint policyAdministratorPoint = policyManagementService.getPAP();
             policies = policyAdministratorPoint.getPolicyList(request);

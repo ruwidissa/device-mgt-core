@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.policy.mgt.core.mgt;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.bean.UpdatedPolicyDeviceListBean;
@@ -92,10 +93,10 @@ public interface PolicyManager {
 
     /**
      * Returns list of policies with users, roles and groups attached to that policy
-     * @param request {@link PaginationRequest} contains offset and limit
+     * @param request {@link PolicyPaginationRequest} contains offset and limit and filters
      * @return {@link List<Policy>} - list of policies for current tenant
      * @throws PolicyManagementException when there is an error while retrieving the policies from database or
      * while retrieving device groups
      */
-    List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException;
+    List<Policy> getPolicyList(PolicyPaginationRequest request) throws PolicyManagementException;
 }
