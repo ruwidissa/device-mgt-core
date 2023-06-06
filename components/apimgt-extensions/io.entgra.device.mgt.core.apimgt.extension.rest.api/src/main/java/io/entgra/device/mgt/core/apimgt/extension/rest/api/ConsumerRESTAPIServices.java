@@ -49,7 +49,7 @@ public interface ConsumerRESTAPIServices {
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     APIInfo[] getAllApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                         Map<String, String> queryParam)
+                         Map<String, String> queryParam, Map<String, String> headerParams)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     Subscription createSubscription(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,

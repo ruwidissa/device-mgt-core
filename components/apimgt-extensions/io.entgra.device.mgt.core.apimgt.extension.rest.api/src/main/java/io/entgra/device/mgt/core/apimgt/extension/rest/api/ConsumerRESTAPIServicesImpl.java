@@ -224,7 +224,7 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
 
     @Override
     public APIInfo[] getAllApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                Map<String, String> queryParams)
+                                Map<String, String> queryParams, Map<String, String> headerParams)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAPIsURL = endPointPrefix + Constants.DEV_PORTAL_API;
@@ -233,12 +233,15 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
             getAPIsURL = getAPIsURL + Constants.AMPERSAND + query.getKey() + Constants.EQUAL + query.getValue();
         }
 
-        Request request = new Request.Builder()
-                .url(getAPIsURL)
-                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
-                        + accessTokenInfo.getAccess_token())
-                .get()
-                .build();
+        Request.Builder builder = new Request.Builder();
+        builder.url(getAPIsURL);
+        builder.addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                + accessTokenInfo.getAccess_token());
+        for (Map.Entry<String, String> header : headerParams.entrySet()) {
+            builder.addHeader(header.getKey(), header.getValue());
+        }
+        builder.get();
+        Request request = builder.build();
 
         try {
             Response response = client.newCall(request).execute();
@@ -251,7 +254,7 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return getAllApis(apiApplicationKey, refreshedAccessToken, queryParams);
+                return getAllApis(apiApplicationKey, refreshedAccessToken, queryParams, headerParams);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid request";
                 log.error(msg);
