@@ -55,12 +55,18 @@ import org.wso2.carbon.user.core.service.RealmService;
  * policy="dynamic"
  * bind="setRealmService"
  * unbind="unsetRealmService"
- * @scr.reference name="io.entgra.device.mgt.core.apimgt.extension.rest.api"
+ * @scr.reference name="apimgt.extension.ConsumerRESTAPIServices"
  * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices"
  * cardinality="0..1"
  * policy="dynamic"
  * bind="setConsumerRESTAPIServices"
  * unbind="unsetConsumerRESTAPIServices"
+ * @scr.reference name="apimgt.extension.APIApplicationService"
+ * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices"
+ * cardinality="0..1"
+ * policy="dynamic"
+ * bind="setAPIApplicationServices"
+ * unbind="unsetAPIApplicationServices"
  */
 public class APIApplicationManagerExtensionServiceComponent {
 

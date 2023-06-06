@@ -41,6 +41,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.App
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Subscription;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.ApiApplicationInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.RegistrationProfile;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
@@ -119,6 +120,40 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         return generateAndRetrieveApplicationKeys(applicationName, tags ,keyType, isAllowedAllDomains, validityTime, tokenInfo);
     }
 
+    @Override
+    public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
+                                                                             String keyType, String username,
+                                                                             boolean isAllowedAllDomains,
+                                                                             String validityTime, String password) throws APIManagerException {
+
+
+        ConsumerRESTAPIServices consumerRESTAPIServices =
+                APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
+
+
+        /*
+
+         */
+
+        try {
+            consumerRESTAPIServices.getAllApplications(null, null, null);
+        } catch (APIServicesException e) {
+            e.printStackTrace();
+        } catch (BadRequestException e) {
+            e.printStackTrace();
+        } catch (UnexpectedResponseException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
                                                                              String keyType, String username,

@@ -39,12 +39,8 @@ public class APIApplicationManagerExtensionDataHolder {
     private TenantIndexingLoader indexLoader;
     private JWTClientManagerService jwtClientManagerService;
     private ConsumerRESTAPIServices consumerRESTAPIServices;
-<<<<<<< HEAD
     private APIApplicationServices apiApplicationServices;
     private MetadataManagementService metadataManagementService;
-=======
->>>>>>> 9fc055cd4f (Add Consumer REST API integration)
-
     private APIApplicationManagerExtensionDataHolder() {
     }
 
@@ -121,7 +117,6 @@ public class APIApplicationManagerExtensionDataHolder {
     public void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
         this.consumerRESTAPIServices = consumerRESTAPIServices;
     }
-<<<<<<< HEAD
 
     public APIApplicationServices getApiApplicationServices() {
         return apiApplicationServices;
@@ -138,6 +133,4 @@ public class APIApplicationManagerExtensionDataHolder {
     public void setMetadataManagementService(MetadataManagementService metadataManagementService) {
         this.metadataManagementService = metadataManagementService;
     }
-=======
->>>>>>> 9fc055cd4f (Add Consumer REST API integration)
 }
