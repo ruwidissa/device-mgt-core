@@ -18,28 +18,48 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer;
 
+import java.util.List;
+
 /**
- * This class represents the Consumer API Key Information.
+ * This class represents the scope data.
  */
 
-public class APIKey {
+public class Scopes {
 
-    private String apikey;
-    private int validityTime;
+    private String key;
+    private String name;
+    private List<String> roles;
+    private String description;
 
-    public String getApikey() {
-        return apikey;
+    public String getKey() {
+        return key;
     }
 
-    public void setApikey(String apikey) {
-        this.apikey = apikey;
+    public void setKey(String key) {
+        this.key = key;
     }
 
-    public int getValidityTime() {
-        return validityTime;
+    public String getName() {
+        return name;
     }
 
-    public void setValidityTime(int validityTime) {
-        this.validityTime = validityTime;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

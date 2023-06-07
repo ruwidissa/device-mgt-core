@@ -25,8 +25,8 @@ public class Subscription {
     private String subscriptionId;
     private String applicationId;
     private String apiId;
-    private JSONObject apiInfo;
-    private JSONObject applicationInfo;
+    private APIInfo apiInfo;
+    private Application applicationInfo;
     private String throttlingPolicy;
     private String requestedThrottlingPolicy;
     private String status;
@@ -56,19 +56,19 @@ public class Subscription {
         this.apiId = apiId;
     }
 
-    public JSONObject getApiInfo() {
+    public APIInfo getApiInfo() {
         return apiInfo;
     }
 
-    public void setApiInfo(JSONObject apiInfo) {
+    public void setApiInfo(APIInfo apiInfo) {
         this.apiInfo = apiInfo;
     }
 
-    public JSONObject getApplicationInfo() {
+    public Application getApplicationInfo() {
         return applicationInfo;
     }
 
-    public void setApplicationInfo(JSONObject applicationInfo) {
+    public void setApplicationInfo(Application applicationInfo) {
         this.applicationInfo = applicationInfo;
     }
 

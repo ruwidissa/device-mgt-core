@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+
 import java.io.IOException;
 
 public class APIApplicationServicesImpl implements APIApplicationServices {
@@ -66,6 +67,38 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
         Request request = new Request.Builder()
                 .url(applicationEndpoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Credentials.basic(serverUser, serverPassword))
+                .post(requestBody)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            return gson.fromJson(response.body().string(), APIApplicationKey.class);
+        } catch (IOException e) {
+            msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(e);
+        }
+    }
+
+    @Override
+    public APIApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
+                                                                String keyType, String username,
+                                                                boolean isAllowedAllDomains,
+                                                                String validityTime, String password)
+            throws APIServicesException {
+
+        String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
+        jsonObject.put("clientName", username);
+        jsonObject.put("grantType", Constants.GRANT_TYPE);
+        jsonObject.put("owner", username);
+        jsonObject.put("saasApp", true);
+
+        RequestBody requestBody = RequestBody.Companion.create(jsonObject.toString(), JSON);
+        Request request = new Request.Builder()
+                .url(applicationEndpoint)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Credentials.basic(username, password))
                 .post(requestBody)
                 .build();
         try {

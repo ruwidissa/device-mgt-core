@@ -19,9 +19,11 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Subscription;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.KeyManager;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
@@ -33,6 +35,7 @@ import okhttp3.*;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -51,7 +54,7 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
             + Constants.COLON + port;
 
     @Override
-    public JSONObject getAllApplications(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String appName)
+    public Application[] getAllApplications(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String appName)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllApplicationsUrl = endPointPrefix + Constants.APPLICATIONS_API + "?query=" + appName;
@@ -65,8 +68,8 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray applicationList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(applicationList.toString(), Application[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -74,6 +77,45 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
                 return getAllApplications(apiApplicationKey, refreshedAccessToken, appName);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid request";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(msg, e);
+        }
+    }
+
+    @Override
+    public Application getDetailsOfAnApplication(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                                 String applicationId)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        String getAllApplicationsUrl = endPointPrefix + Constants.APPLICATIONS_API + Constants.SLASH + applicationId;
+        Request request = new Request.Builder()
+                .url(getAllApplicationsUrl)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
+                .get()
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                return gson.fromJson(response.body().string(), Application.class);
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                //TODO: max attempt count
+                return getDetailsOfAnApplication(apiApplicationKey, refreshedAccessToken, applicationId);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid request";
                 log.error(msg);
@@ -141,8 +183,8 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
     }
 
     @Override
-    public JSONObject getAllSubscriptions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                          String applicationId)
+    public Subscription[] getAllSubscriptions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                              String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllScopesUrl = endPointPrefix + Constants.SUBSCRIPTION_API + "?applicationId=" + applicationId;
@@ -156,8 +198,8 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray subscriptionList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(subscriptionList.toString(), Subscription[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -181,8 +223,8 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
     }
 
     @Override
-    public JSONObject getAllApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                 Map<String, String> queryParams)
+    public APIInfo[] getAllApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                Map<String, String> queryParams, Map<String, String> headerParams)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAPIsURL = endPointPrefix + Constants.DEV_PORTAL_API;
@@ -191,25 +233,28 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
             getAPIsURL = getAPIsURL + Constants.AMPERSAND + query.getKey() + Constants.EQUAL + query.getValue();
         }
 
-        Request request = new Request.Builder()
-                .url(getAPIsURL)
-                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
-                        + accessTokenInfo.getAccess_token())
-                .get()
-                .build();
+        Request.Builder builder = new Request.Builder();
+        builder.url(getAPIsURL);
+        builder.addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                + accessTokenInfo.getAccess_token());
+        for (Map.Entry<String, String> header : headerParams.entrySet()) {
+            builder.addHeader(header.getKey(), header.getValue());
+        }
+        builder.get();
+        Request request = builder.build();
 
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray apiList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(apiList.toString(), APIInfo[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return getAllApis(apiApplicationKey, refreshedAccessToken, queryParams);
+                return getAllApis(apiApplicationKey, refreshedAccessToken, queryParams, headerParams);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid request";
                 log.error(msg);
@@ -227,7 +272,7 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
 
     @Override
     public Subscription createSubscription(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                         Subscription subscriptions)
+                                           Subscription subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllScopesUrl = endPointPrefix + Constants.SUBSCRIPTION_API;
@@ -274,8 +319,8 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
     }
 
     @Override
-    public Subscription createSubscriptions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                            List<Subscription> subscriptions)
+    public Subscription[] createSubscriptions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                              List<Subscription> subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllScopesUrl = endPointPrefix + Constants.SUBSCRIPTION_API + "/multiple";
@@ -293,7 +338,8 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                return gson.fromJson(response.body().string(), Subscription.class);
+                JSONArray subscriptionsArray = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(subscriptionsArray.toString(), Subscription[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -364,7 +410,7 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
     }
 
     @Override
-    public JSONObject getAllKeyManagers(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    public KeyManager[] getAllKeyManagers(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllKeyManagersUrl = endPointPrefix + Constants.KEY_MANAGERS_API;
@@ -378,8 +424,8 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray keyManagerList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(keyManagerList.toString(), KeyManager[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
