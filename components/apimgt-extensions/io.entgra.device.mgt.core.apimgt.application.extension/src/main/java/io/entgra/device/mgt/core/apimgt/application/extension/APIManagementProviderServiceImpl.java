@@ -118,9 +118,10 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
             for (String tag: tags) {
                 Map<String, String> queryParams = new HashMap<>();
+                Map<String, String> headerParams = new HashMap<>();
                 queryParams.put("tag", tag);
                 if ("carbon.super".equals(tenantDomain)) {
-                    consumerRESTAPIServices.getAllApis(null, null, queryParams);
+                    consumerRESTAPIServices.getAllApis(null, null, queryParams, headerParams);
                 } else {
                     //call All API getting call with carbon super header param
                 }
