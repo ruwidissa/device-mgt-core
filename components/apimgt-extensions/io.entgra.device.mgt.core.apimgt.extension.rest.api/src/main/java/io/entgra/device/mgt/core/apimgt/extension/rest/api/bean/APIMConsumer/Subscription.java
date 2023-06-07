@@ -18,8 +18,6 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer;
 
-import org.json.JSONObject;
-
 public class Subscription {
 
     private String subscriptionId;
