@@ -80,10 +80,7 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
     }
 
     @Override
-    public APIApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
-                                                                String keyType, String username,
-                                                                boolean isAllowedAllDomains,
-                                                                String validityTime, String password)
+    public APIApplicationKey generateAndRetrieveApplicationKeys(String username, String password)
             throws APIServicesException {
 
         String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);

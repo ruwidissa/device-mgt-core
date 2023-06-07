@@ -26,10 +26,7 @@ public interface APIApplicationServices {
 
     APIApplicationKey createAndRetrieveApplicationCredentials() throws APIServicesException;
 
-    APIApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
-                                                         String keyType, String username,
-                                                         boolean isAllowedAllDomains,
-                                                         String validityTime, String password)
+    APIApplicationKey generateAndRetrieveApplicationKeys(String username, String password)
             throws APIServicesException;
 
     AccessTokenInfo generateAccessTokenFromRegisteredApplication(String clientId, String clientSecret) throws APIServicesException;
