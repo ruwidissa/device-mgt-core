@@ -50,7 +50,7 @@ public interface APIManagementProviderService {
                                                          String keyType, String username, boolean isAllowedAllDomains,
                                                          String validityTime) throws APIManagerException;
 
-    ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
+    ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
                                                          String keyType, String username,
                                                          boolean isAllowedAllDomains,
                                                          String validityTime, String password) throws APIManagerException;

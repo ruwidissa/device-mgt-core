@@ -103,7 +103,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
     }
 
     @Override
-    public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
+    public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
                                                                              String keyType, String username,
                                                                              boolean isAllowedAllDomains,
                                                                              String validityTime, String password)
@@ -116,15 +116,10 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
         ApiApplicationInfo applicationInfo = applicationInfo(apiApplicationServices, username, password);
         try {
-            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
-                    consumerRESTAPIServices.getAllApplications(applicationInfo, applicationName);
-            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application;
-
             List<APIInfo> uniqueApiList = new ArrayList<>();
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
 
             Map<String, String> headerParams = new HashMap<>();
-            if (!"carbon.super".equals(tenantDomain)) {
+            if (!"carbon.super".equals(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true))) {
                 headerParams.put("X-WSO2-Tenant", "carbon.super");
             }
 
@@ -140,6 +135,9 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 uniqueApiList.addAll(taggedAPISet);
             }
 
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
+                    consumerRESTAPIServices.getAllApplications(applicationInfo, applicationName);
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application;
             if (applications.length == 0) {
                 application = new io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application();
                 application.setName(applicationName);
@@ -151,13 +149,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                             Arrays.stream(applications).findFirst();
                     application = applicationOpt.get();
                     Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(applicationInfo, application.getApplicationId());
-                    for (Subscription subscription : subscriptions) {
-                        if (uniqueApiList.contains(subscription.getApiInfo())) {
-                            uniqueApiList.remove(subscription.getApiInfo());
-                        } else {
-                            uniqueApiList.add(subscription.getApiInfo());
-                        }
-                    }
+                    Arrays.stream(subscriptions).map(Subscription::getApiInfo).forEachOrdered(uniqueApiList::remove);
                     addSubscriptions(application, uniqueApiList, applicationInfo);
                 } else {
                     String msg = "Found more than one application for application name: " + applicationName;
