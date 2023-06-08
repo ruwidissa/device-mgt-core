@@ -120,12 +120,13 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         } catch (APIServicesException e) {
             String errorMsg = "Error occurred while generating the API application";
             log.error(errorMsg, e);
-            throw new APIManagerException(e);
+            throw new APIManagerException(errorMsg, e);
         }
 
         try {
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
                     consumerRESTAPIServices.getAllApplications(apiApplicationKey, accessTokenInfo, applicationName);
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application = null;
 
             List<APIInfo> uniqueApiList = new ArrayList<>();
 
@@ -148,11 +149,10 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             }
 
             if (applications.length == 0) {
-                io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application =
-                        new io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application();
-
+                application = new io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application();
                 application.setName(applicationName);
                 application = consumerRESTAPIServices.createApplication(apiApplicationKey, accessTokenInfo, application);
+
                 List<Subscription> subscriptions = new ArrayList<>();
                 for (APIInfo apiInfo : uniqueApiList) {
                     Subscription subscription = new Subscription();
@@ -163,10 +163,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 consumerRESTAPIServices.createSubscriptions(apiApplicationKey, accessTokenInfo, subscriptions);
             } else {
                 if (applications.length == 1) {
-                    Optional<io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application> application =
+                    Optional<io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application> applicationOpt =
                             Arrays.stream(applications).findFirst();
+                    application = applicationOpt.get();
                     Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(apiApplicationKey, accessTokenInfo,
-                            application.get().getApplicationId());
+                            application.getApplicationId());
                     for (Subscription subscription : subscriptions) {
                         if (uniqueApiList.contains(subscription.getApiInfo())) {
                             uniqueApiList.remove(subscription.getApiInfo());
@@ -175,13 +176,12 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         }
                     }
 
-
-                    //duplicate code block
+                    //todo duplicate code block -> move to a private method
                     List<Subscription> subscriptionList = new ArrayList<>();
                     for (APIInfo apiInfo : uniqueApiList) {
                         Subscription subscription = new Subscription();
                         subscription.setApiId(apiInfo.getId());
-                        subscription.setApplicationId(application.get().getApplicationId());
+                        subscription.setApplicationId(application.getApplicationId());
                         subscriptionList.add(subscription);
                     }
                     consumerRESTAPIServices.createSubscriptions(apiApplicationKey, accessTokenInfo, subscriptionList);
@@ -190,21 +190,38 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     log.error(msg);
                     throw new APIManagerException(msg);
                 }
-
             }
 
-
+            if (application != null)  {
+                if (!application.getKeys().isEmpty()) {
+                    //todo return Application Keys
+                    return null;
+                } else{
+                    //todo this method has to br modified and return different object, this is not mapped with the
+                    // response.
+                    io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIKey apiKey =
+                            consumerRESTAPIServices.generateApplicationKeys(apiApplicationKey, accessTokenInfo,
+                            application.getApplicationId());
+                    return null;
+                }
+            } else{
+                String msg = "Application retrieval process failed.";
+                log.error(msg);
+                throw  new APIManagerException(msg);
+            }
         } catch (APIServicesException e) {
-            e.printStackTrace();
+            String msg = "Error occurred wile processing the response of APIM REST endpoints.";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
         } catch (BadRequestException e) {
-            e.printStackTrace();
+            String msg = "Provided incorrect payload when invoking APIM REST endpoints.";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
         } catch (UnexpectedResponseException e) {
-            e.printStackTrace();
+            String msg = "Error occurred while invoking APIM REST endpoints.";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
         }
-
-        return null;
-
-
     }
 
 
