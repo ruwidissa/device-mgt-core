@@ -106,10 +106,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
     public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
                                                                              String keyType, String username,
                                                                              boolean isAllowedAllDomains,
-                                                                             String validityTime, String password) throws APIManagerException {
+                                                                             String validityTime, String password)
+            throws APIManagerException {
 
-        APIApplicationServices apiApplicationServices = APIApplicationManagerExtensionDataHolder.getInstance().getApiApplicationServices();
-
+        APIApplicationServices apiApplicationServices = APIApplicationManagerExtensionDataHolder.getInstance()
+                .getApiApplicationServices();
         ConsumerRESTAPIServices consumerRESTAPIServices =
                 APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
 
@@ -117,21 +118,21 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         try {
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
                     consumerRESTAPIServices.getAllApplications(applicationInfo, applicationName);
-            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application = null;
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application;
 
             List<APIInfo> uniqueApiList = new ArrayList<>();
-
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+
+            Map<String, String> headerParams = new HashMap<>();
+            if (!"carbon.super".equals(tenantDomain)) {
+                headerParams.put("X-WSO2-Tenant", "carbon.super");
+            }
 
             for (String tag : tags) {
                 Map<String, String> queryParams = new HashMap<>();
-                Map<String, String> headerParams = new HashMap<>();
                 queryParams.put("tag", tag);
-                APIInfo[] apiInfos;
-                if (!"carbon.super".equals(tenantDomain)) {
-                    headerParams.put("X-WSO2-Tenant", "carbon.super");
-                }
-                apiInfos = consumerRESTAPIServices.getAllApis(applicationInfo, queryParams, headerParams);
+
+                APIInfo[] apiInfos = consumerRESTAPIServices.getAllApis(applicationInfo, queryParams, headerParams);
 
                 uniqueApiList.addAll(List.of(apiInfos));
                 Set<APIInfo> taggedAPISet = new HashSet<>(uniqueApiList);
@@ -143,15 +144,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 application = new io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application();
                 application.setName(applicationName);
                 application = consumerRESTAPIServices.createApplication(applicationInfo, application);
-
-                List<Subscription> subscriptions = new ArrayList<>();
-                for (APIInfo apiInfo : uniqueApiList) {
-                    Subscription subscription = new Subscription();
-                    subscription.setApiId(apiInfo.getId());
-                    subscription.setApplicationId(application.getApplicationId());
-                    subscriptions.add(subscription);
-                }
-                consumerRESTAPIServices.createSubscriptions(applicationInfo, subscriptions);
+                addSubscriptions(application, uniqueApiList, applicationInfo);
             } else {
                 if (applications.length == 1) {
                     Optional<io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application> applicationOpt =
@@ -165,16 +158,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                             uniqueApiList.add(subscription.getApiInfo());
                         }
                     }
-
-                    //todo duplicate code block -> move to a private method
-                    List<Subscription> subscriptionList = new ArrayList<>();
-                    for (APIInfo apiInfo : uniqueApiList) {
-                        Subscription subscription = new Subscription();
-                        subscription.setApiId(apiInfo.getId());
-                        subscription.setApplicationId(application.getApplicationId());
-                        subscriptionList.add(subscription);
-                    }
-                    consumerRESTAPIServices.createSubscriptions(applicationInfo, subscriptionList);
+                    addSubscriptions(application, uniqueApiList, applicationInfo);
                 } else {
                     String msg = "Found more than one application for application name: " + applicationName;
                     log.error(msg);
@@ -187,18 +171,20 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     //todo return Application Keys
                     return null;
                 } else{
-                    //todo this method has to br modified and return different object, this is not mapped with the
-                    // response.
+
                     ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, application);
-                    return null;
+                    ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
+                    apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
+                    apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
+                    return apiApplicationKey;
                 }
             } else{
                 String msg = "Application retrieval process failed.";
                 log.error(msg);
-                throw  new APIManagerException(msg);
+                throw new APIManagerException(msg);
             }
         } catch (APIServicesException e) {
-            String msg = "Error occurred wile processing the response of APIM REST endpoints.";
+            String msg = "Error occurred while processing the response of APIM REST endpoints.";
             log.error(msg, e);
             throw new APIManagerException(msg, e);
         } catch (BadRequestException e) {
@@ -212,6 +198,34 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         }
     }
 
+    /**
+     *
+     * This method can be used to add a new subscriptions providing the ids of the APIs and the applications.
+     *
+     * @param application {@link io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application}
+     * @param apiInfos {@link List<APIInfo>}
+     * @param apiApplicationInfo {@link ApiApplicationInfo}
+     *
+     * @throws BadRequestException if incorrect data provided to call subscribing REST API.
+     * @throws UnexpectedResponseException if error occurred while processing the subscribing REST API.
+     * @throws APIServicesException if error occurred while invoking the subscribing REST API.
+     */
+    private void addSubscriptions(
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application,
+            List<APIInfo> apiInfos, ApiApplicationInfo apiApplicationInfo)
+            throws BadRequestException, UnexpectedResponseException, APIServicesException {
+        ConsumerRESTAPIServices consumerRESTAPIServices =
+                APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
+
+        List<Subscription> subscriptionList = new ArrayList<>();
+        apiInfos.forEach(apiInfo -> {
+            Subscription subscription = new Subscription();
+            subscription.setApiId(apiInfo.getId());
+            subscription.setApplicationId(application.getApplicationId());
+            subscriptionList.add(subscription);
+        });
+        consumerRESTAPIServices.createSubscriptions(apiApplicationInfo, subscriptionList);
+    }
 
     /**
      * {@inheritDoc}
