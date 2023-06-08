@@ -21,8 +21,10 @@ package io.entgra.device.mgt.core.apimgt.application.extension;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.ApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Subscription;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.ApiApplicationInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
@@ -111,21 +113,10 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         ConsumerRESTAPIServices consumerRESTAPIServices =
                 APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
 
-        APIApplicationKey apiApplicationKey;
-        io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo accessTokenInfo;
-        try {
-            apiApplicationKey = apiApplicationServices.generateAndRetrieveApplicationKeys(username, password);
-            accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
-                    apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
-        } catch (APIServicesException e) {
-            String errorMsg = "Error occurred while generating the API application";
-            log.error(errorMsg, e);
-            throw new APIManagerException(errorMsg, e);
-        }
-
+        ApiApplicationInfo applicationInfo = applicationInfo(apiApplicationServices, username, password);
         try {
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
-                    consumerRESTAPIServices.getAllApplications(apiApplicationKey, accessTokenInfo, applicationName);
+                    consumerRESTAPIServices.getAllApplications(applicationInfo, applicationName);
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application = null;
 
             List<APIInfo> uniqueApiList = new ArrayList<>();
@@ -140,7 +131,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 if (!"carbon.super".equals(tenantDomain)) {
                     headerParams.put("X-WSO2-Tenant", "carbon.super");
                 }
-                apiInfos = consumerRESTAPIServices.getAllApis(apiApplicationKey, accessTokenInfo, queryParams, headerParams);
+                apiInfos = consumerRESTAPIServices.getAllApis(applicationInfo, queryParams, headerParams);
 
                 uniqueApiList.addAll(List.of(apiInfos));
                 Set<APIInfo> taggedAPISet = new HashSet<>(uniqueApiList);
@@ -151,7 +142,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             if (applications.length == 0) {
                 application = new io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application();
                 application.setName(applicationName);
-                application = consumerRESTAPIServices.createApplication(apiApplicationKey, accessTokenInfo, application);
+                application = consumerRESTAPIServices.createApplication(applicationInfo, application);
 
                 List<Subscription> subscriptions = new ArrayList<>();
                 for (APIInfo apiInfo : uniqueApiList) {
@@ -160,14 +151,13 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     subscription.setApplicationId(application.getApplicationId());
                     subscriptions.add(subscription);
                 }
-                consumerRESTAPIServices.createSubscriptions(apiApplicationKey, accessTokenInfo, subscriptions);
+                consumerRESTAPIServices.createSubscriptions(applicationInfo, subscriptions);
             } else {
                 if (applications.length == 1) {
                     Optional<io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application> applicationOpt =
                             Arrays.stream(applications).findFirst();
                     application = applicationOpt.get();
-                    Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(apiApplicationKey, accessTokenInfo,
-                            application.getApplicationId());
+                    Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(applicationInfo, application.getApplicationId());
                     for (Subscription subscription : subscriptions) {
                         if (uniqueApiList.contains(subscription.getApiInfo())) {
                             uniqueApiList.remove(subscription.getApiInfo());
@@ -184,7 +174,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         subscription.setApplicationId(application.getApplicationId());
                         subscriptionList.add(subscription);
                     }
-                    consumerRESTAPIServices.createSubscriptions(apiApplicationKey, accessTokenInfo, subscriptionList);
+                    consumerRESTAPIServices.createSubscriptions(applicationInfo, subscriptionList);
                 } else {
                     String msg = "Found more than one application for application name: " + applicationName;
                     log.error(msg);
@@ -199,9 +189,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 } else{
                     //todo this method has to br modified and return different object, this is not mapped with the
                     // response.
-                    io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIKey apiKey =
-                            consumerRESTAPIServices.generateApplicationKeys(apiApplicationKey, accessTokenInfo,
-                            application.getApplicationId());
+                    ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, application);
                     return null;
                 }
             } else{
@@ -559,5 +547,33 @@ Otherwise, Generate Application Keys and return them
             PrivilegedCarbonContext.endTenantFlow();
         }
         return info;
+    }
+
+    private ApiApplicationInfo applicationInfo(APIApplicationServices apiApplicationServices, String username, String password)
+            throws APIManagerException {
+
+        APIApplicationKey apiApplicationKey;
+        io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo accessTokenInfo;
+        try {
+            if (username == null && password == null) {
+                apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+            } else {
+                apiApplicationKey = apiApplicationServices.generateAndRetrieveApplicationKeys(username, password);
+            }
+            accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
+                    apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+        } catch (APIServicesException e) {
+            String errorMsg = "Error occurred while generating the API application";
+            log.error(errorMsg, e);
+            throw new APIManagerException(errorMsg, e);
+        }
+
+        ApiApplicationInfo applicationInfo = null;
+        applicationInfo.setClientId(apiApplicationKey.getClientId());
+        applicationInfo.setClientSecret(apiApplicationKey.getClientSecret());
+        applicationInfo.setAccess_token(accessTokenInfo.getAccess_token());
+        applicationInfo.setRefresh_token(accessTokenInfo.getRefresh_token());
+
+        return applicationInfo;
     }
 }
