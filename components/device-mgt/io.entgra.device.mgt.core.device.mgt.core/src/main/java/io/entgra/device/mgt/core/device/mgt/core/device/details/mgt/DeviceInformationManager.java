@@ -80,6 +80,8 @@ public interface DeviceInformationManager {
 
     void addDeviceLocation(Device device, DeviceLocation deviceLocation) throws DeviceDetailsMgtException;
 
+    void deleteDeviceLocation(Device device) throws DeviceDetailsMgtException;
+
     void addDeviceLocations(Device device, List<DeviceLocation> deviceLocations) throws
             DeviceDetailsMgtException;
 
