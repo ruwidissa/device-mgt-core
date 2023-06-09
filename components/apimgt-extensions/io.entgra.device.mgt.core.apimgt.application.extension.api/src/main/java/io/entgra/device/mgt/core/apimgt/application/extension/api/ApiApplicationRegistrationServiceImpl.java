@@ -59,6 +59,9 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
             }
             String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
                     .getRealmConfiguration().getAdminUserName();
+            //todo
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                    .getRealmConfiguration().getAdminPassword();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
             APIManagementProviderService apiManagementProviderService = APIUtil.getAPIManagementProviderService();
             ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
@@ -107,6 +110,8 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
 
             if (username.equals(registrationProfile.getUsername())) {
                 synchronized (ApiApplicationRegistrationServiceImpl.class) {
+                    //todo
+                    registrationProfile.getPassword();
                     ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
                             applicationName, registrationProfile.getTags(),
                             ApiApplicationConstants.DEFAULT_TOKEN_TYPE, username,
@@ -118,6 +123,8 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(PrivilegedCarbonContext.
                     getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName());
 
+            //todo
+            registrationProfile.getPassword();
             synchronized (ApiApplicationRegistrationServiceImpl.class) {
                 ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
                         applicationName, registrationProfile.getTags(),
