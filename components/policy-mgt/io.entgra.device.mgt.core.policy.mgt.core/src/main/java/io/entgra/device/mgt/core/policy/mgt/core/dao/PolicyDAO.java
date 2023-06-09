@@ -22,10 +22,10 @@ import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.CorrectiveAction;
-import io.entgra.device.mgt.core.policy.mgt.common.Criterion;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.DeviceGroupWrapper;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyCriterion;
+import io.entgra.device.mgt.core.policy.mgt.common.Criterion;
 
 import java.util.HashMap;
 import java.util.List;

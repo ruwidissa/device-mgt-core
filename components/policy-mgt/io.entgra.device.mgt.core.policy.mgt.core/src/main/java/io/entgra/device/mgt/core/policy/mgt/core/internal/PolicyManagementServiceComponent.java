@@ -18,13 +18,9 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.policy.PolicyConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.ntask.core.service.TaskService;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationPoint;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerServiceImpl;
@@ -35,40 +31,22 @@ import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
 import io.entgra.device.mgt.core.policy.mgt.core.task.TaskScheduleService;
 import io.entgra.device.mgt.core.policy.mgt.core.task.TaskScheduleServiceImpl;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
+import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
 
-/**
- * @scr.component name="org.wso2.carbon.devicemgt.policy.manager" immediate="true"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="org.wso2.carbon.devicemgt.policy.evaluation.manager"
- * interface="io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationPoint"
- * cardinality="1..n"
- * policy="dynamic"
- * bind="setPEPService"
- * unbind="unsetPEPService"
- * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementService"
- * unbind="unsetDeviceManagementService"
- * @scr.reference name="ntask.component"
- * interface="org.wso2.carbon.ntask.core.service.TaskService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTaskService"
- * unbind="unsetTaskService"
- */
 @SuppressWarnings("unused")
+@Component(
+        name = "io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementServiceComponent",
+        immediate = true)
 public class PolicyManagementServiceComponent {
 
     private static final Log log = LogFactory.getLog(PolicyManagementServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
 
         try {
@@ -95,6 +73,7 @@ public class PolicyManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         try {
             PolicyConfiguration policyConfiguration =
@@ -114,6 +93,12 @@ public class PolicyManagementServiceComponent {
      *
      * @param realmService An instance of RealmService
      */
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
 
         if (log.isDebugEnabled()) {
@@ -149,7 +134,12 @@ public class PolicyManagementServiceComponent {
         PolicyManagementDataHolder.getInstance().setPolicyInformationPoint(null);
     }*/
 
-
+    @Reference(
+            name = "pep.service",
+            service = io.entgra.device.mgt.core.policy.mgt.common.PolicyEvaluationPoint.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPEPService")
     protected void setPEPService(PolicyEvaluationPoint pepService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Policy Information Service");
@@ -164,6 +154,12 @@ public class PolicyManagementServiceComponent {
         PolicyManagementDataHolder.getInstance().removePolicyEvaluationPoint(pepService);
     }
 
+    @Reference(
+            name = "device.mgt.provider.service",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceManagementService")
     protected void setDeviceManagementService(DeviceManagementProviderService deviceManagerService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Device Management Service");
@@ -178,6 +174,12 @@ public class PolicyManagementServiceComponent {
         PolicyManagementDataHolder.getInstance().setDeviceManagementService(null);
     }
 
+    @Reference(
+            name = "task.service",
+            service = org.wso2.carbon.ntask.core.service.TaskService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTaskService")
     protected void setTaskService(TaskService taskService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting the task service.");

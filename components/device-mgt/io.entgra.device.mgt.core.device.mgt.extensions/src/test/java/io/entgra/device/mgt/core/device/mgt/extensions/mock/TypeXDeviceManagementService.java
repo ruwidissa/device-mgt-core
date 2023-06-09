@@ -17,15 +17,9 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.mock;
 
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceManager;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceStatusTaskPluginConfig;
-import io.entgra.device.mgt.core.device.mgt.common.InitialOperationConfig;
-import io.entgra.device.mgt.core.device.mgt.common.MonitoringOperation;
-import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
-import io.entgra.device.mgt.core.device.mgt.common.ProvisioningConfig;
-import io.entgra.device.mgt.core.device.mgt.common.StartupOperationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManager;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.general.GeneralConfig;
 import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;

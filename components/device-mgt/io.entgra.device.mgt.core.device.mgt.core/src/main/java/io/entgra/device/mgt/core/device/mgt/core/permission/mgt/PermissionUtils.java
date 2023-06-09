@@ -18,11 +18,11 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.permission.mgt;
 
-import org.w3c.dom.Document;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.Permission;
 import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
+import org.w3c.dom.Document;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.Registry;

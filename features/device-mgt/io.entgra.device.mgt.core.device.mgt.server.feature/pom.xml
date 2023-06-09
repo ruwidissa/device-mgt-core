@@ -30,7 +30,7 @@
     <artifactId>io.entgra.device.mgt.core.device.mgt.server.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Device Management Server Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains the core bundles required for Back-end Device Management functionality
     </description>
 

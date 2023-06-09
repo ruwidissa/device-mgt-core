@@ -30,13 +30,17 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Policy Decision Point</name>
     <description>WSO2 Carbon - Policy Decision Point</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -50,14 +54,18 @@
                         <Bundle-Description>Policy Decision Point Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.policy.decision.point.internal</Private-Package>
                         <Import-Package>
-                            org.wso2.carbon.context;version="${carbon.kernel.version.range}",
+                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.policy.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.policy.decision.point.internal,
+                            io.entgra.device.mgt.core.policy.decision.point.merged,
+                            io.entgra.device.mgt.core.policy.decision.point.simple,
+                            io.entgra.device.mgt.core.policy.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.policy.mgt.core;version="[5.0,6)",
+                            org.apache.commons.logging;version="[1.2,2)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.logging,
-                            io.entgra.device.mgt.core.policy.mgt.common.*,
-                            io.entgra.device.mgt.core.policy.mgt.core.*,
-                            org.wso2.carbon.user.core.*,
-                            io.entgra.device.mgt.core.device.mgt.common.*
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.user.core.service;version="[4.8,5)"
                         </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.policy.decision.point.*
@@ -95,12 +103,9 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.equinox</groupId>
-            <artifactId>org.eclipse.equinox.common</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>

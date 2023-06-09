@@ -17,11 +17,11 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao.DeviceTypePluginDAOManager;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.exception.DeviceTypePluginExtensionException;
 import io.entgra.device.mgt.core.device.mgt.extensions.spi.DeviceTypePluginExtensionService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -31,7 +31,7 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Device Analytics</name>
     <description>WSO2 Carbon - Device Analytics</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
         <dependency>

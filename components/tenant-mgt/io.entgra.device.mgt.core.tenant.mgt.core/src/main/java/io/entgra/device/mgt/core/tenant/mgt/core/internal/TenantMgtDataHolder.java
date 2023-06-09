@@ -18,8 +18,8 @@
 package io.entgra.device.mgt.core.tenant.mgt.core.internal;
 
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
-import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
+import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
 public class TenantMgtDataHolder {

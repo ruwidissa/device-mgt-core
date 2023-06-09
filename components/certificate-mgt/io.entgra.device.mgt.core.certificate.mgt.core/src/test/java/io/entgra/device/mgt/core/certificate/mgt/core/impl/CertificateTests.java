@@ -18,10 +18,10 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.impl;
 
+import io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate;
 import io.entgra.device.mgt.core.certificate.mgt.core.util.DummyCertificate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate;
 
 /**
  * This class tests the DTO for certificates

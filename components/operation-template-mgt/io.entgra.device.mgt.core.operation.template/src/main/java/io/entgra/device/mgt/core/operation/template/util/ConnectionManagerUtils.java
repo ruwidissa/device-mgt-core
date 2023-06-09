@@ -18,20 +18,19 @@
 
 package io.entgra.device.mgt.core.operation.template.util;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
 import io.entgra.device.mgt.core.operation.template.dao.impl.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.operation.template.dao.impl.config.datasource.JNDILookupDefinition;
 import io.entgra.device.mgt.core.operation.template.exception.DBConnectionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Hashtable;
 import java.util.List;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
 
 /**
  * Connection Manager Utils class.

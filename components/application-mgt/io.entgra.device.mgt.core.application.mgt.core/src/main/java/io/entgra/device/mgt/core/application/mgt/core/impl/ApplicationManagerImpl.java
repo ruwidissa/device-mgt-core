@@ -18,93 +18,49 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
-import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
-import io.entgra.device.mgt.core.device.mgt.common.Base64File;
-import io.entgra.device.mgt.core.application.mgt.core.dao.SPApplicationDAO;
-import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstaller;
-import io.entgra.device.mgt.core.application.mgt.common.DeviceTypes;
-import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
-import io.entgra.device.mgt.core.application.mgt.common.Pagination;
+import io.entgra.device.mgt.core.application.mgt.common.*;
 import io.entgra.device.mgt.core.application.mgt.common.config.RatingConfiguration;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationSubscriptionType;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
-import io.entgra.device.mgt.core.application.mgt.common.dto.CategoryDTO;
-import io.entgra.device.mgt.core.application.mgt.common.Filter;
-import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
-import io.entgra.device.mgt.core.application.mgt.common.LifecycleState;
-import io.entgra.device.mgt.core.application.mgt.common.dto.TagDTO;
-import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationStorageManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
-import io.entgra.device.mgt.core.application.mgt.common.exception.LifecycleManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.exception.RequestValidatingException;
-import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.exception.TransactionManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.dto.*;
+import io.entgra.device.mgt.core.application.mgt.common.exception.*;
 import io.entgra.device.mgt.core.application.mgt.common.response.Application;
 import io.entgra.device.mgt.core.application.mgt.common.response.ApplicationRelease;
 import io.entgra.device.mgt.core.application.mgt.common.response.Category;
 import io.entgra.device.mgt.core.application.mgt.common.response.Tag;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.EntAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationUpdateWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppWrapper;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.*;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
-import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationReleaseDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.LifecycleStateDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.VisibilityDAO;
+import io.entgra.device.mgt.core.application.mgt.core.dao.*;
 import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
-import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
-import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
-import io.entgra.device.mgt.core.application.mgt.core.exception.ForbiddenException;
-import io.entgra.device.mgt.core.application.mgt.core.exception.LifeCycleManagementDAOException;
-import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundException;
-import io.entgra.device.mgt.core.application.mgt.core.exception.VisibilityManagementDAOException;
+import io.entgra.device.mgt.core.application.mgt.core.exception.*;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
+import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
+import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
-import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-
+import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -1287,6 +1243,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 applicationDTO.setId(appId);
                 applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
+                if (applicationDTO.getType().equals("ENTERPRISE") || applicationDTO.getType().equals("PUBLIC") ) {
+                    persistAppIconInfo(applicationReleaseDTO);
+                }
                 return APIUtil.appDtoToAppResponse(applicationDTO);
             }
         } catch (LifeCycleManagementDAOException e) {
@@ -1308,6 +1267,30 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (VisibilityManagementDAOException e) {
             String msg = "Error occurred while adding unrestricted roles. application name: " + applicationDTO.getName()
                     + ".";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Persist application icon information when creating an application
+     *
+     * @param applicationReleaseDTO {@link ApplicationReleaseDTO}
+     * @throws ApplicationManagementException if error occurred while persisting application icon information
+     */
+    private void persistAppIconInfo(ApplicationReleaseDTO applicationReleaseDTO)
+            throws ApplicationManagementException {
+        try {
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+            String iconPath = APIUtil.createAppIconPath(applicationReleaseDTO, tenantId);
+            DataHolder.getInstance().getDeviceManagementService().saveApplicationIcon(iconPath,
+                    String.valueOf(applicationReleaseDTO.getPackageName()), applicationReleaseDTO.getVersion(), tenantId);
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while creating iconPath. Application package name : " + applicationReleaseDTO.getPackageName();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while saving application icon info. Application package name : " + applicationReleaseDTO.getPackageName();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
@@ -1917,6 +1900,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 break;
             }
+        }
+        try {
+            deleteAppIconInfo(applicationDTO);
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while deleting application icon info. Application package name: " + applicationDTO.getPackageName();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         }
     }
 
@@ -4020,6 +4010,34 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void updateAppIconInfo(ApplicationRelease applicationRelease, String oldPackageName) throws ApplicationManagementException {
+        try {
+            DataHolder.getInstance().getDeviceManagementService().updateApplicationIcon(applicationRelease.getIconPath(),
+                    oldPackageName, applicationRelease.getPackageName(), applicationRelease.getVersion());
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while updating application icon info. Application package name: " + oldPackageName;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Delete application icon information when deleting an application
+     *
+     * @param applicationDTO {@link ApplicationDTO}
+     * @throws ApplicationManagementException if error occurred while deleting application icon information
+     */
+    private void deleteAppIconInfo(ApplicationDTO applicationDTO) throws ApplicationManagementException {
+        try {
+            DataHolder.getInstance().getDeviceManagementService().deleteApplicationIcon(applicationDTO.getPackageName());
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while deleting application icon info. Application package name: " + applicationDTO.getPackageName();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         }
     }
 }

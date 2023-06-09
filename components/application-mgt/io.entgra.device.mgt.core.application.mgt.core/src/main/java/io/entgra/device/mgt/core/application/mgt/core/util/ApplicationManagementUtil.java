@@ -18,40 +18,25 @@
 package io.entgra.device.mgt.core.application.mgt.core.util;
 
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
-import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
-import io.entgra.device.mgt.core.application.mgt.core.config.Extension;
-import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
-import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.common.FileDataHolder;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.InvalidConfigurationException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.RequestValidatingException;
-import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.EntAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppWrapper;
+import io.entgra.device.mgt.core.application.mgt.common.services.*;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.*;
+import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
+import io.entgra.device.mgt.core.application.mgt.core.config.Extension;
+import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.FileUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.application.mgt.common.exception.InvalidConfigurationException;
-import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
-import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
-import io.entgra.device.mgt.core.device.mgt.core.common.util.FileUtil;
 
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * This DAOUtil class is responsible for making sure single instance of each Extension Manager is used throughout for

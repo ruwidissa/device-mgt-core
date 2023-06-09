@@ -19,7 +19,6 @@
 package io.entgra.device.mgt.core.device.mgt.common.geo.service;
 
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfig;
-import io.entgra.device.mgt.core.device.mgt.common.event.config.EventMetaData;
 
 import java.util.List;
 import java.util.Map;

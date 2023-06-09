@@ -17,54 +17,34 @@
  */
 package io.entgra.device.mgt.core.application.mgt.publisher.api.impl;
 
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
-import io.entgra.device.mgt.core.device.mgt.common.Base64File;
-import io.entgra.device.mgt.core.application.mgt.common.Filter;
-import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
-import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
-import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.application.mgt.common.LifecycleState;
+import io.entgra.device.mgt.core.application.mgt.common.*;
+import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.LifecycleManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.RequestValidatingException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.response.Application;
 import io.entgra.device.mgt.core.application.mgt.common.response.ApplicationRelease;
 import io.entgra.device.mgt.core.application.mgt.common.response.Category;
 import io.entgra.device.mgt.core.application.mgt.common.response.Tag;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.AppmDataHandler;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.EntAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationUpdateWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppReleaseWrapper;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppWrapper;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.*;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ForbiddenException;
+import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
+import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
 import io.entgra.device.mgt.core.application.mgt.publisher.api.ApplicationManagementPublisherAPI;
-import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundException;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.util.List;
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Implementation of Application Management related APIs.
@@ -532,6 +512,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
+            String oldPackageName = applicationManager.getApplicationByUuid(applicationUUID).getPackageName();
+            applicationManager.updateAppIconInfo(applicationRelease, oldPackageName);
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
             String msg = e.getMessage();
@@ -572,6 +554,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
+            String oldPackageName = applicationManager.getApplicationByUuid(applicationUUID).getPackageName();
+            applicationManager.updateAppIconInfo(applicationRelease, oldPackageName);
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
             String msg = e.getMessage();

@@ -18,11 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.common;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class holds required parameters for a querying a paginated device response.

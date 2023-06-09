@@ -20,11 +20,11 @@ package io.entgra.device.mgt.core.webapp.authenticator.framework.internal;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
+import io.entgra.device.mgt.core.webapp.authenticator.framework.WebappAuthenticatorRepository;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.service.RealmService;
-import io.entgra.device.mgt.core.webapp.authenticator.framework.WebappAuthenticatorRepository;
 
 public class AuthenticatorFrameworkDataHolder {
 

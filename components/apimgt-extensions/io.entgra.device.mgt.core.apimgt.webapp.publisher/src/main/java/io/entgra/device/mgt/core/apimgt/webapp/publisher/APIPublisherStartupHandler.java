@@ -18,10 +18,10 @@
 
 package io.entgra.device.mgt.core.apimgt.webapp.publisher;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.ServerStartupObserver;
 
 import java.util.Stack;

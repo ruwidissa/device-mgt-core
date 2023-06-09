@@ -18,6 +18,8 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.dao;
 
+import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.DataSourceConfig;
+import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.JNDILookupDefinition;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.impl.GenericCertificateDAOImpl;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.impl.OracleCertificateDAOImpl;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.impl.PostgreSQLCertificateDAOImpl;
@@ -28,8 +30,6 @@ import io.entgra.device.mgt.core.certificate.mgt.core.exception.UnsupportedDatab
 import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.DataSourceConfig;
-import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.JNDILookupDefinition;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

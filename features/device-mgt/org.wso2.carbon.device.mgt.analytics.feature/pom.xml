@@ -30,7 +30,7 @@
     <artifactId>org.wso2.carbon.device.mgt.analytics.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Device Management Server Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains bundles related to device analytics data publisher and ws proxy</description>
 
     <dependencies>

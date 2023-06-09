@@ -31,7 +31,7 @@
     <packaging>war</packaging>
     <name>WSO2 Carbon - Admin Certificate Management API</name>
     <description>WSO2 Carbon - Admin Certificate Management API</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <build>
         <plugins>
@@ -162,7 +162,6 @@
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
-            <!--            <version>${pax.logging.api.version}</version>-->
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>

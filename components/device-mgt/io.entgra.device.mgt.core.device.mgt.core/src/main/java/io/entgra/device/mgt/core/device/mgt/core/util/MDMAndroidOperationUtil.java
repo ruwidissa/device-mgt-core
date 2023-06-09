@@ -19,13 +19,13 @@
 package io.entgra.device.mgt.core.device.mgt.core.util;
 
 import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.android.AppStoreApplication;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.android.EnterpriseApplication;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.android.WebApplication;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnknownApplicationTypeException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
-import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnknownApplicationTypeException;
 
 /**
  *

@@ -19,54 +19,25 @@ package io.entgra.device.mgt.core.apimgt.application.extension.internal;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;;
-import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
-import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.service.RealmService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionServiceComponent"
- * @scr.reference name="tenant.registryloader"
- * interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTenantRegistryLoader"
- * unbind="unsetTenantRegistryLoader"
- * @scr.reference name="tenant.indexloader"
- * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setIndexLoader"
- * unbind="unsetIndexLoader"
- * @scr.reference name="realm.service"
- * immediate="true"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="apimgt.extension.ConsumerRESTAPIServices"
- * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setConsumerRESTAPIServices"
- * unbind="unsetConsumerRESTAPIServices"
- * @scr.reference name="apimgt.extension.APIApplicationService"
- * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setAPIApplicationServices"
- * unbind="unsetAPIApplicationServices"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionServiceComponent",
+        immediate = true)
 public class APIApplicationManagerExtensionServiceComponent {
 
     private static final Log log = LogFactory.getLog(APIApplicationManagerExtensionServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -81,10 +52,17 @@ public class APIApplicationManagerExtensionServiceComponent {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
 
+    @Reference(
+            name = "tenant.registry.loader",
+            service = org.wso2.carbon.registry.core.service.TenantRegistryLoader.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTenantRegistryLoader")
     protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
         APIApplicationManagerExtensionDataHolder.getInstance().setTenantRegistryLoader(tenantRegistryLoader);
     }
@@ -93,6 +71,12 @@ public class APIApplicationManagerExtensionServiceComponent {
         APIApplicationManagerExtensionDataHolder.getInstance().setTenantRegistryLoader(null);
     }
 
+    @Reference(
+            name = "tenant.index.loader",
+            service = org.wso2.carbon.registry.indexing.service.TenantIndexingLoader.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetIndexLoader")
     protected void setIndexLoader(TenantIndexingLoader indexLoader) {
         if (indexLoader != null && log.isDebugEnabled()) {
             log.debug("IndexLoader service initialized");
@@ -109,6 +93,12 @@ public class APIApplicationManagerExtensionServiceComponent {
      *
      * @param realmService An instance of RealmService
      */
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting Realm Service");
@@ -133,6 +123,12 @@ public class APIApplicationManagerExtensionServiceComponent {
      *
      * @param consumerRESTAPIServices An instance of ConsumerRESTAPIServices
      */
+    @Reference(
+            name = "APIM.consumer.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConsumerRESTAPIServices")
     protected void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
         if (log.isDebugEnabled()) {
             log.debug("Setting APIM Consumer REST API Service");
@@ -158,6 +154,12 @@ public class APIApplicationManagerExtensionServiceComponent {
      *
      * @param apiApplicationServices An instance of APIApplicationServices
      */
+    @Reference(
+            name = "APIM.application.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIApplicationServices")
     protected void setAPIApplicationServices(APIApplicationServices apiApplicationServices) {
         if (log.isDebugEnabled()) {
             log.debug("Setting DCR REST API Service");
@@ -176,5 +178,4 @@ public class APIApplicationManagerExtensionServiceComponent {
         }
         APIApplicationManagerExtensionDataHolder.getInstance().setApiApplicationServices(null);
     }
-
 }

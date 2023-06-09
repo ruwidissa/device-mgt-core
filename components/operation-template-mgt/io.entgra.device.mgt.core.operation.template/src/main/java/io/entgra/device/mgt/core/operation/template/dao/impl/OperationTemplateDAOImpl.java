@@ -19,21 +19,16 @@
 package io.entgra.device.mgt.core.operation.template.dao.impl;
 
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.operation.template.dto.OperationTemplate;
 import io.entgra.device.mgt.core.operation.template.dao.OperationTemplateDAO;
+import io.entgra.device.mgt.core.operation.template.dto.OperationTemplate;
 import io.entgra.device.mgt.core.operation.template.exception.DBConnectionException;
 import io.entgra.device.mgt.core.operation.template.exception.OperationTemplateManagementDAOException;
 import io.entgra.device.mgt.core.operation.template.util.ConnectionManagerUtils;
 import io.entgra.device.mgt.core.operation.template.util.DAOUtil;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.sql.*;
 
 /**
  * Implementation for generic DB engines.

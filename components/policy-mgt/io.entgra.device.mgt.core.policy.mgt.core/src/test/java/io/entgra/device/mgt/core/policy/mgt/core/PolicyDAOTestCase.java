@@ -17,18 +17,6 @@
  */
 package io.entgra.device.mgt.core.policy.mgt.core;
 
-import io.entgra.device.mgt.core.policy.mgt.common.FeatureManagementException;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyAdministratorPoint;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
-import io.entgra.device.mgt.core.policy.mgt.common.ProfileManagementException;
-import io.entgra.device.mgt.core.policy.mgt.core.impl.PolicyAdministratorPointImpl;
-import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
-import io.entgra.device.mgt.core.policy.mgt.core.util.*;
-import junit.framework.Assert;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.Feature;
@@ -42,6 +30,18 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.*;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.policy.mgt.common.FeatureManagementException;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyAdministratorPoint;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
+import io.entgra.device.mgt.core.policy.mgt.common.ProfileManagementException;
+import io.entgra.device.mgt.core.policy.mgt.core.impl.PolicyAdministratorPointImpl;
+import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
+import io.entgra.device.mgt.core.policy.mgt.core.util.*;
+import junit.framework.Assert;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -19,6 +19,10 @@
 package io.entgra.device.mgt.core.certificate.mgt.core.common;
 
 import io.entgra.device.mgt.core.certificate.mgt.core.util.TestUtils;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -27,10 +31,6 @@ import org.testng.annotations.BeforeSuite;
 import org.w3c.dom.Document;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 
 import javax.sql.DataSource;
 import javax.xml.bind.JAXBContext;

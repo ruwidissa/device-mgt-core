@@ -31,7 +31,7 @@
     <artifactId>io.entgra.device.mgt.core.identity.jwt.client.extension.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - JWT Client Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains jwt client implementation from which we can get a access token using the jwt
         grant type handler
     </description>

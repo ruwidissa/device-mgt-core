@@ -27,20 +27,12 @@ import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.exception.Gr
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.bean.GrafanaPanelIdentifier;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.exception.MaliciousQueryAttempt;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.internal.GrafanaMgtDataHolder;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.sql.SQLException;
 

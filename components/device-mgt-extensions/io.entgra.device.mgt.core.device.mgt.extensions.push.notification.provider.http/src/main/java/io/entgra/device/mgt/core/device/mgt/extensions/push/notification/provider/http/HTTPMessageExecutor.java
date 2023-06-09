@@ -19,6 +19,8 @@
 package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidConfigurationException;
+import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationContext;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
@@ -26,8 +28,6 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidConfigurationException;
-import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationContext;
 
 import java.net.UnknownHostException;
 

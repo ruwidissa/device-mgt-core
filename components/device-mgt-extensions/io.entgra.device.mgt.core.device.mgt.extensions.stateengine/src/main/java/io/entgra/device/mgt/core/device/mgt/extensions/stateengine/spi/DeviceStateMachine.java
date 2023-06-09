@@ -18,10 +18,10 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.stateengine.spi;
 
-import io.entgra.device.mgt.core.device.mgt.extensions.stateengine.dto.StateUpdateResult;
-import io.entgra.device.mgt.core.device.mgt.extensions.stateengine.exception.StateValidationException;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.extensions.stateengine.dto.StateUpdateResult;
+import io.entgra.device.mgt.core.device.mgt.extensions.stateengine.exception.StateValidationException;
 
 public interface DeviceStateMachine {
 

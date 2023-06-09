@@ -18,21 +18,24 @@
 
 package io.entgra.device.mgt.core.apimgt.keymgt.extension.internal;
 
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
-import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
-
-/**
- * @scr.component name="io.entgra.device.mgt.core.apimgt.keymgt.extension.keyMgtServiceComponent" immediate="true"
- */
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+@Component(
+        name = "io.entgra.device.mgt.core.apimgt.keymgt.extension.internal.KeyMgtServiceComponent",
+        immediate = true)
 public class KeyMgtServiceComponent {
 
     private static final Log log = LogFactory.getLog(KeyMgtServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -54,6 +57,7 @@ public class KeyMgtServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Key Management Service Component");

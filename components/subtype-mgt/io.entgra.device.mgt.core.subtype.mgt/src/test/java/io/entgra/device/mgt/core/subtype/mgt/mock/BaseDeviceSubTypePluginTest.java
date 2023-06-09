@@ -18,9 +18,12 @@
 
 package io.entgra.device.mgt.core.subtype.mgt.mock;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import io.entgra.device.mgt.core.subtype.mgt.DataSourceConfig;
 import io.entgra.device.mgt.core.subtype.mgt.TestUtils;
 import io.entgra.device.mgt.core.subtype.mgt.dao.DeviceSubTypeDAOFactory;
-import io.entgra.device.mgt.core.subtype.mgt.DataSourceConfig;
 import io.entgra.device.mgt.core.subtype.mgt.dao.util.ConnectionManagerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,9 +35,6 @@ import org.testng.annotations.Parameters;
 import org.w3c.dom.Document;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 
 import javax.sql.DataSource;
 import javax.xml.bind.JAXBContext;

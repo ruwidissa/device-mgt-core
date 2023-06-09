@@ -34,12 +34,12 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -53,37 +53,29 @@
                         <Bundle-Description>Subtype Management Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.subtype.mgt.internal</Private-Package>
                         <Import-Package>
+                            com.fasterxml.jackson.core;version="[2.10,3)",
+                            com.google.common.cache;version="[31.0,32)",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.config;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.config.datasource;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.service;version="[5.0,6)",
+                            io.entgra.device.mgt.core.subtype.mgt.cache,
+                            io.entgra.device.mgt.core.subtype.mgt.dao,
+                            io.entgra.device.mgt.core.subtype.mgt.dao.impl,
+                            io.entgra.device.mgt.core.subtype.mgt.dao.util,
+                            io.entgra.device.mgt.core.subtype.mgt.dto,
+                            io.entgra.device.mgt.core.subtype.mgt.exception,
+                            io.entgra.device.mgt.core.subtype.mgt.impl,
+                            io.entgra.device.mgt.core.subtype.mgt.spi,
+                            io.entgra.device.mgt.core.subtype.mgt.util,
+                            javax.naming,
+                            javax.sql,
+                            org.apache.commons.logging;version="[1.2,2)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.logging,
-                            org.apache.commons.lang,
-                            javax.xml,
-                            javax.xml.stream,
-                            javax.xml.bind.*,
-                            javax.sql,
-                            javax.xml.parsers; version=0.0.0,
-                            org.w3c.dom,
-                            javax.naming,
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.base,
-                            org.wso2.carbon.utils.*,
-                            io.entgra.device.mgt.core.device.mgt.common.*,
-                            io.entgra.device.mgt.core.device.mgt.core.*,
-                            org.wso2.carbon.ndatasource.core,
-                            org.wso2.carbon.registry.core,
-                            org.wso2.carbon.registry.core.session,
-                            org.wso2.carbon.registry.core.service,
-                            org.wso2.carbon.registry.api,
-                            io.entgra.device.mgt.core.device.mgt.extensions.license.mgt.registry,
-                            javax.net.ssl,
-                            org.wso2.carbon.core.util,
-                            okhttp3,
-                            org.json.*,
-                            com.google.gson.*,
-                            com.fasterxml.jackson.core.*,
-                            com.fasterxml.jackson.databind.*,
-                            com.fasterxml.jackson.annotation.*,
-                            com.google.common.cache.*,
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.ndatasource.core;version="[4.8,5)",
+                            org.wso2.carbon.registry.core.service;version="[1.0,2)"
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.subtype.mgt.internal,
@@ -136,6 +128,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
             <scope>provided</scope>
@@ -164,10 +161,6 @@
                     <groupId>org.codehaus.woodstox</groupId>
                     <artifactId>wstx-asl</artifactId>
                 </exclusion>
-<!--                <exclusion>-->
-<!--                    <groupId>io.entgra.device.mgt.core</groupId>-->
-<!--                    <artifactId>org.wso2.carbon.device.mgt.analytics.data.publisher</artifactId>-->
-<!--                </exclusion>-->
                 <exclusion>
                     <groupId>org.wso2.carbon.analytics</groupId>
                     <artifactId>org.wso2.carbon.analytics.api</artifactId>
@@ -228,16 +221,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
             <scope>provided</scope>
@@ -246,7 +229,6 @@
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
-            <!--            <version>${pax.logging.api.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -341,19 +323,16 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-<!--            <version>${guava.version}</version>-->
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
-<!--            <version>${json.version}</version>-->
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-<!--            <version>${fasterxml.jackson.version}</version>-->
             <scope>provided</scope>
         </dependency>
         <dependency>

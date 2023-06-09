@@ -17,65 +17,38 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.internal;
 
-import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.core.impl.AppmDataHandlerImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
-import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.AppmDataHandler;
-import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.*;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
+import io.entgra.device.mgt.core.application.mgt.core.impl.AppmDataHandlerImpl;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.List;
 
-/**
- * @scr.component name="org.wso2.carbon.application.mgt.service" immediate="true"
- * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementService"
- * unbind="unsetDeviceManagementService"
- * @scr.reference name="realm.service"
- * immediate="true"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="datasource.service"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- * @scr.reference name="app.mgt.ntask.component"
- * interface="org.wso2.carbon.ntask.core.service.TaskService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTaskService"
- * unbind="unsetTaskService"
- */
+
 @SuppressWarnings("unused")
+@Component(
+        name = "io.entgra.device.mgt.core.application.mgt.core.internal.ApplicationManagementServiceComponent",
+        immediate = true)
 public class ApplicationManagementServiceComponent {
 
     private static Log log = LogFactory.getLog(ApplicationManagementServiceComponent.class);
 
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         BundleContext bundleContext = componentContext.getBundleContext();
         try {
@@ -117,7 +90,7 @@ public class ApplicationManagementServiceComponent {
             bundleContext.registerService(AppmDataHandler.class.getName(), configManager, null);
 
             ScheduledAppSubscriptionTaskManager taskManager = new ScheduledAppSubscriptionTaskManager();
-            taskManager.scheduleCleanupTask();
+            // todo: taskManager.scheduleCleanupTask();
 
             log.info("ApplicationManagement core bundle has been successfully initialized");
         } catch (Throwable e) {
@@ -126,11 +99,18 @@ public class ApplicationManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "device.mgt.provider.service",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceManagementService")
     protected void setDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting ApplicationDTO Management OSGI Manager");
@@ -147,6 +127,12 @@ public class ApplicationManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "realm.service",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         DataHolder.getInstance().setRealmService(realmService);
     }
@@ -157,6 +143,12 @@ public class ApplicationManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "datasource.service",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         /*Not implemented. Not needed but to make sure the datasource service are registered, as it is needed create
          databases. */
@@ -169,6 +161,12 @@ public class ApplicationManagementServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "task.service",
+            service = org.wso2.carbon.ntask.core.service.TaskService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTaskService")
     public void setTaskService(TaskService taskService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting the task service to Application Management SC.");

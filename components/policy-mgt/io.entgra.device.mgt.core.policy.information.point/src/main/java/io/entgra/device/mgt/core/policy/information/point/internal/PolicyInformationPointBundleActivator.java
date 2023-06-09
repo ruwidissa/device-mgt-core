@@ -18,13 +18,13 @@
 
 package io.entgra.device.mgt.core.policy.information.point.internal;
 
+import io.entgra.device.mgt.core.policy.information.point.PolicyInformationServiceImpl;
+import io.entgra.device.mgt.core.policy.mgt.common.PolicyInformationPoint;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import io.entgra.device.mgt.core.policy.information.point.PolicyInformationServiceImpl;
-import io.entgra.device.mgt.core.policy.mgt.common.PolicyInformationPoint;
 
 public class PolicyInformationPointBundleActivator implements BundleActivator {
 

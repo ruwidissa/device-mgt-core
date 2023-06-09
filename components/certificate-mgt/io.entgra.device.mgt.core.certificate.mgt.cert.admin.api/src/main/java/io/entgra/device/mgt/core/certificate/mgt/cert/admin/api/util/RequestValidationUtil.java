@@ -17,8 +17,8 @@
  */
 package io.entgra.device.mgt.core.certificate.mgt.cert.admin.api.util;
 
-import io.entgra.device.mgt.core.certificate.mgt.cert.admin.api.beans.ErrorResponse;
 import io.entgra.device.mgt.core.certificate.mgt.cert.admin.api.InputValidationException;
+import io.entgra.device.mgt.core.certificate.mgt.cert.admin.api.beans.ErrorResponse;
 
 public class RequestValidationUtil {
 

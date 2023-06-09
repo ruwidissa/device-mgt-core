@@ -18,11 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.utils;
 
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.LicenseManagementException;
@@ -37,6 +32,11 @@ import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.util
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.util.DeviceTypeUtils;
 import io.entgra.device.mgt.core.device.mgt.extensions.license.mgt.file.FileSystemBasedLicenseManager;
 import io.entgra.device.mgt.core.device.mgt.extensions.license.mgt.registry.RegistryBasedLicenseManager;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;

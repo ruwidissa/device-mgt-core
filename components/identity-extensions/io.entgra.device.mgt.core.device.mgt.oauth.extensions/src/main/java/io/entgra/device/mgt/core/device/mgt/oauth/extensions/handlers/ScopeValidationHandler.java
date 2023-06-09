@@ -17,10 +17,10 @@
  */
 package io.entgra.device.mgt.core.device.mgt.oauth.extensions.handlers;
 
+import io.entgra.device.mgt.core.device.mgt.oauth.extensions.internal.OAuthExtensionsDataHolder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.oauth.extensions.internal.OAuthExtensionsDataHolder;
 import org.wso2.carbon.identity.oauth.cache.CacheEntry;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;

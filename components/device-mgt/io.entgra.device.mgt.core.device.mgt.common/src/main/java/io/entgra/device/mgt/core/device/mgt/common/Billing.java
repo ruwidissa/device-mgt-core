@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.device.mgt.common;
 import com.google.gson.Gson;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.io.Serializable;
 
 @ApiModel(value = "Billing", description = "This class carries all information related to a device billing.")

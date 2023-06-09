@@ -21,11 +21,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
@@ -33,6 +31,8 @@ import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.monitor.PolicyComp
 import io.entgra.device.mgt.core.device.mgt.common.pull.notification.PullNotificationExecutionFailedException;
 import io.entgra.device.mgt.core.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import io.entgra.device.mgt.core.device.mgt.extensions.pull.notification.internal.PullNotificationDataHolder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;

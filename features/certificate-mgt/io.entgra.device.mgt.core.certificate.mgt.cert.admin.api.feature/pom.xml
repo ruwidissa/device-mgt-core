@@ -30,7 +30,7 @@
     <artifactId>io.entgra.device.mgt.core.certificate.mgt.cert.admin.api.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Admin Certificate Management API Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
     <description>This feature contains the APIs required for Admin Certificate Management.</description>
 
     <build>

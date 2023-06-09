@@ -26,18 +26,21 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>io.entgra.device.mgt.core.webapp.authenticator.framework</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Web Application Authenticator Framework Bundle</name>
     <description>WSO2 Carbon - Web Application Authenticator Framework Bundle</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -55,65 +58,70 @@
                             io.entgra.device.mgt.core.webapp.authenticator.framework.*
                         </Export-Package>
                         <Import-Package>
-                            com.nimbusds.jose;version="${nimbus.orbit.version.range}",
-                            com.nimbusds.jose.crypto;version="${nimbus.orbit.version.range}",
-                            com.nimbusds.jwt;version="${nimbus.orbit.version.range}",
-                            javax.xml.bind,
-                            javax.xml.bind.annotation,
-                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
-                            javax.xml.validation,
-                            org.apache.catalina;version="9.0",
-                            org.apache.catalina.connector;version="9.0",
-                            org.apache.catalina.util;version="9.0",
-                            org.apache.commons.logging,
-                            org.apache.coyote;version="9.0",
-                            org.apache.tomcat.util.buf;version="9.0",
-                            org.apache.tomcat.util.http;version="9.0",
+                            com.google.gson;version="[2.9,3)",
+                            com.nimbusds.jose;version="[7.9,8)",
+                            com.nimbusds.jose.crypto;version="[7.9,8)",
+                            com.nimbusds.jwt;version="[7.9,8)",
+                            io.entgra.device.mgt.core.certificate.mgt.core.dto;version="[5.0,6)",
+                            io.entgra.device.mgt.core.certificate.mgt.core.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.certificate.mgt.core.scep;version="[5.0,6)",
+                            io.entgra.device.mgt.core.certificate.mgt.core.service;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.spi;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.util;version="[5.0,6)",
+                            io.entgra.device.mgt.core.webapp.authenticator.framework.authenticator.oauth,
+                            io.entgra.device.mgt.core.webapp.authenticator.framework.authorizer,
+                            io.entgra.device.mgt.core.webapp.authenticator.framework.config,
+                            io.entgra.device.mgt.core.webapp.authenticator.framework.config.impl,
+                            javax.servlet;version="[2.6,3)",
+                            <!--javax.xml.bind;version="[2.3,3)",-->
+                            <!--javax.xml.bind.annotation;version="[2.3,3)",-->
+                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}",
+                            <!--javax.xml.stream;version="[1.0,2)",-->
+                            javax.xml.stream.*;version="[1.0.1,1.1.0)",
+                            org.apache.axiom.om;version="[1.2,2)",
+                            org.apache.axiom.om.impl.builder;version="[1.2,2)",
+                            org.apache.axiom.om.util;version="[1.2,2)",
+                            org.apache.axiom.soap;version="[1.2,2)",
+                            org.apache.axiom.soap.impl.builder;version="[1.2,2)",
+                            org.apache.axis2;version="[1.6,2)",
+                            org.apache.axis2.client;version="[1.6,2)",
+                            org.apache.axis2.context;version="[1.6,2)",
+                            org.apache.catalina;version="${catalina.version.range}",
+                            org.apache.catalina.connector;version="${catalina.version.range}",
+                            org.apache.commons.codec.binary;version="[1.14,2)",
+                            org.apache.commons.httpclient;version="[3.1,4)",
+                            org.apache.commons.httpclient.params;version="[3.1,4)",
+                            org.apache.commons.lang;version="[2.6,3)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.apache.commons.pool;version="[1.5,2)",
+                            org.apache.commons.pool.impl;version="[1.5,2)",
+                            org.apache.coyote;version="[9.0,10)",
+                            org.apache.tomcat.util.buf;version="[9.0,10)",
+                            org.apache.tomcat.util.http;version="[9.0,10)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.owasp.encoder;version="[1.2,2)",
                             org.w3c.dom,
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.core.util,
-                            org.wso2.carbon.identity.base; version="${carbon.identity.imp.pkg.version}",
-                            org.wso2.carbon.identity.core.util; version="${carbon.identity.imp.pkg.version}",
-                            org.wso2.carbon.identity.oauth2.*;
-                            version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
-                            org.wso2.carbon.tomcat.ext.valves,
-                            org.wso2.carbon.user.api,
-                            org.wso2.carbon.user.core.service,
-                            org.wso2.carbon.user.core.tenant,
-                            org.wso2.carbon.utils,
-                            org.wso2.carbon.utils.multitenancy,
-                            org.xml.sax,
-                            <!--com.google.gson.*,-->
-                            javax.servlet,
-                            javax.servlet.http,
-                            javax.xml,
-                            org.apache.axis2.transport.http,
-                            io.entgra.device.mgt.core.certificate.mgt.core.*,
-                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt.*,
-                            io.entgra.device.mgt.core.device.mgt.core.util.*,
-                            io.entgra.device.mgt.core.device.mgt.common.*,
-                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt.*,
-                            org.apache.axis2,
-                            org.apache.axis2.client,
-                            org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
-                            org.apache.commons.httpclient,
-                            org.wso2.carbon.core.security,
-                            org.apache.axis2.context,
-                            org.apache.commons.httpclient.params,
-                            org.apache.commons.pool,
-                            org.apache.commons.pool.impl,
-                            org.apache.http.conn,
-                            org.apache.http.impl.conn,
-                            <!--javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",-->
-                            javax.xml.stream,
-                            org.apache.axiom.*; version="${axiom.osgi.version.range}",
-                            org.wso2.carbon.registry.core.*,
-                            org.wso2.carbon.registry.common.*;version="${carbon.registry.imp.pkg.version.range}",
-                            org.wso2.carbon.registry.indexing.*; version="${carbon.registry.imp.pkg.version.range}",
-                            org.wso2.carbon.base,
-                            org.owasp.encoder
+                            org.wso2.carbon.base;version="[1.0,2)",
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.core.util;version="[4.8,5)",
+                            org.wso2.carbon.identity.oauth2;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.dto;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.stub;version="[6.9,7)",
+                            org.wso2.carbon.identity.oauth2.stub.dto;version="[6.9,7)",
+                            org.wso2.carbon.registry.core.exceptions;version="[1.0,2)",
+                            org.wso2.carbon.registry.core.service;version="[1.0,2)",
+                            org.wso2.carbon.registry.indexing.service;version="[4.8,5)",
+                            org.wso2.carbon.tomcat.ext.valves;version="[4.8,5)",
+                            org.wso2.carbon.user.api;version="[1.0,2)",
+                            org.wso2.carbon.user.core.service;version="[4.8,5)",
+                            org.wso2.carbon.user.core.tenant;version="[4.8,5)",
+                            org.wso2.carbon.utils;version="[4.8,5)",
+                            org.wso2.carbon.utils.multitenancy;version="[4.8,5)"
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -160,6 +168,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.wso2.tomcat</groupId>
             <artifactId>tomcat</artifactId>

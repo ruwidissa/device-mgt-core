@@ -18,16 +18,14 @@
 
 package io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.HeartBeatBeaconUtils;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.datasource.JNDILookupDefinition;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao.impl.GenericHeartBeatDAOImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

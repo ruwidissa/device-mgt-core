@@ -18,9 +18,9 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.permission.mgt;
 
+import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.Permission;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.Permission;
 
 import java.util.StringTokenizer;
 

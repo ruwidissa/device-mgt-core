@@ -44,12 +44,15 @@ import io.entgra.device.mgt.core.certificate.mgt.core.scep.SCEPManager;
 import io.entgra.device.mgt.core.certificate.mgt.core.scep.TenantedDeviceWrapper;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementService;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.PaginationResult;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;

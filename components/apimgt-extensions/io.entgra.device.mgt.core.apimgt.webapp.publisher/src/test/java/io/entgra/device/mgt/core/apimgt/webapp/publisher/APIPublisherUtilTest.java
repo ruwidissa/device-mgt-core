@@ -17,9 +17,6 @@
  */
 package io.entgra.device.mgt.core.apimgt.webapp.publisher;
 
-import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.APIResource;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.APIResourceConfiguration;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
@@ -28,6 +25,9 @@ import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiUriTemplate;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.utils.MockServletContext;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.utils.TestUtils;
+import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.InMemoryRealmService;
@@ -36,14 +36,11 @@ import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.servlet.ServletContext;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherUtil.buildApiConfig;
-import static io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherUtil.getApiEndpointUrl;
-import static io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherUtil.setResourceAuthTypes;
+import static io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherUtil.*;
 
 /**
  * This is the test class for {@link APIPublisherUtil}

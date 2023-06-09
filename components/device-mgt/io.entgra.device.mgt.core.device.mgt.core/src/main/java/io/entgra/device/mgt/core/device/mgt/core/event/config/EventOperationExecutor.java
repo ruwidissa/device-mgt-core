@@ -19,17 +19,10 @@
 package io.entgra.device.mgt.core.device.mgt.core.event.config;
 
 import com.google.gson.Gson;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
-import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfig;
-import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfigurationException;
-import io.entgra.device.mgt.core.device.mgt.common.event.config.EventMetaData;
-import io.entgra.device.mgt.core.device.mgt.common.event.config.EventOperation;
-import io.entgra.device.mgt.core.device.mgt.common.event.config.EventRevokeOperation;
+import io.entgra.device.mgt.core.device.mgt.common.event.config.*;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoFenceEventMeta;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoLocationBasedServiceException;
@@ -43,12 +36,11 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMgtConst
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Event create/revoke operation creation task.

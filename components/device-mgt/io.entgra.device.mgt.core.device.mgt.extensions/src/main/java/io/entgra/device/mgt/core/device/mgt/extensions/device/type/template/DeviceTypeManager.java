@@ -17,28 +17,14 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceManager;
-import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
-import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
+import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.LicenseManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.LicenseManager;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DataSource;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceDetails;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Feature;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Properties;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Table;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.TableConfig;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.*;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao.DeviceDAODefinition;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.dao.DeviceTypePluginDAOManager;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.exception.DeviceTypeDeployerPayloadException;
@@ -49,6 +35,11 @@ import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.util
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.util.DeviceTypeUtils;
 import io.entgra.device.mgt.core.device.mgt.extensions.license.mgt.meta.data.MetaRepositoryBasedLicenseManager;
 import io.entgra.device.mgt.core.device.mgt.extensions.spi.DeviceTypePluginExtensionService;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.utils.CarbonUtils;

@@ -17,9 +17,9 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.dao;
 
-import io.entgra.device.mgt.core.application.mgt.common.response.Review;
 import io.entgra.device.mgt.core.application.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ReviewDTO;
+import io.entgra.device.mgt.core.application.mgt.common.response.Review;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ReviewManagementDAOException;
 
 import java.util.List;

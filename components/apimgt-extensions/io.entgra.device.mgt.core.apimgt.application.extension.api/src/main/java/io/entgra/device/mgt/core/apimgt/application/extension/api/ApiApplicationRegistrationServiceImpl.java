@@ -18,18 +18,18 @@
 
 package io.entgra.device.mgt.core.apimgt.application.extension.api;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
 import io.entgra.device.mgt.core.apimgt.application.extension.api.util.APIUtil;
 import io.entgra.device.mgt.core.apimgt.application.extension.api.util.RegistrationProfile;
 import io.entgra.device.mgt.core.apimgt.application.extension.constants.ApiApplicationConstants;
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.POST;

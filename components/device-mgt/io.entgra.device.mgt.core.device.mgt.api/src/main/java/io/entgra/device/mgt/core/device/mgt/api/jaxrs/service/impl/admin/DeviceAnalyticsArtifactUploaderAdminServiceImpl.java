@@ -17,6 +17,10 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.DeviceAnalyticsArtifactUploaderAdminService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.Stub;
@@ -31,23 +35,15 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
-import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.Utils;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.DeviceAnalyticsArtifactUploaderAdminService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.event.receiver.stub.EventReceiverAdminServiceStub;
 import org.wso2.carbon.event.stream.stub.EventStreamAdminServiceStub;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.activation.DataHandler;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -58,11 +54,7 @@ import javax.ws.rs.core.Response;
 import java.io.*;
 import java.nio.file.Files;
 import java.rmi.RemoteException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
@@ -176,10 +168,11 @@ public class DeviceAnalyticsArtifactUploaderAdminServiceImpl implements DeviceAn
             if (streamFileList != null) {
                 publishDynamicEventStream(type, tenantDomain, streamFileList);
             }
-            if (deployAnalyticsCapp(type, list)){
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("\"Error, Artifact does not exist.\"").build();
-            }
+            //todo:analytics
+//            if (deployAnalyticsCapp(type, list)){
+//                return Response.status(Response.Status.BAD_REQUEST)
+//                        .entity("\"Error, Artifact does not exist.\"").build();
+//            }
             if (receiverFileList != null) {
                 publishDynamicEventReceivers(type, tenantDomain, receiverFileList);
             }
@@ -201,62 +194,64 @@ public class DeviceAnalyticsArtifactUploaderAdminServiceImpl implements DeviceAn
                 KeyManagementException | IOException | NoSuchAlgorithmException e) {
             log.error("Failed to access keystore for, tenantDomain: " + tenantDomain, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (RegistryException e) {
-            log.error("Failed to load tenant, tenantDomain: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            //todo:analytics
+//        } catch (RegistryException e) {
+//            log.error("Failed to load tenant, tenantDomain: " + tenantDomain, e);
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (ParseException e) {
             log.error("Invalid stream definition for device type" + type + " for tenant, tenantDomain: " + tenantDomain, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    private boolean deployAnalyticsCapp(@PathParam("type") String type, List<Header> list) throws IOException, RegistryException {
-        CarbonAppUploaderStub carbonAppUploaderStub = null;
-        try {
-            File directory = new File(CAR_FILE_LOCATION + File.separator + type);
-            if (directory.isDirectory() && directory.exists()) {
-                UploadedFileItem[] uploadedFileItems = loadCappFromFileSystem(type);
-                if (uploadedFileItems.length > 0) {
-                    if (DEVICE_MANAGEMENT_TYPE.equals(type.toLowerCase())) {
-                        carbonAppUploaderStub = new CarbonAppUploaderStub(Utils.replaceSystemProperty(
-                                IOT_MGT_URL));
-                        Options appUploaderOptions = carbonAppUploaderStub._getServiceClient().getOptions();
-                        if (appUploaderOptions == null) {
-                            appUploaderOptions = new Options();
-                        }
-                        appUploaderOptions.setProperty(HTTPConstants.HTTP_HEADERS, list);
-                        appUploaderOptions.setProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER
-                                , new Protocol(DEFAULT_HTTP_PROTOCOL,
-                                               (ProtocolSocketFactory) new SSLProtocolSocketFactory
-                                                       (sslContext), Integer.parseInt(Utils.replaceSystemProperty(
-                                IOT_MGT_PORT))));
-
-                        carbonAppUploaderStub._getServiceClient().setOptions(appUploaderOptions);
-                        carbonAppUploaderStub.uploadApp(uploadedFileItems);
-                    } else {
-                        carbonAppUploaderStub = new CarbonAppUploaderStub(Utils.replaceSystemProperty(DAS_URL));
-                        Options appUploaderOptions = carbonAppUploaderStub._getServiceClient().getOptions();
-                        if (appUploaderOptions == null) {
-                            appUploaderOptions = new Options();
-                        }
-                        appUploaderOptions.setProperty(HTTPConstants.HTTP_HEADERS, list);
-                        appUploaderOptions.setProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER
-                                , new Protocol(DEFAULT_HTTP_PROTOCOL
-                                , (ProtocolSocketFactory) new SSLProtocolSocketFactory(sslContext)
-                                , Integer.parseInt(Utils.replaceSystemProperty(DAS_PORT))));
-
-                        carbonAppUploaderStub._getServiceClient().setOptions(appUploaderOptions);
-                        carbonAppUploaderStub.uploadApp(uploadedFileItems);
-                    }
-                }
-            } else {
-                return true;
-            }
-            return false;
-        } finally {
-            cleanup(carbonAppUploaderStub);
-        }
-    }
+    //todo:analytics
+//    private boolean deployAnalyticsCapp(@PathParam("type") String type, List<Header> list) throws IOException, RegistryException {
+//        CarbonAppUploaderStub carbonAppUploaderStub = null;
+//        try {
+//            File directory = new File(CAR_FILE_LOCATION + File.separator + type);
+//            if (directory.isDirectory() && directory.exists()) {
+//                UploadedFileItem[] uploadedFileItems = loadCappFromFileSystem(type);
+//                if (uploadedFileItems.length > 0) {
+//                    if (DEVICE_MANAGEMENT_TYPE.equals(type.toLowerCase())) {
+//                        carbonAppUploaderStub = new CarbonAppUploaderStub(Utils.replaceSystemProperty(
+//                                IOT_MGT_URL));
+//                        Options appUploaderOptions = carbonAppUploaderStub._getServiceClient().getOptions();
+//                        if (appUploaderOptions == null) {
+//                            appUploaderOptions = new Options();
+//                        }
+//                        appUploaderOptions.setProperty(HTTPConstants.HTTP_HEADERS, list);
+//                        appUploaderOptions.setProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER
+//                                , new Protocol(DEFAULT_HTTP_PROTOCOL,
+//                                               (ProtocolSocketFactory) new SSLProtocolSocketFactory
+//                                                       (sslContext), Integer.parseInt(Utils.replaceSystemProperty(
+//                                IOT_MGT_PORT))));
+//
+//                        carbonAppUploaderStub._getServiceClient().setOptions(appUploaderOptions);
+//                        carbonAppUploaderStub.uploadApp(uploadedFileItems);
+//                    } else {
+//                        carbonAppUploaderStub = new CarbonAppUploaderStub(Utils.replaceSystemProperty(DAS_URL));
+//                        Options appUploaderOptions = carbonAppUploaderStub._getServiceClient().getOptions();
+//                        if (appUploaderOptions == null) {
+//                            appUploaderOptions = new Options();
+//                        }
+//                        appUploaderOptions.setProperty(HTTPConstants.HTTP_HEADERS, list);
+//                        appUploaderOptions.setProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER
+//                                , new Protocol(DEFAULT_HTTP_PROTOCOL
+//                                , (ProtocolSocketFactory) new SSLProtocolSocketFactory(sslContext)
+//                                , Integer.parseInt(Utils.replaceSystemProperty(DAS_PORT))));
+//
+//                        carbonAppUploaderStub._getServiceClient().setOptions(appUploaderOptions);
+//                        carbonAppUploaderStub.uploadApp(uploadedFileItems);
+//                    }
+//                }
+//            } else {
+//                return true;
+//            }
+//            return false;
+//        } finally {
+//            cleanup(carbonAppUploaderStub);
+//        }
+//    }
 
     private void publishDynamicEventReceivers(String deviceType, String tenantDomain, List<String> receiversList)
             throws IOException, UserStoreException, JWTClientException {
@@ -406,31 +401,32 @@ public class DeviceAnalyticsArtifactUploaderAdminServiceImpl implements DeviceAn
         return streamList;
     }
 
-    private UploadedFileItem[] loadCappFromFileSystem(String deviceType) throws IOException {
-
-        File directory = new File(CAR_FILE_LOCATION + File.separator + deviceType);
-        File[] carFiles = directory.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.toLowerCase().endsWith(".car");
-            }
-        });
-        List<UploadedFileItem> uploadedFileItemLis = new ArrayList<>();
-        if (carFiles != null) {
-
-            for (File carFile : carFiles) {
-                UploadedFileItem uploadedFileItem = new UploadedFileItem();
-                DataHandler param = new DataHandler(carFile.toURI().toURL());
-                uploadedFileItem.setDataHandler(param);
-                uploadedFileItem.setFileName(carFile.getName());
-                uploadedFileItem.setFileType("jar");
-                uploadedFileItemLis.add(uploadedFileItem);
-            }
-        }
-        UploadedFileItem[] fileItems = new UploadedFileItem[uploadedFileItemLis.size()];
-        fileItems = uploadedFileItemLis.toArray(fileItems);
-        return fileItems;
-    }
+    //todo:analytics
+//    private UploadedFileItem[] loadCappFromFileSystem(String deviceType) throws IOException {
+//
+//        File directory = new File(CAR_FILE_LOCATION + File.separator + deviceType);
+//        File[] carFiles = directory.listFiles(new FilenameFilter() {
+//            @Override
+//            public boolean accept(File dir, String name) {
+//                return name.toLowerCase().endsWith(".car");
+//            }
+//        });
+//        List<UploadedFileItem> uploadedFileItemLis = new ArrayList<>();
+//        if (carFiles != null) {
+//
+//            for (File carFile : carFiles) {
+//                UploadedFileItem uploadedFileItem = new UploadedFileItem();
+//                DataHandler param = new DataHandler(carFile.toURI().toURL());
+//                uploadedFileItem.setDataHandler(param);
+//                uploadedFileItem.setFileName(carFile.getName());
+//                uploadedFileItem.setFileType("jar");
+//                uploadedFileItemLis.add(uploadedFileItem);
+//            }
+//        }
+//        UploadedFileItem[] fileItems = new UploadedFileItem[uploadedFileItemLis.size()];
+//        fileItems = uploadedFileItemLis.toArray(fileItems);
+//        return fileItems;
+//    }
 
     /**
      * Loads the keystore.

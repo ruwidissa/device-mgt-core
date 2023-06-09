@@ -18,6 +18,11 @@
 
 package io.entgra.device.mgt.core.identity.jwt.client.extension;
 
+import io.entgra.device.mgt.core.identity.jwt.client.extension.constant.JWTConstants;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.JWTConfig;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
+import io.entgra.device.mgt.core.identity.jwt.client.extension.util.JWTClientUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,11 +35,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.constant.JWTConstants;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.JWTConfig;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
-import io.entgra.device.mgt.core.identity.jwt.client.extension.util.JWTClientUtil;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

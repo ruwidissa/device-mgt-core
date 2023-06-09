@@ -17,12 +17,6 @@
  */
 package io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.listener;
 
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleEvent;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.core.StandardContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIConfig;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherUtil;
@@ -30,6 +24,12 @@ import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.APIResourceConfi
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.util.AnnotationProcessor;
+import org.apache.catalina.Lifecycle;
+import org.apache.catalina.LifecycleEvent;
+import org.apache.catalina.LifecycleListener;
+import org.apache.catalina.core.StandardContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 

@@ -18,6 +18,8 @@
 
 package io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service;
 
+import io.entgra.device.mgt.core.device.mgt.common.ServerCtxInfo;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.HeartBeatBeaconConfig;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao.HeartBeatBeaconDAOFactory;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao.HeartBeatDAO;
@@ -29,17 +31,10 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartB
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal.HeartBeatBeaconDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.ServerCtxInfo;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class HeartBeatManagementServiceImpl implements HeartBeatManagementService {

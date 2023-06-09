@@ -18,11 +18,11 @@
 
 package io.entgra.device.mgt.core.device.mgt.core;
 
+import io.entgra.device.mgt.core.device.mgt.common.ServerCtxInfo;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dto.HeartBeatEvent;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dto.ServerContext;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
-import io.entgra.device.mgt.core.device.mgt.common.ServerCtxInfo;
 
 import java.util.Map;
 

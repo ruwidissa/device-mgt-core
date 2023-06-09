@@ -18,9 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 
-import org.apache.commons.collections.map.SingletonMap;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
@@ -30,28 +27,21 @@ import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.DevicePrope
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceMonitoringData;
+import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
+import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCoordinate;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCoordinate;
+import org.apache.commons.collections.map.SingletonMap;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.sql.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
+import java.util.*;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 

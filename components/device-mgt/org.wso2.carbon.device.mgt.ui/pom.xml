@@ -31,7 +31,7 @@
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Device Management Base UI</name>
     <description>WSO2 Carbon - Device Management Base UI</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <build>
         <plugins>

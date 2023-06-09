@@ -18,33 +18,25 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceTypeGeneratorService;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypeGeneratorServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.DeviceTypePluginExtensionServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.extensions.spi.DeviceTypePluginExtensionService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.device.mgt.extensions.DeviceTypeExtensionServiceComponent"
- * immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService" cardinality="0..1"
- * policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
- * @scr.reference name="org.wso2.carbon.ndatasource"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.extensions.internal.DeviceTypeExtensionServiceComponent",
+        immediate = true)
 public class DeviceTypeExtensionServiceComponent {
 
     private static final Log log = LogFactory.getLog(DeviceTypeExtensionServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctx) {
         try {
             if (log.isDebugEnabled()) {
@@ -61,13 +53,19 @@ public class DeviceTypeExtensionServiceComponent {
             log.error("Error occurred while initializing device type extension component ", e);
         }
     }
-
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating DeviceType Deployer Service Component");
         }
     }
 
+    @Reference(
+            name = "registry.service",
+            service = org.wso2.carbon.registry.core.service.RegistryService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (log.isDebugEnabled()) {
             log.debug("RegistryService acquired");
@@ -79,6 +77,12 @@ public class DeviceTypeExtensionServiceComponent {
         DeviceTypeExtensionDataHolder.getInstance().setRegistryService(null);
     }
 
+    @Reference(
+            name = "datasource.service",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         /* This is to avoid  device management component getting initialized before the underlying datasources
         are registered */

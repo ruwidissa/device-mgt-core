@@ -17,18 +17,18 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.GroupManagementAdminService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.GroupManagementAdminService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;

@@ -18,9 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.device.mgt.core.archival.dao.ArchivalDestinationDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.archival.dao.ArchivalSourceDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
@@ -29,26 +26,19 @@ import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceCon
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.task.ArchivalTaskManager;
 import io.entgra.device.mgt.core.device.mgt.core.task.impl.ArchivalTaskManagerImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.ntask.core.service.TaskService;
 
-/**
- * @scr.component name="org.wso2.carbon.activity.data.archival" immediate="true"
- * @scr.reference name="device.ntask.component"
- * interface="org.wso2.carbon.ntask.core.service.TaskService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTaskService"
- * unbind="unsetTaskService"
- * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDeviceManagementService"
- * unbind="unsetDeviceManagementService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.core.internal.ActivityDataPurgingServiceComponent",
+        immediate = true)
 public class ActivityDataPurgingServiceComponent {
     private static Log log = LogFactory.getLog(ActivityDataPurgingServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -99,6 +89,12 @@ public class ActivityDataPurgingServiceComponent {
         }
     }
 
+    @Reference(
+            name = "task.service",
+            service = org.wso2.carbon.ntask.core.service.TaskService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTaskService")
     protected void setTaskService(TaskService taskService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting the task service.");
@@ -113,6 +109,12 @@ public class ActivityDataPurgingServiceComponent {
         DeviceManagementDataHolder.getInstance().setTaskService(null);
     }
 
+    @Reference(
+            name = "device.mgt.provider.service",
+            service = io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDeviceManagementService")
     protected void setDeviceManagementService(DeviceManagementProviderService deviceManagementService){
 
     }
@@ -122,6 +124,7 @@ public class ActivityDataPurgingServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
 
     }

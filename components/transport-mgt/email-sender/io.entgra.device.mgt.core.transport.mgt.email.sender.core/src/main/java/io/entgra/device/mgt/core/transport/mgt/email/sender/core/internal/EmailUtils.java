@@ -17,20 +17,15 @@
  */
 package io.entgra.device.mgt.core.transport.mgt.email.sender.core.internal;
 
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailSenderConfigurationFailedException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
-import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailSenderConfigurationFailedException;
-import org.wso2.carbon.registry.api.Collection;
-import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 
 class EmailUtils {
@@ -49,31 +44,11 @@ class EmailUtils {
             }
         }
         if (templateDir.canRead()) {
-            File[] templates = templateDir.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    name = name.toLowerCase();
-                    return name.endsWith(".vm");
-                }
-            });
             try {
                 int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-                Registry registry =
-                        EmailSenderDataHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
-                if (!registry.resourceExists(EMAIL_TEMPLATE_DIR_RELATIVE_REGISTRY_PATH)) {
-                    Collection collection = registry.newCollection();
-                    registry.put(EMAIL_TEMPLATE_DIR_RELATIVE_REGISTRY_PATH, collection);
-                    for (File template : templates) {
-                        Resource resource = registry.newResource();
-                        resource.setMediaType("text/plain");
-                        String contents = FileUtils.readFileToString(template);
-                        resource.setContent(contents);
-                        registry.put(EMAIL_TEMPLATE_DIR_RELATIVE_REGISTRY_PATH + "/"
-                                     + template.getName().replace(".vm", ""), resource);
-                    }
-                }
-            } catch (RegistryException e) {
-                throw new EmailSenderConfigurationFailedException("Error occurred while setting up email templates", e);
+                String tenantTemplateDirectory = CarbonUtils.getCarbonTenantsDirPath() + File.separator + tenantId + File.separator;
+                File destinationDirectory = new File(tenantTemplateDirectory);
+                FileUtils.copyDirectoryToDirectory(templateDir, destinationDirectory);
             } catch (FileNotFoundException e) {
                 throw new EmailSenderConfigurationFailedException("Error occurred while writing template file " +
                                                                   "contents as an input stream of a resource", e);

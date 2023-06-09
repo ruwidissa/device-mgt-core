@@ -17,8 +17,8 @@
  */
 package io.entgra.device.mgt.core.tenant.mgt.core.impl;
 
-import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerService;
 import io.entgra.device.mgt.core.tenant.mgt.common.exception.TenantMgtException;
+import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerService;
 import io.entgra.device.mgt.core.tenant.mgt.core.internal.TenantMgtDataHolder;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 

@@ -49,9 +49,9 @@
     </dependencies>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+<!--        <maven.compiler.source>8</maven.compiler.source>-->
+<!--        <maven.compiler.target>8</maven.compiler.target>-->
+<!--        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
     </properties>
 
     <build>
@@ -59,6 +59,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <!-- <version>3.8.1</version>-->
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -71,10 +76,12 @@
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>Device Notification Logger Bundle</Bundle-Description>
                         <Import-Package>
-                            io.entgra.device.mgt.core.device.mgt.extensions.logger.*,
-                            org.apache.commons.logging;version="[1.2,2)",
-                            org.apache.log4j;version="[1.2,2)",
-                            org.wso2.carbon.context;version="[4.4,5)
+                            io.entgra.device.mgt.core.device.mgt.extensions.logger;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.logger.spi;version="[5.0,6)",
+                            io.entgra.device.mgt.core.notification.logger,
+                            io.entgra.device.mgt.core.notification.logger.util,
+                            org.apache.commons.logging;version="[1.2,2)"
+<!--                            org.apache.log4j;version="[2,3)"-->
                         </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.notification.logger.*

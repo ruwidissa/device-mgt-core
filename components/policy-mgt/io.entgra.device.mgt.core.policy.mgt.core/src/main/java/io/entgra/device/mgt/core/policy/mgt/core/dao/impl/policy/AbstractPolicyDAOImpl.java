@@ -18,9 +18,6 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.dao.impl.policy;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.CorrectiveAction;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.DeviceGroupWrapper;
@@ -33,21 +30,15 @@ import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagerDAOException;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.util.PolicyManagementDAOUtil;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
 import io.entgra.device.mgt.core.policy.mgt.core.util.SetReferenceTransformer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+import java.sql.*;
+import java.util.*;
 
 /**
  * Abstract implementation of PolicyDAO which holds generic SQL queries.

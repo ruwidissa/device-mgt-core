@@ -35,8 +35,12 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -50,40 +54,91 @@
                         <Bundle-Description>Application Management Core Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.application.mgt.core.internal</Private-Package>
                         <Import-Package>
+                            com.dd.plist;version="[1.21,2)",
+                            com.google.gson;version="[2.9,3)",
+                            com.google.gson.reflect;version="[2.9,3)",
+                            io.entgra.device.mgt.core.apimgt.application.extension;version="[5.0,6)",
+                            io.entgra.device.mgt.core.apimgt.application.extension.dto;version="[5.0,6)",
+                            io.entgra.device.mgt.core.apimgt.application.extension.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.common.config;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.common.dto;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.common.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.common.response;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.common.services;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.common.wrapper;version="[5.0,6)",
+                            io.entgra.device.mgt.core.application.mgt.core.config,
+                            io.entgra.device.mgt.core.application.mgt.core.dao,
+                            io.entgra.device.mgt.core.application.mgt.core.dao.common,
+                            io.entgra.device.mgt.core.application.mgt.core.dao.impl,
+                            io.entgra.device.mgt.core.application.mgt.core.dao.impl.application,
+                            io.entgra.device.mgt.core.application.mgt.core.dao.impl.application.release,
+                            io.entgra.device.mgt.core.application.mgt.core.dao.impl.application.spapplication,
+                            io.entgra.device.mgt.core.application.mgt.core.dao.impl.lifecyclestate,
+                            io.entgra.device.mgt.core.application.mgt.core.dao.impl.review,
+                            io.entgra.device.mgt.core.application.mgt.core.dao.impl.subscription,
+                            io.entgra.device.mgt.core.application.mgt.core.dao.impl.visibility,
+                            io.entgra.device.mgt.core.application.mgt.core.exception,
+                            io.entgra.device.mgt.core.application.mgt.core.serviceprovider,
+                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.app.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.app.mgt.android;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.group.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.operation.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.common.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.common.util;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.dto;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.operation.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.service;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.task.impl;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.core.util;version="[5.0,6)",
+                            io.entgra.device.mgt.core.identity.jwt.client.extension;version="[5.0,6)",
+                            io.entgra.device.mgt.core.identity.jwt.client.extension.dto;version="[5.0,6)",
+                            io.entgra.device.mgt.core.identity.jwt.client.extension.exception;version="[5.0,6)",
+                            io.entgra.device.mgt.core.identity.jwt.client.extension.service;version="[5.0,6)",
+                            javax.annotation;version="[1.0,2)",
+                            javax.naming,
+                            javax.sql,
+                            <!--javax.ws.rs.core;version="[2.1,3)",-->
+                            javax.xml.bind;version="[0.0,1)",
+                            javax.xml.bind.annotation;version="[0.0,1)",
+                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}",
+                            org.apache.commons.codec.digest;version="[1.4,2)",
+                            org.apache.commons.httpclient;version="[3.1,4)",
+                            org.apache.commons.httpclient.methods;version="[3.1,4)",
+                            org.apache.commons.io;version="[2.4,3)",
+                            org.apache.commons.lang;version="[2.6,3)",
+                            org.apache.commons.lang3;version="[3.12,4)",
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.apache.commons.validator.routines;version="[1.7,2)",
+                            <!--org.apache.cxf.jaxrs.ext.multipart;version="[3.5,4)",-->
+                            org.apache.http;version="[4.4,5)",
+                            org.apache.http.client;version="[4.3,5)",
+                            org.apache.http.client.methods;version="[4.3,5)",
+                            org.apache.http.impl.client;version="[4.3,5)",
+                            org.bouncycastle.cert,
+                            org.bouncycastle.cert.jcajce,
+                            org.bouncycastle.cms,
+                            org.bouncycastle.jce.provider;version="[1.70,2)",
+                            org.bouncycastle.util;version="[1.70,2)",
+                            org.json;version="[3.0,4)",
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
-                            org.apache.commons.logging,
-                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
-                            org.wso2.carbon.context.*,
-                            org.wso2.carbon.utils.*,
-                            org.w3c.dom,
-                            org.json,
-                            javax.sql,
-                            com.google.gson.*,
-                            javax.naming,
-                            javax.xml.bind.annotation; version="${javax.xml.bind.imp.pkg.version}",
-                            javax.xml.bind; version="${javax.xml.bind.imp.pkg.version}",
-                            io.entgra.device.mgt.core.application.mgt.common.*,
-                            io.entgra.device.mgt.core.device.mgt.core.*,
-                            io.entgra.device.mgt.core.device.mgt.common.*,
-                            org.wso2.carbon.user.core.*,
-                            org.wso2.carbon.user.api.*,
-                            org.wso2.carbon.ntask.*,
-                            org.quartz.*,
-                            org.wso2.carbon.ndatasource.core,
-                            org.wso2.carbon,
+                            org.quartz;version="[2.1,3)",
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.ndatasource.core;version="[4.8,5)",
+                            org.wso2.carbon.ntask.common;version="[4.9,5)",
+                            org.wso2.carbon.ntask.core;version="[4.9,5)",
+                            org.wso2.carbon.ntask.core.service;version="[4.9,5)",
+                            org.wso2.carbon.user.api;version="[1.0,2)",
+                            org.wso2.carbon.user.core.service;version="[4.8,5)",
+                            org.wso2.carbon.utils;version="[4.8,5)",
+                            org.wso2.carbon.utils.dbcreator;version="[4.8,5)",
                             org.xml.sax,
-                            org.xml.sax.helpers,
-                            org.apache.commons.io,
-                            org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
-                            org.apache.commons.codec.digest;version="${commons-codec.wso2.osgi.version.range}",
-                            org.wso2.carbon.base,
-                            com.dd.*,
-                            io.entgra.device.mgt.core.identity.jwt.client.extension.*,
-                            io.entgra.device.mgt.core.apimgt.application.extension.*,
-                            org.apache.commons.httpclient,
-                            org.apache.commons.httpclient.methods,
-                            org.apache.commons.validator.routines
+                            org.xml.sax.helpers
                         </Import-Package>
                         <Embed-Dependency>apk-parser;scope=compile|runtime;inline=false</Embed-Dependency>
                         <Export-Package>
@@ -112,16 +167,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.osgi</groupId>
-            <artifactId>org.eclipse.osgi.services</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.equinox</groupId>
-            <artifactId>org.eclipse.equinox.common</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -136,7 +184,6 @@
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
-            <!--            <version>${pax.logging.api.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>

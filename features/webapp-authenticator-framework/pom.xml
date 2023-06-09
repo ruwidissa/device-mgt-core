@@ -31,7 +31,7 @@
     <artifactId>webapp-authenticator-framework-feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Webapp Authenticator Framework Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <modules>
         <module>io.entgra.device.mgt.core.webapp.authenticator.framework.server.feature</module>

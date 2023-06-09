@@ -17,15 +17,15 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.config;
 
+import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.InvalidConfigurationException;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.exception.InvalidConfigurationException;
 
-import java.io.File;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+import java.io.File;
 
 /**
  * ConfigurationManager is responsible for the managing Application Management related configurations.

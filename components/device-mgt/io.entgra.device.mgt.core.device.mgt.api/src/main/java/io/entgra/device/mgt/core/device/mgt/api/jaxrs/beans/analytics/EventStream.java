@@ -19,7 +19,6 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics;
 
 import io.swagger.annotations.ApiModelProperty;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

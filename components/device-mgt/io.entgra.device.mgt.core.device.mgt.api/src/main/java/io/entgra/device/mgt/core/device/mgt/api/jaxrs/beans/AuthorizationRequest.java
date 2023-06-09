@@ -17,9 +17,9 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 
 import java.util.List;
 

@@ -17,22 +17,22 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidConfigurationException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationContext;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.NotificationStrategy;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationExecutionFailedException;
+import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.PolicyOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal.MQTTDataHolder;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.internal.util.MQTTAdapterConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.event.output.adapter.core.MessageType;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
-import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.PolicyOperation;
 
 import java.util.HashMap;
 import java.util.List;

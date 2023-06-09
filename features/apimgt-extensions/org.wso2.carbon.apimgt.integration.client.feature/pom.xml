@@ -29,7 +29,7 @@
 	<artifactId>org.wso2.carbon.apimgt.integration.client.feature</artifactId>
 	<packaging>pom</packaging>
 	<name>WSO2 Carbon - APIM Integration Client Feature</name>
-	<url>http://wso2.org</url>
+	<url>https://entgra.io</url>
 	<description>This feature contains a http client implementation to communicate with WSO2-APIM server</description>
 
 	<dependencies>

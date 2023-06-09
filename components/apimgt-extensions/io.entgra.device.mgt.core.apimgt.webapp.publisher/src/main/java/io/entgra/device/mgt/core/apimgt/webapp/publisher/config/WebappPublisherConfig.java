@@ -18,10 +18,10 @@
 
 package io.entgra.device.mgt.core.apimgt.webapp.publisher.config;
 
-import org.w3c.dom.Document;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.InvalidConfigurationStateException;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.WebappPublisherConfigurationFailedException;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.WebappPublisherUtil;
+import org.w3c.dom.Document;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.bind.JAXBContext;

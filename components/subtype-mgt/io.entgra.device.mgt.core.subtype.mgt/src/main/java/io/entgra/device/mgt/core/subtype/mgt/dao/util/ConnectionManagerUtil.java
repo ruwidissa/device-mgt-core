@@ -18,12 +18,12 @@
 
 package io.entgra.device.mgt.core.subtype.mgt.dao.util;
 
-import io.entgra.device.mgt.core.subtype.mgt.exception.DBConnectionException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.JNDILookupDefinition;
+import io.entgra.device.mgt.core.subtype.mgt.exception.DBConnectionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;

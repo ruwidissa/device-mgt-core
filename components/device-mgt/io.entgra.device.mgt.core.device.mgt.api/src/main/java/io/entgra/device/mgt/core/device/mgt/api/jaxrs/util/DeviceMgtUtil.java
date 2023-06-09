@@ -18,12 +18,12 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
-import io.entgra.device.mgt.core.device.mgt.core.config.permission.Scope;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorListItem;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ProfileFeature;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
+import io.entgra.device.mgt.core.device.mgt.core.config.permission.Scope;
 
 import javax.validation.ConstraintViolation;
 import java.util.ArrayList;

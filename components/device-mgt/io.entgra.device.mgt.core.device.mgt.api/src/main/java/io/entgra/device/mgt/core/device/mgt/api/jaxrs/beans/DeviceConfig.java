@@ -17,10 +17,8 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans;
 
-import io.swagger.annotations.ApiModel;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
-
-import java.util.List;
+import io.swagger.annotations.ApiModel;
 
 @ApiModel(value = "DeviceConfig", description = "Device config")
 public class DeviceConfig {

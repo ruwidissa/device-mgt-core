@@ -27,7 +27,7 @@
     <artifactId>org.wso2.carbon.device.mgt.analytics.wsproxy</artifactId>
     <packaging>war</packaging>
     <name>WSO2 - Webapp for Web Socket Proxy</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
         <dependency>

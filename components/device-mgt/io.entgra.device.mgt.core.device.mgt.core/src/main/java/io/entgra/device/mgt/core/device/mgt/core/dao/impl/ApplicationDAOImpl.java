@@ -17,15 +17,14 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.core.dao.ApplicationDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,7 +33,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -394,4 +395,178 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         return application;
     }
 
+    @Override
+    public void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId)
+            throws DeviceManagementDAOException{
+        Connection conn;
+        String sql = "INSERT INTO DM_APP_ICONS " +
+                "(ICON_PATH, " +
+                "PACKAGE_NAME, " +
+                "VERSION, " +
+                "CREATED_TIMESTAMP, " +
+                "TENANT_ID) " +
+                "VALUES (?, ?, ?, ?, ?)";
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1,iconPath);
+                stmt.setString(2,packageName);
+                stmt.setString(3,version);
+                stmt.setTimestamp(4, new Timestamp(new Date().getTime()));
+                stmt.setInt(5, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while saving application icon details";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int getApplicationPackageCount(String packageName) throws DeviceManagementDAOException{
+        Connection conn;
+        String sql = "SELECT " +
+                "COUNT(*) AS APP_PACKAGE_COUNT " +
+                "FROM DM_APP_ICONS " +
+                "WHERE PACKAGE_NAME = ?";
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, packageName);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("APP_PACKAGE_COUNT");
+                    }
+                    return 0;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting application icon details";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void updateApplicationIcon(String iconPath, String oldPackageName, String newPackageName, String version)
+            throws DeviceManagementDAOException{
+        Connection conn;
+        String sql = "UPDATE DM_APP_ICONS " +
+                "SET " +
+                "ICON_PATH= ?, " +
+                "PACKAGE_NAME = ?, " +
+                "VERSION = ? " +
+                "WHERE PACKAGE_NAME = ?";
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1,iconPath);
+                stmt.setString(2,newPackageName);
+                stmt.setString(3,version);
+                stmt.setString(4,oldPackageName);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while updating application icon details";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteApplicationIcon(String packageName) throws DeviceManagementDAOException {
+        Connection conn;
+        String sql = "DELETE " +
+                "FROM DM_APP_ICONS " +
+                "WHERE PACKAGE_NAME = ?";
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, packageName);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting application icon details";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public String getIconPath(String applicationIdentifier) throws DeviceManagementDAOException{
+        Connection conn;
+        String sql = "SELECT " +
+                "ICON_PATH " +
+                "FROM DM_APP_ICONS " +
+                "WHERE PACKAGE_NAME = ?";
+        String iconPath = null;
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1,applicationIdentifier);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        iconPath = rs.getString("ICON_PATH");
+                    }
+                    return iconPath;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving app icon path of the application";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<Application> getInstalledApplicationListOnDevice(int deviceId, int enrolmentId, int offset, int limit, int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        List<Application> applicationList = new ArrayList<>();
+        Application application;
+        String sql = "SELECT " +
+                "ID, " +
+                "NAME, " +
+                "APP_IDENTIFIER, " +
+                "PLATFORM, " +
+                "CATEGORY, " +
+                "VERSION, " +
+                "TYPE, " +
+                "LOCATION_URL, " +
+                "IMAGE_URL, " +
+                "APP_PROPERTIES, " +
+                "MEMORY_USAGE, " +
+                "IS_ACTIVE, " +
+                "TENANT_ID " +
+                "FROM DM_APPLICATION " +
+                "WHERE DEVICE_ID = ? AND " +
+                "ENROLMENT_ID = ? AND " +
+                "TENANT_ID = ? " +
+                "LIMIT ? " +
+                "OFFSET ?";
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, deviceId);
+                stmt.setInt(2, enrolmentId);
+                stmt.setInt(3, tenantId);
+                stmt.setInt(4, limit);
+                stmt.setInt(5, offset);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        application = loadApplication(rs);
+                        applicationList.add(application);
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while retrieving the list of Applications " +
+                    "installed in device id '" + deviceId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+        return applicationList;
+    }
 }

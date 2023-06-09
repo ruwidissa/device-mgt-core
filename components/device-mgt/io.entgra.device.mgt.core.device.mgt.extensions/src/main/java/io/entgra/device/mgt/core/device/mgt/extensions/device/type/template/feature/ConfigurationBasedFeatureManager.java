@@ -18,14 +18,14 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.feature;
 
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import org.apache.commons.lang.StringUtils;
 import io.entgra.device.mgt.core.device.mgt.common.Feature;
 import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Operation;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.OperationMetadata;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Params;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.UIParameter;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

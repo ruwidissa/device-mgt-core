@@ -20,50 +20,10 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import org.apache.commons.collections.map.SingletonMap;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HTTP;
-import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.Billing;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceEnrollmentInfoNotification;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceManager;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceNotification;
-import io.entgra.device.mgt.core.device.mgt.common.DevicePropertyNotification;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceTransferRequest;
-import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
-import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
-import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
-import io.entgra.device.mgt.core.device.mgt.common.InitialOperationConfig;
-import io.entgra.device.mgt.core.device.mgt.common.MonitoringOperation;
-import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
-import io.entgra.device.mgt.core.device.mgt.common.StartupOperationConfig;
-import io.entgra.device.mgt.core.device.mgt.common.BillingResponse;
+import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.app.mgt.MobileAppTypes;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.CorrectiveActionConfig;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.DeviceConfiguration;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.DevicePropertyInfo;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.*;
 import io.entgra.device.mgt.core.device.mgt.common.cost.mgt.Cost;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
@@ -72,15 +32,8 @@ import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocation
 import io.entgra.device.mgt.core.device.mgt.common.enrollment.notification.EnrollmentNotificationConfiguration;
 import io.entgra.device.mgt.core.device.mgt.common.enrollment.notification.EnrollmentNotifier;
 import io.entgra.device.mgt.core.device.mgt.common.enrollment.notification.EnrollmentNotifierException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.BadRequestException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceTypeNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UserNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.*;
+import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
@@ -111,20 +64,13 @@ import io.entgra.device.mgt.core.device.mgt.core.cache.impl.DeviceCacheManagerIm
 import io.entgra.device.mgt.core.device.mgt.core.common.Constants;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
-import io.entgra.device.mgt.core.device.mgt.core.dao.ApplicationDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceStatusDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceTypeDAO;
-import io.entgra.device.mgt.core.device.mgt.core.dao.EnrollmentDAO;
+import io.entgra.device.mgt.core.device.mgt.core.dao.*;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeVersion;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementServiceComponent;
 import io.entgra.device.mgt.core.device.mgt.core.internal.PluginInitializationListener;
@@ -135,16 +81,25 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.CommandOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.HttpReportingUtil;
-import io.entgra.device.mgt.core.transport.mgt.email.sender.core.ContentProviderInfo;
-import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailContext;
-import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailSendingFailedException;
-import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailTransportNotConfiguredException;
-import io.entgra.device.mgt.core.transport.mgt.email.sender.core.TypedValue;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.*;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
+import org.apache.commons.collections.map.SingletonMap;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HTTP;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -155,17 +110,7 @@ import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -4898,5 +4843,131 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
+    }
+
+    @Override
+    public void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId) throws DeviceManagementException{
+        try{
+            DeviceManagementDAOFactory.beginTransaction();
+            if(applicationDAO.getApplicationPackageCount(packageName) == 0){
+                applicationDAO.saveApplicationIcon(iconPath, packageName, version, tenantId);
+            }
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while saving app icon. Icon Path: " + iconPath +
+                    " Package Name: " + packageName +
+                    " Version: " + version +
+                    " Tenant Id: " + tenantId;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public void updateApplicationIcon(String iconPath, String oldPackageName, String newPackageName, String version)
+            throws DeviceManagementException{
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            applicationDAO.updateApplicationIcon(iconPath, oldPackageName, newPackageName, version);
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while updating app icon info." +
+                    " Package Name: " + oldPackageName;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public void deleteApplicationIcon(String packageName)
+            throws DeviceManagementException {
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            applicationDAO.deleteApplicationIcon(packageName);
+            DeviceManagementDAOFactory.commitTransaction();
+        }  catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while deleting app icon info." +
+                    " Package Name: " + packageName ;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    private List<Application> getInstalledAppIconInfo(List<Application> applications) throws DeviceManagementException {
+        String iconPath;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            for (Application app : applications) {
+                iconPath = applicationDAO.getIconPath(app.getApplicationIdentifier());
+                app.setImageUrl(iconPath);
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving installed app icon info";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return applications;
+    }
+
+    @Override
+    public List<Application> getInstalledApplicationsOnDevice(Device device, int offset, int limit) throws DeviceManagementException {
+        List<Application> applications;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            applications = applicationDAO.getInstalledApplicationListOnDevice(device.getId(),
+                    device.getEnrolmentInfo().getId(), offset, limit, tenantId);
+            if (applications == null) {
+                String msg = "Couldn't found applications for device identifier '" + device.getId() + "'";
+                log.error(msg);
+                throw new DeviceManagementException(msg);
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving the application list of android device, " +
+                    "which carries the id '" + device.getId() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        List<Application> newApplicationList;
+        newApplicationList = this.getInstalledAppIconInfo(applications);
+        if (newApplicationList == null) {
+            String msg = "Error occurred while getting app icon info for device identifier '" + device.getId() + "'";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        return newApplicationList;
     }
 }

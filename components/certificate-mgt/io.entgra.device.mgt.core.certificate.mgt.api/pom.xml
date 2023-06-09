@@ -31,7 +31,7 @@
     <packaging>war</packaging>
     <name>WSO2 Carbon - Certificate Management API</name>
     <description>WSO2 Carbon - Certificate Management API</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <build>
         <plugins>

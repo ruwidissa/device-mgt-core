@@ -22,18 +22,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.resource.loader.ResourceLoader;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.registry.api.Registry;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.Map;
 
 public class VelocityBasedEmailContentProvider implements EmailContentProvider {
@@ -41,12 +36,11 @@ public class VelocityBasedEmailContentProvider implements EmailContentProvider {
     private VelocityEngine engine;
     private static final Log log = LogFactory.getLog(VelocityBasedEmailContentProvider.class);
 
+    private static final String EMAIL_TEMPLATE_PATH =   "repository" + File.separator +
+            "resources" + File.separator + "email-templates";
     public VelocityBasedEmailContentProvider() {
         engine = new VelocityEngine();
-        engine.setProperty("resource.loader", "registry");
-        engine.setProperty("velocimacro.library", "");
-        engine.setProperty("registry.resource.loader.class",
-                "io.entgra.device.mgt.core.transport.mgt.email.sender.core.RegistryBasedResourceLoader");
+        engine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
         engine.init();
     }
 
@@ -57,7 +51,7 @@ public class VelocityBasedEmailContentProvider implements EmailContentProvider {
         for (Map.Entry<String, TypedValue<Class<?>, Object>> param : params.entrySet()) {
             ctx.put(param.getKey(), param.getValue().getValue());
         }
-        Template template = engine.getTemplate(name);
+        Template template = engine.getTemplate(EMAIL_TEMPLATE_PATH + File.separator + name + ".vm");
 
         StringWriter content = new StringWriter();
         template.merge(ctx, content);

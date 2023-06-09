@@ -19,15 +19,11 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.search.mgt.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.search.Condition;
+import io.entgra.device.mgt.core.device.mgt.core.search.mgt.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.search.Condition;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.Constants;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.InvalidOperatorException;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.QueryBuilder;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.QueryHolder;
-import io.entgra.device.mgt.core.device.mgt.core.search.mgt.ValueType;
 
 import java.util.ArrayList;
 import java.util.HashMap;

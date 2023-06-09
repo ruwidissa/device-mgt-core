@@ -30,7 +30,7 @@
     <packaging>war</packaging>
     <name>WSO2 Carbon - API Application Management API</name>
     <description>This module provides capability to create api manager application.</description>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
         <dependency>
@@ -159,10 +159,6 @@
 			<artifactId>org.wso2.carbon.registry.core</artifactId>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

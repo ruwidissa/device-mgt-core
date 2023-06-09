@@ -18,9 +18,9 @@
 
 package io.entgra.device.mgt.core.application.mgt.common;
 
-import io.swagger.annotations.ApiModelProperty;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 

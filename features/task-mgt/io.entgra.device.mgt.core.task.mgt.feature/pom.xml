@@ -29,7 +29,7 @@
     <artifactId>io.entgra.device.mgt.core.task.mgt.feature</artifactId>
     <packaging>pom</packaging>
     <name>Entgra IoT - Task Manager Feature</name>
-    <url>http://wso2.org</url>
+    <url>https://entgra.io</url>
 
     <dependencies>
         <dependency>

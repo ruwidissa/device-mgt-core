@@ -18,19 +18,13 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.mgt.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
 import io.entgra.device.mgt.core.policy.mgt.common.ProfileManagementException;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.FeatureDAO;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.FeatureManagerDAOException;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagerDAOException;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.ProfileDAO;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.ProfileManagerDAOException;
+import io.entgra.device.mgt.core.policy.mgt.core.dao.*;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.ProfileManager;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;

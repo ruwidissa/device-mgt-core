@@ -18,22 +18,15 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.service;
 
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import org.apache.commons.collections.map.SingletonMap;
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.DeviceConfiguration;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.*;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceTypeNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UserNotFoundException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.*;
+import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
@@ -48,7 +41,7 @@ import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceStatus;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeVersion;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
+import org.apache.commons.collections.map.SingletonMap;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -1017,4 +1010,42 @@ public interface DeviceManagementProviderService {
             throws DeviceManagementException;
 
     Boolean sendDeviceNameChangedNotification(Device device) throws DeviceManagementException;
+
+    /**
+     * This method is for saving application icon info
+     * @param iconPath Icon path of the application
+     * @param packageName Package name of the application
+     * @param version Version of the application
+     * @param tenantId Tenant ID of the application created user
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId)
+            throws DeviceManagementException;
+
+    /**
+     * This method is for updating application icon info
+     * @param iconPath Icon path of the application
+     * @param oldPackageName Old package name of the application
+     * @param newPackageName New package name of the application
+     * @param version Version of the application
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    void updateApplicationIcon(String iconPath, String oldPackageName, String newPackageName, String version)
+            throws DeviceManagementException;
+
+    /**
+     * This method is for deleting application icon info
+     * @param packageName Package name of the application
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    void deleteApplicationIcon(String packageName) throws DeviceManagementException;
+
+    /**
+     * This method is for getting the installed application list of a device
+     * @param device {@link Device}
+     * @return list of applications {@link Application}
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    List<Application> getInstalledApplicationsOnDevice(Device device, int offset, int limit)
+            throws DeviceManagementException;
 }

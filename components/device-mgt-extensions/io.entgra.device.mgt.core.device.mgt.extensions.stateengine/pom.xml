@@ -38,10 +38,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -54,13 +54,13 @@
                         <Bundle-Version>${io.entgra.device.mgt.core.version}</Bundle-Version>
                         <Bundle-Description>IoT Device Management State Engine Bundle</Bundle-Description>
                         <Import-Package>
-                            org.wso2.carbon.context,
-                            org.wso2.carbon.logging,
-                            org.apache.commons.lang,
-                            org.wso2.carbon.user.api,
-                            org.apache.commons.logging,
-                            org.wso2.carbon.user.core.service,
-                            io.entgra.device.mgt.core.device.mgt.common.*
+                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
+                            io.entgra.device.mgt.core.device.mgt.extensions.stateengine.dto,
+                            io.entgra.device.mgt.core.device.mgt.extensions.stateengine.exception,
+                            org.apache.commons.logging;version="[1.2,2)",
+                            org.wso2.carbon.context;version="[4.8,5)",
+                            org.wso2.carbon.user.api;version="[1.0,2)",
+                            org.wso2.carbon.user.core.service;version="[4.8,5)"
                         </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.device.mgt.extensions.stateengine.*,
@@ -100,10 +100,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
-            <!--            <version>${pax.logging.api.version}</version>-->
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

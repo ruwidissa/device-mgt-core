@@ -21,7 +21,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 
 @ApiModel(value = "EnrolmentInfo", description = "This class carries all information related to a devices enrollment" +
                                                  " status.")
