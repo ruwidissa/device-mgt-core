@@ -242,9 +242,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                                                                  boolean isAllowedAllDomains,
                                                                  String validityTime, TokenInfo tokenInfo) throws APIManagerException {
 
+
         ConsumerRESTAPIServices consumerRESTAPIServices =
                 APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
 
+        ApiApplicationInfo applicationInfo = getApplicationInfo(username, password);
         try {
             List<APIInfo> uniqueApiList = new ArrayList<>();
 
@@ -310,6 +312,16 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     log.error(msg);
                     throw new APIManagerException(msg);
                 }
+            }
+
+            if (isNewApplication) {
+                ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, application);
+                ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
+                apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
+                apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
+                return apiApplicationKey;
+            } else {
+                return null;
             }
         } catch (APIServicesException e) {
             String msg = "Error occurred while processing the response of APIM REST endpoints.";
