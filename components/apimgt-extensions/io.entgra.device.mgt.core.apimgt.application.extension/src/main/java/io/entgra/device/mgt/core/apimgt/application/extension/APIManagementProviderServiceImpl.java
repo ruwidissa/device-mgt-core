@@ -109,12 +109,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                                                                              String validityTime, String password)
             throws APIManagerException {
 
-        APIApplicationServices apiApplicationServices = APIApplicationManagerExtensionDataHolder.getInstance()
-                .getApiApplicationServices();
+
         ConsumerRESTAPIServices consumerRESTAPIServices =
                 APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
 
-        ApiApplicationInfo applicationInfo = applicationInfo(apiApplicationServices, username, password);
+        ApiApplicationInfo applicationInfo = getApplicationInfo(username, password);
         try {
             List<APIInfo> uniqueApiList = new ArrayList<>();
 
@@ -138,7 +137,9 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
                     consumerRESTAPIServices.getAllApplications(applicationInfo, applicationName);
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application;
+            boolean isNewApplication = false;
             if (applications.length == 0) {
+                isNewApplication = true;
                 application = new io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application();
                 application.setName(applicationName);
                 application = consumerRESTAPIServices.createApplication(applicationInfo, application);
@@ -158,22 +159,14 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 }
             }
 
-            if (application != null)  {
-                if (!application.getKeys().isEmpty()) {
-                    //todo return Application Keys
-                    return null;
-                } else{
-
-                    ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, application);
-                    ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
-                    apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
-                    apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
-                    return apiApplicationKey;
-                }
-            } else{
-                String msg = "Application retrieval process failed.";
-                log.error(msg);
-                throw new APIManagerException(msg);
+            if (isNewApplication) {
+                ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, application);
+                ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
+                apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
+                apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
+                return apiApplicationKey;
+            } else {
+                return null;
             }
         } catch (APIServicesException e) {
             String msg = "Error occurred while processing the response of APIM REST endpoints.";
@@ -555,8 +548,11 @@ Otherwise, Generate Application Keys and return them
         return info;
     }
 
-    private ApiApplicationInfo applicationInfo(APIApplicationServices apiApplicationServices, String username, String password)
+    private ApiApplicationInfo getApplicationInfo(String username, String password)
             throws APIManagerException {
+
+        APIApplicationServices apiApplicationServices = APIApplicationManagerExtensionDataHolder.getInstance()
+                .getApiApplicationServices();
 
         APIApplicationKey apiApplicationKey;
         io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo accessTokenInfo;

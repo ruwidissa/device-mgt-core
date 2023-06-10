@@ -797,6 +797,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
         KeyMgtService keyMgtService = new KeyMgtServiceImpl();
         try {
+            //todo - lasantha - can't get password from here
             DCRResponse dcrResponse = keyMgtService.dynamicClientRegistration(applicationName, username,
                     "client_credentials", null, new String[] {"device_management"}, false, validityTime);
             deviceConfig.setClientId(dcrResponse.getClientId());

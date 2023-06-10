@@ -118,10 +118,13 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             createUserIfNotExists(subTenantUserUsername, subTenantUserPassword);
 
             // DCR for the requesting user
+            //todo lasantha -> need to pass password of user
             OAuthApplication dcrApplication = createOauthApplication(clientName, owner, tags, validityPeriod);
             String requestingUserAccessToken = createAccessToken(dcrApplication);
 
             // get application id
+            //todo --> can use requestingUserAccessToken token here to get application data - modify getApplication
+            // method signature
             Application application = getApplication(clientName, owner);
             String applicationUUID = application.getUUID();
 
@@ -420,6 +423,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
         try {
             APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
             APIConsumer apiConsumer = apiManagerFactory.getAPIConsumer(owner);
+            //todo modify the method signature and use access token and call REST API to get application data
             return null; // todo:apim - apiConsumer.getApplicationsByName(owner, applicationName, "");
             //            //            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v3/applications?query=CalculatorApp"
 
