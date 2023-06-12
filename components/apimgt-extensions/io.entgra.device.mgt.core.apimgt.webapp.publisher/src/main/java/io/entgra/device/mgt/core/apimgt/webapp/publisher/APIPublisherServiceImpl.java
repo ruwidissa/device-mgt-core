@@ -153,17 +153,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                         }
                         if (!apiFound) {
                             // add new scopes as shared scopes
-                            for (ApiScope apiScope : apiConfig.getScopes()) {
-                                if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
-                                        apiScope.getKey())) {
-                                    Scope scope = new Scope();
-                                    scope.setName(apiScope.getName());
-                                    scope.setDescription(apiScope.getDescription());
-                                    scope.setKey(apiScope.getKey());
-                                    scope.setRoles(apiScope.getRoles());
-                                    publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
-                                }
-                            }
+                            addNewSharedScope(apiConfig.getScopes(), publisherRESTAPIServices, apiApplicationKey,
+                                    accessTokenInfo);
                             APIInfo api = getAPI(apiConfig, true);
                             JSONObject createdAPI = publisherRESTAPIServices.addAPI(apiApplicationKey, accessTokenInfo, api);
                             if (apiConfig.getEndpointType() != null && "WS".equals(apiConfig.getEndpointType())) {
@@ -202,7 +193,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             }
                         } else {
                             if (WebappPublisherConfig.getInstance().isEnabledUpdateApi()) {
-
                                 // With 4.x to 5.x upgrade
                                 // - there cannot be same local scope assigned in 2 different APIs
                                 // - local scopes will be deprecated in the future, so need to move all scopes as shared scopes
@@ -217,50 +207,17 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 // 1. add new scopes as shared scopes
                                 // 2. update the API adding scopes for the URI Templates
 
-                                Set<ApiScope> scopesToMoveAsSharedScopes = new HashSet<>();
-                                for (ApiScope apiScope : apiConfig.getScopes()) {
-                                    // if the scope is not available as shared scope, and it is assigned to an API as a local scope
-                                    // need remove the local scope and add as a shared scope
-                                    if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
-                                            apiScope.getKey())) {
-                                        //resolve- todo:apim- resolve
-//                                         if (apiProvider.isScopeKeyAssignedLocally(apiIdentifier, apiScope.getKey(), tenantId)) {
-                                        if (true) {
-                                            // collect scope to move as shared scopes
-                                            scopesToMoveAsSharedScopes.add(apiScope);
-                                        } else {
-                                            // if new scope add as shared scope
-                                            Scope scope = new Scope();
-                                            scope.setName(apiScope.getName());
-                                            scope.setDescription(apiScope.getDescription());
-                                            scope.setKey(apiScope.getKey());
-                                            scope.setRoles(apiScope.getRoles());
-                                            publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                                // It is guaranteed that there is no local scope if we update from 5.0.0 to the most
+                                // recent version. Therefore, if the scope is not already available as a shared scope,
+                                // new scopes must be added as shared scopes. Additionally, it is necessary to
+                                // upgrade to 5.0.0 first before updating from 5.0.0 to the most recent version if we
+                                // are updating from a version that is older than 5.0.0.
 
-                                        }
-                                    }
-                                }
+                                addNewSharedScope(apiConfig.getScopes(), publisherRESTAPIServices, apiApplicationKey,
+                                        accessTokenInfo);
 
-                                // Get existing API
-                                JSONObject existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo,
-                                        apiIdentifier);
-                                if (scopesToMoveAsSharedScopes.size() > 0) {
-                                    // update API to remove local scopes
-                                    APIInfo api = getAPI(apiConfig, false);
-                                    api.setLifeCycleStatus(existingAPI.getString("lifeCycleStatus"));
-                                    publisherRESTAPIServices.updateApi(apiApplicationKey, accessTokenInfo, api);
-
-                                    for (ApiScope apiScope : scopesToMoveAsSharedScopes) {
-                                        Scope scope = new Scope();
-                                        scope.setName(apiScope.getName());
-                                        scope.setDescription(apiScope.getDescription());
-                                        scope.setKey(apiScope.getKey());
-                                        scope.setRoles(apiScope.getRoles());
-                                        publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
-                                    }
-                                }
-
-                                existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo, apiIdentifier);
+                                JSONObject existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey,
+                                    accessTokenInfo, apiIdentifier);
                                 APIInfo api = getAPI(apiConfig, true);
                                 api.setLastUpdatedTime(existingAPI.getString("lifeCycleStatus"));
                                 api.setId(existingAPI.getString("id"));
@@ -405,6 +362,32 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             String msg = "Error occurred while retrieving admin user from tenant user realm";
             log.error(msg, e);
             throw new APIManagerPublisherException(e);
+        }
+    }
+
+    /**
+     * Add new Shared Scopes
+     *
+     * @param apiScopes set of API scopes
+     * @param publisherRESTAPIServices {@link PublisherRESTAPIServices}
+     * @param apiApplicationKey API application Key
+     * @param accessTokenInfo Details of access token
+     * @throws BadRequestException if invalid payload receives to add new shared scopes.
+     * @throws UnexpectedResponseException if the response is not either 200 or 400.
+     * @throws APIServicesException if error occurred while processing the response.
+     */
+    private void addNewSharedScope(Set<ApiScope> apiScopes, PublisherRESTAPIServices publisherRESTAPIServices,
+                                   APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo) throws BadRequestException, UnexpectedResponseException, APIServicesException {
+        for (ApiScope apiScope : apiScopes) {
+            if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
+                    apiScope.getKey())) {
+                Scope scope = new Scope();
+                scope.setName(apiScope.getName());
+                scope.setDescription(apiScope.getDescription());
+                scope.setKey(apiScope.getKey());
+                scope.setRoles(apiScope.getRoles());
+                publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
+            }
         }
     }
 

@@ -45,7 +45,6 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.Unexpected
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.jetty.http.MetaData;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -64,7 +63,14 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * This class represents an implementation of APIManagementProviderService.
@@ -197,6 +203,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         throw new APIManagerException(msg);
                     }
                     String[] metaValues = metaData.getMetaValue().split(":");
+                    if (metaValues.length != 2) {
+                        String msg = "Found invalid Meta value for meta key: " + applicationName;
+                        log.error(msg);
+                        throw new APIManagerException(msg);
+                    }
                     String applicationId = metaValues[0];
                     String keyMappingId = metaValues[1];
                     //todo call the API key retrieving call,                     return apiApplicationKey;
@@ -296,41 +307,29 @@ Otherwise, Generate Application Keys and return them
         }
         try {
             APIConsumer apiConsumer = API_MANAGER_FACTORY.getAPIConsumer(username);
-            Application application = null; // todo:apim - apiConsumer.getApplicationsByName(username, applicationName, "");
-//            cnt rm
-//            //            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v3/applications?query=CalculatorApp"
-
+            Application application = null; // todo:resolve:apim - apiConsumer.getApplicationsByName(username, applicationName, "");
             int applicationId = 0;
             Subscriber subscriber = null;
             if (application == null) {
-                subscriber = null; // todo:apim - apiConsumer.getSubscriber(username);
-//                cnt rm
+                subscriber = null; // todo:resolve:apim - apiConsumer.getSubscriber(username);
                 if (subscriber == null) {
                     // create subscriber
-                    // todo:apim - apiConsumer.addSubscriber(username, "");
-//                    cnt rm
-                    subscriber = null; // todo:apim - apiConsumer.getSubscriber(username);
-//                    cnt rm
+                    // todo:resolve:apim - apiConsumer.addSubscriber(username, "");
+                    subscriber = null; // todo:resolve:apim - apiConsumer.getSubscriber(username);
                 }
                 //create application
                 application = new Application(applicationName, subscriber);
                 application.setTier(ApiApplicationConstants.DEFAULT_TIER);
                 application.setGroupId("");
                 application.setTokenType("OAUTH");
-                // todo:apim - apiConsumer.addApplication(application, username);
-//                cnt rm
-                application = null; // todo:apim - apiConsumer.getApplicationsByName(username, applicationName, "");
-//                cnt rm
+                // todo:resolve:apim - apiConsumer.addApplication(application, username);
+                application = null; // todo:resolve:apim - apiConsumer.getApplicationsByName(username, applicationName, "");
             } else {
-                subscriber = null; // todo:apim - apiConsumer.getSubscriber(username);
-//                cnt rm
+                subscriber = null; // todo:resolve:apim - apiConsumer.getSubscriber(username);
             }
 
             Set<SubscribedAPI> subscribedAPIs =
-                    null; // todo:apim - apiConsumer.getSubscribedAPIs(subscriber, applicationName, "");
-
-            //curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v3/subscriptions?apiId=02e658e7-71c7-4b1d-a623-be145b789340"
-//            cnt rm
+                    null; // todo:resolve:apim - apiConsumer.getSubscribedAPIs(subscriber, applicationName, "");
 
             log.info("Already subscribed API count: " + subscribedAPIs.size());
 
@@ -339,9 +338,7 @@ Otherwise, Generate Application Keys and return them
             if (tags != null && tags.length > 0) {
                 for (String tag : tags) {
                     boolean startedTenantFlow = false;
-                    Set<API> apisWithTag = null; // todo:apim - apiConsumer.getAPIsWithTag(tag, tenantDomain);
-//                    curl -k "https://localhost:9443/api/am/devportal/v3/apis"
-//                    cnt rm
+                    Set<API> apisWithTag = null; // todo:resolve:apim - apiConsumer.getAPIsWithTag(tag, tenantDomain);
 
                     /**
                      * From APIM 4.0.0, APIs published in the super tenant can only be listed by
@@ -364,8 +361,7 @@ Otherwise, Generate Application Keys and return them
                                     ". Caused by to inability to get super tenant username", e);
                         }
 
-                        apisWithTag = null; // todo:apim - apiConsumerAPIPublishedTenant.getAPIsWithTag(tag, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-//                        cnt rm
+                        apisWithTag = null; // todo:resolve:apim - apiConsumerAPIPublishedTenant.getAPIsWithTag(tag, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                         startedTenantFlow = true;
                     }
 
@@ -378,8 +374,7 @@ Otherwise, Generate Application Keys and return them
                             boolean subscriptionExist = false;
                             if (subscribedAPIs.size() > 0) {
                                 for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-                                    // todo:apim
-//                                    cnt rm
+                                    // todo:resolve:apim
 //                                    if (String.valueOf(subscribedAPI.getApiId().toString()).equals(id)) {
 //                                        subscriptionExist = true;
 //                                        break;
@@ -422,8 +417,7 @@ Otherwise, Generate Application Keys and return them
                          * Oauth app for a child tenant.
                          */
                         for (ApiTypeWrapper apiTypeWrapper : apiTypeWrapperList) {
-                            // todo:apim - apiConsumer.addSubscription(apiTypeWrapper, username, application);
-//                            cnt rm
+                            // todo:resolve:apim - apiConsumer.addSubscription(apiTypeWrapper, username, application);
                         }
                     }
                 }
@@ -454,7 +448,7 @@ Otherwise, Generate Application Keys and return them
             APIAdmin apiAdmin = new APIAdminImpl();
             String keyManagerId = null;
             try {
-                List<KeyManagerConfigurationDTO> keyManagerConfigurations = null; // todo:apim -
+                List<KeyManagerConfigurationDTO> keyManagerConfigurations = null; // todo:resolve:apim -
                 // apiAdmin.getKeyManagerConfigurationsByTenant(tenantDomain);
                 if (keyManagerConfigurations != null) {
                     for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurations) {
@@ -474,7 +468,7 @@ Otherwise, Generate Application Keys and return them
                         "\\\"id_token_expiry_time\\\":\\\"N\\/A\\\"}\"," +
                         "\"username\":\"" + username + "\"}";
 
-                Map<String, Object> keyDetails = null; // todo:apim - apiConsumer
+                Map<String, Object> keyDetails = null; // todo:resolve:apim - apiConsumer
 //                        .requestApprovalForApplicationRegistration(username, applicationName, keyType, "",
 //                                allowedDomains.toArray(new String[allowedDomains.size()]), validityTime, "default", "",
 //                                jsonString, keyManagerId, tenantDomain);
@@ -486,7 +480,7 @@ Otherwise, Generate Application Keys and return them
                     return apiApplicationKey;
                 }
                 throw new APIManagerException("Failed to generate keys for tenant: " + tenantDomain);
-//            todo:apim - commected as it says never throw since we commented apim calls above
+//            todo:resolve:apim - commected as it says never throw since we commented apim calls above
 //                cnt rm
 //             } catch (APIManagementException e) {
             } catch (Exception e) {
@@ -525,11 +519,10 @@ Otherwise, Generate Application Keys and return them
             JWTClientManagerService jwtClientManagerService = APIApplicationManagerExtensionDataHolder.getInstance()
                     .getJwtClientManagerService();
             JWTClient jwtClient = jwtClientManagerService.getJWTClient();
-            AccessTokenInfo accessTokenForAdmin = jwtClient
+
+            return jwtClient
                     .getAccessToken(clientCredentials.getConsumerKey(), clientCredentials.getConsumerSecret(), username,
                             scopes);
-
-            return accessTokenForAdmin;
         } catch (JWTClientException e) {
             String msg = "JWT Error occurred while registering Application to get access token.";
             log.error(msg, e);
@@ -546,7 +539,8 @@ Otherwise, Generate Application Keys and return them
     }
 
     /**
-     * Get Client credentials
+     * Get Client credentials of application belongs to tenant admin
+     *
      * @param tenantDomain Tenant Domain
      * @param tags Tags
      * @param applicationName Application Name
@@ -554,7 +548,7 @@ Otherwise, Generate Application Keys and return them
      * @param validityPeriod Validity Period
      * @return {@link ApiApplicationKey}
      * @throws APIManagerException if error occurred while generating access token
-     * @throws UserStoreException if error ocurred while getting admin username.
+     * @throws UserStoreException if error occurred while getting admin username.
      */
     private ApiApplicationKey getClientCredentials(String tenantDomain, String[] tags, String applicationName,
             String tokenType, String validityPeriod) throws APIManagerException, UserStoreException {
@@ -565,7 +559,6 @@ Otherwise, Generate Application Keys and return them
         registrationProfile.setTags(tags);
         registrationProfile.setApplicationName(applicationName);
 
-        ApiApplicationKey info = null;
         if (tenantDomain == null || tenantDomain.isEmpty()) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
@@ -576,15 +569,14 @@ Otherwise, Generate Application Keys and return them
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration()
                             .getAdminUserName());
 
-            if (registrationProfile.getUsername() == null || registrationProfile.getUsername().isEmpty()) {
-                info = generateAndRetrieveApplicationKeys(registrationProfile.getApplicationName(),
-                        registrationProfile.getTags(), tokenType, null,
-                        registrationProfile.isAllowedToAllDomains(), validityPeriod);
-            }
+            return generateAndRetrieveApplicationKeys(registrationProfile.getApplicationName(),
+                    registrationProfile.getTags(), tokenType, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                            .getRealmConfiguration().getAdminUserName(),
+                    registrationProfile.isAllowedToAllDomains(), validityPeriod, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                            .getRealmConfiguration().getAdminPassword());
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
-        return info;
     }
 
     private ApiApplicationInfo getApplicationInfo(String username, String password)
