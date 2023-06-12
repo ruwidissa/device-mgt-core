@@ -33,7 +33,6 @@
     <url>https://entgra.io</url>
 
     <modules>
-        <module>io.entgra.device.mgt.core.application.mgt.api.feature</module>
         <module>io.entgra.device.mgt.core.application.mgt.server.feature</module>
     </modules>
 </project>
