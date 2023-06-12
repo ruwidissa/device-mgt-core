@@ -48,6 +48,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.Unexpected
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.http.MetaData;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -314,13 +315,47 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 }
             }
 
+            MetadataManagementService metadataManagementService = APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
             if (isNewApplication) {
                 ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, application);
                 ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
                 apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
                 apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
-                return apiApplicationKey;
+
+                Metadata metaData = new Metadata();
+                metaData.setMetaKey(applicationName);
+                String metaValue = application.getApplicationId() + ":" + applicationKey.getKeyMappingId();
+                metaData.setMetaValue(metaValue);
+                try {
+                    metadataManagementService.createMetadata(metaData);
+                    return apiApplicationKey;
+                } catch (MetadataManagementException e) {
+                    String msg = "Error occurred while creating the meta data entry for mata key: " + applicationName;
+                    log.error(msg, e);
+                    throw new APIManagerException(msg, e);
+                } catch (MetadataKeyAlreadyExistsException e) {
+                    String msg = "Found duplicate meta value entry for meta key: " + applicationName;
+                    log.error(msg, e);
+                    throw new APIManagerException(msg, e);
+                }
             } else {
+                try {
+                    Metadata metaData = metadataManagementService.retrieveMetadata(applicationName);
+                    if (metaData == null) {
+                        String msg =
+                                "Couldn't find application key data from meta data mgt service. Meta key: " + applicationName;
+                        log.error(msg);
+                        throw new APIManagerException(msg);
+                    }
+                    String[] metaValues = metaData.getMetaValue().split(":");
+                    String applicationId = metaValues[0];
+                    String keyMappingId = metaValues[1];
+                    //todo call the API key retrieving call,                     return apiApplicationKey;
+                } catch (MetadataManagementException e) {
+                    String msg = "Error occurred while getting meta data for meta key: " + applicationName;
+                    log.error(msg, e);
+                    throw new APIManagerException(msg, e);
+                }
                 return null;
             }
         } catch (APIServicesException e) {
