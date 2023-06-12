@@ -21,6 +21,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationService
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -177,5 +178,35 @@ public class APIApplicationManagerExtensionServiceComponent {
             log.debug("Unsetting DCR REST API Service");
         }
         APIApplicationManagerExtensionDataHolder.getInstance().setApiApplicationServices(null);
+    }
+
+    /**
+     * Sets Meta Data Mgt service.
+     *
+     * @param metadataManagementService An instance of MetadataManagementService
+     */
+    @Reference(
+            name = "meta.data.mgt.service",
+            service = io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAMetaMgtServices")
+    protected void setMetaMgtServices(MetadataManagementService metadataManagementService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting Meta data mgt Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setMetadataManagementService(metadataManagementService);
+    }
+
+    /**
+     * Unset Meta Data Mgt service
+     *
+     * @param metadataManagementService An instance of MetadataManagementService
+     */
+    protected void unsetAMetaMgtServices(MetadataManagementService metadataManagementService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting Meta Data mgt Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setMetadataManagementService(null);
     }
 }

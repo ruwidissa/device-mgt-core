@@ -32,6 +32,8 @@ public class DCRRequest {
     @XmlElement(required = true)
     private String username;
     @XmlElement(required = true)
+    private String password;
+    @XmlElement(required = true)
     private String grantTypes;
     @XmlElement
     private String callBackUrl;
@@ -98,4 +100,8 @@ public class DCRRequest {
     public void setValidityPeriod(int validityPeriod) {
         this.validityPeriod = validityPeriod;
     }
+
+    public String getPassword() { return password; }
+
+    public void setPassword(String password) { this.password = password; }
 }
