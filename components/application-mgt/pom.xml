@@ -36,10 +36,6 @@
     <modules>
         <module>io.entgra.device.mgt.core.application.mgt.common</module>
         <module>io.entgra.device.mgt.core.application.mgt.core</module>
-        <module>io.entgra.device.mgt.core.application.mgt.addons</module>
-        <module>io.entgra.device.mgt.core.application.mgt.publisher.api</module>
-        <module>io.entgra.device.mgt.core.application.mgt.store.api</module>
-        <module>io.entgra.device.mgt.core.application.mgt.api</module>
     </modules>
 
     <build>

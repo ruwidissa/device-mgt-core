@@ -1313,7 +1313,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
             //Add the query for owner
             if (owner != null && !owner.isEmpty()) {
-                sql = sql + " AND e.OWNER = ?";
+                sql = sql + " AND e.OWNER LIKE ?";
                 isOwnerProvided = true;
             } else if (ownerPattern != null && !ownerPattern.isEmpty()) {
                 sql = sql + " AND e.OWNER LIKE ?";
@@ -1341,7 +1341,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     stmt.setString(paramIdx++, request.getOwnership());
                 }
                 if (isOwnerProvided) {
-                    stmt.setString(paramIdx++, owner);
+                    stmt.setString(paramIdx++, "%" + owner + "%");
                 } else if (isOwnerPatternProvided) {
                     stmt.setString(paramIdx++, ownerPattern + "%");
                 }
