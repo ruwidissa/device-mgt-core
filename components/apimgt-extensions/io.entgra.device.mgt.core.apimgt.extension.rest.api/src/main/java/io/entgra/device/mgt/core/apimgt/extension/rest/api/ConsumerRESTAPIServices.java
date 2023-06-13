@@ -37,6 +37,9 @@ public interface ConsumerRESTAPIServices {
     Application createApplication(ApiApplicationInfo applicationInfo, Application application)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
+    Application deleteApplication(ApiApplicationInfo apiApplicationInfo, String applicationId)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
     Subscription[] getAllSubscriptions(ApiApplicationInfo apiApplicationInfo, String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
@@ -49,7 +52,10 @@ public interface ConsumerRESTAPIServices {
     Subscription[] createSubscriptions(ApiApplicationInfo apiApplicationInfo, List<Subscription> subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    ApplicationKey generateApplicationKeys(ApiApplicationInfo applicationInfo, Application application)
+    ApplicationKey generateApplicationKeys(ApiApplicationInfo applicationInfo, Application application, KeyManager keyManager)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
+    ApplicationKey getKeyDetails(ApiApplicationInfo apiApplicationInfo, String applicationId, String keyMapId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     KeyManager[] getAllKeyManagers(ApiApplicationInfo apiApplicationInfo)

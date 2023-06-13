@@ -180,6 +180,46 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
     }
 
     @Override
+    public Application deleteApplication(ApiApplicationInfo apiApplicationInfo, String applicationId)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        String deleteScopesUrl = endPointPrefix + Constants.APPLICATIONS_API + Constants.SLASH + applicationId;
+
+        Request request = new Request.Builder()
+                .url(deleteScopesUrl)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + apiApplicationInfo.getAccess_token())
+                .delete()
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                return gson.fromJson(response.body().string(), Application.class);
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(apiApplicationInfo.getRefresh_token(),
+                                apiApplicationInfo.getClientId(), apiApplicationInfo.getClientSecret());
+                ApiApplicationInfo refreshedApiApplicationInfo = returnApplicationInfo(apiApplicationInfo, refreshedAccessToken);
+                //TODO: max attempt count
+                return deleteApplication(refreshedApiApplicationInfo, applicationId);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid request body";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(msg, e);
+        }
+    }
+
+    @Override
     public Subscription[] getAllSubscriptions(ApiApplicationInfo apiApplicationInfo, String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
@@ -361,20 +401,20 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
     }
 
     @Override
-    public ApplicationKey generateApplicationKeys(ApiApplicationInfo apiApplicationInfo, Application application)
+    public ApplicationKey generateApplicationKeys(ApiApplicationInfo apiApplicationInfo, Application application, KeyManager keyManager)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getAllScopesUrl = endPointPrefix + Constants.SUBSCRIPTION_API + Constants.SLASH +
+        String getAllScopesUrl = endPointPrefix + Constants.APPLICATIONS_API + Constants.SLASH +
                 application.getApplicationId() + "/generate-keys";
 
         String keyInfo = "{\n" +
                 "  \"keyType\": \"PRODUCTION\",\n" +
-                "  \"keyManager\": \"Resident Key Manager\",\n" +
+                "  \"keyManager\": \""+ keyManager.getName() +"\",\n" +
                 "  \"grantTypesToBeSupported\": [\n" +
                 "    \"password\",\n" +
                 "    \"client_credentials\"\n" +
                 "  ],\n" +
-                "  \"callbackUrl\": \"http://sample.com/callback/url\",\n" +
+                "  \"callbackUrl\": \"\",\n" +
                 "  \"scopes\": [\n" +
                 "    \"am_application_scope\",\n" +
                 "    \"default\"\n" +
@@ -402,9 +442,49 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
                                 apiApplicationInfo.getClientId(), apiApplicationInfo.getClientSecret());
                 ApiApplicationInfo refreshedApiApplicationKey = returnApplicationInfo(apiApplicationInfo, refreshedAccessToken);
                 //TODO: max attempt count
-                return generateApplicationKeys(refreshedApiApplicationKey, application);
+                return generateApplicationKeys(refreshedApiApplicationKey, application, keyManager);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid request body";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(msg, e);
+        }
+    }
+
+    @Override
+    public ApplicationKey getKeyDetails(ApiApplicationInfo apiApplicationInfo, String applicationId, String keyMapId)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        String getKeyDetails = endPointPrefix + Constants.APPLICATIONS_API + Constants.SLASH + applicationId + "/oauth-keys/" + keyMapId;
+
+        Request request = new Request.Builder()
+                .url(getKeyDetails)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + apiApplicationInfo.getAccess_token())
+                .get()
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                return gson.fromJson(response.body().string(), ApplicationKey.class);
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(apiApplicationInfo.getRefresh_token(),
+                                apiApplicationInfo.getClientId(), apiApplicationInfo.getClientSecret());
+                ApiApplicationInfo refreshedApiApplicationKey = returnApplicationInfo(apiApplicationInfo, refreshedAccessToken);
+                //TODO: max attempt count
+                return getKeyDetails(refreshedApiApplicationKey, applicationId, keyMapId);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid request";
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else {

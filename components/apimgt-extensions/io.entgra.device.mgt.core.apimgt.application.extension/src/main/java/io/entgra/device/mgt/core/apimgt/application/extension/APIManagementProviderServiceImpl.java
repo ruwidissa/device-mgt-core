@@ -24,6 +24,7 @@ import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplication
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
 import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
 import io.entgra.device.mgt.core.apimgt.application.extension.util.APIManagerUtil;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.KeyManager;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
@@ -172,7 +173,8 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
             MetadataManagementService metadataManagementService = APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
             if (isNewApplication) {
-                ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, application);
+                KeyManager keyManager = consumerRESTAPIServices.getAllKeyManagers(applicationInfo)[0];
+                ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, application, keyManager);
                 ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
                 apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
                 apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
@@ -210,7 +212,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     }
                     String applicationId = metaValues[0];
                     String keyMappingId = metaValues[1];
-                    //todo call the API key retrieving call,                     return apiApplicationKey;
+                    ApplicationKey applicationKey = consumerRESTAPIServices.getKeyDetails(applicationInfo, applicationId, keyMappingId);
+                    ApiApplicationKey apiApplicationKey = null;
+                    apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
+                    apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
+                    return apiApplicationKey;
                 } catch (MetadataManagementException e) {
                     String msg = "Error occurred while getting meta data for meta key: " + applicationName;
                     log.error(msg, e);
