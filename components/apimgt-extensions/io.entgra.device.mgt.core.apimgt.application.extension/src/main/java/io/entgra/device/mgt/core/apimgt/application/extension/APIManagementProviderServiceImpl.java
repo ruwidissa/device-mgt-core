@@ -173,7 +173,15 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
             MetadataManagementService metadataManagementService = APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
             if (isNewApplication) {
-                KeyManager keyManager = consumerRESTAPIServices.getAllKeyManagers(applicationInfo)[0];
+                KeyManager[] keyManagers = consumerRESTAPIServices.getAllKeyManagers(applicationInfo);
+                KeyManager keyManager;
+                if (keyManagers.length == 1) {
+                    keyManager = keyManagers[0];
+                } else {
+                    String msg =
+                            "Found invalid number of key managers. No of key managers found from the APIM: " + keyManagers.length;
+                    throw new APIManagerException(msg);
+                }
                 ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, application, keyManager);
                 ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
                 apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
@@ -199,21 +207,22 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 try {
                     Metadata metaData = metadataManagementService.retrieveMetadata(applicationName);
                     if (metaData == null) {
-                        String msg =
-                                "Couldn't find application key data from meta data mgt service. Meta key: " + applicationName;
+                        String msg = "Couldn't find application key data from meta data mgt service. Meta key: "
+                                + applicationName;
                         log.error(msg);
                         throw new APIManagerException(msg);
                     }
                     String[] metaValues = metaData.getMetaValue().split(":");
                     if (metaValues.length != 2) {
-                        String msg = "Found invalid Meta value for meta key: " + applicationName;
+                        String msg = "Found invalid Meta value for meta key: " + applicationName + ". Meta Value: "
+                                + metaData.getMetaValue();
                         log.error(msg);
                         throw new APIManagerException(msg);
                     }
                     String applicationId = metaValues[0];
                     String keyMappingId = metaValues[1];
                     ApplicationKey applicationKey = consumerRESTAPIServices.getKeyDetails(applicationInfo, applicationId, keyMappingId);
-                    ApiApplicationKey apiApplicationKey = null;
+                    ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
                     apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
                     apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
                     return apiApplicationKey;
@@ -222,7 +231,6 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     log.error(msg, e);
                     throw new APIManagerException(msg, e);
                 }
-                return null;
             }
         } catch (APIServicesException e) {
             String msg = "Error occurred while processing the response of APIM REST endpoints.";
