@@ -37,12 +37,10 @@ public class DeviceGroupRoleWrapper implements Serializable {
     @ApiModelProperty(name = "id", value = "ID of the device group in the device group information database.")
     private int id;
 
-    @ApiModelProperty(name = "description", value = "The device group description that can be set on the device group by the user.",
-            required = true)
+    @ApiModelProperty(name = "description", value = "The device group description that can be set on the device group by the user.", required = true)
     private String description;
 
-    @ApiModelProperty(name = "name", value = "The device group name that can be set on the device group by the user.",
-            required = true)
+    @ApiModelProperty(name = "name", value = "The device group name that can be set on the device group by the user.", required = true)
     private String name;
 
     private String owner;
@@ -62,10 +60,8 @@ public class DeviceGroupRoleWrapper implements Serializable {
     @ApiModelProperty(name = "userRoles", value = "User roles")
     private List<String> userRoles;
 
-//    @ApiModelProperty(name = "DeviceGroupRoleWrapper", value = "Device group role wrapper")
-//    private List<DeviceGroupRoleWrapper> DeviceGroupRoleWrapper;
-
-    public DeviceGroupRoleWrapper() {}
+    public DeviceGroupRoleWrapper() {
+    }
 
     public DeviceGroupRoleWrapper(String name) {
         this.name = name;
@@ -79,7 +75,7 @@ public class DeviceGroupRoleWrapper implements Serializable {
         this.status = status;
     }
 
-    private Map<String,String> groupProperties;
+    private Map<String, String> groupProperties;
 
     public int getGroupId() {
         return id;
@@ -113,11 +109,11 @@ public class DeviceGroupRoleWrapper implements Serializable {
         this.owner = owner;
     }
 
-    public Map<String,String> getGroupProperties() {
+    public Map<String, String> getGroupProperties() {
         return groupProperties;
     }
 
-    public void setGroupProperties(Map<String,String> groupProperties) {
+    public void setGroupProperties(Map<String, String> groupProperties) {
         this.groupProperties = groupProperties;
     }
 
