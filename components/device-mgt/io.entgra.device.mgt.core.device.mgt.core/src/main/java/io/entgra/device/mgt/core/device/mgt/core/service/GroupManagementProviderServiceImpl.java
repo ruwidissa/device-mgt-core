@@ -147,9 +147,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         }
     }
 
-
-    public void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole, String[] defaultPermissions)
-            throws GroupManagementException, GroupAlreadyExistException {
+    public void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole, String[] defaultPermissions) throws GroupManagementException, GroupAlreadyExistException {
         if (groups == null) {
             String msg = "Received incomplete data for createGroup";
             log.error(msg);
@@ -168,9 +166,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 } else {
                     DeviceGroup immediateParentGroup = groupDAO.getGroup(groups.getParentGroupId(), tenantId);
                     if (immediateParentGroup == null) {
-                        String msg = "Parent group with group ID '" + groups.getParentGroupId()
-                                + "' does not exist.  Hence creating of group '" + groups.getName()
-                                + "' was not success";
+                        String msg = "Parent group with group ID '" + groups.getParentGroupId() + "' does not exist.  Hence creating of group '" + groups.getName() + "' was not success";
                         log.error(msg);
                         throw new GroupManagementException(msg);
                     }
