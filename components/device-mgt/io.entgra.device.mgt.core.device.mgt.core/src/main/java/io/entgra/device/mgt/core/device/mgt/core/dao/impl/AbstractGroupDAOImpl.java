@@ -197,8 +197,6 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             if (hasStatus) {
                 stmt.setString(7, deviceGroup.getStatus());
             }
-
-
             stmt.executeUpdate();
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
@@ -239,8 +237,6 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             if (hasStatus) {
                 stmt.setString(7, groups.getStatus());
             }
-
-
             stmt.executeUpdate();
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {

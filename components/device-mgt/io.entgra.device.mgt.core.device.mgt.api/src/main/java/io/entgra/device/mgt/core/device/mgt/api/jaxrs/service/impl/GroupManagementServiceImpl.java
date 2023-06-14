@@ -49,9 +49,6 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyAdministratorPoint;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.transaction.UserTransaction;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -467,5 +464,4 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
-
 }
