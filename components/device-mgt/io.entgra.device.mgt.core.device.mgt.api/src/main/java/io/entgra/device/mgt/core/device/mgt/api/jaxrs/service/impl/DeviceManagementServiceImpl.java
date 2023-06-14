@@ -798,6 +798,28 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         KeyMgtService keyMgtService = new KeyMgtServiceImpl();
         try {
             //todo - lasantha - can't get password from here
+
+            try {
+//                DCRResponse dcrResponse = keyMgtService.dynamicClientRegistration(applicationName, username,
+//                        "client_credentials", null, new String[] {"device_management"}, false, validityTime);
+//                deviceConfig.setClientId(dcrResponse.getClientId());
+//                deviceConfig.setClientSecret(dcrResponse.getClientSecret());
+
+                PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                JWTClientManagerService jwtClientManagerService = (JWTClientManagerService) ctx.
+                        getOSGiService(JWTClientManagerService.class, null);
+                JWTClient jwtClient = jwtClientManagerService.getJWTClient();
+//                AccessTokenInfo accessTokenInfo = jwtClient.getAccessToken(apiApplicationKey.getConsumerKey(),
+//                        apiApplicationKey.getConsumerSecret(),
+//                        username, Constants.ApplicationInstall.SUBSCRIPTION_SCOPE);
+            } catch (JWTClientException e) {
+                String msg = "Error while generating an OAuth token for user " + username;
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+
+            //todo call REST APIs
             DCRResponse dcrResponse = keyMgtService.dynamicClientRegistration(applicationName, username,
                     "client_credentials", null, new String[] {"device_management"}, false, validityTime);
             deviceConfig.setClientId(dcrResponse.getClientId());

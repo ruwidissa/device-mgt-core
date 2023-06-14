@@ -312,6 +312,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
      * @throws KeyMgtException if any error occurs while creating response object
      */
     private OAuthApplication createOauthApplication (String clientName, String owner, String[] tags, int validityPeriod) throws KeyMgtException {
+        //todo modify this to pass the password as well
         String oauthAppCreationPayloadStr = createOauthAppCreationPayload(clientName, owner, tags, validityPeriod);
         RequestBody oauthAppCreationPayload = RequestBody.Companion.create(oauthAppCreationPayloadStr, JSON);
         kmConfig = getKeyManagerConfig();

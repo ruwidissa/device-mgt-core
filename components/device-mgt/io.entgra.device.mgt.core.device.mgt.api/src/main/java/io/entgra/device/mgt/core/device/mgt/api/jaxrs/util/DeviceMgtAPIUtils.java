@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceTypeVersionWrapper;
@@ -154,6 +155,7 @@ public class DeviceMgtAPIUtils {
 
     private static volatile SubscriptionManager subscriptionManager;
     private static volatile ApplicationManager applicationManager;
+    private static volatile ConsumerRESTAPIServices consumerRESTAPIServices;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -385,6 +387,25 @@ public class DeviceMgtAPIUtils {
             }
         }
         return otpManagementService;
+    }
+
+    /**
+     * Initializing and accessing method for APIM Consumer REST API.
+     *
+     * @return ConsumerRESTAPIServices instance
+     * @throws IllegalStateException if ConsumerRESTAPIServices cannot be initialized
+     */
+    public static synchronized ConsumerRESTAPIServices getConsumerRESTAPIServices() {
+        if (consumerRESTAPIServices == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            consumerRESTAPIServices = (ConsumerRESTAPIServices) ctx.getOSGiService(ConsumerRESTAPIServices.class, null);
+            if (consumerRESTAPIServices == null) {
+                String msg = "Consumer Rest API service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return consumerRESTAPIServices;
     }
 
     public static RegistryService getRegistryService() {
