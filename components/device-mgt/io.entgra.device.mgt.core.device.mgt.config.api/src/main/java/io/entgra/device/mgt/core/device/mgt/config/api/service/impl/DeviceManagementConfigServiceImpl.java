@@ -48,6 +48,30 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.common.AppRegistrationCredentials;
+import org.wso2.carbon.device.mgt.common.ApplicationRegistrationException;
+import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
+import org.wso2.carbon.device.mgt.common.general.TenantDetail;
+import org.wso2.carbon.device.mgt.common.otp.mgt.OTPEmailTypes;
+import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
+import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
+import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
+import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
+import org.wso2.carbon.device.mgt.core.config.keymanager.KeyManagerConfigurations;
+import org.wso2.carbon.device.mgt.core.config.ui.UIConfiguration;
+import org.wso2.carbon.device.mgt.core.config.ui.UIConfigurationManager;
+import org.wso2.carbon.device.mgt.core.permission.mgt.PermissionUtils;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
+import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -70,7 +94,8 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
     @Path("/configurations")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getConfiguration(@HeaderParam("token") String token,
-                                     @QueryParam("properties") String properties) {
+                                     @QueryParam("properties") String properties,
+                                     @QueryParam("withAccessToken") boolean withAccessToken) {
         DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
         try {
             if (token == null || token.isEmpty()) {
@@ -95,7 +120,8 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             deviceProps.put("token", token);
             DeviceConfiguration devicesConfiguration =
                     dms.getDeviceConfiguration(deviceProps);
-            setAccessTokenToDeviceConfigurations(devicesConfiguration);
+            if (withAccessToken) setAccessTokenToDeviceConfigurations(devicesConfiguration);
+                else setOTPTokenToDeviceConfigurations(devicesConfiguration);
             return Response.status(Response.Status.OK).entity(devicesConfiguration).build();
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving configurations";
@@ -204,6 +230,33 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             String msg = "Error occurred while creating JWT client : " + e.getMessage();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
+        }
+    }
+
+    private void setOTPTokenToDeviceConfigurations(DeviceConfiguration deviceConfiguration)
+            throws DeviceManagementException {
+        OneTimePinDTO oneTimePinData = new OneTimePinDTO();
+        oneTimePinData.setEmail(OTPEmailTypes.DEVICE_ENROLLMENT.toString());
+        oneTimePinData.setEmailType(OTPEmailTypes.DEVICE_ENROLLMENT.toString());
+        oneTimePinData.setUsername(deviceConfiguration.getDeviceOwner());
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                deviceConfiguration.getTenantDomain(), true);
+        oneTimePinData.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        PrivilegedCarbonContext.endTenantFlow();
+        OTPManagementService otpManagementService = DeviceMgtAPIUtils.getOtpManagementService();
+        try {
+            OneTimePinDTO oneTimePinDTO = otpManagementService.generateOneTimePin(oneTimePinData, true);
+            if (oneTimePinDTO == null) {
+                String msg = "Null value returned when generating OTP token for " + oneTimePinData.getOtpToken();
+                log.error(msg);
+                throw new DeviceManagementException(msg);
+            }
+            deviceConfiguration.setAccessToken(oneTimePinDTO.getOtpToken());
+        } catch (OTPManagementException ex) {
+            String msg = "Error occurred while generating one time pin: " + ex.getMessage();
+            log.error(msg, ex);
+            throw new DeviceManagementException(msg, ex);
         }
     }
 
