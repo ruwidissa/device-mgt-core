@@ -138,7 +138,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 Map<String, String> queryParams = new HashMap<>();
                 queryParams.put("tag", tag);
 
-                APIInfo[] apiInfos = consumerRESTAPIServices.getAllApis(applicationInfo, queryParams, headerParams);
+                APIInfo[] apiInfos = consumerRESTAPIServices.getAllApis(applicationInfo, null, queryParams, headerParams);
 
                 uniqueApiList.addAll(List.of(apiInfos));
                 Set<APIInfo> taggedAPISet = new HashSet<>(uniqueApiList);
@@ -147,21 +147,22 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             }
 
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
-                    consumerRESTAPIServices.getAllApplications(applicationInfo, applicationName);
+                    consumerRESTAPIServices.getAllApplications(applicationInfo, null, applicationName);
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application;
             boolean isNewApplication = false;
             if (applications.length == 0) {
                 isNewApplication = true;
                 application = new io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application();
                 application.setName(applicationName);
-                application = consumerRESTAPIServices.createApplication(applicationInfo, application);
+                application = consumerRESTAPIServices.createApplication(applicationInfo, null, application);
                 addSubscriptions(application, uniqueApiList, applicationInfo);
             } else {
                 if (applications.length == 1) {
                     Optional<io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application> applicationOpt =
                             Arrays.stream(applications).findFirst();
                     application = applicationOpt.get();
-                    Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(applicationInfo, application.getApplicationId());
+                    Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(applicationInfo, null,
+                            application.getApplicationId());
                     Arrays.stream(subscriptions).map(Subscription::getApiInfo).forEachOrdered(uniqueApiList::remove);
                     addSubscriptions(application, uniqueApiList, applicationInfo);
                 } else {
@@ -173,7 +174,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
             MetadataManagementService metadataManagementService = APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
             if (isNewApplication) {
-                KeyManager[] keyManagers = consumerRESTAPIServices.getAllKeyManagers(applicationInfo);
+                KeyManager[] keyManagers = consumerRESTAPIServices.getAllKeyManagers(applicationInfo, null);
                 KeyManager keyManager;
                 if (keyManagers.length == 1) {
                     keyManager = keyManagers[0];
@@ -182,7 +183,8 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                             "Found invalid number of key managers. No of key managers found from the APIM: " + keyManagers.length;
                     throw new APIManagerException(msg);
                 }
-                ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, application, keyManager);
+                ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(applicationInfo, null,
+                        application.getApplicationId(), keyManager.getName(), keyType, validityTime);
                 ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
                 apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
                 apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
@@ -221,7 +223,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     }
                     String applicationId = metaValues[0];
                     String keyMappingId = metaValues[1];
-                    ApplicationKey applicationKey = consumerRESTAPIServices.getKeyDetails(applicationInfo, applicationId, keyMappingId);
+                    ApplicationKey applicationKey = consumerRESTAPIServices.getKeyDetails(applicationInfo, null, applicationId, keyMappingId);
                     ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
                     apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
                     apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
@@ -273,7 +275,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             subscription.setApplicationId(application.getApplicationId());
             subscriptionList.add(subscription);
         });
-        consumerRESTAPIServices.createSubscriptions(apiApplicationInfo, subscriptionList);
+        consumerRESTAPIServices.createSubscriptions(apiApplicationInfo, null, subscriptionList);
     }
 
     /**

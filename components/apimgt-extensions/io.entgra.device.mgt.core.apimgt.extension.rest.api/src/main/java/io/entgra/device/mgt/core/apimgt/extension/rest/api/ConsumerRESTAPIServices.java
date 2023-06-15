@@ -28,36 +28,39 @@ import java.util.List;
 import java.util.Map;
 
 public interface ConsumerRESTAPIServices {
-    Application[] getAllApplications(ApiApplicationInfo applicationInfo, String appName)
+    Application[] getAllApplications(ApiApplicationInfo applicationInfo, String accessToken, String appName)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Application getDetailsOfAnApplication(ApiApplicationInfo applicationInfo, String applicationId)
+    Application getDetailsOfAnApplication(ApiApplicationInfo apiApplicationInfo, String accessToken, String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Application createApplication(ApiApplicationInfo applicationInfo, Application application)
+    Application createApplication(ApiApplicationInfo apiApplicationInfo, String accessToken, Application application)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Application deleteApplication(ApiApplicationInfo apiApplicationInfo, String applicationId)
+    Boolean deleteApplication(ApiApplicationInfo apiApplicationInfo, String accessToken, String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Subscription[] getAllSubscriptions(ApiApplicationInfo apiApplicationInfo, String applicationId)
+    Subscription[] getAllSubscriptions(ApiApplicationInfo apiApplicationInfo, String accessToken, String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    APIInfo[] getAllApis(ApiApplicationInfo applicationInfo, Map<String, String> queryParam, Map<String, String> headerParams)
+    APIInfo[] getAllApis(ApiApplicationInfo apiApplicationInfo, String accessToken, Map<String, String> queryParams,
+                         Map<String, String> headerParams)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Subscription createSubscription(ApiApplicationInfo apiApplicationInfo, Subscription subscriptions)
+    Subscription createSubscription(ApiApplicationInfo apiApplicationInfo, String accessToken, Subscription subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Subscription[] createSubscriptions(ApiApplicationInfo apiApplicationInfo, List<Subscription> subscriptions)
+    Subscription[] createSubscriptions(ApiApplicationInfo apiApplicationInfo, String accessToken,
+                                       List<Subscription> subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    ApplicationKey generateApplicationKeys(ApiApplicationInfo applicationInfo, Application application, KeyManager keyManager)
+    ApplicationKey generateApplicationKeys(ApiApplicationInfo apiApplicationInfo, String accessToken, String  applicationId,
+                                           String keyManager, String validityTime, String keyType)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    ApplicationKey getKeyDetails(ApiApplicationInfo apiApplicationInfo, String applicationId, String keyMapId)
+    ApplicationKey getKeyDetails(ApiApplicationInfo apiApplicationInfo, String accessToken, String applicationId, String keyMapId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    KeyManager[] getAllKeyManagers(ApiApplicationInfo apiApplicationInfo)
+    KeyManager[] getAllKeyManagers(ApiApplicationInfo apiApplicationInfo, String accessToken)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 }

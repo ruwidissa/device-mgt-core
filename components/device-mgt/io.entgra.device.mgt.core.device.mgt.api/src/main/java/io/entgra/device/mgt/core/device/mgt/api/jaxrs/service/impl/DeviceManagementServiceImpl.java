@@ -19,6 +19,10 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
+import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.DCRResponse;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
@@ -825,6 +829,13 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             deviceConfig.setClientId(dcrResponse.getClientId());
             deviceConfig.setClientSecret(dcrResponse.getClientSecret());
 
+            APIManagementProviderService apiManagementProviderService = new APIManagementProviderServiceImpl();
+            ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(applicationName,
+                    new String[] {"device_management"}, null, username, false, String.valueOf(validityTime),  null);
+
+            deviceConfig.setClientId(apiApplicationKey.getConsumerKey());
+            deviceConfig.setClientSecret(apiApplicationKey.getConsumerSecret());
+
             StringBuilder scopes = new StringBuilder("device:" + type.replace(" ", "") + ":" + id);
             for (String topic : mqttEventTopicStructure) {
                 if (topic.contains("${deviceId}")) {
@@ -871,6 +882,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (APIManagerException e) {
+            String msg = "Error while calling rest Call for application key generation";
+            log.error(msg, e);
         }
         return Response.status(Response.Status.OK).entity(deviceConfig).build();
 
