@@ -35,6 +35,7 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.netbeans.lib.cvsclient.commandLine.command.status;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -147,7 +148,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         }
     }
 
-    public void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole, String[] defaultPermissions) throws GroupManagementException, GroupAlreadyExistException {
+    public void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole, String[] defaultPermissions) throws GroupManagementException {
         if (groups == null) {
             String msg = "Received incomplete data for createGroup";
             log.error(msg);
@@ -179,21 +180,15 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 }
                 GroupManagementDAOFactory.commitTransaction();
             } else {
-                throw new GroupAlreadyExistException("Group exist with name " + groups.getName());
+                throw new GroupManagementException("Group exist with name " + groups.getName());
             }
-        } catch (GroupManagementDAOException e) {
+        } catch (GroupManagementDAOException | GroupManagementException e) {
             GroupManagementDAOFactory.rollbackTransaction();
-            String msg = "Error occurred while adding deviceGroup '" + groups.getName() + "' to database.";
+            String msg = e.getMessage();
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while initiating transaction.";
-            log.error(msg, e);
-            throw new GroupManagementException(msg, e);
-        } catch (GroupAlreadyExistException ex) {
-            throw ex;
-        } catch (Exception e) {
-            String msg = "Error occurred in creating group '" + groups.getName() + "'";
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
         } finally {

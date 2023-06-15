@@ -211,9 +211,8 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         }
     }
 
+    @Override
     public int addGroupWithRoles(DeviceGroupRoleWrapper groups, int tenantId) throws GroupManagementDAOException {
-        PreparedStatement stmt = null;
-        ResultSet rs;
         int groupId = -1;
         boolean hasStatus = false;
         try {
@@ -227,27 +226,29 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                         + "VALUES (?, ?, ?, ?, ?, ?, ?)";
                 hasStatus = true;
             }
-            stmt = conn.prepareStatement(sql, new String[]{"ID"});
-            stmt.setString(1, groups.getDescription());
-            stmt.setString(2, groups.getName());
-            stmt.setString(3, groups.getOwner());
-            stmt.setInt(4, tenantId);
-            stmt.setString(5, groups.getParentPath());
-            stmt.setInt(6, groups.getParentGroupId());
-            if (hasStatus) {
-                stmt.setString(7, groups.getStatus());
+            try (PreparedStatement stmt = conn.prepareStatement(sql, new String[]{"ID"})) {
+                stmt.setString(1, groups.getDescription());
+                stmt.setString(2, groups.getName());
+                stmt.setString(3, groups.getOwner());
+                stmt.setInt(4, tenantId);
+                stmt.setString(5, groups.getParentPath());
+                stmt.setInt(6, groups.getParentGroupId());
+                if (hasStatus) {
+                    stmt.setString(7, groups.getStatus());
+                }
+                stmt.executeUpdate();
+                try (ResultSet rs = stmt.getGeneratedKeys();) {
+                    if (rs.next()) {
+                        groupId = rs.getInt(1);
+                    }
+                    return groupId;
+                }
             }
-            stmt.executeUpdate();
-            rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                groupId = rs.getInt(1);
-            }
-            return groupId;
         } catch (SQLException e) {
-            throw new GroupManagementDAOException("Error occurred while adding deviceGroup '" +
-                    groups.getName() + "'", e);
-        } finally {
-            GroupManagementDAOUtil.cleanupResources(stmt, null);
+            String msg = "Error occurred while adding deviceGroup '" +
+                    groups.getName() + "'";
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
         }
     }
 
@@ -282,27 +283,26 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
     public boolean addGroupPropertiesWithRoles(DeviceGroupRoleWrapper groups, int groupId, int tenantId)
             throws GroupManagementDAOException {
         boolean status;
-        PreparedStatement stmt = null;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            stmt = conn.prepareStatement(
+            try (PreparedStatement stmt = conn.prepareStatement(
                     "INSERT INTO GROUP_PROPERTIES(GROUP_ID, PROPERTY_NAME, " +
-                            "PROPERTY_VALUE, TENANT_ID) VALUES (?, ?, ?, ?)");
-            for (Map.Entry<String, String> entry : groups.getGroupProperties().entrySet()) {
-                stmt.setInt(1, groupId);
-                stmt.setString(2, entry.getKey());
-                stmt.setString(3, entry.getValue());
-                stmt.setInt(4, tenantId);
-                stmt.addBatch();
+                            "PROPERTY_VALUE, TENANT_ID) VALUES (?, ?, ?, ?)")) {
+                for (Map.Entry<String, String> entry : groups.getGroupProperties().entrySet()) {
+                    stmt.setInt(1, groupId);
+                    stmt.setString(2, entry.getKey());
+                    stmt.setString(3, entry.getValue());
+                    stmt.setInt(4, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                status = true;
             }
-            stmt.executeBatch();
-            status = true;
         } catch (SQLException e) {
             String msg = "Error occurred while adding properties for group '" +
                     groups.getName() + "' values : " + groups.getGroupProperties();
+            log.error(msg);
             throw new GroupManagementDAOException(msg, e);
-        } finally {
-            GroupManagementDAOUtil.cleanupResources(stmt, null);
         }
         return status;
     }
