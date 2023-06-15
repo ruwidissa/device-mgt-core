@@ -435,15 +435,15 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     @Path("/roles/share")
     @Override
     public Response createGroupWithRoles(DeviceGroupRoleWrapper groups) {
-        String owner = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (groups == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        groups.setOwner(owner);
+        groups.setOwner(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
         groups.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
         try {
             DeviceMgtAPIUtils.getGroupManagementProviderService().createGroupWithRoles(groups, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS);
-            DeviceGroup group = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroup(groups.getName(), owner.isEmpty());
+            DeviceGroup group = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroup(groups.getName(),
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername().isEmpty());
             if (group != null) {
                 DeviceMgtAPIUtils.getGroupManagementProviderService().manageGroupSharing(group.getGroupId(), groups.getUserRoles());
                 return Response.status(Response.Status.CREATED).entity(group.getGroupId()).build();
@@ -453,7 +453,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
         } catch (GroupManagementException e) {
-            String msg = "Error occurred while adding new group.";
+            String msg = "Error occurred while adding " + groups.getName() + " group";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (GroupAlreadyExistException e) {
