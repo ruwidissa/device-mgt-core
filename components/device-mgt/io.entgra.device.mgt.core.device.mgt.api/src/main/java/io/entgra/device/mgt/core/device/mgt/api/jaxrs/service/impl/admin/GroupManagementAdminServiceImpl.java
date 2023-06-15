@@ -164,21 +164,22 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
     @Path("/roles/share")
     @Override
     public Response createGroupWithRoles(DeviceGroupRoleWrapper group) {
-        String owner = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (group == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        group.setOwner(owner);
+        group.setOwner(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
         group.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
         try {
             DeviceMgtAPIUtils.getGroupManagementProviderService().createGroupWithRoles(group, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS);
             DeviceMgtAPIUtils.getGroupManagementProviderService().manageGroupSharing(group.getGroupId(), group.getUserRoles());
             return Response.status(Response.Status.CREATED).build();
         } catch (GroupManagementException e) {
-            String msg = "Error occurred while adding new group.";
+            String msg = "Error occurred while adding " + group.getName() + " group";
+            log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (GroupAlreadyExistException e) {
             String msg = "Group already exists with name : " + group.getName() + ".";
+            log.warn(msg);
             return Response.status(Response.Status.CONFLICT).entity(msg).build();
         } catch (RoleDoesNotExistException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
