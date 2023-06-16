@@ -21,6 +21,30 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.device.mgt.common.*;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.DeviceEnrolmentLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceEnrolmentLoggerImpl;
+import org.apache.commons.collections.map.SingletonMap;
+import org.apache.commons.lang.StringUtils;
+import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.Billing;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceEnrollmentInfoNotification;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManager;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceNotification;
+import io.entgra.device.mgt.core.device.mgt.common.DevicePropertyNotification;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceTransferRequest;
+import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
+import io.entgra.device.mgt.core.device.mgt.common.InitialOperationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.MonitoringOperation;
+import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.common.StartupOperationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.BillingResponse;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.*;
@@ -117,7 +141,9 @@ import java.util.stream.Collectors;
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
         PluginInitializationListener {
 
-    private static final Log log = LogFactory.getLog(DeviceManagementProviderServiceImpl.class);
+    DeviceEnrolmentLogContext.Builder deviceEnrolmentLogContextBuilder = new DeviceEnrolmentLogContext.Builder();
+
+    private static final EntgraLogger log = new EntgraDeviceEnrolmentLoggerImpl(DeviceManagementProviderServiceImpl.class);
 
     private static final String OPERATION_RESPONSE_EVENT_STREAM_DEFINITION = "org.wso2.iot.OperationResponseStream";
     private final DeviceManagementPluginRepository pluginRepository;
@@ -205,6 +231,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             }
             return false;
         }
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         EnrollmentConfiguration enrollmentConfiguration = DeviceManagerUtil.getEnrollmentConfigurationEntry();
         String deviceSerialNumber = null;
         if (enrollmentConfiguration != null) {
@@ -291,6 +319,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                         device.getType() + " upon the user '" + device.getEnrolmentInfo().getOwner() +
                                         "'");
                             }
+                            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(existingDevice.getId())).setDeviceType(String.valueOf(existingDevice.getType())).setOwner(newEnrolmentInfo.getOwner()).setOwnership(String.valueOf(newEnrolmentInfo.getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
                             status = true;
                         } else {
                             log.warn("Unable to update device enrollment for device : " + device.getDeviceIdentifier() +
@@ -327,6 +356,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     }
                     device.setEnrolmentInfo(enrollment);
                     DeviceManagementDAOFactory.commitTransaction();
+                    log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(device.getId())).setDeviceType(String.valueOf(device.getType())).setOwner(enrollment.getOwner()).setOwnership(String.valueOf(enrollment.getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
                 } else {
                     DeviceManagementDAOFactory.rollbackTransaction();
                     throw new DeviceManagementException("No device type registered with name - " + device.getType()
@@ -515,7 +545,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
 
         int tenantId = this.getTenantId();
-
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         Device device = this.getDevice(deviceId, false);
         if (device == null) {
             if (log.isDebugEnabled()) {
@@ -549,7 +580,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 }
             }
             //procees to dis-enroll a device from traccar ends
-
+            log.info("Device disenrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(device.getId())).setDeviceType(String.valueOf(device.getType())).setOwner(device.getEnrolmentInfo().getOwner()).setOwnership(String.valueOf(device.getEnrolmentInfo().getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while dis-enrolling '" + deviceId.getType() +
