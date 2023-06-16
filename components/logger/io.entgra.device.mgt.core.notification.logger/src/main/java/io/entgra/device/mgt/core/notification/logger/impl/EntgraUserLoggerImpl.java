@@ -17,7 +17,6 @@
  */
 package io.entgra.device.mgt.core.notification.logger.impl;
 
-
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.LogContext;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.notification.logger.UserLogContext;
@@ -25,7 +24,6 @@ import io.entgra.device.mgt.core.notification.logger.util.MDCContextUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.MDC;
-
 
 public class EntgraUserLoggerImpl implements EntgraLogger {
 

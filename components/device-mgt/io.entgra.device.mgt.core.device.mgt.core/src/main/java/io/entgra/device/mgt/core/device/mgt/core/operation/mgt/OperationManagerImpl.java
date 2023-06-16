@@ -19,9 +19,11 @@
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.DeviceConnectivityLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceConnectivityLoggerImpl;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraPolicyLoggerImpl;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
@@ -91,7 +93,8 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class OperationManagerImpl implements OperationManager {
 
-    private static final Log log = LogFactory.getLog(OperationManagerImpl.class);
+    DeviceConnectivityLogContext.Builder deviceConnectivityLogContextBuilder = new DeviceConnectivityLogContext.Builder();
+    private static final EntgraLogger log = new EntgraDeviceConnectivityLoggerImpl(OperationManagerImpl.class);
     private static final int CACHE_VALIDITY_PERIOD = 5 * 60 * 1000;
     private static final String NOTIFIER_TYPE_LOCAL = "LOCAL";
     private static final String SYSTEM = "system";
@@ -174,6 +177,8 @@ public class OperationManagerImpl implements OperationManager {
             }
         }
 
+        String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         DeviceIDHolder deviceValidationResult = DeviceManagerUtil.validateDeviceIdentifiers(deviceIds);
         List<DeviceIdentifier> validDeviceIds = deviceValidationResult.getValidDeviceIDList();
         if (!validDeviceIds.isEmpty()) {
@@ -249,6 +254,10 @@ public class OperationManagerImpl implements OperationManager {
                 if (!isScheduledOperation) {
                     activity.setActivityStatus(
                             this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult));
+                }
+                for (DeviceIdentifier deviceId : authorizedDeviceIds) {
+                    device = getDevice(deviceId);
+                    log.info("Operation added", deviceConnectivityLogContextBuilder.setDeviceId(String.valueOf(device.getId())).setDeviceType(deviceType).setActionTag("ADD_OPERATION").setTenantDomain(tenantDomain).setTenantId(tenantId).setUserName(initiatedBy).setOperationCode(operationCode).build());
                 }
                 return activity;
             } catch (OperationManagementDAOException e) {
@@ -696,7 +705,9 @@ public class OperationManagerImpl implements OperationManager {
         if (log.isDebugEnabled()) {
             log.debug("Device identifier id:[" + deviceId.getId() + "] type:[" + deviceId.getType() + "]");
         }
-
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         EnrolmentInfo enrolmentInfo = this.getActiveEnrolmentInfo(deviceId);
         if (enrolmentInfo == null) {
             throw new OperationManagementException("Device not found for the given device Identifier:" +
@@ -709,16 +720,18 @@ public class OperationManagerImpl implements OperationManager {
             case INACTIVE:
             case UNREACHABLE:
                 this.setEnrolmentStatus(enrolmentId, EnrolmentInfo.Status.ACTIVE);
-                int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
                 DeviceCacheManagerImpl.getInstance().removeDeviceFromCache(deviceId, tenantId);
                 break;
         }
-
+        log.info("Device Connected", deviceConnectivityLogContextBuilder.setDeviceId(deviceId.getId()).setDeviceType(deviceId.getType()).setActionTag("PENDING_OPERATION").setTenantDomain(tenantDomain).setTenantId(String.valueOf(tenantId)).setUserName(userName).build());
         return getOperations(deviceId, Operation.Status.PENDING, enrolmentId);
     }
 
     @Override
     public List<? extends Operation> getPendingOperations(Device device) throws OperationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
         if (enrolmentInfo == null) {
             throw new OperationManagementException("Device not found for the given device Identifier:" +
@@ -736,10 +749,10 @@ public class OperationManagerImpl implements OperationManager {
                 this.setEnrolmentStatus(enrolmentId, EnrolmentInfo.Status.ACTIVE);
                 enrolmentInfo.setStatus(EnrolmentInfo.Status.ACTIVE);
                 device.setEnrolmentInfo(enrolmentInfo);
-                int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
                 DeviceCacheManagerImpl.getInstance().addDeviceToCache(deviceIdentifier, device, tenantId);
                 break;
         }
+        log.info("Device Connected", deviceConnectivityLogContextBuilder.setDeviceId(device.getDeviceIdentifier()).setDeviceType(device.getType()).setActionTag("PENDING_OPERATION").setTenantDomain(tenantDomain).setTenantId(String.valueOf(tenantId)).setUserName(userName).build());
         return getOperations(deviceIdentifier, Operation.Status.PENDING, enrolmentId);
     }
 
