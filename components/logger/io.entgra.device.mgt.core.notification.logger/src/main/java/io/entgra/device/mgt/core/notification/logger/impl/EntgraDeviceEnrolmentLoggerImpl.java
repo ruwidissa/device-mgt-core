@@ -19,17 +19,17 @@ package io.entgra.device.mgt.core.notification.logger.impl;
 
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.LogContext;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
-import io.entgra.device.mgt.core.notification.logger.DeviceLogContext;
+import io.entgra.device.mgt.core.notification.logger.DeviceEnrolmentLogContext;
 import io.entgra.device.mgt.core.notification.logger.util.MDCContextUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.MDC;
 
-public class EntgraDeviceLoggerImpl implements EntgraLogger {
+public class EntgraDeviceEnrolmentLoggerImpl implements EntgraLogger {
 
     private static Log log = null;
 
-    public EntgraDeviceLoggerImpl(Class<?> clazz) {
+    public EntgraDeviceEnrolmentLoggerImpl(Class<?> clazz) {
         log = LogFactory.getLog(clazz);
     }
 
@@ -53,22 +53,22 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
 
     @Override
     public void info(String message, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.info(message);
     }
 
     @Override
     public void info(Object object, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.info(object);
     }
 
     @Override
     public void info(Object object, Throwable t, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.info(object, t);
     }
 
@@ -92,22 +92,22 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
 
     @Override
     public void debug(String message, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.debug(message);
     }
 
     @Override
     public void debug(Object object, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.debug(object);
     }
 
     @Override
     public void debug(Object object, Throwable t, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.debug(object, t);
     }
 
@@ -131,29 +131,29 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
 
     @Override
     public void error(String message, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.error(message);
     }
 
     @Override
     public void error(String message, Throwable t, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.error(message, t);
     }
 
     @Override
     public void error(Object object, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.error(object);
     }
 
     @Override
     public void error(Object object, Throwable t, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.error(object, t);
     }
 
@@ -177,29 +177,29 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
 
     @Override
     public void warn(String message, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.warn(message);
     }
 
     @Override
     public void warn(String message, Throwable t, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.warn(message, t);
     }
 
     @Override
     public void warn(Object object, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.warn(object);
     }
 
     @Override
     public void warn(Object object, Throwable t, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.warn(object, t);
     }
 
@@ -223,22 +223,22 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
 
     @Override
     public void trace(String message, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.trace(message);
     }
 
     @Override
     public void trace(Object object, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.trace(object);
     }
 
     @Override
     public void trace(Object object, Throwable t, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.trace(object, t);
     }
 
@@ -262,22 +262,22 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
 
     @Override
     public void fatal(String message, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.fatal(message);
     }
 
     @Override
     public void fatal(Object object, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.fatal(object);
     }
 
     @Override
     public void fatal(Object object, Throwable t, LogContext logContext) {
-        DeviceLogContext deviceLogContext = (DeviceLogContext) logContext;
-        MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
+        DeviceEnrolmentLogContext deviceEnrolmentLogContext = (DeviceEnrolmentLogContext) logContext;
+        MDCContextUtil.populateDeviceEnrolmentMDCContext(deviceEnrolmentLogContext);
         log.fatal(object, t);
     }
 
