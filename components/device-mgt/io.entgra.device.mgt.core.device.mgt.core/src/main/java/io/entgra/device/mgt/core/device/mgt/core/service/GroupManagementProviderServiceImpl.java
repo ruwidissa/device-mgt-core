@@ -167,6 +167,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 } else {
                     DeviceGroup immediateParentGroup = groupDAO.getGroup(groups.getParentGroupId(), tenantId);
                     if (immediateParentGroup == null) {
+                        GroupManagementDAOFactory.rollbackTransaction();
                         String msg = "Parent group with group ID '" + groups.getParentGroupId() + "' does not exist.  Hence creating of group '" + groups.getName() + "' was not success";
                         log.error(msg);
                         throw new GroupManagementException(msg);
@@ -182,7 +183,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             } else {
                 throw new GroupManagementException("Group exist with name " + groups.getName());
             }
-        } catch (GroupManagementDAOException | GroupManagementException e) {
+        } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();
             String msg = e.getMessage();
             log.error(msg, e);
