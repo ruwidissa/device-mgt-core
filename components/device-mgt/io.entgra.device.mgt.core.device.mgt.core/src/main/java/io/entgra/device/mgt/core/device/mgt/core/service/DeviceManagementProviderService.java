@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -15,26 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
- *  Copyright (c) 2020, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
- *
- *  Entgra (pvt) Ltd. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied. See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
- */
 
 package io.entgra.device.mgt.core.device.mgt.core.service;
 
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import org.apache.commons.collections.map.SingletonMap;
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
@@ -1034,4 +1018,42 @@ public interface DeviceManagementProviderService {
             throws DeviceManagementException;
 
     Boolean sendDeviceNameChangedNotification(Device device) throws DeviceManagementException;
+
+    /**
+     * This method is for saving application icon info
+     * @param iconPath Icon path of the application
+     * @param packageName Package name of the application
+     * @param version Version of the application
+     * @param tenantId Tenant ID of the application created user
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId)
+            throws DeviceManagementException;
+
+    /**
+     * This method is for updating application icon info
+     * @param iconPath Icon path of the application
+     * @param oldPackageName Old package name of the application
+     * @param newPackageName New package name of the application
+     * @param version Version of the application
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    void updateApplicationIcon(String iconPath, String oldPackageName, String newPackageName, String version)
+            throws DeviceManagementException;
+
+    /**
+     * This method is for deleting application icon info
+     * @param packageName Package name of the application
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    void deleteApplicationIcon(String packageName) throws DeviceManagementException;
+
+    /**
+     * This method is for getting the installed application list of a device
+     * @param device {@link Device}
+     * @return list of applications {@link Application}
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    List<Application> getInstalledApplicationsOnDevice(Device device, int offset, int limit)
+            throws DeviceManagementException;
 }

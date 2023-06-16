@@ -1,23 +1,27 @@
 /*
-*  Copyright (c) 2015 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package io.entgra.device.mgt.core.policy.mgt.core.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.PolicyLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraPolicyLoggerImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -49,7 +53,8 @@ import java.util.Set;
 
 public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
 
-    private static final Log log = LogFactory.getLog(PolicyAdministratorPointImpl.class);
+    PolicyLogContext.Builder policyLogContextBuilder = new PolicyLogContext.Builder();
+    private static final EntgraLogger log = new EntgraPolicyLoggerImpl(PolicyAdministratorPointImpl.class);
 
     private PolicyManager policyManager;
     private ProfileManager profileManager;
@@ -130,6 +135,8 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
 
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
             TaskService taskService = PolicyManagementDataHolder.getInstance().getTaskService();
 
             if (log.isDebugEnabled()) {
@@ -163,11 +170,13 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
                             properties, triggerInfo);
                     taskManager.registerTask(taskInfo);
                     taskManager.scheduleTask(taskInfo.getName());
+                    log.info("Apply changes to device", policyLogContextBuilder.setActionTag("PUBLISH_CHANGES").setUserName(userName).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).build());
                 } else {
                     if (!taskManager.isTaskScheduled(taskName)) {
                         TaskInfo taskInfo = new TaskInfo(taskName, PolicyManagementConstants.DELEGATION_TASK_CLAZZ,
                                 properties, triggerInfo);
                         taskManager.scheduleTask(taskInfo.getName());
+                        log.info("Apply changes to device", policyLogContextBuilder.setActionTag("PUBLISH_CHANGES").setUserName(userName).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).build());
                     } else {
                         throw new PolicyManagementException("There is a task already running for policy changes. Please try " +
                                 "to apply " +
@@ -335,7 +344,7 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
     }
 
     @Override
-    public List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException {
+    public List<Policy> getPolicyList(PolicyPaginationRequest request) throws PolicyManagementException {
         return policyManager.getPolicyList(request);
     }
 }

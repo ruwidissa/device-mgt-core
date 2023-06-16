@@ -1,22 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *
- *
- * Copyright (c) 2020, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -37,10 +20,11 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.DeviceEnrolmentLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceEnrolmentLoggerImpl;
 import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -189,7 +173,9 @@ import java.util.stream.Collectors;
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
         PluginInitializationListener {
 
-    private static final Log log = LogFactory.getLog(DeviceManagementProviderServiceImpl.class);
+    DeviceEnrolmentLogContext.Builder deviceEnrolmentLogContextBuilder = new DeviceEnrolmentLogContext.Builder();
+
+    private static final EntgraLogger log = new EntgraDeviceEnrolmentLoggerImpl(DeviceManagementProviderServiceImpl.class);
 
     private static final String OPERATION_RESPONSE_EVENT_STREAM_DEFINITION = "org.wso2.iot.OperationResponseStream";
     private final DeviceManagementPluginRepository pluginRepository;
@@ -277,6 +263,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             }
             return false;
         }
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         EnrollmentConfiguration enrollmentConfiguration = DeviceManagerUtil.getEnrollmentConfigurationEntry();
         String deviceSerialNumber = null;
         if (enrollmentConfiguration != null) {
@@ -363,6 +351,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                         device.getType() + " upon the user '" + device.getEnrolmentInfo().getOwner() +
                                         "'");
                             }
+                            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(existingDevice.getId())).setDeviceType(String.valueOf(existingDevice.getType())).setOwner(newEnrolmentInfo.getOwner()).setOwnership(String.valueOf(newEnrolmentInfo.getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
                             status = true;
                         } else {
                             log.warn("Unable to update device enrollment for device : " + device.getDeviceIdentifier() +
@@ -399,6 +388,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     }
                     device.setEnrolmentInfo(enrollment);
                     DeviceManagementDAOFactory.commitTransaction();
+                    log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(device.getId())).setDeviceType(String.valueOf(device.getType())).setOwner(enrollment.getOwner()).setOwnership(String.valueOf(enrollment.getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
                 } else {
                     DeviceManagementDAOFactory.rollbackTransaction();
                     throw new DeviceManagementException("No device type registered with name - " + device.getType()
@@ -587,7 +577,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
 
         int tenantId = this.getTenantId();
-
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         Device device = this.getDevice(deviceId, false);
         if (device == null) {
             if (log.isDebugEnabled()) {
@@ -621,7 +612,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 }
             }
             //procees to dis-enroll a device from traccar ends
-
+            log.info("Device disenrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(device.getId())).setDeviceType(String.valueOf(device.getType())).setOwner(device.getEnrolmentInfo().getOwner()).setOwnership(String.valueOf(device.getEnrolmentInfo().getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while dis-enrolling '" + deviceId.getType() +
@@ -4915,5 +4906,131 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
+    }
+
+    @Override
+    public void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId) throws DeviceManagementException{
+        try{
+            DeviceManagementDAOFactory.beginTransaction();
+            if(applicationDAO.getApplicationPackageCount(packageName) == 0){
+                applicationDAO.saveApplicationIcon(iconPath, packageName, version, tenantId);
+            }
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while saving app icon. Icon Path: " + iconPath +
+                    " Package Name: " + packageName +
+                    " Version: " + version +
+                    " Tenant Id: " + tenantId;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public void updateApplicationIcon(String iconPath, String oldPackageName, String newPackageName, String version)
+            throws DeviceManagementException{
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            applicationDAO.updateApplicationIcon(iconPath, oldPackageName, newPackageName, version);
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while updating app icon info." +
+                    " Package Name: " + oldPackageName;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public void deleteApplicationIcon(String packageName)
+            throws DeviceManagementException {
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            applicationDAO.deleteApplicationIcon(packageName);
+            DeviceManagementDAOFactory.commitTransaction();
+        }  catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while deleting app icon info." +
+                    " Package Name: " + packageName ;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    private List<Application> getInstalledAppIconInfo(List<Application> applications) throws DeviceManagementException {
+        String iconPath;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            for (Application app : applications) {
+                iconPath = applicationDAO.getIconPath(app.getApplicationIdentifier());
+                app.setImageUrl(iconPath);
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving installed app icon info";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return applications;
+    }
+
+    @Override
+    public List<Application> getInstalledApplicationsOnDevice(Device device, int offset, int limit) throws DeviceManagementException {
+        List<Application> applications;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            applications = applicationDAO.getInstalledApplicationListOnDevice(device.getId(),
+                    device.getEnrolmentInfo().getId(), offset, limit, tenantId);
+            if (applications == null) {
+                String msg = "Couldn't found applications for device identifier '" + device.getId() + "'";
+                log.error(msg);
+                throw new DeviceManagementException(msg);
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving the application list of android device, " +
+                    "which carries the id '" + device.getId() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        List<Application> newApplicationList;
+        newApplicationList = this.getInstalledAppIconInfo(applications);
+        if (newApplicationList == null) {
+            String msg = "Error occurred while getting app icon info for device identifier '" + device.getId() + "'";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        return newApplicationList;
     }
 }

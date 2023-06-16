@@ -1,4 +1,5 @@
-/* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+/*
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -1286,6 +1287,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 applicationDTO.setId(appId);
                 applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
+                if (applicationDTO.getType().equals("ENTERPRISE") || applicationDTO.getType().equals("PUBLIC") ) {
+                    persistAppIconInfo(applicationReleaseDTO);
+                }
                 return APIUtil.appDtoToAppResponse(applicationDTO);
             }
         } catch (LifeCycleManagementDAOException e) {
@@ -1307,6 +1311,30 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (VisibilityManagementDAOException e) {
             String msg = "Error occurred while adding unrestricted roles. application name: " + applicationDTO.getName()
                     + ".";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Persist application icon information when creating an application
+     *
+     * @param applicationReleaseDTO {@link ApplicationReleaseDTO}
+     * @throws ApplicationManagementException if error occurred while persisting application icon information
+     */
+    private void persistAppIconInfo(ApplicationReleaseDTO applicationReleaseDTO)
+            throws ApplicationManagementException {
+        try {
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+            String iconPath = APIUtil.createAppIconPath(applicationReleaseDTO, tenantId);
+            DataHolder.getInstance().getDeviceManagementService().saveApplicationIcon(iconPath,
+                    String.valueOf(applicationReleaseDTO.getPackageName()), applicationReleaseDTO.getVersion(), tenantId);
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while creating iconPath. Application package name : " + applicationReleaseDTO.getPackageName();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while saving application icon info. Application package name : " + applicationReleaseDTO.getPackageName();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
@@ -1916,6 +1944,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 break;
             }
+        }
+        try {
+            deleteAppIconInfo(applicationDTO);
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while deleting application icon info. Application package name: " + applicationDTO.getPackageName();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         }
     }
 
@@ -4019,6 +4054,34 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void updateAppIconInfo(ApplicationRelease applicationRelease, String oldPackageName) throws ApplicationManagementException {
+        try {
+            DataHolder.getInstance().getDeviceManagementService().updateApplicationIcon(applicationRelease.getIconPath(),
+                    oldPackageName, applicationRelease.getPackageName(), applicationRelease.getVersion());
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while updating application icon info. Application package name: " + oldPackageName;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Delete application icon information when deleting an application
+     *
+     * @param applicationDTO {@link ApplicationDTO}
+     * @throws ApplicationManagementException if error occurred while deleting application icon information
+     */
+    private void deleteAppIconInfo(ApplicationDTO applicationDTO) throws ApplicationManagementException {
+        try {
+            DataHolder.getInstance().getDeviceManagementService().deleteApplicationIcon(applicationDTO.getPackageName());
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while deleting application icon info. Application package name: " + applicationDTO.getPackageName();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         }
     }
 }

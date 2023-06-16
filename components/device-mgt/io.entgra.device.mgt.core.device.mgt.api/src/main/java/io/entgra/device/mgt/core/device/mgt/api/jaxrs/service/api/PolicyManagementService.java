@@ -1,20 +1,19 @@
 /*
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
- *   WSO2 Inc. licenses this file to you under the Apache License,
- *   Version 2.0 (the "License"); you may not use this file except
- *   in compliance with the License.
- *   You may obtain a copy of the License at
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing,
- *   software distributed under the License is distributed on an
- *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *   KIND, either express or implied.  See the License for the
- *   specific language governing permissions and limitations
- *   under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
@@ -917,6 +916,24 @@ public interface PolicyManagementService {
                             response = ErrorResponse.class)
             })
     Response getPolicyList(
+            @ApiParam(
+                    name = "name",
+                    value = "The name of the policy that needs filtering.",
+                    required = false)
+            @QueryParam("name")
+                    String name,
+            @ApiParam(
+                    name = "type",
+                    value = "The type of the policy that needs filtering.",
+                    required = false)
+            @QueryParam("type")
+                    String type,
+            @ApiParam(
+                    name = "status",
+                    value = "The status of the policy that needs filtering.",
+                    required = false)
+            @QueryParam("status")
+                    String status,
             @ApiParam(
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time. \n" +

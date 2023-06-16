@@ -1,4 +1,5 @@
-/* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+/*
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,6 +20,9 @@ package io.entgra.device.mgt.core.application.mgt.core.impl;
 
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.AppInstallLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraAppInstallLoggerImpl;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
@@ -110,8 +114,8 @@ import java.util.stream.Collectors;
  * This is the default implementation for the Subscription Manager.
  */
 public class SubscriptionManagerImpl implements SubscriptionManager {
-
-    private static final Log log = LogFactory.getLog(SubscriptionManagerImpl.class);
+    AppInstallLogContext.Builder appInstallLogContextBuilder = new AppInstallLogContext.Builder();
+    private static final EntgraLogger log = new EntgraAppInstallLoggerImpl(SubscriptionManagerImpl.class);
     private SubscriptionDAO subscriptionDAO;
     private ApplicationDAO applicationDAO;
     private LifecycleStateManager lifecycleStateManager;
@@ -643,7 +647,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                                               Properties properties,
                                                               boolean isOperationReExecutingDisabled)
             throws ApplicationManagementException {
-
+        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
         //Get app subscribing info of each device
         SubscribingDeviceIdHolder subscribingDeviceIdHolder = getSubscribingDeviceIdHolder(devices,
                 applicationDTO.getApplicationReleaseDTOs().get(0).getId());
@@ -693,10 +699,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 Activity activity = addAppOperationOnDevices(applicationDTO, new ArrayList<>(entry.getValue()),
                         entry.getKey(), action, properties);
                 activityList.add(activity);
+                for (DeviceIdentifier identifier : deviceIdentifiers) {
+                    log.info(String.format("Web app %s triggered", action), appInstallLogContextBuilder.setAppId(String.valueOf(applicationDTO.getId())).setAppName(applicationDTO.getName()).setAppType(applicationDTO.getType()).setSubType(subType).setTenantId(tenantId).setTenantDomain(tenantDomain).setDevice(String.valueOf(identifier)).setUserName(username).setAction(action).build());
+                }
             }
         } else {
             Activity activity = addAppOperationOnDevices(applicationDTO, deviceIdentifiers, deviceType, action, properties);
             activityList.add(activity);
+            for (DeviceIdentifier identifier : deviceIdentifiers) {
+                log.info(String.format("App %s triggered", action), appInstallLogContextBuilder.setAppId(String.valueOf(applicationDTO.getId())).setAppName(applicationDTO.getName()).setAppType(applicationDTO.getType()).setSubType(subType).setTenantId(tenantId).setTenantDomain(tenantDomain).setDevice(String.valueOf(identifier)).setUserName(username).setAction(action).build());
+            }
         }
 
         ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();

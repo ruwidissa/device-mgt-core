@@ -1,29 +1,12 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *
- *
- * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -31,10 +14,10 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -499,6 +482,9 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
     @Path("/list")
     @Override
     public Response getPolicyList(
+            @QueryParam("name") String name,
+            @QueryParam("type") String type,
+            @QueryParam("status") String status,
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
             @QueryParam("offset") int offset,
             @QueryParam("limit") int limit) {
@@ -506,7 +492,16 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
         List<Policy> policies;
         PolicyList targetPolicies = new PolicyList();
-        PaginationRequest request = new PaginationRequest(offset, limit);
+        PolicyPaginationRequest request = new PolicyPaginationRequest(offset, limit);
+        if (name != null){
+            request.setName(name);
+        }
+        if (type != null){
+            request.setType(type);
+        }
+        if (status != null){
+            request.setStatus(status);
+        }
         try {
             PolicyAdministratorPoint policyAdministratorPoint = policyManagementService.getPAP();
             policies = policyAdministratorPoint.getPolicyList(request);

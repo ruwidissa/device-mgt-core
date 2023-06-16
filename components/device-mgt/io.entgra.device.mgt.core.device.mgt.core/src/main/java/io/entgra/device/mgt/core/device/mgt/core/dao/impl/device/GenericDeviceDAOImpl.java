@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
- * you may obtain a copy of the License at
+ * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
@@ -97,7 +97,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                         "WHERE DEVICE_TYPE_ID = t.ID " +
                         "AND d.ID= i.DEVICE_ID " +
                         "AND i.KEY_FIELD = 'serial' " +
-                        "AND i.VALUE_FIELD = ? " +
+                        "AND i.VALUE_FIELD LIKE ? " +
                         "AND d.TENANT_ID = ? ";
                 isSerialProvided = true;
             } else {
@@ -126,7 +126,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             }
             //Add the query for owner
             if (owner != null && !owner.isEmpty()) {
-                sql = sql + " AND e.OWNER = ?";
+                sql = sql + " AND e.OWNER LIKE ?";
                 isOwnerProvided = true;
             } else if (ownerPattern != null && !ownerPattern.isEmpty()) {
                 sql = sql + " AND e.OWNER LIKE ?";
@@ -141,7 +141,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;
                 if (isSerialProvided) {
-                    stmt.setString(paramIdx++, serial);
+                    stmt.setString(paramIdx++, "%" + serial + "%");
                 }
                 stmt.setInt(paramIdx++, tenantId);
                 if (isSinceProvided) {
@@ -158,7 +158,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     stmt.setString(paramIdx++, ownership);
                 }
                 if (isOwnerProvided) {
-                    stmt.setString(paramIdx++, owner);
+                    stmt.setString(paramIdx++, "%" + owner + "%");
                 } else if (isOwnerPatternProvided) {
                     stmt.setString(paramIdx++, ownerPattern + "%");
                 }
@@ -1184,6 +1184,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         String name = request.getDeviceName();
         String user = request.getOwner();
         String ownership = request.getOwnership();
+        String serial = request.getSerialNumber();
         String query = null;
         try {
             List<Device> devices = new ArrayList<>();
@@ -1197,6 +1198,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             boolean isDeviceNameProvided = false;
             boolean isOwnerProvided = false;
             boolean isOwnershipProvided = false;
+            boolean isSerialProvided = false;
 
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT "
@@ -1219,6 +1221,9 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                             + "DM_DEVICE.TENANT_ID = e.TENANT_ID "
                             + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
                             + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID "
+                            + "INNER JOIN DM_DEVICE_INFO i ON "
+                            + "DM_DEVICE.ID = i.DEVICE_ID "
+                            + "AND i.KEY_FIELD = 'serial' "
                             + "WHERE DM_DEVICE.ID IN (",
                     ") AND DM_DEVICE.TENANT_ID = ? AND e.STATUS != ?");
 
@@ -1232,6 +1237,10 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             if (ownership != null && !ownership.isEmpty()) {
                 query += " AND e.OWNERSHIP = ?";
                 isOwnershipProvided = true;
+            }
+            if (serial != null && !serial.isEmpty()) {
+                query += " AND i.VALUE_FIELD LIKE ?" ;
+                isSerialProvided = true;
             }
             if (user != null && !user.isEmpty()) {
                 query += " AND e.OWNER = ?";
@@ -1256,6 +1265,9 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
                 if (isOwnershipProvided) {
                     ps.setString(index++, ownership);
+                }
+                if (isSerialProvided) {
+                    ps.setString(index++, "%" + serial + "%");
                 }
                 if (isOwnerProvided) {
                     ps.setString(index++, user);

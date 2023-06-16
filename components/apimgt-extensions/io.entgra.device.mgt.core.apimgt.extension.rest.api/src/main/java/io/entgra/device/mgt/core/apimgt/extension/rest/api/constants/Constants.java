@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -34,7 +34,7 @@ public final class Constants {
     public static final String OAUTH_TOKEN_TYPE = "token_type";
     public static final String REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
     public static final String SCOPE_PARAM_NAME = "scope";
-    public static final String SCOPES = "apim:api_create apim:api_view apim:shared_scope_manage";
+    public static final String SCOPES = "apim:api_create apim:api_view apim:shared_scope_manage apim:api_import_export apim:api_publish";
     public static final String DCR_END_POINT = "WorkflowConfigurations.DCREndPoint";
     public static final String TOKE_END_POINT = "WorkflowConfigurations.TokenEndPoint";
     public static final String ADAPTER_CONF_KEEP_ALIVE = "keepAlive";
@@ -58,10 +58,13 @@ public final class Constants {
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";
     public static final String QUERY_KEY_VALUE_SEPARATOR = "=";
+    public static final String SPACE = " ";
     public static final String IOT_CORE_HOST = "iot.core.host";
     public static final String IOT_CORE_HTTPS_PORT = "iot.core.https.port";
     public static final String GET_ALL_SCOPES = "/api/am/publisher/v2/scopes?limit=1000";
-    public static final String GET_SCOPE = "/api/am/publisher/v2/scopes/";
+    public static final String SCOPE_API_ENDPOINT = "/api/am/publisher/v2/scopes/";
+    public static final String API_ENDPOINT = "/api/am/publisher/v2/apis/";
+    public static final String GET_ALL_APIS = "/api/am/publisher/v2/apis?limit=1000";
 }
 
 

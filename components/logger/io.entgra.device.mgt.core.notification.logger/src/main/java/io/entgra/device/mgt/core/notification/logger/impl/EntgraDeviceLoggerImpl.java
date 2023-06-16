@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2023, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
- * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,7 +17,6 @@
  */
 package io.entgra.device.mgt.core.notification.logger.impl;
 
-
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.LogContext;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.notification.logger.DeviceLogContext;
@@ -25,7 +24,6 @@ import io.entgra.device.mgt.core.notification.logger.util.MDCContextUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.MDC;
-
 
 public class EntgraDeviceLoggerImpl implements EntgraLogger {
 
@@ -74,7 +72,6 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.info(object, t);
     }
 
-
     public void debug(String message) {
         log.debug(message);
     }
@@ -113,7 +110,6 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
         log.debug(object, t);
     }
-
 
     public void error(String message) {
         log.error(message);
@@ -161,7 +157,6 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.error(object, t);
     }
 
-
     public void warn(String message) {
         log.warn(message);
     }
@@ -208,7 +203,6 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.warn(object, t);
     }
 
-
     public void trace(String message) {
         log.trace(message);
     }
@@ -247,7 +241,6 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
         log.trace(object, t);
     }
-
 
     public void fatal(String message) {
         log.fatal(message);

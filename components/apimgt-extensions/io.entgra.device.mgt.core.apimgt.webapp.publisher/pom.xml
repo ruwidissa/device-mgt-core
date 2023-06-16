@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
   ~
-  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
   ~ Version 2.0 (the "License"); you may not use this file except
   ~ in compliance with the License.
   ~ You may obtain a copy of the License at
   ~
-  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~    http://www.apache.org/licenses/LICENSE-2.0
   ~
   ~ Unless required by applicable law or agreed to in writing,
   ~ software distributed under the License is distributed on an
@@ -125,7 +125,6 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.json.wso2</groupId>
@@ -174,9 +173,7 @@
                             org.scannotation;version="1.0",
                             org.scannotation.archiveiterator;version="1.0",
                             org.w3c.dom,
-                            io.entgra.device.mgt.core.apimgt.extension.rest.api,
-                            io.entgra.device.mgt.core.apimgt.extension.rest.api.dto,
-                            io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions,
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.*,
                             io.entgra.device.mgt.core.apimgt.annotations,
                             org.wso2.carbon.apimgt.api,
                             org.wso2.carbon.apimgt.api.model,

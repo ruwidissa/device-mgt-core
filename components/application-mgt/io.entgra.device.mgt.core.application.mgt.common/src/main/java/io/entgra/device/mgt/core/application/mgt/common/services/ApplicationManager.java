@@ -1,4 +1,5 @@
-/* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+/*
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -524,4 +525,12 @@ public interface ApplicationManager {
     String getPlistArtifact(String uuid) throws ApplicationManagementException;
 
     List<ApplicationReleaseDTO> getReleaseByPackageNames(List<String> packageIds) throws ApplicationManagementException;
+
+    /**
+     * @param applicationRelease {@link ApplicationRelease}
+     * @param oldPackageName Old package name of the application
+     * @throws ApplicationManagementException Application management exception
+     */
+    void updateAppIconInfo(ApplicationRelease applicationRelease, String oldPackageName)
+            throws ApplicationManagementException;
 }

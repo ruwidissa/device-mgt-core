@@ -1,24 +1,24 @@
 /*
- * Copyright (C) 2018 - 2023 Entgra (Pvt) Ltd, Inc - All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
- * Unauthorised copying/redistribution of this file, via any medium is strictly prohibited.
- *
- * Licensed under the Entgra Commercial License, Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://entgra.io/licenses/entgra-commercial/1.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
 
 package io.entgra.device.mgt.core.policy.mgt.core.dao.impl.policy;
 
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -42,21 +42,57 @@ public class GenericPolicyDAOImpl extends AbstractPolicyDAOImpl {
     }
 
     @Override
-    public List<Policy> getAllPolicies(PaginationRequest request) throws PolicyManagerDAOException {
+    public List<Policy> getAllPolicies(PolicyPaginationRequest request) throws PolicyManagerDAOException {
         Connection conn;
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String name = request.getName();
+        String type = request.getType();
+        String status = request.getStatus();
+        int statusValue = 0;
+        boolean isPolicyNameProvided = false;
+        boolean isPolicyTypeProvided = false;
+        boolean isPolicyStatusProvided = false;
 
         try {
             conn = this.getConnection();
             String query = "SELECT * " +
                     "FROM DM_POLICY " +
-                    "WHERE TENANT_ID = ? " +
-                    "ORDER BY ID LIMIT ?,?";
+                    "WHERE TENANT_ID = ? ";
+
+            if (name != null && !name.isEmpty()) {
+                query += "AND NAME LIKE ? " ;
+                isPolicyNameProvided = true;
+            }
+
+            if (type != null && !type.isEmpty()) {
+                query += "AND POLICY_TYPE = ? " ;
+                isPolicyTypeProvided = true;
+            }
+
+            if (status != null && !status.isEmpty()) {
+                if (status.equals("ACTIVE")) {
+                    statusValue = 1;
+                }
+                query += "AND ACTIVE = ? " ;
+                isPolicyStatusProvided = true;
+            }
+
+            query += "ORDER BY ID LIMIT ?,?";
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, tenantId);
-                stmt.setInt(2, request.getStartIndex());
-                stmt.setInt(3, request.getRowCount());
+                int paramIdx = 1;
+                stmt.setInt(paramIdx++, tenantId);
+                if (isPolicyNameProvided) {
+                    stmt.setString(paramIdx++, "%" + name + "%");
+                }
+                if (isPolicyTypeProvided) {
+                    stmt.setString(paramIdx++, type);
+                }
+                if (isPolicyStatusProvided) {
+                    stmt.setInt(paramIdx++, statusValue);
+                }
+                stmt.setInt(paramIdx++, request.getStartIndex());
+                stmt.setInt(paramIdx++, request.getRowCount());
                 try (ResultSet resultSet = stmt.executeQuery()) {
                     return this.extractPolicyListFromDbResult(resultSet, tenantId);
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,20 +18,20 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.JNDILookupDefinition;
-import io.entgra.device.mgt.core.device.mgt.core.dao.impl.*;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.event.GenericEventConfigDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.event.H2EventConfigDAOImpl;
+import io.entgra.device.mgt.core.device.mgt.core.dao.impl.event.SQLServerEventConfigDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.geofence.GenericGeofenceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.geofence.SQLServerGeofenceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -69,6 +69,7 @@ public class EventManagementDAOFactory {
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_ORACLE:
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerEventConfigDAOImpl();
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MYSQL:
                     return new GenericEventConfigDAOImpl();
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2:

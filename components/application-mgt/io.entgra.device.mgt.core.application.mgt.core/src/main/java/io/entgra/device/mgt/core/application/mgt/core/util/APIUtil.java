@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
- * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -509,5 +509,19 @@ public class APIUtil {
         String artifactDownloadEndpoint = mdmConfig.getArtifactDownloadEndpoint();
         return mdmConfig.getArtifactDownloadProtocol() + "://" + host + ":" + port
                 + artifactDownloadEndpoint + Constants.FORWARD_SLASH;
+    }
+
+    /**
+     * To create the application icon path.
+     *
+     * @param applicationReleaseDTO {@link ApplicationReleaseDTO}
+     * @param tenantId tenant ID
+     * @return iconPath constructed icon path.
+     */
+    public static String createAppIconPath(ApplicationReleaseDTO applicationReleaseDTO, int tenantId) throws ApplicationManagementException {
+        String basePath = getArtifactDownloadBaseURL() + tenantId + Constants.FORWARD_SLASH + applicationReleaseDTO
+                .getAppHashValue() + Constants.FORWARD_SLASH;
+        String iconPath = basePath + Constants.ICON_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName();
+        return iconPath;
     }
 }

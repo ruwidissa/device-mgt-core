@@ -1,26 +1,27 @@
 /*
-*  Copyright (c) 2015 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package io.entgra.device.mgt.core.policy.mgt.core.mgt;
 
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.bean.UpdatedPolicyDeviceListBean;
@@ -93,10 +94,10 @@ public interface PolicyManager {
 
     /**
      * Returns list of policies with users, roles and groups attached to that policy
-     * @param request {@link PaginationRequest} contains offset and limit
+     * @param request {@link PolicyPaginationRequest} contains offset and limit and filters
      * @return {@link List<Policy>} - list of policies for current tenant
      * @throws PolicyManagementException when there is an error while retrieving the policies from database or
      * while retrieving device groups
      */
-    List<Policy> getPolicyList(PaginationRequest request) throws PolicyManagementException;
+    List<Policy> getPolicyList(PolicyPaginationRequest request) throws PolicyManagementException;
 }
