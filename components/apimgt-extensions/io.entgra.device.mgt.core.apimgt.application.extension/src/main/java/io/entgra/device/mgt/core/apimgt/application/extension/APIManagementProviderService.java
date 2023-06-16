@@ -55,6 +55,11 @@ public interface APIManagementProviderService {
                                                          boolean isAllowedAllDomains,
                                                          String validityTime, String password) throws APIManagerException;
 
+    ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
+                                                         String keyType,
+                                                         boolean isAllowedAllDomains,
+                                                         String validityTime, String accessToken) throws APIManagerException;
+
     /**
      * Remove APIM Application.
      */

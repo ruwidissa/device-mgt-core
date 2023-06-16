@@ -802,37 +802,40 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         KeyMgtService keyMgtService = new KeyMgtServiceImpl();
         try {
             //todo - lasantha - can't get password from here
-
+            ApiApplicationKey apiApplicationKey = null;
             try {
-//                DCRResponse dcrResponse = keyMgtService.dynamicClientRegistration(applicationName, username,
-//                        "client_credentials", null, new String[] {"device_management"}, false, validityTime);
-//                deviceConfig.setClientId(dcrResponse.getClientId());
-//                deviceConfig.setClientSecret(dcrResponse.getClientSecret());
+                DCRResponse adminDCRResponse = keyMgtService.dynamicClientRegistration(applicationName,
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                                .getRealmConfiguration().getAdminUserName(),
+                        "client_credentials", null, new String[] {"device_management"}, false, validityTime, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                                .getRealmConfiguration().getAdminPassword());
 
                 PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 JWTClientManagerService jwtClientManagerService = (JWTClientManagerService) ctx.
                         getOSGiService(JWTClientManagerService.class, null);
                 JWTClient jwtClient = jwtClientManagerService.getJWTClient();
-//                AccessTokenInfo accessTokenInfo = jwtClient.getAccessToken(apiApplicationKey.getConsumerKey(),
-//                        apiApplicationKey.getConsumerSecret(),
-//                        username, Constants.ApplicationInstall.SUBSCRIPTION_SCOPE);
+                AccessTokenInfo accessTokenInfo = jwtClient.getAccessToken(adminDCRResponse.getClientId(),
+                        adminDCRResponse.getClientSecret(),
+                        username, "appm:subscribe");
+
+                APIManagementProviderService apiManagementProviderService = DeviceMgtAPIUtils.getAPIManagementService();
+                apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(applicationName,
+                        new String[] {"device_management"}, null, false, String.valueOf(validityTime),
+                        accessTokenInfo.getAccessToken());
+
             } catch (JWTClientException e) {
-                String msg = "Error while generating an OAuth token for user " + username;
+                String msg = "Error while generating an application tokens for Tenant Admin.";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            } catch (UserStoreException e) {
+                String msg = "Error while getting user credentials.";
                 log.error(msg, e);
                 return Response.serverError().entity(
                         new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
             }
 
             //todo call REST APIs
-            DCRResponse dcrResponse = keyMgtService.dynamicClientRegistration(applicationName, username,
-                    "client_credentials", null, new String[] {"device_management"}, false, validityTime);
-            deviceConfig.setClientId(dcrResponse.getClientId());
-            deviceConfig.setClientSecret(dcrResponse.getClientSecret());
-
-            APIManagementProviderService apiManagementProviderService = new APIManagementProviderServiceImpl();
-            ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(applicationName,
-                    new String[] {"device_management"}, null, username, false, String.valueOf(validityTime),  null);
-
             deviceConfig.setClientId(apiApplicationKey.getConsumerKey());
             deviceConfig.setClientSecret(apiApplicationKey.getConsumerSecret());
 
@@ -852,7 +855,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             // add scopes for update operation /tenantDomain/deviceType/deviceId/update/operation
             scopes.append(" perm:topic:pub:" + tenantDomain + ":" + type + ":" + id + ":update:operation");
 
-            TokenRequest tokenRequest = new TokenRequest(dcrResponse.getClientId(), dcrResponse.getClientSecret(),
+            TokenRequest tokenRequest = new TokenRequest(apiApplicationKey.getConsumerKey(),
+            apiApplicationKey.getConsumerSecret(),
                     null, scopes.toString(), "client_credentials", null,
                     null, null, null,  validityTime);
             TokenResponse tokenResponse = keyMgtService.generateAccessToken(tokenRequest);

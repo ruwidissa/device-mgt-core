@@ -19,9 +19,13 @@
 package io.entgra.device.mgt.core.apimgt.keymgt.extension.service;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.*;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.internal.KeyMgtDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.keymanager.KeyManagerConfigurations;
@@ -62,7 +66,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
     String subTenantUserUsername, subTenantUserPassword, keyManagerName, msg = null;
 
     public DCRResponse dynamicClientRegistration(String clientName, String owner, String grantTypes, String callBackUrl,
-                                                 String[] tags, boolean isSaasApp, int validityPeriod) throws KeyMgtException {
+                                                 String[] tags, boolean isSaasApp, int validityPeriod, String password) throws KeyMgtException {
 
         if (owner == null) {
             PrivilegedCarbonContext threadLocalCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
@@ -90,13 +94,14 @@ public class KeyMgtServiceImpl implements KeyMgtService {
         kmConfig = getKeyManagerConfig();
 
         if (KeyMgtConstants.SUPER_TENANT.equals(tenantDomain)) {
-            OAuthApplication dcrApplication = createOauthApplication(clientName, kmConfig.getAdminUsername(), tags, validityPeriod);
+            OAuthApplication dcrApplication = createOauthApplication(clientName, kmConfig.getAdminUsername(), tags,
+                    validityPeriod, kmConfig.getAdminPassword());
             return new DCRResponse(dcrApplication.getClientId(), dcrApplication.getClientSecret());
         } else {
             // super-tenant admin dcr and token generation
             OAuthApplication superTenantOauthApp = createOauthApplication(
                     KeyMgtConstants.RESERVED_OAUTH_APP_NAME_PREFIX + KeyMgtConstants.SUPER_TENANT,
-                    kmConfig.getAdminUsername(), null, validityPeriod);
+                    kmConfig.getAdminUsername(), null, validityPeriod, kmConfig.getAdminPassword());
             String superAdminAccessToken = createAccessToken(superTenantOauthApp);
 
             // create new key manager for the tenant, under super-tenant space
@@ -119,7 +124,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
 
             // DCR for the requesting user
             //todo lasantha -> need to pass password of user
-            OAuthApplication dcrApplication = createOauthApplication(clientName, owner, tags, validityPeriod);
+            OAuthApplication dcrApplication = createOauthApplication(clientName, owner, tags, validityPeriod, password);
             String requestingUserAccessToken = createAccessToken(dcrApplication);
 
             // get application id
@@ -311,14 +316,16 @@ public class KeyMgtServiceImpl implements KeyMgtService {
      * @return @{@link OAuthApplication} OAuth application object
      * @throws KeyMgtException if any error occurs while creating response object
      */
-    private OAuthApplication createOauthApplication (String clientName, String owner, String[] tags, int validityPeriod) throws KeyMgtException {
+    private OAuthApplication createOauthApplication (String clientName, String owner, String[] tags,
+                                                     int validityPeriod, String ownerPassword) throws KeyMgtException {
         //todo modify this to pass the password as well
-        String oauthAppCreationPayloadStr = createOauthAppCreationPayload(clientName, owner, tags, validityPeriod);
+        String oauthAppCreationPayloadStr = createOauthAppCreationPayload(clientName, owner, tags, validityPeriod, ownerPassword);
         RequestBody oauthAppCreationPayload = RequestBody.Companion.create(oauthAppCreationPayloadStr, JSON);
         kmConfig = getKeyManagerConfig();
         String dcrEndpoint = kmConfig.getServerUrl() + KeyMgtConstants.DCR_ENDPOINT;
         String username, password;
 
+        //todo why can't we use owner details here?
         if (KeyMgtConstants.SUPER_TENANT.equals(MultitenantUtils.getTenantDomain(owner))) {
             username = kmConfig.getAdminUsername();
             password = kmConfig.getAdminPassword();
@@ -327,6 +334,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             password = subTenantUserPassword;
         }
 
+        //todo why can't we use owner details for authentication
         Request request = new Request.Builder()
                 .url(dcrEndpoint)
                 .addHeader(KeyMgtConstants.AUTHORIZATION_HEADER, Credentials.basic(username, password))
@@ -420,27 +428,46 @@ public class KeyMgtServiceImpl implements KeyMgtService {
      * @return @{@link Application} Application object
      * @throws KeyMgtException if any error occurs while retrieving the application
      */
-    private Application getApplication(String applicationName, String owner) throws KeyMgtException {
+    private Application getApplication(String applicationName, String accessToken) throws KeyMgtException {
         try {
             APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
-            APIConsumer apiConsumer = apiManagerFactory.getAPIConsumer(owner);
+//            APIConsumer apiConsumer = apiManagerFactory.getAPIConsumer(owner);
+
+            ConsumerRESTAPIServices consumerRESTAPIServices =
+                    KeyMgtDataHolder.getInstance().getConsumerRESTAPIServices();
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
+                    consumerRESTAPIServices.getAllApplications(null, accessToken, applicationName);
+            //todo map Application and return
             //todo modify the method signature and use access token and call REST API to get application data
             return null; // todo:apim - apiConsumer.getApplicationsByName(owner, applicationName, "");
             //            //            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v3/applications?query=CalculatorApp"
 
-        } catch (APIManagementException e) {
-            msg = "Error while trying to retrieve the application";
-            log.error(msg);
-            throw new KeyMgtException(msg);
+        }
+
+//        catch (APIManagementException e) {
+//            msg = "Error while trying to retrieve the application";
+//            log.error(msg);
+//            throw new KeyMgtException(msg);
+//        }
+
+        catch (io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException e) {
+            e.printStackTrace();
+                        throw new KeyMgtException("");
+        } catch (UnexpectedResponseException e) {
+            throw new KeyMgtException("");
+        } catch (APIServicesException e) {
+            throw new KeyMgtException("");
         }
     }
 
-    private String createOauthAppCreationPayload(String clientName, String owner, String[] tags, int validityPeriod) {
+    private String createOauthAppCreationPayload(String clientName, String owner, String[] tags, int validityPeriod,
+                                                 String password) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("applicationName", clientName);
         jsonObject.put("username", owner);
         jsonObject.put("tags", tags);
         jsonObject.put("validityPeriod", validityPeriod);
+        jsonObject.put("password", password);
         return jsonObject.toString();
     }
 

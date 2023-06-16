@@ -116,6 +116,138 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
     @Override
     public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
+                                                         String keyType,
+                                                         boolean isAllowedAllDomains,
+                                                         String validityTime, String accessToken) throws APIManagerException {
+        ConsumerRESTAPIServices consumerRESTAPIServices =
+                APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
+
+        try {
+            List<APIInfo> uniqueApiList = new ArrayList<>();
+
+            Map<String, String> headerParams = new HashMap<>();
+            if (!"carbon.super".equals(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true))) {
+                headerParams.put("X-WSO2-Tenant", "carbon.super");
+            }
+
+            for (String tag : tags) {
+                Map<String, String> queryParams = new HashMap<>();
+                queryParams.put("tag", tag);
+
+                APIInfo[] apiInfos = consumerRESTAPIServices.getAllApis(null, accessToken, queryParams, headerParams);
+
+                uniqueApiList.addAll(List.of(apiInfos));
+                Set<APIInfo> taggedAPISet = new HashSet<>(uniqueApiList);
+                uniqueApiList.clear();
+                uniqueApiList.addAll(taggedAPISet);
+            }
+
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
+                    consumerRESTAPIServices.getAllApplications(null, accessToken, applicationName);
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application;
+            boolean isNewApplication = false;
+            if (applications.length == 0) {
+                isNewApplication = true;
+                application = new io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application();
+                application.setName(applicationName);
+                application = consumerRESTAPIServices.createApplication(null, accessToken, application);
+                addSubscriptions(application, uniqueApiList, accessToken);
+            } else {
+                if (applications.length == 1) {
+                    Optional<io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application> applicationOpt =
+                            Arrays.stream(applications).findFirst();
+                    application = applicationOpt.get();
+                    Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(null, accessToken,
+                            application.getApplicationId());
+                    Arrays.stream(subscriptions).map(Subscription::getApiInfo).forEachOrdered(uniqueApiList::remove);
+                    addSubscriptions(application, uniqueApiList, accessToken);
+                } else {
+                    String msg = "Found more than one application for application name: " + applicationName;
+                    log.error(msg);
+                    throw new APIManagerException(msg);
+                }
+            }
+
+            MetadataManagementService metadataManagementService = APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
+            if (isNewApplication) {
+                KeyManager[] keyManagers = consumerRESTAPIServices.getAllKeyManagers(null, accessToken);
+                KeyManager keyManager;
+                if (keyManagers.length == 1) {
+                    keyManager = keyManagers[0];
+                } else {
+                    String msg =
+                            "Found invalid number of key managers. No of key managers found from the APIM: " + keyManagers.length;
+                    throw new APIManagerException(msg);
+                }
+                ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(null, accessToken,
+                        application.getApplicationId(), keyManager.getName(), keyType, validityTime);
+                ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
+                apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
+                apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
+
+                Metadata metaData = new Metadata();
+                metaData.setMetaKey(applicationName);
+                String metaValue = application.getApplicationId() + ":" + applicationKey.getKeyMappingId();
+                metaData.setMetaValue(metaValue);
+                try {
+                    metadataManagementService.createMetadata(metaData);
+                    return apiApplicationKey;
+                } catch (MetadataManagementException e) {
+                    String msg = "Error occurred while creating the meta data entry for mata key: " + applicationName;
+                    log.error(msg, e);
+                    throw new APIManagerException(msg, e);
+                } catch (MetadataKeyAlreadyExistsException e) {
+                    String msg = "Found duplicate meta value entry for meta key: " + applicationName;
+                    log.error(msg, e);
+                    throw new APIManagerException(msg, e);
+                }
+            } else {
+                try {
+                    Metadata metaData = metadataManagementService.retrieveMetadata(applicationName);
+                    if (metaData == null) {
+                        String msg = "Couldn't find application key data from meta data mgt service. Meta key: "
+                                + applicationName;
+                        log.error(msg);
+                        throw new APIManagerException(msg);
+                    }
+                    String[] metaValues = metaData.getMetaValue().split(":");
+                    if (metaValues.length != 2) {
+                        String msg = "Found invalid Meta value for meta key: " + applicationName + ". Meta Value: "
+                                + metaData.getMetaValue();
+                        log.error(msg);
+                        throw new APIManagerException(msg);
+                    }
+                    String applicationId = metaValues[0];
+                    String keyMappingId = metaValues[1];
+                    ApplicationKey applicationKey = consumerRESTAPIServices.getKeyDetails(null, accessToken, applicationId,
+                            keyMappingId);
+                    ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
+                    apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
+                    apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
+                    return apiApplicationKey;
+                } catch (MetadataManagementException e) {
+                    String msg = "Error occurred while getting meta data for meta key: " + applicationName;
+                    log.error(msg, e);
+                    throw new APIManagerException(msg, e);
+                }
+            }
+        } catch (APIServicesException e) {
+            String msg = "Error occurred while processing the response of APIM REST endpoints.";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
+        } catch (BadRequestException e) {
+            String msg = "Provided incorrect payload when invoking APIM REST endpoints.";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
+        } catch (UnexpectedResponseException e) {
+            String msg = "Error occurred while invoking APIM REST endpoints.";
+            log.error(msg, e);
+            throw new APIManagerException(msg, e);
+        }
+    }
+
+    @Override
+    public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
                                                                              String keyType, String username,
                                                                              boolean isAllowedAllDomains,
                                                                              String validityTime, String password)
@@ -276,6 +408,23 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             subscriptionList.add(subscription);
         });
         consumerRESTAPIServices.createSubscriptions(apiApplicationInfo, null, subscriptionList);
+    }
+
+    private void addSubscriptions(
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application,
+            List<APIInfo> apiInfos, String accessToken)
+            throws BadRequestException, UnexpectedResponseException, APIServicesException {
+        ConsumerRESTAPIServices consumerRESTAPIServices =
+                APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
+
+        List<Subscription> subscriptionList = new ArrayList<>();
+        apiInfos.forEach(apiInfo -> {
+            Subscription subscription = new Subscription();
+            subscription.setApiId(apiInfo.getId());
+            subscription.setApplicationId(application.getApplicationId());
+            subscriptionList.add(subscription);
+        });
+        consumerRESTAPIServices.createSubscriptions(null, accessToken, subscriptionList);
     }
 
     /**

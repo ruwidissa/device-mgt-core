@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
@@ -156,6 +157,7 @@ public class DeviceMgtAPIUtils {
     private static volatile SubscriptionManager subscriptionManager;
     private static volatile ApplicationManager applicationManager;
     private static volatile ConsumerRESTAPIServices consumerRESTAPIServices;
+    private static volatile APIManagementProviderService apiManagementProviderService;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -406,6 +408,25 @@ public class DeviceMgtAPIUtils {
             }
         }
         return consumerRESTAPIServices;
+    }
+
+    /**
+     * Initializing and accessing method for API management Provider Service.
+     *
+     * @return APIManagementProviderService instance
+     * @throws IllegalStateException if APIManagementProviderService cannot be initialized
+     */
+    public static synchronized APIManagementProviderService getAPIManagementService() {
+        if (apiManagementProviderService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            apiManagementProviderService = (APIManagementProviderService) ctx.getOSGiService(APIManagementProviderService.class, null);
+            if (apiManagementProviderService == null) {
+                String msg = "API Management Provider service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return apiManagementProviderService;
     }
 
     public static RegistryService getRegistryService() {
