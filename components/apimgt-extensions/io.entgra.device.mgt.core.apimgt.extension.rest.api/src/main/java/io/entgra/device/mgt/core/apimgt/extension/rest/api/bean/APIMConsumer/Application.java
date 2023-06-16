@@ -18,9 +18,10 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer;
 
-import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the Consumer Application Information.
@@ -36,7 +37,7 @@ public class Application {
     private List<String> groups;
     private int subscriptionCount;
     private List<String> keys;
-    private JSONObject attributes;
+    private Map<String, String> attributes;
     private List<Scopes> subscriptionScopes;
     private String owner;
     private boolean hashEnabled;
@@ -113,11 +114,11 @@ public class Application {
         this.keys = keys;
     }
 
-    public JSONObject getAttributes() {
+    public Map<String, String> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(JSONObject attributes) {
+    public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
     }
 

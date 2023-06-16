@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -429,30 +430,40 @@ public class KeyMgtServiceImpl implements KeyMgtService {
      * @throws KeyMgtException if any error occurs while retrieving the application
      */
     private Application getApplication(String applicationName, String accessToken) throws KeyMgtException {
-        try {
-            APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
-//            APIConsumer apiConsumer = apiManagerFactory.getAPIConsumer(owner);
 
+        try {
             ConsumerRESTAPIServices consumerRESTAPIServices =
                     KeyMgtDataHolder.getInstance().getConsumerRESTAPIServices();
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
                     consumerRESTAPIServices.getAllApplications(null, accessToken, applicationName);
-            //todo map Application and return
-            //todo modify the method signature and use access token and call REST API to get application data
-            return null; // todo:apim - apiConsumer.getApplicationsByName(owner, applicationName, "");
-            //            //            curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://localhost:9443/api/am/devportal/v3/applications?query=CalculatorApp"
 
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application applicationFromRestCall;
+            if (applications.length == 1) {
+                applicationFromRestCall = applications[0];
+            } else {
+                String msg =
+                        "Found invalid number of applications. No of applications found from the APIM: " + applications.length;
+                throw new KeyMgtException(msg);
+            }
+
+            Application application = null;
+            application.setUUID(applicationFromRestCall.getApplicationId());
+            application.setName(applicationFromRestCall.getName());
+            application.setDescription(applicationFromRestCall.getDescription());
+            application.setApplicationAttributes(applicationFromRestCall.getAttributes());
+            application.setTokenType(applicationFromRestCall.getTokenType());
+            application.setStatus(applicationFromRestCall.getStatus());
+            application.setSubscriptionCount(applicationFromRestCall.getSubscriptionCount());
+            application.setOwner(applicationFromRestCall.getOwner());
+            application.setIsBlackListed(applicationFromRestCall.isHashEnabled());
+            return application;
         }
-
-//        catch (APIManagementException e) {
-//            msg = "Error while trying to retrieve the application";
-//            log.error(msg);
-//            throw new KeyMgtException(msg);
-//        }
 
         catch (io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException e) {
             e.printStackTrace();
-                        throw new KeyMgtException("");
+            msg = "Error while trying to retrieve the application";
+            log.error(msg);
+            throw new KeyMgtException(msg);
         } catch (UnexpectedResponseException e) {
             throw new KeyMgtException("");
         } catch (APIServicesException e) {
