@@ -42,6 +42,17 @@ public interface CertificateDAO {
             throws CertificateManagementDAOException;
 
     /**
+     * This can be used to store a certificate in the database, where it will be stored against the serial number
+     * of the certificate.
+     *
+     * @param certificate Holds the certificate and relevant details.
+     * @throws CertificateManagementDAOException
+     *
+     */
+    void addCertificate(Certificate certificate)
+            throws CertificateManagementDAOException;
+
+    /**
      * Usage is to obtain a certificate stored in the database by providing the common name.
      *
      * @param serialNumber Serial number of the certificate.

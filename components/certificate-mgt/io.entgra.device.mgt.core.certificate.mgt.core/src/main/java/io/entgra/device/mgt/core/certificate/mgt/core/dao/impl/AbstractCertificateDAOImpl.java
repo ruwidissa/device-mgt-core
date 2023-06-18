@@ -82,6 +82,40 @@ public abstract class AbstractCertificateDAOImpl implements CertificateDAO{
     }
 
     @Override
+    public void addCertificate(Certificate certificate)
+            throws CertificateManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        try {
+            conn = this.getConnection();
+            stmt = conn.prepareStatement(
+                    "INSERT INTO DM_DEVICE_CERTIFICATE (SERIAL_NUMBER, CERTIFICATE, TENANT_ID," +
+                            " USERNAME, DEVICE_IDENTIFIER) VALUES (?,?,?,?,?)");
+            PrivilegedCarbonContext threadLocalCarbonContext = PrivilegedCarbonContext.
+                    getThreadLocalCarbonContext();
+            String username = threadLocalCarbonContext.getUsername();
+            // the serial number of the certificate used for its creation is set as its alias.
+            String serialNumber = certificate.getSerial();
+            if (serialNumber == null || serialNumber.isEmpty()) {
+                serialNumber = String.valueOf(certificate.getCertificate().getSerialNumber());
+            }
+            byte[] bytes = Serializer.serialize(certificate.getCertificate());
+
+            stmt.setString(1, serialNumber);
+            stmt.setBytes(2, bytes);
+            stmt.setInt(3, certificate.getTenantId());
+            stmt.setString(4, username);
+            stmt.setString(5, certificate.getDeviceIdentifier());
+            stmt.executeUpdate();
+        } catch (SQLException | IOException e) {
+            throw new CertificateManagementDAOException("Error occurred while saving the " +
+                    "certificate. ", e);
+        } finally {
+            CertificateManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
     public CertificateResponse retrieveCertificate(String serialNumber)
             throws CertificateManagementDAOException {
         Connection conn;

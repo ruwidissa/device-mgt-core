@@ -727,6 +727,29 @@ public class CertificateGenerator {
             throw new KeystoreException(errorMsg, e);
         }
     }
+    public void saveCertificate(org.wso2.carbon.certificate.mgt.core.bean.Certificate
+                                     certificate) throws KeystoreException {
+
+        if (certificate == null) {
+            return;
+        }
+
+        try {
+            CertificateDAO certificateDAO = CertificateManagementDAOFactory.getCertificateDAO();
+            CertificateManagementDAOFactory.beginTransaction();
+            certificateDAO.addCertificate(certificate);
+            CertificateManagementDAOFactory.commitTransaction();
+        } catch (CertificateManagementDAOException e) {
+            String errorMsg = "Error occurred when saving the generated certificate in database";
+            log.error(errorMsg);
+            CertificateManagementDAOFactory.rollbackTransaction();
+            throw new KeystoreException(errorMsg, e);
+        } catch (TransactionManagementException e) {
+            String errorMsg = "Error occurred when saving the generated certificate in database";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        }
+    }
 
     public void saveCertInKeyStore(List<io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate> certificate)
             throws KeystoreException {
@@ -866,8 +889,8 @@ public class CertificateGenerator {
             List<io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate> certificates = new ArrayList<>();
             certificate.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             certificate.setCertificate(issuedCert);
-            certificates.add(certificate);
-            saveCertInKeyStore(certificates);
+            certificate.setDeviceIdentifier(commonName);
+            saveCertificate(certificate);
 
         } catch (OperatorCreationException e) {
             String errorMsg = "Error creating the content signer";
