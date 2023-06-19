@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.apimgt.keymgt.extension.service;
 
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.TokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.*;
@@ -431,11 +432,14 @@ public class KeyMgtServiceImpl implements KeyMgtService {
      */
     private Application getApplication(String applicationName, String accessToken) throws KeyMgtException {
 
+        TokenInfo tokenInfo = new TokenInfo();
+        tokenInfo.setApiApplicationInfo(null);
+        tokenInfo.setAccessToken(accessToken);
         try {
             ConsumerRESTAPIServices consumerRESTAPIServices =
                     KeyMgtDataHolder.getInstance().getConsumerRESTAPIServices();
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
-                    consumerRESTAPIServices.getAllApplications(null, accessToken, applicationName);
+                    consumerRESTAPIServices.getAllApplications(tokenInfo, applicationName);
 
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application applicationFromRestCall;
             if (applications.length == 1) {

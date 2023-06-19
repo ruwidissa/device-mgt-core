@@ -19,7 +19,7 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.*;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.ApiApplicationInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.TokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
@@ -28,39 +28,36 @@ import java.util.List;
 import java.util.Map;
 
 public interface ConsumerRESTAPIServices {
-    Application[] getAllApplications(ApiApplicationInfo applicationInfo, String accessToken, String appName)
+    Application[] getAllApplications(TokenInfo tokenInfo, String appName)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Application getDetailsOfAnApplication(ApiApplicationInfo apiApplicationInfo, String accessToken, String applicationId)
+    Application getDetailsOfAnApplication(TokenInfo tokenInfo, String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Application createApplication(ApiApplicationInfo apiApplicationInfo, String accessToken, Application application)
+    Application createApplication(TokenInfo tokenInfo, Application application)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Boolean deleteApplication(ApiApplicationInfo apiApplicationInfo, String accessToken, String applicationId)
+    Boolean deleteApplication(TokenInfo tokenInfo, String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Subscription[] getAllSubscriptions(ApiApplicationInfo apiApplicationInfo, String accessToken, String applicationId)
+    Subscription[] getAllSubscriptions(TokenInfo tokenInfo, String applicationId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    APIInfo[] getAllApis(ApiApplicationInfo apiApplicationInfo, String accessToken, Map<String, String> queryParams,
-                         Map<String, String> headerParams)
+    APIInfo[] getAllApis(TokenInfo tokenInfo, Map<String, String> queryParams, Map<String, String> headerParams)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Subscription createSubscription(ApiApplicationInfo apiApplicationInfo, String accessToken, Subscription subscriptions)
+    Subscription createSubscription(TokenInfo tokenInfo, Subscription subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Subscription[] createSubscriptions(ApiApplicationInfo apiApplicationInfo, String accessToken,
-                                       List<Subscription> subscriptions)
+    Subscription[] createSubscriptions(TokenInfo tokenInfo, List<Subscription> subscriptions)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    ApplicationKey generateApplicationKeys(ApiApplicationInfo apiApplicationInfo, String accessToken, String  applicationId,
-                                           String keyManager, String validityTime, String keyType)
+    ApplicationKey generateApplicationKeys(TokenInfo tokenInfo, String applicationId, String keyManager, String validityTime, String keyType)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    ApplicationKey getKeyDetails(ApiApplicationInfo apiApplicationInfo, String accessToken, String applicationId, String keyMapId)
+    ApplicationKey getKeyDetails(TokenInfo tokenInfo, String applicationId, String keyMapId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    KeyManager[] getAllKeyManagers(ApiApplicationInfo apiApplicationInfo, String accessToken)
+    KeyManager[] getAllKeyManagers(TokenInfo tokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 }
