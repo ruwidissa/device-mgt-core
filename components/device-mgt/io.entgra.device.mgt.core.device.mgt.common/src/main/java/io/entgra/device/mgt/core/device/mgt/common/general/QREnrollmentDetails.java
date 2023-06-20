@@ -18,10 +18,21 @@
 
 package io.entgra.device.mgt.core.device.mgt.common.general;
 
+import java.util.Map;
+
 public class QREnrollmentDetails {
     String ownershipType;
     String username;
     String enrollmentMode;
+    Map<String, String> customValues;
+
+    public Map<String, String> getCustomValues() {
+        return customValues;
+    }
+
+    public void setCustomValues(Map<String, String> customValues) {
+        this.customValues = customValues;
+    }
 
     public String getOwnershipType() { return ownershipType; }
 
