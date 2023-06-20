@@ -218,8 +218,7 @@ public class JWTClientUtil {
 			long nbf = currentTimeMillis + jwtConfig.getValidityPeriodFromCurrentTime() * 60 * 1000;
 			String jti = jwtConfig.getJti();
 			if (jti == null) {
-				String defaultTokenId = currentTimeMillis + "" + new SecureRandom().nextInt();
-				jti = defaultTokenId;
+				jti = currentTimeMillis + "" + new SecureRandom().nextInt();
 			}
 			List<String> aud = jwtConfig.getAudiences();
 			//set up the basic claims
@@ -273,8 +272,7 @@ public class JWTClientUtil {
 			JWSSigner signer = new RSASSASigner(rsaPrivateKey);
 			SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet.build());
 			signedJWT.sign(signer);
-			String assertion = signedJWT.serialize();
-			return assertion;
+			return signedJWT.serialize();
 		} catch (KeyStoreException e) {
 			throw new JWTClientException("Failed loading the keystore.", e);
 		} catch (IOException e) {

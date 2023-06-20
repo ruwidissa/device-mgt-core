@@ -34,11 +34,8 @@ import okhttp3.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserRealm;
@@ -132,8 +129,9 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             // get application id
             //todo --> can use requestingUserAccessToken token here to get application data - modify getApplication
             // method signature
-            Application application = getApplication(clientName, owner);
-            String applicationUUID = application.getUUID();
+
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application = getApplication(clientName, owner);
+            String applicationUUID = application.getApplicationId();
 
             // do app key mapping
             mapApplicationKeys(dcrApplication.getClientId(), dcrApplication.getClientSecret(), keyManagerName,
@@ -426,11 +424,11 @@ public class KeyMgtServiceImpl implements KeyMgtService {
      * Retrieves an application by name and owner
      *
      * @param applicationName name of the application
-     * @param owner owner of the application
+     * @param accessToken Access Token
      * @return @{@link Application} Application object
      * @throws KeyMgtException if any error occurs while retrieving the application
      */
-    private Application getApplication(String applicationName, String accessToken) throws KeyMgtException {
+    private io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application getApplication(String applicationName, String accessToken) throws KeyMgtException {
 
         TokenInfo tokenInfo = new TokenInfo();
         tokenInfo.setApiApplicationInfo(null);
@@ -440,38 +438,26 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                     KeyMgtDataHolder.getInstance().getConsumerRESTAPIServices();
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
                     consumerRESTAPIServices.getAllApplications(tokenInfo, applicationName);
-
-            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application applicationFromRestCall;
             if (applications.length == 1) {
-                applicationFromRestCall = applications[0];
+                return applications[0];
             } else {
                 String msg =
                         "Found invalid number of applications. No of applications found from the APIM: " + applications.length;
+                log.error(msg);
                 throw new KeyMgtException(msg);
             }
-
-            Application application = null;
-            application.setUUID(applicationFromRestCall.getApplicationId());
-            application.setName(applicationFromRestCall.getName());
-            application.setDescription(applicationFromRestCall.getDescription());
-            application.setApplicationAttributes(applicationFromRestCall.getAttributes());
-            application.setTokenType(applicationFromRestCall.getTokenType());
-            application.setStatus(applicationFromRestCall.getStatus());
-            application.setSubscriptionCount(applicationFromRestCall.getSubscriptionCount());
-            application.setOwner(applicationFromRestCall.getOwner());
-            application.setIsBlackListed(applicationFromRestCall.isHashEnabled());
-            return application;
-        }
-
-        catch (io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException e) {
-            e.printStackTrace();
+        } catch (io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException e) {
             msg = "Error while trying to retrieve the application";
-            log.error(msg);
+            log.error(msg, e);
             throw new KeyMgtException(msg);
         } catch (UnexpectedResponseException e) {
-            throw new KeyMgtException("");
+            msg = "Received invalid response for the API applications retrieving REST API call.";
+            log.error(msg, e);
+            throw new KeyMgtException(msg);
         } catch (APIServicesException e) {
-            throw new KeyMgtException("");
+            msg = "Error occurred while processing the API Response.";
+            log.error(msg, e);
+            throw new KeyMgtException(msg);
         }
     }
 
