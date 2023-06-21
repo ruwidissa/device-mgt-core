@@ -51,6 +51,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
+import io.entgra.ui.request.interceptor.beans.ProxyResponse;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,6 +72,8 @@ public class HandlerUtil {
     private static LoginCache loginCache = null;
     private static boolean isLoginCacheInitialized = false;
     private static AuthData authData;
+
+    private static OTPManagementService otpManagementService;
 
     /***
      *
@@ -741,5 +746,13 @@ public class HandlerUtil {
 
     public static boolean isPropertyDefined(String property) {
         return StringUtils.isEmpty(System.getProperty(property));
+    }
+
+    public static OTPManagementService getOTPManagementService() {
+        if (otpManagementService == null) {
+            otpManagementService = (OTPManagementService) PrivilegedCarbonContext
+                    .getThreadLocalCarbonContext().getOSGiService(OTPManagementService.class, null);
+        }
+        return otpManagementService;
     }
 }
