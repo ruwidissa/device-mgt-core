@@ -424,6 +424,9 @@ public class UserManagementServiceImpl implements UserManagementService {
             userList = new ArrayList<>(users.size());
             BasicUserInfo user;
             for (String username : users) {
+                if (Constants.APIM_RESERVED_USER.equals(username)) {
+                    continue;
+                }
                 user = getBasicUserInfo(username);
                 userList.add(user);
             }
@@ -483,6 +486,9 @@ public class UserManagementServiceImpl implements UserManagementService {
         try {
             if (StringUtils.isNotEmpty(username)) {
                 commonUsers = getUserList(null, username);
+            }
+            if (commonUsers != null) {
+                commonUsers.remove(Constants.APIM_RESERVED_USER);
             }
 
             if (!skipSearch(commonUsers) && StringUtils.isNotEmpty(firstName)) {
@@ -658,6 +664,9 @@ public class UserManagementServiceImpl implements UserManagementService {
             userList = new ArrayList<>();
             UserInfo user;
             for (String username : users) {
+                if (Constants.APIM_RESERVED_USER.equals(username)) {
+                    continue;
+                }
                 user = new UserInfo();
                 user.setUsername(username);
                 user.setEmailAddress(getClaimValue(username, Constants.USER_CLAIM_EMAIL_ADDRESS));
