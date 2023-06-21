@@ -18,6 +18,14 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceTypesOfGroups;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -29,13 +37,6 @@ import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceTypesOfGroups;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
@@ -430,4 +431,37 @@ public class GroupManagementServiceImpl implements GroupManagementService {
         }
     }
 
+    @POST
+    @Path("/roles/share")
+    @Override
+    public Response createGroupWithRoles(DeviceGroupRoleWrapper groups) {
+        if (groups == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        groups.setOwner(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
+        groups.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
+        try {
+            DeviceMgtAPIUtils.getGroupManagementProviderService().createGroupWithRoles(groups, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS);
+            DeviceGroup group = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroup(groups.getName(),
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername().isEmpty());
+            if (group != null) {
+                DeviceMgtAPIUtils.getGroupManagementProviderService().manageGroupSharing(group.getGroupId(), groups.getUserRoles());
+                return Response.status(Response.Status.CREATED).entity(group.getGroupId()).build();
+            } else {
+                String msg = "Error occurred while retrieving newly created group.";
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
+        } catch (GroupManagementException e) {
+            String msg = "Error occurred while adding " + groups.getName() + " group";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (GroupAlreadyExistException e) {
+            String msg = "Group already exists with name : " + groups.getName() + ".";
+            log.warn(msg);
+            return Response.status(Response.Status.CONFLICT).entity(msg).build();
+        } catch (RoleDoesNotExistException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 }
