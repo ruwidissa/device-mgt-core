@@ -18,5 +18,5 @@
 package org.wso2.carbon.device.mgt.common.otp.mgt;
 
 public enum OTPEmailTypes {
-    USER_VERIFY, DEVICE_ENROLLMENT, USER_INVITE
+    USER_VERIFY, DEVICE_ENROLLMENT, USER_INVITE, REMOTE_SESSION
 }
