@@ -80,6 +80,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
     private static final Log log = LogFactory.getLog(APIManagementProviderServiceImpl.class);
     public static final APIManagerFactory API_MANAGER_FACTORY = APIManagerFactory.getInstance();
+    private static final String UNLIMITED_TIER = "Unlimited";
 
     @Override
     public boolean isTierLoaded() {
@@ -238,6 +239,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
         io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application = new io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application();
         application.setName(applicationName);
+        application.setThrottlingPolicy(UNLIMITED_TIER);
 
         try {
             application = consumerRESTAPIServices.createApplication(tokenInfo, application);
@@ -254,7 +256,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 throw new APIManagerException(msg);
             }
             ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(tokenInfo, application.getApplicationId(),
-                    keyManager.getName(), keyType, validityTime);
+                    keyManager.getName(), validityTime, keyType);
             ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
             apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
             apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
@@ -317,6 +319,8 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             Subscription subscription = new Subscription();
             subscription.setApiId(apiInfo.getId());
             subscription.setApplicationId(application.getApplicationId());
+            subscription.setThrottlingPolicy(UNLIMITED_TIER);
+            subscription.setRequestedThrottlingPolicy(UNLIMITED_TIER);
             subscriptionList.add(subscription);
         });
 
@@ -649,7 +653,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         APIApplicationKey apiApplicationKey;
         io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo accessTokenInfo;
         try {
-            if (username == null && password == null) {
+            if (username == null || password == null) {
                 apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
             } else {
                 apiApplicationKey = apiApplicationServices.generateAndRetrieveApplicationKeys(username, password);
