@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>logger-feature</artifactId>
-        <version>5.0.26</version>
+        <version>5.0.27-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
