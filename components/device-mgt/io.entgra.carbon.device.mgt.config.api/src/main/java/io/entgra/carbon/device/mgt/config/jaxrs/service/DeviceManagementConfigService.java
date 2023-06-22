@@ -156,7 +156,12 @@ public interface DeviceManagementConfigService {
                     value = "The properties list using for query a device",
                     required = true)
             @QueryParam("properties")
-                    String properties);
+                    String properties,
+            @ApiParam(
+                    name = "withAccessToken",
+                    value = "Whether to use access token or otp token for device configuration")
+            @QueryParam("withAccessToken")
+                    boolean withAccessToken);
 
     @PUT
     @Path("/device/transfer")
