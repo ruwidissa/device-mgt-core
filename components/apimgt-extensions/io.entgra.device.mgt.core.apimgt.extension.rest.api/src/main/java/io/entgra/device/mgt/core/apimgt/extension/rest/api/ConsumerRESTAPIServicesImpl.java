@@ -176,7 +176,7 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
                 "  \"description\": \"" + application.getDescription() + "\",\n" +
                 "  \"tokenType\": \"" + application.getTokenType() + "\",\n" +
                 "  \"groups\": " + gson.toJson(application.getGroups()) + ",\n" +
-                "  \"attributes\": " + application.getAttributes().toString() + ",\n" +
+                "  \"attributes\": " + gson.toJson(application.getAttributes()) + ",\n" +
                 "  \"subscriptionScopes\": " + gson.toJson(application.getSubscriptionScopes()) + "\n" +
                 "}";
         RequestBody requestBody = RequestBody.create(JSON, applicationInfo);
@@ -291,7 +291,7 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
 
         ApiApplicationInfo apiApplicationInfo = tokenInfo.getApiApplicationInfo();
         boolean token = isTokenNull(apiApplicationInfo, tokenInfo.getAccessToken());
-        String getAllScopesUrl = endPointPrefix + Constants.SUBSCRIPTION_API + "?applicationId=" + applicationId;
+        String getAllScopesUrl = endPointPrefix + Constants.SUBSCRIPTION_API + "?applicationId=" + applicationId + "&limit=1000";
 
         Request.Builder builder = new Request.Builder();
         builder.url(getAllScopesUrl);
@@ -497,8 +497,7 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONArray subscriptionsArray = (JSONArray) new JSONObject(response.body().string()).get("list");
-                return gson.fromJson(subscriptionsArray.toString(), Subscription[].class);
+                return gson.fromJson(response.body().string(), Subscription[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 if (!token) {
                     APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();

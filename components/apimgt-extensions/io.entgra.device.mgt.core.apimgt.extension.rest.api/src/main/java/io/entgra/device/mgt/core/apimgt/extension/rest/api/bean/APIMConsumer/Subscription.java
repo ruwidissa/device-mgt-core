@@ -18,13 +18,15 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer;
 
+import org.json.JSONObject;
+
 public class Subscription {
 
     private String subscriptionId;
     private String applicationId;
     private String apiId;
     private APIInfo apiInfo;
-    private Application applicationInfo;
+    private JSONObject applicationInfo;
     private String throttlingPolicy;
     private String requestedThrottlingPolicy;
     private String status;
@@ -62,11 +64,11 @@ public class Subscription {
         this.apiInfo = apiInfo;
     }
 
-    public Application getApplicationInfo() {
+    public JSONObject getApplicationInfo() {
         return applicationInfo;
     }
 
-    public void setApplicationInfo(Application applicationInfo) {
+    public void setApplicationInfo(JSONObject applicationInfo) {
         this.applicationInfo = applicationInfo;
     }
 

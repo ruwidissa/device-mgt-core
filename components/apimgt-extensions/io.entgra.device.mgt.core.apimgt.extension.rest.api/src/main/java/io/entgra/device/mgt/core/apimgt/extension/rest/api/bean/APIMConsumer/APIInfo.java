@@ -36,31 +36,16 @@ public class APIInfo {
     private String context;
     private String version;
     private String provider;
-    private JSONObject apiDefinition;
-    private String wsdlUri;
     private String lifeCycleStatus;
-    private boolean isDefaultVersion;
-    private String type;
-    private Set<String> transport;
-    private List<JSONObject> operations;
-    private String authorizationHeader;
-    private String securityScheme;
-    private Set<String> tags;
-    private List<JSONObject> tiers;
-    private boolean hasThumbnail;
-    private String additionalProperties;
-    private JSONObject monetization;
-    private List<JSONObject> endpointURLs;
-    private JSONObject businessInformation;
-    private List<JSONObject> environmentList;
-    private List<ScopeUtils> scopes;
+    private String thumbnailUri;
     private String avgRating;
+    private List<String> throttlingPolicies;
     private JSONObject advertiseInfo;
+    private JSONObject businessInformation;
     private boolean isSubscriptionAvailable;
-    private List<JSONObject> categories;
-    private List<String> keyManagers = new ArrayList();
-    private String createdTime;
-    private String lastUpdatedTime;
+    private String monetizationLabel;
+    private String gatewayVendor;
+    private List<String> additionalProperties;
 
     public String getId() {
         return id;
@@ -110,22 +95,6 @@ public class APIInfo {
         this.provider = provider;
     }
 
-    public JSONObject getApiDefinition() {
-        return apiDefinition;
-    }
-
-    public void setApiDefinition(JSONObject apiDefinition) {
-        this.apiDefinition = apiDefinition;
-    }
-
-    public String getWsdlUri() {
-        return wsdlUri;
-    }
-
-    public void setWsdlUri(String wsdlUri) {
-        this.wsdlUri = wsdlUri;
-    }
-
     public String getLifeCycleStatus() {
         return lifeCycleStatus;
     }
@@ -134,124 +103,12 @@ public class APIInfo {
         this.lifeCycleStatus = lifeCycleStatus;
     }
 
-    public boolean isDefaultVersion() {
-        return isDefaultVersion;
+    public String getThumbnailUri() {
+        return thumbnailUri;
     }
 
-    public void setDefaultVersion(boolean defaultVersion) {
-        isDefaultVersion = defaultVersion;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Set<String> getTransport() {
-        return transport;
-    }
-
-    public void setTransport(Set<String> transport) {
-        this.transport = transport;
-    }
-
-    public List<JSONObject> getOperations() {
-        return operations;
-    }
-
-    public void setOperations(List<JSONObject> operations) {
-        this.operations = operations;
-    }
-
-    public String getAuthorizationHeader() {
-        return authorizationHeader;
-    }
-
-    public void setAuthorizationHeader(String authorizationHeader) {
-        this.authorizationHeader = authorizationHeader;
-    }
-
-    public String getSecurityScheme() {
-        return securityScheme;
-    }
-
-    public void setSecurityScheme(String securityScheme) {
-        this.securityScheme = securityScheme;
-    }
-
-    public Set<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(Set<String> tags) {
-        this.tags = tags;
-    }
-
-    public List<JSONObject> getTiers() {
-        return tiers;
-    }
-
-    public void setTiers(List<JSONObject> tiers) {
-        this.tiers = tiers;
-    }
-
-    public boolean isHasThumbnail() {
-        return hasThumbnail;
-    }
-
-    public void setHasThumbnail(boolean hasThumbnail) {
-        this.hasThumbnail = hasThumbnail;
-    }
-
-    public String getAdditionalProperties() {
-        return additionalProperties;
-    }
-
-    public void setAdditionalProperties(String additionalProperties) {
-        this.additionalProperties = additionalProperties;
-    }
-
-    public JSONObject getMonetization() {
-        return monetization;
-    }
-
-    public void setMonetization(JSONObject monetization) {
-        this.monetization = monetization;
-    }
-
-    public List<JSONObject> getEndpointURLs() {
-        return endpointURLs;
-    }
-
-    public void setEndpointURLs(List<JSONObject> endpointURLs) {
-        this.endpointURLs = endpointURLs;
-    }
-
-    public JSONObject getBusinessInformation() {
-        return businessInformation;
-    }
-
-    public void setBusinessInformation(JSONObject businessInformation) {
-        this.businessInformation = businessInformation;
-    }
-
-    public List<JSONObject> getEnvironmentList() {
-        return environmentList;
-    }
-
-    public void setEnvironmentList(List<JSONObject> environmentList) {
-        this.environmentList = environmentList;
-    }
-
-    public List<ScopeUtils> getScopes() {
-        return scopes;
-    }
-
-    public void setScopes(List<ScopeUtils> scopes) {
-        this.scopes = scopes;
+    public void setThumbnailUri(String thumbnailUri) {
+        this.thumbnailUri = thumbnailUri;
     }
 
     public String getAvgRating() {
@@ -262,12 +119,28 @@ public class APIInfo {
         this.avgRating = avgRating;
     }
 
+    public List<String> getThrottlingPolicies() {
+        return throttlingPolicies;
+    }
+
+    public void setThrottlingPolicies(List<String> throttlingPolicies) {
+        this.throttlingPolicies = throttlingPolicies;
+    }
+
     public JSONObject getAdvertiseInfo() {
         return advertiseInfo;
     }
 
     public void setAdvertiseInfo(JSONObject advertiseInfo) {
         this.advertiseInfo = advertiseInfo;
+    }
+
+    public JSONObject getBusinessInformation() {
+        return businessInformation;
+    }
+
+    public void setBusinessInformation(JSONObject businessInformation) {
+        this.businessInformation = businessInformation;
     }
 
     public boolean isSubscriptionAvailable() {
@@ -278,35 +151,27 @@ public class APIInfo {
         isSubscriptionAvailable = subscriptionAvailable;
     }
 
-    public List<JSONObject> getCategories() {
-        return categories;
+    public String getMonetizationLabel() {
+        return monetizationLabel;
     }
 
-    public void setCategories(List<JSONObject> categories) {
-        this.categories = categories;
+    public void setMonetizationLabel(String monetizationLabel) {
+        this.monetizationLabel = monetizationLabel;
     }
 
-    public List<String> getKeyManagers() {
-        return keyManagers;
+    public String getGatewayVendor() {
+        return gatewayVendor;
     }
 
-    public void setKeyManagers(List<String> keyManagers) {
-        this.keyManagers = keyManagers;
+    public void setGatewayVendor(String gatewayVendor) {
+        this.gatewayVendor = gatewayVendor;
     }
 
-    public String getCreatedTime() {
-        return createdTime;
+    public List<String> getAdditionalProperties() {
+        return additionalProperties;
     }
 
-    public void setCreatedTime(String createdTime) {
-        this.createdTime = createdTime;
-    }
-
-    public String getLastUpdatedTime() {
-        return lastUpdatedTime;
-    }
-
-    public void setLastUpdatedTime(String lastUpdatedTime) {
-        this.lastUpdatedTime = lastUpdatedTime;
+    public void setAdditionalProperties(List<String> additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 }
