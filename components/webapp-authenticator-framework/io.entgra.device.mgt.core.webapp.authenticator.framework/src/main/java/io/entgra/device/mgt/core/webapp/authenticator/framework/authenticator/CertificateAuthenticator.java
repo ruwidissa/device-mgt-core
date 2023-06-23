@@ -74,31 +74,29 @@ public class CertificateAuthenticator implements WebappAuthenticator {
             // When there is a load balancer terminating mutual SSL, it should pass this header along and
             // as the value of this header, the client certificate subject dn should be passed.
             if (request.getHeader(PROXY_MUTUAL_AUTH_HEADER) != null) {
-                log.info("PROXY_MUTUAL_AUTH_HEADER " + request.getHeader(PROXY_MUTUAL_AUTH_HEADER));
+                if (log.isDebugEnabled()) {
+                    log.debug("PROXY_MUTUAL_AUTH_HEADER " + request.getHeader(PROXY_MUTUAL_AUTH_HEADER));
+                }
                 CertificateResponse certificateResponse = AuthenticatorFrameworkDataHolder.getInstance().
                         getCertificateManagementService().verifySubjectDN(request.getHeader(PROXY_MUTUAL_AUTH_HEADER));
-                log.info("clientCertificate" + certificateResponse.getSerialNumber());
-                log.info("clientCertificate" + certificateResponse.getCommonName());
                 authenticationInfo = checkCertificateResponse(certificateResponse);
-                log.info("username" + authenticationInfo.getUsername());
+                if (log.isDebugEnabled()) {
+                    log.debug("Certificate Serial : " + certificateResponse.getSerialNumber()
+                            + ", CN : " + certificateResponse.getCommonName()
+                            + " , username" + authenticationInfo.getUsername());
+                }
             }
             else if (request.getHeader(MUTUAL_AUTH_HEADER) != null) {
-                log.info("MUTUAL_AUTH_HEADER");
                 Object object = request.getAttribute(CLIENT_CERTIFICATE_ATTRIBUTE);
                 X509Certificate[] clientCertificate = null;
                 if (object instanceof  X509Certificate[]) {
-                    log.info("clientCertificate");
                     clientCertificate = (X509Certificate[]) request.
                             getAttribute(CLIENT_CERTIFICATE_ATTRIBUTE);
                 }
                 if (clientCertificate != null && clientCertificate[0] != null) {
                     CertificateResponse certificateResponse = AuthenticatorFrameworkDataHolder.getInstance().
                             getCertificateManagementService().verifyPEMSignature(clientCertificate[0]);
-                    log.info("clientCertificate" + certificateResponse.getSerialNumber());
-                    log.info("clientCertificate" + certificateResponse.getCommonName());
                     authenticationInfo = checkCertificateResponse(certificateResponse);
-                    log.info("username" + authenticationInfo.getUsername());
-
                 } else {
                     authenticationInfo.setStatus(Status.FAILURE);
                     authenticationInfo.setMessage("No client certificate is present");
