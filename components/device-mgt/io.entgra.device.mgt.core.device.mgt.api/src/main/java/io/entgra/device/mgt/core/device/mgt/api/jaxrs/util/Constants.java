@@ -30,6 +30,7 @@ public class Constants {
 	public static final String USER_CLAIM_MODIFIED = "http://wso2.org/claims/modified";
 	public static final String USER_CLAIM_DEVICES = "http://wso2.org/claims/devices";
 	public static final String PRIMARY_USER_STORE = "PRIMARY";
+	public static final String APIM_RESERVED_USER = "apim_reserved_user";
     public static final String DEFAULT_STREAM_VERSION = "1.0.0";
 	public static final String SCOPE = "scope";
 	public static final String JDBC_USERSTOREMANAGER = "org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager";
