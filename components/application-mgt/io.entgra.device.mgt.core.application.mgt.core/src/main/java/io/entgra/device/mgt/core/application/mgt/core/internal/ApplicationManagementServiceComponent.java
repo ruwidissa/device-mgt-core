@@ -18,7 +18,9 @@
 package io.entgra.device.mgt.core.application.mgt.core.internal;
 
 import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.core.impl.AppmDataHandlerImpl;
+import io.entgra.device.mgt.core.application.mgt.core.impl.VppApplicationManagerImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -115,6 +117,12 @@ public class ApplicationManagementServiceComponent {
             AppmDataHandler configManager = new AppmDataHandlerImpl();
             DataHolder.getInstance().setConfigManager(configManager);
             bundleContext.registerService(AppmDataHandler.class.getName(), configManager, null);
+
+
+            // TODO: Get the new instance from extension like others
+            VppApplicationManagerImpl vppApplicationManager = new VppApplicationManagerImpl();
+            DataHolder.getInstance().setVppApplicationManager(vppApplicationManager);
+            bundleContext.registerService(VPPApplicationManager.class.getName(), vppApplicationManager, null);
 
             ScheduledAppSubscriptionTaskManager taskManager = new ScheduledAppSubscriptionTaskManager();
             taskManager.scheduleCleanupTask();
