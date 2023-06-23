@@ -25,6 +25,15 @@ public class Certificate {
     X509Certificate certificate;
     int tenantId;
     String tenantDomain;
+    String deviceIdentifier;
+
+    public String getDeviceIdentifier() {
+        return deviceIdentifier;
+    }
+
+    public void setDeviceIdentifier(String deviceIdentifier) {
+        this.deviceIdentifier = deviceIdentifier;
+    }
 
     public int getTenantId() {
         return tenantId;
