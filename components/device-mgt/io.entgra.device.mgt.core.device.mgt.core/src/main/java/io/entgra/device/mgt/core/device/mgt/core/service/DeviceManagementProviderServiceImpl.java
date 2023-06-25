@@ -135,6 +135,18 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -1037,7 +1049,15 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                     dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
                                 }
                             }
-                            long dateInDays = TimeUnit.DAYS.convert(dateDiff, TimeUnit.MILLISECONDS);
+
+                            // Convert dateDiff to days as a decimal value
+                            double dateDiffInDays = (double) dateDiff / (24 * 60 * 60 * 1000);
+
+                            if (dateDiffInDays % 1 >= 0.9) {
+                                dateDiffInDays = Math.ceil(dateDiffInDays);
+                            }
+
+                            long dateInDays = (long) dateDiffInDays;
                             double cost = (tenantCost.getCost() / 365) * dateInDays;
                             totalCost += cost;
                             device.setCost(Math.round(cost * 100.0) / 100.0);
@@ -1104,9 +1124,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
                 long difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24)) % 365;
 
+                if (difference_In_Time % (1000 * 60 * 60 * 24) >= 0.9 * (1000 * 60 * 60 * 24)) {
+                    difference_In_Days++;
+                }
+
                 for (int i = 1; i <= difference_In_Years; i++) {
                     List<Device> allDevicesPerYear = new ArrayList<>();
-                    LocalDateTime oneYearAfterStart = startDate.toLocalDateTime().plusYears(1);
+                    LocalDateTime oneYearAfterStart = startDate.toLocalDateTime().plusYears(1).with(LocalTime.of(23, 59, 59));;
                     Timestamp newStartDate;
                     Timestamp newEndDate;
 
@@ -1115,14 +1139,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             remainingDaysConsidered = true;
                             oneYearAfterStart = startDate.toLocalDateTime();
                             newEndDate = endDate;
-                        } else if (Timestamp.valueOf(oneYearAfterStart).getTime() >= endDate.getTime()) {
-                            newEndDate = Timestamp.valueOf(oneYearAfterStart);
                         } else {
-                            oneYearAfterStart = startDate.toLocalDateTime().plusYears(1);
+                            oneYearAfterStart = startDate.toLocalDateTime().plusYears(1).with(LocalTime.of(23, 59, 59));;
                             newEndDate = Timestamp.valueOf(oneYearAfterStart);
                         }
                     } else {
-                        oneYearAfterStart = startDate.toLocalDateTime().plusYears(1);
+                        oneYearAfterStart = startDate.toLocalDateTime().plusYears(1).with(LocalTime.of(23, 59, 59));;
                         newEndDate = Timestamp.valueOf(oneYearAfterStart);
                     }
 
@@ -1145,7 +1167,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     allDevices.addAll(billingResponse.getDevice());
                     totalCost = totalCost + billingResponse.getTotalCostPerYear();
                     deviceCount = deviceCount + billingResponse.getDeviceCount();
-                    LocalDateTime nextStartDate = oneYearAfterStart.plusDays(1);
+                    LocalDateTime nextStartDate = oneYearAfterStart.plusDays(1).with(LocalTime.of(00, 00, 00));
                     startDate = Timestamp.valueOf(nextStartDate);
                 }
 
