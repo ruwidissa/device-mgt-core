@@ -446,6 +446,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         if (log.isDebugEnabled()) {
             log.debug("Modifying enrollment for device: " + device.getId() + " of type '" + device.getType() + "'");
         }
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         DeviceManager deviceManager = this.getDeviceManager(device.getType());
         DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
         if (deviceManager == null) {
@@ -474,6 +476,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
 
             DeviceManagementDAOFactory.commitTransaction();
+            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(currentDevice.getId())).setDeviceType(String.valueOf(currentDevice.getType())).setOwner(currentDevice.getEnrolmentInfo().getOwner()).setOwnership(String.valueOf(currentDevice.getEnrolmentInfo().getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
             this.removeDeviceFromCache(deviceIdentifier);
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
