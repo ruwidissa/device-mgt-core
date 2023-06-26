@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.otp.mgt.dao.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
