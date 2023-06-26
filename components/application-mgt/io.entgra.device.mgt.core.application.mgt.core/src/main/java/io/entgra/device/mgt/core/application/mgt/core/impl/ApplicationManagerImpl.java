@@ -1239,13 +1239,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             this.changeLifecycleState(applicationReleaseDTO, lifecycleChanger);
                         }
                     }
+                    if (applicationDTO.getType().equals("ENTERPRISE") || applicationDTO.getType().equals("PUBLIC") ) {
+                        persistAppIconInfo(applicationReleaseDTO);
+                    }
                     applicationReleaseEntities.add(applicationReleaseDTO);
                 }
                 applicationDTO.setId(appId);
                 applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
-                if (applicationDTO.getType().equals("ENTERPRISE") || applicationDTO.getType().equals("PUBLIC") ) {
-                    persistAppIconInfo(applicationReleaseDTO);
-                }
                 return APIUtil.appDtoToAppResponse(applicationDTO);
             }
         } catch (LifeCycleManagementDAOException e) {
