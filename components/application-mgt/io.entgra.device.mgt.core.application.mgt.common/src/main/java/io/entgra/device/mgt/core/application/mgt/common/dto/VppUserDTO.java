@@ -73,4 +73,20 @@ public class VppUserDTO extends VppItuneUserDTO {
         this.tmpPassword = tmpPassword;
     }
 
+    @Override
+    public String toString() {
+        return "VppUserDTO{" +
+                "id=" + id +
+                ", dmUsername='" + dmUsername + '\'' +
+                ", tenantId=" + tenantId +
+                ", createdTime='" + createdTime + '\'' +
+                ", lastUpdatedTime='" + lastUpdatedTime + '\'' +
+                ", tmpPassword='" + tmpPassword + '\'' +
+                ", clientUserId='" + clientUserId + '\'' +
+                ", inviteCode='" + inviteCode + '\'' +
+                ", status='" + status + '\'' +
+                ", email='" + email + '\'' +
+                ", managedId='" + managedId + '\'' +
+                '}';
+    }
 }

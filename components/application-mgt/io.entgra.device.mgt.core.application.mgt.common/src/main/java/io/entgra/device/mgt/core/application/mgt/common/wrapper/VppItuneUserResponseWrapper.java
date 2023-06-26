@@ -18,15 +18,16 @@
 package io.entgra.device.mgt.core.application.mgt.common.wrapper;
 
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppItuneUserDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppPaginationDTO;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class VppItuneUserRequestWrapper {
+public class VppItuneUserResponseWrapper extends VppPaginationDTO {
 
     List<VppItuneUserDTO> users;
 
-    public VppItuneUserRequestWrapper() {
+    public VppItuneUserResponseWrapper() {
         users = new ArrayList<>();
     }
     public List<VppItuneUserDTO> getUser() {
@@ -36,5 +37,4 @@ public class VppItuneUserRequestWrapper {
     public void setUser(List<VppItuneUserDTO> users) {
         this.users = users;
     }
-
 }

@@ -55,13 +55,13 @@ public class VppHttpUtil {
                                   String method) throws IOException {
 
         HttpRequestBase endpoint = null;
-        if (Constants.GET.equalsIgnoreCase(method) || Constants.DELETE.equalsIgnoreCase(method)) {
+        if (Constants.VPP.GET.equalsIgnoreCase(method) || Constants.VPP.DELETE.equalsIgnoreCase(method)) {
             endpoint = new HttpGet(url);
             addHeaders(endpoint, accessToken);
             return VppHttpUtil.execute(endpoint);
-        } else if (Constants.POST.equalsIgnoreCase(method)) {
+        } else if (Constants.VPP.POST.equalsIgnoreCase(method)) {
             endpoint = new HttpPost(url);
-        } else if (Constants.PUT.equalsIgnoreCase(method)) {
+        } else if (Constants.VPP.PUT.equalsIgnoreCase(method)) {
             endpoint = new HttpPut(url);
         }
         addHeaders(endpoint, accessToken);
@@ -69,9 +69,9 @@ public class VppHttpUtil {
 
         if (payload != null) {
             HttpEntity forwardRequestBody = new StringEntity(payload, ContentType.APPLICATION_JSON.toString(), "utf-8");
-            if (Constants.POST.equalsIgnoreCase(method)) {
+            if (Constants.VPP.POST.equalsIgnoreCase(method)) {
                 ((HttpPost) endpoint).setEntity(forwardRequestBody);
-            } else if (Constants.PUT.equalsIgnoreCase(method)) {
+            } else if (Constants.VPP.PUT.equalsIgnoreCase(method)) {
                 ((HttpPut) endpoint).setEntity(forwardRequestBody);
             }
 
@@ -85,7 +85,7 @@ public class VppHttpUtil {
     private static void addHeaders(HttpRequestBase endpoint, String accessToken) {
         endpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         endpoint.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.toString());
-        endpoint.setHeader(HttpHeaders.AUTHORIZATION, Constants.BEARER + accessToken);
+        endpoint.setHeader(HttpHeaders.AUTHORIZATION, Constants.VPP.BEARER + accessToken);
     }
 
 
@@ -103,9 +103,9 @@ public class VppHttpUtil {
             if (response == null) {
                 log.error("Received null response for http request : " + httpRequest.getMethod() + " " + httpRequest
                         .getURI().toString());
-                proxyResponse.setCode(Constants.INTERNAL_ERROR_CODE);
-                proxyResponse.setExecutorResponse(Constants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(
-                        Constants.INTERNAL_ERROR_CODE));
+                proxyResponse.setCode(Constants.VPP.INTERNAL_ERROR_CODE);
+                proxyResponse.setExecutorResponse(Constants.VPP.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(
+                        Constants.VPP.INTERNAL_ERROR_CODE));
                 return proxyResponse;
             } else {
                 int statusCode = response.getStatusLine().getStatusCode();
@@ -126,7 +126,7 @@ public class VppHttpUtil {
                         if (jsonString.contains("Access token expired") || jsonString
                                 .contains("Invalid input. Access token validation failed")) {
                             proxyResponse.setCode(statusCode);
-                            proxyResponse.setExecutorResponse(Constants.TOKEN_IS_EXPIRED);
+                            proxyResponse.setExecutorResponse(Constants.VPP.TOKEN_IS_EXPIRED);
                             return proxyResponse;
                         } else {
                             log.error(
@@ -135,7 +135,7 @@ public class VppHttpUtil {
                             proxyResponse.setCode(statusCode);
                             proxyResponse.setData(jsonString);
                             proxyResponse.setExecutorResponse(
-                                    Constants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
+                                    Constants.VPP.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
                             return proxyResponse;
                         }
                     }
@@ -145,7 +145,7 @@ public class VppHttpUtil {
                     proxyResponse.setCode(statusCode);
                     proxyResponse.setData(jsonString);
                     proxyResponse
-                            .setExecutorResponse(Constants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
+                            .setExecutorResponse(Constants.VPP.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
                     return proxyResponse;
                 }
             }
@@ -205,8 +205,8 @@ public class VppHttpUtil {
         if (proxyResponse == null) {
             proxyResponse = new ProxyResponse();
             proxyResponse.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            proxyResponse.setExecutorResponse(Constants.EXECUTOR_EXCEPTION_PREFIX + VppHttpUtil
-                    .getStatusKey(Constants.INTERNAL_ERROR_CODE));
+            proxyResponse.setExecutorResponse(Constants.VPP.EXECUTOR_EXCEPTION_PREFIX + VppHttpUtil
+                    .getStatusKey(Constants.VPP.INTERNAL_ERROR_CODE));
         }
         resp.setStatus(proxyResponse.getCode());
         resp.setContentType(ContentType.APPLICATION_JSON.getMimeType());
@@ -230,7 +230,7 @@ public class VppHttpUtil {
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(errorCode);
         proxyResponse.setExecutorResponse(
-                Constants.EXECUTOR_EXCEPTION_PREFIX + VppHttpUtil.getStatusKey(errorCode));
+                Constants.VPP.EXECUTOR_EXCEPTION_PREFIX + VppHttpUtil.getStatusKey(errorCode));
         VppHttpUtil.handleError(resp, proxyResponse);
     }
 
