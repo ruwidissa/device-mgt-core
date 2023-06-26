@@ -19,7 +19,6 @@
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
@@ -28,12 +27,17 @@ import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.OTPManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.OTPEmailTypes;
+import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
+import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -55,71 +59,28 @@ public class DefaultTokenHandler extends HttpServlet {
             HttpSession httpSession = req.getSession(false);
 
             if (httpSession != null) {
-                AuthData authData = (AuthData) httpSession.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
-                if (authData == null) {
-                    HandlerUtil.sendUnAuthorizeResponse(resp);
-                    return;
+                String userWithDomain = (String) httpSession.getAttribute(HandlerConstants.USERNAME_WITH_DOMAIN);
+                String[] userNameParts = userWithDomain.split("@");
+
+                OneTimePinDTO oneTimePinData = new OneTimePinDTO();
+                oneTimePinData.setEmail(OTPEmailTypes.REMOTE_SESSION.toString());
+                oneTimePinData.setEmailType(OTPEmailTypes.REMOTE_SESSION.toString());
+                oneTimePinData.setUsername(userNameParts[0]);
+                PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                RealmService realmService = (RealmService) ctx.getOSGiService(RealmService.class, null);
+                try {
+                    oneTimePinData.setTenantId(realmService.getTenantManager().getTenantId(userNameParts[1]));
+                } catch (UserStoreException e) {
+                    throw new RuntimeException(e);
                 }
-
-                AuthData defaultAuthData = (AuthData) httpSession
-                        .getAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY);
-                if (defaultAuthData != null) {
-                    HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(defaultAuthData.getAccessToken()));
-                    return;
-                }
-
-                String clientId = authData.getClientId();
-                String clientSecret = authData.getClientSecret();
-
-                String queryString = req.getQueryString();
-                String scopeString = "";
-                if (StringUtils.isNotEmpty(queryString)) {
-                    scopeString = req.getParameter("scopes");
-                    if (scopeString != null) {
-                        scopeString = "?scopes=" + scopeString;
-                    }
-                }
-
-                String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR
-                        + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
-                        + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-                String tokenUrl = iotsCoreUrl + "/api/device-mgt/v1.0/devices/" + clientId
-                                + "/" + clientSecret + "/default-token" + scopeString;
-
-                HttpGet defaultTokenRequest = new HttpGet(tokenUrl);
-                defaultTokenRequest
-                        .setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-                defaultTokenRequest
-                        .setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
-                ProxyResponse tokenResultResponse = HandlerUtil.execute(defaultTokenRequest);
-
-                if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                    log.error("Error occurred while invoking the API to get default token data.");
-                    HandlerUtil.handleError(resp, tokenResultResponse);
-                    return;
-                }
-                String tokenResult = tokenResultResponse.getData();
-                if (tokenResult == null) {
-                    log.error("Invalid default token response is received.");
-                    HandlerUtil.handleError(resp, tokenResultResponse);
-                    return;
-                }
-
-                JsonParser jsonParser = new JsonParser();
-                JsonElement jTokenResult = jsonParser.parse(tokenResult);
-                if (jTokenResult.isJsonObject()) {
-                    JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
-                    AuthData newDefaultAuthData = new AuthData();
-                    newDefaultAuthData.setClientId(clientId);
-                    newDefaultAuthData.setClientSecret(clientSecret);
-
-                    String defaultToken = jTokenResultAsJsonObject.get("accessToken").getAsString();
-                    newDefaultAuthData.setAccessToken(defaultToken);
-                    newDefaultAuthData.setRefreshToken(jTokenResultAsJsonObject.get("refreshToken").getAsString());
-                    newDefaultAuthData.setScope(jTokenResultAsJsonObject.get("scopes").getAsString());
-                    httpSession.setAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY, newDefaultAuthData);
-
-                    HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(defaultToken));
+                oneTimePinData.setExpiryTime(DeviceManagementConstants.OTPProperties.OTP_DEFAULT_EXPIRY_SECONDS);
+                OTPManagementService otpManagementService = HandlerUtil.getOTPManagementService();
+                try {
+                    oneTimePinData = otpManagementService.generateOneTimePin(oneTimePinData, true);
+                    HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(oneTimePinData.getOtpToken()));
+                } catch (OTPManagementException e) {
+                    log.error("Failed while generating remote session OTP for user " + userWithDomain, e);
+                    HandlerUtil.handleError(resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
                 }
             } else {
                 HandlerUtil.sendUnAuthorizeResponse(resp);
