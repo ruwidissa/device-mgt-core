@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.otp.mgt.dao.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
 import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import io.entgra.device.mgt.core.device.mgt.core.otp.mgt.dao.AbstractDAOImpl;
