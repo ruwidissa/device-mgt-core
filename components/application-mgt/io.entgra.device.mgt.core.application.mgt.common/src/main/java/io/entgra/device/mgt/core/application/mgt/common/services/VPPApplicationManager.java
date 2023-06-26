@@ -26,9 +26,13 @@ import java.io.IOException;
 
 public interface VPPApplicationManager {
 
-    VppUserDTO getUserByDMUsername() throws ApplicationManagementException;
-
     VppUserDTO addUser(VppUserDTO userDTO) throws ApplicationManagementException;
+
+    VppUserDTO getUserByDMUsername(String emmUsername) throws ApplicationManagementException;
+
+    void updateUser(VppUserDTO userDTO) throws ApplicationManagementException;
+
+    void syncUsers(String clientId) throws ApplicationManagementException;
 
     ProxyResponse callVPPBackend(String url, String payload, String accessToken, String method) throws IOException;
 }

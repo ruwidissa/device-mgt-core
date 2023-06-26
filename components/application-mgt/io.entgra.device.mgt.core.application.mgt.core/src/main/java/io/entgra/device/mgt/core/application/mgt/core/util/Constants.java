@@ -100,17 +100,23 @@ public class Constants {
     }
     public static final Map<String, String> AGENT_FILE_NAMES = Collections.unmodifiableMap(AGENT_DATA);
 
-    public static final String BEARER = "Bearer ";
+    public static final class VPP {
+        public static final String GET = "GET";
+        public static final String BEARER = "Bearer ";
+        public static final String EXECUTOR_EXCEPTION_PREFIX = "ExecutorException-";
+        public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
+        public static final int INTERNAL_ERROR_CODE = 500;
+        public static final String POST = "POST";
+        public static final String PUT = "PUT";
+        public static final String DELETE = "DELETE";
+        public static final String CLIENT_USER_ID = "clientUserId";
+        public static final String EVENT_ID = "eventId";
+        public static final String CLIENT_USER_ID_PARAM = "?clientUserId=";
+        public static final String TOTAL_PAGES = "totalPages";
 
-    public static final String EXECUTOR_EXCEPTION_PREFIX = "ExecutorException-";
-    public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
-
-    public static final int INTERNAL_ERROR_CODE = 500;
-
-    public static final String GET = "GET";
-    public static final String POST = "POST";
-    public static final String PUT = "PUT";
-    public static final String DELETE = "DELETE";
+        private VPP() {
+        }
+    }
 
 
     /**
