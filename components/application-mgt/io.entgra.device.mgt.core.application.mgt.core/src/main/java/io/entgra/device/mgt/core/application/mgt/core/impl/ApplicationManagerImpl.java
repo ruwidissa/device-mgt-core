@@ -3658,13 +3658,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     log.error(msg);
                     throw new ApplicationManagementException(msg);
                 }
-                if (!hasUserRole(unrestrictedRoles, userName)) {
-                    String msg = "You are trying to restrict the visibility of the application for a role set, but "
-                            + "in order to perform the action at least one role should be assigned to user: "
-                            + userName;
-                    log.error(msg);
-                    throw new BadRequestException(msg);
-                }
             }
 
             Filter filter = new Filter();
