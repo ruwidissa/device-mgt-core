@@ -218,6 +218,19 @@ public interface GroupDAO {
      * @param paginationRequest to filter results.
      * @param deviceGroupIds    of groups required.
      * @param tenantId          of user's tenant.
+     * @param isWithParentPath      of user's ParentPath.
+     * @return List of all Device Groups in tenant.
+     * @throws GroupManagementDAOException
+     */
+    List<DeviceGroup> getGroups(GroupPaginationRequest paginationRequest, List<Integer> deviceGroupIds,
+                                int tenantId, boolean isWithParentPath) throws GroupManagementDAOException;
+
+    /**
+     * Get paginated list of Device Groups in tenant with specified device group ids.
+     *
+     * @param paginationRequest to filter results.
+     * @param deviceGroupIds    of groups required.
+     * @param tenantId          of user's tenant.
      * @return List of all Device Groups in tenant.
      * @throws GroupManagementDAOException
      */

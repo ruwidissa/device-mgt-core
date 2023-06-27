@@ -312,6 +312,13 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                             newParentPath = DeviceGroupConstants.HierarchicalGroup.SEPERATOR;
                         }
                         childrenGroup.setParentPath(newParentPath);
+                        if (!newParentPath.equals(DeviceGroupConstants.HierarchicalGroup.SEPERATOR)) {
+                            String[] groupIds = newParentPath.split(DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
+                            int latestGroupId = Integer.parseInt(groupIds[groupIds.length - 1]);
+                            childrenGroup.setParentGroupId(latestGroupId);
+                        } else {
+                            childrenGroup.setParentGroupId(0);
+                        }
                     }
                 }
             }
@@ -518,7 +525,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
     @Override
     public PaginationResult getGroupsWithHierarchy(String username, GroupPaginationRequest request,
-            boolean requireGroupProps) throws GroupManagementException {
+                                                   boolean requireGroupProps) throws GroupManagementException {
         if (request == null) {
             String msg = "Received incomplete data for retrieve groups with hierarchy";
             log.error(msg);
@@ -527,6 +534,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         if (log.isDebugEnabled()) {
             log.debug("Get groups with hierarchy " + request.toString());
         }
+        boolean isWithParentPath = false;
         DeviceManagerUtil.validateGroupListPageSize(request);
         List<DeviceGroup> rootGroups;
         try {
@@ -538,7 +546,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             } else {
                 List<Integer> allDeviceGroupIdsOfUser = getGroupIds(username);
                 GroupManagementDAOFactory.openConnection();
-                rootGroups = this.groupDAO.getGroups(request, allDeviceGroupIdsOfUser, tenantId);
+                rootGroups = this.groupDAO.getGroups(request, allDeviceGroupIdsOfUser, tenantId, isWithParentPath);
             }
             String parentPath;
             List<DeviceGroup> childrenGroups;
@@ -1359,7 +1367,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
      * @throws GroupManagementDAOException on error during population of group properties.
      */
     private void createGroupWithChildren(DeviceGroup parentGroup, List<DeviceGroup> childrenGroups,
-            boolean requireGroupProps, int tenantId, int depth, int counter) throws GroupManagementDAOException {
+                                         boolean requireGroupProps, int tenantId, int depth, int counter) throws GroupManagementDAOException {
         if (childrenGroups.isEmpty() || depth == counter) {
             return;
         }
