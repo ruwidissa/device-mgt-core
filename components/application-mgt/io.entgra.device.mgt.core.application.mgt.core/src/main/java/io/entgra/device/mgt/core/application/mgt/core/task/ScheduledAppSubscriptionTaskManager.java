@@ -158,7 +158,7 @@ public class ScheduledAppSubscriptionTaskManager {
             TaskManager taskManager = taskService.getTaskManager(SCHEDULED_APP_SUBSCRIPTION_TASK_TYPE);
 
             TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
-            triggerInfo.setCronExpression("0 0 0/24 ? * * *");
+            triggerInfo.setCronExpression("0 0 0 ? * * *");
 
             String taskName = "SCHEDULED_APP_SUBSCRIPTION_CLEANUP_TASK";
             TaskInfo taskInfo = new TaskInfo(taskName, ScheduledAppSubscriptionCleanupTask.class.getName(), null,
