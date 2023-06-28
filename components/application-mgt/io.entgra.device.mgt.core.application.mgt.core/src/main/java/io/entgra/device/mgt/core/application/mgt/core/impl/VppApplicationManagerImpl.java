@@ -45,6 +45,7 @@ import io.entgra.device.mgt.core.application.mgt.core.util.VppHttpUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
 
@@ -77,6 +78,9 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
 
     @Override
     public VppUserDTO addUser(VppUserDTO userDTO) throws ApplicationManagementException {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+
         // Call the API to add
         try {
             VppItuneUserDTO ituneUserDTO = userDTO;
@@ -105,7 +109,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
                     log.error("userDTO " + userDTO.toString());
                     try {
                         ConnectionManagerUtil.beginDBTransaction();
-                        if (vppApplicationDAO.addVppUser(userDTO) != -1) {
+                        if (vppApplicationDAO.addVppUser(userDTO, tenantId) != -1) {
                             ConnectionManagerUtil.commitDBTransaction();
                             return userDTO;
                         }
@@ -140,9 +144,10 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
 
     @Override
     public VppUserDTO getUserByDMUsername(String emmUsername) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.openDBConnection();
-            return vppApplicationDAO.getUserByDMUsername(emmUsername);
+            return vppApplicationDAO.getUserByDMUsername(emmUsername, tenantId);
         } catch (DBConnectionException e) {
             String msg = "DB Connection error occurs while getting vpp User data related to EMM user  " + emmUsername + ".";
             log.error(msg, e);
@@ -158,6 +163,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
 
     @Override
     public void updateUser(VppUserDTO userDTO) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         VppItuneUserDTO ituneUserDTO = userDTO;
         VppItuneUserRequestWrapper wrapper = new VppItuneUserRequestWrapper();
         wrapper.getUser().add(ituneUserDTO);
@@ -173,7 +179,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
 
                 try {
                     ConnectionManagerUtil.beginDBTransaction();
-                    if (vppApplicationDAO.updateVppUser(userDTO) == null) {
+                    if (vppApplicationDAO.updateVppUser(userDTO, tenantId) == null) {
                         ConnectionManagerUtil.rollbackDBTransaction();
                         String msg = "Unable to update the Vpp user " +userDTO.getId();
                         log.error(msg);

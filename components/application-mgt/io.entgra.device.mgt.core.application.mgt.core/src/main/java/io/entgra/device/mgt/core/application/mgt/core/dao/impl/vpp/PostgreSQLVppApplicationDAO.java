@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.entgra.device.mgt.core.application.mgt.core.dao.impl.vpp;
 
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
@@ -12,7 +30,7 @@ public class PostgreSQLVppApplicationDAO extends GenericVppApplicationDAOImpl {
 
     private static final Log log = LogFactory.getLog(GenericVppApplicationDAOImpl.class);
 
-    public int addVppUser(VppUserDTO userDTO)
+    public int addVppUser(VppUserDTO userDTO, int tenantId)
             throws ApplicationManagementDAOException {
         int vppUserId = -1;
         String sql = "INSERT INTO "
@@ -34,7 +52,7 @@ public class PostgreSQLVppApplicationDAO extends GenericVppApplicationDAOImpl {
                 long currentTime = System.currentTimeMillis();
                 stmt.setString(1, userDTO.getClientUserId());
                 stmt.setString(2, userDTO.getDmUsername());
-                stmt.setInt(3, userDTO.getTenantId());
+                stmt.setInt(3, tenantId);
                 stmt.setString(4, userDTO.getEmail());
                 stmt.setString(5, userDTO.getInviteCode());
                 stmt.setString(6, userDTO.getStatus());

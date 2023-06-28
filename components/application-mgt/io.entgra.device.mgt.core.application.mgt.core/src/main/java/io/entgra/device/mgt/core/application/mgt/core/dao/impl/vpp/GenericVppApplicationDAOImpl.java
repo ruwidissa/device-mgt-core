@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package io.entgra.device.mgt.core.application.mgt.core.dao.impl.vpp;
 
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
@@ -16,7 +34,7 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
     private static final Log log = LogFactory.getLog(GenericVppApplicationDAOImpl.class);
 
     @Override
-    public int addVppUser(VppUserDTO userDTO)
+    public int addVppUser(VppUserDTO userDTO, int tenantId)
             throws ApplicationManagementDAOException {
         int vppUserId = -1;
         String sql = "INSERT INTO "
@@ -38,7 +56,7 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
                 long currentTime = System.currentTimeMillis();
                 stmt.setString(1, userDTO.getClientUserId());
                 stmt.setString(2, userDTO.getDmUsername());
-                stmt.setInt(3, userDTO.getTenantId());
+                stmt.setInt(3, tenantId);
                 stmt.setString(4, userDTO.getEmail());
                 stmt.setString(5, userDTO.getInviteCode());
                 stmt.setString(6, userDTO.getStatus());
@@ -65,7 +83,7 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
         }
     }
 
-    public VppUserDTO updateVppUser(VppUserDTO userDTO)
+    public VppUserDTO updateVppUser(VppUserDTO userDTO, int tenantId)
             throws ApplicationManagementDAOException {
 
         String sql = "UPDATE "
@@ -87,7 +105,7 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, userDTO.getClientUserId());
                 stmt.setString(2, userDTO.getDmUsername());
-                stmt.setInt(3, userDTO.getTenantId());
+                stmt.setInt(3, tenantId);
                 stmt.setString(4, userDTO.getEmail());
                 stmt.setString(5, userDTO.getInviteCode());
                 stmt.setString(6, userDTO.getStatus());
@@ -112,7 +130,7 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
         }
     }
 
-    public VppUserDTO getUserByDMUsername(String emmUsername)
+    public VppUserDTO getUserByDMUsername(String emmUsername, int tenantId)
             throws ApplicationManagementDAOException {
         String sql = "SELECT "
                 + "ID, "
@@ -126,11 +144,12 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
                 + "MANAGED_ID, "
                 + "TEMP_PASSWORD "
                 + "FROM AP_VPP_USER "
-                + "WHERE DM_USERNAME = ?";
+                + "WHERE DM_USERNAME = ? AND TENANT_ID = ?";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, emmUsername);
+                stmt.setInt(2, tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     return DAOUtil.loadVppUser(rs);
                 }
