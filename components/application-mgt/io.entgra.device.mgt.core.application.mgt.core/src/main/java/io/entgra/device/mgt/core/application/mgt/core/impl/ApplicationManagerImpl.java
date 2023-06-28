@@ -22,6 +22,8 @@ import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestExcept
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.core.dao.SPApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -30,6 +32,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
@@ -95,6 +98,7 @@ import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProvide
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1711,6 +1715,31 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new UserStoreException(msg);
         }
+    }
+
+    /**
+     * Check whether valid metaData value or not
+     *
+     * @return true or false
+     * @throws MetadataManagementException If it is unable to load metaData
+     */
+    private boolean isUserAbleToViewAllRoles() throws MetadataManagementException {
+        List<Metadata> allMetadata;
+        allMetadata = APIUtil.getMetadataManagementService().retrieveAllMetadata();
+        if (allMetadata != null && !allMetadata.isEmpty()) {
+            for(Metadata metadata : allMetadata){
+                if(Constants.SHOW_ALL_ROLES.equals(metadata.getMetaKey())){
+                    String metaValue = metadata.getMetaValue();
+                    if (metaValue != null) {
+                        JSONObject jsonObject;
+                        jsonObject = new JSONObject(metaValue);
+                        boolean isUserAbleToViewAllRoles = jsonObject.getBoolean(Constants.IS_USER_ABLE_TO_VIEW_ALL_ROLES);
+                        return isUserAbleToViewAllRoles;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -3486,7 +3515,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public <T> void validateAppCreatingRequest(T param) throws ApplicationManagementException, RequestValidatingException {
+    public <T> void validateAppCreatingRequest(T param)
+            throws ApplicationManagementException, RequestValidatingException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int deviceTypeId = -1;
@@ -3658,6 +3688,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     log.error(msg);
                     throw new ApplicationManagementException(msg);
                 }
+                if (!isUserAbleToViewAllRoles()) {
+                    if (!hasUserRole(unrestrictedRoles, userName)) {
+                        String msg = "You are trying to restrict the visibility of the application for a role set, but "
+                                + "in order to perform the action at least one role should be assigned to user: "
+                                + userName;
+                        log.error(msg);
+                        throw new BadRequestException(msg);
+                    }
+                }
             }
 
             Filter filter = new Filter();
@@ -3707,6 +3746,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (UserStoreException e) {
             String msg = "Error occurred when validating the unrestricted roles given for the web clip";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while retrieving metadata list";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {

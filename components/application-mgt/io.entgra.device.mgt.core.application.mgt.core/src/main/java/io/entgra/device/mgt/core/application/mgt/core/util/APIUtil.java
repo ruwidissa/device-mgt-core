@@ -26,6 +26,7 @@ import io.entgra.device.mgt.core.application.mgt.core.config.IdentityServiceProv
 import io.entgra.device.mgt.core.application.mgt.core.serviceprovider.ISServiceProviderApplicationService;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,6 +72,7 @@ public class APIUtil {
     private static volatile SubscriptionManager subscriptionManager;
     private static volatile ReviewManager reviewManager;
     private static volatile AppmDataHandler appmDataHandler;
+    private static volatile MetadataManagementService metadataManagementService;
 
     public static SPApplicationManager getSPApplicationManager() {
         if (SPApplicationManager == null) {
@@ -522,5 +524,21 @@ public class APIUtil {
         String basePath = getArtifactDownloadBaseURL() + tenantId + Constants.FORWARD_SLASH + applicationReleaseDTO
                 .getAppHashValue() + Constants.FORWARD_SLASH;
         return basePath + Constants.ICON_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName();
+    }
+
+    public static MetadataManagementService getMetadataManagementService() {
+        if (metadataManagementService == null) {
+            synchronized (APIUtil.class) {
+                if (metadataManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    metadataManagementService = (MetadataManagementService) ctx.getOSGiService(
+                            MetadataManagementService.class, null);
+                    if (metadataManagementService == null) {
+                        throw new IllegalStateException("Metadata Management service not initialized.");
+                    }
+                }
+            }
+        }
+        return metadataManagementService;
     }
 }

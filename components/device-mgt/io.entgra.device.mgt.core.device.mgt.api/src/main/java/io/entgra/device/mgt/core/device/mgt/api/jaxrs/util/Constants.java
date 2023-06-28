@@ -38,6 +38,7 @@ public class Constants {
 	public static final int DEFAULT_PAGE_LIMIT = 50;
 	public static final String FORWARD_SLASH = "/";
 	public static final String ANDROID = "android";
+	public static final String IS_USER_ABLE_TO_VIEW_ALL_ROLES = "isUserAbleToViewAllRoles";
 	public static final String ANDROID_POLICY_VALIDATOR = "io.entgra.proprietary.uem.platform.android." +
 			"core.polcy.AndroidPolicyPayloadValidator";
 	public static final String IOS = "ios";
