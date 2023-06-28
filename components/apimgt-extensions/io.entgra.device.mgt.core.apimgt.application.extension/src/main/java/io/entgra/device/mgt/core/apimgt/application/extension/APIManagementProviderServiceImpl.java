@@ -64,14 +64,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class represents an implementation of APIManagementProviderService.
@@ -188,7 +181,9 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         return handleNewAPIApplication(applicationName, uniqueApiList, tokenInfo, keyType, validityTime);
                     } else {
                         Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(tokenInfo, application.getApplicationId());
-                        Arrays.stream(subscriptions).map(Subscription::getApiInfo).forEachOrdered(uniqueApiList::remove);
+                        for (Subscription subscription : subscriptions) {
+                            uniqueApiList.removeIf(apiInfo -> Objects.equals(apiInfo.getId(), subscription.getApiInfo().getId()));
+                        }
                         addSubscriptions(application, uniqueApiList, tokenInfo);
 
                         String[] metaValues = metaData.getMetaValue().split(":");
