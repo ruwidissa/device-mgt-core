@@ -109,10 +109,11 @@ public class Constants {
         public static final String POST = "POST";
         public static final String PUT = "PUT";
         public static final String DELETE = "DELETE";
-        public static final String CLIENT_USER_ID = "clientUserId";
         public static final String EVENT_ID = "eventId";
         public static final String CLIENT_USER_ID_PARAM = "?clientUserId=";
         public static final String TOTAL_PAGES = "totalPages";
+        public static final String GET_APP_DATA_RESPONSE_START = "results";
+        public static final String REMOTE_FILE_NAME = "512x512w.png";
 
         private VPP() {
         }
@@ -181,5 +182,30 @@ public class Constants {
 
         public static final String AUTHORIZATION = "Authorization";
         public static final String AUTHORIZATION_HEADER_VALUE = "Bearer ";
+    }
+
+    public final class ApplicationProperties {
+        private ApplicationProperties() {
+            throw new AssertionError();
+        }
+
+        public static final String NAME = "name";
+        public static final String VERSION = "version";
+        public static final String FREE_SUB_METHOD = "FREE";
+        public static final String PAID_SUB_METHOD = "PAID";
+        public static final String TYPE = "type";;
+        public static final String PACKAGE_NAME = "packageName";
+        public static final String APPLE_STORE_SYNCED_APP_CATEGORY = "APPLE_STORE_SYNCED_APP";
+
+        public static final String RESULTS = "results";
+        public static final String ARTWORK = "artwork";
+        public static final String URL = "url";
+        public static final String DESCRIPTION = "description";
+        public static final String STANDARD = "standard";
+        public static final String OFFERS = "offers";
+        public static final String PRICE = "price";
+        public static final String DISPLAY = "display";
+        public static final String GENRE_NAMES = "genreNames";
+        public static final String PRICE_ZERO = "0.0";
     }
 }

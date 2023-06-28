@@ -22,6 +22,7 @@ public class VppPaginationDTO {
     int currentPageIndex;
     int size;
     String tokenExpirationDate;
+    int nextPageIndex;
     int totalPages;
     String uId;
     String versionId;
@@ -48,6 +49,14 @@ public class VppPaginationDTO {
 
     public void setTokenExpirationDate(String tokenExpirationDate) {
         this.tokenExpirationDate = tokenExpirationDate;
+    }
+
+    public int getNextPageIndex() {
+        return nextPageIndex;
+    }
+
+    public void setNextPageIndex(int nextPageIndex) {
+        this.nextPageIndex = nextPageIndex;
     }
 
     public int getTotalPages() {

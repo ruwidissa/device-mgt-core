@@ -18,16 +18,18 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ItuneAppDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ProxyResponse;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppItuneUserDTO;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.VppItuneUserRequestWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.VppItuneAssetResponseWrapper;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.VppItuneUserRequestWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.VppItuneUserResponseWrapper;
 import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.SPApplicationDAO;
@@ -35,11 +37,13 @@ import io.entgra.device.mgt.core.application.mgt.core.dao.VisibilityDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
+import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
 import io.entgra.device.mgt.core.application.mgt.core.util.VppHttpUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
 
@@ -50,8 +54,14 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     private static final String USER_UPDATE = APP_API + "/users/update";
     private static final String USER_GET = APP_API + "/users";
     private static final String TOKEN = "";
+    private static final String LOOKUP_API = "https://uclient-api.itunes.apple" +
+            ".com/WebObjects/MZStorePlatform.woa/wa/lookup?version=2&id=";
+    private static final String LOOKUP_API_PREFIX =
+            "&p=mdm-lockup&caller=MDM&platform=enterprisestore&cc=us&l=en";
+
 
     private static final Log log = LogFactory.getLog(VppApplicationManagerImpl.class);
+
     private ApplicationDAO applicationDAO;
     private SPApplicationDAO spApplicationDAO;
     private VisibilityDAO visibilityDAO;
@@ -154,6 +164,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
                 Gson gson = new Gson();
                 VppItuneUserResponseWrapper vppUserResponseWrapper = gson.fromJson
                         (proxyResponse.getData(), VppItuneUserResponseWrapper.class);
+                // TODO: to implement later
             }
         } catch (IOException e) {
             String msg = "Error while syncing VPP users with backend";
@@ -161,6 +172,122 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
             throw new ApplicationManagementException(msg, e);
         }
 
+    }
+
+    @Override
+    public void syncAssets(int nextPageIndex) throws ApplicationManagementException {
+        ProxyResponse proxyResponse = null;
+        try {
+            String url = ASSETS;
+            if (nextPageIndex > 0) { // Not the first page
+                url += "?pageIndex=" + nextPageIndex;
+            }
+            proxyResponse = callVPPBackend(url, null, TOKEN, Constants.VPP.GET);
+            if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
+                    HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.TOTAL_PAGES)) {
+                Gson gson = new Gson();
+                VppItuneAssetResponseWrapper vppItuneAssetResponse = gson.fromJson
+                        (proxyResponse.getData(), VppItuneAssetResponseWrapper.class);
+                if (vppItuneAssetResponse.getSize() > 0) {
+                    for (VppAssetDTO vppAssetDTO : vppItuneAssetResponse.getAssets()) {
+                        vppAssetDTO.setTenantId(PrivilegedCarbonContext
+                                .getThreadLocalCarbonContext().getTenantId());
+                        vppAssetDTO.setCreatedTime(String.valueOf(System.currentTimeMillis()));
+                        vppAssetDTO.setLastUpdatedTime(String.valueOf(System.currentTimeMillis()));
+                    }
+
+                    for (VppAssetDTO vppAssetDTO : vppItuneAssetResponse.getAssets()) {
+                        ItuneAppDTO ituneAppDTO = lookupAsset(vppAssetDTO.getAdamId());
+                        ApplicationManagementUtil.persistApp(ituneAppDTO);
+                    }
+
+                    // TODO: Store/update vppItuneAssetResponse.getAssets() in the DB
+
+                    // TODO: END of DAO access
+
+                }
+
+
+                if (vppItuneAssetResponse.getCurrentPageIndex() == (vppItuneAssetResponse
+                        .getTotalPages() - 1)) {
+                    return;
+                } else {
+                    syncAssets(vppItuneAssetResponse.getNextPageIndex());
+                }
+            }
+        } catch (IOException e) {
+            String msg = "Error while syncing VPP users with backend";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+
+
+    }
+
+    private ItuneAppDTO lookupAsset(String packageName) throws ApplicationManagementException {
+        String lookupURL = LOOKUP_API + packageName + LOOKUP_API_PREFIX;
+        try {
+            ProxyResponse proxyResponse = callVPPBackend(lookupURL, null, TOKEN, Constants.VPP.GET);
+            if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
+                    HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.GET_APP_DATA_RESPONSE_START)) {
+                String responseData = proxyResponse.getData();
+                JsonObject responseJson = new JsonParser().parse(responseData)
+                        .getAsJsonObject();
+
+                JsonObject results = responseJson.getAsJsonObject(Constants.ApplicationProperties.RESULTS);
+                JsonObject result = results.getAsJsonObject(packageName);
+
+                String iconUrl = result.getAsJsonObject(Constants.ApplicationProperties.ARTWORK)
+                        .get(Constants.ApplicationProperties.URL).getAsString();
+                int lastSlashIndex = iconUrl.lastIndexOf("/");
+                if (lastSlashIndex != -1) {
+                    iconUrl = iconUrl.substring(0, lastSlashIndex + 1) + Constants.VPP.REMOTE_FILE_NAME;
+                }
+
+                String descriptionStandard = result.getAsJsonObject(Constants.ApplicationProperties.DESCRIPTION)
+                        .get(Constants.ApplicationProperties.STANDARD).getAsString();
+                if (descriptionStandard != null && !descriptionStandard.isEmpty()) {
+                    descriptionStandard = descriptionStandard.substring(0, 199);
+                }
+                String name = result.get(Constants.ApplicationProperties.NAME).getAsString();
+                double price = result.getAsJsonArray(Constants.ApplicationProperties.OFFERS).get(0)
+                        .getAsJsonObject().get(Constants.ApplicationProperties.PRICE).getAsDouble();
+                String version = result.getAsJsonArray(Constants.ApplicationProperties.OFFERS)
+                        .get(0).getAsJsonObject().get(Constants.ApplicationProperties.VERSION)
+                        .getAsJsonObject().get(Constants.ApplicationProperties.DISPLAY).getAsString();
+
+                String[] genreNames = new Gson().fromJson(result.getAsJsonArray(Constants.ApplicationProperties.GENRE_NAMES),
+                        String[].class);
+
+                ItuneAppDTO ituneAppDTO = new ItuneAppDTO();
+                ituneAppDTO.setPackageName(packageName);
+                ituneAppDTO.setVersion(version);
+                ituneAppDTO.setDescription(descriptionStandard);
+                ituneAppDTO.setTitle(name);
+
+                if (Constants.ApplicationProperties.PRICE_ZERO.equalsIgnoreCase(String.valueOf(price))) {
+                    ituneAppDTO.setPaymentMethod(Constants.ApplicationProperties.FREE_SUB_METHOD);
+                } else {
+                    ituneAppDTO.setPaymentMethod(Constants.ApplicationProperties.PAID_SUB_METHOD);
+                }
+                ituneAppDTO.setIconURL(iconUrl);
+                ituneAppDTO.setCategory(genreNames[0]);
+
+                return ituneAppDTO;
+            }
+        } catch (IOException e) {
+            String msg = "Error while looking up the app details";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+        return null;
+    }
+
+
+    public VppAssetDTO getAssetByAppId(String appId) throws ApplicationManagementException {
+        // App ID is the app id of the App management database
+        VppAssetDTO assetDTO = null; // TODO: load from the DB
+        return assetDTO;
     }
 
     @Override
