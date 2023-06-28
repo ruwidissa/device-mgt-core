@@ -17,7 +17,7 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.dao.common;
 
-import io.entgra.device.mgt.core.application.mgt.core.dao.SPApplicationDAO;
+import io.entgra.device.mgt.core.application.mgt.core.dao.*;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.application.spapplication.GenericSPApplicationDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.application.spapplication.OracleSPApplicationDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.application.spapplication.PostgreSQLSPApplicationDAOImpl;
@@ -26,16 +26,14 @@ import io.entgra.device.mgt.core.application.mgt.core.dao.impl.visibility.Generi
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.visibility.OracleVisibilityDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.visibility.PostgreSQLVisibilityDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.visibility.SQLServerVisibilityDAOImpl;
+import io.entgra.device.mgt.core.application.mgt.core.dao.impl.vpp.GenericVppApplicationDAOImpl;
+import io.entgra.device.mgt.core.application.mgt.core.dao.impl.vpp.OracleVppApplicationDAOImpl;
+import io.entgra.device.mgt.core.application.mgt.core.dao.impl.vpp.PostgreSQLVppApplicationDAO;
+import io.entgra.device.mgt.core.application.mgt.core.dao.impl.vpp.SQLServerVppApplicationDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.exception.UnsupportedDatabaseEngineException;
-import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationReleaseDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.LifecycleStateDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.ReviewDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.VisibilityDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.application.PostgreSQLApplicationDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.application.SQLServerApplicationDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.application.release.OracleApplicationReleaseDAOImpl;
@@ -228,6 +226,30 @@ public class ApplicationManagementDAOFactory {
                 return new SQLServerReviewDAOImpl();
             default:
                 throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
+            }
+        }
+        throw new IllegalStateException("Database engine has not initialized properly.");
+    }
+
+
+    /**
+     * To get the instance of VppApplicationImplementation of the particular database engine.
+     * @return specific VppApplicationImplementation
+     */
+    public static VppApplicationDAO getVppApplicationDAO() {
+        if (databaseEngine != null) {
+            switch (databaseEngine) {
+                case Constants.DataBaseTypes.DB_TYPE_H2:
+                case Constants.DataBaseTypes.DB_TYPE_MYSQL:
+                    return new GenericVppApplicationDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                    return new PostgreSQLVppApplicationDAO();
+                case Constants.DataBaseTypes.DB_TYPE_ORACLE:
+                    return new OracleVppApplicationDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerVppApplicationDAOImpl();
+                default:
+                    throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
             }
         }
         throw new IllegalStateException("Database engine has not initialized properly.");
