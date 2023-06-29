@@ -32,6 +32,7 @@ import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDT
 import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ReviewDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 
 import java.sql.PreparedStatement;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -342,6 +344,42 @@ public class DAOUtil {
             subscriptionDTOS.add(subscription);
         }
         return subscriptionDTOS;
+    }
+
+    public static VppUserDTO loadVppUser(ResultSet rs) throws SQLException, UnexpectedServerErrorException {
+        List<VppUserDTO> vppUserDTOS = loadVppUsers(rs);
+        if (vppUserDTOS.isEmpty()) {
+            return null;
+        }
+        if (vppUserDTOS.size() > 1) {
+            String msg = "Internal server error. Found more than one vpp user for requested emmUsername";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+        return vppUserDTOS.get(0);
+    }
+
+    public static List<VppUserDTO> loadVppUsers (ResultSet rs) throws SQLException {
+        List<VppUserDTO> vppUserDTOS = new ArrayList<>();
+        while (rs.next()) {
+            VppUserDTO vppUserDTO = new VppUserDTO();
+            vppUserDTO.setId(rs.getInt("ID"));
+            vppUserDTO.setClientUserId(rs.getString("CLIENT_USER_ID"));
+            vppUserDTO.setTenantId(rs.getInt("TENANT_ID"));
+            vppUserDTO.setEmail(rs.getString("EMAIL"));
+            vppUserDTO.setInviteCode(rs.getString("INVITE_CODE"));
+            vppUserDTO.setStatus(rs.getString("STATUS"));
+            vppUserDTO.setManagedId(rs.getString("MANAGED_ID"));
+            vppUserDTO.setTmpPassword(rs.getString("TEMP_PASSWORD"));
+            if (rs.getLong("CREATED_TIME") != 0) {
+                vppUserDTO.setCreatedTime(new Date(rs.getLong(("CREATED_TIME")) * 1000).toString());
+            }
+            if (rs.getLong("LAST_UPDATED_TIME") != 0) {
+                vppUserDTO.setLastUpdatedTime(new Date(rs.getLong(("LAST_UPDATED_TIME")) * 1000).toString());
+            }
+            vppUserDTOS.add(vppUserDTO);
+        }
+        return vppUserDTOS;
     }
 
     /**
