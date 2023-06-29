@@ -19,6 +19,7 @@
 package io.entgra.device.mgt.core.application.mgt.common.services;
 
 import io.entgra.device.mgt.core.application.mgt.common.dto.ProxyResponse;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 
@@ -33,6 +34,10 @@ public interface VPPApplicationManager {
     void updateUser(VppUserDTO userDTO) throws ApplicationManagementException;
 
     void syncUsers(String clientId) throws ApplicationManagementException;
+
+    void syncAssets(int nextPageIndex) throws ApplicationManagementException;
+
+    VppAssetDTO getAssetByAppId(String appId) throws ApplicationManagementException;
 
     ProxyResponse callVPPBackend(String url, String payload, String accessToken, String method) throws IOException;
 }
