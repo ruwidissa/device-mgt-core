@@ -37,7 +37,7 @@ public interface VPPApplicationManager {
 
     void syncAssets(int nextPageIndex) throws ApplicationManagementException;
 
-    VppAssetDTO getAssetByAppId(String appId) throws ApplicationManagementException;
+    VppAssetDTO getAssetByAppId(int appId) throws ApplicationManagementException;
 
     ProxyResponse callVPPBackend(String url, String payload, String accessToken, String method) throws IOException;
 }

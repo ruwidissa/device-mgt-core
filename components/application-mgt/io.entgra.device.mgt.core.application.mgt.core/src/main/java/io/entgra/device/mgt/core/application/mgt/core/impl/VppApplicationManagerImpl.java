@@ -21,12 +21,14 @@ package io.entgra.device.mgt.core.application.mgt.core.impl;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.entgra.device.mgt.core.application.mgt.common.DepConfig;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ItuneAppDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ProxyResponse;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppItuneUserDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.TransactionManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.response.Application;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.VppItuneUserRequestWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
@@ -46,12 +48,19 @@ import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagement
 import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
 import io.entgra.device.mgt.core.application.mgt.core.util.VppHttpUtil;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
+import java.util.List;
 
 public class VppApplicationManagerImpl implements VPPApplicationManager {
     private static final String APP_API = "https://vpp.itunes.apple.com/mdm/v2";
@@ -245,6 +254,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     @Override
     public void syncAssets(int nextPageIndex) throws ApplicationManagementException {
         ProxyResponse proxyResponse = null;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             String url = ASSETS;
             if (nextPageIndex > 0) { // Not the first page
@@ -267,14 +277,65 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
                     for (VppAssetDTO vppAssetDTO : vppItuneAssetResponse.getAssets()) {
                         ItuneAppDTO ituneAppDTO = lookupAsset(vppAssetDTO.getAdamId());
                         ApplicationManagementUtil.persistApp(ituneAppDTO);
+                        List<Application> applications =  ApplicationManagementUtil.getAppDetails(vppAssetDTO.getAdamId());
+                        for (Application application :applications) {
+                            VppAssetDTO vppAssetDTOs = getAssetByAppId(application.getId());
+                            if (vppAssetDTOs == null) {
+                                vppAssetDTOs = new VppAssetDTO();
+                                vppAssetDTOs.setAppId(application.getId());
+                                try {
+                                    ConnectionManagerUtil.beginDBTransaction();
+                                    if (vppApplicationDAO.addAsset(vppAssetDTOs, tenantId) != -1) {
+                                        ConnectionManagerUtil.commitDBTransaction();
+                                    }
+                                    ConnectionManagerUtil.rollbackDBTransaction();
+                                } catch (ApplicationManagementDAOException e) {
+                                    ConnectionManagerUtil.rollbackDBTransaction();
+                                    String msg = "Error occurred while adding the Asset.";
+                                    log.error(msg, e);
+                                    throw new ApplicationManagementException(msg, e);
+                                } catch (TransactionManagementException e) {
+                                    String msg = "Error occurred while executing database transaction for adding Asset.";
+                                    log.error(msg, e);
+                                    throw new ApplicationManagementException(msg, e);
+                                } catch (DBConnectionException e) {
+                                    String msg = "Error occurred while retrieving the database connection for adding Asset.";
+                                    log.error(msg, e);
+                                    throw new ApplicationManagementException(msg, e);
+                                } finally {
+                                    ConnectionManagerUtil.closeDBConnection();
+                                }
+                            } else {
+                                vppAssetDTOs.setAppId(application.getId());
+                                try {
+                                    ConnectionManagerUtil.beginDBTransaction();
+                                    if (vppApplicationDAO.updateAsset(vppAssetDTOs, tenantId) == null) {
+                                        ConnectionManagerUtil.rollbackDBTransaction();
+                                        String msg = "Unable to update the asset: " +vppAssetDTOs.getAdamId();
+                                        log.error(msg);
+                                        throw new ApplicationManagementException(msg);
+                                    }
+                                    ConnectionManagerUtil.commitDBTransaction();
+                                } catch (ApplicationManagementDAOException e) {
+                                    ConnectionManagerUtil.rollbackDBTransaction();
+                                    String msg = "Error occurred while updating the Asset.";
+                                    log.error(msg, e);
+                                    throw new ApplicationManagementException(msg, e);
+                                } catch (TransactionManagementException e) {
+                                    String msg = "Error occurred while executing database transaction for Asset update.";
+                                    log.error(msg, e);
+                                    throw new ApplicationManagementException(msg, e);
+                                } catch (DBConnectionException e) {
+                                    String msg = "Error occurred while retrieving the database connection for Asset update.";
+                                    log.error(msg, e);
+                                    throw new ApplicationManagementException(msg, e);
+                                } finally {
+                                    ConnectionManagerUtil.closeDBConnection();
+                                }
+                            }
+                        }
                     }
-
-                    // TODO: Store/update vppItuneAssetResponse.getAssets() in the DB
-
-                    // TODO: END of DAO access
-
                 }
-
 
                 if (vppItuneAssetResponse.getCurrentPageIndex() == (vppItuneAssetResponse
                         .getTotalPages() - 1)) {
@@ -288,8 +349,6 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
-
-
     }
 
     private ItuneAppDTO lookupAsset(String packageName) throws ApplicationManagementException {
@@ -352,10 +411,22 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     }
 
 
-    public VppAssetDTO getAssetByAppId(String appId) throws ApplicationManagementException {
-        // App ID is the app id of the App management database
-        VppAssetDTO assetDTO = null; // TODO: load from the DB
-        return assetDTO;
+    public VppAssetDTO getAssetByAppId(int appId) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return vppApplicationDAO.getAssetByAppId(appId, tenantId);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurs while getting asset related to app with app id " + appId + ".";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }  catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting asset data related to  app with app id " + appId + ".";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
     }
 
     @Override
@@ -366,4 +437,25 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
         return VppHttpUtil.execute(url, payload, accessToken, method);
     }
 
+    public String getVppToken() throws ApplicationManagementException {
+        String token = "";
+        MetadataManagementService meta = DeviceManagementDataHolder
+                .getInstance().getMetadataManagementService();
+        Metadata metadata = null;
+        try {
+            metadata = meta.retrieveMetadata(DeviceManagementConstants.DEP_META_KEY);
+            if (metadata != null) {
+
+                Gson g = new Gson();
+                DepConfig depConfigs = g.fromJson(metadata.getMetaValue(), DepConfig.class);
+                token =  depConfigs.getAccessToken();
+                return token;
+            }
+        }catch (MetadataManagementException e) {
+            String msg = "Error when retrieving metadata of vpp feature";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+        return token;
+    }
 }
