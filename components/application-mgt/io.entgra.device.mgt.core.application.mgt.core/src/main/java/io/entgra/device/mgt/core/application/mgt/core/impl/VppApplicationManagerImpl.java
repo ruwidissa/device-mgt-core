@@ -24,13 +24,15 @@ import com.google.gson.JsonParser;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ItuneAppDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ProxyResponse;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssociationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppItuneAssetDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppItuneUserDTO;
-import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
-import io.entgra.device.mgt.core.application.mgt.common.exception.TransactionManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.wrapper.VppItuneUserRequestWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.TransactionManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.VppAssociateRequestWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.VppItuneAssetResponseWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.VppItuneUserRequestWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.VppItuneUserResponseWrapper;
@@ -52,6 +54,8 @@ import org.apache.http.HttpStatus;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VppApplicationManagerImpl implements VPPApplicationManager {
     private static final String APP_API = "https://vpp.itunes.apple.com/mdm/v2";
@@ -59,6 +63,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     private static final String USER_CREATE = APP_API + "/users/create";
     private static final String USER_UPDATE = APP_API + "/users/update";
     private static final String USER_GET = APP_API + "/users";
+    private static final String ASSIGNMENTS_POST = APP_API + "/assets/associate";
     private static final String TOKEN = "";
     private static final String LOOKUP_API = "https://uclient-api.itunes.apple" +
             ".com/WebObjects/MZStorePlatform.woa/wa/lookup?version=2&id=";
@@ -267,6 +272,8 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
                     for (VppAssetDTO vppAssetDTO : vppItuneAssetResponse.getAssets()) {
                         ItuneAppDTO ituneAppDTO = lookupAsset(vppAssetDTO.getAdamId());
                         ApplicationManagementUtil.persistApp(ituneAppDTO);
+
+
                     }
 
                     // TODO: Store/update vppItuneAssetResponse.getAssets() in the DB
@@ -364,6 +371,52 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
                                         String accessToken,
                                         String method) throws IOException {
         return VppHttpUtil.execute(url, payload, accessToken, method);
+    }
+
+    public boolean addAssociation(VppAssetDTO asset, List<VppUserDTO> vppUsers) throws
+            ApplicationManagementException {
+
+        List<VppAssociationDTO> associations = new ArrayList<>(); // To save to UEM DBs
+        List<String> clientUserIds = new ArrayList<>(); // Need this to send to vpp backend.
+        if (asset != null) {
+            for (VppUserDTO vppUserDTO : vppUsers) {
+                VppAssociationDTO associationDTO = VppHttpUtil.getAssociation(vppUserDTO, asset);
+                associations.add(associationDTO);
+                clientUserIds.add(vppUserDTO.getClientUserId());
+            }
+
+            if (associations.size() > 0) {
+                //TODO: Add or Update associations
+                try {
+
+                    // Create the VPP backend payload
+                    List<VppItuneAssetDTO> assets = new ArrayList<>();
+                    VppItuneAssetDTO assetDTO = new VppItuneAssetDTO();
+                    assetDTO.setAdamId(asset.getAdamId());
+                    assetDTO.setPricingParam(asset.getPricingParam());
+                    assets.add(assetDTO);
+
+                    VppAssociateRequestWrapper vppAssociate = new VppAssociateRequestWrapper();
+                    vppAssociate.setAssets(assets);
+                    vppAssociate.setClientUserIds(clientUserIds);
+
+                    Gson gson = new Gson();
+                    String payload = gson.toJson(vppAssociate);
+
+                    ProxyResponse proxyResponse = callVPPBackend(ASSIGNMENTS_POST, payload, TOKEN,
+                            Constants.VPP.POST);
+                    return true;
+
+                } catch (IOException e) {
+                    String msg = "Error while adding associations";
+                    log.error(msg, e);
+                    throw new ApplicationManagementException(msg, e);
+                }
+            }
+
+        }
+
+        return false;
     }
 
 }

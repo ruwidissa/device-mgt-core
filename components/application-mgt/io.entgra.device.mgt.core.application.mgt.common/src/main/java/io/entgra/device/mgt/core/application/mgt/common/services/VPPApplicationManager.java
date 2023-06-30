@@ -24,6 +24,7 @@ import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface VPPApplicationManager {
 
@@ -40,4 +41,7 @@ public interface VPPApplicationManager {
     VppAssetDTO getAssetByAppId(String appId) throws ApplicationManagementException;
 
     ProxyResponse callVPPBackend(String url, String payload, String accessToken, String method) throws IOException;
+
+    boolean addAssociation(VppAssetDTO asset, List<VppUserDTO> vppUsers) throws
+            ApplicationManagementException;
 }
