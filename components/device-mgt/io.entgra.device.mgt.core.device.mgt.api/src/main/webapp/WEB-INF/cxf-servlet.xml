@@ -43,7 +43,6 @@
             <ref bean="groupManagementAdminService"/>
             <ref bean="applicationManagementAdminService"/>
             <ref bean="deviceTypeManagementAdminService"/>
-            <ref bean="deviceAnalyticsArtifactUploaderAdminService"/>
 			<ref bean="deviceEventManagementService"/>
 			<ref bean="deviceAgentService"/>
             <ref bean="swaggerResource"/>
