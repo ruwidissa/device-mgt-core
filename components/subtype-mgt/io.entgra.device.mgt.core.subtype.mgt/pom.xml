@@ -53,7 +53,7 @@
                         <Bundle-Description>Subtype Management Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.subtype.mgt.internal</Private-Package>
                         <Import-Package>
-                            com.fasterxml.jackson.core;version="[2.10,3)",
+                            com.fasterxml.jackson.core;version="[2.14,3)",
                             com.google.common.cache;version="[31.0,32)",
                             io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
                             io.entgra.device.mgt.core.device.mgt.core.config;version="[5.0,6)",
@@ -331,7 +331,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>
+            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <scope>provided</scope>
         </dependency>
