@@ -101,9 +101,10 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
             request.setOwner(owner);
             request.setStatus(status);
             request.setDepth(depth);
+            boolean isAdmin = DEFAULT_ADMIN_ROLE.equals(currentUser);
 
             PaginationResult deviceGroupsResult;
-            if (StringUtils.isBlank(currentUser)) {
+            if (StringUtils.isBlank(currentUser) || isAdmin) {
                 deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
                         .getGroupsWithHierarchy(null, request, requireGroupProps);
             } else {
