@@ -44,6 +44,7 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.GroupMan
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.apache.commons.lang.StringUtils;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -106,13 +107,22 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
             @DefaultValue("5") @QueryParam("limit") int limit) {
         try {
             RequestValidationUtil.validatePaginationParameters(offset, limit);
+            String currentUser = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
             GroupPaginationRequest request = new GroupPaginationRequest(offset, limit);
             request.setGroupName(name);
             request.setOwner(owner);
             request.setStatus(status);
             request.setDepth(depth);
-            PaginationResult deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
-                    .getGroupsWithHierarchy(null, request, requireGroupProps);
+
+            PaginationResult deviceGroupsResult;
+            if (StringUtils.isBlank(currentUser)) {
+                deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                        .getGroupsWithHierarchy(null, request, requireGroupProps);
+            } else {
+                deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                        .getGroupsWithHierarchy(currentUser, request, requireGroupProps);
+            }
+
             DeviceGroupList deviceGroupList = new DeviceGroupList();
             deviceGroupList.setList(deviceGroupsResult.getData());
             deviceGroupList.setCount(deviceGroupsResult.getRecordsTotal());
