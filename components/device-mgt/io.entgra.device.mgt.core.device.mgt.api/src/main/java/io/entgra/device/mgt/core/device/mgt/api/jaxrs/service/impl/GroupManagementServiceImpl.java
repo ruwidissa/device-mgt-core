@@ -29,6 +29,7 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistExc
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
@@ -58,6 +59,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.*;
 import javax.naming.InitialContext;
@@ -70,6 +73,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GroupManagementServiceImpl implements GroupManagementService {
@@ -123,8 +127,18 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             request.setGroupName(name);
             request.setOwner(owner);
             request.setDepth(depth);
-            PaginationResult deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
-                    .getGroupsWithHierarchy(currentUser, request, requireGroupProps);
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            UserRealm realmService = DeviceMgtAPIUtils.getRealmService().getTenantUserRealm(tenantId);
+            String[] roles = realmService.getUserStoreManager().getRoleListOfUser(currentUser);
+            boolean hasAdminRole = Arrays.asList(roles).contains(DEFAULT_ADMIN_ROLE);
+            PaginationResult deviceGroupsResult;
+            if (hasAdminRole) {
+                deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                        .getGroupsWithHierarchy(null, request, requireGroupProps);
+            } else{
+                deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                        .getGroupsWithHierarchy(currentUser, request, requireGroupProps);
+            }
             DeviceGroupList deviceGroupList = new DeviceGroupList();
             deviceGroupList.setList(deviceGroupsResult.getData());
             deviceGroupList.setCount(deviceGroupsResult.getRecordsTotal());
@@ -133,6 +147,10 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             String error = "Error occurred while retrieving groups with hierarchy.";
             log.error(error, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while getting user realm.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
