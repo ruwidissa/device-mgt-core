@@ -472,6 +472,7 @@ public class OperationManagerImpl implements OperationManager {
                     int failAttempts = 0;
                     while (true) {
                         try {
+                            OperationManagementDAOFactory.beginTransaction();
                             operationMappingDAO.updateOperationMapping(operation.getId(), device.getEnrolmentInfo().getId(),
                                     io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.PushNotificationStatus.SCHEDULED);
                             OperationManagementDAOFactory.commitTransaction();
@@ -494,6 +495,11 @@ public class OperationManagerImpl implements OperationManager {
                             } catch (InterruptedException ignore) {
                                 break;
                             }
+                        } catch (TransactionManagementException ex) {
+                            log.error("Error occurred while initiating the transaction", ex);
+                            break;
+                        } finally {
+                            OperationManagementDAOFactory.closeConnection();
                         }
                     }
                 } catch (Exception e) {
