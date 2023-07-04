@@ -73,6 +73,7 @@ public class Constants {
 
     public static final String GOOGLE_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=";
     public static final String APPLE_STORE_URL = "https://itunes.apple.com/country/app/app-name/id";
+    public static final String GOOGLE_PLAY_SYNCED_APP = "GooglePlaySyncedApp";
 
     // Subscription task related constants
     public static final String SUBSCRIBERS = "SUBSCRIBERS";
@@ -207,5 +208,7 @@ public class Constants {
         public static final String DISPLAY = "display";
         public static final String GENRE_NAMES = "genreNames";
         public static final String PRICE_ZERO = "0.0";
+        public static final String ASSOCIATION_DEVICE = "ASSOCIATION_DEVICE";
+        public static final String ASSOCIATION_USER = "ASSOCIATION_USER";
     }
 }

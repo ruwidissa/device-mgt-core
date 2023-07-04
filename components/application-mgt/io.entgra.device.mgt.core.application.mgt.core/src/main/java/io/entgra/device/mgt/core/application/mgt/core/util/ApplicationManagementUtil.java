@@ -32,6 +32,7 @@ import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStor
 import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppReleaseWrapper;
@@ -44,6 +45,7 @@ import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppWrapper;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.config.Extension;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.application.mgt.core.impl.VppApplicationManagerImpl;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
@@ -200,6 +202,11 @@ public class ApplicationManagementUtil {
         ConfigurationManager configurationManager = ConfigurationManager.getInstance();
         Extension extension = configurationManager.getExtension(Extension.Name.LifecycleStateManager);
         return getInstance(extension, LifecycleStateManager.class);
+    }
+
+    public static VPPApplicationManager getVPPManagerInstance() {
+        // TODO: implement as an extension
+        return new VppApplicationManagerImpl();
     }
 
     /**

@@ -17,26 +17,25 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.internal;
 
-import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.core.impl.AppmDataHandlerImpl;
-import io.entgra.device.mgt.core.application.mgt.core.impl.VppApplicationManagerImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.AppmDataHandler;
 import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
+import io.entgra.device.mgt.core.application.mgt.core.impl.AppmDataHandlerImpl;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -118,9 +117,9 @@ public class ApplicationManagementServiceComponent {
             DataHolder.getInstance().setConfigManager(configManager);
             bundleContext.registerService(AppmDataHandler.class.getName(), configManager, null);
 
-
             // TODO: Get the new instance from extension like others
-            VppApplicationManagerImpl vppApplicationManager = new VppApplicationManagerImpl();
+            VPPApplicationManager vppApplicationManager = ApplicationManagementUtil
+                    .getVPPManagerInstance();
             DataHolder.getInstance().setVppApplicationManager(vppApplicationManager);
             bundleContext.registerService(VPPApplicationManager.class.getName(), vppApplicationManager, null);
 

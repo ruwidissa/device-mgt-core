@@ -20,6 +20,9 @@ package io.entgra.device.mgt.core.application.mgt.core.util;
 
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ProxyResponse;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssociationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +42,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -280,6 +284,22 @@ public class VppHttpUtil {
      */
     public static CloseableHttpClient getHttpClient() {
         return HttpClients.custom().setMaxConnTotal(1).setMaxConnPerRoute(1).build();
+    }
+
+    public static VppAssociationDTO getAssociation(VppUserDTO user, VppAssetDTO asset) {
+        VppAssociationDTO associationDTO = new VppAssociationDTO();
+        associationDTO.setAdamId(asset.getAdamId());
+        associationDTO.setClientUserId(user.getClientUserId());
+        associationDTO.setPricingParam(asset.getPricingParam());
+        associationDTO.setAssociationType(Constants.ApplicationProperties.ASSOCIATION_USER);
+
+        associationDTO.setAssetId(asset.getId());
+        associationDTO.setClientId(user.getId());
+        associationDTO.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                .getTenantId(true));
+        associationDTO.setCreatedTime(String.valueOf(System.currentTimeMillis()));
+        associationDTO.setLastUpdatedTime(String.valueOf(System.currentTimeMillis()));
+        return associationDTO;
     }
 
 }
