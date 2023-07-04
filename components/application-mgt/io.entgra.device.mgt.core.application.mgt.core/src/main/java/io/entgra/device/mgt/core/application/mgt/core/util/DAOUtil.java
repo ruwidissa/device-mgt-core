@@ -19,20 +19,14 @@ package io.entgra.device.mgt.core.application.mgt.core.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.entgra.device.mgt.core.application.mgt.common.dto.IdentityServerDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.*;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ReviewDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 
 import java.sql.PreparedStatement;
@@ -380,6 +374,52 @@ public class DAOUtil {
             vppUserDTOS.add(vppUserDTO);
         }
         return vppUserDTOS;
+    }
+
+    public static VppAssetDTO loadAsset(ResultSet rs) throws SQLException, UnexpectedServerErrorException {
+        List<VppAssetDTO> vppAssetDTOS = loadAssets(rs);
+        if (vppAssetDTOS.isEmpty()) {
+            return null;
+        }
+        if (vppAssetDTOS.size() > 1) {
+            String msg = "Internal server error. Found more than one asset for given app id.";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+        return vppAssetDTOS.get(0);
+    }
+
+    public static List<VppAssetDTO> loadAssets (ResultSet rs) throws SQLException {
+        List<VppAssetDTO> vppAssetDTOS = new ArrayList<>();
+        while (rs.next()) {
+            VppAssetDTO vppAssetDTO = new VppAssetDTO();
+            vppAssetDTO.setId(rs.getInt("ID"));
+            vppAssetDTO.setAppId(rs.getInt("APP_ID"));
+            vppAssetDTO.setTenantId(rs.getInt("TENANT_ID"));
+            if (rs.getLong("CREATED_TIME") != 0) {
+                vppAssetDTO.setCreatedTime(new Date(rs.getLong(("CREATED_TIME")) * 1000).toString());
+            }
+            if (rs.getLong("LAST_UPDATED_TIME") != 0) {
+                vppAssetDTO.setLastUpdatedTime(new Date(rs.getLong(("LAST_UPDATED_TIME")) * 1000).toString());
+            }
+            vppAssetDTO.setAdamId(rs.getString("ADAM_ID"));
+            vppAssetDTO.setAssignedCount(rs.getString("ASSIGNED_COUNT"));
+            vppAssetDTO.setDeviceAssignable(rs.getString("DEVICE_ASSIGNABLE"));
+            vppAssetDTO.setPricingParam(rs.getString("PRICING_PARAMS"));
+            vppAssetDTO.setProductType(rs.getString("PRODUCT_TYPE"));
+            vppAssetDTO.setRetiredCount(rs.getString("RETIRED_COUNT"));
+            vppAssetDTO.setRevocable(rs.getString("REVOCABLE"));
+//            String jsonString = rs.getString("SUPPORTED_PLATFORMS");
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            try {
+//                List<String> platformList = objectMapper.readValue(jsonString, new TypeReference<List<String>>() {});
+//                vppAssetDTO.setSupportedPlatforms(platformList);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+            vppAssetDTOS.add(vppAssetDTO);
+        }
+        return vppAssetDTOS;
     }
 
     /**

@@ -170,11 +170,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                                           applicationSubscriptionInfo) throws ApplicationManagementException {
         try {
             // Only for iOS devices
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
             if (DeviceTypes.IOS.toString().equalsIgnoreCase(APIUtil.getDeviceTypeData(applicationDTO
                     .getDeviceTypeId()).getName())) {
                 // TODO: replace getAssetByAppId with the correct one in DAO
                 // Check if the app trying to subscribe is a VPP asset.
-                VppAssetDTO storedAsset = vppApplicationDAO.getAssetByAppId(applicationDTO.getId());
+                VppAssetDTO storedAsset = vppApplicationDAO.getAssetByAppId(applicationDTO.getId(), tenantId);
                 if (storedAsset != null) { // This is a VPP asset
                     List<VppUserDTO> users = new ArrayList<>();
                     List<Device> devices = applicationSubscriptionInfo.getDevices();// get

@@ -527,4 +527,11 @@ public class ApplicationManagementUtil {
             }
         }
     }
+
+    public static List<Application> getAppDetails(String adamId) throws ApplicationManagementException {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        List<String> packageNamesOfApps = new ArrayList<>();
+        packageNamesOfApps.add(adamId);
+        return applicationManager.getApplications(packageNamesOfApps);
+    }
 }
