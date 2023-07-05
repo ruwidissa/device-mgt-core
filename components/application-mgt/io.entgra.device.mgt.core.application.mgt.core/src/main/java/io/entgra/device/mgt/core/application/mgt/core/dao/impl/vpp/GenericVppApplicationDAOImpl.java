@@ -458,7 +458,6 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
                 stmt.setString(5, vppAssociationDTO.getPricingParam());
                 stmt.setInt(6, vppAssociationDTO.getId());
                 stmt.setLong(7, tenantId);
-                stmt.executeUpdate();
                 if (stmt.executeUpdate() == 1) {
                     return vppAssociationDTO;
                 }

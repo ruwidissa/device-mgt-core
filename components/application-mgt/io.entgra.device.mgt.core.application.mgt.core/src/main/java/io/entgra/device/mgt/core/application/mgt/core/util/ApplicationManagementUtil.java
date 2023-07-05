@@ -210,14 +210,6 @@ public class ApplicationManagementUtil {
         // TODO: implement as an extension
         return new VppApplicationManagerImpl();
     }
-
-    public static MetadataManagementService getDeviceManagerInstance()  throws InvalidConfigurationException {
-        ConfigurationManager configurationManager = ConfigurationManager.getInstance();
-        Extension extension = configurationManager.getExtension(Extension.Name.MetadataManagementService);
-        return getInstance(extension, MetadataManagementService.class);
-    }
-
-
     /**
      * This is useful to delete application artifacts if any error occurred while creating release/application
      * after uploading the artifacts

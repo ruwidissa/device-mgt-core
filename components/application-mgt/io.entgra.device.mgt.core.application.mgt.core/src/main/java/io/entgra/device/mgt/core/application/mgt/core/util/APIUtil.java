@@ -27,7 +27,6 @@ import io.entgra.device.mgt.core.application.mgt.core.serviceprovider.ISServiceP
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -117,23 +116,19 @@ public class APIUtil {
     }
 
     public static MetadataManagementService getMetadataManager() {
-        try {
-            if (metadataManagementService == null) {
-                synchronized (APIUtil.class) {
+        if (metadataManagementService == null) {
+            synchronized (APIUtil.class) {
+                if (metadataManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    metadataManagementService =
+                            (MetadataManagementService) ctx.getOSGiService(MetadataManagementService.class, null);
                     if (metadataManagementService == null) {
-                        metadataManagementService = ApplicationManagementUtil.getDeviceManagerInstance();
-                        if (metadataManagementService == null) {
-                            String msg = "MetadataManagement Service service has not initialized.";
-                            log.error(msg);
-                            throw new IllegalStateException(msg);
-                        }
+                        String msg = "MetadataManagement Manager service has not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
                     }
                 }
             }
-        } catch (Exception e) {
-            String msg = "Error occurred while getting the vpp manager";
-            log.error(msg);
-            throw new IllegalStateException(msg);
         }
         return metadataManagementService;
     }

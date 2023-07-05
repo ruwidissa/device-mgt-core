@@ -88,8 +88,7 @@ public class Extension {
         SubscriptionManager,
         VisibilityManager,
         ApplicationStorageManager,
-        PlatformStorageManager,
-        MetadataManagementService
+        PlatformStorageManager
     }
 }
 
