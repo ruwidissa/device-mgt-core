@@ -187,8 +187,8 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (GroupAlreadyExistException e) {
-            String msg = "Group already exists with name : " + group.getName() + ".";
-            log.warn(msg);
+            String msg = "Group already exists with name : " + group.getName() + " Try with another group name.";
+            log.error(msg, e);
             return Response.status(Response.Status.CONFLICT).entity(msg).build();
         } catch (RoleDoesNotExistException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();

@@ -148,7 +148,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         }
     }
 
-    public void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole, String[] defaultPermissions) throws GroupManagementException {
+    public void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole, String[] defaultPermissions) throws GroupAlreadyExistException, GroupManagementException {
         if (groups == null) {
             String msg = "Received incomplete data for createGroup";
             log.error(msg);
@@ -181,7 +181,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 }
                 GroupManagementDAOFactory.commitTransaction();
             } else {
-                throw new GroupManagementException("Group exist with name " + groups.getName());
+                throw new GroupAlreadyExistException("Group already exists with name : " + groups.getName() + " Try with another group name.");
             }
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();

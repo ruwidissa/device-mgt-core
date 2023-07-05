@@ -57,7 +57,7 @@ public interface GroupManagementProviderService {
      * @param defaultPermissions of the default role
      * @throws GroupManagementException
      */
-    void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole, String[] defaultPermissions) throws GroupManagementException, GroupAlreadyExistException, RoleDoesNotExistException;
+    void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole, String[] defaultPermissions) throws  GroupAlreadyExistException,GroupManagementException, RoleDoesNotExistException;
 
     /**
      * Update existing device group.
