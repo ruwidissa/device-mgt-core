@@ -19,6 +19,7 @@
 package io.entgra.device.mgt.core.application.mgt.core.dao;
 
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssociationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
 
@@ -36,4 +37,10 @@ public interface VppApplicationDAO {
     int addAsset(VppAssetDTO vppAssetDTO, int tenantId) throws ApplicationManagementDAOException;
 
     VppAssetDTO updateAsset(VppAssetDTO vppAssetDTO, int tenantId) throws ApplicationManagementDAOException;
+
+    VppAssociationDTO getAssociation(int assetId, int userId, int tenantId) throws ApplicationManagementDAOException;
+
+    int addAssociation(VppAssociationDTO vppAssociationDTO, int tenantId) throws ApplicationManagementDAOException;
+
+    VppAssociationDTO updateAssociation(VppAssociationDTO vppAssociationDTO, int tenantId) throws ApplicationManagementDAOException;
 }

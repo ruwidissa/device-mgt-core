@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.application.mgt.common.services;
 
 import io.entgra.device.mgt.core.application.mgt.common.dto.ProxyResponse;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssociationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 
@@ -43,5 +44,8 @@ public interface VPPApplicationManager {
     ProxyResponse callVPPBackend(String url, String payload, String accessToken, String method) throws IOException;
 
     boolean addAssociation(VppAssetDTO asset, List<VppUserDTO> vppUsers) throws
+            ApplicationManagementException;
+
+    VppAssociationDTO getAssociation(int assetId, int userId) throws
             ApplicationManagementException;
 }
