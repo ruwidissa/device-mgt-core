@@ -362,9 +362,18 @@ public class DAOUtil {
             vppUserDTO.setTenantId(rs.getInt("TENANT_ID"));
             vppUserDTO.setEmail(rs.getString("EMAIL"));
             vppUserDTO.setInviteCode(rs.getString("INVITE_CODE"));
-            vppUserDTO.setStatus(rs.getString("STATUS"));
-            vppUserDTO.setManagedId(rs.getString("MANAGED_ID"));
-            vppUserDTO.setTmpPassword(rs.getString("TEMP_PASSWORD"));
+            if (columnExist(rs,"STATUS")) {
+                vppUserDTO.setStatus(rs.getString("STATUS"));
+            }
+            if (columnExist(rs,"MANAGED_ID")) {
+                vppUserDTO.setManagedId(rs.getString("MANAGED_ID"));
+            }
+            if (columnExist(rs,"TEMP_PASSWORD")) {
+                vppUserDTO.setTmpPassword(rs.getString("TEMP_PASSWORD"));
+            }
+            if (columnExist(rs,"DM_USERNAME")) {
+                vppUserDTO.setDmUsername(rs.getString("DM_USERNAME"));
+            }
             if (rs.getLong("CREATED_TIME") != 0) {
                 vppUserDTO.setCreatedTime(new Date(rs.getLong(("CREATED_TIME")) * 1000).toString());
             }
@@ -374,6 +383,16 @@ public class DAOUtil {
             vppUserDTOS.add(vppUserDTO);
         }
         return vppUserDTOS;
+    }
+
+    private static boolean columnExist(ResultSet rs, String column){
+        try{
+            rs.findColumn(column);
+            return true;
+        } catch (SQLException sqlex){
+        }
+
+        return false;
     }
 
     public static VppAssetDTO loadAsset(ResultSet rs) throws SQLException, UnexpectedServerErrorException {

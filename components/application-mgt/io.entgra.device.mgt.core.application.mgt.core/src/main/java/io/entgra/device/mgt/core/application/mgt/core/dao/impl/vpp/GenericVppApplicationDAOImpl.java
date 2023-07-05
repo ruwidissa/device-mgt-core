@@ -90,34 +90,61 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
     public VppUserDTO updateVppUser(VppUserDTO userDTO, int tenantId)
             throws ApplicationManagementDAOException {
 
-        String sql = "UPDATE "
-                + "AP_VPP_USER "
-                + "SET "
-                + "CLIENT_USER_ID = ?,"
-                + "DM_USERNAME = ?, "
-                + "TENANT_ID = ?, "
-                + "EMAIL = ?, "
-                + "INVITE_CODE = ?, "
-                + "STATUS = ?, "
-                + "LAST_UPDATED_TIME = ?, "
-                + "MANAGED_ID = ?, "
-                + "TEMP_PASSWORD = ? "
-                + "WHERE ID = ?";
+        String sql = "UPDATE AP_VPP_USER SET ";
+        if (userDTO.getClientUserId() != null && !userDTO.getClientUserId().isEmpty()) {
+            sql += "CLIENT_USER_ID = ?,";
+        }
+        if (userDTO.getDmUsername() != null && !userDTO.getDmUsername().isEmpty()) {
+            sql += "DM_USERNAME = ?,";
+        }
+        if (userDTO.getEmail() != null && !userDTO.getEmail().isEmpty()) {
+            sql += "EMAIL = ?,";
+        }
+        if (userDTO.getInviteCode() != null && !userDTO.getInviteCode().isEmpty()) {
+            sql += "INVITE_CODE = ?,";
+        }
+        if (userDTO.getStatus() != null && !userDTO.getStatus().isEmpty()) {
+            sql += "STATUS = ?,";
+        }
+        if (userDTO.getManagedId() != null && !userDTO.getManagedId().isEmpty()) {
+            sql += "MANAGED_ID = ?,";
+        }
+        if (userDTO.getTmpPassword() != null && !userDTO.getTmpPassword().isEmpty()) {
+            sql += "TEMP_PASSWORD = ?,";
+        }
+
+        sql += " TENANT_ID = ?, LAST_UPDATED_TIME = ? WHERE ID = ?";
+
         try {
             Connection conn = this.getDBConnection();
             long updatedTime = System.currentTimeMillis();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, userDTO.getClientUserId());
-                stmt.setString(2, userDTO.getDmUsername());
-                stmt.setInt(3, tenantId);
-                stmt.setString(4, userDTO.getEmail());
-                stmt.setString(5, userDTO.getInviteCode());
-                stmt.setString(6, userDTO.getStatus());
-                stmt.setLong(7, updatedTime);
-                stmt.setString(8, userDTO.getManagedId());
-                stmt.setString(9, userDTO.getTmpPassword());
-                stmt.setInt(10, userDTO.getId());
-                stmt.executeUpdate();
+                int x = 0;
+
+                if (userDTO.getClientUserId() != null && !userDTO.getClientUserId().isEmpty()) {
+                    stmt.setString(++x, userDTO.getClientUserId());
+                }
+                if (userDTO.getDmUsername() != null && !userDTO.getDmUsername().isEmpty()) {
+                    stmt.setString(++x, userDTO.getDmUsername());
+                }
+                if (userDTO.getEmail() != null && !userDTO.getEmail().isEmpty()) {
+                    stmt.setString(++x, userDTO.getEmail());
+                }
+                if (userDTO.getInviteCode() != null && !userDTO.getInviteCode().isEmpty()) {
+                    stmt.setString(++x, userDTO.getInviteCode());
+                }
+                if (userDTO.getStatus() != null && !userDTO.getStatus().isEmpty()) {
+                    stmt.setString(++x, userDTO.getStatus());
+                }
+                if (userDTO.getManagedId() != null && !userDTO.getManagedId().isEmpty()) {
+                    stmt.setString(++x, userDTO.getManagedId());
+                }
+                if (userDTO.getTmpPassword() != null && !userDTO.getTmpPassword().isEmpty()) {
+                    stmt.setString(++x, userDTO.getTmpPassword());
+                }
+                stmt.setInt(++x, tenantId);
+                stmt.setLong(++x, updatedTime);
+                stmt.setInt(++x, userDTO.getId());
                 if (stmt.executeUpdate() == 1) {
                     return userDTO;
                 }
@@ -148,6 +175,7 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
                 + "LAST_UPDATED_TIME, "
                 + "MANAGED_ID, "
                 + "TEMP_PASSWORD "
+                + "DM_USERNAME "
                 + "FROM AP_VPP_USER "
                 + "WHERE DM_USERNAME = ? AND TENANT_ID = ?";
         try {

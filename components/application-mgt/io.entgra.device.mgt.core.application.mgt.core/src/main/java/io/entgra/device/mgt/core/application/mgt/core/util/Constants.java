@@ -196,7 +196,7 @@ public class Constants {
         public static final String PAID_SUB_METHOD = "PAID";
         public static final String TYPE = "type";;
         public static final String PACKAGE_NAME = "packageName";
-        public static final String APPLE_STORE_SYNCED_APP_CATEGORY = "APPLE_STORE_SYNCED_APP";
+        public static final String APPLE_STORE_SYNCED_APP_CATEGORY = "AppleStoreSyncedApp";
 
         public static final String RESULTS = "results";
         public static final String ARTWORK = "artwork";
