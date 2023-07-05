@@ -110,9 +110,6 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
             wrapper.getUser().add(ituneUserDTO);
 
             Gson gson = new Gson();
-//            Gson gson = new GsonBuilder()
-//                    .setExclusionStrategies(new NullEmptyExclusionStrategy())
-//                    .create();
             String userPayload = gson.toJson(wrapper);
 
             ProxyResponse proxyResponse = callVPPBackend(USER_CREATE, userPayload, TOKEN, Constants.VPP.POST);
@@ -131,8 +128,12 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
                     log.error("userDTO " + userDTO.toString());
                     try {
                         ConnectionManagerUtil.beginDBTransaction();
-                        if (vppApplicationDAO.addVppUser(userDTO, tenantId) != -1) {
+                        int id = vppApplicationDAO.addVppUser(userDTO, tenantId);
+                        if (id != -1) {
                             ConnectionManagerUtil.commitDBTransaction();
+                            userDTO.setId(id);
+                            userDTO.setTenantId(PrivilegedCarbonContext
+                                    .getThreadLocalCarbonContext().getTenantId());
                             return userDTO;
                         }
                         ConnectionManagerUtil.rollbackDBTransaction();
@@ -507,4 +508,11 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
 
         return false;
     }
+
+    @Override
+    public VppAssociationDTO getUserAssociation(String adamId, String emmUsername) throws ApplicationManagementException {
+        // Todo: Join the 3 tables and find a matching association
+        return null;
+    }
+
 }
