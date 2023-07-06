@@ -35,7 +35,6 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.netbeans.lib.cvsclient.commandLine.command.status;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -46,14 +45,13 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementEx
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.TrackerAlreadyExistException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.event.config.GroupAssignmentEventOperationExecutor;
 import io.entgra.device.mgt.core.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMgtConstants;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
-import io.entgra.device.mgt.core.device.mgt.core.util.HttpReportingUtil;
+import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -352,6 +350,40 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             throw new GroupManagementException(msg, e);
         } catch (Exception e) {
             String msg = "Error occurred in deleting group: " + groupId;
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteRoleAndRoleGroupMapping(String roleName, String roleToDelete, int tenantId, UserStoreManager userStoreManager, AuthorizationManager authorizationManager) throws GroupManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Delete roles");
+        }
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.deleteGroupsMapping(roleToDelete, tenantId);
+            userStoreManager.deleteRole(roleName);
+            // Delete all authorizations for the current role before deleting
+            authorizationManager.clearRoleAuthorization(roleName);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (UserStoreException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while deleting the role '" + roleName + "'";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while deleting the role";
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
         } finally {

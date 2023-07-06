@@ -30,6 +30,8 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistEx
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.UserStoreManager;
 
 import java.util.List;
 
@@ -78,6 +80,18 @@ public interface GroupManagementProviderService {
      * @throws GroupManagementException
      */
     boolean deleteGroup(int groupId, boolean isDeleteChildren) throws GroupManagementException;
+
+    /**
+     * Delete existing device group.
+     *
+     * @param role                 to be deleted with the userStore name.
+     * @param roleToDelete       to delete the role.
+     * @param tenantId             to belongs to roles.
+     * @param userStoreManager     with details.
+     * @param authorizationManager with details.
+     * @throws GroupManagementException
+     */
+    void deleteRoleAndRoleGroupMapping(String role, String roleToDelete, int tenantId, UserStoreManager userStoreManager, AuthorizationManager authorizationManager) throws GroupManagementException;
 
     /**
      * Get the device group provided the device group id.
