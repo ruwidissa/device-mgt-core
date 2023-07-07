@@ -130,7 +130,7 @@ public class CertificateGenerator {
                     X509Certificate certificate = (X509Certificate) x509Certificate;
                     certificateResponse.setNotAfter(certificate.getNotAfter().getTime());
                     certificateResponse.setNotBefore(certificate.getNotBefore().getTime());
-                    certificateResponse.setCertificateserial(certificate.getSerialNumber());
+                    certificateResponse.setCertificateSerial(certificate.getSerialNumber());
                     certificateResponse.setIssuer(certificate.getIssuerDN().getName());
                     certificateResponse.setSubject(certificate.getSubjectDN().getName());
                     certificateResponse.setCertificateVersion(certificate.getVersion());

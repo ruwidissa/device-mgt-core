@@ -73,7 +73,7 @@ public interface CertificateManagementService {
 
     PaginationResult getAllCertificates(int rowNum, int limit) throws CertificateManagementException;
 
-    boolean removeCertificate(String serialNumber) throws CertificateManagementException;
+    boolean removeCertificate(String certificateId) throws CertificateManagementException;
 
     List<CertificateResponse> getCertificates() throws CertificateManagementException;
 
