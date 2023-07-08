@@ -114,12 +114,12 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
             Gson gson = new Gson();
             String userPayload = gson.toJson(wrapper);
 
-            ProxyResponse proxyResponse = callVPPBackend(USER_CREATE, userPayload, TOKEN, Constants.VPP.POST);
+            ProxyResponse proxyResponse = callVPPBackend(USER_CREATE, userPayload, getVppToken(), Constants.VPP.POST);
             if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                     HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.EVENT_ID)) {
                 // Create user does not return any useful data. Its needed to call the backend again
                 ProxyResponse getUserResponse = callVPPBackend(USER_GET + Constants.VPP.CLIENT_USER_ID_PARAM +
-                                userDTO.getClientUserId(), userPayload, TOKEN, Constants.VPP.GET);
+                                userDTO.getClientUserId(), userPayload, getVppToken(), Constants.VPP.GET);
                 if ((getUserResponse.getCode() == HttpStatus.SC_OK || getUserResponse.getCode() ==
                         HttpStatus.SC_CREATED) && getUserResponse.getData().contains(Constants.VPP.TOTAL_PAGES)) {
                     VppItuneUserResponseWrapper vppItuneUserResponseWrapper = gson.fromJson
@@ -196,38 +196,40 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
         Gson gson = new Gson();
         String userPayload = gson.toJson(wrapper);
         try {
-            ProxyResponse proxyResponse = callVPPBackend(USER_UPDATE, userPayload, TOKEN, Constants.VPP.POST);
+            ProxyResponse proxyResponse = callVPPBackend(USER_UPDATE, userPayload, getVppToken(), Constants.VPP.POST);
             if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                     HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.EVENT_ID)) {
-
-                log.error("userDTO " + userDTO.toString());
-
-                try {
-                    ConnectionManagerUtil.beginDBTransaction();
-                    if (vppApplicationDAO.updateVppUser(userDTO, tenantId) == null) {
-                        ConnectionManagerUtil.rollbackDBTransaction();
-                        String msg = "Unable to update the Vpp user " +userDTO.getId();
-                        log.error(msg);
-                        throw new ApplicationManagementException(msg);
+                    VppUserDTO currentUserDTO =  getUserByDMUsername(userDTO.getDmUsername());
+                    if (currentUserDTO != null) {
+                        userDTO.setId(currentUserDTO.getId());
                     }
-                    ConnectionManagerUtil.commitDBTransaction();
-                } catch (ApplicationManagementDAOException e) {
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    String msg = "Error occurred while updating the Vpp User.";
-                    log.error(msg, e);
-                    throw new ApplicationManagementException(msg, e);
-                } catch (TransactionManagementException e) {
-                    String msg = "Error occurred while executing database transaction for Vpp User update.";
-                    log.error(msg, e);
-                    throw new ApplicationManagementException(msg, e);
-                } catch (DBConnectionException e) {
-                    String msg = "Error occurred while retrieving the database connection for Vpp User update.";
-                    log.error(msg, e);
-                    throw new ApplicationManagementException(msg, e);
-                } finally {
-                    ConnectionManagerUtil.closeDBConnection();
+                    try {
+                        ConnectionManagerUtil.beginDBTransaction();
+                        if (vppApplicationDAO.updateVppUser(userDTO, tenantId) == null) {
+                            ConnectionManagerUtil.rollbackDBTransaction();
+                            String msg = "Unable to update the Vpp user " +userDTO.getId();
+                            log.error(msg);
+                            throw new ApplicationManagementException(msg);
+                        }
+                        ConnectionManagerUtil.commitDBTransaction();
+                    } catch (ApplicationManagementDAOException e) {
+                        ConnectionManagerUtil.rollbackDBTransaction();
+                        String msg = "Error occurred while updating the Vpp User.";
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } catch (TransactionManagementException e) {
+                        String msg = "Error occurred while executing database transaction for Vpp User update.";
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } catch (DBConnectionException e) {
+                        String msg = "Error occurred while retrieving the database connection for Vpp User update.";
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } finally {
+                        ConnectionManagerUtil.closeDBConnection();
+                    }
                 }
-            }
+
         } catch (IOException e) {
             String msg = "Error while calling VPP backend to update";
             log.error(msg, e);
@@ -239,7 +241,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     public void syncUsers(String clientId) throws ApplicationManagementException {
         ProxyResponse proxyResponse = null;
         try {
-            proxyResponse = callVPPBackend(USER_GET, null, TOKEN, Constants
+            proxyResponse = callVPPBackend(USER_GET, null, getVppToken(), Constants
                     .VPP.GET);
             if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                     HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.TOTAL_PAGES)) {
@@ -266,7 +268,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
             if (nextPageIndex > 0) { // Not the first page
                 url += "?pageIndex=" + nextPageIndex;
             }
-            proxyResponse = callVPPBackend(url, null, TOKEN, Constants.VPP.GET);
+            proxyResponse = callVPPBackend(url, null, getVppToken(), Constants.VPP.GET);
             if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                     HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.TOTAL_PAGES)) {
                 Gson gson = new Gson();
@@ -360,7 +362,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     private ItuneAppDTO lookupAsset(String packageName) throws ApplicationManagementException {
         String lookupURL = LOOKUP_API + packageName + LOOKUP_API_PREFIX;
         try {
-            ProxyResponse proxyResponse = callVPPBackend(lookupURL, null, TOKEN, Constants.VPP.GET);
+            ProxyResponse proxyResponse = callVPPBackend(lookupURL, null, getVppToken(), Constants.VPP.GET);
             if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                     HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.GET_APP_DATA_RESPONSE_START)) {
                 String responseData = proxyResponse.getData();
@@ -467,12 +469,12 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
                     Gson gson = new Gson();
                     String payload = gson.toJson(vppAssociate);
 
-                    ProxyResponse proxyResponse = callVPPBackend(ASSIGNMENTS_POST, payload, TOKEN,
+                    ProxyResponse proxyResponse = callVPPBackend(ASSIGNMENTS_POST, payload, getVppToken(),
                             Constants.VPP.POST);
                     if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                             HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.EVENT_ID)) {
                         // Create assignment does not return any useful data. Its needed to call the backend again
-                        ProxyResponse getAssignmentResponse = callVPPBackend(ASSIGNMENTS_GET, null, TOKEN, Constants.VPP.GET);
+                        ProxyResponse getAssignmentResponse = callVPPBackend(ASSIGNMENTS_GET, null, getVppToken(), Constants.VPP.GET);
                         if ((getAssignmentResponse.getCode() == HttpStatus.SC_OK || getAssignmentResponse.getCode() ==
                                 HttpStatus.SC_CREATED) && getAssignmentResponse.getData().contains(Constants.VPP.TOTAL_PAGES)) {
 //                            VppAssociateResponseWrapper vppAssociateResponseWrapper = gson.fromJson
