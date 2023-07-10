@@ -26,6 +26,7 @@ import io.entgra.device.mgt.core.application.mgt.core.config.IdentityServiceProv
 import io.entgra.device.mgt.core.application.mgt.core.serviceprovider.ISServiceProviderApplicationService;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,6 +73,7 @@ public class APIUtil {
     private static volatile ReviewManager reviewManager;
     private static volatile AppmDataHandler appmDataHandler;
     private static volatile VPPApplicationManager vppApplicationManager;
+    private static volatile MetadataManagementService metadataManagementService;
 
     public static SPApplicationManager getSPApplicationManager() {
         if (SPApplicationManager == null) {
@@ -111,6 +113,24 @@ public class APIUtil {
             throw new IllegalStateException(msg);
         }
         return applicationManager;
+    }
+
+    public static MetadataManagementService getMetadataManager() {
+        if (metadataManagementService == null) {
+            synchronized (APIUtil.class) {
+                if (metadataManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    metadataManagementService =
+                            (MetadataManagementService) ctx.getOSGiService(MetadataManagementService.class, null);
+                    if (metadataManagementService == null) {
+                        String msg = "MetadataManagement Manager service has not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+        return metadataManagementService;
     }
 
     /**

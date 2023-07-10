@@ -49,7 +49,9 @@ import io.entgra.device.mgt.core.application.mgt.core.impl.VppApplicationManager
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.common.util.FileUtil;
+import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -208,7 +210,6 @@ public class ApplicationManagementUtil {
         // TODO: implement as an extension
         return new VppApplicationManagerImpl();
     }
-
     /**
      * This is useful to delete application artifacts if any error occurred while creating release/application
      * after uploading the artifacts

@@ -50,6 +50,7 @@ import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagement
 import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
 import io.entgra.device.mgt.core.application.mgt.core.util.VppHttpUtil;
+import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
@@ -71,6 +72,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     private static final String USER_UPDATE = APP_API + "/users/update";
     private static final String USER_GET = APP_API + "/users";
     private static final String ASSIGNMENTS_POST = APP_API + "/assets/associate";
+    private static final String ASSIGNMENTS_GET = APP_API + "/assignments";
     private static final String TOKEN = "";
     private static final String LOOKUP_API = "https://uclient-api.itunes.apple" +
             ".com/WebObjects/MZStorePlatform.woa/wa/lookup?version=2&id=";
@@ -112,12 +114,12 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
             Gson gson = new Gson();
             String userPayload = gson.toJson(wrapper);
 
-            ProxyResponse proxyResponse = callVPPBackend(USER_CREATE, userPayload, TOKEN, Constants.VPP.POST);
+            ProxyResponse proxyResponse = callVPPBackend(USER_CREATE, userPayload, getVppToken(), Constants.VPP.POST);
             if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                     HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.EVENT_ID)) {
                 // Create user does not return any useful data. Its needed to call the backend again
                 ProxyResponse getUserResponse = callVPPBackend(USER_GET + Constants.VPP.CLIENT_USER_ID_PARAM +
-                                userDTO.getClientUserId(), userPayload, TOKEN, Constants.VPP.GET);
+                                userDTO.getClientUserId(), userPayload, getVppToken(), Constants.VPP.GET);
                 if ((getUserResponse.getCode() == HttpStatus.SC_OK || getUserResponse.getCode() ==
                         HttpStatus.SC_CREATED) && getUserResponse.getData().contains(Constants.VPP.TOTAL_PAGES)) {
                     VppItuneUserResponseWrapper vppItuneUserResponseWrapper = gson.fromJson
@@ -194,38 +196,40 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
         Gson gson = new Gson();
         String userPayload = gson.toJson(wrapper);
         try {
-            ProxyResponse proxyResponse = callVPPBackend(USER_UPDATE, userPayload, TOKEN, Constants.VPP.POST);
+            ProxyResponse proxyResponse = callVPPBackend(USER_UPDATE, userPayload, getVppToken(), Constants.VPP.POST);
             if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                     HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.EVENT_ID)) {
-
-                log.error("userDTO " + userDTO.toString());
-
-                try {
-                    ConnectionManagerUtil.beginDBTransaction();
-                    if (vppApplicationDAO.updateVppUser(userDTO, tenantId) == null) {
-                        ConnectionManagerUtil.rollbackDBTransaction();
-                        String msg = "Unable to update the Vpp user " +userDTO.getId();
-                        log.error(msg);
-                        throw new ApplicationManagementException(msg);
+                    VppUserDTO currentUserDTO =  getUserByDMUsername(userDTO.getDmUsername());
+                    if (currentUserDTO != null) {
+                        userDTO.setId(currentUserDTO.getId());
                     }
-                    ConnectionManagerUtil.commitDBTransaction();
-                } catch (ApplicationManagementDAOException e) {
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    String msg = "Error occurred while updating the Vpp User.";
-                    log.error(msg, e);
-                    throw new ApplicationManagementException(msg, e);
-                } catch (TransactionManagementException e) {
-                    String msg = "Error occurred while executing database transaction for Vpp User update.";
-                    log.error(msg, e);
-                    throw new ApplicationManagementException(msg, e);
-                } catch (DBConnectionException e) {
-                    String msg = "Error occurred while retrieving the database connection for Vpp User update.";
-                    log.error(msg, e);
-                    throw new ApplicationManagementException(msg, e);
-                } finally {
-                    ConnectionManagerUtil.closeDBConnection();
+                    try {
+                        ConnectionManagerUtil.beginDBTransaction();
+                        if (vppApplicationDAO.updateVppUser(userDTO, tenantId) == null) {
+                            ConnectionManagerUtil.rollbackDBTransaction();
+                            String msg = "Unable to update the Vpp user " +userDTO.getId();
+                            log.error(msg);
+                            throw new ApplicationManagementException(msg);
+                        }
+                        ConnectionManagerUtil.commitDBTransaction();
+                    } catch (ApplicationManagementDAOException e) {
+                        ConnectionManagerUtil.rollbackDBTransaction();
+                        String msg = "Error occurred while updating the Vpp User.";
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } catch (TransactionManagementException e) {
+                        String msg = "Error occurred while executing database transaction for Vpp User update.";
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } catch (DBConnectionException e) {
+                        String msg = "Error occurred while retrieving the database connection for Vpp User update.";
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } finally {
+                        ConnectionManagerUtil.closeDBConnection();
+                    }
                 }
-            }
+
         } catch (IOException e) {
             String msg = "Error while calling VPP backend to update";
             log.error(msg, e);
@@ -237,7 +241,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     public void syncUsers(String clientId) throws ApplicationManagementException {
         ProxyResponse proxyResponse = null;
         try {
-            proxyResponse = callVPPBackend(USER_GET, null, TOKEN, Constants
+            proxyResponse = callVPPBackend(USER_GET, null, getVppToken(), Constants
                     .VPP.GET);
             if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                     HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.TOTAL_PAGES)) {
@@ -264,7 +268,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
             if (nextPageIndex > 0) { // Not the first page
                 url += "?pageIndex=" + nextPageIndex;
             }
-            proxyResponse = callVPPBackend(url, null, TOKEN, Constants.VPP.GET);
+            proxyResponse = callVPPBackend(url, null, getVppToken(), Constants.VPP.GET);
             if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                     HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.TOTAL_PAGES)) {
                 Gson gson = new Gson();
@@ -286,10 +290,10 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
                             VppAssetDTO vppAssetDTOs = getAssetByAppId(application.getId());
                             if (vppAssetDTOs == null) {
                                 vppAssetDTOs = new VppAssetDTO();
-                                vppAssetDTOs.setAppId(application.getId());
+                                vppAssetDTO.setAppId(application.getId());
                                 try {
                                     ConnectionManagerUtil.beginDBTransaction();
-                                    if (vppApplicationDAO.addAsset(vppAssetDTOs, tenantId) != -1) {
+                                    if (vppApplicationDAO.addAsset(vppAssetDTO, tenantId) != -1) {
                                         ConnectionManagerUtil.commitDBTransaction();
                                     }
                                     ConnectionManagerUtil.rollbackDBTransaction();
@@ -358,7 +362,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     private ItuneAppDTO lookupAsset(String packageName) throws ApplicationManagementException {
         String lookupURL = LOOKUP_API + packageName + LOOKUP_API_PREFIX;
         try {
-            ProxyResponse proxyResponse = callVPPBackend(lookupURL, null, TOKEN, Constants.VPP.GET);
+            ProxyResponse proxyResponse = callVPPBackend(lookupURL, null, getVppToken(), Constants.VPP.GET);
             if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
                     HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.GET_APP_DATA_RESPONSE_START)) {
                 String responseData = proxyResponse.getData();
@@ -414,7 +418,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
         return null;
     }
 
-
+    @Override
     public VppAssetDTO getAssetByAppId(int appId) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
@@ -434,40 +438,12 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     }
 
     @Override
-    public ProxyResponse callVPPBackend(String url,
-                                        String payload,
-                                        String accessToken,
-                                        String method) throws IOException {
-        return VppHttpUtil.execute(url, payload, accessToken, method);
-    }
-
-    public String getVppToken() throws ApplicationManagementException {
-        String token = "";
-        MetadataManagementService meta = DeviceManagementDataHolder
-                .getInstance().getMetadataManagementService();
-        Metadata metadata = null;
-        try {
-            metadata = meta.retrieveMetadata("DEP_META_KEY");
-            if (metadata != null) {
-
-                Gson g = new Gson();
-                DepConfig depConfigs = g.fromJson(metadata.getMetaValue(), DepConfig.class);
-                token =  depConfigs.getAccessToken();
-                return token;
-            }
-        }catch (MetadataManagementException e) {
-            String msg = "Error when retrieving metadata of vpp feature";
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        }
-        return token;
-    }
-
     public boolean addAssociation(VppAssetDTO asset, List<VppUserDTO> vppUsers) throws
             ApplicationManagementException {
 
         List<VppAssociationDTO> associations = new ArrayList<>(); // To save to UEM DBs
         List<String> clientUserIds = new ArrayList<>(); // Need this to send to vpp backend.
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         if (asset != null) {
             for (VppUserDTO vppUserDTO : vppUsers) {
                 VppAssociationDTO associationDTO = VppHttpUtil.getAssociation(vppUserDTO, asset);
@@ -493,9 +469,77 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
                     Gson gson = new Gson();
                     String payload = gson.toJson(vppAssociate);
 
-                    ProxyResponse proxyResponse = callVPPBackend(ASSIGNMENTS_POST, payload, TOKEN,
+                    ProxyResponse proxyResponse = callVPPBackend(ASSIGNMENTS_POST, payload, getVppToken(),
                             Constants.VPP.POST);
-                    return true;
+                    if ((proxyResponse.getCode() == HttpStatus.SC_OK || proxyResponse.getCode() ==
+                            HttpStatus.SC_CREATED) && proxyResponse.getData().contains(Constants.VPP.EVENT_ID)) {
+                        // Create assignment does not return any useful data. Its needed to call the backend again
+                        ProxyResponse getAssignmentResponse = callVPPBackend(ASSIGNMENTS_GET, null, getVppToken(), Constants.VPP.GET);
+                        if ((getAssignmentResponse.getCode() == HttpStatus.SC_OK || getAssignmentResponse.getCode() ==
+                                HttpStatus.SC_CREATED) && getAssignmentResponse.getData().contains(Constants.VPP.TOTAL_PAGES)) {
+//                            VppAssociateResponseWrapper vppAssociateResponseWrapper = gson.fromJson
+//                                    (getAssignmentResponse.getData(), VppAssociateResponseWrapper.class);
+                            for (VppAssociationDTO association : associations) {
+
+                                VppAssociationDTO vppAssociation =  getAssociation(association.getAssetId(), association.getClientId());
+
+                                if (vppAssociation == null) {
+                                    try {
+                                        ConnectionManagerUtil.beginDBTransaction();
+                                        if (vppApplicationDAO.addAssociation(association, tenantId) != -1) {
+                                            ConnectionManagerUtil.commitDBTransaction();
+                                            return true;
+                                        }
+                                        ConnectionManagerUtil.rollbackDBTransaction();
+                                        return false;
+                                    } catch (ApplicationManagementDAOException e) {
+                                        ConnectionManagerUtil.rollbackDBTransaction();
+                                        String msg = "Error occurred while adding the Assignment.";
+                                        log.error(msg, e);
+                                        throw new ApplicationManagementException(msg, e);
+                                    } catch (TransactionManagementException e) {
+                                        String msg = "Error occurred while executing database transaction for adding Assignment.";
+                                        log.error(msg, e);
+                                        throw new ApplicationManagementException(msg, e);
+                                    } catch (DBConnectionException e) {
+                                        String msg = "Error occurred while retrieving the database connection for adding Assignment.";
+                                        log.error(msg, e);
+                                        throw new ApplicationManagementException(msg, e);
+                                    } finally {
+                                        ConnectionManagerUtil.closeDBConnection();
+                                    }
+                                } else {
+                                    try {
+                                        ConnectionManagerUtil.beginDBTransaction();
+                                        if (vppApplicationDAO.updateAssociation(association, tenantId) == null) {
+                                            ConnectionManagerUtil.rollbackDBTransaction();
+                                            String msg = "Unable to update the assignment: " +association.getAssetId();
+                                            log.error(msg);
+                                            throw new ApplicationManagementException(msg);
+                                        }
+                                        ConnectionManagerUtil.commitDBTransaction();
+                                        return true;
+                                    } catch (ApplicationManagementDAOException e) {
+                                        ConnectionManagerUtil.rollbackDBTransaction();
+                                        String msg = "Error occurred while updating the Asset.";
+                                        log.error(msg, e);
+                                        throw new ApplicationManagementException(msg, e);
+                                    } catch (TransactionManagementException e) {
+                                        String msg = "Error occurred while executing database transaction for Asset update.";
+                                        log.error(msg, e);
+                                        throw new ApplicationManagementException(msg, e);
+                                    } catch (DBConnectionException e) {
+                                        String msg = "Error occurred while retrieving the database connection for Asset update.";
+                                        log.error(msg, e);
+                                        throw new ApplicationManagementException(msg, e);
+                                    } finally {
+                                        ConnectionManagerUtil.closeDBConnection();
+                                    }
+                                }
+                            }
+                        }
+
+                    }
 
                 } catch (IOException e) {
                     String msg = "Error while adding associations";
@@ -510,6 +554,53 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
     }
 
     @Override
+    public VppAssociationDTO getAssociation(int assetId, int userId) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return vppApplicationDAO.getAssociation(assetId, userId, tenantId);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurs while getting assignment related to user of id " + userId + ".";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }  catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting assignment data related to user of id " + userId + ".";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public ProxyResponse callVPPBackend(String url,
+                                        String payload,
+                                        String accessToken,
+                                        String method) throws IOException {
+        return VppHttpUtil.execute(url, payload, accessToken, method);
+    }
+
+    public String getVppToken() throws ApplicationManagementException {
+        String token = "";
+        MetadataManagementService meta = APIUtil.getMetadataManager();
+        Metadata metadata = null;
+        try {
+            metadata = meta.retrieveMetadata("DEP_META_KEY");
+            if (metadata != null) {
+
+                Gson g = new Gson();
+                DepConfig depConfigs = g.fromJson(metadata.getMetaValue(), DepConfig.class);
+                token =  depConfigs.getAccessToken();
+                return token;
+            }
+        }catch (MetadataManagementException e) {
+            String msg = "Error when retrieving metadata of vpp feature";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+        return token;
+    }
+
     public VppAssociationDTO getUserAssociation(String adamId, String emmUsername) throws ApplicationManagementException {
         // Todo: Join the 3 tables and find a matching association
         return null;

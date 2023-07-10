@@ -19,6 +19,7 @@
 package io.entgra.device.mgt.core.application.mgt.core.dao.impl.vpp;
 
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssociationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
 import io.entgra.device.mgt.core.application.mgt.core.dao.VppApplicationDAO;
@@ -339,6 +340,126 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
                 stmt.executeUpdate();
                 if (stmt.executeUpdate() == 1) {
                     return vppAssetDTO;
+                }
+                return null;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining database connection when updating the vpp user";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when processing SQL to updating the vpp user.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public VppAssociationDTO getAssociation(int assetId, int userId, int tenantId)
+            throws ApplicationManagementDAOException {
+        String sql = "SELECT "
+                + "ID, "
+                + "ASSOCIATION_TYPE, "
+                + "CREATED_TIME, "
+                + "LAST_UPDATED_TIME, "
+                + "PRICING_PARAMS "
+                + "FROM AP_VPP_ASSOCIATION "
+                + "WHERE ASSET_ID = ? AND USER_ID = ? AND TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, assetId);
+                stmt.setInt(2, userId);
+                stmt.setInt(3, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return DAOUtil.loadAssignment(rs);
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining database connection when retrieving assignment data of user with id "+ userId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when processing SQL to retrieve assignment by asset id and user id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }  catch (UnexpectedServerErrorException e) {
+            String msg = "Found more than one assignment for user id: " + userId + " and asset id: " + assetId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int addAssociation(VppAssociationDTO vppAssociationDTO, int tenantId)
+            throws ApplicationManagementDAOException {
+        int associationId = -1;
+        String sql = "INSERT INTO "
+                + "AP_VPP_ASSOCIATION("
+                + "ASSET_ID, "
+                + "USER_ID, "
+                + "TENANT_ID, "
+                + "ASSOCIATION_TYPE,"
+                + "CREATED_TIME,"
+                + "LAST_UPDATED_TIME,"
+                + "PRICING_PARAMS) "
+                + "VALUES (?, ?, ?, ?, ?)";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                long currentTime = System.currentTimeMillis();
+                stmt.setInt(1, vppAssociationDTO.getAssetId());
+                stmt.setInt(2, vppAssociationDTO.getClientId());
+                stmt.setInt(3, tenantId);
+                stmt.setString(4, vppAssociationDTO.getAssociationType());
+                stmt.setLong(5, currentTime);
+                stmt.setLong(6, currentTime);
+                stmt.setString(7, vppAssociationDTO.getPricingParam());
+                stmt.executeUpdate();
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        associationId = rs.getInt(1);
+                    }
+                }
+                return associationId;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining database connection when adding the asset.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when processing SQL to add the asset.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public VppAssociationDTO updateAssociation(VppAssociationDTO vppAssociationDTO, int tenantId)
+            throws ApplicationManagementDAOException {
+
+        String sql = "UPDATE "
+                + "AP_VPP_ASSOCIATION "
+                + "SET "
+                + "ASSET_ID = ?,"
+                + "USER_ID = ?, "
+                + "ASSOCIATION_TYPE = ?, "
+                + "LAST_UPDATED_TIME = ?, "
+                + "PRICING_PARAMS = ? "
+                + "WHERE ID = ? AND TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            long updatedTime = System.currentTimeMillis();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, vppAssociationDTO.getAssetId());
+                stmt.setInt(2, vppAssociationDTO.getClientId());
+                stmt.setString(3, vppAssociationDTO.getAssociationType());
+                stmt.setLong(4, updatedTime);
+                stmt.setString(5, vppAssociationDTO.getPricingParam());
+                stmt.setInt(6, vppAssociationDTO.getId());
+                stmt.setLong(7, tenantId);
+                if (stmt.executeUpdate() == 1) {
+                    return vppAssociationDTO;
                 }
                 return null;
             }

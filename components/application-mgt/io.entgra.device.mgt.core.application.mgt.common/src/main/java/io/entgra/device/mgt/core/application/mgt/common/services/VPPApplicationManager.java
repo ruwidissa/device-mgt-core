@@ -46,6 +46,7 @@ public interface VPPApplicationManager {
     boolean addAssociation(VppAssetDTO asset, List<VppUserDTO> vppUsers) throws
             ApplicationManagementException;
 
-    VppAssociationDTO getUserAssociation(String adamId, String emmUsername) throws
-            ApplicationManagementException;
+    VppAssociationDTO getAssociation(int assetId, int userId)  throws ApplicationManagementException;
+
+    VppAssociationDTO getUserAssociation(String adamId, String emmUsername) throws ApplicationManagementException;
 }
