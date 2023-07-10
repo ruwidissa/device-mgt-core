@@ -542,6 +542,23 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
     }
 
     @Override
+    public void deleteGroupsMapping(String role, int tenantId) throws GroupManagementDAOException {
+
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "DELETE FROM DM_ROLE_GROUP_MAP WHERE ROLE = ? AND TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, role);
+                stmt.setInt(2, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while removing record from group-role mapping.";
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
+        }
+    }
+    @Override
     public void deleteGroups(List<Integer> groupIds, int tenantId) throws GroupManagementDAOException {
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();

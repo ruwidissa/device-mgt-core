@@ -156,6 +156,15 @@ public interface GroupDAO {
     void deleteGroupsMapping(List<Integer> groupIds, int tenantId) throws GroupManagementDAOException;
 
     /**
+     * Delete mappings of Device Groups.
+     *
+     * @param role of Device Groups.
+     * @param tenantId  of the role.
+     * @throws GroupManagementDAOException on error during deletion of mappings of groups
+     */
+    void deleteGroupsMapping(String role, int tenantId) throws GroupManagementDAOException;
+
+    /**
      * Delete existing Device Groups.
      *
      * @param groupIds of Device Groups.

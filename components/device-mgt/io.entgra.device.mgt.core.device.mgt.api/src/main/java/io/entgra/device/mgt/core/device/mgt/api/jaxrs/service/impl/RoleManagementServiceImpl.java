@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import org.apache.axis2.databinding.types.xsd._boolean;
 import org.json.simple.JSONObject;
@@ -638,6 +639,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     @Consumes(MediaType.WILDCARD)
     @Override
     public Response deleteRole(@PathParam("roleName") String roleName, @QueryParam("user-store") String userStoreName) {
+        String roleToDelete = roleName;
         if (userStoreName != null && !userStoreName.isEmpty()) {
             roleName = userStoreName + "/" + roleName;
         }
@@ -645,6 +647,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         try {
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             final UserStoreManager userStoreManager = userRealm.getUserStoreManager();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             if (!userStoreManager.isExistingRole(roleName)) {
                 String msg = "No role exists with the name : " + roleName ;
                 return Response.status(404).entity(msg).build();
@@ -654,13 +657,15 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             if (log.isDebugEnabled()) {
                 log.debug("Deleting the role in user store");
             }
-            userStoreManager.deleteRole(roleName);
-            // Delete all authorizations for the current role before deleting
-            authorizationManager.clearRoleAuthorization(roleName);
-
+            DeviceMgtAPIUtils.getGroupManagementProviderService().deleteRoleAndRoleGroupMapping(roleName, roleToDelete, tenantId, userStoreManager, authorizationManager);
             return Response.status(Response.Status.OK).build();
         } catch (UserStoreException e) {
             String msg = "Error occurred while deleting the role '" + roleName + "'";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (GroupManagementException e) {
+            String msg = "Error occurred while deleting group-role mapping records";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
