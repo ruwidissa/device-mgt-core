@@ -22,17 +22,25 @@ import com.google.gson.JsonObject;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api.GrafanaAPIProxyService;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api.bean.ErrorResponse;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api.exception.RefererNotValid;
+import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api.impl.util.GrafanaMgtAPIUtils;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api.impl.util.GrafanaRequestHandlerUtil;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.exception.GrafanaManagementException;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.bean.GrafanaPanelIdentifier;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.exception.MaliciousQueryAttempt;
-import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.internal.GrafanaMgtDataHolder;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -49,8 +57,8 @@ public class GrafanaAPIProxyServiceImpl implements GrafanaAPIProxyService {
     public Response queryDatasource(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo) {
         try {
             GrafanaPanelIdentifier panelIdentifier = GrafanaRequestHandlerUtil.getPanelIdentifier(headers);
-            GrafanaMgtDataHolder.getInstance().getGrafanaQueryService().
-                    buildSafeQuery(body,  panelIdentifier.getDashboardId(), panelIdentifier.getPanelId(), requestUriInfo.getRequestUri());
+            GrafanaMgtAPIUtils.getGrafanaQueryService().buildSafeQuery(body, panelIdentifier.getDashboardId(),
+                    panelIdentifier.getPanelId(), requestUriInfo.getRequestUri());
             return GrafanaRequestHandlerUtil.proxyPassPostRequest(body, requestUriInfo, panelIdentifier.getOrgId());
         } catch (MaliciousQueryAttempt e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(
