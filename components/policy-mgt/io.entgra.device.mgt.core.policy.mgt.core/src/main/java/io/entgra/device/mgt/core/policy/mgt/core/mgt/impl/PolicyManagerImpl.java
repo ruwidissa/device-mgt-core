@@ -27,18 +27,32 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.*;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.CorrectiveAction;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.DeviceGroupWrapper;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyCriterion;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.ProfileFeature;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.policy.PolicyConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.CommandOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMgtConstants;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.PolicyLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraPolicyLoggerImpl;
 import io.entgra.device.mgt.core.policy.mgt.common.Criterion;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.common.ProfileManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.cache.impl.PolicyCacheManagerImpl;
-import io.entgra.device.mgt.core.policy.mgt.core.dao.*;
+import io.entgra.device.mgt.core.policy.mgt.core.dao.FeatureDAO;
+import io.entgra.device.mgt.core.policy.mgt.core.dao.FeatureManagerDAOException;
+import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyDAO;
+import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
+import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagerDAOException;
+import io.entgra.device.mgt.core.policy.mgt.core.dao.ProfileDAO;
+import io.entgra.device.mgt.core.policy.mgt.core.dao.ProfileManagerDAOException;
 import io.entgra.device.mgt.core.policy.mgt.core.internal.PolicyManagementDataHolder;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.PolicyManager;
 import io.entgra.device.mgt.core.policy.mgt.core.mgt.ProfileManager;
@@ -46,21 +60,26 @@ import io.entgra.device.mgt.core.policy.mgt.core.mgt.bean.UpdatedPolicyDeviceLis
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagementConstants;
 import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PolicyManagerImpl implements PolicyManager {
 
+    PolicyLogContext.Builder policyLogContextBuilder = new PolicyLogContext.Builder();
     private final PolicyDAO policyDAO;
     private final ProfileDAO profileDAO;
     private final FeatureDAO featureDAO;
     private final ProfileManager profileManager;
     private final PolicyConfiguration policyConfiguration;
-    private static final Log log = LogFactory.getLog(PolicyManagerImpl.class);
+    private static final EntgraLogger log = new EntgraPolicyLoggerImpl(PolicyManagerImpl.class);
 
     public PolicyManagerImpl() {
         this.policyDAO = PolicyManagementDAOFactory.getPolicyDAO();
@@ -72,6 +91,9 @@ public class PolicyManagerImpl implements PolicyManager {
 
     @Override
     public Policy addPolicy(Policy policy) throws PolicyManagementException {
+        String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
         try {
             PolicyManagementDAOFactory.beginTransaction();
             if (policy.getProfile() != null && policy.getProfile().getProfileId() == 0) {
@@ -153,11 +175,16 @@ public class PolicyManagerImpl implements PolicyManager {
         } finally {
             PolicyManagementDAOFactory.closeConnection();
         }
+        String stringPayload = new Gson().toJson(policy);
+        log.info("Policy created", policyLogContextBuilder.setPolicyName(policy.getPolicyName()).setPayload(stringPayload).setActionTag("ADD_POLICY").setUserName(userName).setTenantID(tenantId).setTenantDomain(tenantDomain).build());
         return policy;
     }
 
     @Override
     public Policy updatePolicy(Policy policy) throws PolicyManagementException {
+        String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
         try {
             // Previous policy needs to be obtained before beginning the transaction
             Policy previousPolicy = this.getPolicy(policy.getId());
@@ -299,6 +326,8 @@ public class PolicyManagerImpl implements PolicyManager {
         } finally {
             PolicyManagementDAOFactory.closeConnection();
         }
+        String stringPayload = new Gson().toJson(policy);
+        log.info("Policy updated", policyLogContextBuilder.setPolicyName(policy.getPolicyName()).setPayload(stringPayload).setActionTag("UPDATE_POLICY").setUserName(userName).setTenantID(tenantId).setTenantDomain(tenantDomain).build());
         return policy;
     }
 
@@ -488,6 +517,10 @@ public class PolicyManagerImpl implements PolicyManager {
 
     @Override
     public boolean updatePolicyPriorities(List<Policy> policies) throws PolicyManagementException {
+        String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
+        String stringPayload = new Gson().toJson(policies);
         boolean bool;
         try {
             List<Policy> existingPolicies;
@@ -516,18 +549,24 @@ public class PolicyManagerImpl implements PolicyManager {
         } finally {
             PolicyManagementDAOFactory.closeConnection();
         }
+        log.info("Policy priorities updated", policyLogContextBuilder.setPayload(stringPayload).setActionTag("UPDATE_POLICY_PRIORITIES").setUserName(userName).setTenantID(tenantId).setTenantDomain(tenantDomain).build());
         return bool;
     }
 
     @Override
     public boolean deletePolicy(Policy policy) throws PolicyManagementException {
         try {
+            String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+            String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
             PolicyManagementDAOFactory.beginTransaction();
             policyDAO.deleteAllPolicyRelatedConfigs(policy.getId());
             policyDAO.deletePolicy(policy.getId());
             featureDAO.deleteFeaturesOfProfile(policy.getProfileId());
             profileDAO.deleteProfile(policy.getProfileId());
             PolicyManagementDAOFactory.commitTransaction();
+            String stringPayload = new Gson().toJson(policy);
+            log.info("Policy deleted", policyLogContextBuilder.setPolicyName(policy.getPolicyName()).setPayload(stringPayload).setActionTag("DELETE_POLICY").setUserName(userName).setTenantID(tenantId).setTenantDomain(tenantDomain).build());
             return true;
         } catch (PolicyManagerDAOException e) {
             PolicyManagementDAOFactory.rollbackTransaction();
@@ -548,6 +587,9 @@ public class PolicyManagerImpl implements PolicyManager {
 
     @Override
     public boolean deletePolicy(int policyId) throws PolicyManagementException {
+        String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
         boolean bool;
         List<Policy> policies = this.getPolicies();
         Policy pol = null;
@@ -578,6 +620,8 @@ public class PolicyManagerImpl implements PolicyManager {
             featureDAO.deleteFeaturesOfProfile(policy.getProfileId());
             profileDAO.deleteProfile(policy.getProfileId());
             PolicyManagementDAOFactory.commitTransaction();
+            String stringPayload = new Gson().toJson(policy);
+            log.info("Policy deleted", policyLogContextBuilder.setPolicyName(policy.getPolicyName()).setPayload(stringPayload).setActionTag("DELETE_POLICY").setUserName(userName).setTenantID(tenantId).setTenantDomain(tenantDomain).build());
             return bool;
         } catch (PolicyManagerDAOException e) {
             PolicyManagementDAOFactory.rollbackTransaction();
@@ -636,6 +680,9 @@ public class PolicyManagerImpl implements PolicyManager {
         List<Device> deviceList = new ArrayList<>();
         DeviceManagementProviderService deviceManagementService = PolicyManagementDataHolder
                 .getInstance().getDeviceManagementService();
+        String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
         for (DeviceIdentifier deviceIdentifier : deviceIdentifierList) {
             try {
                 Device device = deviceManagementService.getDevice(deviceIdentifier, false);
@@ -664,6 +711,9 @@ public class PolicyManagerImpl implements PolicyManager {
                 }
                 policy.setDevices(deviceList);
             }
+            String policyPayload = new Gson().toJson(policy);
+            String deviceListPayload = new Gson().toJson(deviceList);
+            log.info("Policy added to devices", policyLogContextBuilder.setPolicyName(policy.getPolicyName()).setPayload(" Policy: " + policyPayload + " DeviceList: " + deviceListPayload).setActionTag("ADD_POLICY_TO_DEVICE").setUserName(userName).setTenantID(tenantId).setTenantDomain(tenantDomain).build());
         } catch (PolicyManagerDAOException e) {
             PolicyManagementDAOFactory.rollbackTransaction();
             throw new PolicyManagementException("Error occurred while adding the policy ("
