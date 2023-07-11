@@ -706,7 +706,17 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         entry.getKey(), action, properties);
                 activityList.add(activity);
                 for (DeviceIdentifier identifier : deviceIdentifiers) {
-                    log.info(String.format("Web app %s triggered", action), appInstallLogContextBuilder.setAppId(String.valueOf(applicationDTO.getId())).setAppName(applicationDTO.getName()).setAppType(applicationDTO.getType()).setSubType(subType).setTenantId(tenantId).setTenantDomain(tenantDomain).setDevice(String.valueOf(identifier)).setUserName(username).setAction(action).build());
+                    log.info(String.format("Web app %s triggered", action), appInstallLogContextBuilder
+                            .setAppId(String.valueOf(applicationDTO.getId()))
+                            .setAppName(applicationDTO.getName())
+                            .setAppType(applicationDTO.getType())
+                            .setSubType(subType)
+                            .setTenantId(tenantId)
+                            .setTenantDomain(tenantDomain)
+                            .setDevice(String.valueOf(identifier))
+                            .setUserName(username)
+                            .setAction(action)
+                            .build());
                 }
             }
         } else {
