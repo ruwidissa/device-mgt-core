@@ -719,7 +719,14 @@ public class OperationManagerImpl implements OperationManager {
                 DeviceCacheManagerImpl.getInstance().removeDeviceFromCache(deviceId, tenantId);
                 break;
         }
-        log.info("Device Connected", deviceConnectivityLogContextBuilder.setDeviceId(deviceId.getId()).setDeviceType(deviceId.getType()).setActionTag("PENDING_OPERATION").setTenantDomain(tenantDomain).setTenantId(String.valueOf(tenantId)).setUserName(userName).build());
+        log.info("Device Connected", deviceConnectivityLogContextBuilder
+                .setDeviceId(deviceId.getId())
+                .setDeviceType(deviceId.getType())
+                .setActionTag("PENDING_OPERATION")
+                .setTenantDomain(tenantDomain)
+                .setTenantId(String.valueOf(tenantId))
+                .setUserName(userName)
+                .build());
         return getOperations(deviceId, Operation.Status.PENDING, enrolmentId);
     }
 

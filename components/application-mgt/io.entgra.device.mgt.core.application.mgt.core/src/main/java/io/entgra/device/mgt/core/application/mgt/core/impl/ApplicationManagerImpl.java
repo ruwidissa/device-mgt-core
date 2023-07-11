@@ -1286,7 +1286,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             this.changeLifecycleState(applicationReleaseDTO, lifecycleChanger);
                         }
                     }
-                    if (applicationDTO.getType().equals("ENTERPRISE") || applicationDTO.getType().equals("PUBLIC") ) {
+                    if (Constants.ENTERPRISE_APP_TYPE.equals(applicationDTO.getType()) || Constants.PUBLIC_APP_TYPE.equals(applicationDTO.getType())) {
                         persistAppIconInfo(applicationReleaseDTO);
                     }
                     applicationReleaseEntities.add(applicationReleaseDTO);
@@ -1726,8 +1726,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         List<Metadata> allMetadata;
         allMetadata = APIUtil.getMetadataManagementService().retrieveAllMetadata();
         if (allMetadata != null && !allMetadata.isEmpty()) {
-            for(Metadata metadata : allMetadata){
-                if(Constants.SHOW_ALL_ROLES.equals(metadata.getMetaKey())){
+            for (Metadata metadata : allMetadata) {
+                if (Constants.SHOW_ALL_ROLES.equals(metadata.getMetaKey())) {
                     String metaValue = metadata.getMetaValue();
                     if (metaValue != null) {
                         JSONObject jsonObject;

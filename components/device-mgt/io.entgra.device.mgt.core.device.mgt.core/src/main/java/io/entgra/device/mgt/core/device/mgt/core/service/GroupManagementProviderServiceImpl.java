@@ -298,7 +298,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                             newParentPath = DeviceGroupConstants.HierarchicalGroup.SEPERATOR;
                         }
                         childrenGroup.setParentPath(newParentPath);
-                        if (!newParentPath.equals(DeviceGroupConstants.HierarchicalGroup.SEPERATOR)) {
+                        if (!DeviceGroupConstants.HierarchicalGroup.SEPERATOR.equals(newParentPath)) {
                             String[] groupIds = newParentPath.split(DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
                             int latestGroupId = Integer.parseInt(groupIds[groupIds.length - 1]);
                             childrenGroup.setParentGroupId(latestGroupId);
