@@ -261,9 +261,9 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
                 + "PRICING_PARAMS,"
                 + "PRODUCT_TYPE,"
                 + "RETIRED_COUNT,"
-                + "REVOCABLE) "
-//                + "SUPPORTED_PLATFORMS) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "REVOCABLE, "
+                + "SUPPORTED_PLATFORMS) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -279,9 +279,9 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
                 stmt.setString(9, vppAssetDTO.getProductType());
                 stmt.setString(10, vppAssetDTO.getRetiredCount());
                 stmt.setString(11, vppAssetDTO.getRevocable());
-//                List<String> platformList =  vppAssetDTO.getSupportedPlatforms();
-//                String platformString = String.join(",", platformList);
-//                stmt.setString(12, platformString);
+                List<String> platformList =  vppAssetDTO.getSupportedPlatforms();
+                String platformString = String.join(",", platformList);
+                stmt.setString(12, platformString);
                 stmt.executeUpdate();
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
@@ -305,39 +305,71 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
     public VppAssetDTO updateAsset(VppAssetDTO vppAssetDTO, int tenantId)
             throws ApplicationManagementDAOException {
 
-        String sql = "UPDATE "
-                + "AP_ASSETS "
-                + "SET "
-                + "APP_ID = ?,"
-                + "LAST_UPDATED_TIME = ?, "
-                + "ADAM_ID = ?, "
-                + "ASSIGNED_COUNT = ?, "
-                + "DEVICE_ASSIGNABLE = ?, "
-                + "PRICING_PARAMS = ?, "
-                + "PRODUCT_TYPE = ?, "
-                + "RETIRED_COUNT = ?, "
-                + "REVOCABLE = ? "
-//                + "SUPPORTED_PLATFORMS = ? "
-                + "WHERE ID = ? AND TENANT_ID = ?";
+        String sql = "UPDATE AP_ASSETS SET ";
+
+        if (vppAssetDTO.getAdamId() != null && !vppAssetDTO.getAdamId().isEmpty()) {
+            sql += "ADAM_ID = ?, ";
+        }
+        if (vppAssetDTO.getAssignedCount() != null && !vppAssetDTO.getAssignedCount().isEmpty()) {
+            sql += "ASSIGNED_COUNT = ?, ";
+        }
+        if (vppAssetDTO.getDeviceAssignable() != null && !vppAssetDTO.getDeviceAssignable().isEmpty()) {
+            sql += "DEVICE_ASSIGNABLE = ?, ";
+        }
+        if (vppAssetDTO.getPricingParam() != null && !vppAssetDTO.getPricingParam().isEmpty()) {
+            sql += "PRICING_PARAMS = ?, ";
+        }
+        if (vppAssetDTO.getProductType() != null && !vppAssetDTO.getProductType().isEmpty()) {
+            sql += "PRODUCT_TYPE = ?, ";
+        }
+        if (vppAssetDTO.getRetiredCount() != null && !vppAssetDTO.getRetiredCount().isEmpty()) {
+            sql += "RETIRED_COUNT = ?, ";
+        }
+        if (vppAssetDTO.getRevocable() != null && !vppAssetDTO.getRevocable().isEmpty()) {
+            sql += "REVOCABLE = ?, ";
+        }
+        if (vppAssetDTO.getSupportedPlatforms() != null && !vppAssetDTO.getSupportedPlatforms().isEmpty()) {
+            sql += "SUPPORTED_PLATFORMS = ?,";
+        }
+        sql += "APP_ID = ?, LAST_UPDATED_TIME = ? WHERE ID = ? AND TENANT_ID = ?";
+
         try {
             Connection conn = this.getDBConnection();
             long updatedTime = System.currentTimeMillis();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, vppAssetDTO.getAppId());
-                stmt.setLong(2, updatedTime);
-                stmt.setString(3, vppAssetDTO.getAdamId());
-                stmt.setString(4, vppAssetDTO.getAssignedCount());
-                stmt.setString(5, vppAssetDTO.getDeviceAssignable());
-                stmt.setString(6, vppAssetDTO.getPricingParam());
-                stmt.setString(7, vppAssetDTO.getProductType());
-                stmt.setString(8, vppAssetDTO.getRetiredCount());
-                stmt.setString(9, vppAssetDTO.getRevocable());
-//                List<String> platformList =  vppAssetDTO.getSupportedPlatforms();
-//                String platformString = String.join(",", platformList);
-//                stmt.setString(10, platformString);
-                stmt.setInt(10, vppAssetDTO.getId());
-                stmt.setLong(11, tenantId);
-                stmt.executeUpdate();
+                int x = 0;
+
+                if (vppAssetDTO.getAdamId() != null && !vppAssetDTO.getAdamId().isEmpty()) {
+                    stmt.setString(++x, vppAssetDTO.getAdamId());
+                }
+                if (vppAssetDTO.getAssignedCount() != null && !vppAssetDTO.getAssignedCount().isEmpty()) {
+                    stmt.setString(++x, vppAssetDTO.getAssignedCount());
+                }
+                if (vppAssetDTO.getDeviceAssignable() != null && !vppAssetDTO.getDeviceAssignable().isEmpty()) {
+                    stmt.setString(++x, vppAssetDTO.getDeviceAssignable());
+                }
+                if (vppAssetDTO.getPricingParam() != null && !vppAssetDTO.getPricingParam().isEmpty()) {
+                    stmt.setString(++x, vppAssetDTO.getPricingParam());
+                }
+                if (vppAssetDTO.getProductType() != null && !vppAssetDTO.getProductType().isEmpty()) {
+                    stmt.setString(++x, vppAssetDTO.getProductType());
+                }
+                if (vppAssetDTO.getRetiredCount() != null && !vppAssetDTO.getRetiredCount().isEmpty()) {
+                    stmt.setString(++x, vppAssetDTO.getRetiredCount());
+                }
+                if (vppAssetDTO.getRevocable() != null && !vppAssetDTO.getRevocable().isEmpty()) {
+                    stmt.setString(++x, vppAssetDTO.getRevocable());
+                }
+                if (vppAssetDTO.getSupportedPlatforms() != null && !vppAssetDTO.getSupportedPlatforms().isEmpty()) {
+                    List<String> platformList =  vppAssetDTO.getSupportedPlatforms();
+                    String platformString = String.join(",", platformList);
+                    stmt.setString(++x, platformString);
+                }
+
+                stmt.setInt(++x, vppAssetDTO.getAppId());
+                stmt.setLong(++x, updatedTime);
+                stmt.setInt(++x, vppAssetDTO.getId());
+                stmt.setLong(++x, tenantId);
                 if (stmt.executeUpdate() == 1) {
                     return vppAssetDTO;
                 }

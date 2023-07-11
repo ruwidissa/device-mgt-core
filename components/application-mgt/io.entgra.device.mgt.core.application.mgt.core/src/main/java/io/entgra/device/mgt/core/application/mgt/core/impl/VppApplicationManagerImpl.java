@@ -315,6 +315,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
                                 }
                             } else {
                                 vppAssetDTOs.setAppId(application.getId());
+                                vppAssetDTOs.setSupportedPlatforms(vppAssetDTO.getSupportedPlatforms());
                                 try {
                                     ConnectionManagerUtil.beginDBTransaction();
                                     if (vppApplicationDAO.updateAsset(vppAssetDTOs, tenantId) == null) {
