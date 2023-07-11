@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 /**
  * @scr.component name="io.entgra.analytics.mgt.grafana.proxy.grafanamanagementservicecomponent" immediate="true"
