@@ -124,7 +124,7 @@
                             org.wso2.carbon.utils;version="[4.8,5)"
                         </Import-Package>
                         <Export-Package>
-                            !io.entgra.device.mgt.core.transport.mgt.email.sender.core.internal,
+                            !io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.internal,
                             io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.*
                         </Export-Package>
                         <Embed-Dependency>
