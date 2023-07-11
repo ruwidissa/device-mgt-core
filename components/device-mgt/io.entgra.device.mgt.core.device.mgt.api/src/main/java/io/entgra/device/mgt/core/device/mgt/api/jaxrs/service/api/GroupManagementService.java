@@ -33,6 +33,17 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Extension;
+import io.swagger.annotations.ExtensionProperty;
+import io.swagger.annotations.Info;
+import io.swagger.annotations.ResponseHeader;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -1286,11 +1297,11 @@ public interface GroupManagementService {
                                     "Server error occurred while creating the group or adding devices or sharing the group.",
                             response = ErrorResponse.class)
             })
-    Response createGroupWithRoles(@ApiParam(
-            name = "group",
-            value = "Define the group object with data.",
-            required = true)
-                                  @Valid DeviceGroupRoleWrapper group
-                                  );
-
+    Response createGroupWithRoles(
+            @ApiParam(
+                    name = "group",
+                    value = "Define the group object with data.",
+                    required = true)
+            @Valid DeviceGroupRoleWrapper group
+    );
 }

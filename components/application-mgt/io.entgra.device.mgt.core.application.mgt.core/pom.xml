@@ -411,6 +411,10 @@
             <artifactId>org.wso2.carbon.ntask.core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
+        </dependency>
     </dependencies>
 </project>
 
