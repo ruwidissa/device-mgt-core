@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.mgt.impl;
 
+import com.google.gson.Gson;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;

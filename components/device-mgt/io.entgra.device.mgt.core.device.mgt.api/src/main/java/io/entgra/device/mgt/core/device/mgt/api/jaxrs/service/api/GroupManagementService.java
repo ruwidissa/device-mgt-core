@@ -28,6 +28,7 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -1302,11 +1303,11 @@ public interface GroupManagementService {
                                     "Server error occurred while creating the group or adding devices or sharing the group.",
                             response = ErrorResponse.class)
             })
-    Response createGroupWithRoles(@ApiParam(
-            name = "group",
-            value = "Define the group object with data.",
-            required = true)
-                                  @Valid DeviceGroupRoleWrapper group
-                                  );
-
+    Response createGroupWithRoles(
+            @ApiParam(
+                    name = "group",
+                    value = "Define the group object with data.",
+                    required = true)
+            @Valid DeviceGroupRoleWrapper group
+    );
 }
