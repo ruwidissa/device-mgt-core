@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import com.google.common.base.Strings;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
@@ -35,6 +36,7 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.SetReferenceTransformer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.StringUtils;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
@@ -57,6 +59,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants.PRIMARY_USER_STORE;
 
@@ -120,7 +128,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         if (limit == 0){
             limit = Constants.DEFAULT_PAGE_LIMIT;
         }
-        if (domain != null && !domain.isEmpty()) {
+        if (!Strings.isNullOrEmpty(domain)) {
             username = domain + '/' + username;
         }
         Metadata metadata;
@@ -133,7 +141,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             JSONObject jsonObject = (JSONObject) parser.parse(metaValue);
             boolean decision = (boolean) jsonObject.get(Constants.IS_USER_ABLE_TO_VIEW_ALL_ROLES);
             if (decision) {
-                if (userStore == null || "".equals(userStore)){
+                if (Strings.isNullOrEmpty(userStore)){
                     userStore = PRIMARY_USER_STORE;
                 }
                 try {

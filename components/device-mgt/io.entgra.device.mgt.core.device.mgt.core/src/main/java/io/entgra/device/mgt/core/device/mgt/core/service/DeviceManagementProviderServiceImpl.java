@@ -331,7 +331,15 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                         device.getType() + " upon the user '" + device.getEnrolmentInfo().getOwner() +
                                         "'");
                             }
-                            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(existingDevice.getId())).setDeviceType(String.valueOf(existingDevice.getType())).setOwner(newEnrolmentInfo.getOwner()).setOwnership(String.valueOf(newEnrolmentInfo.getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
+                            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder
+                                    .setDeviceId(String.valueOf(existingDevice.getId()))
+                                    .setDeviceType(String.valueOf(existingDevice.getType()))
+                                    .setOwner(newEnrolmentInfo.getOwner())
+                                    .setOwnership(String.valueOf(newEnrolmentInfo.getOwnership()))
+                                    .setTenantID(String.valueOf(tenantId))
+                                    .setTenantDomain(tenantDomain)
+                                    .setUserName(userName)
+                                    .build());
                             status = true;
                         } else {
                             log.warn("Unable to update device enrollment for device : " + device.getDeviceIdentifier() +
