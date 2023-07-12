@@ -21,6 +21,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.AppRegistrationCredentials;
 import io.entgra.device.mgt.core.device.mgt.common.ApplicationRegistrationException;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceTransferRequest;
@@ -30,6 +34,10 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementEx
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.general.TenantDetail;
 import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.OTPManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.OTPEmailTypes;
+import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
+import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import io.entgra.device.mgt.core.device.mgt.config.api.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.config.api.service.DeviceManagementConfigService;
 import io.entgra.device.mgt.core.device.mgt.config.api.util.DeviceMgtAPIUtils;
@@ -44,15 +52,18 @@ import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProvide
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -70,7 +81,8 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
     @Path("/configurations")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getConfiguration(@HeaderParam("token") String token,
-                                     @QueryParam("properties") String properties) {
+                                     @QueryParam("properties") String properties,
+                                     @QueryParam("withAccessToken") boolean withAccessToken) {
         DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
         try {
             if (token == null || token.isEmpty()) {
@@ -95,7 +107,8 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             deviceProps.put("token", token);
             DeviceConfiguration devicesConfiguration =
                     dms.getDeviceConfiguration(deviceProps);
-            setAccessTokenToDeviceConfigurations(devicesConfiguration);
+            if (withAccessToken) setAccessTokenToDeviceConfigurations(devicesConfiguration);
+                else setOTPTokenToDeviceConfigurations(devicesConfiguration);
             return Response.status(Response.Status.OK).entity(devicesConfiguration).build();
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving configurations";
@@ -204,6 +217,33 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             String msg = "Error occurred while creating JWT client : " + e.getMessage();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
+        }
+    }
+
+    private void setOTPTokenToDeviceConfigurations(DeviceConfiguration deviceConfiguration)
+            throws DeviceManagementException {
+        OneTimePinDTO oneTimePinData = new OneTimePinDTO();
+        oneTimePinData.setEmail(OTPEmailTypes.DEVICE_ENROLLMENT.toString());
+        oneTimePinData.setEmailType(OTPEmailTypes.DEVICE_ENROLLMENT.toString());
+        oneTimePinData.setUsername(deviceConfiguration.getDeviceOwner());
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                deviceConfiguration.getTenantDomain(), true);
+        oneTimePinData.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        PrivilegedCarbonContext.endTenantFlow();
+        OTPManagementService otpManagementService = DeviceMgtAPIUtils.getOtpManagementService();
+        try {
+            OneTimePinDTO oneTimePinDTO = otpManagementService.generateOneTimePin(oneTimePinData, true);
+            if (oneTimePinDTO == null) {
+                String msg = "Null value returned when generating OTP token for " + oneTimePinData.getOtpToken();
+                log.error(msg);
+                throw new DeviceManagementException(msg);
+            }
+            deviceConfiguration.setAccessToken(oneTimePinDTO.getOtpToken());
+        } catch (OTPManagementException ex) {
+            String msg = "Error occurred while generating one time pin: " + ex.getMessage();
+            log.error(msg, ex);
+            throw new DeviceManagementException(msg, ex);
         }
     }
 

@@ -39,6 +39,7 @@ import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServer
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.serviceprovider.ISServiceProviderApplicationService;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -64,6 +65,7 @@ public class APIUtil {
     private static volatile SubscriptionManager subscriptionManager;
     private static volatile ReviewManager reviewManager;
     private static volatile AppmDataHandler appmDataHandler;
+    private static volatile MetadataManagementService metadataManagementService;
 
     public static SPApplicationManager getSPApplicationManager() {
         if (SPApplicationManager == null) {
@@ -514,7 +516,22 @@ public class APIUtil {
     public static String createAppIconPath(ApplicationReleaseDTO applicationReleaseDTO, int tenantId) throws ApplicationManagementException {
         String basePath = getArtifactDownloadBaseURL() + tenantId + Constants.FORWARD_SLASH + applicationReleaseDTO
                 .getAppHashValue() + Constants.FORWARD_SLASH;
-        String iconPath = basePath + Constants.ICON_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName();
-        return iconPath;
+        return basePath + Constants.ICON_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName();
+    }
+
+    public static MetadataManagementService getMetadataManagementService() {
+        if (metadataManagementService == null) {
+            synchronized (APIUtil.class) {
+                if (metadataManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    metadataManagementService = (MetadataManagementService) ctx.getOSGiService(
+                            MetadataManagementService.class, null);
+                    if (metadataManagementService == null) {
+                        throw new IllegalStateException("Metadata Management service not initialized.");
+                    }
+                }
+            }
+        }
+        return metadataManagementService;
     }
 }

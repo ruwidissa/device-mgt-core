@@ -22,6 +22,7 @@ import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -45,12 +46,36 @@ public interface GroupDAO {
      * Note that groupId parameter is considered seperately due to the groupId parameter passed with
      * device group Payload is ignored in the add/update logic instead the internal groupId reference is used.
      *
+     * @param groups to be added.
+     * @param tenantId    of the group.
+     * @return sql execution result.
+     * @throws GroupManagementDAOException
+     */
+    int addGroupWithRoles(DeviceGroupRoleWrapper groups, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Add properties for device group.
+     * Note that groupId parameter is considered seperately due to the groupId parameter passed with
+     * device group Payload is ignored in the add/update logic instead the internal groupId reference is used.
+     *
      * @param deviceGroup to be added.
      * @param tenantId    of the group.
      * @return sql execution result.
      * @throws GroupManagementDAOException
      */
     boolean addGroupProperties(DeviceGroup deviceGroup, int groupId, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Update properties for device group.
+     * Note that groupId parameter is considered seperately due to the groupId parameter passed with
+     * device group Payload is ignored in the add/update logic instead the internal groupId reference is used.
+     *
+     * @param groups to be updated.
+     * @param tenantId    of the group.
+     * @return sql execution result.
+     * @throws GroupManagementDAOException
+     */
+    boolean addGroupPropertiesWithRoles(DeviceGroupRoleWrapper groups, int groupId, int tenantId) throws GroupManagementDAOException;
 
     /**
      * Update properties for device group.
@@ -131,6 +156,15 @@ public interface GroupDAO {
     void deleteGroupsMapping(List<Integer> groupIds, int tenantId) throws GroupManagementDAOException;
 
     /**
+     * Delete mappings of Device Groups.
+     *
+     * @param role of Device Groups.
+     * @param tenantId  of the role.
+     * @throws GroupManagementDAOException on error during deletion of mappings of groups
+     */
+    void deleteGroupsMapping(String role, int tenantId) throws GroupManagementDAOException;
+
+    /**
      * Delete existing Device Groups.
      *
      * @param groupIds of Device Groups.
@@ -185,6 +219,19 @@ public interface GroupDAO {
      * @throws GroupManagementDAOException
      */
     List<DeviceGroup> getGroups(GroupPaginationRequest paginationRequest, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Get paginated list of Device Groups in tenant with specified device group ids.
+     *
+     * @param paginationRequest to filter results.
+     * @param deviceGroupIds    of groups required.
+     * @param tenantId          of user's tenant.
+     * @param isWithParentPath      of user's ParentPath.
+     * @return List of all Device Groups in tenant.
+     * @throws GroupManagementDAOException
+     */
+    List<DeviceGroup> getGroups(GroupPaginationRequest paginationRequest, List<Integer> deviceGroupIds,
+                                int tenantId, boolean isWithParentPath) throws GroupManagementDAOException;
 
     /**
      * Get paginated list of Device Groups in tenant with specified device group ids.
