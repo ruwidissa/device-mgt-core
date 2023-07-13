@@ -157,6 +157,15 @@ public interface GroupDAO {
     void deleteGroupsMapping(List<Integer> groupIds, int tenantId) throws GroupManagementDAOException;
 
     /**
+     * Delete mappings of Device Groups.
+     *
+     * @param role of Device Groups.
+     * @param tenantId  of the role.
+     * @throws GroupManagementDAOException on error during deletion of mappings of groups
+     */
+    void deleteGroupsMapping(String role, int tenantId) throws GroupManagementDAOException;
+
+    /**
      * Delete existing Device Groups.
      *
      * @param groupIds of Device Groups.
@@ -211,6 +220,19 @@ public interface GroupDAO {
      * @throws GroupManagementDAOException
      */
     List<DeviceGroup> getGroups(GroupPaginationRequest paginationRequest, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Get paginated list of Device Groups in tenant with specified device group ids.
+     *
+     * @param paginationRequest to filter results.
+     * @param deviceGroupIds    of groups required.
+     * @param tenantId          of user's tenant.
+     * @param isWithParentPath      of user's ParentPath.
+     * @return List of all Device Groups in tenant.
+     * @throws GroupManagementDAOException
+     */
+    List<DeviceGroup> getGroups(GroupPaginationRequest paginationRequest, List<Integer> deviceGroupIds,
+                                int tenantId, boolean isWithParentPath) throws GroupManagementDAOException;
 
     /**
      * Get paginated list of Device Groups in tenant with specified device group ids.

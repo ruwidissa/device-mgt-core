@@ -25,6 +25,7 @@ public class QREnrollmentDetails {
     String username;
     String enrollmentMode;
     Map<String, String> customValues;
+    int tokenExpiry;
 
     public Map<String, String> getCustomValues() {
         return customValues;
@@ -45,4 +46,12 @@ public class QREnrollmentDetails {
     public String getEnrollmentMode() { return enrollmentMode; }
 
     public void setEnrollmentMode(String enrollmentMode) { this.enrollmentMode = enrollmentMode; }
+
+    public int getTokenExpiry() {
+        return tokenExpiry;
+    }
+
+    public void setTokenExpiry(int tokenExpiry) {
+        this.tokenExpiry = tokenExpiry;
+    }
 }
