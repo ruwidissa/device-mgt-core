@@ -800,9 +800,14 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo accessTokenInfo;
         try {
             if (username == null || password == null) {
-                apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+                apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                        "ClientForConsumerRestCalls",
+                        "client_credentials password refresh_token urn:ietf:params:oauth:grant-type:jwt-bearer");
             } else {
-                apiApplicationKey = apiApplicationServices.generateAndRetrieveApplicationKeys(username, password);
+                apiApplicationKey = apiApplicationServices.generateAndRetrieveApplicationKeys(
+                        "ClientForConsumerRestCalls",
+                        username, password,
+                        "client_credentials password refresh_token urn:ietf:params:oauth:grant-type:jwt-bearer");
             }
             accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
