@@ -247,14 +247,15 @@ public interface CertificateManagementAdminService {
      *
      * @return paginated result of certificate.
      */
+
     @GET
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "Getting Details of Certificates",
-            notes = "Get all the details of the certificates you have used for mutual SSL. In a situation where you wish to "
-                    + "view all the certificate details, it is not feasible to show all the details on one "
+            value = "Getting Details of search Certificates",
+            notes = "Get all the details of the search certificates you have used for mutual SSL. In a situation where you wish to "
+                    + "view all the search certificate details, it is not feasible to show all the details on one "
                     + "page. Therefore, the details are paginated.",
             tags = "Certificate Management",
             extensions = {
@@ -308,6 +309,31 @@ public interface CertificateManagementAdminService {
     })
     Response getAllCertificates(
             @ApiParam(
+                    name = "serialNumber",
+                    value = "The serial number of the certificates",
+                    required = false,
+                    defaultValue = "0")
+            @QueryParam("serialNumber") String serialNumber,
+            @ApiParam(
+                    name = "deviceIdentifier",
+                    value = "The device identifier of the certificates",
+                    required = false,
+                    defaultValue = "0")
+            @QueryParam("deviceIdentifier") String deviceIdentifier,
+            @ApiParam(
+                    name = "username",
+                    value = "User name of the certificate added user" ,
+                    required = false,
+                    defaultValue = "0")
+            @QueryParam("username") String username,
+            @ApiParam(
+                    name = "If-Modified-Since",
+                    value = "Checks if the requested variant was modified, since the specified date-time. \n" +
+                            "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
+                    required = false)
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @ApiParam(
                     name = "offset",
                     value = "The starting pagination index for the complete list of qualified items.",
                     required = false,
@@ -318,14 +344,7 @@ public interface CertificateManagementAdminService {
                     value = "Provide how many certificate details you require from the starting pagination index/offset.",
                     required = false,
                     defaultValue = "5")
-            @QueryParam("limit") int limit,
-            @ApiParam(
-                    name = "If-Modified-Since",
-                    value = "Checks if the requested variant was modified, since the specified date-time. \n" +
-                            "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
-                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
-                    required = false)
-            @HeaderParam("If-Modified-Since") String ifModifiedSince);
+            @QueryParam("limit") int limit);
 
     @DELETE
     @ApiOperation(

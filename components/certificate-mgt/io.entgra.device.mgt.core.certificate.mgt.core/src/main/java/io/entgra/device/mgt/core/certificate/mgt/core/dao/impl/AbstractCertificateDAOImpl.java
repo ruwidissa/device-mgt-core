@@ -237,7 +237,7 @@ public abstract class AbstractCertificateDAOImpl implements CertificateDAO{
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             Connection conn = this.getConnection();
-            String sql = "SELECT CERTIFICATE, SERIAL_NUMBER, ID, DEVICE_IDENTIFIER, TENANT_ID, USERNAME"
+            String sql = "SELECT CERTIFICATE, SERIAL_NUMBER, TENANT_ID, USERNAME"
                          + " FROM DM_DEVICE_CERTIFICATE WHERE TENANT_ID = ? ORDER BY ID DESC";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
@@ -247,8 +247,6 @@ public abstract class AbstractCertificateDAOImpl implements CertificateDAO{
                 certificateResponse = new CertificateResponse();
                 byte[] certificateBytes = resultSet.getBytes("CERTIFICATE");
                 certificateResponse.setSerialNumber(resultSet.getString("SERIAL_NUMBER"));
-                certificateResponse.setCertificateId(resultSet.getString("ID"));
-                certificateResponse.setDeviceIdentifier(resultSet.getString("DEVICE_IDENTIFIER"));
                 certificateResponse.setTenantId(resultSet.getInt("TENANT_ID"));
                 certificateResponse.setUsername(resultSet.getString("USERNAME"));
                 CertificateGenerator.extractCertificateDetails(certificateBytes, certificateResponse);
@@ -265,7 +263,7 @@ public abstract class AbstractCertificateDAOImpl implements CertificateDAO{
     }
 
     @Override
-    public boolean removeCertificate(String certificateId) throws CertificateManagementDAOException {
+    public boolean removeCertificate(String serialNumber) throws CertificateManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
@@ -273,15 +271,15 @@ public abstract class AbstractCertificateDAOImpl implements CertificateDAO{
         try {
             conn = this.getConnection();
             String query =
-                    "DELETE FROM DM_DEVICE_CERTIFICATE WHERE ID = ?" +
+                    "DELETE FROM DM_DEVICE_CERTIFICATE WHERE SERIAL_NUMBER = ?" +
                     " AND TENANT_ID = ? ";
             stmt = conn.prepareStatement(query);
-            stmt.setString(1, certificateId);
+            stmt.setString(1, serialNumber);
             stmt.setInt(2, tenantId);
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            String msg = "Unable to get the read the certificate with certificate id" + certificateId;
+            String msg = "Unable to get the read the certificate with serialNumber" + serialNumber;
             log.error(msg, e);
             throw new CertificateManagementDAOException(msg, e);
         } finally {

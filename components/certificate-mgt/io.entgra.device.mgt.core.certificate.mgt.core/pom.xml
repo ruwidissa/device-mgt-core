@@ -95,7 +95,8 @@
                             io.entgra.device.mgt.core.device.mgt.core.*,
                             org.wso2.carbon.registry.indexing.*,
                             javax.cache.*,
-                            javax.naming.ldap
+                            javax.naming.ldap,
+                            com.google.gson.*
                             <!--org.bouncycastle.pkcs.jcajce-->
                         </Import-Package>
                         <Export-Package>
@@ -252,6 +253,10 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
         </dependency>
     </dependencies>
 </project>

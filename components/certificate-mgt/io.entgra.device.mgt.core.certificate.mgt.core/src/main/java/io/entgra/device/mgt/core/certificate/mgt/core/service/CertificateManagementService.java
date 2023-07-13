@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.certificate.mgt.core.service;
 
+import io.entgra.device.mgt.core.device.mgt.common.CertificatePaginationRequest;
 import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
 import io.entgra.device.mgt.core.certificate.mgt.core.dto.SCEPResponse;
 import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
@@ -71,9 +72,11 @@ public interface CertificateManagementService {
 
     CertificateResponse retrieveCertificate(String serialNumber) throws CertificateManagementException;
 
-    PaginationResult getAllCertificates(int rowNum, int limit) throws CertificateManagementException;
+    PaginationResult getAllCertificates(CertificatePaginationRequest request) throws CertificateManagementException;
 
-    boolean removeCertificate(String certificateId) throws CertificateManagementException;
+    boolean removeCertificate(String serialNumber) throws CertificateManagementException;
+
+    boolean getValidateMetaValue() throws CertificateManagementException;
 
     List<CertificateResponse> getCertificates() throws CertificateManagementException;
 

@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.dao.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.CertificatePaginationRequest;
 import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
 import io.entgra.device.mgt.core.certificate.mgt.core.impl.CertificateGenerator;
 import org.apache.commons.logging.Log;
@@ -47,47 +48,120 @@ public class GenericCertificateDAOImpl extends AbstractCertificateDAOImpl {
     private Connection getConnection() throws SQLException {
         return CertificateManagementDAOFactory.getConnection();
     }
-    private int getCertificateCount(int tenantId) throws CertificateManagementDAOException, SQLException {
+
+    private int getCertificateCount(CertificatePaginationRequest request) throws CertificateManagementDAOException {
         int certificateCount = 0;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String serialNumber = request.getSerialNumber();
+        String deviceIdentifier = request.getDeviceIdentifier();
+        String username = request.getUsername();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
         try {
             Connection conn = this.getConnection();
-            String sql =
-                    "SELECT COUNT(*) AS DEVICE_CERTIFICATE_COUNT FROM DM_DEVICE_CERTIFICATE WHERE TENANT_ID = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, tenantId);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        certificateCount = rs.getInt("DEVICE_CERTIFICATE_COUNT");
-                    }
-                }
+            StringBuilder queryBuilder = new StringBuilder("SELECT COUNT(*) AS DEVICE_CERTIFICATE_COUNT FROM DM_DEVICE_CERTIFICATE WHERE TENANT_ID = ?");
+
+            if (serialNumber != null && !serialNumber.isEmpty()) {
+                queryBuilder.append(" AND SERIAL_NUMBER = ?");
+            }
+
+            if (deviceIdentifier != null && !deviceIdentifier.isEmpty()) {
+                queryBuilder.append(" AND DEVICE_IDENTIFIER = ?");
+            }
+
+            if (username != null && !username.isEmpty()) {
+                queryBuilder.append(" AND USERNAME LIKE ?");
+            }
+
+            String sql = queryBuilder.toString();
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+
+            int paramIdx = 2;
+            if (serialNumber != null && !serialNumber.isEmpty()) {
+                stmt.setString(paramIdx++, serialNumber);
+            }
+
+            if (deviceIdentifier != null && !deviceIdentifier.isEmpty()) {
+                stmt.setString(paramIdx++, deviceIdentifier);
+            }
+
+            if (username != null && !username.isEmpty()) {
+                stmt.setString(paramIdx, "%" + username + "%");
+            }
+
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                certificateCount = rs.getInt("DEVICE_CERTIFICATE_COUNT");
             }
         } catch (SQLException e) {
-            String errorMsg = "SQL error occurred while retrieving the certificates.";
+            String errorMsg = "SQL error occurred while retrieving the certificate count.";
             log.error(errorMsg, e);
             throw new CertificateManagementDAOException(errorMsg, e);
+        } finally {
+            CertificateManagementDAOUtil.cleanupResources(stmt, rs);
         }
+
         return certificateCount;
     }
 
+
+
     @Override
-    public PaginationResult getAllCertificates(int rowNum, int limit) throws CertificateManagementDAOException {
+    public PaginationResult getAllCertificates(CertificatePaginationRequest request) throws CertificateManagementDAOException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         CertificateResponse certificateResponse;
         List<CertificateResponse> certificates = new ArrayList<>();
         PaginationResult paginationResult;
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String serialNumber = request.getSerialNumber();
+        String deviceIdentifier = request.getDeviceIdentifier();
+        String username = request.getUsername();
+        boolean isCertificateSerialNumberProvided = false;
+        boolean isCertificateDeviceIdentifierProvided = false;
+        boolean isCertificateUsernameProvided = false;
+
         try {
             Connection conn = this.getConnection();
-            String sql = "SELECT CERTIFICATE, SERIAL_NUMBER, ID, DEVICE_IDENTIFIER, TENANT_ID, USERNAME FROM "
-                         + "DM_DEVICE_CERTIFICATE WHERE TENANT_ID = ? ORDER BY ID DESC LIMIT ?,?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, tenantId);
-            stmt.setInt(2, rowNum);
-            stmt.setInt(3, limit);
-            resultSet = stmt.executeQuery();
+            String query = "SELECT * " +
+                    "FROM DM_DEVICE_CERTIFICATE " +
+                    "WHERE TENANT_ID = ? ";
+            if (serialNumber != null && !serialNumber.isEmpty()) {
+                query += "AND SERIAL_NUMBER = ? ";
+                isCertificateSerialNumberProvided = true;
+            }
 
-            int resultCount = 0;
+            if (deviceIdentifier != null && !deviceIdentifier.isEmpty()) {
+                query += "AND DEVICE_IDENTIFIER = ? ";
+                isCertificateDeviceIdentifierProvided = true;
+            }
+
+            if (username != null && !username.isEmpty()) {
+                query += "AND USERNAME LIKE ? ";
+                isCertificateUsernameProvided = true;
+            }
+
+            query += "ORDER BY ID LIMIT ?,?";
+
+            stmt = conn.prepareStatement(query);
+            int paramIdx = 1;
+            stmt.setInt(paramIdx++, tenantId);
+            if (isCertificateSerialNumberProvided) {
+                stmt.setString(paramIdx++, serialNumber);
+            }
+            if (isCertificateDeviceIdentifierProvided) {
+                stmt.setString(paramIdx++, deviceIdentifier);
+            }
+            if (isCertificateUsernameProvided) {
+                stmt.setString(paramIdx++, "%" + username + "%");
+            }
+            stmt.setInt(paramIdx++, request.getStartIndex());
+            stmt.setInt(paramIdx++, request.getRowCount());
+            resultSet = stmt.executeQuery();
             while (resultSet.next()) {
                 certificateResponse = new CertificateResponse();
                 byte[] certificateBytes = resultSet.getBytes("CERTIFICATE");
@@ -98,11 +172,11 @@ public class GenericCertificateDAOImpl extends AbstractCertificateDAOImpl {
                 certificateResponse.setUsername(resultSet.getString("USERNAME"));
                 CertificateGenerator.extractCertificateDetails(certificateBytes, certificateResponse);
                 certificates.add(certificateResponse);
-                resultCount++;
             }
             paginationResult = new PaginationResult();
             paginationResult.setData(certificates);
-            paginationResult.setRecordsTotal(this.getCertificateCount(tenantId));
+            paginationResult.setRecordsTotal(this.getCertificateCount(request));
+
         } catch (SQLException e) {
             String errorMsg = "SQL error occurred while retrieving the certificates.";
             log.error(errorMsg, e);
