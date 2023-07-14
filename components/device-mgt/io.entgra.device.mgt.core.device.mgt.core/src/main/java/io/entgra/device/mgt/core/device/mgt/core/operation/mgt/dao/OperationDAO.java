@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao;
 
 import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationResponse;
@@ -46,7 +47,11 @@ public interface OperationDAO {
 
     int getOperationCountForDevice(int enrolmentId, PaginationRequest request) throws OperationManagementDAOException;
 
+    int getOperationCountForDeviceWithDeviceIdentifier(DeviceIdentifier deviceId, PaginationRequest request) throws OperationManagementDAOException;
+
     List<? extends Operation> getOperationsForDevice(int enrolmentId, PaginationRequest request) throws OperationManagementDAOException;
+
+    List<? extends Operation> getOperationsForDeviceByDeviceIdentifier(DeviceIdentifier deviceId, PaginationRequest request) throws OperationManagementDAOException;
 
     Operation getNextOperation(int enrolmentId, Operation.Status status) throws OperationManagementDAOException;
 
