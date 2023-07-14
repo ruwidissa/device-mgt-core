@@ -169,6 +169,46 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             throw new GroupManagementDAOException(msg, e);
         }
     }
+
+    @Override
+    public List<DeviceGroup> getGroups(List<Integer> deviceGroupIds, int tenantId) throws GroupManagementDAOException {
+        int deviceGroupIdsCount = deviceGroupIds.size();
+        if (deviceGroupIdsCount == 0) {
+            return new ArrayList<>();
+        }
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH, PARENT_GROUP_ID FROM DM_GROUP WHERE TENANT_ID = ?";
+
+            sql += " AND ID IN (";
+            for (int i = 0; i < deviceGroupIdsCount; i++) {
+                sql += (deviceGroupIdsCount - 1 != i) ? "?," : "?";
+            }
+                sql += ")";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, tenantId);
+
+                for (Integer deviceGroupId : deviceGroupIds) {
+                    stmt.setInt(paramIndex++, deviceGroupId);
+                }
+                List<DeviceGroup> deviceGroupList = new ArrayList<>();
+                try (ResultSet resultSet = stmt.executeQuery()) {
+                    while (resultSet.next()) {
+                        deviceGroupList.add(GroupManagementDAOUtil.loadGroup(resultSet));
+                    }
+                }
+                return deviceGroupList;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving groups of groups IDs " + deviceGroupIds
+                    +  " in tenant: " + tenantId;
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
+        }
+    }
+
+
     @Override
     public List<DeviceGroup> getGroups(GroupPaginationRequest request, List<Integer> deviceGroupIds,
                                        int tenantId, boolean isWithParentPath) throws GroupManagementDAOException {
