@@ -26,6 +26,7 @@ public class DepConfig {
     private String accessToken;
     private String accessSecret;
     private String accessTokenExpiry;
+    private String vppToken;
 
     public String getAgentPackageName() {
         return agentPackageName;
@@ -57,6 +58,14 @@ public class DepConfig {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public String getVppToken() {
+        return vppToken;
+    }
+
+    public void setVppToken(String vppToken) {
+        this.vppToken = vppToken;
     }
 
     public String getAccessSecret() {

@@ -591,7 +591,7 @@ public class VppApplicationManagerImpl implements VPPApplicationManager {
 
                 Gson g = new Gson();
                 DepConfig depConfigs = g.fromJson(metadata.getMetaValue(), DepConfig.class);
-                token =  depConfigs.getAccessToken();
+                token =  depConfigs.getVppToken();
                 return token;
             }
         }catch (MetadataManagementException e) {

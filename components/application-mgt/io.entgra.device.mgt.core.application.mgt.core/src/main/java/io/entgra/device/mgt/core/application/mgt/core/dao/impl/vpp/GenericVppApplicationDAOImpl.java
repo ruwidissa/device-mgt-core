@@ -174,7 +174,7 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
                 + "CREATED_TIME, "
                 + "LAST_UPDATED_TIME, "
                 + "MANAGED_ID, "
-                + "TEMP_PASSWORD "
+                + "TEMP_PASSWORD, "
                 + "DM_USERNAME "
                 + "FROM AP_VPP_USER "
                 + "WHERE DM_USERNAME = ? AND TENANT_ID = ?";
