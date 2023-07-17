@@ -57,11 +57,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -564,33 +560,38 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             throw new GroupManagementException(msg);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Get groups with hierarchy " + request.toString());
+            log.debug("Get groups with hierarchy " + request);
         }
-        boolean isWithParentPath = false;
         DeviceManagerUtil.validateGroupListPageSize(request);
         List<DeviceGroup> rootGroups;
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             request.setParentPath(DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
+            String parentPath;
+            List<DeviceGroup> childrenGroups;
             if (StringUtils.isBlank(username)) {
                 GroupManagementDAOFactory.openConnection();
                 rootGroups = groupDAO.getGroups(request, tenantId);
+                for (DeviceGroup rootGroup : rootGroups) {
+                    parentPath = DeviceManagerUtil.createParentPath(rootGroup);
+                    childrenGroups = groupDAO.getChildrenGroups(parentPath, tenantId);
+                    createGroupWithChildren(
+                            rootGroup, childrenGroups, requireGroupProps, tenantId, request.getDepth(), 0);
+                    if (requireGroupProps) {
+                        populateGroupProperties(rootGroup, tenantId);
+                    }
+                }
             } else {
                 List<Integer> allDeviceGroupIdsOfUser = getGroupIds(username);
                 GroupManagementDAOFactory.openConnection();
-                rootGroups = this.groupDAO.getGroups(request, allDeviceGroupIdsOfUser, tenantId, isWithParentPath);
-            }
-            String parentPath;
-            List<DeviceGroup> childrenGroups;
-            for (DeviceGroup rootGroup : rootGroups) {
-                parentPath = DeviceManagerUtil.createParentPath(rootGroup);
-                childrenGroups = groupDAO.getChildrenGroups(parentPath, tenantId);
-                createGroupWithChildren(
-                        rootGroup, childrenGroups, requireGroupProps, tenantId, request.getDepth(), 0);
+                rootGroups = this.getGroups(allDeviceGroupIdsOfUser, tenantId);
                 if (requireGroupProps) {
-                    populateGroupProperties(rootGroup, tenantId);
+                    for (DeviceGroup rootGroup : rootGroups) {
+                        populateGroupProperties(rootGroup, tenantId);
+                    }
                 }
             }
+
         } catch (GroupManagementDAOException e) {
             String msg = "Error occurred while retrieving all groups with hierarchy";
             log.error(msg, e);
@@ -611,6 +612,49 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             groupResult.setRecordsTotal(getGroupCount(username, request.getParentPath()));
         }
         return groupResult;
+    }
+
+    private List<DeviceGroup> getGroups(List<Integer> groupIds, int tenantId) throws GroupManagementException {
+        try {
+            List<DeviceGroup >groups = groupDAO.getGroups(groupIds, tenantId);
+            if (groups == null) {
+                String msg = "Retrieved null when getting groups for group ids " + groupIds.toString();
+                log.error(msg);
+                throw new GroupManagementException(msg);
+            }
+            if (groups.isEmpty()) return groups;
+            groups.sort(Comparator.comparing(DeviceGroup::getGroupId));
+            return getTree(groups);
+        } catch (GroupManagementDAOException ex) {
+            String msg = "Error occurred while getting groups for group ids " + groupIds.toString();
+            log.error(msg, ex);
+            throw new GroupManagementException(msg, ex);
+        }
+    }
+
+    private List<DeviceGroup> getTree(List<DeviceGroup> groups) {
+        List<DeviceGroup> tree = new ArrayList<>();
+        for (DeviceGroup deviceGroup : groups) {
+            DeviceGroup treeNode = tree.stream().
+                    filter(node -> deviceGroup.getParentPath().
+                            contains(Integer.toString(node.getGroupId()))).
+                    findFirst().orElse(null);
+            if (treeNode != null) {
+                if (Objects.equals(treeNode.getParentPath(), deviceGroup.getParentPath())) {
+                    tree.add(deviceGroup);
+                } else {
+                    List<DeviceGroup> tempGroups = treeNode.getChildrenGroups();
+                    if (tempGroups == null) {
+                        tempGroups = new ArrayList<>();
+                    }
+                    tempGroups.add(deviceGroup);
+                    treeNode.setChildrenGroups(getTree(tempGroups));
+                }
+            } else {
+                tree.add(deviceGroup);
+            }
+        }
+        return tree;
     }
 
     @Override
