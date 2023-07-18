@@ -480,6 +480,7 @@ public class OperationManagerImpl implements OperationManager {
                     int failAttempts = 0;
                     while (true) {
                         try {
+                            OperationManagementDAOFactory.beginTransaction();
                             operationMappingDAO.updateOperationMapping(operation.getId(), device.getEnrolmentInfo().getId(),
                                     io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.PushNotificationStatus.SCHEDULED);
                             OperationManagementDAOFactory.commitTransaction();
@@ -502,6 +503,11 @@ public class OperationManagerImpl implements OperationManager {
                             } catch (InterruptedException ignore) {
                                 break;
                             }
+                        } catch (TransactionManagementException ex) {
+                            log.error("Error occurred while initiating the transaction", ex);
+                            break;
+                        } finally {
+                            OperationManagementDAOFactory.closeConnection();
                         }
                     }
                 } catch (Exception e) {
@@ -641,23 +647,34 @@ public class OperationManagerImpl implements OperationManager {
                     deviceId.getType() + "' device, which carries the identifier '" +
                     deviceId.getId() + "' of owner '" + owner + "'");
         }
-        EnrolmentInfo enrolmentInfo = this.getEnrolmentInfo(deviceId, request);
-        if (enrolmentInfo == null){
-            throw new OperationManagementException("Enrollment info not found for given device which has device "
-                    + "Identifier:" + deviceId.getId() + " and device type: " + deviceId.getType() + "Further, device "
-                    + "is own to: " + owner);
+
+        paginationResult = new PaginationResult();
+        int enrolmentId = 0;
+        List<? extends io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation> operationList;
+        int count;
+
+        if (owner != null) {
+            EnrolmentInfo enrolmentInfo = this.getEnrolmentInfo(deviceId, request);
+            if (enrolmentInfo == null) {
+                throw new OperationManagementException("Enrollment info not found for given device which has device "
+                        + "Identifier:" + deviceId.getId() + " and device type: " + deviceId.getType() + "Further, device "
+                        + "is own to: " + owner);
+            }
+            enrolmentId = enrolmentInfo.getId();
         }
-        int enrolmentId = enrolmentInfo.getId();
         try {
             OperationManagementDAOFactory.openConnection();
-            List<? extends io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation> operationList =
-                    operationDAO.getOperationsForDevice(enrolmentId, request);
+            if (owner != null) {
+                operationList = operationDAO.getOperationsForDevice(enrolmentId, request);
+                count = operationDAO.getOperationCountForDevice(enrolmentId, request);
+            } else {
+                operationList = operationDAO.getOperationsForDeviceByDeviceIdentifier(deviceId, request);
+                count = operationDAO.getOperationCountForDeviceWithDeviceIdentifier(deviceId, request);
+            }
             for (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation dtoOperation : operationList) {
                 Operation operation = OperationDAOUtil.convertOperation(dtoOperation);
                 operations.add(operation);
             }
-            paginationResult = new PaginationResult();
-            int count = operationDAO.getOperationCountForDevice(enrolmentId, request);
             paginationResult.setData(operations);
             paginationResult.setRecordsTotal(count);
             paginationResult.setRecordsFiltered(count);
@@ -1587,7 +1604,7 @@ public class OperationManagerImpl implements OperationManager {
             return deviceSpecificOperation != null;
         } catch (OperationManagementDAOException e) {
             String msg = "Error occurred while checking if operation with operation id "
-                    + operationId +" exist for " + deviceId.getType() + "' device '" + deviceId.getId() + "'";
+                    + operationId + " exist for " + deviceId.getType() + "' device '" + deviceId.getId() + "'";
             log.error(msg, e);
             throw new OperationManagementException(msg, e);
         } catch (SQLException e) {

@@ -358,15 +358,31 @@ public class CertificateGenerator {
         CertificateResponse lookUpCertificate = null;
         KeyStoreReader keyStoreReader = new KeyStoreReader();
         if (distinguishedName != null && !distinguishedName.isEmpty()) {
-            if (distinguishedName.contains("/CN=")) {
-                String[] dnSplits = distinguishedName.split("/");
-                for (String dnPart : dnSplits) {
-                    if (dnPart.contains("CN=")) {
-                        String commonNameExtracted = dnPart.replace("CN=", "");
-                        lookUpCertificate = keyStoreReader.getCertificateBySerial(commonNameExtracted);
-                        break;
+            if (distinguishedName.contains("CN=")) {
+                String[] dnSplits = null;
+                if (distinguishedName.contains("/")) {
+                    dnSplits = distinguishedName.split("/");
+                } else if (distinguishedName.contains(",")) {
+                    //some older versions of nginx will forward the client certificate subject dn separated with commas
+                    dnSplits = distinguishedName.split(",");
+                }
+                String commonNameExtracted = null;
+                int tenantId = 0;
+                if (dnSplits != null && dnSplits.length >= 1) {
+                    for (String dnPart : dnSplits) {
+                        if (dnPart.contains("CN=")) {
+                            commonNameExtracted = dnPart.replace("CN=", "");
+                        } else if (dnPart.contains("OU=")) {
+                            //the OU of the certificate will be like OU=tenant_<TENANT_ID> ex: OU=tenant_-1234
+                            //splitting by underscore to extract the tenant domain
+                            String[] orgUnitSplits = dnPart.split("_");
+                            tenantId = Integer.parseInt(orgUnitSplits[1]);
+                        }
                     }
                 }
+
+                lookUpCertificate = keyStoreReader.getCertificateBySerial(commonNameExtracted, tenantId);
+
             } else {
                 LdapName ldapName;
                 try {
@@ -689,6 +705,30 @@ public class CertificateGenerator {
             throw new KeystoreException(errorMsg, e);
         } catch (IOException e) {
             String errorMsg = "Input output issue occurred in getCACert";
+            log.error(errorMsg);
+            throw new KeystoreException(errorMsg, e);
+        }
+    }
+
+    public void saveCertificate(io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate
+                                     certificate) throws KeystoreException {
+
+        if (certificate == null) {
+            return;
+        }
+
+        try {
+            CertificateDAO certificateDAO = CertificateManagementDAOFactory.getCertificateDAO();
+            CertificateManagementDAOFactory.beginTransaction();
+            certificateDAO.addCertificate(certificate);
+            CertificateManagementDAOFactory.commitTransaction();
+        } catch (CertificateManagementDAOException e) {
+            String errorMsg = "Error occurred when saving the generated certificate in database";
+            log.error(errorMsg);
+            CertificateManagementDAOFactory.rollbackTransaction();
+            throw new KeystoreException(errorMsg, e);
+        } catch (TransactionManagementException e) {
+            String errorMsg = "Error occurred when saving the generated certificate in database";
             log.error(errorMsg);
             throw new KeystoreException(errorMsg, e);
         }

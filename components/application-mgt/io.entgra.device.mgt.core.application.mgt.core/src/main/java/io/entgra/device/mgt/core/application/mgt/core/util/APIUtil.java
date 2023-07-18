@@ -569,7 +569,22 @@ public class APIUtil {
     public static String createAppIconPath(ApplicationReleaseDTO applicationReleaseDTO, int tenantId) throws ApplicationManagementException {
         String basePath = getArtifactDownloadBaseURL() + tenantId + Constants.FORWARD_SLASH + applicationReleaseDTO
                 .getAppHashValue() + Constants.FORWARD_SLASH;
-        String iconPath = basePath + Constants.ICON_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName();
-        return iconPath;
+        return basePath + Constants.ICON_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName();
+    }
+
+    public static MetadataManagementService getMetadataManagementService() {
+        if (metadataManagementService == null) {
+            synchronized (APIUtil.class) {
+                if (metadataManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    metadataManagementService = (MetadataManagementService) ctx.getOSGiService(
+                            MetadataManagementService.class, null);
+                    if (metadataManagementService == null) {
+                        throw new IllegalStateException("Metadata Management service not initialized.");
+                    }
+                }
+            }
+        }
+        return metadataManagementService;
     }
 }

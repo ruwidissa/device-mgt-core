@@ -17,7 +17,13 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import org.apache.commons.logging.Log;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -95,6 +101,96 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
+    }
+
+    @GET
+    @Path("/visible/{metaKey}")
+    @Override
+    public Response getVisibleRole(
+            @QueryParam("filter") String filter,
+            @QueryParam("user-store") String userStore,
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @QueryParam("offset") int offset,
+            @QueryParam("limit") int limit,
+            @QueryParam("username") String username,
+            @QueryParam("domain") String domain,
+            @PathParam("metaKey") String metaKey) {
+        RequestValidationUtil.validatePaginationParameters(offset, limit);
+        if (limit == 0){
+            limit = Constants.DEFAULT_PAGE_LIMIT;
+        }
+        if (domain != null && !domain.isEmpty()) {
+            username = domain + '/' + username;
+        }
+        Metadata metadata;
+        List<String> visibleRoles;
+        RoleList visibleRoleList = new RoleList();
+        try {
+            metadata = DeviceMgtAPIUtils.getMetadataManagementService().retrieveMetadata(metaKey);
+            String metaValue = metadata.getMetaValue();
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) parser.parse(metaValue);
+            boolean decision = (boolean) jsonObject.get(Constants.IS_USER_ABLE_TO_VIEW_ALL_ROLES);
+            if (decision) {
+                if (userStore == null || "".equals(userStore)){
+                    userStore = PRIMARY_USER_STORE;
+                }
+                try {
+                    visibleRoles = getRolesFromUserStore(filter, userStore);
+                    visibleRoleList.setList(visibleRoles);
+
+                    visibleRoles = FilteringUtil.getFilteredList(getRolesFromUserStore(filter, userStore), offset, limit);
+                    visibleRoleList.setList(visibleRoles);
+
+                    return Response.status(Response.Status.OK).entity(visibleRoleList).build();
+                } catch (UserStoreException e) {
+                    String msg = "Error occurred while retrieving roles from the underlying user stores";
+                    log.error(msg, e);
+                    return Response.serverError().entity(
+                            new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+                }
+            } else {
+                try {
+                    UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
+                    if (!userStoreManager.isExistingUser(username)) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("User by username: " + username + " does not exist for role retrieval.");
+                        }
+                        String msg = "User by username: " + username + " does not exist for role retrieval.";
+                        return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+                    }
+                    visibleRoleList.setList(getFilteredVisibleRoles(userStoreManager, username));
+
+                    return Response.status(Response.Status.OK).entity(visibleRoleList).build();
+                } catch (UserStoreException e) {
+                    String msg = "Error occurred while trying to retrieve roles of the user '" + username + "'";
+                    log.error(msg, e);
+                    return Response.serverError().entity(
+                            new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+                }
+            }
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while getting the metadata entry for metaKey:" + metaKey;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (ParseException e) {
+            String msg = "Error occurred while parsing JSON metadata: " + e.getMessage();
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    private List<String> getFilteredVisibleRoles(UserStoreManager userStoreManager, String username)
+            throws UserStoreException {
+        String[] roleListOfUser;
+        roleListOfUser = userStoreManager.getRoleListOfUser(username);
+        List<String> filteredRoles = new ArrayList<>();
+        for (String role : roleListOfUser) {
+            if (!(role.startsWith("Internal/") || role.startsWith("Authentication/"))) {
+                filteredRoles.add(role);
+            }
+        }
+        return filteredRoles;
     }
 
     @GET
@@ -542,6 +638,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     @Consumes(MediaType.WILDCARD)
     @Override
     public Response deleteRole(@PathParam("roleName") String roleName, @QueryParam("user-store") String userStoreName) {
+        String roleToDelete = roleName;
         if (userStoreName != null && !userStoreName.isEmpty()) {
             roleName = userStoreName + "/" + roleName;
         }
@@ -549,6 +646,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         try {
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             final UserStoreManager userStoreManager = userRealm.getUserStoreManager();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             if (!userStoreManager.isExistingRole(roleName)) {
                 String msg = "No role exists with the name : " + roleName ;
                 return Response.status(404).entity(msg).build();
@@ -558,13 +656,15 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             if (log.isDebugEnabled()) {
                 log.debug("Deleting the role in user store");
             }
-            userStoreManager.deleteRole(roleName);
-            // Delete all authorizations for the current role before deleting
-            authorizationManager.clearRoleAuthorization(roleName);
-
+            DeviceMgtAPIUtils.getGroupManagementProviderService().deleteRoleAndRoleGroupMapping(roleName, roleToDelete, tenantId, userStoreManager, authorizationManager);
             return Response.status(Response.Status.OK).build();
         } catch (UserStoreException e) {
             String msg = "Error occurred while deleting the role '" + roleName + "'";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (GroupManagementException e) {
+            String msg = "Error occurred while deleting group-role mapping records";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -597,7 +697,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             userStoreManager.updateUserListOfRole(roleName, usersToDelete, usersToAdd);
 
             return Response.status(Response.Status.OK).entity("Role '" + roleName + "' has " +
-                    "successfully been updated with the user list")
+                            "successfully been updated with the user list")
                     .build();
         } catch (UserStoreException e) {
             String msg = "Error occurred while updating the users of the role '" + roleName + "'";

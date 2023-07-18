@@ -187,6 +187,104 @@ public interface RoleManagementService {
                     defaultValue = "5")
             @QueryParam("limit") int limit);
 
+    @GET
+    @Path("/visible/{metaKey}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting the List of Visible Roles",
+            notes = "WSO2 IoTS supports role-based access control (RBAC) and role management. Using this API you can the list of roles that are in WSO2 IoTS.\n" +
+                    "Note: Internal roles, roles created for service-providers, and application related roles will not be given in the output.",
+            tags = "Role Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK. \n Successfully fetched the list of roles in WSO2 IoTS.",
+                    response = RoleList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource has been modified the last time.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client already has the latest version of the " +
+                            "requested resource."),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n The specified resource does not exist.\n",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the list of roles" +
+                            " assigned to the specified user.",
+                    response = ErrorResponse.class)
+    })
+    Response getVisibleRole(
+            @ApiParam(
+                    name = "filter",
+                    value = "Provide a character or a few characters in the role name.",
+                    required = false)
+            @QueryParam("filter") String filter,
+            @ApiParam(
+                    name = "user-store",
+                    value = "The name of the UserStore you wish to get the list of roles.",
+                    required = false)
+            @QueryParam("user-store") String userStoreName,
+            @ApiParam(
+                    name = "If-Modified-Since",
+                    value = "Checks if the requested variant was modified, since the specified date-time." +
+                            "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
+                    required = false)
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    required = false,
+                    defaultValue = "0")
+            @QueryParam("offset") int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many role details you require from the starting pagination index/offset.",
+                    required = false,
+                    defaultValue = "5")
+            @QueryParam("limit") int limit,
+            @ApiParam(
+                    name = "username",
+                    value = "The username of the user.",
+                    required = true,
+                    defaultValue = "admin")
+            @QueryParam("username") String username,
+            @ApiParam(
+                    name = "domain",
+                    value = "The domain name of the user store.",
+                    required = false)
+            @QueryParam("domain") String domain,
+            @ApiParam(
+                    name = "metaKey",
+                    value = "Key of the metadata",
+                    required = true)
+            @PathParam("metaKey") String metaKey);
+
         @GET
         @Path("/filter/{prefix}")
         @ApiOperation(
