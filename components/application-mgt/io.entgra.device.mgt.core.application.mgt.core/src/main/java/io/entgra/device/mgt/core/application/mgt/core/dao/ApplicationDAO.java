@@ -22,6 +22,7 @@ import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.CategoryDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.TagDTO;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 
 import java.util.List;
 
@@ -158,7 +159,7 @@ public interface ApplicationDAO {
      * @return the application
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    List<ApplicationDTO> getSubscribedAppsOfDevice(int deviceId, int tenantId) throws ApplicationManagementDAOException;
+    List<ApplicationDTO> getSubscribedAppsOfDevice(int deviceId, int tenantId, PaginationRequest request) throws ApplicationManagementDAOException;
 
     /**
      * To get the application with the given uuid

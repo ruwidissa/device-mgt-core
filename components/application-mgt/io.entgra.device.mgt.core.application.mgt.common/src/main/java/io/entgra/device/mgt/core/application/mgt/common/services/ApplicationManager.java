@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.application.mgt.common.response.Category;
 import io.entgra.device.mgt.core.application.mgt.common.response.Tag;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
@@ -281,7 +282,7 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException
      * if an error occurred while getting subscribed app details for relevant device id,
      */
-    ApplicationList getSubscribedAppsOfDevice(int deviceId)
+    ApplicationList getSubscribedAppsOfDevice(int deviceId, PaginationRequest request)
             throws ApplicationManagementException;
 
     /**

@@ -22,6 +22,7 @@ import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
 import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -657,7 +658,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public  List<ApplicationDTO> getSubscribedAppsOfDevice(int deviceId, int tenantId) throws
+    public  List<ApplicationDTO> getSubscribedAppsOfDevice(int deviceId, int tenantId, PaginationRequest request) throws
             ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting all installed apps of device " + deviceId
@@ -700,11 +701,19 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "WHERE AP_DEVICE_SUBSCRIPTION.DM_DEVICE_ID = ? AND AP_DEVICE_SUBSCRIPTION.TENANT_ID= ? "
                 +"AND AP_DEVICE_SUBSCRIPTION.STATUS= 'COMPLETED'";
 
+        if (request != null)  {
+            sql = sql + " LIMIT ?,?";
+        }
+
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, deviceId);
                 stmt.setInt(2, tenantId);
+                if (request != null)  {
+                    stmt.setInt(3, request.getStartIndex());
+                    stmt.setInt(4, request.getRowCount());
+                }
                 try (ResultSet rs = stmt.executeQuery()) {
                     appList = new ArrayList<>();
                     while (rs.next()) {
