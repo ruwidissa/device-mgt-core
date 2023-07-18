@@ -69,7 +69,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 /**
  * This class holds the unit tests for the class {@link DeviceAgentServiceImpl}
  */
-@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "org.mockito.*"})
 @SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext", "org.wso2.carbon.context.internal.CarbonContextDataHolder"})
 @PrepareForTest({DeviceMgtAPIUtils.class, DeviceManagementProviderService.class,

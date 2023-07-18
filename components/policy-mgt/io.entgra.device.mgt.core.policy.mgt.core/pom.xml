@@ -70,8 +70,6 @@
                             io.entgra.device.mgt.core.device.mgt.core.operation.mgt;version="[5.0,6)",
                             io.entgra.device.mgt.core.device.mgt.core.service;version="[5.0,6)",
                             io.entgra.device.mgt.core.device.mgt.core.task.impl;version="[5.0,6)",
-                            io.entgra.device.mgt.core.notification.logger;version="[5.0,6)",
-                            io.entgra.device.mgt.core.notification.logger.impl;version="[5.0,6)",
                             io.entgra.device.mgt.core.policy.mgt.common;version="[5.0,6)",
                             io.entgra.device.mgt.core.policy.mgt.common.monitor;version="[5.0,6)",
                             io.entgra.device.mgt.core.policy.mgt.core.cache,
@@ -128,9 +126,6 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
-<!--                    <classpathDependencyExcludes>-->
-<!--                        <classpathDependencyExclude>org.ops4j.pax.logging</classpathDependencyExclude>-->
-<!--                    </classpathDependencyExcludes>-->
                 </configuration>
             </plugin>
             <plugin>
@@ -171,7 +166,7 @@
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>
             <artifactId>pax-logging-api</artifactId>
-<!--            <scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -284,10 +279,6 @@
         <dependency>
             <groupId>org.wso2.orbit.javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.logger</artifactId>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
