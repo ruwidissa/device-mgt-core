@@ -642,8 +642,8 @@ public class PolicyManagerImpl implements PolicyManager {
 
     @Override
     public void activatePolicy(int policyId) throws PolicyManagementException {
+        Policy policy = this.getPolicy(policyId);
         try {
-            Policy policy = this.getPolicy(policyId);
             PolicyManagementDAOFactory.beginTransaction();
             policyDAO.activatePolicy(policyId);
             policyDAO.recordUpdatedPolicy(policy);
