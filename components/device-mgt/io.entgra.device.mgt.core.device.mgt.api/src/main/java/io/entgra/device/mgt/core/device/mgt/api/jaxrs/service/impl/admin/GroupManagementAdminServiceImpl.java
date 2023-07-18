@@ -21,21 +21,30 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.GroupManagementAdminService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
-import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GroupManagementAdminServiceImpl implements GroupManagementAdminService {
 
@@ -90,13 +99,25 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
             @DefaultValue("5") @QueryParam("limit") int limit) {
         try {
             RequestValidationUtil.validatePaginationParameters(offset, limit);
+            String currentUser = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
             GroupPaginationRequest request = new GroupPaginationRequest(offset, limit);
             request.setGroupName(name);
             request.setOwner(owner);
             request.setStatus(status);
             request.setDepth(depth);
-            PaginationResult deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
-                    .getGroupsWithHierarchy(null, request, requireGroupProps);
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            UserRealm realmService = DeviceMgtAPIUtils.getRealmService().getTenantUserRealm(tenantId);
+            String[] roles = realmService.getUserStoreManager().getRoleListOfUser(currentUser);
+            boolean isAdmin = DEFAULT_ADMIN_ROLE.equals(currentUser);
+            boolean hasAdminRole = Arrays.asList(roles).contains(DEFAULT_ADMIN_ROLE);
+            PaginationResult deviceGroupsResult;
+            if (StringUtils.isBlank(currentUser) || isAdmin || hasAdminRole) {
+                deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                        .getGroupsWithHierarchy(null, request, requireGroupProps);
+            } else {
+                deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                        .getGroupsWithHierarchy(currentUser, request, requireGroupProps);
+            }
             DeviceGroupList deviceGroupList = new DeviceGroupList();
             deviceGroupList.setList(deviceGroupsResult.getData());
             deviceGroupList.setCount(deviceGroupsResult.getRecordsTotal());
@@ -105,6 +126,10 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
             String error = "Error occurred while retrieving groups with hierarchy.";
             log.error(error, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while getting user realm.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
@@ -144,4 +169,31 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
             return Response.status(Response.Status.CONFLICT).entity(msg).build();
         }
     }
+    @POST
+    @Path("/roles/share")
+    @Override
+    public Response createGroupWithRoles(DeviceGroupRoleWrapper group) {
+        if (group == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        group.setOwner(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
+        group.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
+        try {
+            DeviceMgtAPIUtils.getGroupManagementProviderService().createGroupWithRoles(group, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS);
+            DeviceMgtAPIUtils.getGroupManagementProviderService().manageGroupSharing(group.getGroupId(), group.getUserRoles());
+            return Response.status(Response.Status.CREATED).build();
+        } catch (GroupManagementException e) {
+            String msg = "Error occurred while adding " + group.getName() + " group";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (GroupAlreadyExistException e) {
+            String msg = "Group already exists with name : " + group.getName() + " Try with another group name.";
+            log.error(msg, e);
+            return Response.status(Response.Status.CONFLICT).entity(msg).build();
+        } catch (RoleDoesNotExistException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
 }
+

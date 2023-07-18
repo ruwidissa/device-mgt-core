@@ -21,9 +21,25 @@ package io.entgra.device.mgt.core.application.mgt.core.impl;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
-import io.entgra.device.mgt.core.application.mgt.common.*;
-import io.entgra.device.mgt.core.application.mgt.common.dto.*;
-import io.entgra.device.mgt.core.application.mgt.common.exception.*;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationSubscriptionInfo;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
+import io.entgra.device.mgt.core.application.mgt.common.DeviceSubscriptionData;
+import io.entgra.device.mgt.core.application.mgt.common.DeviceTypes;
+import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
+import io.entgra.device.mgt.core.application.mgt.common.SubAction;
+import io.entgra.device.mgt.core.application.mgt.common.SubscribingDeviceIdHolder;
+import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationPolicyDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
+import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.LifecycleManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.TransactionManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.response.Application;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationDAO;
@@ -35,11 +51,20 @@ import io.entgra.device.mgt.core.application.mgt.core.exception.ForbiddenExcepti
 import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundException;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
-import io.entgra.device.mgt.core.application.mgt.core.util.*;
+import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
+import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil;
+import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
+import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
+import io.entgra.device.mgt.core.application.mgt.core.util.OAuthUtils;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
 import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
-import io.entgra.device.mgt.core.device.mgt.common.*;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.MobileAppTypes;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.android.CustomApplication;
@@ -57,15 +82,16 @@ import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProvider
 import io.entgra.device.mgt.core.device.mgt.core.util.MDMAndroidOperationUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.MDMIOSOperationUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.MDMWindowsOperationUtil;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.notification.logger.AppInstallLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraAppInstallLoggerImpl;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -79,7 +105,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -87,8 +120,8 @@ import java.util.stream.Collectors;
  * This is the default implementation for the Subscription Manager.
  */
 public class SubscriptionManagerImpl implements SubscriptionManager {
-
-    private static final Log log = LogFactory.getLog(SubscriptionManagerImpl.class);
+    AppInstallLogContext.Builder appInstallLogContextBuilder = new AppInstallLogContext.Builder();
+    private static final EntgraLogger log = new EntgraAppInstallLoggerImpl(SubscriptionManagerImpl.class);
     private SubscriptionDAO subscriptionDAO;
     private ApplicationDAO applicationDAO;
     private LifecycleStateManager lifecycleStateManager;
@@ -620,7 +653,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                                               Properties properties,
                                                               boolean isOperationReExecutingDisabled)
             throws ApplicationManagementException {
-
+        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
         //Get app subscribing info of each device
         SubscribingDeviceIdHolder subscribingDeviceIdHolder = getSubscribingDeviceIdHolder(devices,
                 applicationDTO.getApplicationReleaseDTOs().get(0).getId());
@@ -670,10 +705,36 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 Activity activity = addAppOperationOnDevices(applicationDTO, new ArrayList<>(entry.getValue()),
                         entry.getKey(), action, properties);
                 activityList.add(activity);
+                for (DeviceIdentifier identifier : deviceIdentifiers) {
+                    log.info(String.format("Web app %s triggered", action), appInstallLogContextBuilder
+                            .setAppId(String.valueOf(applicationDTO.getId()))
+                            .setAppName(applicationDTO.getName())
+                            .setAppType(applicationDTO.getType())
+                            .setSubType(subType)
+                            .setTenantId(tenantId)
+                            .setTenantDomain(tenantDomain)
+                            .setDevice(String.valueOf(identifier))
+                            .setUserName(username)
+                            .setAction(action)
+                            .build());
+                }
             }
         } else {
             Activity activity = addAppOperationOnDevices(applicationDTO, deviceIdentifiers, deviceType, action, properties);
             activityList.add(activity);
+            for (DeviceIdentifier identifier : deviceIdentifiers) {
+                log.info(String.format("App %s triggered", action), appInstallLogContextBuilder
+                        .setAppId(String.valueOf(applicationDTO.getId()))
+                        .setAppName(applicationDTO.getName())
+                        .setAppType(applicationDTO.getType())
+                        .setSubType(subType)
+                        .setTenantId(tenantId)
+                        .setTenantDomain(tenantDomain)
+                        .setDevice(String.valueOf(identifier))
+                        .setUserName(username)
+                        .setAction(action)
+                        .build());
+            }
         }
 
         ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
