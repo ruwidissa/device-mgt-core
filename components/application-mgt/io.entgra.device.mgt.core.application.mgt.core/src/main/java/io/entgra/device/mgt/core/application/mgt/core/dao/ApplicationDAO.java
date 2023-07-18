@@ -151,6 +151,16 @@ public interface ApplicationDAO {
     ApplicationDTO getApplication(int applicationId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
+     * To get the application with the given id
+     *
+     * @param deviceId ID of the device which the apps are installed on.
+     * @param tenantId ID of the tenant.
+     * @return the application
+     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
+     */
+    List<ApplicationDTO> getSubscribedAppsOfDevice(int deviceId, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
      * To get the application with the given uuid
      *
      * @param releaseUuid UUID of the application release.

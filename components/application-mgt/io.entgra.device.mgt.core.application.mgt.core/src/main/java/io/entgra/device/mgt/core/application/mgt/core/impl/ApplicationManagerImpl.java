@@ -1444,6 +1444,35 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
+    @Override
+    public  ApplicationList getSubscribedAppsOfDevice(int deviceId) throws ApplicationManagementException {
+        ApplicationList applicationList = new ApplicationList();
+        List<Application> applications = new ArrayList<>();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            List<ApplicationDTO>  applicationDTOS = this.applicationDAO.getSubscribedAppsOfDevice(deviceId, tenantId);
+            for (ApplicationDTO applicationDTO: applicationDTOS) {
+                applicationDTO.setTags(this.applicationDAO.getAppTags(applicationDTO.getId(), tenantId));
+                applicationDTO.setAppCategories(this.applicationDAO.getAppCategories(applicationDTO.getId(), tenantId));
+                applications.add(APIUtil.appDtoToAppResponse(applicationDTO));
+            }
+            applicationList.setApplications(applications);
+            return applicationList;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting installed apps of device with device id: "
+                    + deviceId;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while getting  installed apps of device with device id: " + deviceId;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
     /**
      * Check whether given OS range is valid or invalid
      *

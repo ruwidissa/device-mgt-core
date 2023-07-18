@@ -274,6 +274,17 @@ public interface ApplicationManager {
     ApplicationDTO getApplication(int applicationId) throws ApplicationManagementException;
 
     /**
+     * This method is responsible to provide application data for given deviceId.
+     *
+     * @param  deviceId id of the device
+     * @return {@link ApplicationDTO}
+     * @throws ApplicationManagementException
+     * if an error occurred while getting subscribed app details for relevant device id,
+     */
+    ApplicationList getSubscribedAppsOfDevice(int deviceId)
+            throws ApplicationManagementException;
+
+    /**
      * To get the Application for given Id.
      *
      * @param id id of the ApplicationDTO

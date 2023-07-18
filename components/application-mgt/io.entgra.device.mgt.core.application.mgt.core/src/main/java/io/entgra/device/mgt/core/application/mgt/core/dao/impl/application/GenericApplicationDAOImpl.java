@@ -657,6 +657,76 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public  List<ApplicationDTO> getSubscribedAppsOfDevice(int deviceId, int tenantId) throws
+            ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting all installed apps of device " + deviceId
+                    + " from the database");
+        }
+        List<ApplicationDTO> appList = null;
+
+        String sql = "SELECT "
+                + "AP_APP.ID AS APP_ID, "
+                + "AP_APP.NAME AS APP_NAME, "
+                + "AP_APP.DESCRIPTION AS APP_DESCRIPTION, "
+                + "AP_APP.TYPE AS APP_TYPE, "
+                + "AP_APP.STATUS AS APP_STATUS, "
+                + "AP_APP.SUB_TYPE AS APP_SUB_TYPE, "
+                + "AP_APP.CURRENCY AS APP_CURRENCY, "
+                + "AP_APP.RATING AS APP_RATING, "
+                + "AP_APP.DEVICE_TYPE_ID AS APP_DEVICE_TYPE_ID, "
+                + "AP_APP_RELEASE.ID AS RELEASE_ID, "
+                + "AP_APP_RELEASE.DESCRIPTION AS RELEASE_DESCRIPTION, "
+                + "AP_APP_RELEASE.VERSION AS RELEASE_VERSION, "
+                + "AP_APP_RELEASE.UUID AS RELEASE_UUID, "
+                + "AP_APP_RELEASE.RELEASE_TYPE AS RELEASE_TYPE, "
+                + "AP_APP_RELEASE.INSTALLER_LOCATION AS AP_RELEASE_STORED_LOC, "
+                + "AP_APP_RELEASE.ICON_LOCATION AS AP_RELEASE_ICON_LOC, "
+                + "AP_APP_RELEASE.BANNER_LOCATION AS AP_RELEASE_BANNER_LOC, "
+                + "AP_APP_RELEASE.SC_1_LOCATION AS AP_RELEASE_SC1, "
+                + "AP_APP_RELEASE.SC_2_LOCATION AS AP_RELEASE_SC2, "
+                + "AP_APP_RELEASE.SC_3_LOCATION AS AP_RELEASE_SC3, "
+                + "AP_APP_RELEASE.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
+                + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
+                + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
+                + "AP_APP_RELEASE.PACKAGE_NAME AS PACKAGE_NAME, "
+                + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
+                + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
+                + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
+                + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT "
+                + "FROM AP_APP "
+                + "JOIN AP_APP_RELEASE ON AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
+                + "JOIN AP_DEVICE_SUBSCRIPTION ON AP_APP_RELEASE.ID = AP_DEVICE_SUBSCRIPTION.AP_APP_RELEASE_ID "
+                + "WHERE AP_DEVICE_SUBSCRIPTION.DM_DEVICE_ID = ? AND AP_DEVICE_SUBSCRIPTION.TENANT_ID= ? "
+                +"AND AP_DEVICE_SUBSCRIPTION.STATUS= 'COMPLETED'";
+
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, deviceId);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    appList = new ArrayList<>();
+                    while (rs.next()) {
+                        ApplicationDTO app =  DAOUtil.loadDeviceApp(rs);
+                        appList.add(app);
+                    }
+                    return appList;
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection for getting all apps installed on the device of "
+                    + "device Id: " + deviceId + ".";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while while running SQL to get all installed apps of device with device Id: " + deviceId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
     public boolean updateApplication(ApplicationDTO applicationDTO, int tenantId)
             throws ApplicationManagementDAOException {
         String sql = "UPDATE AP_APP " +
