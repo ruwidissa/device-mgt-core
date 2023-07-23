@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>heartbeat-management</artifactId>
-        <version>5.0.27</version>
+        <version>5.0.28-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
