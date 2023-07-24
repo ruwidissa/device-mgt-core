@@ -176,10 +176,11 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     }
 
     @Override
-    public Response getGroup(int groupId, boolean requireGroupProps, int depth) {
+    public Response getGroup(int groupId, boolean requireGroupProps, int depth, boolean allowed) {
         try {
             GroupManagementProviderService service = DeviceMgtAPIUtils.getGroupManagementProviderService();
-            DeviceGroup deviceGroup = service.getGroup(groupId, requireGroupProps, depth);
+            DeviceGroup deviceGroup = allowed ? service.getUserOwnGroup(groupId, requireGroupProps, depth):
+                service.getGroup(groupId, requireGroupProps, depth);
             if (deviceGroup != null) {
                 return Response.status(Response.Status.OK).entity(deviceGroup).build();
             } else {

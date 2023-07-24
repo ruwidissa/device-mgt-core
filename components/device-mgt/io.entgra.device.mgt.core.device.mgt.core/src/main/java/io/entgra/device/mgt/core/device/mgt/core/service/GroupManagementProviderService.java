@@ -351,4 +351,6 @@ public interface GroupManagementProviderService {
      * @throws GroupManagementException
      */
     DeviceTypesOfGroups getDeviceTypesOfGroups(List<String> identifiers) throws GroupManagementException;
+
+    DeviceGroup getUserOwnGroup(int groupId, boolean requireGroupProps, int depth) throws GroupManagementException;
 }

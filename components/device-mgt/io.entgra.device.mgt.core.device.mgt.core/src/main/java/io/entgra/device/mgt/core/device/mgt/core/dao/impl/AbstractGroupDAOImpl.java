@@ -1353,7 +1353,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                     + "FROM DM_DEVICE d, "
                     + "(SELECT dgm.DEVICE_ID "
                     + "FROM DM_DEVICE_GROUP_MAP dgm "
-                    + "WHERE dgm.GROUP_ID = (SELECT ID FROM DM_GROUP WHERE GROUP_NAME = ? )) dgm1 "
+                    + "WHERE dgm.GROUP_ID = (SELECT ID FROM DM_GROUP WHERE GROUP_NAME = ? AND TENANT_ID = ?)) dgm1 "
                     + "WHERE d.ID = dgm1.DEVICE_ID AND d.TENANT_ID = ?) gd, DM_DEVICE_TYPE t "
                     + "WHERE gd.DEVICE_TYPE_ID = t.ID) d1 "
                     + "WHERE d1.DEVICE_ID = e.DEVICE_ID AND TENANT_ID = ?";
@@ -1362,6 +1362,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                 stmt.setString(1, groupName);
                 stmt.setInt(2, tenantId);
                 stmt.setInt(3, tenantId);
+                stmt.setInt(4, tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     devices = new ArrayList<>();
                     while (rs.next()) {

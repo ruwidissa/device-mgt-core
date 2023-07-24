@@ -176,13 +176,13 @@ public class GroupManagementServiceImplTest {
         Mockito.doReturn(new DeviceGroup()).when(groupManagementProviderService).getGroup(1, false, 1);
         Mockito.doReturn(null).when(groupManagementProviderService).getGroup(2, false, 1);
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).getGroup(3, false, 1);
-        Response response = groupManagementService.getGroup(1, false, 1);
+        Response response = groupManagementService.getGroup(1, false, 1, false);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "getGroup request failed for a request with valid parameters");
-        response = groupManagementService.getGroup(2, false, 1);
+        response = groupManagementService.getGroup(2, false, 1, false);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
                 "getGroup request returned a group for a non-existing group");
-        response = groupManagementService.getGroup(3, false, 1);
+        response = groupManagementService.getGroup(3, false, 1, false);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "getGroup request returned a group for a in-valid request");
     }
