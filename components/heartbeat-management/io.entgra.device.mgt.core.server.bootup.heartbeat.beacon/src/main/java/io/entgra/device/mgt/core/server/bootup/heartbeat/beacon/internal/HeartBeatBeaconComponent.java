@@ -61,20 +61,22 @@ public class HeartBeatBeaconComponent {
                 DataSourceConfig dsConfig = HeartBeatBeaconConfig.getInstance().getDataSourceConfig();
                 HeartBeatBeaconDAOFactory.init(dsConfig);
 
+                ClusterFormationChangedNotifierRepository clusterFormationChangedNotifierRepository
+                        = new ClusterFormationChangedNotifierRepository();
+                List<String> notifiers = HeartBeatBeaconConfig.getInstance().getNotifiers();
+                if (notifiers != null && notifiers.size() > 0) {
+                    for (String notifier : notifiers) {
+                        clusterFormationChangedNotifierRepository.addNotifier(notifier);
+                    }
+                }
+                HeartBeatBeaconDataHolder.getInstance().setClusterFormationChangedNotifierRepository(
+                        clusterFormationChangedNotifierRepository);
+
                 //Setting up executors to notify heart beat status */
                 HeartBeatExecutor.setUpNotifiers(HeartBeatBeaconUtils.getServerDetails());
             }
 
-            ClusterFormationChangedNotifierRepository clusterFormationChangedNotifierRepository
-                    = new ClusterFormationChangedNotifierRepository();
-            List<String> notifiers = HeartBeatBeaconConfig.getInstance().getNotifiers();
-            if (notifiers != null && notifiers.size() > 0) {
-                for (String notifier : notifiers) {
-                    clusterFormationChangedNotifierRepository.addNotifier(notifier);
-                }
-            }
-            HeartBeatBeaconDataHolder.getInstance().setClusterFormationChangedNotifierRepository(
-                    clusterFormationChangedNotifierRepository);
+
 
             if (log.isDebugEnabled()) {
                 log.debug("Heart Beat Notifier bundle has been successfully initialized");

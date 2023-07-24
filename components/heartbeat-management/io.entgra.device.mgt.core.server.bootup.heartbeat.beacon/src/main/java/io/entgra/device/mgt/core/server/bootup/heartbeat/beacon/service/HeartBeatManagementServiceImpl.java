@@ -261,7 +261,9 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
     public void notifyClusterFormationChanged(int elapsedTimeInSeconds) throws HeartBeatManagementException {
         if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
             try {
+                HeartBeatBeaconDAOFactory.beginTransaction();
                 Map<String, ServerContext> servers = heartBeatDAO.getActiveServerDetails(elapsedTimeInSeconds);
+                HeartBeatBeaconDAOFactory.commitTransaction();
                 if (servers != null && !servers.isEmpty()) {
                     String serverUUID = HeartBeatBeaconDataHolder.getInstance().getLocalServerUUID();
                     ServerContext serverContext = servers.get(serverUUID);
@@ -289,6 +291,13 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                 String msg = "Error occurred while notifyClusterFormationChanged.";
                 log.error(msg, e);
                 throw new HeartBeatManagementException(msg, e);
+            } catch (TransactionManagementException e) {
+                HeartBeatBeaconDAOFactory.rollbackTransaction();
+                String msg = "Error occurred while electing candidate for dynamic task execution. Issue in opening a connection to the underlying data source";
+                log.error(msg, e);
+                throw new HeartBeatManagementException(msg, e);
+            } finally {
+                HeartBeatBeaconDAOFactory.closeConnection();
             }
         } else {
             String msg = "Heart Beat Configuration Disabled. Error while notifyClusterFormationChanged.";
