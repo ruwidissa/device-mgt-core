@@ -144,6 +144,7 @@ public abstract class BaseOperationTemplatePluginTest {
             conn = ConnectionManagerUtils.getDBConnection();
             stmt = conn.createStatement();
             stmt.executeUpdate("RUNSCRIPT FROM './src/test/resources/carbon-home/dbscripts/dm-db-h2.sql'");
+            stmt.executeUpdate("RUNSCRIPT FROM './src/test/resources/carbon-home/dbscripts/insert-subtypes.sql'");
         } finally {
             TestUtils.cleanupResources(conn, stmt, null);
         }

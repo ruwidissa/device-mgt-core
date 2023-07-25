@@ -23,6 +23,11 @@ import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProvi
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
+import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.DCRResponse;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
@@ -804,11 +809,12 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             //todo - lasantha - can't get password from here
             ApiApplicationKey apiApplicationKey;
             try {
-                DCRResponse adminDCRResponse = keyMgtService.dynamicClientRegistration(applicationName,
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
-                                .getRealmConfiguration().getAdminUserName(),
-                        "client_credentials", null, new String[] {"device_management"}, false, validityTime, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
-                                .getRealmConfiguration().getAdminPassword());
+
+                APIApplicationServices apiApplicationServices = DeviceMgtAPIUtils.getApiApplicationServices();
+                APIApplicationKey adminDCRResponse = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                        "ClientForJWTTokenGeneration",
+                        "client_credentials password refresh_token urn:ietf:params:oauth:grant-type:jwt-bearer"
+                );
 
                 PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 JWTClientManagerService jwtClientManagerService = (JWTClientManagerService) ctx.
@@ -816,11 +822,14 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 JWTClient jwtClient = jwtClientManagerService.getJWTClient();
                 AccessTokenInfo accessTokenInfo = jwtClient.getAccessToken(adminDCRResponse.getClientId(),
                         adminDCRResponse.getClientSecret(),
-                        username, "appm:subscribe");
+                        username, "appm:subscribe apim:admin apim:api_key apim:app_import_export apim:app_manage" +
+                                " apim:store_settings apim:sub_alert_manage apim:sub_manage apim:subscribe openid perm:device:enroll " +
+                                "perm:devices:details perm:devices:features perm:devices:search perm:devices:view perm:groups:groups " +
+                                "perm:users:send-invitation");
 
                 APIManagementProviderService apiManagementProviderService = DeviceMgtAPIUtils.getAPIManagementService();
                 apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(applicationName,
-                        new String[] {"device_management"}, null, false, String.valueOf(validityTime),
+                        new String[] {"device_management"}, "PRODUCTION", false, String.valueOf(validityTime),
                         accessTokenInfo.getAccessToken());
 
             } catch (JWTClientException e) {
@@ -828,8 +837,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 log.error(msg, e);
                 return Response.serverError().entity(
                         new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-            } catch (UserStoreException e) {
-                String msg = "Error while getting user credentials.";
+            } catch (APIServicesException e) {
+                String msg = "Error while generating api Application";
                 log.error(msg, e);
                 return Response.serverError().entity(
                         new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();

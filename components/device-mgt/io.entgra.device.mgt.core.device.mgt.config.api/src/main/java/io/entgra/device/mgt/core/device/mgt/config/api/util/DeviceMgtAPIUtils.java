@@ -22,6 +22,8 @@ import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProvide
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 /**
@@ -33,6 +35,8 @@ public class DeviceMgtAPIUtils {
 
     private static DeviceManagementProviderService deviceManagementProviderService = null;
     private static RealmService realmService = null;
+
+    private static OTPManagementService otpManagementService = null;
 
     public static DeviceManagementProviderService getDeviceManagementService() {
         if (deviceManagementProviderService == null) {
@@ -46,6 +50,19 @@ public class DeviceMgtAPIUtils {
             }
         }
         return deviceManagementProviderService;
+    }
+
+    public static OTPManagementService getOtpManagementService() {
+        if (otpManagementService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            otpManagementService = (OTPManagementService) ctx.getOSGiService(OTPManagementService.class, null);
+            if (otpManagementService == null) {
+                String msg = "OTP Management Service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return otpManagementService;
     }
 
     public static RealmService getRealmService() {

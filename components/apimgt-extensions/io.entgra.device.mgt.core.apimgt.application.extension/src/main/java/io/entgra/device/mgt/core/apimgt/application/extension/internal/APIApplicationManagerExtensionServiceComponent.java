@@ -34,6 +34,40 @@ import org.wso2.carbon.user.core.service.RealmService;
 @Component(
         name = "io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionServiceComponent",
         immediate = true)
+/**
+ * @scr.component name="io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionServiceComponent"
+ * @scr.reference name="tenant.registryloader"
+ * interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setTenantRegistryLoader"
+ * unbind="unsetTenantRegistryLoader"
+ * @scr.reference name="tenant.indexloader"
+ * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setIndexLoader"
+ * unbind="unsetIndexLoader"
+ * @scr.reference name="realm.service"
+ * immediate="true"
+ * interface="org.wso2.carbon.user.core.service.RealmService"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setRealmService"
+ * unbind="unsetRealmService"
+ * @scr.reference name="apimgt.extension.ConsumerRESTAPIServices"
+ * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices"
+ * cardinality="0..1"
+ * policy="dynamic"
+ * bind="setConsumerRESTAPIServices"
+ * unbind="unsetConsumerRESTAPIServices"
+ * @scr.reference name="apimgt.extension.APIApplicationService"
+ * interface="io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices"
+ * cardinality="0..1"
+ * policy="dynamic"
+ * bind="setAPIApplicationServices"
+ * unbind="unsetAPIApplicationServices"
+ */
 public class APIApplicationManagerExtensionServiceComponent {
 
     private static final Log log = LogFactory.getLog(APIApplicationManagerExtensionServiceComponent.class);

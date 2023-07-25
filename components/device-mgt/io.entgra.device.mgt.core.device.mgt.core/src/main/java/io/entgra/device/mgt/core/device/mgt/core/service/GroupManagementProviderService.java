@@ -24,6 +24,15 @@ import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.*;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceTypesOfGroups;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.UserStoreManager;
 
 import java.util.List;
 
@@ -44,6 +53,16 @@ public interface GroupManagementProviderService {
                      String[] defaultPermissions) throws GroupManagementException, GroupAlreadyExistException;
 
     /**
+     * Add new device group and create default role with default permissions.
+     *
+     * @param groups             to add
+     * @param defaultRole        of the deviceGroup
+     * @param defaultPermissions of the default role
+     * @throws GroupManagementException
+     */
+    void createGroupWithRoles(DeviceGroupRoleWrapper groups, String defaultRole, String[] defaultPermissions) throws  GroupAlreadyExistException,GroupManagementException, RoleDoesNotExistException;
+
+    /**
      * Update existing device group.
      *
      * @param deviceGroup  to update.
@@ -62,6 +81,18 @@ public interface GroupManagementProviderService {
      * @throws GroupManagementException
      */
     boolean deleteGroup(int groupId, boolean isDeleteChildren) throws GroupManagementException;
+
+    /**
+     * Delete existing device group.
+     *
+     * @param role                 to be deleted with the userStore name.
+     * @param roleToDelete       to delete the role.
+     * @param tenantId             to belongs to roles.
+     * @param userStoreManager     with details.
+     * @param authorizationManager with details.
+     * @throws GroupManagementException
+     */
+    void deleteRoleAndRoleGroupMapping(String role, String roleToDelete, int tenantId, UserStoreManager userStoreManager, AuthorizationManager authorizationManager) throws GroupManagementException;
 
     /**
      * Get the device group provided the device group id.

@@ -18,6 +18,9 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl.group;
 
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOException;
@@ -39,6 +42,7 @@ import java.util.List;
  */
 public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
 
+    private static final Log log = LogFactory.getLog(PostgreSQLGroupDAOImpl.class);
     @Override
     public int addGroup(DeviceGroup deviceGroup, int tenantId) throws GroupManagementDAOException {
         PreparedStatement stmt = null;
@@ -49,7 +53,7 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
             Connection conn = GroupManagementDAOFactory.getConnection();
             String sql;
             if(StringUtils.isEmpty(deviceGroup.getStatus())) {
-                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, PARENT_PATH) " +
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, PARENT_PATH, PARENT_GROUP_ID) " +
                       "VALUES (?, ?, ?, ?) RETURNING ID";
             } else {
                 sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, PARENT_PATH, STATUS) " +
@@ -76,6 +80,46 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
                     deviceGroup.getName() + "'", e);
         } finally {
             GroupManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public int addGroupWithRoles(DeviceGroupRoleWrapper groups, int tenantId) throws GroupManagementDAOException {
+        int groupId = -1;
+        boolean hasStatus = false;
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql;
+            if (StringUtils.isEmpty(groups.getStatus())) {
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, PARENT_PATH) " +
+                        "VALUES (?, ?, ?, ?) RETURNING ID";
+            } else {
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, PARENT_PATH, STATUS) " +
+                        "VALUES (?, ?, ?, ?, ?) RETURNING ID";
+                hasStatus = true;
+            }
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, groups.getDescription());
+                stmt.setString(2, groups.getName());
+                stmt.setString(3, groups.getOwner());
+                stmt.setInt(4, tenantId);
+                stmt.setString(5, groups.getParentPath());
+                if (hasStatus) {
+                    stmt.setString(6, groups.getStatus());
+                }
+                stmt.execute();
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        groupId = rs.getInt(1);
+                    }
+                    return groupId;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while adding deviceGroup '" +
+                    groups.getName() + "'";
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
         }
     }
 
