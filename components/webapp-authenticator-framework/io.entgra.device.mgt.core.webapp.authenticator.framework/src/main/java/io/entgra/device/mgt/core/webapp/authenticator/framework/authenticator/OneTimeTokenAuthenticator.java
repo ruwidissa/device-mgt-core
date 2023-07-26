@@ -49,8 +49,18 @@ public class OneTimeTokenAuthenticator implements WebappAuthenticator {
         try {
             OTPManagementService otpManagementService = AuthenticatorFrameworkDataHolder.getInstance()
                     .getOtpManagementService();
-            OneTimePinDTO validOTP = otpManagementService.isValidOTP(request.getHeader(Constants.HTTPHeaders
-                    .ONE_TIME_TOKEN_HEADER));
+            OneTimePinDTO validOTP;
+            if (request.getRequestURI().toString().endsWith("cloud/download-url")
+                    || request.getRequestURI().toString().endsWith("cloud/tenant")) {
+                validOTP = otpManagementService.isValidOTP(request.getHeader(Constants.HTTPHeaders
+                        .ONE_TIME_TOKEN_HEADER), true);
+            } else {
+                log.info("Validating OTP for enrollments PIN: " + request.getHeader(Constants
+                        .HTTPHeaders.ONE_TIME_TOKEN_HEADER));
+                validOTP = otpManagementService.isValidOTP(request.getHeader(Constants.HTTPHeaders
+                        .ONE_TIME_TOKEN_HEADER), false);
+            }
+
             if (validOTP != null) {
                 authenticationInfo.setStatus(Status.CONTINUE);
                 authenticationInfo.setTenantId(validOTP.getTenantId());

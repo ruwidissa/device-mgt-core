@@ -87,6 +87,7 @@ public final class GroupManagementDAOUtil {
         group.setOwner(resultSet.getString("OWNER"));
         group.setStatus(resultSet.getString("STATUS"));
         group.setParentPath(resultSet.getString("PARENT_PATH"));
+        group.setParentGroupId(resultSet.getInt("PARENT_GROUP_ID"));
         return group;
     }
 

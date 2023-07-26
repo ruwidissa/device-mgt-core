@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>operation-template-mgt</artifactId>
-        <version>5.0.26-SNAPSHOT</version>
+        <version>5.0.27-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -119,6 +119,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <argLine>
+                        --add-opens=java.xml/jdk.xml.internal=ALL-UNNAMED
+                        --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED
+                    </argLine>
                     <systemPropertyVariables>
                         <log4j.configuration>file:src/test/resources/carbon-home/repository/conf/log4j.properties
                         </log4j.configuration>
@@ -126,6 +130,9 @@
                     <suiteXmlFiles>
                         <file>src/test/resources/testng.xml</file>
                     </suiteXmlFiles>
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>org.ops4j.pax.logging</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
                 </configuration>
             </plugin>
         </plugins>

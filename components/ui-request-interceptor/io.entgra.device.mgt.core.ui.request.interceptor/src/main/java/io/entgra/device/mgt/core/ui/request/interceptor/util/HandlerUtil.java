@@ -18,7 +18,12 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor.util;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.cache.LoginCache;
@@ -29,7 +34,11 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.*;
+import org.apache.http.Consts;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -51,6 +60,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,6 +79,8 @@ public class HandlerUtil {
     private static LoginCache loginCache = null;
     private static boolean isLoginCacheInitialized = false;
     private static AuthData authData;
+
+    private static OTPManagementService otpManagementService;
 
     /***
      *
@@ -741,5 +753,13 @@ public class HandlerUtil {
 
     public static boolean isPropertyDefined(String property) {
         return StringUtils.isEmpty(System.getProperty(property));
+    }
+
+    public static OTPManagementService getOTPManagementService() {
+        if (otpManagementService == null) {
+            otpManagementService = (OTPManagementService) PrivilegedCarbonContext
+                    .getThreadLocalCarbonContext().getOSGiService(OTPManagementService.class, null);
+        }
+        return otpManagementService;
     }
 }

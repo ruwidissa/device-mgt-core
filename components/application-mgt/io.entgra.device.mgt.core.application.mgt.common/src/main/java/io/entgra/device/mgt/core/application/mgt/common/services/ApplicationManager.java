@@ -17,7 +17,12 @@
  */
 package io.entgra.device.mgt.core.application.mgt.common.services;
 
-import io.entgra.device.mgt.core.application.mgt.common.*;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
+import io.entgra.device.mgt.core.application.mgt.common.Filter;
+import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
+import io.entgra.device.mgt.core.application.mgt.common.LifecycleState;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
