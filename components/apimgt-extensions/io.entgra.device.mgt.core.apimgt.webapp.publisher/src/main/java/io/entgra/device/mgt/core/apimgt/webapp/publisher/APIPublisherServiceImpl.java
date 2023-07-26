@@ -90,10 +90,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         APIApplicationKey apiApplicationKey;
         AccessTokenInfo accessTokenInfo;
         try {
-            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
-                    "ClientForPublisherRestCalls",
-                    "client_credentials password refresh_token"
-            );
+            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
             accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
         } catch (APIServicesException e) {
@@ -406,10 +403,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         APIApplicationKey apiApplicationKey;
         AccessTokenInfo accessTokenInfo;
         try {
-            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
-                    "ClientForPublisherRestCalls",
-                    "client_credentials password refresh_token"
-            );
+            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
             accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
         } catch (APIServicesException e) {

@@ -30,16 +30,13 @@ public class Constants {
 	public static final String USER_CLAIM_MODIFIED = "http://wso2.org/claims/modified";
 	public static final String USER_CLAIM_DEVICES = "http://wso2.org/claims/devices";
 	public static final String PRIMARY_USER_STORE = "PRIMARY";
-	public static final String APIM_RESERVED_USER = "apim_reserved_user";
-	public static final String RESERVED_USER = "reserved_user";
-	public static final String DEFAULT_STREAM_VERSION = "1.0.0";
+    public static final String DEFAULT_STREAM_VERSION = "1.0.0";
 	public static final String SCOPE = "scope";
 	public static final String JDBC_USERSTOREMANAGER = "org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager";
 	public static final String DEFAULT_SIMPLE_DATE_FORMAT = "EEE, d MMM yyyy HH:mm:ss Z";
 	public static final int DEFAULT_PAGE_LIMIT = 50;
 	public static final String FORWARD_SLASH = "/";
 	public static final String ANDROID = "android";
-	public static final String IS_USER_ABLE_TO_VIEW_ALL_ROLES = "isUserAbleToViewAllRoles";
 	public static final String ANDROID_POLICY_VALIDATOR = "io.entgra.proprietary.uem.platform.android." +
 			"core.polcy.AndroidPolicyPayloadValidator";
 	public static final String IOS = "ios";

@@ -271,43 +271,6 @@ public class KeyStoreReader {
         return raPrivateKey;
     }
 
-    public CertificateResponse getCertificateBySerial(String serialNumber, int tenantId) throws KeystoreException {
-        CertificateResponse certificateResponse = null;
-        try {
-            CertificateCacheManager cacheManager = CertificateCacheManagerImpl.getInstance();
-            certificateResponse = cacheManager.getCertificateBySerial(serialNumber);
-            if (certificateResponse == null) {
-                try {
-                    CertificateManagementDAOFactory.openConnection();
-                    certificateResponse = certDao.retrieveCertificate(serialNumber, tenantId);
-                } catch (SQLException e) {
-                    String errorMsg = "Error when making a connection to the database.";
-                    throw new KeystoreException(errorMsg, e);
-                } finally {
-                    CertificateManagementDAOFactory.closeConnection();
-                }
-                if (certificateResponse != null && certificateResponse.getCertificate() != null) {
-                    Certificate certificate = (Certificate) Serializer.deserialize(certificateResponse.getCertificate());
-                    if (certificate instanceof X509Certificate) {
-                        X509Certificate x509cert = (X509Certificate) certificate;
-                        String commonName = CertificateGenerator.getCommonName(x509cert);
-                        certificateResponse.setCommonName(commonName);
-                        cacheManager.addCertificateBySerial(serialNumber, certificateResponse);
-                    }
-                }
-            }
-        } catch (CertificateManagementDAOException e) {
-            String errorMsg = "Error when retrieving certificate from the the database for the serial number: " +
-                    serialNumber;
-            throw new KeystoreException(errorMsg, e);
-
-        } catch (ClassNotFoundException | IOException e) {
-            String errorMsg = "Error when de-serializing saved certificate.";
-            throw new KeystoreException(errorMsg, e);
-        }
-        return certificateResponse;
-    }
-
     public CertificateResponse getCertificateBySerial(String serialNumber) throws KeystoreException {
         CertificateResponse certificateResponse = null;
         try {

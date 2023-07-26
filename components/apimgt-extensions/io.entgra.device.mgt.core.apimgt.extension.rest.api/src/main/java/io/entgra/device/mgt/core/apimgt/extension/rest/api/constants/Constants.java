@@ -27,8 +27,10 @@ public final class Constants {
     public static final String AMPERSAND = "&";
     public static final String SLASH = "/";
     public static final String EQUAL = "=";
+    public static final String CLIENT_NAME = "rest_api_publisher_code";
     public static final String SERVER_USER = "WorkflowConfigurations.ServerUser";
     public static final String SERVER_PASSWORD = "WorkflowConfigurations.ServerPassword";
+    public static final String GRANT_TYPE = "client_credentials password refresh_token";
     public static final String REFRESH_TOKEN_GRANT_TYPE_PARAM_NAME = "refresh_token";
     public static final String OAUTH_EXPIRES_IN = "expires_in";
     public static final String OAUTH_TOKEN_SCOPE = "scope";

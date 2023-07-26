@@ -19,9 +19,6 @@
 package io.entgra.device.mgt.core.policy.mgt.core.impl;
 
 import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
-import io.entgra.device.mgt.core.notification.logger.PolicyLogContext;
-import io.entgra.device.mgt.core.notification.logger.impl.EntgraPolicyLoggerImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -57,8 +54,7 @@ import java.util.Set;
 
 public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
 
-    PolicyLogContext.Builder policyLogContextBuilder = new PolicyLogContext.Builder();
-    private static final EntgraLogger log = new EntgraPolicyLoggerImpl(PolicyAdministratorPointImpl.class);
+    private static final Log log = LogFactory.getLog(PolicyAdministratorPointImpl.class);
 
     private PolicyManager policyManager;
     private ProfileManager profileManager;
@@ -139,8 +135,6 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
 
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
             TaskService taskService = PolicyManagementDataHolder.getInstance().getTaskService();
 
             if (log.isDebugEnabled()) {
@@ -174,13 +168,11 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
                             properties, triggerInfo);
                     taskManager.registerTask(taskInfo);
                     taskManager.scheduleTask(taskInfo.getName());
-                    log.info("Apply changes to device", policyLogContextBuilder.setActionTag("PUBLISH_CHANGES").setUserName(userName).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).build());
                 } else {
                     if (!taskManager.isTaskScheduled(taskName)) {
                         TaskInfo taskInfo = new TaskInfo(taskName, PolicyManagementConstants.DELEGATION_TASK_CLAZZ,
                                 properties, triggerInfo);
                         taskManager.scheduleTask(taskInfo.getName());
-                        log.info("Apply changes to device", policyLogContextBuilder.setActionTag("PUBLISH_CHANGES").setUserName(userName).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).build());
                     } else {
                         throw new PolicyManagementException("There is a task already running for policy changes. Please try " +
                                 "to apply " +

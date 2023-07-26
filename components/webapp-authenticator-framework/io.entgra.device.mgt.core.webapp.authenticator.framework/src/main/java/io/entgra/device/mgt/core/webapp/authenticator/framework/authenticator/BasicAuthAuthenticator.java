@@ -35,7 +35,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 public class BasicAuthAuthenticator implements WebappAuthenticator {
 
@@ -51,23 +50,15 @@ public class BasicAuthAuthenticator implements WebappAuthenticator {
     @Override
     public boolean canHandle(Request request) {
         /*
-        This is done to avoid every web app being able to use basic auth. Add the following to
-        the required web.xml of the web app. This is a global config for a web app to allow all
-        contexts of the web app to use basic auth
+        This is done to avoid every endpoint being able to use basic auth. Add the following to
+        the required web.xml of the web app.
         <context-param>
             <param-name>basicAuth</param-name>
             <param-value>true</param-value>
 	    </context-param>
-
-	    Adding the basicAuthAllowList parameter allows to selectively allow some context paths in a
-	    web app to use basic auth while all the other context remain unavailable with basic auth.
-	    If this parameter is present, any context that requires basic auth must be specially
-	    added as comma separated list to the param-value of basicAuthAllowList.
          */
-        if (!isAllowListedForBasicAuth(request)) {
-            if (!isAuthenticationSupported(request)) {
-                return false;
-            }
+        if (!isAuthenticationSupported(request)) {
+            return false;
         }
         if (request.getCoyoteRequest() == null || request.getCoyoteRequest().getMimeHeaders() == null) {
             return false;
@@ -79,20 +70,6 @@ public class BasicAuthAuthenticator implements WebappAuthenticator {
             ByteChunk authBC = authorization.getByteChunk();
             if (authBC.startsWithIgnoreCase(AUTH_HEADER, 0)) {
                 return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isAllowListedForBasicAuth(Request request) {
-        String param = request.getContext().findParameter("basicAuthAllowList");
-        if (param != null && !param.isEmpty()) {
-            //Add the nonSecured end-points to cache
-            String[] basicAuthAllowList = param.split(",");
-            for (String contexPath : basicAuthAllowList) {
-                if (request.getRequestURI().toString().endsWith(contexPath.trim())) {
-                    return true;
-                }
             }
         }
         return false;

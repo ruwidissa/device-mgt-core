@@ -70,8 +70,7 @@ public class Constants {
     public static final String ANY = "ANY";
     public static final String DEFAULT_PCK_NAME = "default.app.com";
     public static final String ALL = "ALL";
-    public static final String SHOW_ALL_ROLES = "SHOW_ALL_ROLES";
-    public static final String IS_USER_ABLE_TO_VIEW_ALL_ROLES = "isUserAbleToViewAllRoles";
+
     public static final String GOOGLE_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=";
     public static final String APPLE_STORE_URL = "https://itunes.apple.com/country/app/app-name/id";
 
@@ -93,9 +92,6 @@ public class Constants {
     //App type constants related to window device type
     public static final String MSI = "MSI";
     public static final String APPX = "APPX";
-
-    public static final String ENTERPRISE_APP_TYPE = "ENTERPRISE";
-    public static final String PUBLIC_APP_TYPE = "ENTERPRISE";
 
     private static final Map<String, String> AGENT_DATA = new HashMap<>();
     static {

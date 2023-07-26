@@ -18,28 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceTypesOfGroups;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
-import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceToGroupsAssignment;
@@ -59,21 +37,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.user.api.UserRealm;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.*;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.transaction.UserTransaction;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class GroupManagementServiceImpl implements GroupManagementService {
@@ -127,18 +94,8 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             request.setGroupName(name);
             request.setOwner(owner);
             request.setDepth(depth);
-            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            UserRealm realmService = DeviceMgtAPIUtils.getRealmService().getTenantUserRealm(tenantId);
-            String[] roles = realmService.getUserStoreManager().getRoleListOfUser(currentUser);
-            boolean hasAdminRole = Arrays.asList(roles).contains(DEFAULT_ADMIN_ROLE);
-            PaginationResult deviceGroupsResult;
-            if (hasAdminRole) {
-                deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
-                        .getGroupsWithHierarchy(null, request, requireGroupProps);
-            } else{
-                deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
-                        .getGroupsWithHierarchy(currentUser, request, requireGroupProps);
-            }
+            PaginationResult deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                    .getGroupsWithHierarchy(currentUser, request, requireGroupProps);
             DeviceGroupList deviceGroupList = new DeviceGroupList();
             deviceGroupList.setList(deviceGroupsResult.getData());
             deviceGroupList.setCount(deviceGroupsResult.getRecordsTotal());
@@ -147,10 +104,6 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             String error = "Error occurred while retrieving groups with hierarchy.";
             log.error(error, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
-        } catch (UserStoreException e) {
-            String msg = "Error occurred while getting user realm.";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
@@ -460,40 +413,6 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             String msg = "Only numbers can exists in a group ID or Invalid Group ID provided.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        }
-    }
-
-    @POST
-    @Path("/roles/share")
-    @Override
-    public Response createGroupWithRoles(DeviceGroupRoleWrapper groups) {
-        if (groups == null) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-        groups.setOwner(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
-        groups.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
-        try {
-            DeviceMgtAPIUtils.getGroupManagementProviderService().createGroupWithRoles(groups, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS);
-            DeviceGroup group = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroup(groups.getName(),
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername().isEmpty());
-            if (group != null) {
-                DeviceMgtAPIUtils.getGroupManagementProviderService().manageGroupSharing(group.getGroupId(), groups.getUserRoles());
-                return Response.status(Response.Status.CREATED).entity(group.getGroupId()).build();
-            } else {
-                String msg = "Error occurred while retrieving newly created group.";
-                log.error(msg);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            }
-        } catch (GroupManagementException e) {
-            String msg = "Error occurred while adding " + groups.getName() + " group";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (GroupAlreadyExistException e) {
-            String msg = "Group already exists with name : " + groups.getName() + " Try with another group name.";
-            log.error(msg, e);
-            return Response.status(Response.Status.CONFLICT).entity(msg).build();
-        } catch (RoleDoesNotExistException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 

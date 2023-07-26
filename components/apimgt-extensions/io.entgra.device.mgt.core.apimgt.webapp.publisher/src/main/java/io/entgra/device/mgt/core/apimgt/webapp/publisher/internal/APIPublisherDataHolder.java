@@ -75,18 +75,17 @@ public class APIPublisherDataHolder {
 
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
-        setTenantManager(realmService != null ?
-                realmService.getTenantManager() : null);
+        this.setTenantManager(realmService);
     }
 
-    private void setTenantManager(TenantManager tenantManager) {
-        this.tenantManager = tenantManager;
+    private void setTenantManager(RealmService realmService) {
+        if (realmService == null) {
+            throw new IllegalStateException("Realm service is not initialized properly");
+        }
+        this.tenantManager = realmService.getTenantManager();
     }
 
     public TenantManager getTenantManager() {
-        if (tenantManager == null) {
-            throw new IllegalStateException("Tenant manager is not initialized properly");
-        }
         return tenantManager;
     }
 
