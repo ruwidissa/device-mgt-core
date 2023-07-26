@@ -344,7 +344,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             Response response = client.newCall(request).execute();
             return gson.fromJson(response.body().string(), OAuthApplication.class);
         } catch (IOException e) {
-            msg = "Error occurred while processing the response";
+            msg = "Error occurred while processing the response" + e;
             throw new KeyMgtException(msg);
         }
     }

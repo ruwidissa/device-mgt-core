@@ -138,7 +138,9 @@ public class JWTClient {
 			if (jwtConfig == null) {
 				return null;
 			}
-			URL tokenEndpoint = new URL(jwtConfig.getTokenEndpoint());
+//			todo:
+//			URL tokenEndpoint = new URL(jwtConfig.getTokenEndpoint());
+			URL tokenEndpoint = new URL("https://localhost:9443/oauth2/token");
 			HttpClient httpClient = JWTClientUtil.getHttpClient(tokenEndpoint.getProtocol());
 			HttpPost postMethod = new HttpPost(tokenEndpoint.toString());
 			postMethod.setEntity(new UrlEncodedFormEntity(nameValuePairs));
