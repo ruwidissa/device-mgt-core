@@ -48,7 +48,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 /**
  * This class holds the unit tests for the class {@link DeviceTypeManagementService}
  */
-@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "org.mockito.*"})
 @SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils"})
 @PrepareForTest({DeviceMgtAPIUtils.class, DeviceManagementProviderService.class})
 public class DeviceTypeManagementServiceTest {
@@ -129,8 +129,9 @@ public class DeviceTypeManagementServiceTest {
         FeatureManager featureManager = Mockito.mock(FeatureManager.class);
         Mockito.when(this.deviceManagementProviderService.getFeatureManager(Mockito.anyString())).thenReturn
                 (featureManager);
-        Mockito.when((featureManager).getFeatures(Mockito.anyString())).thenThrow(new DeviceManagementException());
-        Mockito.when((featureManager).getFeatures(Mockito.anyString(), Mockito.anyBoolean())).thenThrow(new DeviceManagementException());
+        Mockito.when(featureManager.getFeatures(Mockito.anyString())).thenThrow(new DeviceManagementException());
+        Mockito.when(featureManager.getFeatures(Mockito.anyString(), Mockito.anyBoolean())).thenThrow(new DeviceManagementException());
+        Mockito.when(featureManager.getFeatures(Mockito.any(), Mockito.anyBoolean())).thenThrow(new DeviceManagementException());
         Response response = this.deviceTypeManagementService.getFeatures(TEST_DEVICE_TYPE, null, "false", MODIFIED_SINCE);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),

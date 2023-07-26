@@ -51,7 +51,7 @@ import java.util.List;
 /**
  * This is a test case for {@link GroupManagementServiceImpl}.
  */
-@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "javax.xml.parsers"})
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "javax.xml.parsers", "org.mockito.*"})
 @SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.PrivilegedCarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, CarbonContext.class})
@@ -125,13 +125,13 @@ public class GroupManagementServiceImplTest {
         PowerMockito.stub(PowerMockito.method(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext"))
                 .toReturn(context);
         Mockito.doReturn(2).when(groupManagementProviderService)
-                .getGroupCount(Mockito.anyString(), Mockito.anyString());
+                .getGroupCount(Mockito.anyString(), Mockito.any());
         Response response = groupManagementService.getGroupCount();
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "GetGroupCount request failed with valid parameters");
         Mockito.reset(groupManagementProviderService);
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService)
-                .getGroupCount(Mockito.anyString(), Mockito.anyString());
+                .getGroupCount(Mockito.anyString(), Mockito.any());
         response = groupManagementService.getGroupCount();
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "GetGroupCount request succeeded with in-valid parameters");

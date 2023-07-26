@@ -18,7 +18,7 @@
   -->
 
 <DataSourceConfig>
-    <Url>jdbc:h2:mem:smart-meter-test-db;DB_CLOSE_ON_EXIT=FALSE;MVCC=true</Url>
+    <Url>jdbc:h2:mem:smart-meter-test-db;DB_CLOSE_ON_EXIT=FALSE</Url>
     <DriverClassName>org.h2.Driver</DriverClassName>
     <User>wso2carbon</User>
     <Password>wso2carbon</Password>
