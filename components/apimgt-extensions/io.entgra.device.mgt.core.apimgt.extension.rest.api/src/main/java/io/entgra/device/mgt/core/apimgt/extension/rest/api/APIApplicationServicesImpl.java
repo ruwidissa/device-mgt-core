@@ -44,7 +44,7 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
     @Override
-    public APIApplicationKey createAndRetrieveApplicationCredentials()
+    public APIApplicationKey createAndRetrieveApplicationCredentials(String clientName, String grantType)
             throws APIServicesException {
 
         String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);
@@ -53,8 +53,8 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
-        jsonObject.put("clientName", Constants.CLIENT_NAME);
-        jsonObject.put("grantType", Constants.GRANT_TYPE);
+        jsonObject.put("clientName", clientName);
+        jsonObject.put("grantType", grantType);
         jsonObject.put("owner", serverUser);
         jsonObject.put("saasApp", true);
 
@@ -75,15 +75,15 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
     }
 
     @Override
-    public APIApplicationKey generateAndRetrieveApplicationKeys(String username, String password)
+    public APIApplicationKey generateAndRetrieveApplicationKeys(String clientName, String username, String password, String grantType)
             throws APIServicesException {
 
         String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
-        jsonObject.put("clientName", username);
-        jsonObject.put("grantType", Constants.GRANT_TYPE);
+        jsonObject.put("clientName", clientName);
+        jsonObject.put("grantType", grantType);
         jsonObject.put("owner", username);
         jsonObject.put("saasApp", true);
 
