@@ -847,8 +847,9 @@ public class CertificateGenerator {
             X500Name issuerName = new X500Name(subjectDn);
             String commonName = certificationRequest.getSubject().getRDNs(BCStyle.CN)[0].getFirst()
                     .getValue().toString();
-            X500Name subjectName = new X500Name("O=" + commonName + "O=AndroidDevice,CN=" +
-                    serialNumber);
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            X500Name subjectName = new X500Name("O=" + commonName + " ,CN=" +
+                    serialNumber + ", OU=tenant_" + tenantId);
             Date startDate = new Date(System.currentTimeMillis());
             Date endDate = new Date(System.currentTimeMillis()
                     + TimeUnit.DAYS.toMillis(365 * 100));
@@ -869,7 +870,7 @@ public class CertificateGenerator {
             io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate certificate =
                     new io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate();
             List<io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate> certificates = new ArrayList<>();
-            certificate.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+            certificate.setTenantId(tenantId);
             certificate.setCertificate(issuedCert);
             certificates.add(certificate);
             saveCertInKeyStore(certificates);
