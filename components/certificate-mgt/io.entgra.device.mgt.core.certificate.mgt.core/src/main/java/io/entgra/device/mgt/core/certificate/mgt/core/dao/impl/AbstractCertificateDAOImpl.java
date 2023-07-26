@@ -82,40 +82,6 @@ public abstract class AbstractCertificateDAOImpl implements CertificateDAO{
     }
 
     @Override
-    public void addCertificate(Certificate certificate)
-            throws CertificateManagementDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        try {
-            conn = this.getConnection();
-            stmt = conn.prepareStatement(
-                    "INSERT INTO DM_DEVICE_CERTIFICATE (SERIAL_NUMBER, CERTIFICATE, TENANT_ID," +
-                            " USERNAME, DEVICE_IDENTIFIER) VALUES (?,?,?,?,?)");
-            PrivilegedCarbonContext threadLocalCarbonContext = PrivilegedCarbonContext.
-                    getThreadLocalCarbonContext();
-            String username = threadLocalCarbonContext.getUsername();
-            // the serial number of the certificate used for its creation is set as its alias.
-            String serialNumber = certificate.getSerial();
-            if (serialNumber == null || serialNumber.isEmpty()) {
-                serialNumber = String.valueOf(certificate.getCertificate().getSerialNumber());
-            }
-            byte[] bytes = Serializer.serialize(certificate.getCertificate());
-
-            stmt.setString(1, serialNumber);
-            stmt.setBytes(2, bytes);
-            stmt.setInt(3, certificate.getTenantId());
-            stmt.setString(4, username);
-            stmt.setString(5, certificate.getDeviceIdentifier());
-            stmt.executeUpdate();
-        } catch (SQLException | IOException e) {
-            throw new CertificateManagementDAOException("Error occurred while saving the " +
-                    "certificate. ", e);
-        } finally {
-            CertificateManagementDAOUtil.cleanupResources(stmt, null);
-        }
-    }
-
-    @Override
     public CertificateResponse retrieveCertificate(String serialNumber)
             throws CertificateManagementDAOException {
         Connection conn;
@@ -128,42 +94,6 @@ public abstract class AbstractCertificateDAOImpl implements CertificateDAO{
             String query =
                     "SELECT CERTIFICATE, SERIAL_NUMBER, TENANT_ID, USERNAME FROM"
                     + " DM_DEVICE_CERTIFICATE WHERE SERIAL_NUMBER = ? AND TENANT_ID = ? ";
-            stmt = conn.prepareStatement(query);
-            stmt.setString(1, serialNumber);
-            stmt.setInt(2, tenantId);
-            resultSet = stmt.executeQuery();
-
-            if (resultSet.next()) {
-                certificateResponse = new CertificateResponse();
-                byte[] certificateBytes = resultSet.getBytes("CERTIFICATE");
-                certificateResponse.setCertificate(certificateBytes);
-                certificateResponse.setSerialNumber(resultSet.getString("SERIAL_NUMBER"));
-                certificateResponse.setTenantId(resultSet.getInt("TENANT_ID"));
-                certificateResponse.setUsername(resultSet.getString("USERNAME"));
-                CertificateGenerator.extractCertificateDetails(certificateBytes, certificateResponse);
-            }
-        } catch (SQLException e) {
-            String errorMsg =
-                    "Unable to get the read the certificate with serial" + serialNumber;
-            log.error(errorMsg, e);
-            throw new CertificateManagementDAOException(errorMsg, e);
-        } finally {
-            CertificateManagementDAOUtil.cleanupResources(stmt, resultSet);
-        }
-        return certificateResponse;
-    }
-
-    @Override
-    public CertificateResponse retrieveCertificate(String serialNumber, int tenantId) throws CertificateManagementDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet resultSet = null;
-        CertificateResponse certificateResponse = null;
-        try {
-            conn = this.getConnection();
-            String query =
-                    "SELECT CERTIFICATE, SERIAL_NUMBER, TENANT_ID, USERNAME FROM"
-                            + " DM_DEVICE_CERTIFICATE WHERE SERIAL_NUMBER = ? AND TENANT_ID = ? ";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, serialNumber);
             stmt.setInt(2, tenantId);

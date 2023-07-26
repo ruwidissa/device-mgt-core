@@ -19,5 +19,5 @@
 package io.entgra.device.mgt.core.device.mgt.common.otp.mgt;
 
 public enum OTPEmailTypes {
-    USER_VERIFY, DEVICE_ENROLLMENT, USER_INVITE, REMOTE_SESSION
+    USER_VERIFY, DEVICE_ENROLLMENT
 }

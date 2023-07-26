@@ -224,22 +224,9 @@
         <Scope>perm:admin:tenant:view</Scope>
         <Scope>perm:admin:metadata:view</Scope>
         <Scope>perm:admin:usage:view</Scope>
-        <Scope>perm:android:clear-application</Scope>
+        <Scope>perm:android:clear-applicatio</Scope>
         <Scope>perm:android:suspend-package</Scope>
         <Scope>perm:android:alternate-install</Scope>
-	<Scope>perm:ios:lock</Scope>
-        <Scope>perm:ios:location</Scope>
-        <Scope>perm:ios:ring</Scope>
-        <Scope>perm:ios:clear-passcode</Scope>
-        <Scope>perm:ios:enterprise-wipe</Scope>
-        <Scope>perm:ios:notification</Scope>
-        <Scope>perm:ios:wipe-data</Scope>
-        <Scope>perm:ios:boolean-setting</Scope>
-        <Scope>perm:ios:wallpaper</Scope>
-        <Scope>perm:ios:app-attributes</Scope>
-        <Scope>perm:ios:app-configurations</Scope>
-        <Scope>perm:mac-os:restart</Scope>
-        <Scope>perm:mac-os:shut-down</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

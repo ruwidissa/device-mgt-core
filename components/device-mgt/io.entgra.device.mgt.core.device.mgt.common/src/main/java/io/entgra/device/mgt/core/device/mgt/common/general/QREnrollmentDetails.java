@@ -18,22 +18,10 @@
 
 package io.entgra.device.mgt.core.device.mgt.common.general;
 
-import java.util.Map;
-
 public class QREnrollmentDetails {
     String ownershipType;
     String username;
     String enrollmentMode;
-    Map<String, String> customValues;
-
-    public Map<String, String> getCustomValues() {
-        return customValues;
-    }
-
-    public void setCustomValues(Map<String, String> customValues) {
-        this.customValues = customValues;
-    }
-    int tokenExpiry;
 
     public String getOwnershipType() { return ownershipType; }
 
@@ -46,12 +34,4 @@ public class QREnrollmentDetails {
     public String getEnrollmentMode() { return enrollmentMode; }
 
     public void setEnrollmentMode(String enrollmentMode) { this.enrollmentMode = enrollmentMode; }
-
-    public int getTokenExpiry() {
-        return tokenExpiry;
-    }
-
-    public void setTokenExpiry(int tokenExpiry) {
-        this.tokenExpiry = tokenExpiry;
-    }
 }

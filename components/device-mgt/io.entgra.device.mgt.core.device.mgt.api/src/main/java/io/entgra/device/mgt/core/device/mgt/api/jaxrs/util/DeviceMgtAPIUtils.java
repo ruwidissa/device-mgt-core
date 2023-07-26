@@ -19,7 +19,6 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
@@ -158,7 +157,6 @@ public class DeviceMgtAPIUtils {
     private static volatile SubscriptionManager subscriptionManager;
     private static volatile ApplicationManager applicationManager;
     private static volatile ConsumerRESTAPIServices consumerRESTAPIServices;
-    private static volatile APIApplicationServices apiApplicationServices;
     private static volatile APIManagementProviderService apiManagementProviderService;
 
     static {
@@ -410,25 +408,6 @@ public class DeviceMgtAPIUtils {
             }
         }
         return consumerRESTAPIServices;
-    }
-
-    /**
-     * Initializing and accessing method for APIM API application REST API.
-     *
-     * @return APIApplicationServices instance
-     * @throws IllegalStateException if APIApplicationServices cannot be initialized
-     */
-    public static synchronized APIApplicationServices getApiApplicationServices() {
-        if (apiApplicationServices == null) {
-            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-            apiApplicationServices = (APIApplicationServices) ctx.getOSGiService(APIApplicationServices.class, null);
-            if (apiApplicationServices == null) {
-                String msg = "API application service has not initialized.";
-                log.error(msg);
-                throw new IllegalStateException(msg);
-            }
-        }
-        return apiApplicationServices;
     }
 
     /**

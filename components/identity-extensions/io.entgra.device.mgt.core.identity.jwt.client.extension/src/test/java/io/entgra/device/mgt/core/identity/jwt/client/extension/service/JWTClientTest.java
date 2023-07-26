@@ -43,10 +43,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.powermock.modules.testng.PowerMockTestCase;
 
 @PrepareForTest(JWTClientUtil.class)
-public class JWTClientTest extends PowerMockTestCase{
+public class JWTClientTest {
     private static final Log log = LogFactory.getLog(JWTClientTest.class);
 
     @ObjectFactory

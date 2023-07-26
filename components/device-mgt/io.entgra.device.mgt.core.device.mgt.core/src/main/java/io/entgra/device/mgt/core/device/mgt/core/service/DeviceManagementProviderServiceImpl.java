@@ -21,30 +21,6 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.device.mgt.common.*;
-import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
-import io.entgra.device.mgt.core.notification.logger.DeviceEnrolmentLogContext;
-import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceEnrolmentLoggerImpl;
-import org.apache.commons.collections.map.SingletonMap;
-import org.apache.commons.lang.StringUtils;
-import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.Billing;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceEnrollmentInfoNotification;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceManager;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceNotification;
-import io.entgra.device.mgt.core.device.mgt.common.DevicePropertyNotification;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceTransferRequest;
-import io.entgra.device.mgt.core.device.mgt.common.DynamicTaskContext;
-import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
-import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
-import io.entgra.device.mgt.core.device.mgt.common.InitialOperationConfig;
-import io.entgra.device.mgt.core.device.mgt.common.MonitoringOperation;
-import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
-import io.entgra.device.mgt.core.device.mgt.common.StartupOperationConfig;
-import io.entgra.device.mgt.core.device.mgt.common.BillingResponse;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.*;
@@ -135,27 +111,13 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
         PluginInitializationListener {
 
-    DeviceEnrolmentLogContext.Builder deviceEnrolmentLogContextBuilder = new DeviceEnrolmentLogContext.Builder();
-
-    private static final EntgraLogger log = new EntgraDeviceEnrolmentLoggerImpl(DeviceManagementProviderServiceImpl.class);
+    private static final Log log = LogFactory.getLog(DeviceManagementProviderServiceImpl.class);
 
     private static final String OPERATION_RESPONSE_EVENT_STREAM_DEFINITION = "org.wso2.iot.OperationResponseStream";
     private final DeviceManagementPluginRepository pluginRepository;
@@ -243,8 +205,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             }
             return false;
         }
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         EnrollmentConfiguration enrollmentConfiguration = DeviceManagerUtil.getEnrollmentConfigurationEntry();
         String deviceSerialNumber = null;
         if (enrollmentConfiguration != null) {
@@ -331,15 +291,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                         device.getType() + " upon the user '" + device.getEnrolmentInfo().getOwner() +
                                         "'");
                             }
-                            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder
-                                    .setDeviceId(String.valueOf(existingDevice.getId()))
-                                    .setDeviceType(String.valueOf(existingDevice.getType()))
-                                    .setOwner(newEnrolmentInfo.getOwner())
-                                    .setOwnership(String.valueOf(newEnrolmentInfo.getOwnership()))
-                                    .setTenantID(String.valueOf(tenantId))
-                                    .setTenantDomain(tenantDomain)
-                                    .setUserName(userName)
-                                    .build());
                             status = true;
                         } else {
                             log.warn("Unable to update device enrollment for device : " + device.getDeviceIdentifier() +
@@ -376,7 +327,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     }
                     device.setEnrolmentInfo(enrollment);
                     DeviceManagementDAOFactory.commitTransaction();
-                    log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(device.getId())).setDeviceType(String.valueOf(device.getType())).setOwner(enrollment.getOwner()).setOwnership(String.valueOf(enrollment.getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
                 } else {
                     DeviceManagementDAOFactory.rollbackTransaction();
                     throw new DeviceManagementException("No device type registered with name - " + device.getType()
@@ -454,8 +404,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         if (log.isDebugEnabled()) {
             log.debug("Modifying enrollment for device: " + device.getId() + " of type '" + device.getType() + "'");
         }
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         DeviceManager deviceManager = this.getDeviceManager(device.getType());
         DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
         if (deviceManager == null) {
@@ -484,7 +432,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
 
             DeviceManagementDAOFactory.commitTransaction();
-            log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(currentDevice.getId())).setDeviceType(String.valueOf(currentDevice.getType())).setOwner(currentDevice.getEnrolmentInfo().getOwner()).setOwnership(String.valueOf(currentDevice.getEnrolmentInfo().getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
             this.removeDeviceFromCache(deviceIdentifier);
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
@@ -568,8 +515,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
 
         int tenantId = this.getTenantId();
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+
         Device device = this.getDevice(deviceId, false);
         if (device == null) {
             if (log.isDebugEnabled()) {
@@ -603,7 +549,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 }
             }
             //procees to dis-enroll a device from traccar ends
-            log.info("Device disenrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(device.getId())).setDeviceType(String.valueOf(device.getType())).setOwner(device.getEnrolmentInfo().getOwner()).setOwnership(String.valueOf(device.getEnrolmentInfo().getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
+
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while dis-enrolling '" + deviceId.getType() +
@@ -1060,15 +1006,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                     dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
                                 }
                             }
-
-                            // Convert dateDiff to days as a decimal value
-                            double dateDiffInDays = (double) dateDiff / (24 * 60 * 60 * 1000);
-
-                            if (dateDiffInDays % 1 >= 0.9) {
-                                dateDiffInDays = Math.ceil(dateDiffInDays);
-                            }
-
-                            long dateInDays = (long) dateDiffInDays;
+                            long dateInDays = TimeUnit.DAYS.convert(dateDiff, TimeUnit.MILLISECONDS);
                             double cost = (tenantCost.getCost() / 365) * dateInDays;
                             totalCost += cost;
                             device.setCost(Math.round(cost * 100.0) / 100.0);
@@ -1135,13 +1073,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
                 long difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24)) % 365;
 
-                if (difference_In_Time % (1000 * 60 * 60 * 24) >= 0.9 * (1000 * 60 * 60 * 24)) {
-                    difference_In_Days++;
-                }
-
                 for (int i = 1; i <= difference_In_Years; i++) {
                     List<Device> allDevicesPerYear = new ArrayList<>();
-                    LocalDateTime oneYearAfterStart = startDate.toLocalDateTime().plusYears(1).with(LocalTime.of(23, 59, 59));;
+                    LocalDateTime oneYearAfterStart = startDate.toLocalDateTime().plusYears(1);
                     Timestamp newStartDate;
                     Timestamp newEndDate;
 
@@ -1150,12 +1084,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             remainingDaysConsidered = true;
                             oneYearAfterStart = startDate.toLocalDateTime();
                             newEndDate = endDate;
+                        } else if (Timestamp.valueOf(oneYearAfterStart).getTime() >= endDate.getTime()) {
+                            newEndDate = Timestamp.valueOf(oneYearAfterStart);
                         } else {
-                            oneYearAfterStart = startDate.toLocalDateTime().plusYears(1).with(LocalTime.of(23, 59, 59));;
+                            oneYearAfterStart = startDate.toLocalDateTime().plusYears(1);
                             newEndDate = Timestamp.valueOf(oneYearAfterStart);
                         }
                     } else {
-                        oneYearAfterStart = startDate.toLocalDateTime().plusYears(1).with(LocalTime.of(23, 59, 59));;
+                        oneYearAfterStart = startDate.toLocalDateTime().plusYears(1);
                         newEndDate = Timestamp.valueOf(oneYearAfterStart);
                     }
 
@@ -1178,7 +1114,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     allDevices.addAll(billingResponse.getDevice());
                     totalCost = totalCost + billingResponse.getTotalCostPerYear();
                     deviceCount = deviceCount + billingResponse.getDeviceCount();
-                    LocalDateTime nextStartDate = oneYearAfterStart.plusDays(1).with(LocalTime.of(00, 00, 00));
+                    LocalDateTime nextStartDate = oneYearAfterStart.plusDays(1);
                     startDate = Timestamp.valueOf(nextStartDate);
                 }
 

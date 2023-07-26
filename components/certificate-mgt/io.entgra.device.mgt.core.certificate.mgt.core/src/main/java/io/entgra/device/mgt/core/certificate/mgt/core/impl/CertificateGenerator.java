@@ -55,28 +55,10 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.util.Store;
-import org.jscep.message.CertRep;
-import org.jscep.message.MessageDecodingException;
-import org.jscep.message.MessageEncodingException;
-import org.jscep.message.PkcsPkiEnvelopeDecoder;
-import org.jscep.message.PkcsPkiEnvelopeEncoder;
-import org.jscep.message.PkiMessage;
-import org.jscep.message.PkiMessageDecoder;
-import org.jscep.message.PkiMessageEncoder;
+import org.jscep.message.*;
 import org.jscep.transaction.FailInfo;
 import org.jscep.transaction.Nonce;
 import org.jscep.transaction.TransactionId;
-import org.wso2.carbon.certificate.mgt.core.dao.CertificateDAO;
-import org.wso2.carbon.certificate.mgt.core.dao.CertificateManagementDAOException;
-import org.wso2.carbon.certificate.mgt.core.dao.CertificateManagementDAOFactory;
-import org.wso2.carbon.certificate.mgt.core.dto.CAStatus;
-import org.wso2.carbon.certificate.mgt.core.dto.CertificateResponse;
-import org.wso2.carbon.certificate.mgt.core.dto.SCEPResponse;
-import org.wso2.carbon.certificate.mgt.core.exception.KeystoreException;
-import org.wso2.carbon.certificate.mgt.core.exception.TransactionManagementException;
-import org.wso2.carbon.certificate.mgt.core.util.CertificateManagementConstants;
-import org.wso2.carbon.certificate.mgt.core.util.CommonUtil;
-import org.wso2.carbon.certificate.mgt.core.util.Serializer;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.naming.InvalidNameException;
@@ -88,34 +70,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
-import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class CertificateGenerator {
@@ -376,31 +336,15 @@ public class CertificateGenerator {
         CertificateResponse lookUpCertificate = null;
         KeyStoreReader keyStoreReader = new KeyStoreReader();
         if (distinguishedName != null && !distinguishedName.isEmpty()) {
-            if (distinguishedName.contains("CN=")) {
-                String[] dnSplits = null;
-                if (distinguishedName.contains("/")) {
-                    dnSplits = distinguishedName.split("/");
-                } else if (distinguishedName.contains(",")) {
-                    //some older versions of nginx will forward the client certificate subject dn separated with commas
-                    dnSplits = distinguishedName.split(",");
-                }
-                String commonNameExtracted = null;
-                int tenantId = 0;
-                if (dnSplits != null && dnSplits.length >= 1) {
-                    for (String dnPart : dnSplits) {
-                        if (dnPart.contains("CN=")) {
-                            commonNameExtracted = dnPart.replace("CN=", "");
-                        } else if (dnPart.contains("OU=")) {
-                            //the OU of the certificate will be like OU=tenant_<TENANT_ID> ex: OU=tenant_-1234
-                            //splitting by underscore to extract the tenant domain
-                            String[] orgUnitSplits = dnPart.split("_");
-                            tenantId = Integer.parseInt(orgUnitSplits[1]);
-                        }
+            if (distinguishedName.contains("/CN=")) {
+                String[] dnSplits = distinguishedName.split("/");
+                for (String dnPart : dnSplits) {
+                    if (dnPart.contains("CN=")) {
+                        String commonNameExtracted = dnPart.replace("CN=", "");
+                        lookUpCertificate = keyStoreReader.getCertificateBySerial(commonNameExtracted);
+                        break;
                     }
                 }
-
-                lookUpCertificate = keyStoreReader.getCertificateBySerial(commonNameExtracted, tenantId);
-
             } else {
                 LdapName ldapName;
                 try {
@@ -727,29 +671,6 @@ public class CertificateGenerator {
             throw new KeystoreException(errorMsg, e);
         }
     }
-    public void saveCertificate(org.wso2.carbon.certificate.mgt.core.bean.Certificate
-                                     certificate) throws KeystoreException {
-
-        if (certificate == null) {
-            return;
-        }
-
-        try {
-            CertificateDAO certificateDAO = CertificateManagementDAOFactory.getCertificateDAO();
-            CertificateManagementDAOFactory.beginTransaction();
-            certificateDAO.addCertificate(certificate);
-            CertificateManagementDAOFactory.commitTransaction();
-        } catch (CertificateManagementDAOException e) {
-            String errorMsg = "Error occurred when saving the generated certificate in database";
-            log.error(errorMsg);
-            CertificateManagementDAOFactory.rollbackTransaction();
-            throw new KeystoreException(errorMsg, e);
-        } catch (TransactionManagementException e) {
-            String errorMsg = "Error occurred when saving the generated certificate in database";
-            log.error(errorMsg);
-            throw new KeystoreException(errorMsg, e);
-        }
-    }
 
     public void saveCertInKeyStore(List<io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate> certificate)
             throws KeystoreException {
@@ -864,9 +785,8 @@ public class CertificateGenerator {
             X500Name issuerName = new X500Name(subjectDn);
             String commonName = certificationRequest.getSubject().getRDNs(BCStyle.CN)[0].getFirst()
                     .getValue().toString();
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            X500Name subjectName = new X500Name("O=" + commonName + ",CN=" +
-                    serialNumber + ", OU=tenant_"+tenantId);
+            X500Name subjectName = new X500Name("O=" + commonName + "O=AndroidDevice,CN=" +
+                    serialNumber);
             Date startDate = new Date(System.currentTimeMillis());
             Date endDate = new Date(System.currentTimeMillis()
                     + TimeUnit.DAYS.toMillis(365 * 100));
@@ -889,8 +809,8 @@ public class CertificateGenerator {
             List<io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate> certificates = new ArrayList<>();
             certificate.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             certificate.setCertificate(issuedCert);
-            certificate.setDeviceIdentifier(commonName);
-            saveCertificate(certificate);
+            certificates.add(certificate);
+            saveCertInKeyStore(certificates);
 
         } catch (OperatorCreationException e) {
             String errorMsg = "Error creating the content signer";

@@ -74,17 +74,9 @@ public class CertificateAuthenticator implements WebappAuthenticator {
             // When there is a load balancer terminating mutual SSL, it should pass this header along and
             // as the value of this header, the client certificate subject dn should be passed.
             if (request.getHeader(PROXY_MUTUAL_AUTH_HEADER) != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("PROXY_MUTUAL_AUTH_HEADER " + request.getHeader(PROXY_MUTUAL_AUTH_HEADER));
-                }
                 CertificateResponse certificateResponse = AuthenticatorFrameworkDataHolder.getInstance().
                         getCertificateManagementService().verifySubjectDN(request.getHeader(PROXY_MUTUAL_AUTH_HEADER));
                 authenticationInfo = checkCertificateResponse(certificateResponse);
-                if (log.isDebugEnabled()) {
-                    log.debug("Certificate Serial : " + certificateResponse.getSerialNumber()
-                            + ", CN : " + certificateResponse.getCommonName()
-                            + " , username" + authenticationInfo.getUsername());
-                }
             }
             else if (request.getHeader(MUTUAL_AUTH_HEADER) != null) {
                 Object object = request.getAttribute(CLIENT_CERTIFICATE_ATTRIBUTE);
@@ -97,6 +89,7 @@ public class CertificateAuthenticator implements WebappAuthenticator {
                     CertificateResponse certificateResponse = AuthenticatorFrameworkDataHolder.getInstance().
                             getCertificateManagementService().verifyPEMSignature(clientCertificate[0]);
                     authenticationInfo = checkCertificateResponse(certificateResponse);
+
                 } else {
                     authenticationInfo.setStatus(Status.FAILURE);
                     authenticationInfo.setMessage("No client certificate is present");

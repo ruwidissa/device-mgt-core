@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>policy-mgt</artifactId>
-        <version>5.0.27-SNAPSHOT</version>
+        <version>5.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -116,19 +116,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>
-                        --add-opens=java.xml/jdk.xml.internal=ALL-UNNAMED
-                        --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED
-                    </argLine>
                     <systemPropertyVariables>
                         <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
-                    <classpathDependencyExcludes>
-                        <classpathDependencyExclude>org.ops4j.pax.logging</classpathDependencyExclude>
-                    </classpathDependencyExcludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -261,7 +254,7 @@
 
         <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
+            <artifactId>powermock-api-mockito</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -282,10 +275,6 @@
         <dependency>
             <groupId>org.wso2.orbit.javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
         </dependency>
     </dependencies>
 

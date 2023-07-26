@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.notification.logger.impl;
 
+
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.LogContext;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.notification.logger.DeviceLogContext;
@@ -24,6 +25,7 @@ import io.entgra.device.mgt.core.notification.logger.util.MDCContextUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.MDC;
+
 
 public class EntgraDeviceLoggerImpl implements EntgraLogger {
 
@@ -72,6 +74,7 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.info(object, t);
     }
 
+
     public void debug(String message) {
         log.debug(message);
     }
@@ -110,6 +113,7 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
         log.debug(object, t);
     }
+
 
     public void error(String message) {
         log.error(message);
@@ -157,6 +161,7 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.error(object, t);
     }
 
+
     public void warn(String message) {
         log.warn(message);
     }
@@ -203,6 +208,7 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         log.warn(object, t);
     }
 
+
     public void trace(String message) {
         log.trace(message);
     }
@@ -241,6 +247,7 @@ public class EntgraDeviceLoggerImpl implements EntgraLogger {
         MDCContextUtil.populateDeviceMDCContext(deviceLogContext);
         log.trace(object, t);
     }
+
 
     public void fatal(String message) {
         log.fatal(message);

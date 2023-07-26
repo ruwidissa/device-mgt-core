@@ -117,8 +117,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
     }
 
     @Override
-    public OneTimePinDTO isValidOTP(String oneTimeToken, boolean requireRenewal) throws OTPManagementException,
-            BadRequestException {
+    public OneTimePinDTO isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException {
         if (StringUtils.isBlank(oneTimeToken)){
             String msg = "Received blank OTP to verify. OTP: " + oneTimeToken;
             log.error(msg);
@@ -142,19 +141,17 @@ public class OTPManagementServiceImpl implements OTPManagementService {
                 oneTimePinDTO.getCreatedAt().getTime() + oneTimePinDTO.getExpiryTime() * 1000L);
 
         if (currentTimestamp.after(expiredTimestamp)) {
-            if (requireRenewal) {
-                String renewedOTP = UUID.randomUUID().toString();
-                renewOTP(oneTimePinDTO, renewedOTP);
-                Gson gson = new Gson();
-                Tenant tenant = gson.fromJson(oneTimePinDTO.getMetaInfo(), Tenant.class);
+            String renewedOTP = UUID.randomUUID().toString();
+            renewOTP(oneTimePinDTO, renewedOTP);
+            Gson gson = new Gson();
+            Tenant tenant = gson.fromJson(oneTimePinDTO.getMetaInfo(), Tenant.class);
 
-                Properties props = new Properties();
-                props.setProperty("first-name", tenant.getAdminFirstName());
-                props.setProperty("otp-token", renewedOTP);
-                props.setProperty("email", oneTimePinDTO.getEmail());
-                props.setProperty("type", oneTimePinDTO.getEmailType());
-                sendMail(props, oneTimePinDTO.getEmail(), DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE);
-            }
+            Properties props = new Properties();
+            props.setProperty("first-name", tenant.getAdminFirstName());
+            props.setProperty("otp-token", renewedOTP);
+            props.setProperty("email", oneTimePinDTO.getEmail());
+            props.setProperty("type", oneTimePinDTO.getEmailType());
+            sendMail(props, oneTimePinDTO.getEmail(), DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE);
             return null;
         }
         return oneTimePinDTO;
@@ -227,6 +224,9 @@ public class OTPManagementServiceImpl implements OTPManagementService {
                 }
             }
         }
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        OneTimePinDTO oneTimePinDTO;
+        List<OneTimePinDTO> oneTimePinDTOList = new ArrayList<>();
         Properties props = new Properties();
         props.setProperty("enrollment-steps", enrollmentSteps.toString());
         try {
@@ -234,11 +234,16 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             for (String username : deviceEnrollmentInvitation.getUsernames()) {
                 String emailAddress = DeviceManagerUtil.getUserClaimValue(
                         username, DeviceManagementConstants.User.CLAIM_EMAIL_ADDRESS);
+                oneTimePinDTO = generateOneTimePin(emailAddress, OTPEmailTypes.DEVICE_ENROLLMENT.toString(), username,
+                        null, tenantId, false);
+                oneTimePinDTOList.add(oneTimePinDTO);
                 props.setProperty("first-name", DeviceManagerUtil.
                         getUserClaimValue(username, DeviceManagementConstants.User.CLAIM_FIRST_NAME));
                 props.setProperty("username", username);
+                props.setProperty("otp-token", oneTimePinDTO.getOtpToken());
                 sendMail(props, emailAddress, DeviceManagementConstants.EmailAttributes.USER_ENROLLMENT_TEMPLATE);
             }
+            this.otpManagementDAO.addOTPData(oneTimePinDTOList);
             ConnectionManagerUtil.commitDBTransaction();
         } catch (UserStoreException e) {
             String msg = "Error occurred while getting claim values to invite user";
@@ -252,6 +257,11 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             String msg = "SQL Error occurred when adding OPT data to send device enrollment Invitation.";
             log.error(msg, e);
             throw new OTPManagementException(msg, e);
+        } catch (OTPManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while saving the OTP data.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -259,17 +269,27 @@ public class OTPManagementServiceImpl implements OTPManagementService {
 
     /**
      * Create One Time Token
-     * @param oneTimePinDTO Data related to the one time pin
+     * @param email email
+     * @param emailType email type
+     * @param userName username
+     * @param metaDataObj meta data object
+     * @param tenantId tenant Id
      * @return {@link OneTimePinDTO}
      */
     @Override
-    public OneTimePinDTO generateOneTimePin(OneTimePinDTO oneTimePinDTO, boolean persistPin) throws OTPManagementException {
+    public OneTimePinDTO generateOneTimePin(String email, String emailType, String userName, Object metaDataObj,
+                                            int tenantId, boolean persistPin) throws OTPManagementException {
 
         String otpValue = UUID.randomUUID().toString();
 
         Gson gson = new Gson();
-        String metaInfo = gson.toJson(oneTimePinDTO.getMetaInfo());
+        String metaInfo = gson.toJson(metaDataObj);
 
+        OneTimePinDTO oneTimePinDTO = new OneTimePinDTO();
+        oneTimePinDTO.setEmail(email);
+        oneTimePinDTO.setTenantId(tenantId);
+        oneTimePinDTO.setUsername(userName);
+        oneTimePinDTO.setEmailType(emailType);
         oneTimePinDTO.setMetaInfo(metaInfo);
         oneTimePinDTO.setOtpToken(otpValue);
 

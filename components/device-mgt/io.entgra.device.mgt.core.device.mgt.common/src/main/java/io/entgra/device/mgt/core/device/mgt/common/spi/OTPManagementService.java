@@ -35,8 +35,7 @@ public interface OTPManagementService {
      * @throws OTPManagementException if error occurred whle verifying validity of the OPT
      * @throws BadRequestException if found an null value for OTP
      */
-    OneTimePinDTO isValidOTP(String oneTimeToken, boolean requireRenewal) throws
-            OTPManagementException, BadRequestException;
+    OneTimePinDTO isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException;
 
     /**
      * Invalidate the OTP and send welcome mail
@@ -60,7 +59,8 @@ public interface OTPManagementService {
     boolean hasEmailRegistered(String email, String emailDomain) throws OTPManagementException,
             DeviceManagementException;
 
-    OneTimePinDTO generateOneTimePin(OneTimePinDTO oneTimePinData, boolean persistPin) throws OTPManagementException;
+    OneTimePinDTO generateOneTimePin(String email, String emailType, String userName, Object metaDataObj,
+                                     int tenantId, boolean persistPin) throws OTPManagementException;
 
     OneTimePinDTO getRenewedOtpByEmailAndMailType(String email, String emailType) throws OTPManagementException;
 

@@ -31,10 +31,18 @@
         <SchedulerTaskInitialDelay>60000</SchedulerTaskInitialDelay>
         <SchedulerTaskEnabled>true</SchedulerTaskEnabled>
         <PushNotificationProviders>
-            <Provider>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.FCMBasedPushNotificationProvider</Provider>
-            <Provider>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.MQTTBasedPushNotificationProvider</Provider>
-            <Provider>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http.HTTPBasedPushNotificationProvider</Provider>
-            <Provider>io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider</Provider>
+            <Provider>
+                io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.FCMBasedPushNotificationProvider
+            </Provider>
+            <Provider>
+                io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.mqtt.MQTTBasedPushNotificationProvider
+            </Provider>
+            <Provider>
+                io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.http.HTTPBasedPushNotificationProvider
+            </Provider>
+            <Provider>
+                io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider
+            </Provider>
         </PushNotificationProviders>
     </PushNotificationConfiguration>
     <PullNotificationConfiguration>
@@ -42,16 +50,16 @@
     </PullNotificationConfiguration>
     <IdentityConfiguration>
         <ServerUrl>https://localhost:9443</ServerUrl>
-        <AdminUsername>${admin.username}</AdminUsername>
-        <AdminPassword>${admin.username}</AdminPassword>
+        <AdminUsername>admin</AdminUsername>
+        <AdminPassword>admin</AdminPassword>
     </IdentityConfiguration>
     <KeyManagerConfiguration>
         <ServerUrl>https://localhost:9443</ServerUrl>
-        <AdminUsername>${admin.username}</AdminUsername>
-        <AdminPassword>${admin.username}</AdminPassword>
+        <AdminUsername>admin</AdminUsername>
+        <AdminPassword>admin</AdminPassword>
     </KeyManagerConfiguration>
     <PolicyConfiguration>
-        <MonitoringClass>io.entgra.device.mgt.core.policy.mgt</MonitoringClass>
+        <MonitoringClass>org.wso2.carbon.policy.mgt</MonitoringClass>
         <MonitoringEnable>true</MonitoringEnable>
         <MonitoringFrequency>60000</MonitoringFrequency>
         <MaxRetries>5</MaxRetries>
@@ -82,7 +90,7 @@
     device caching for upto configured expiry-time in seconds. In clustered setup all worker nodes can enable the
     device-cache to improve performance. -->
     <DeviceCacheConfiguration>
-        <Enable>true</Enable>
+        <Enable>false</Enable>
         <ExpiryTime>600</ExpiryTime>
         <!--This configuration specifies the number of cache entries in device cache. default capacity is 10000 entries.
         This can be configured to higher number if cache eviction happens due to large number of devices in the
@@ -90,20 +98,18 @@
         <Capacity>10000</Capacity>
     </DeviceCacheConfiguration>
     <GeoFenceCacheConfiguration>
-        <Enable>true</Enable>
+        <Enable>false</Enable>
         <ExpiryTime>600</ExpiryTime>
+        <!--This configuration specifies the number of cache entries in device cache. default capacity is 10000 entries.
+        This can be configured to higher number if cache eviction happens due to large number of devices in the
+        server environment-->
         <Capacity>10000</Capacity>
     </GeoFenceCacheConfiguration>
-    <BillingCacheConfiguration>
-        <Enable>true</Enable>
-        <ExpiryTime>600</ExpiryTime>
-        <Capacity>10000</Capacity>
-    </BillingCacheConfiguration>
     <EventOperationTaskConfiguration>
         <Enable>true</Enable>
     </EventOperationTaskConfiguration>
     <CertificateCacheConfiguration>
-        <Enable>true</Enable>
+        <Enable>false</Enable>
         <ExpiryTime>86400</ExpiryTime>
     </CertificateCacheConfiguration>
     <ArchivalConfiguration>
@@ -114,11 +120,6 @@
         </DataSourceConfiguration>
         <ArchivalTask>
             <Enabled>false</Enabled>
-            <ArchivePendingOperations>false</ArchivePendingOperations>
-            <DBConfig>
-                <SourceDB>DM_DB</SourceDB>
-                <DestinationDB>ARCHIVAL_DB</DestinationDB>
-            </DBConfig>
             <TaskClass>io.entgra.device.mgt.core.device.mgt.core.task.impl.ArchivalTask</TaskClass>
             <!-- Cron expression to run the task at specified time -->
             <CronExpression>0 0 0 1/1 * ? *</CronExpression>
@@ -158,7 +159,7 @@
     <!--This configuration used to configure the options for remote device control feature -->
     <RemoteSessionConfiguration>
         <Enabled>true</Enabled>
-        <RemoteSessionServerUrl>ws://localhost:9763</RemoteSessionServerUrl>
+        <RemoteSessionServerUrl>wss://localhost:9443</RemoteSessionServerUrl>
         <MaximumHTTPConnectionPerHost>2</MaximumHTTPConnectionPerHost>
         <MaximumTotalHTTPConnections>100</MaximumTotalHTTPConnections>
         <MaximumMessagesPerSecond>20</MaximumMessagesPerSecond>
@@ -166,50 +167,5 @@
         <MaximumMessageBufferSize>640</MaximumMessageBufferSize>
     </RemoteSessionConfiguration>
     <DefaultGroupsConfiguration>BYOD,COPE</DefaultGroupsConfiguration>
-    <EnrolmentNotificationConfiguration>
-        <Enabled>false</Enabled>
-        <NotifyThroughExtension>false</NotifyThroughExtension>
-        <ExtensionClass>io.entgra.device.mgt.core.device.mgt.common.enrollment.notification.EnrollmentNotifier</ExtensionClass>
-        <NotifyingInternalHost>http://localhost:8280</NotifyingInternalHost>
-    </EnrolmentNotificationConfiguration>
-    <DefaultRoles>
-        <Enabled>false</Enabled>
-        <Roles>
-            <Role>
-                <Name>test_role</Name>
-                <Permissions>
-                    <Permission>/permission/admin/Login</Permission>
-                </Permissions>
-            </Role>
-        </Roles>
-    </DefaultRoles>
-    <MetaDataConfiguration>
-        <WhiteLabelConfiguration>
-            <FooterText>
-                &lt;a href='https://entgra.io' target='_blank'&gt;
-                Entgra
-                &lt;/a&gt;
-                IoT Server 5.2.0 |  &#169; 2023
-                , All Rights Reserved.
-            </FooterText>
-            <AppTitle>Entgra</AppTitle>
-            <WhiteLabelImages>
-                <StoragePath>repository/resources/whitelabel</StoragePath>
-                <DefaultFaviconName>favicon.png</DefaultFaviconName>
-                <DefaultLogoName>logo.png</DefaultLogoName>
-                <DefaultLogoIconName>icon.png</DefaultLogoIconName>
-                <DefaultImagesLocation>default</DefaultImagesLocation>
-            </WhiteLabelImages>
-        </WhiteLabelConfiguration>
-    </MetaDataConfiguration>
-
-    <OperationTimeoutConfigurations>
-        <OperationTimeouts>
-        </OperationTimeouts>
-    </OperationTimeoutConfigurations>
-    <EnrollmentGuideConfiguration>
-        <Enable>false</Enable>
-        <Mail>Replace with mail</Mail>
-    </EnrollmentGuideConfiguration>
 </DeviceMgtConfiguration>
 
