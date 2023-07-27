@@ -22,7 +22,7 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.0.28-SNAPSHOT</version>
+        <version>5.0.28</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
