@@ -120,6 +120,7 @@ public class OperationDAOUtil {
         operation.setEnabled(dtoOperation.isEnabled());
         operation.setProperties(dtoOperation.getProperties());
         operation.setActivityId(dtoOperation.getActivityId());
+        operation.setInitiatedBy(dtoOperation.getInitiatedBy());
 
 
         return operation;

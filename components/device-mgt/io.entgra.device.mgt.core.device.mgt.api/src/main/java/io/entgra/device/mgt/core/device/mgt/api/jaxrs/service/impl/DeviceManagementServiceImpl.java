@@ -1064,10 +1064,11 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("operationStatus") List<String> status) {
         OperationList operationsList = new OperationList();
         RequestValidationUtil requestValidationUtil = new RequestValidationUtil();
-        RequestValidationUtil.validateOwnerParameter(owner);
         RequestValidationUtil.validatePaginationParameters(offset, limit);
         PaginationRequest request = new PaginationRequest(offset, limit);
-        request.setOwner(owner);
+        if(owner != null){
+            request.setOwner(owner);
+        }
         try {
             //validating the operation log filters
             OperationLogFilters olf = requestValidationUtil.validateOperationLogFilters(operationCode, createdFrom,

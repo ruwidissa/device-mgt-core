@@ -533,7 +533,14 @@ public interface GroupManagementService {
                     defaultValue = "1")
             @DefaultValue("1")
             @QueryParam("depth")
-                    int depth);
+                    int depth,
+            @ApiParam(
+                    name = "allowed",
+                    value = "Whether to return allowed group",
+                    defaultValue = "false")
+            @QueryParam("allowed")
+            @DefaultValue("false")
+            boolean allowed);
 
     @Path("/name/{groupName}")
     @GET
