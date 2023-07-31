@@ -169,6 +169,46 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             throw new GroupManagementDAOException(msg, e);
         }
     }
+
+    @Override
+    public List<DeviceGroup> getGroups(List<Integer> deviceGroupIds, int tenantId) throws GroupManagementDAOException {
+        int deviceGroupIdsCount = deviceGroupIds.size();
+        if (deviceGroupIdsCount == 0) {
+            return new ArrayList<>();
+        }
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH, PARENT_GROUP_ID FROM DM_GROUP WHERE TENANT_ID = ?";
+
+            sql += " AND ID IN (";
+            for (int i = 0; i < deviceGroupIdsCount; i++) {
+                sql += (deviceGroupIdsCount - 1 != i) ? "?," : "?";
+            }
+                sql += ")";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, tenantId);
+
+                for (Integer deviceGroupId : deviceGroupIds) {
+                    stmt.setInt(paramIndex++, deviceGroupId);
+                }
+                List<DeviceGroup> deviceGroupList = new ArrayList<>();
+                try (ResultSet resultSet = stmt.executeQuery()) {
+                    while (resultSet.next()) {
+                        deviceGroupList.add(GroupManagementDAOUtil.loadGroup(resultSet));
+                    }
+                }
+                return deviceGroupList;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving groups of groups IDs " + deviceGroupIds
+                    +  " in tenant: " + tenantId;
+            log.error(msg);
+            throw new GroupManagementDAOException(msg, e);
+        }
+    }
+
+
     @Override
     public List<DeviceGroup> getGroups(GroupPaginationRequest request, List<Integer> deviceGroupIds,
                                        int tenantId, boolean isWithParentPath) throws GroupManagementDAOException {
@@ -1313,7 +1353,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                     + "FROM DM_DEVICE d, "
                     + "(SELECT dgm.DEVICE_ID "
                     + "FROM DM_DEVICE_GROUP_MAP dgm "
-                    + "WHERE dgm.GROUP_ID = (SELECT ID FROM DM_GROUP WHERE GROUP_NAME = ? )) dgm1 "
+                    + "WHERE dgm.GROUP_ID = (SELECT ID FROM DM_GROUP WHERE GROUP_NAME = ? AND TENANT_ID = ?)) dgm1 "
                     + "WHERE d.ID = dgm1.DEVICE_ID AND d.TENANT_ID = ?) gd, DM_DEVICE_TYPE t "
                     + "WHERE gd.DEVICE_TYPE_ID = t.ID) d1 "
                     + "WHERE d1.DEVICE_ID = e.DEVICE_ID AND TENANT_ID = ?";
@@ -1322,6 +1362,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                 stmt.setString(1, groupName);
                 stmt.setInt(2, tenantId);
                 stmt.setInt(3, tenantId);
+                stmt.setInt(4, tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     devices = new ArrayList<>();
                     while (rs.next()) {
