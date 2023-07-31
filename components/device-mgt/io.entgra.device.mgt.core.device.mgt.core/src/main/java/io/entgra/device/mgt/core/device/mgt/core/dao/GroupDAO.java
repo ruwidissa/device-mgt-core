@@ -252,6 +252,15 @@ public interface GroupDAO {
      * @return List of all Device Groups in tenant.
      * @throws GroupManagementDAOException
      */
+    List<DeviceGroup> getGroups(List<Integer> deviceGroupIds, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Get the list of Device Groups in tenant.
+     *
+     * @param tenantId of user's tenant.
+     * @return List of all Device Groups in tenant.
+     * @throws GroupManagementDAOException
+     */
     List<DeviceGroup> getGroups(int tenantId) throws GroupManagementDAOException;
 
     /**

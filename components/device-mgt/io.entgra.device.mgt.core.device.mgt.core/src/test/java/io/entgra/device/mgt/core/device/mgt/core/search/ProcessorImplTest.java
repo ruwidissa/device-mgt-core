@@ -29,7 +29,6 @@ import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementServic
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.InvalidOperatorException;
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchMgtException;
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.impl.ProcessorImpl;
-import io.entgra.device.mgt.core.device.mgt.core.search.util.ChangeEnumValues;
 import io.entgra.device.mgt.core.device.mgt.core.search.util.Utils;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
@@ -131,8 +130,6 @@ public class ProcessorImplTest extends BaseDeviceManagementTest {
     public void testInvalidState() throws SearchMgtException {
         SearchContext context = new SearchContext();
         List<Condition> conditions = new ArrayList<>();
-        ChangeEnumValues.addEnum(Condition.State.class, "BLA");
-        Condition.State state = Condition.State.valueOf("BLA");
 
         Condition cond = new Condition();
         cond.setKey("batteryLevel");
@@ -152,7 +149,7 @@ public class ProcessorImplTest extends BaseDeviceManagementTest {
         cond3.setKey("batteryLevel");
         cond3.setOperator("=");
         cond3.setValue("23.0");
-        cond3.setState(state);
+        cond3.setState(Condition.State.AND);
         conditions.add(cond3);
 
         context.setConditions(conditions);

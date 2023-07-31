@@ -1736,7 +1736,6 @@ public interface DeviceManagementService {
             @ApiParam(
                     name = "owner",
                     value = "Provides the owner of the required device.",
-                    required = true,
                     defaultValue = "")
             @QueryParam("owner")
                     String owner,

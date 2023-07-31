@@ -22,7 +22,7 @@
     <parent>
         <artifactId>device-mgt</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.0.27-SNAPSHOT</version>
+        <version>5.0.29-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -66,6 +66,12 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.osgi</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
@@ -111,10 +117,10 @@
             <artifactId>org.wso2.carbon.governance.registry.extensions</artifactId>
             <scope>test</scope>
             <exclusions>
-            <exclusion>
-                <groupId>jaxen</groupId>
-                <artifactId>jaxen</artifactId>
-            </exclusion>
+                <exclusion>
+                    <groupId>jaxen</groupId>
+                    <artifactId>jaxen</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -144,6 +150,11 @@
         <dependency>
             <groupId>org.wso2.orbit.javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.notification.logger</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -263,8 +274,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
-    
 </project>

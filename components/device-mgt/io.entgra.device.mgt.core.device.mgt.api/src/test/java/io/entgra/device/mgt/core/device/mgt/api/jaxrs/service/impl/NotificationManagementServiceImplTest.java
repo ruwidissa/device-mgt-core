@@ -46,7 +46,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 /**
  * This is a test class for {@link NotificationManagementServiceImpl}.
  */
-@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "org.mockito.*"})
 @SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, MultitenantUtils.class, CarbonContext.class})

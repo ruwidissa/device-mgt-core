@@ -23,7 +23,7 @@
     <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>io.entgra.device.mgt.core.parent</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.27-SNAPSHOT</version>
+    <version>5.0.29-SNAPSHOT</version>
     <name>WSO2 Carbon - Device Management - Parent</name>
     <url>https://entgra.io</url>
     <description>WSO2 Connected Device Manager Components</description>
@@ -843,7 +843,6 @@
                 <artifactId>jaxb-impl</artifactId>
                 <version>2.3.1</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.axis2.transport</groupId>
                 <artifactId>axis2-transport-mail</artifactId>
@@ -1903,7 +1902,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.2</version>
+                    <version>3.1.2</version>
                     <configuration>
                         <systemPropertyVariables>
                             <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-ut.exec
@@ -1997,7 +1996,7 @@
         <axiom.wso2.version>1.2.11-wso2v25</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <io.entgra.device.mgt.core.version>5.0.27-SNAPSHOT</io.entgra.device.mgt.core.version>
+        <io.entgra.device.mgt.core.version>5.0.29-SNAPSHOT</io.entgra.device.mgt.core.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.9.2</carbon.commons.version>
@@ -2084,7 +2083,7 @@
         <nimbus.orbit.version.range>[7.3, 8)</nimbus.orbit.version.range>
 
         <!--javax ws rs version-->
-        <javax.ws.rs.version>2.0.1</javax.ws.rs.version>
+        <javax.ws.rs.version>2.1.1</javax.ws.rs.version>
         <swagger.version>1.6.9</swagger.version>
         <swagger.annotations.version>1.6.9</swagger.annotations.version>
         <servlet-api.version>4.0.1</servlet-api.version>
@@ -2096,7 +2095,7 @@
         <joda-time.version>2.8.2.wso2v1</joda-time.version>
         <owasp.encoder.version>1.2.0.wso2v1</owasp.encoder.version>
 
-        <hibernate-validator.version>5.0.2.Final</hibernate-validator.version>
+        <hibernate-validator.version>5.1.2.Final</hibernate-validator.version>
         <javax.xml.parsers.import.pkg.version>[0.0.0,1.0.0)</javax.xml.parsers.import.pkg.version>
         <javax.xml.bind.imp.pkg.version>[0.0.0,1.0.0)</javax.xml.bind.imp.pkg.version>
 
@@ -2125,8 +2124,7 @@
         <maven.javadoc.skip>true</maven.javadoc.skip>
 
         <!-- jacoco plugin version -->
-        <jacoco.maven.plugin.version>0.7.8</jacoco.maven.plugin.version>
-        <jacoco.ant.verision>0.7.5.201505241946</jacoco.ant.verision>
+        <jacoco.maven.plugin.version>0.8.10</jacoco.maven.plugin.version>
         <ant.contrib.version>1.0b3</ant.contrib.version>
         <power.mock.version>2.0.2</power.mock.version>
         <commons.dbcp.version>1.4.0.wso2v1</commons.dbcp.version>
@@ -2135,8 +2133,6 @@
         <!-- app management related versions -->
         <googlecode.plist.version>1.21</googlecode.plist.version>
         <net.dongliu.version>2.6.5</net.dongliu.version>
-        <frontend.mave.version>1.7.6</frontend.mave.version>
-        <node.version>v12.18.1</node.version>
 
         <maven.checkstyle.vesion>3.1.0</maven.checkstyle.vesion>
 

@@ -45,11 +45,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -552,45 +548,51 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             throw new GroupManagementException(msg);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Get groups with hierarchy " + request.toString());
+            log.debug("Get groups with hierarchy " + request);
         }
-        boolean isWithParentPath = false;
         DeviceManagerUtil.validateGroupListPageSize(request);
         List<DeviceGroup> rootGroups;
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             request.setParentPath(DeviceGroupConstants.HierarchicalGroup.SEPERATOR);
-            if (StringUtils.isBlank(username)) {
-                GroupManagementDAOFactory.openConnection();
-                rootGroups = groupDAO.getGroups(request, tenantId);
-            } else {
-                List<Integer> allDeviceGroupIdsOfUser = getGroupIds(username);
-                GroupManagementDAOFactory.openConnection();
-                rootGroups = this.groupDAO.getGroups(request, allDeviceGroupIdsOfUser, tenantId, isWithParentPath);
-            }
             String parentPath;
             List<DeviceGroup> childrenGroups;
-            for (DeviceGroup rootGroup : rootGroups) {
-                parentPath = DeviceManagerUtil.createParentPath(rootGroup);
-                childrenGroups = groupDAO.getChildrenGroups(parentPath, tenantId);
-                createGroupWithChildren(
-                        rootGroup, childrenGroups, requireGroupProps, tenantId, request.getDepth(), 0);
+            if (StringUtils.isBlank(username)) {
+                try {
+                    GroupManagementDAOFactory.openConnection();
+                    rootGroups = groupDAO.getGroups(request, tenantId);
+                    for (DeviceGroup rootGroup : rootGroups) {
+                        parentPath = DeviceManagerUtil.createParentPath(rootGroup);
+                        childrenGroups = groupDAO.getChildrenGroups(parentPath, tenantId);
+                        createGroupWithChildren(
+                                rootGroup, childrenGroups, requireGroupProps, tenantId, request.getDepth(), 0);
+                        if (requireGroupProps) {
+                            populateGroupProperties(rootGroup, tenantId);
+                        }
+                    }
+                } catch (SQLException e) {
+                    String msg = "Error occurred while opening a connection to the data source to retrieve all groups "
+                            + "with hierarchy";
+                    log.error(msg, e);
+                    throw new GroupManagementException(msg, e);
+                } finally {
+                    GroupManagementDAOFactory.closeConnection();
+                }
+            } else {
+                List<Integer> allDeviceGroupIdsOfUser = getGroupIds(username);
+                rootGroups = this.getGroups(allDeviceGroupIdsOfUser, tenantId);
                 if (requireGroupProps) {
-                    populateGroupProperties(rootGroup, tenantId);
+                    for (DeviceGroup rootGroup : rootGroups) {
+                        populateGroupProperties(rootGroup, tenantId);
+                    }
                 }
             }
         } catch (GroupManagementDAOException e) {
             String msg = "Error occurred while retrieving all groups with hierarchy";
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the data source to retrieve all groups "
-                    + "with hierarchy";
-            log.error(msg, e);
-            throw new GroupManagementException(msg, e);
-        } finally {
-            GroupManagementDAOFactory.closeConnection();
         }
+
         PaginationResult groupResult = new PaginationResult();
         groupResult.setData(rootGroups);
         if (StringUtils.isBlank(username)) {
@@ -599,6 +601,127 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             groupResult.setRecordsTotal(getGroupCount(username, request.getParentPath()));
         }
         return groupResult;
+    }
+
+    private List<DeviceGroup> getGroups(List<Integer> groupIds, int tenantId) throws GroupManagementException {
+        try {
+            GroupManagementDAOFactory.openConnection();
+            List<DeviceGroup >groups = groupDAO.getGroups(groupIds, tenantId);
+            if (groups == null) {
+                String msg = "Retrieved null when getting groups for group ids " + groupIds.toString();
+                log.error(msg);
+                throw new GroupManagementException(msg);
+            }
+            if (groups.isEmpty()) return groups;
+            groups.sort(Comparator.comparing(DeviceGroup::getGroupId));
+            return getTree(groups);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source to retrieve all groups "
+                    + "with hierarchy";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (GroupManagementDAOException ex) {
+            String msg = "Error occurred while getting groups for group ids " + groupIds.toString();
+            log.error(msg, ex);
+            throw new GroupManagementException(msg, ex);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    private List<DeviceGroup> getTree(List<DeviceGroup> groups) {
+        List<DeviceGroup> tree = new ArrayList<>();
+        for (DeviceGroup deviceGroup : groups) {
+            DeviceGroup treeNode = tree.stream().
+                    filter(node -> Arrays.stream(deviceGroup.getParentPath().split("/")).
+                            collect(Collectors.toList()).contains(Integer.toString(node.getGroupId()))).
+                    findFirst().orElse(null);
+            if (treeNode != null) {
+                if (Objects.equals(treeNode.getParentPath(), deviceGroup.getParentPath())) {
+                    tree.add(deviceGroup);
+                } else {
+                    List<DeviceGroup> tempGroups = treeNode.getChildrenGroups();
+                    if (tempGroups == null) {
+                        tempGroups = new ArrayList<>();
+                    }
+                    tempGroups.add(deviceGroup);
+                    treeNode.setChildrenGroups(getTree(tempGroups));
+                }
+            } else {
+                tree.add(deviceGroup);
+            }
+        }
+        return tree;
+    }
+
+    private DeviceGroup findGroupFromTree(List<DeviceGroup> tree, int groupId) {
+        for (DeviceGroup node: tree) {
+            if (node.getGroupId() == groupId) return node;
+            if (node.getChildrenGroups() != null) {
+                DeviceGroup tempNode = findGroupFromTree(node.getChildrenGroups(), groupId);
+                if (tempNode != null) {
+                    return tempNode;
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean isAdminUser(String username, UserStoreManager userStoreManager)
+            throws GroupManagementException {
+        try {
+            if (!userStoreManager.isExistingUser(username)) {
+                String msg = "User doesn't exists with given username " + username;
+                throw new GroupManagementException(msg);
+            }
+
+            String []currentRoles = userStoreManager.getRoleListOfUser(username);
+            for (String role : currentRoles) {
+                if (role.equals("admin")) return true;
+            }
+
+            return false;
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while requesting user details";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public DeviceGroup getUserOwnGroup(int groupId, boolean requireGroupProps, int depth) throws GroupManagementException {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        String username = ctx.getUsername();
+        int tenantId = ctx.getTenantId();
+        try {
+            UserStoreManager userStoreManager = DeviceManagementDataHolder.getInstance().
+                    getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
+            if (isAdminUser(username, userStoreManager)) {
+                return getGroup(groupId, requireGroupProps);
+            }
+
+            List<Integer> userOwnGroupIds = this.getGroupIds(username);
+            if (userOwnGroupIds == null) {
+                String msg = "Retrieved null when getting group ids for user " + username;
+                log.error(msg);
+                throw new GroupManagementException(msg);
+            }
+
+            DeviceGroup deviceGroup = findGroupFromTree(
+                    getGroups(userOwnGroupIds, tenantId), groupId);
+            if (deviceGroup != null && requireGroupProps)
+                populateGroupProperties(deviceGroup, tenantId);
+
+            return deviceGroup;
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while getting user store manager service";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (GroupManagementDAOException e) {
+            String msg = "Error occurred while obtaining group '" + groupId + "'";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        }
     }
 
     @Override
