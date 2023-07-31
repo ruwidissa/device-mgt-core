@@ -23,33 +23,32 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServi
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Mediation;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevision;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevisionDeployment;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.CORSConfiguration;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiUriTemplate;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiUriTemplate;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -65,16 +64,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Date;
+import java.util.*;
 
 /**
  * This class represents the concrete implementation of the APIPublisherService that corresponds to providing all
@@ -167,6 +157,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 break;
                             }
                         }
+                        String apiUuid = apiIdentifier.getUUID();
                         if (!apiFound) {
                             // add new scopes as shared scopes
                             for (ApiScope apiScope : apiConfig.getScopes()) {
@@ -182,9 +173,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             }
                             APIInfo api = getAPI(apiConfig, true);
                             JSONObject createdAPI = publisherRESTAPIServices.addAPI(apiApplicationKey, accessTokenInfo, api);
+                            apiUuid = createdAPI.getString("id");
                             if (apiConfig.getEndpointType() != null && "WS".equals(apiConfig.getEndpointType())) {
                                 publisherRESTAPIServices.saveAsyncApiDefinition(apiApplicationKey, accessTokenInfo,
-                                        createdAPI.getString("id"), apiConfig.getAsyncApiDefinition());
+                                        apiUuid, apiConfig.getAsyncApiDefinition());
                             }
                             if (CREATED_STATUS.equals(createdAPI.getString("lifeCycleStatus"))) {
                                 // if endpoint type "dynamic" and then add in sequence
@@ -195,13 +187,13 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     mediation.setType("in");
                                     mediation.setGlobal(false);
                                     publisherRESTAPIServices.addApiSpecificMediationPolicy(apiApplicationKey,
-                                            accessTokenInfo, createdAPI.getString("id"), mediation);
+                                            accessTokenInfo, apiUuid, mediation);
                                 }
                                 publisherRESTAPIServices.changeLifeCycleStatus(apiApplicationKey, accessTokenInfo,
-                                        createdAPI.getString("id"), PUBLISH_ACTION);
+                                        apiUuid, PUBLISH_ACTION);
 
                                 APIRevision apiRevision = new APIRevision();
-                                apiRevision.setApiUUID(createdAPI.getString("id"));
+                                apiRevision.setApiUUID(apiUuid);
                                 apiRevision.setDescription("Initial Revision");
                                 String apiRevisionId = publisherRESTAPIServices.addAPIRevision(apiApplicationKey,
                                         accessTokenInfo, apiRevision).getString("id");
@@ -214,7 +206,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
                                 apiRevisionDeploymentList.add(apiRevisionDeployment);
                                 publisherRESTAPIServices.deployAPIRevision(apiApplicationKey, accessTokenInfo,
-                                        createdAPI.getString("id"), apiRevisionId, apiRevisionDeploymentList);
+                                        apiUuid, apiRevisionId, apiRevisionDeploymentList);
                             }
                         } else {
                             if (WebappPublisherConfig.getInstance().isEnabledUpdateApi()) {
@@ -257,7 +249,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
                                 // Get existing API
                                 JSONObject existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo,
-                                        apiIdentifier);
+                                        apiUuid);
                                 if (scopesToMoveAsSharedScopes.size() > 0) {
                                     // update API to remove local scopes
                                     APIInfo api = getAPI(apiConfig, false);
@@ -274,15 +266,15 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     }
                                 }
 
-                                existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo, apiIdentifier);
+                                existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo, apiUuid);
                                 APIInfo api = getAPI(apiConfig, true);
                                 api.setLastUpdatedTime(existingAPI.getString("lifeCycleStatus"));
-                                api.setId(existingAPI.getString("id"));
+                                api.setId(apiUuid);
                                 publisherRESTAPIServices.updateApi(apiApplicationKey, accessTokenInfo, api);
 
                                 if (apiConfig.getEndpointType() != null && "WS".equals(apiConfig.getEndpointType())) {
                                     publisherRESTAPIServices.saveAsyncApiDefinition(apiApplicationKey, accessTokenInfo,
-                                            existingAPI.getString("id"), apiConfig.getAsyncApiDefinition());
+                                            apiUuid, apiConfig.getAsyncApiDefinition());
                                 }
 
                                 // if endpoint type "dynamic" and then add /update in sequence
@@ -293,48 +285,50 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     mediation.setType("in");
                                     mediation.setGlobal(false);
 
-                                    List<Mediation> mediationList = (List) publisherRESTAPIServices
+                                    JSONArray mediationList = (JSONArray) publisherRESTAPIServices
                                             .getAllApiSpecificMediationPolicies(apiApplicationKey, accessTokenInfo,
-                                                    apiIdentifier).get("list");
+                                                    apiUuid).get("list");
 
                                     boolean isMediationPolicyFound = false;
-                                    for (Mediation m : mediationList) {
-                                        if (apiConfig.getInSequenceName().equals(m.getName())) {
-                                            m.setConfig(apiConfig.getInSequenceConfig());
-                                            publisherRESTAPIServices.
-                                                    updateApiSpecificMediationPolicyContent(apiApplicationKey,
-                                                            accessTokenInfo, existingAPI.getString("id"), m);
+                                    for (int i = 0; i < mediationList.length(); i++) {
+                                        JSONObject mediationObj = mediationList.getJSONObject(i);
+                                        if (apiConfig.getInSequenceName().equals(mediationObj.getString("name"))) {
+                                            mediation.setUuid(mediationObj.getString("id"));
+                                            publisherRESTAPIServices.deleteApiSpecificMediationPolicy(apiApplicationKey,
+                                                    accessTokenInfo, apiUuid, mediation);
+                                            publisherRESTAPIServices.addApiSpecificMediationPolicy(apiApplicationKey,
+                                                    accessTokenInfo, apiUuid, mediation);
                                             isMediationPolicyFound = true;
                                             break;
                                         }
                                     }
                                     if (!isMediationPolicyFound) {
                                         publisherRESTAPIServices.addApiSpecificMediationPolicy(apiApplicationKey,
-                                                accessTokenInfo, existingAPI.getString("id"), mediation);
+                                                accessTokenInfo, apiUuid, mediation);
                                     }
                                 }
 
                                 // This will retrieve the deployed revision
                                 JSONArray revisionDeploymentList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
-                                        accessTokenInfo, existingAPI.getString("id"), true).get("list");
+                                        accessTokenInfo, apiUuid, true).get("list");
                                 // This will retrieve the un deployed revision list
                                 JSONArray undeployedRevisionList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
-                                        accessTokenInfo, existingAPI.getString("id"), false).get("list");
+                                        accessTokenInfo, apiUuid, false).get("list");
                                 int apiRevisionCount = (int) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
-                                        accessTokenInfo, existingAPI.getString("id"), null).get("count");
+                                        accessTokenInfo, apiUuid, null).get("count");
 
                                 if (apiRevisionCount >= 5) {
                                     JSONObject latestRevisionDeployment = revisionDeploymentList.getJSONObject(0);
                                     JSONObject earliestUndeployRevision = undeployedRevisionList.getJSONObject(0);
                                     publisherRESTAPIServices.undeployAPIRevisionDeployment(apiApplicationKey,
-                                            accessTokenInfo, latestRevisionDeployment, existingAPI.getString("id"));
+                                            accessTokenInfo, latestRevisionDeployment, apiUuid);
                                     publisherRESTAPIServices.deleteAPIRevision(apiApplicationKey, accessTokenInfo,
-                                            earliestUndeployRevision, existingAPI.getString("id"));
+                                            earliestUndeployRevision, apiUuid);
                                 }
 
                                 // create new revision
                                 APIRevision apiRevision = new APIRevision();
-                                apiRevision.setApiUUID(existingAPI.getString("id"));
+                                apiRevision.setApiUUID(apiUuid);
                                 apiRevision.setDescription("Updated Revision");
                                 String apiRevisionId = publisherRESTAPIServices.addAPIRevision(apiApplicationKey,
                                         accessTokenInfo, apiRevision).getString("id");
@@ -348,17 +342,15 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 apiRevisionDeploymentList.add(apiRevisionDeployment);
 
                                 publisherRESTAPIServices.deployAPIRevision(apiApplicationKey, accessTokenInfo,
-                                        existingAPI.getString("id"), apiRevisionId, apiRevisionDeploymentList);
+                                        apiUuid, apiRevisionId, apiRevisionDeploymentList);
 
                                 if (CREATED_STATUS.equals(existingAPI.getString("lifeCycleStatus"))) {
                                     publisherRESTAPIServices.changeLifeCycleStatus(apiApplicationKey,accessTokenInfo,
-                                            existingAPI.getString("id"), PUBLISH_ACTION);
+                                            apiUuid, PUBLISH_ACTION);
                                 }
                             }
                         }
-                        if (apiConfig.getApiDocumentationSourceFile() != null) {
-                            APIInfo api = getAPI(apiConfig, true);
-
+                        if (apiUuid != null && apiConfig.getApiDocumentationSourceFile() != null) {
                             String fileName =
                                     CarbonUtils.getCarbonHome() + File.separator + "repository" +
                                             File.separator + "resources" + File.separator + "api-docs" + File.separator +
@@ -376,7 +368,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             br.close();
                             String docContent = stringBuilder.toString();
 
-                            Documentation apiDocumentation = new Documentation(DocumentationType.HOWTO, apiConfig.getApiDocumentationName());
+                            Documentation apiDocumentation = new Documentation(Documentation.DocumentationType.HOWTO, apiConfig.getApiDocumentationName());
                             apiDocumentation.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
                             apiDocumentation.setSourceType(Documentation.DocumentSourceType.MARKDOWN);
                             apiDocumentation.setCreatedDate(new Date());
@@ -385,25 +377,27 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             apiDocumentation.setOtherTypeName(null);
 
                             JSONArray documentList = (JSONArray) publisherRESTAPIServices.getDocumentations(apiApplicationKey,
-                                    accessTokenInfo, api.getId()).get("list");
+                                    accessTokenInfo, apiUuid).get("list");
 
                             if (documentList.length() > 0) {
                                 for (int i = 0; i < documentList.length(); i++) {
                                     JSONObject existingDoc = documentList.getJSONObject(i);
                                     if (existingDoc.getString("name").equals(apiConfig.getApiDocumentationName())
-                                            && existingDoc.getString("type").equals(DocumentationType.HOWTO)) {
+                                            && existingDoc.getString("type").equals(Documentation.DocumentationType.HOWTO.name())) {
                                         publisherRESTAPIServices.deleteDocumentations(apiApplicationKey, accessTokenInfo,
-                                                api.getId(), existingDoc.getString("documentId"));
+                                                apiUuid, existingDoc.getString("documentId"));
                                     }
                                 }
                             } else {
                                 log.info("There is no any existing api documentation.");
                             }
-                            Documentation createdDoc = publisherRESTAPIServices.addDocumentation(apiApplicationKey, accessTokenInfo,
-                                    api.getId(), apiDocumentation);
 
-                            publisherRESTAPIServices.addDocumentationContent(apiApplicationKey, accessTokenInfo, api,
-                                    createdDoc.getId(), docContent);
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation createdDoc = publisherRESTAPIServices.addDocumentation(apiApplicationKey, accessTokenInfo,
+                                    apiUuid, apiDocumentation);
+
+                            publisherRESTAPIServices.addDocumentationContent(apiApplicationKey, accessTokenInfo, apiUuid,
+                                    createdDoc.getDocumentId(), docContent);
+
                         }
                     } catch (APIManagementException | IOException | APIServicesException |
                              BadRequestException | UnexpectedResponseException e) {
@@ -572,45 +566,49 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         }
         apiInfo.setPolicies(availableTiers);
 
-        if (config.getEndpointType() == null) {
-            List<JSONObject> operations = new ArrayList();
-            List<JSONObject> scopeSet = new ArrayList();
-            Iterator<ApiUriTemplate> iterator;
-            for (iterator = config.getUriTemplates().iterator(); iterator.hasNext(); ) {
-                ApiUriTemplate apiUriTemplate = iterator.next();
-                JSONObject operation = new JSONObject();
-                operation.put("target", apiUriTemplate.getUriTemplate());
-                operation.put("verb", apiUriTemplate.getHttpVerb());
-                operation.put("authType", apiUriTemplate.getAuthType());
-                operation.put("throttlingPolicy", UNLIMITED_TIER);
-                if (includeScopes) {
-                    if (apiUriTemplate.getScope() != null) {
-                        String scopeString = "{\n" +
-                                "            \"scope\": {\n" +
-                                "                \"id\": null,\n" +
-                                "                \"name\": \"" + apiUriTemplate.getScope().getKey() + "\",\n" +
-                                "                \"displayName\": \"" + apiUriTemplate.getScope().getName() + "\",\n" +
-                                "                \"description\": \"" + apiUriTemplate.getScope().getDescription() + "\",\n" +
-                                "                \"bindings\": [\n" +
-                                "                    \"" + apiUriTemplate.getScope().getRoles() + "\"\n" +
-                                "                ],\n" +
-                                "                \"usageCount\": null\n" +
-                                "            },\n" +
-                                "            \"shared\": true\n" +
-                                "        }";
-                        JSONObject scope = new JSONObject(scopeString);
-                        scopeSet.add(scope);
-
-                        Set<String> scopes = new HashSet<>();
-                        scopes.add(apiUriTemplate.getScope().getKey());
-                        operation.put("scopes", scopes);
-                    }
-                }
-                operations.add(operation);
-            }
-            apiInfo.setScopes(scopeSet);
-            apiInfo.setOperations(operations);
+        if (config.getEndpointType() != null && "WS".equals(config.getEndpointType())) {
+            apiInfo.setAsyncApiDefinition(config.getAsyncApiDefinition());
         }
+
+        //set operations and scopes
+        List<JSONObject> operations = new ArrayList();
+        List<JSONObject> scopeSet = new ArrayList();
+        Iterator<ApiUriTemplate> iterator;
+        for (iterator = config.getUriTemplates().iterator(); iterator.hasNext(); ) {
+            ApiUriTemplate apiUriTemplate = iterator.next();
+            JSONObject operation = new JSONObject();
+            operation.put("target", apiUriTemplate.getUriTemplate());
+            operation.put("verb", apiUriTemplate.getHttpVerb());
+            operation.put("authType", apiUriTemplate.getAuthType());
+            operation.put("throttlingPolicy", UNLIMITED_TIER);
+            operation.put("uriMapping", apiUriTemplate.getUriMapping());
+            if (includeScopes) {
+                if (apiUriTemplate.getScope() != null) {
+                    String scopeString = "{\n" +
+                            "            \"scope\": {\n" +
+                            "                \"id\": null,\n" +
+                            "                \"name\": \"" + apiUriTemplate.getScope().getKey() + "\",\n" +
+                            "                \"displayName\": \"" + apiUriTemplate.getScope().getName() + "\",\n" +
+                            "                \"description\": \"" + apiUriTemplate.getScope().getDescription() + "\",\n" +
+                            "                \"bindings\": [\n" +
+                            "                    \"" + apiUriTemplate.getScope().getRoles() + "\"\n" +
+                            "                ],\n" +
+                            "                \"usageCount\": null\n" +
+                            "            },\n" +
+                            "            \"shared\": true\n" +
+                            "        }";
+                    JSONObject scope = new JSONObject(scopeString);
+                    scopeSet.add(scope);
+
+                    Set<String> scopes = new HashSet<>();
+                    scopes.add(apiUriTemplate.getScope().getKey());
+                    operation.put("scopes", scopes);
+                }
+            }
+            operations.add(operation);
+        }
+        apiInfo.setScopes(scopeSet);
+        apiInfo.setOperations(operations);
 
         if (config.isSharedWithAllTenants()) {
             apiInfo.setSubscriptionAvailability(SUBSCRIPTION_TO_ALL_TENANTS);
@@ -640,7 +638,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
         if (config.getEndpointType() != null && "dynamic".equals(config.getEndpointType())) {
             endpointConfig = "{\n" +
-                    "        \"endpoint_type\": \"http\",\n" +
+                    "        \"endpoint_type\": \"default\",\n" +
                     "        \"sandbox_endpoints\": {\n" +
                     "            \"url\": \" default \"\n" +
                     "        },\n" +
@@ -649,8 +647,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     "        }\n" +
                     "    }";
             endPointConfig = new JSONObject(endpointConfig);
-            //TODO: Will be used in dynamic endpoints
-//            apiInfo.setInSequence(config.getInSequenceName());
+            apiInfo.setInSequence(config.getInSequenceName());
         }
 
         // if ws endpoint
@@ -702,42 +699,5 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         apiInfo.setServiceInfo(null);
 
         return apiInfo;
-
-        //TODO: Will be used in WS or dynamic endpoints
-//        if (config.getEndpointType() != null && "WS".equals(config.getEndpointType())) {
-//            api.setAsyncApiDefinition(config.getAsyncApiDefinition());
-//            AsyncApiParser asyncApiParser = new AsyncApiParser();
-//            try {
-//                api.setUriTemplates(asyncApiParser.getURITemplates(config.getAsyncApiDefinition(), true));
-//            } catch (APIManagementException e) {
-//
-//            }
-//            api.setWsUriMapping(asyncApiParser.buildWSUriMapping(config.getAsyncApiDefinition()));
-//        } else {
-//            api.setSwaggerDefinition(APIPublisherUtil.getSwaggerDefinition(config));
-//
-//            Set<URITemplate> uriTemplates = new HashSet<>();
-//            Iterator<ApiUriTemplate> iterator;
-//            for (iterator = config.getUriTemplates().iterator(); iterator.hasNext(); ) {
-//                ApiUriTemplate apiUriTemplate = iterator.next();
-//                URITemplate uriTemplate = new URITemplate();
-//                uriTemplate.setAuthType(apiUriTemplate.getAuthType());
-//                uriTemplate.setHTTPVerb(apiUriTemplate.getHttpVerb());
-//                uriTemplate.setResourceURI(apiUriTemplate.getResourceURI());
-//                uriTemplate.setUriTemplate(apiUriTemplate.getUriTemplate());
-//                if (includeScopes) {
-//                    Scope scope = new Scope();
-//                    if (apiUriTemplate.getScope() != null) {
-//                        scope.setName(apiUriTemplate.getScope().getName());
-//                        scope.setDescription(apiUriTemplate.getScope().getDescription());
-//                        scope.setKey(apiUriTemplate.getScope().getKey());
-//                        scope.setRoles(apiUriTemplate.getScope().getRoles());
-//                        uriTemplate.setScopes(scope);
-//                    }
-//                }
-//                uriTemplates.add(uriTemplate);
-//            }
-//            api.setUriTemplates(uriTemplates);
-//        }
     }
 }
