@@ -250,8 +250,13 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 log.error(msg);
                 throw new APIManagerException(msg);
             }
-            ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(tokenInfo, application.getApplicationId(),
-                    keyManager.getName(), validityTime, keyType);
+
+            ApiApplicationInfo applicationInfo = getApplicationInfo(null, null);
+            tokenInfo.setApiApplicationInfo(applicationInfo);
+
+            ApplicationKey applicationKey = consumerRESTAPIServices.mapApplicationKeys(tokenInfo, application,
+                    keyManager.getName(), keyType);
+
             ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
             apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
             apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
