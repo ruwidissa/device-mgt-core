@@ -55,6 +55,9 @@ public interface ConsumerRESTAPIServices {
     ApplicationKey generateApplicationKeys(TokenInfo tokenInfo, String applicationId, String keyManager, String validityTime, String keyType)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
+    ApplicationKey mapApplicationKeys(TokenInfo tokenInfo, Application application, String keyManager, String keyType)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException;
+
     ApplicationKey getKeyDetails(TokenInfo tokenInfo, String applicationId, String keyMapId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 

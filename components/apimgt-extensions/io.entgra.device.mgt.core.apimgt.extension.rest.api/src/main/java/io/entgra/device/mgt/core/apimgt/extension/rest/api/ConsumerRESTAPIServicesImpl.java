@@ -607,6 +607,71 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
     }
 
     @Override
+    public ApplicationKey mapApplicationKeys(TokenInfo tokenInfo, Application application, String keyManager, String keyType)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        ApiApplicationInfo apiApplicationInfo = tokenInfo.getApiApplicationInfo();
+        boolean token = isTokenNull(apiApplicationInfo, tokenInfo.getAccessToken());
+        String getAllScopesUrl = endPointPrefix + Constants.APPLICATIONS_API + Constants.SLASH +
+                application.getApplicationId() + "/map-keys";
+
+        String payload = "{\n" +
+                "  \"consumerKey\": \"" + apiApplicationInfo.getClientId() + "\",\n" +
+                "  \"consumerSecret\": \"" + apiApplicationInfo.getClientSecret() + "\",\n" +
+                "  \"keyManager\": \"" +  keyManager + "\",\n" +
+                "  \"keyType\": \"" + keyType + "\"\n" +
+                "}";
+        RequestBody requestBody = RequestBody.create(JSON, payload);
+
+        Request.Builder builder = new Request.Builder();
+        builder.url(getAllScopesUrl);
+        if (!token) {
+            builder.addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                    + apiApplicationInfo.getAccess_token());
+        } else {
+            builder.addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                    + tokenInfo.getAccessToken());
+        }
+        builder.post(requestBody);
+        Request request = builder.build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                return gson.fromJson(response.body().string(), ApplicationKey.class);
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                if (!token) {
+                    APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                    AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                            generateAccessTokenFromRefreshToken(apiApplicationInfo.getRefresh_token(),
+                                    apiApplicationInfo.getClientId(), apiApplicationInfo.getClientSecret());
+                    ApiApplicationInfo refreshedApiApplicationInfo = returnApplicationInfo(apiApplicationInfo, refreshedAccessToken);
+                    //TODO: max attempt count
+                    TokenInfo refreshedTokenInfo = new TokenInfo();
+                    refreshedTokenInfo.setApiApplicationInfo(refreshedApiApplicationInfo);
+                    refreshedTokenInfo.setAccessToken(null);
+                    return mapApplicationKeys(refreshedTokenInfo, application, keyManager, keyType);
+                } else {
+                    String msg = "Invalid access token. Unauthorized request";
+                    log.error(msg);
+                    throw new APIServicesException(msg);
+                }
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid request body";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(msg, e);
+        }
+    }
+
+    @Override
     public ApplicationKey getKeyDetails(TokenInfo tokenInfo, String applicationId, String keyMapId)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
@@ -733,7 +798,7 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
     private boolean isTokenNull(ApiApplicationInfo apiApplicationInfo, String accessToken) throws BadRequestException {
 
         boolean token;
-        if ((!(accessToken == null) && apiApplicationInfo == null)) {
+        if ((!(accessToken == null))) {
             token = true;
         } else if (!(apiApplicationInfo == null) && accessToken == null) {
             token = false;
