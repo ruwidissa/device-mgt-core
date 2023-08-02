@@ -314,22 +314,27 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     }
                                 }
 
-                                // This will retrieve the deployed revision
-                                JSONArray revisionDeploymentList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
-                                        accessTokenInfo, existingAPI.getString("id"), true).get("list");
-                                // This will retrieve the un deployed revision list
-                                JSONArray undeployedRevisionList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
-                                        accessTokenInfo, existingAPI.getString("id"), false).get("list");
                                 int apiRevisionCount = (int) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
                                         accessTokenInfo, existingAPI.getString("id"), null).get("count");
-
                                 if (apiRevisionCount >= 5) {
-                                    JSONObject latestRevisionDeployment = revisionDeploymentList.getJSONObject(0);
-                                    JSONObject earliestUndeployRevision = undeployedRevisionList.getJSONObject(0);
-                                    publisherRESTAPIServices.undeployAPIRevisionDeployment(apiApplicationKey,
-                                            accessTokenInfo, latestRevisionDeployment, existingAPI.getString("id"));
-                                    publisherRESTAPIServices.deleteAPIRevision(apiApplicationKey, accessTokenInfo,
-                                            earliestUndeployRevision, existingAPI.getString("id"));
+                                    // This will retrieve the deployed revision
+                                    JSONArray revisionDeploymentList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(
+                                            apiApplicationKey, accessTokenInfo, existingAPI.getString("id"),
+                                            true).get("list");
+                                    if (revisionDeploymentList.length() > 0) {
+                                        JSONObject latestRevisionDeployment = revisionDeploymentList.getJSONObject(0);
+                                        publisherRESTAPIServices.undeployAPIRevisionDeployment(apiApplicationKey,
+                                                accessTokenInfo, latestRevisionDeployment, existingAPI.getString("id"));
+                                    }
+                                    // This will retrieve the un deployed revision list
+                                    JSONArray undeployedRevisionList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(
+                                            apiApplicationKey, accessTokenInfo, existingAPI.getString("id"),
+                                            false).get("list");
+                                    if (undeployedRevisionList.length() > 0) {
+                                        JSONObject earliestUndeployRevision = undeployedRevisionList.getJSONObject(0);
+                                        publisherRESTAPIServices.deleteAPIRevision(apiApplicationKey, accessTokenInfo,
+                                                earliestUndeployRevision, existingAPI.getString("id"));
+                                    }
                                 }
 
                                 // create new revision
