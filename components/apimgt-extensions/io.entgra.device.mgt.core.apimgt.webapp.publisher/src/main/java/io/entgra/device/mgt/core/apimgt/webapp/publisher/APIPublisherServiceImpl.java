@@ -41,14 +41,25 @@ import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPub
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiUriTemplate;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -64,7 +75,16 @@ import java.io.IOException;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Date;
 
 /**
  * This class represents the concrete implementation of the APIPublisherService that corresponds to providing all
@@ -308,22 +328,27 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     }
                                 }
 
-                                // This will retrieve the deployed revision
-                                JSONArray revisionDeploymentList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
-                                        accessTokenInfo, apiUuid, true).get("list");
-                                // This will retrieve the un deployed revision list
-                                JSONArray undeployedRevisionList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
-                                        accessTokenInfo, apiUuid, false).get("list");
                                 int apiRevisionCount = (int) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
                                         accessTokenInfo, apiUuid, null).get("count");
-
                                 if (apiRevisionCount >= 5) {
-                                    JSONObject latestRevisionDeployment = revisionDeploymentList.getJSONObject(0);
-                                    JSONObject earliestUndeployRevision = undeployedRevisionList.getJSONObject(0);
-                                    publisherRESTAPIServices.undeployAPIRevisionDeployment(apiApplicationKey,
-                                            accessTokenInfo, latestRevisionDeployment, apiUuid);
-                                    publisherRESTAPIServices.deleteAPIRevision(apiApplicationKey, accessTokenInfo,
-                                            earliestUndeployRevision, apiUuid);
+                                    // This will retrieve the deployed revision
+                                    JSONArray revisionDeploymentList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(
+                                            apiApplicationKey, accessTokenInfo, apiUuid,
+                                            true).get("list");
+                                    if (revisionDeploymentList.length() > 0) {
+                                        JSONObject latestRevisionDeployment = revisionDeploymentList.getJSONObject(0);
+                                        publisherRESTAPIServices.undeployAPIRevisionDeployment(apiApplicationKey,
+                                                accessTokenInfo, latestRevisionDeployment, apiUuid);
+                                    }
+                                    // This will retrieve the un deployed revision list
+                                    JSONArray undeployedRevisionList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(
+                                            apiApplicationKey, accessTokenInfo, apiUuid,
+                                            false).get("list");
+                                    if (undeployedRevisionList.length() > 0) {
+                                        JSONObject earliestUndeployRevision = undeployedRevisionList.getJSONObject(0);
+                                        publisherRESTAPIServices.deleteAPIRevision(apiApplicationKey, accessTokenInfo,
+                                                earliestUndeployRevision, apiUuid);
+                                    }
                                 }
 
                                 // create new revision
