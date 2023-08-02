@@ -44,8 +44,8 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @MultipartConfig
-@WebServlet("/ws-credentials")
-public class WsTokenHandler extends HttpServlet {
+@WebServlet("/default-oauth2-credentials")
+public class DefaultOauth2TokenHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(DefaultTokenHandler.class);
 
 
