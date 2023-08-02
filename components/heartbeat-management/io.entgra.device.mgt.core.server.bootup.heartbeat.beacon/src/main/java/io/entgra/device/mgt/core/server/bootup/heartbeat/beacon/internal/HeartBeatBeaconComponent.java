@@ -22,12 +22,15 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.HeartBeatBeaconU
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.HeartBeatBeaconConfig;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao.HeartBeatBeaconDAOFactory;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.ClusterFormationChangedNotifierRepository;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
+
+import java.util.List;
 
 /**
  * @scr.component name="io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.heartbeatBeaconComponent"
@@ -58,9 +61,22 @@ public class HeartBeatBeaconComponent {
                 DataSourceConfig dsConfig = HeartBeatBeaconConfig.getInstance().getDataSourceConfig();
                 HeartBeatBeaconDAOFactory.init(dsConfig);
 
+                ClusterFormationChangedNotifierRepository clusterFormationChangedNotifierRepository
+                        = new ClusterFormationChangedNotifierRepository();
+                List<String> notifiers = HeartBeatBeaconConfig.getInstance().getNotifiers();
+                if (notifiers != null && notifiers.size() > 0) {
+                    for (String notifier : notifiers) {
+                        clusterFormationChangedNotifierRepository.addNotifier(notifier);
+                    }
+                }
+                HeartBeatBeaconDataHolder.getInstance().setClusterFormationChangedNotifierRepository(
+                        clusterFormationChangedNotifierRepository);
+
                 //Setting up executors to notify heart beat status */
                 HeartBeatExecutor.setUpNotifiers(HeartBeatBeaconUtils.getServerDetails());
             }
+
+
 
             if (log.isDebugEnabled()) {
                 log.debug("Heart Beat Notifier bundle has been successfully initialized");

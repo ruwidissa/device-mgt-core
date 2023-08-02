@@ -69,6 +69,7 @@ public class HeartBeatExecutor {
                     try {
                         recordHeartBeat(designatedUUID);
                         electDynamicTaskExecutionCandidate(cumilativeTimeOut);
+                        notifyClusterFormationChanged(cumilativeTimeOut);
                     } catch (Exception e) {
                         log.error("Error while executing record heart beat task. This will result in schedule operation malfunction.", e);
                     }
@@ -98,5 +99,8 @@ public class HeartBeatExecutor {
         HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().electCandidate(cumilativeTimeOut);
     }
 
+    static void notifyClusterFormationChanged(int cumilativeTimeOut) throws HeartBeatManagementException {
+        HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().notifyClusterFormationChanged(cumilativeTimeOut);
+    }
 
 }
