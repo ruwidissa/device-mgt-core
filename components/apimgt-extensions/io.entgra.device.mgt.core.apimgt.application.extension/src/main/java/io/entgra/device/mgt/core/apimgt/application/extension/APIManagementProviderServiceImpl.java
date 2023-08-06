@@ -65,6 +65,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class represents an implementation of APIManagementProviderService.
@@ -143,31 +144,29 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
 
         try {
-            List<APIInfo> uniqueApiList = new ArrayList<>();
-
             Map<String, String> headerParams = new HashMap<>();
             if (!"carbon.super".equals(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true))) {
                 headerParams.put("X-WSO2-Tenant", "carbon.super");
             }
 
+            Map <String, APIInfo> uniqueApiSet = new HashMap<>();
             for (String tag : tags) {
                 Map<String, String> queryParams = new HashMap<>();
                 queryParams.put("tag", tag);
 
                 APIInfo[] apiInfos = consumerRESTAPIServices.getAllApis(tokenInfo, queryParams, headerParams);
-
-                uniqueApiList.addAll(List.of(apiInfos));
-                Set<APIInfo> taggedAPISet = new HashSet<>(uniqueApiList);
-                uniqueApiList.clear();
-                uniqueApiList.addAll(taggedAPISet);
+                Arrays.stream(apiInfos).forEach(apiInfo -> uniqueApiSet.putIfAbsent(apiInfo.getName(), apiInfo));
             }
+
+            List<APIInfo> uniqueApiList = new ArrayList<>(uniqueApiSet.values());
 
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
                     consumerRESTAPIServices.getAllApplications(tokenInfo, applicationName);
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application;
             MetadataManagementService metadataManagementService = APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
             if (applications.length == 0) {
-                return handleNewAPIApplication(applicationName, uniqueApiList, tokenInfo, keyType, validityTime);
+                return handleNewAPIApplication(applicationName, uniqueApiList, tokenInfo, keyType,
+                        validityTime);
             } else {
                 if (applications.length == 1) {
                     Optional<io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application> applicationOpt =

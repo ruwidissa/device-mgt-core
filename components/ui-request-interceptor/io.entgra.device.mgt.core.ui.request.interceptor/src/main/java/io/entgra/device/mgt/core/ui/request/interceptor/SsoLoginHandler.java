@@ -222,7 +222,7 @@ public class SsoLoginHandler extends HttpServlet {
             }
 
             // Update the grant types of the application
-            String url = apiMgtUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT + applicationId + "/keys/" +
+            String url = apiMgtUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT + "/" + applicationId + "/keys/" +
                     HandlerConstants.PRODUCTION_KEY;
             HttpPut updateApplicationGrantTypesEndpoint = new HttpPut(url);
             updateApplicationGrantTypesEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER +
