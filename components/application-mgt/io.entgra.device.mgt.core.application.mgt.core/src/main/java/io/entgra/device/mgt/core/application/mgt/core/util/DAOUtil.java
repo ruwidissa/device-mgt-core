@@ -238,6 +238,26 @@ public class DAOUtil {
         return applicationDTOs.get(0);
     }
 
+    public static ApplicationDTO loadDeviceApp(ResultSet rs) throws SQLException {
+        ApplicationDTO application = new ApplicationDTO();
+        application.setId( rs.getInt("APP_ID"));
+        application.setName(rs.getString("APP_NAME"));
+        application.setDescription(rs.getString("APP_DESCRIPTION"));
+        application.setType(rs.getString("APP_TYPE"));
+        application.setSubType(rs.getString("APP_SUB_TYPE"));
+        application.setPaymentCurrency(rs.getString("APP_CURRENCY"));
+        application.setStatus(rs.getString("APP_STATUS"));
+        application.setAppRating(rs.getDouble("APP_RATING"));
+        application.setDeviceTypeId(rs.getInt("APP_DEVICE_TYPE_ID"));
+        ApplicationReleaseDTO releaseDTO = constructAppReleaseDTO(rs);
+        List<ApplicationReleaseDTO> releaseDtoList = new ArrayList<>();
+        if (releaseDTO != null) {
+            releaseDtoList.add(constructAppReleaseDTO(rs));
+            application.setApplicationReleaseDTOs(releaseDtoList);
+        }
+        return application;
+    }
+
     /**
      * Populates {@link ApplicationReleaseDTO} object with the result obtained from the database.
      *
