@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -19,13 +19,8 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo;
 
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class represents the API response.
@@ -70,7 +65,6 @@ public class APIInfo {
     private String accessControlRoles;
     private BusinessInformation businessInformation;
     private CORSConfiguration corsConfiguration;
-    private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
     private String workflowStatus;
     private String createdTime;
     private String lastUpdatedTime;
@@ -79,11 +73,16 @@ public class APIInfo {
     private List<JSONObject> scopes = new ArrayList();
     private List<JSONObject> operations;
     private String threatProtectionPolicies;
-    private List<APICategory> apiCategories;
     private List<String> keyManagers = new ArrayList();
     private JSONObject serviceInfo = new JSONObject();
     private AdvertiseInfo advertiseInfo;
 
+    private String asyncApiDefinition;
+
+    private Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+    private String inSequence;
+
+    private Map<String, String> wsUriMapping;
     public String getId() {
         return id;
     }
@@ -372,14 +371,6 @@ public class APIInfo {
         this.corsConfiguration = corsConfiguration;
     }
 
-    public WebsubSubscriptionConfiguration getWebsubSubscriptionConfiguration() {
-        return websubSubscriptionConfiguration;
-    }
-
-    public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
-        this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
-    }
-
     public String getWorkflowStatus() {
         return workflowStatus;
     }
@@ -444,14 +435,6 @@ public class APIInfo {
         this.threatProtectionPolicies = threatProtectionPolicies;
     }
 
-    public List<APICategory> getApiCategories() {
-        return apiCategories;
-    }
-
-    public void setApiCategories(List<APICategory> apiCategories) {
-        this.apiCategories = apiCategories;
-    }
-
     public List<String> getKeyManagers() {
         return keyManagers;
     }
@@ -474,5 +457,37 @@ public class APIInfo {
 
     public void setAdvertiseInfo(AdvertiseInfo advertiseInfo) {
         this.advertiseInfo = advertiseInfo;
+    }
+
+    public String getInSequence() {
+        return inSequence;
+    }
+
+    public void setInSequence(String inSequence) {
+        this.inSequence = inSequence;
+    }
+
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
+    }
+
+    public Set<URITemplate> getUriTemplates() {
+        return uriTemplates;
+    }
+
+    public void setUriTemplates(Set<URITemplate> uriTemplates) {
+        this.uriTemplates = uriTemplates;
+    }
+
+    public Map<String, String> getWsUriMapping() {
+        return wsUriMapping;
+    }
+
+    public void setWsUriMapping(Map<String, String> wsUriMapping) {
+        this.wsUriMapping = wsUriMapping;
     }
 }

@@ -126,11 +126,14 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         List<String> visibleRoles;
         RoleList visibleRoleList = new RoleList();
         try {
-            metadata = DeviceMgtAPIUtils.getMetadataManagementService().retrieveMetadata(metaKey);
-            String metaValue = metadata.getMetaValue();
-            JSONParser parser = new JSONParser();
-            JSONObject jsonObject = (JSONObject) parser.parse(metaValue);
-            boolean decision = (boolean) jsonObject.get(Constants.IS_USER_ABLE_TO_VIEW_ALL_ROLES);
+            boolean decision = false;
+            if(DeviceMgtAPIUtils.getMetadataManagementService().retrieveMetadata(metaKey) != null){
+                metadata = DeviceMgtAPIUtils.getMetadataManagementService().retrieveMetadata(metaKey);
+                String metaValue = metadata.getMetaValue();
+                JSONParser parser = new JSONParser();
+                JSONObject jsonObject = (JSONObject) parser.parse(metaValue);
+                decision = (boolean) jsonObject.get(Constants.IS_USER_ABLE_TO_VIEW_ALL_ROLES);
+            }
             if (decision) {
                 if (userStore == null || "".equals(userStore)){
                     userStore = PRIMARY_USER_STORE;
