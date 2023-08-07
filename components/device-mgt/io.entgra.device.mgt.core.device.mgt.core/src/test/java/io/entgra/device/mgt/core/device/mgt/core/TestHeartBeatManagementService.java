@@ -66,4 +66,9 @@ public class TestHeartBeatManagementService implements HeartBeatManagementServic
     @Override public Map<Integer, ServerContext> getActiveServers() throws HeartBeatManagementException {
         return null;
     }
+
+    @Override
+    public void notifyClusterFormationChanged(int elapsedTimeInSeconds) throws HeartBeatManagementException {
+
+    }
 }

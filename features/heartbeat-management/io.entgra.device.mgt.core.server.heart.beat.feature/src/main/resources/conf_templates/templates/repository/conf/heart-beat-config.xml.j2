@@ -51,11 +51,21 @@
      <NotifierFrequencyInSeconds>{{heart_beat_beacon_conf.notifier_frequency_in_seconds}}</NotifierFrequencyInSeconds>
      <TimeSkewInSeconds>{{heart_beat_beacon_conf.time_skew_in_seconds}}</TimeSkewInSeconds>
      <ServerTimeOutIntervalInSeconds>{{heart_beat_beacon_conf.sever_timeout_interval_in_seconds}}</ServerTimeOutIntervalInSeconds>
+         {% if heart_beat_beacon_conf.cluster_formation_changed_configs.cluster_formation_changed_notifiers is defined %}
+         <ClusterFormationChangedNotifiers>
+             {%- for cluster_formation_changed_notifier in heart_beat_beacon_conf.cluster_formation_changed_configs.cluster_formation_changed_notifiers -%}
+             <Notifier>{{cluster_formation_changed_notifier}}</Notifier>
+             {% endfor %}
+         </ClusterFormationChangedNotifiers>
+         {% endif %}
      {% else %}
      <Enable>false</Enable>
      <NotifierInitialDelayInSeconds>30</NotifierInitialDelayInSeconds>
      <NotifierFrequencyInSeconds>300</NotifierFrequencyInSeconds>
      <TimeSkewInSeconds>5</TimeSkewInSeconds>
      <ServerTimeOutIntervalInSeconds>600</ServerTimeOutIntervalInSeconds>
+     <ClusterFormationChangedNotifiers>
+         <Notifier></Notifier>
+     </ClusterFormationChangedNotifiers>
      {% endif %}
 </HeartBeatBeaconConfig>

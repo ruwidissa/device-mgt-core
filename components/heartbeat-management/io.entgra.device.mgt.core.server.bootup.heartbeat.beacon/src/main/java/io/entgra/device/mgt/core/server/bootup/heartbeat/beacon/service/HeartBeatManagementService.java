@@ -36,6 +36,7 @@ public interface HeartBeatManagementService {
     boolean recordHeartBeat(HeartBeatEvent event) throws HeartBeatManagementException;
 
     void electCandidate(int elapsedTimeInSeconds) throws HeartBeatManagementException;
+    void notifyClusterFormationChanged(int elapsedTimeInSeconds) throws HeartBeatManagementException;
 
     boolean updateTaskExecutionAcknowledgement(String newTask) throws HeartBeatManagementException;
 
