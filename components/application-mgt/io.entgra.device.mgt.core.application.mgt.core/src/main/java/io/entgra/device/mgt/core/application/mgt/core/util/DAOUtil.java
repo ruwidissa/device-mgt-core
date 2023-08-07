@@ -19,30 +19,27 @@ package io.entgra.device.mgt.core.application.mgt.core.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.entgra.device.mgt.core.application.mgt.common.dto.IdentityServerDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.*;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ReviewDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -362,6 +359,156 @@ public class DAOUtil {
             subscriptionDTOS.add(subscription);
         }
         return subscriptionDTOS;
+    }
+
+    public static VppUserDTO loadVppUser(ResultSet rs) throws SQLException, UnexpectedServerErrorException {
+        List<VppUserDTO> vppUserDTOS = loadVppUsers(rs);
+        if (vppUserDTOS.isEmpty()) {
+            return null;
+        }
+        if (vppUserDTOS.size() > 1) {
+            String msg = "Internal server error. Found more than one vpp user for requested emmUsername";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+        return vppUserDTOS.get(0);
+    }
+
+    public static List<VppUserDTO> loadVppUsers (ResultSet rs) throws SQLException {
+        List<VppUserDTO> vppUserDTOS = new ArrayList<>();
+        while (rs.next()) {
+            VppUserDTO vppUserDTO = new VppUserDTO();
+            vppUserDTO.setId(rs.getInt("ID"));
+            vppUserDTO.setClientUserId(rs.getString("CLIENT_USER_ID"));
+            vppUserDTO.setTenantId(rs.getInt("TENANT_ID"));
+            vppUserDTO.setEmail(rs.getString("EMAIL"));
+            vppUserDTO.setInviteCode(rs.getString("INVITE_CODE"));
+            if (columnExist(rs,"STATUS")) {
+                vppUserDTO.setStatus(rs.getString("STATUS"));
+            }
+            if (columnExist(rs,"MANAGED_ID")) {
+                vppUserDTO.setManagedId(rs.getString("MANAGED_ID"));
+            }
+            if (columnExist(rs,"TEMP_PASSWORD")) {
+                vppUserDTO.setTmpPassword(rs.getString("TEMP_PASSWORD"));
+            }
+            if (columnExist(rs,"DM_USERNAME")) {
+                vppUserDTO.setDmUsername(rs.getString("DM_USERNAME"));
+            }
+            if (rs.getLong("CREATED_TIME") != 0) {
+                Date date = new Date(rs.getLong("CREATED_TIME"));
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String dateString = dateFormat.format(date);
+                vppUserDTO.setCreatedTime(dateString);
+            }
+            if (rs.getLong("LAST_UPDATED_TIME") != 0) {
+                Date date = new Date(rs.getLong("LAST_UPDATED_TIME"));
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String dateString = dateFormat.format(date);
+                vppUserDTO.setLastUpdatedTime(dateString);
+            }
+            vppUserDTOS.add(vppUserDTO);
+        }
+        return vppUserDTOS;
+    }
+
+    private static boolean columnExist(ResultSet rs, String column){
+        try{
+            rs.findColumn(column);
+            return true;
+        } catch (SQLException sqlex){
+        }
+
+        return false;
+    }
+
+    public static VppAssetDTO loadAsset(ResultSet rs) throws SQLException, UnexpectedServerErrorException {
+        List<VppAssetDTO> vppAssetDTOS = loadAssets(rs);
+        if (vppAssetDTOS.isEmpty()) {
+            return null;
+        }
+        if (vppAssetDTOS.size() > 1) {
+            String msg = "Internal server error. Found more than one asset for given app id.";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+        return vppAssetDTOS.get(0);
+    }
+
+    public static List<VppAssetDTO> loadAssets (ResultSet rs) throws SQLException {
+        List<VppAssetDTO> vppAssetDTOS = new ArrayList<>();
+        while (rs.next()) {
+            VppAssetDTO vppAssetDTO = new VppAssetDTO();
+            vppAssetDTO.setId(rs.getInt("ID"));
+            vppAssetDTO.setAppId(rs.getInt("APP_ID"));
+            vppAssetDTO.setTenantId(rs.getInt("TENANT_ID"));
+            if (rs.getLong("CREATED_TIME") != 0) {
+                Date date = new Date(rs.getLong("CREATED_TIME"));
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String dateString = dateFormat.format(date);
+                vppAssetDTO.setCreatedTime(dateString);
+            }
+            if (rs.getLong("LAST_UPDATED_TIME") != 0) {
+                Date date = new Date(rs.getLong("LAST_UPDATED_TIME"));
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String dateString = dateFormat.format(date);
+                vppAssetDTO.setLastUpdatedTime(dateString);
+            }
+            vppAssetDTO.setAdamId(rs.getString("ADAM_ID"));
+            vppAssetDTO.setAssignedCount(rs.getString("ASSIGNED_COUNT"));
+            vppAssetDTO.setDeviceAssignable(rs.getString("DEVICE_ASSIGNABLE"));
+            vppAssetDTO.setPricingParam(rs.getString("PRICING_PARAMS"));
+            vppAssetDTO.setProductType(rs.getString("PRODUCT_TYPE"));
+            vppAssetDTO.setRetiredCount(rs.getString("RETIRED_COUNT"));
+            vppAssetDTO.setRevocable(rs.getString("REVOCABLE"));
+//            String jsonString = rs.getString("SUPPORTED_PLATFORMS");
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            try {
+//                List<String> platformList = objectMapper.readValue(jsonString, new TypeReference<List<String>>() {});
+//                vppAssetDTO.setSupportedPlatforms(platformList);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+            vppAssetDTOS.add(vppAssetDTO);
+        }
+        return vppAssetDTOS;
+    }
+
+    public static VppAssociationDTO loadAssignment(ResultSet rs) throws SQLException, UnexpectedServerErrorException {
+        List<VppAssociationDTO> vppAssociationDTOS = loadAssignments(rs);
+        if (vppAssociationDTOS.isEmpty()) {
+            return null;
+        }
+        if (vppAssociationDTOS.size() > 1) {
+            String msg = "Internal server error. Found more than one asset for given app id.";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+        return vppAssociationDTOS.get(0);
+    }
+
+    public static List<VppAssociationDTO> loadAssignments (ResultSet rs) throws SQLException {
+        List<VppAssociationDTO> vppAssociationDTOS = new ArrayList<>();
+        while (rs.next()) {
+            VppAssociationDTO vppAssociationDTO = new VppAssociationDTO();
+            vppAssociationDTO.setId(rs.getInt("ID"));
+            vppAssociationDTO.setAssociationType(rs.getString("ASSOCIATION_TYPE"));
+            if (rs.getLong("CREATED_TIME") != 0) {
+                Date date = new Date(rs.getLong("CREATED_TIME"));
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String dateString = dateFormat.format(date);
+                vppAssociationDTO.setCreatedTime(dateString);
+            }
+            if (rs.getLong("LAST_UPDATED_TIME") != 0) {
+                Date date = new Date(rs.getLong("LAST_UPDATED_TIME"));
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String dateString = dateFormat.format(date);
+                vppAssociationDTO.setLastUpdatedTime(dateString);
+            }
+            vppAssociationDTO.setPricingParam(rs.getString("PRICING_PARAMS"));
+            vppAssociationDTOS.add(vppAssociationDTO);
+        }
+        return vppAssociationDTOS;
     }
 
     /**
