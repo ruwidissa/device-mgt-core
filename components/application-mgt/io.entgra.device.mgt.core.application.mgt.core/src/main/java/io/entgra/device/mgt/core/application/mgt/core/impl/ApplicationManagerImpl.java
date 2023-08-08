@@ -22,6 +22,7 @@ import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestExcept
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.core.dao.SPApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -1437,6 +1438,43 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred while getting application data for application ID: " + applicationId;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public  ApplicationList getSubscribedAppsOfDevice(int deviceId, PaginationRequest request) throws ApplicationManagementException {
+        ApplicationList applicationList = new ApplicationList();
+        List<Application> applications = new ArrayList<>();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            List<ApplicationDTO>  applicationDTOS = this.applicationDAO.getSubscribedAppsOfDevice(deviceId, tenantId, request);
+            for (ApplicationDTO applicationDTO: applicationDTOS) {
+                applicationDTO.setTags(this.applicationDAO.getAppTags(applicationDTO.getId(), tenantId));
+                applicationDTO.setAppCategories(this.applicationDAO.getAppCategories(applicationDTO.getId(), tenantId));
+                applications.add(APIUtil.appDtoToAppResponse(applicationDTO));
+            }
+
+            List<ApplicationDTO>  totalApplications = this.applicationDAO.getSubscribedAppsOfDevice(deviceId, tenantId, null);
+            Pagination pagination = new Pagination();
+            pagination.setCount(totalApplications.size());
+            pagination.setSize(applications.size());
+            pagination.setOffset(request.getStartIndex());
+            pagination.setLimit(request.getRowCount());
+            applicationList.setApplications(applications);
+            applicationList.setPagination(pagination);
+            return applicationList;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting installed apps of device with device id: "
+                    + deviceId;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while getting  installed apps of device with device id: " + deviceId;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
