@@ -206,7 +206,7 @@ public class ActivityProviderServiceImplTest {
         Mockito.when(this.deviceManagementProviderService
                 .getOperationByActivityIdAndDevice(TEST_ACTIVITY_ID, deviceIdentifier)).thenReturn(activity);
         Response response = this.activityInfoProviderService.getActivityByDevice(TEST_ACTIVITY_ID,
-                DEVICE_TYPE, DEVICE_ID, IF_MODIFIED_SINCE);
+                DEVICE_TYPE, DEVICE_ID, IF_MODIFIED_SINCE, false, false);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         Mockito.reset(this.deviceManagementProviderService);

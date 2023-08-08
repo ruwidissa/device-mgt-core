@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.application.mgt.core.impl;
 
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.notification.logger.AppInstallLogContext;
 import io.entgra.device.mgt.core.notification.logger.impl.EntgraAppInstallLoggerImpl;
@@ -1568,4 +1569,29 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
+
+    @Override
+    public Activity getOperationAppDetails(String id) throws SubscriptionManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        int operationId = Integer.parseInt(
+                id.replace(DeviceManagementConstants.OperationAttributes.ACTIVITY, ""));
+        if (operationId == 0) {
+            throw new IllegalArgumentException("Operation ID cannot be null or zero (0).");
+        }
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return subscriptionDAO.getOperationAppDetails(operationId, tenantId);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while retrieving app details of operation: " + operationId;
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while retrieving the database connection";
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
 }

@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 
 import java.util.List;
 import java.util.Properties;
@@ -207,4 +208,13 @@ public interface SubscriptionManager {
      */
     PaginationResult getAppInstalledSubscribeDevices(PaginationRequest request, String appUUID, String subType,
                                                      String subTypeName) throws ApplicationManagementException;
+
+
+    /***
+     * This method is responsible for retrieving application details of the passed operation id.
+     * @param id  ID of the related operation
+     * @return {@link Activity} Activity result of the app information.
+     * @throws {@link SubscriptionManagementException} Exception of the subscription management
+     */
+    Activity getOperationAppDetails(String id) throws SubscriptionManagementException;
 }

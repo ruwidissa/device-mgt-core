@@ -21,6 +21,7 @@ import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
@@ -1431,6 +1432,51 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting current installed version of the app for given " +
                     "app id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    public Activity getOperationAppDetails(int operationId, int tenantId) throws ApplicationManagementDAOException {
+        Activity activity = null;
+        try {
+        String sql = "SELECT "
+                + "AP.NAME, "
+                + "AR.PACKAGE_NAME, "
+                + "DS.SUBSCRIBED_BY, "
+                + "DS.STATUS "
+                + "FROM AP_APP_SUB_OP_MAPPING SOP "
+                + "JOIN AP_DEVICE_SUBSCRIPTION DS ON SOP.AP_DEVICE_SUBSCRIPTION_ID = DS.ID "
+                + "JOIN AP_APP_RELEASE AR ON DS.AP_APP_RELEASE_ID = AR.ID "
+                + "JOIN AP_APP AP ON AP.ID = AR.AP_APP_ID "
+                + " WHERE SOP.OPERATION_ID = ? AND SOP.TENANT_ID = ?";
+
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, operationId);
+                stmt.setInt(2,tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully retrieved app details for operation "
+                                + operationId);
+                    }
+                    while (rs.next()) {
+                        activity = new Activity();
+                        activity.setAppName(rs.getString("NAME"));
+                        activity.setUsername(rs.getString("SUBSCRIBED_BY"));
+                        activity.setPackageName(rs.getString("PACKAGE_NAME"));
+                        activity.setStatus(rs.getString("STATUS"));
+                    }
+                    return activity;
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg =
+                    "Error occurred while getting the app details from the database related to operation " + operationId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when processing SQL to retrieve app details of operation" + operationId;
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
