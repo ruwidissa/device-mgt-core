@@ -215,6 +215,7 @@
         <Scope>perm:android:google-account</Scope>
         <Scope>perm:android:info</Scope>
         <Scope>perm:windows:lock-devices</Scope>
+        <Scope>perm:windows:enroll</Scope>
         <Scope>perm:windows:disenroll</Scope>
         <Scope>perm:windows:wipe</Scope>
         <Scope>perm:windows:ring</Scope>
@@ -227,7 +228,7 @@
         <Scope>perm:android:clear-application</Scope>
         <Scope>perm:android:suspend-package</Scope>
         <Scope>perm:android:alternate-install</Scope>
-	<Scope>perm:ios:lock</Scope>
+        <Scope>perm:ios:lock</Scope>
         <Scope>perm:ios:location</Scope>
         <Scope>perm:ios:ring</Scope>
         <Scope>perm:ios:clear-passcode</Scope>
