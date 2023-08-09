@@ -1438,7 +1438,6 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     public Activity getOperationAppDetails(int operationId, int tenantId) throws ApplicationManagementDAOException {
-        Activity activity = null;
         try {
         String sql = "SELECT "
                 + "AP.NAME, "
@@ -1456,18 +1455,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 stmt.setInt(1, operationId);
                 stmt.setInt(2,tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Successfully retrieved app details for operation "
-                                + operationId);
-                    }
-                    while (rs.next()) {
-                        activity = new Activity();
-                        activity.setAppName(rs.getString("NAME"));
-                        activity.setUsername(rs.getString("SUBSCRIBED_BY"));
-                        activity.setPackageName(rs.getString("PACKAGE_NAME"));
-                        activity.setStatus(rs.getString("STATUS"));
-                    }
-                    return activity;
+                    return DAOUtil.loadOperationActivity(rs);
                 }
             }
         } catch (DBConnectionException e) {
@@ -1477,6 +1465,10 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred when processing SQL to retrieve app details of operation" + operationId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }  catch (UnexpectedServerErrorException e) {
+            String msg = "More than one app for operation " + operationId;
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }

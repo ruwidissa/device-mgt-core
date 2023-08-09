@@ -169,10 +169,16 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                 }
                 SubscriptionManager subscriptionManager = DeviceMgtAPIUtils.getSubscriptionManager();
                 appActivity = subscriptionManager.getOperationAppDetails(id);
-                activity.setUsername(appActivity.getUsername());
-                activity.setPackageName(appActivity.getPackageName());
-                activity.setAppName(appActivity.getAppName());
-                activity.setStatus(appActivity.getStatus());
+                if (appActivity != null) {
+                    activity.setUsername(appActivity.getUsername());
+                    activity.setPackageName(appActivity.getPackageName());
+                    activity.setAppName(appActivity.getAppName());
+                    activity.setStatus(appActivity.getStatus());
+                } else {
+                    String msg = "Cannot find the app details related to the operation ";
+                    log.error(msg);
+                    Response.status(404).entity(msg).build();
+                }
             }   else {
                 activity = dmService.getOperationByActivityIdAndDevice(id, deviceIdentifier);
             }

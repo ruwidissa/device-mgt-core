@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.entgra.device.mgt.core.application.mgt.common.dto.*;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -359,6 +360,32 @@ public class DAOUtil {
             subscriptionDTOS.add(subscription);
         }
         return subscriptionDTOS;
+    }
+
+    public static Activity loadOperationActivity(ResultSet rs) throws SQLException, UnexpectedServerErrorException {
+        List<Activity> activity  = loadOperationActivities(rs);
+        if (activity.isEmpty()) {
+            return null;
+        }
+        if (activity.size() > 1) {
+            String msg = "Internal server error. Found more than one app for operation";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+        return activity.get(0);
+    }
+
+    public static  List<Activity> loadOperationActivities (ResultSet rs) throws SQLException {
+        List<Activity> activities = new ArrayList<>();
+        while (rs.next()) {
+            Activity activity = new Activity();
+            activity.setAppName(rs.getString("NAME"));
+            activity.setUsername(rs.getString("SUBSCRIBED_BY"));
+            activity.setPackageName(rs.getString("PACKAGE_NAME"));
+            activity.setStatus(rs.getString("STATUS"));
+            activities.add(activity);
+        }
+        return activities;
     }
 
     public static VppUserDTO loadVppUser(ResultSet rs) throws SQLException, UnexpectedServerErrorException {
