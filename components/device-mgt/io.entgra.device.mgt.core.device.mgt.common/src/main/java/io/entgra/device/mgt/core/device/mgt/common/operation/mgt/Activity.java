@@ -80,6 +80,32 @@ public class Activity {
     @JsonProperty("initiatedBy")
     private String initiatedBy;
 
+    @ApiModelProperty(name = "appName", value = "App Name.")
+    private String appName;
+
+    @ApiModelProperty(name = "packageName",
+            value = "package name of the application")
+    private String packageName;
+    @ApiModelProperty(name = "username",
+            value = "username of subscribed person")
+    private String username;
+    @ApiModelProperty(name = "status",
+            value = "Status of app install")
+    private String status;
+
+    @ApiModelProperty(name = "version",
+            value = "Version of app")
+    private String version;
+
+    @ApiModelProperty(name = "triggeredBy",
+            value = "Operation triggered by what")
+    private String triggeredBy;
+
+    @ApiModelProperty(name = "appType",
+            value = "Type of application")
+    private String appType;
+
+
     public String getActivityId() {
         return activityId;
     }
@@ -126,6 +152,62 @@ public class Activity {
 
     public void setInitiatedBy(String initiatedBy) {
         this.initiatedBy = initiatedBy;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getTriggeredBy() {
+        return triggeredBy;
+    }
+
+    public void setTriggeredBy(String triggeredBy) {
+        this.triggeredBy = triggeredBy;
+    }
+
+    public String getAppType() {
+        return appType;
+    }
+
+    public void setAppType(String appType) {
+        this.appType = appType;
     }
 }
 
