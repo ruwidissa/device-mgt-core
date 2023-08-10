@@ -174,6 +174,9 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                     activity.setPackageName(appActivity.getPackageName());
                     activity.setAppName(appActivity.getAppName());
                     activity.setStatus(appActivity.getStatus());
+                    activity.setAppType(appActivity.getAppType());
+                    activity.setVersion(appActivity.getVersion());
+                    activity.setTriggeredBy(appActivity.getTriggeredBy());
                 } else {
                     String msg = "Cannot find the app details related to the operation ";
                     log.error(msg);

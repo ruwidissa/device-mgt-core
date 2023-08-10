@@ -93,6 +93,18 @@ public class Activity {
             value = "Status of app install")
     private String status;
 
+    @ApiModelProperty(name = "version",
+            value = "Version of app")
+    private String version;
+
+    @ApiModelProperty(name = "triggeredBy",
+            value = "Operation triggered by what")
+    private String triggeredBy;
+
+    @ApiModelProperty(name = "appType",
+            value = "Type of application")
+    private String appType;
+
 
     public String getActivityId() {
         return activityId;
@@ -172,6 +184,30 @@ public class Activity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getTriggeredBy() {
+        return triggeredBy;
+    }
+
+    public void setTriggeredBy(String triggeredBy) {
+        this.triggeredBy = triggeredBy;
+    }
+
+    public String getAppType() {
+        return appType;
+    }
+
+    public void setAppType(String appType) {
+        this.appType = appType;
     }
 }
 

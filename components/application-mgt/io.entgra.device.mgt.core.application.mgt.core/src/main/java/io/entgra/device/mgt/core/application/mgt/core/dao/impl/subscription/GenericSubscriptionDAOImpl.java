@@ -1441,9 +1441,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         try {
         String sql = "SELECT "
                 + "AP.NAME, "
+                + "AP.TYPE, "
                 + "AR.PACKAGE_NAME, "
+                + "AR.VERSION, "
                 + "DS.SUBSCRIBED_BY, "
-                + "DS.STATUS "
+                + "DS.STATUS, "
+                + "DS.ACTION_TRIGGERED_FROM "
                 + "FROM AP_APP_SUB_OP_MAPPING SOP "
                 + "JOIN AP_DEVICE_SUBSCRIPTION DS ON SOP.AP_DEVICE_SUBSCRIPTION_ID = DS.ID "
                 + "JOIN AP_APP_RELEASE AR ON DS.AP_APP_RELEASE_ID = AR.ID "

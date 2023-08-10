@@ -380,9 +380,12 @@ public class DAOUtil {
         while (rs.next()) {
             Activity activity = new Activity();
             activity.setAppName(rs.getString("NAME"));
+            activity.setAppType(rs.getString("TYPE"));
             activity.setUsername(rs.getString("SUBSCRIBED_BY"));
             activity.setPackageName(rs.getString("PACKAGE_NAME"));
             activity.setStatus(rs.getString("STATUS"));
+            activity.setVersion(rs.getString("VERSION"));
+            activity.setTriggeredBy(rs.getString("ACTION_TRIGGERED_FROM"));
             activities.add(activity);
         }
         return activities;
