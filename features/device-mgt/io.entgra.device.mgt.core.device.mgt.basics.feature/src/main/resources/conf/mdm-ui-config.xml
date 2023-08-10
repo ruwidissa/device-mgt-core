@@ -241,6 +241,10 @@
         <Scope>perm:ios:app-configurations</Scope>
         <Scope>perm:mac-os:restart</Scope>
         <Scope>perm:mac-os:shut-down</Scope>
+        <Scope>perm:app:vpp:user:modify</Scope>
+        <Scope>perm:app:vpp:user:view</Scope>
+        <Scope>perm:app:vpp:asset:modify</Scope>
+        <Scope>perm:app:vpp:asset:view</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
