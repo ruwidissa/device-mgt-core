@@ -40,6 +40,76 @@
         <HideDomainSelectionInSuperTenant>false</HideDomainSelectionInSuperTenant>
         <HideDomainSelectionInSubTenant>true</HideDomainSelectionInSubTenant>
     </Billing>
+    <DeviceInfoConfigurations>
+        <DeviceInfoItem>
+            <DefinedValue>FIRMWARE_VERSION</DefinedValue>
+            <DisplayValue>Firmware version</DisplayValue>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>FIRMWARE_APP_VERSION</DefinedValue>
+            <DisplayValue>App version</DisplayValue>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>name</DefinedValue>
+            <DisplayValue>Device</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>type</DefinedValue>
+            <DisplayValue>Type</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>owner</DefinedValue>
+            <DisplayValue>Owner</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>serial</DefinedValue>
+            <DisplayValue>Serial Number</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>ownership</DefinedValue>
+            <DisplayValue>Ownership</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>status</DefinedValue>
+            <DisplayValue>Status</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>dateOfLastUpdate</DefinedValue>
+            <DisplayValue>Last Updated</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>actions</DefinedValue>
+            <DisplayValue>Actions</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>batteryLevel</DefinedValue>
+            <DisplayValue>Battery Level</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>deviceModel</DefinedValue>
+            <DisplayValue>Device Model</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>osVersion</DefinedValue>
+            <DisplayValue>OS Version</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>vendor</DefinedValue>
+            <DisplayValue>Vendor</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+    </DeviceInfoConfigurations>
     <AppRegistration>
         <Tags>
             <Tag>analytics_management</Tag>
