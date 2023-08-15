@@ -151,20 +151,20 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
     }
 
     @DELETE
-    public Response removeCertificate(@QueryParam("serialNumber") String serialNumber) {
-        RequestValidationUtil.validateSerialNumber(serialNumber);
+    public Response removeCertificate(@QueryParam("certificateId") String certificateId) {
+        RequestValidationUtil.validateCertificateId(certificateId);
 
         CertificateManagementService certificateService = CertificateMgtAPIUtils.getCertificateManagementService();
         try {
-            boolean status = certificateService.removeCertificate(serialNumber);
+            boolean status = certificateService.removeCertificate(certificateId);
             if (!status) {
                 return Response.status(Response.Status.NOT_FOUND).entity(
                         "No certificate is found with the given " +
-                                "serial number '" + serialNumber + "'").build();
+                                "certificate id '" + certificateId + "'").build();
             } else {
                 return Response.status(Response.Status.OK).entity(
-                        "Certificate that carries the serial number '" +
-                                serialNumber + "' has been removed").build();
+                        "Certificate that carries the certificate id '" +
+                                certificateId + "' has been removed").build();
             }
         } catch (CertificateManagementException e) {
             String msg = "Error occurred while converting PEM file to X509Certificate";

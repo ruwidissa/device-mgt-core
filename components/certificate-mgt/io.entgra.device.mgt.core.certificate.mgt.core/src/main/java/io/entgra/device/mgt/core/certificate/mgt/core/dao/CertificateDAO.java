@@ -95,10 +95,10 @@ public interface CertificateDAO {
     /**
      * Delete a certificate identified by a serial number()
      *
-     * @param serialNumber serial number
+     * @param certificateId number
      * @return whether the certificate was removed or not.
      */
-    boolean removeCertificate(String serialNumber) throws CertificateManagementDAOException;
+    boolean removeCertificate(String certificateId) throws CertificateManagementDAOException;
 
     List<CertificateResponse> searchCertificate(String serialNumber) throws CertificateManagementDAOException;
 
