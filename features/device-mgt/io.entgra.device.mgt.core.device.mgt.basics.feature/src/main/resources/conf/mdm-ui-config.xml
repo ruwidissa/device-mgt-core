@@ -44,10 +44,12 @@
         <DeviceInfoItem>
             <DefinedValue>FIRMWARE_VERSION</DefinedValue>
             <DisplayValue>Firmware version</DisplayValue>
+            <Type>deviceInfo</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>FIRMWARE_APP_VERSION</DefinedValue>
             <DisplayValue>App version</DisplayValue>
+            <Type>deviceInfo</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>name</DefinedValue>
