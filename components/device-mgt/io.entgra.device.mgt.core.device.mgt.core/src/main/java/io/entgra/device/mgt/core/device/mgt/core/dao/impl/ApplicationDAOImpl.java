@@ -293,11 +293,11 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                         "WHERE A.NAME = DM_APPLICATION.NAME " +
                         "AND A.ID < DM_APPLICATION.ID) " +
                     "AND PLATFORM = ? " +
-                    "AND TENANT_ID = ?";
+                    "AND TENANT_ID = ? ";
         try {
             String filter = request.getFilter();
             if (filter != null) {
-                sql = sql + "AND NAME LIKE ?";
+                sql = sql + "AND NAME LIKE ? ";
             }
             sql = sql + "LIMIT ? OFFSET ?";
             Connection conn = this.getConnection();

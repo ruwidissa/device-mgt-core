@@ -210,7 +210,7 @@ public class CertificateManagementServiceImplTests extends BaseDeviceManagementC
         X509Certificate x509Certificate = managementService.generateX509Certificate();
         CertificateResponse certificateResponse = managementService.retrieveCertificate(x509Certificate.getSerialNumber().toString());
         Assert.assertNotNull(certificateResponse);
-        Assert.assertEquals(x509Certificate.getSerialNumber(), certificateResponse.getCertificateserial());
+        Assert.assertEquals(x509Certificate.getSerialNumber(), certificateResponse.getCertificateSerial());
     }
 
     @Test(description = "This test case tests the retrieval of Certificates from keystore in desired pagination")

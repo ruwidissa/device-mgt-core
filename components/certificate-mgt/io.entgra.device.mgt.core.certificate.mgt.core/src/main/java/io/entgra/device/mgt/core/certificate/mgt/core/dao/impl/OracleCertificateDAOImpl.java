@@ -53,7 +53,7 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             Connection conn = this.getConnection();
-            String sql = "SELECT CERTIFICATE, SERIAL_NUMBER, TENANT_ID, USERNAME FROM "
+            String sql = "SELECT CERTIFICATE, SERIAL_NUMBER, ID, DEVICE_IDENTIFIER, TENANT_ID, USERNAME FROM "
                          + "DM_DEVICE_CERTIFICATE WHERE TENANT_ID = ? ORDER BY ID DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
@@ -66,6 +66,8 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
                 certificateResponse = new CertificateResponse();
                 byte[] certificateBytes = resultSet.getBytes("CERTIFICATE");
                 certificateResponse.setSerialNumber(resultSet.getString("SERIAL_NUMBER"));
+                certificateResponse.setCertificateId(resultSet.getString("ID"));
+                certificateResponse.setDeviceIdentifier(resultSet.getString("DEVICE_IDENTIFIER"));
                 certificateResponse.setTenantId(resultSet.getInt("TENANT_ID"));
                 certificateResponse.setUsername(resultSet.getString("USERNAME"));
                 CertificateGenerator.extractCertificateDetails(certificateBytes, certificateResponse);
@@ -74,7 +76,7 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
             }
             paginationResult = new PaginationResult();
             paginationResult.setData(certificates);
-            paginationResult.setRecordsTotal(resultCount);
+            paginationResult.setRecordsTotal(this.getCertificateCount(tenantId));
         } catch (SQLException e) {
             String errorMsg = "SQL error occurred while retrieving the certificates.";
             log.error(errorMsg, e);
@@ -87,5 +89,27 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
 
     private Connection getConnection() throws SQLException {
         return CertificateManagementDAOFactory.getConnection();
+    }
+
+    private int getCertificateCount(int tenantId) throws CertificateManagementDAOException, SQLException {
+        int certificateCount = 0;
+        try {
+            Connection conn = this.getConnection();
+            String sql =
+                    "SELECT COUNT(*) AS DEVICE_CERTIFICATE_COUNT FROM DM_DEVICE_CERTIFICATE WHERE TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        certificateCount = rs.getInt("DEVICE_CERTIFICATE_COUNT");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String errorMsg = "SQL error occurred while retrieving the certificates.";
+            log.error(errorMsg, e);
+            throw new CertificateManagementDAOException(errorMsg, e);
+        }
+        return certificateCount;
     }
 }

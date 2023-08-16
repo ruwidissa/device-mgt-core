@@ -174,20 +174,20 @@ public class CertificateManagementServiceImpl implements CertificateManagementSe
     }
 
     @Override
-    public boolean removeCertificate(String serialNumber) throws CertificateManagementException {
+    public boolean removeCertificate(String certificateId) throws CertificateManagementException {
         try {
             CertificateManagementDAOFactory.beginTransaction();
             CertificateDAO certificateDAO = CertificateManagementDAOFactory.getCertificateDAO();
-            boolean status = certificateDAO.removeCertificate(serialNumber);
+            boolean status = certificateDAO.removeCertificate(certificateId);
             CertificateManagementDAOFactory.commitTransaction();
             return status;
         } catch (TransactionManagementException e) {
-            String msg = "Error occurred while removing certificate carrying serial number '" + serialNumber + "'";
+            String msg = "Error occurred while removing certificate carrying certificate id '" + certificateId + "'";
             log.error(msg, e);
             throw new CertificateManagementException(msg, e);
         } catch (CertificateManagementDAOException e) {
             CertificateManagementDAOFactory.rollbackTransaction();
-            String msg = "Error occurred while removing the certificate carrying serial number '" + serialNumber +
+            String msg = "Error occurred while removing the certificate carrying certificate id '" + certificateId +
                     "' from the certificate repository";
             log.error(msg, e);
             throw new CertificateManagementException(msg, e);

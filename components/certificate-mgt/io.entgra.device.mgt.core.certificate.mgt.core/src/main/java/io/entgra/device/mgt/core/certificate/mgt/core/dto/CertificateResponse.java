@@ -32,6 +32,12 @@ public class CertificateResponse {
     @ApiModelProperty(name = "serialNumber", value = "It is the unique ID that is used to identify a certificate", required = true)
     String serialNumber;
 
+    @ApiModelProperty(name = "deviceIdentifier", value = "It is use to identify a certificate list", required = true)
+    String deviceIdentifier;
+
+    @ApiModelProperty(name = "certificateId", value = "It is the unique ID that is used to identify a certificate", required = true)
+    String certificateId;
+
     @ApiModelProperty(name = "tenantId", value = "The ID of the tenant who adds the certificate", required = true)
     int tenantId;
 
@@ -44,8 +50,8 @@ public class CertificateResponse {
     @ApiModelProperty(name = "notBefore", value = "The date from when the certificate is valid", required = true)
     long notBefore;
 
-    @ApiModelProperty(name = "certificateserial", value = "The serial number of the certificate", required = true)
-    BigInteger certificateserial;
+    @ApiModelProperty(name = "certificateSerial", value = "The serial number of the certificate", required = true)
+    BigInteger certificateSerial;
 
     @ApiModelProperty(name = "issuer", value = "The identity of the authority that signs the SSL certificate", required = true)
     String issuer;
@@ -83,12 +89,12 @@ public class CertificateResponse {
         this.notBefore = notBefore;
     }
 
-    public BigInteger getCertificateserial() {
-        return certificateserial;
+    public BigInteger getCertificateSerial() {
+        return certificateSerial;
     }
 
-    public void setCertificateserial(BigInteger certificateserial) {
-        this.certificateserial = certificateserial;
+    public void setCertificateSerial(BigInteger certificateSerial) {
+        this.certificateSerial = certificateSerial;
     }
 
     public String getIssuer() {
@@ -145,5 +151,21 @@ public class CertificateResponse {
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getDeviceIdentifier() {
+        return deviceIdentifier;
+    }
+
+    public void setDeviceIdentifier(String deviceIdentifier) {
+        this.deviceIdentifier = deviceIdentifier;
+    }
+
+    public String getCertificateId() {
+        return certificateId;
+    }
+
+    public void setCertificateId(String certificateId) {
+        this.certificateId = certificateId;
     }
 }
