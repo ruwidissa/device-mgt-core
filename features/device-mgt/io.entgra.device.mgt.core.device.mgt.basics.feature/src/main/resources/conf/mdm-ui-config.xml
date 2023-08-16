@@ -43,72 +43,132 @@
     <DeviceInfoConfigurations>
         <DeviceInfoItem>
             <DefinedValue>FIRMWARE_VERSION</DefinedValue>
-            <DisplayValue>Firmware version</DisplayValue>
+            <DisplayValue>label_firmware_version</DisplayValue>
             <Type>deviceInfo</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>FIRMWARE_APP_VERSION</DefinedValue>
-            <DisplayValue>App version</DisplayValue>
+            <DisplayValue>label_app_version</DisplayValue>
             <Type>deviceInfo</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>name</DefinedValue>
-            <DisplayValue>Device</DisplayValue>
+            <DisplayValue>label_device</DisplayValue>
             <Type>default</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>type</DefinedValue>
-            <DisplayValue>Type</DisplayValue>
+            <DisplayValue>label_type</DisplayValue>
             <Type>default</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>owner</DefinedValue>
-            <DisplayValue>Owner</DisplayValue>
+            <DisplayValue>label_owner</DisplayValue>
             <Type>default</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>serial</DefinedValue>
-            <DisplayValue>Serial Number</DisplayValue>
+            <DisplayValue>label_serialNumber</DisplayValue>
             <Type>default</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>ownership</DefinedValue>
-            <DisplayValue>Ownership</DisplayValue>
+            <DisplayValue>label_ownership</DisplayValue>
             <Type>default</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>status</DefinedValue>
-            <DisplayValue>Status</DisplayValue>
+            <DisplayValue>label_status</DisplayValue>
             <Type>default</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>dateOfLastUpdate</DefinedValue>
-            <DisplayValue>Last Updated</DisplayValue>
+            <DisplayValue>label_last_updated</DisplayValue>
             <Type>default</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>actions</DefinedValue>
-            <DisplayValue>Actions</DisplayValue>
+            <DisplayValue>label_actions</DisplayValue>
             <Type>default</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>batteryLevel</DefinedValue>
-            <DisplayValue>Battery Level</DisplayValue>
+            <DisplayValue>label_battery_leve</DisplayValue>
             <Type>deviceInfo</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>deviceModel</DefinedValue>
-            <DisplayValue>Device Model</DisplayValue>
+            <DisplayValue>label_deviceModel</DisplayValue>
             <Type>deviceInfo</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>osVersion</DefinedValue>
-            <DisplayValue>OS Version</DisplayValue>
+            <DisplayValue>label_os_version</DisplayValue>
             <Type>deviceInfo</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>vendor</DefinedValue>
-            <DisplayValue>Vendor</DisplayValue>
+            <DisplayValue>label_vendor</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>availableRAMMemory</DefinedValue>
+            <DisplayValue>label_available_ram_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>connectionType</DefinedValue>
+            <DisplayValue>label_connection_type</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>cpuUsage</DefinedValue>
+            <DisplayValue>label_cpu_usage</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>externalAvailableMemory</DefinedValue>
+            <DisplayValue>label_external_available_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>externalTotalMemory</DefinedValue>
+            <DisplayValue>label_external_tot_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>internalAvailableMemory</DefinedValue>
+            <DisplayValue>label_internal_available_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>internalTotalMemory</DefinedValue>
+            <DisplayValue>label_internal_tot_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>osBuildDate</DefinedValue>
+            <DisplayValue>label_os_build_date</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>pluggedIn</DefinedValue>
+            <DisplayValue>label_plugged_in</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>ssid</DefinedValue>
+            <DisplayValue>label_ssid</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>totalRAMMemory</DefinedValue>
+            <DisplayValue>label_tot_ram_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>updatedTime</DefinedValue>
+            <DisplayValue>label_updated_time</DisplayValue>
             <Type>deviceInfo</Type>
         </DeviceInfoItem>
     </DeviceInfoConfigurations>
