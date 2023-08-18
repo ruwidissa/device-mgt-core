@@ -42,16 +42,6 @@
     </Billing>
     <DeviceInfoConfigurations>
         <DeviceInfoItem>
-            <DefinedValue>FIRMWARE_VERSION</DefinedValue>
-            <DisplayValue>label_firmware_version</DisplayValue>
-            <Type>deviceInfo</Type>
-        </DeviceInfoItem>
-        <DeviceInfoItem>
-            <DefinedValue>FIRMWARE_APP_VERSION</DefinedValue>
-            <DisplayValue>label_app_version</DisplayValue>
-            <Type>deviceInfo</Type>
-        </DeviceInfoItem>
-        <DeviceInfoItem>
             <DefinedValue>name</DefinedValue>
             <DisplayValue>label_device</DisplayValue>
             <Type>default</Type>
@@ -90,6 +80,21 @@
             <DefinedValue>actions</DefinedValue>
             <DisplayValue>label_actions</DisplayValue>
             <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>FIRMWARE_VERSION</DefinedValue>
+            <DisplayValue>label_firmware_version</DisplayValue>
+            <Type>deviceDetailsMap</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>FIRMWARE_APP_VERSION</DefinedValue>
+            <DisplayValue>label_app_version</DisplayValue>
+            <Type>deviceDetailsMap</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>FIRMWARE_SYSTEM_VERSION</DefinedValue>
+            <DisplayValue>label_firmware_system_version</DisplayValue>
+            <Type>deviceDetailsMap</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
             <DefinedValue>batteryLevel</DefinedValue>
