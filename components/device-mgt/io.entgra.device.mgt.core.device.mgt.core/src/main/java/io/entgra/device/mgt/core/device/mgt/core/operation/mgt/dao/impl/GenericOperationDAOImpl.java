@@ -1357,8 +1357,6 @@ public class GenericOperationDAOImpl implements OperationDAO {
         List<Operation> operations = new ArrayList<>();
         String createdTo = null;
         String createdFrom = null;
-        ByteArrayInputStream bais;
-        ObjectInputStream ois;
         ProfileOperation profileOperation = null;
         DateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         boolean isCreatedDayProvided = false;
@@ -1483,19 +1481,24 @@ public class GenericOperationDAOImpl implements OperationDAO {
                         operation.setInitiatedBy(rs.getString("INITIATED_BY"));
                         if (MDMAppConstants.AndroidConstants.UNMANAGED_APP_UNINSTALL.equals(operation.getCode())) {
                             byte[] operationDetails = rs.getBytes("OPERATION_DETAILS");
-                            bais = new ByteArrayInputStream(operationDetails);
-                            ois = new ObjectInputStream(bais);
-                            profileOperation = (ProfileOperation) ois.readObject();
-                            operation.setPayLoad(profileOperation.getPayLoad());
+                            try (ByteArrayInputStream bais = new ByteArrayInputStream(operationDetails);
+                                 ObjectInputStream ois = new ObjectInputStream(bais)) {
+                                profileOperation = (ProfileOperation) ois.readObject();
+                                operation.setPayLoad(profileOperation.getPayLoad());
+                            } catch (IOException e) {
+                                String msg = "IO Error occurred while retrieving app data of operation ";
+                                log.error(msg, e);
+                                throw new OperationManagementDAOException(msg, e);
+                            } catch (ClassNotFoundException e) {
+                                String msg = "Class not found error occurred while  retrieving app data of operation ";
+                                log.error(msg, e);
+                                throw new OperationManagementDAOException(msg, e);
+                            }
                         }
                         operation.setStatus(Operation.Status.valueOf(rs.getString("STATUS")));
                         OperationDAOUtil.setActivityId(operation, rs.getInt("ID"));
                         operations.add(operation);
                     }
-                } catch (IOException e) {
-                    throw new OperationManagementDAOException("IO Error occurred while retrieving app data of operation ", e);
-                } catch (ClassNotFoundException e) {
-                    throw new OperationManagementDAOException("Class not found error occurred while  retrieving app data of operation ", e);
                 }
             }
         } catch (SQLException e) {
@@ -1512,8 +1515,6 @@ public class GenericOperationDAOImpl implements OperationDAO {
         List<Operation> operations = new ArrayList<>();
         String createdTo = null;
         String createdFrom = null;
-        ByteArrayInputStream bais;
-        ObjectInputStream ois;
         ProfileOperation profileOperation = null;
         DateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         boolean isCreatedDayProvided = false;
@@ -1638,19 +1639,24 @@ public class GenericOperationDAOImpl implements OperationDAO {
                         operation.setInitiatedBy(rs.getString("INITIATED_BY"));
                         if (MDMAppConstants.AndroidConstants.UNMANAGED_APP_UNINSTALL.equals(operation.getCode())) {
                             byte[] operationDetails = rs.getBytes("OPERATION_DETAILS");
-                            bais = new ByteArrayInputStream(operationDetails);
-                            ois = new ObjectInputStream(bais);
-                            profileOperation = (ProfileOperation) ois.readObject();
-                            operation.setPayLoad(profileOperation.getPayLoad());
+                            try (ByteArrayInputStream bais = new ByteArrayInputStream(operationDetails);
+                                 ObjectInputStream ois = new ObjectInputStream(bais)) {
+                                profileOperation = (ProfileOperation) ois.readObject();
+                                operation.setPayLoad(profileOperation.getPayLoad());
+                            } catch (IOException e) {
+                                String msg = "IO Error occurred while retrieving app data of operation ";
+                                log.error(msg, e);
+                                throw new OperationManagementDAOException(msg, e);
+                            } catch (ClassNotFoundException e) {
+                                String msg = "Class not found error occurred while retrieving app data of operation ";
+                                log.error(msg, e);
+                                throw new OperationManagementDAOException(msg, e);
+                            }
                         }
                         operation.setStatus(Operation.Status.valueOf(rs.getString("STATUS")));
                         OperationDAOUtil.setActivityId(operation, rs.getInt("ID"));
                         operations.add(operation);
                     }
-                } catch (IOException e) {
-                    throw new OperationManagementDAOException("IO Error occurred while retrieving app data of operation " , e);
-                } catch (ClassNotFoundException e) {
-                    throw new OperationManagementDAOException("Class not found error occurred while retrieving app data of operation ", e);
                 }
             }
         } catch (SQLException e) {
