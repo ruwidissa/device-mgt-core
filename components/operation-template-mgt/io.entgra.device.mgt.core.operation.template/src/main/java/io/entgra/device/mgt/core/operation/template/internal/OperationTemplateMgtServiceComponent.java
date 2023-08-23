@@ -31,7 +31,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 
 /**
- * @scr.component name="io.entgra.device.mgt.operation.template.internal.OperationTemplateMgtServiceComponent" immediate="true"
+ * @scr.component name="io.entgra.device.mgt.core.operation.template.internal.OperationTemplateMgtServiceComponent" immediate="true"
  * immediate="true"
  * @scr.reference name="org.wso2.carbon.ndatasource"
  * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
