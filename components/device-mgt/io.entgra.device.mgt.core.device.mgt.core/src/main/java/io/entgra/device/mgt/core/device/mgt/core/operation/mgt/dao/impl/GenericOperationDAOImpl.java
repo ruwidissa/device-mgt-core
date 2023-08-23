@@ -17,6 +17,8 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
+import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.ProfileOperation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -41,6 +43,8 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.util.Operatio
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1353,6 +1357,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
         List<Operation> operations = new ArrayList<>();
         String createdTo = null;
         String createdFrom = null;
+        ProfileOperation profileOperation = null;
         DateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         boolean isCreatedDayProvided = false;
         boolean isUpdatedDayProvided = false;  //updated day = received day
@@ -1375,6 +1380,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 "o.RECEIVED_TIMESTAMP, " +
                 "o.OPERATION_CODE, " +
                 "o.INITIATED_BY, " +
+                "o.OPERATION_DETAILS, " +
                 "om.STATUS, " +
                 "om.ID AS OM_MAPPING_ID, " +
                 "om.UPDATED_TIMESTAMP " +
@@ -1473,6 +1479,22 @@ public class GenericOperationDAOImpl implements OperationDAO {
                         }
                         operation.setCode(rs.getString("OPERATION_CODE"));
                         operation.setInitiatedBy(rs.getString("INITIATED_BY"));
+                        if (MDMAppConstants.AndroidConstants.UNMANAGED_APP_UNINSTALL.equals(operation.getCode())) {
+                            byte[] operationDetails = rs.getBytes("OPERATION_DETAILS");
+                            try (ByteArrayInputStream bais = new ByteArrayInputStream(operationDetails);
+                                 ObjectInputStream ois = new ObjectInputStream(bais)) {
+                                profileOperation = (ProfileOperation) ois.readObject();
+                                operation.setPayLoad(profileOperation.getPayLoad());
+                            } catch (IOException e) {
+                                String msg = "IO Error occurred while retrieving app data of operation ";
+                                log.error(msg, e);
+                                throw new OperationManagementDAOException(msg, e);
+                            } catch (ClassNotFoundException e) {
+                                String msg = "Class not found error occurred while  retrieving app data of operation ";
+                                log.error(msg, e);
+                                throw new OperationManagementDAOException(msg, e);
+                            }
+                        }
                         operation.setStatus(Operation.Status.valueOf(rs.getString("STATUS")));
                         OperationDAOUtil.setActivityId(operation, rs.getInt("ID"));
                         operations.add(operation);
@@ -1493,6 +1515,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
         List<Operation> operations = new ArrayList<>();
         String createdTo = null;
         String createdFrom = null;
+        ProfileOperation profileOperation = null;
         DateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         boolean isCreatedDayProvided = false;
         boolean isUpdatedDayProvided = false;  //updated day = received day
@@ -1515,6 +1538,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 "o.RECEIVED_TIMESTAMP, " +
                 "o.OPERATION_CODE, " +
                 "o.INITIATED_BY, " +
+                "o.OPERATION_DETAILS, " +
                 "om.STATUS, " +
                 "om.ID AS OM_MAPPING_ID, " +
                 "om.UPDATED_TIMESTAMP " +
@@ -1613,6 +1637,22 @@ public class GenericOperationDAOImpl implements OperationDAO {
                         }
                         operation.setCode(rs.getString("OPERATION_CODE"));
                         operation.setInitiatedBy(rs.getString("INITIATED_BY"));
+                        if (MDMAppConstants.AndroidConstants.UNMANAGED_APP_UNINSTALL.equals(operation.getCode())) {
+                            byte[] operationDetails = rs.getBytes("OPERATION_DETAILS");
+                            try (ByteArrayInputStream bais = new ByteArrayInputStream(operationDetails);
+                                 ObjectInputStream ois = new ObjectInputStream(bais)) {
+                                profileOperation = (ProfileOperation) ois.readObject();
+                                operation.setPayLoad(profileOperation.getPayLoad());
+                            } catch (IOException e) {
+                                String msg = "IO Error occurred while retrieving app data of operation ";
+                                log.error(msg, e);
+                                throw new OperationManagementDAOException(msg, e);
+                            } catch (ClassNotFoundException e) {
+                                String msg = "Class not found error occurred while retrieving app data of operation ";
+                                log.error(msg, e);
+                                throw new OperationManagementDAOException(msg, e);
+                            }
+                        }
                         operation.setStatus(Operation.Status.valueOf(rs.getString("STATUS")));
                         OperationDAOUtil.setActivityId(operation, rs.getInt("ID"));
                         operations.add(operation);

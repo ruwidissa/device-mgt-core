@@ -1657,7 +1657,31 @@ public interface DeviceManagementService {
                     value = "The package name of the app user want to uninstall",
                     required = true)
             @QueryParam("packageName")
-                    String packageName);
+                    String packageName,
+            @ApiParam(
+                    name = "platform",
+                    value = "The platform of the app user want to uninstall",
+                    required = false)
+            @QueryParam("platform")
+            String platform,
+            @ApiParam(
+                    name = "name",
+                    value = "The name of the app user want to uninstall",
+                    required = false)
+            @QueryParam("name")
+            String name,
+            @ApiParam(
+                    name = "version",
+                    value = "The version of the app user want to uninstall",
+                    required = false)
+            @QueryParam("version")
+            String version,
+            @ApiParam(
+                    name = "user",
+                    value = "The user who triggered the app uninstall",
+                    required = false)
+            @QueryParam("user")
+            String user);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
