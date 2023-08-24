@@ -105,6 +105,10 @@ public interface OperationDAO {
     Map<Integer, List<OperationMapping>> getOperationMappingsByStatus(Operation.Status opStatus, Operation.PushNotificationStatus pushNotificationStatus,
                                                                       int limit) throws OperationManagementDAOException;
 
+    Map<Integer, List<OperationMapping>> getAllocatedOperationMappingsByStatus(Operation.Status opStatus,
+            Operation.PushNotificationStatus pushNotificationStatus, int limit, int activeServerCount, int serverIndex)
+            throws OperationManagementDAOException;
+
     List<Activity> getActivities(List<String> deviceTypes, String operationCode, long updatedSince, String operationStatus)
             throws OperationManagementDAOException;
 
