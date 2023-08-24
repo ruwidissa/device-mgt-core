@@ -17,8 +17,6 @@
  */
 package io.entgra.device.mgt.core.certificate.mgt.core.service;
 
-
-
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -38,6 +36,7 @@ import io.entgra.device.mgt.core.certificate.mgt.core.impl.KeyStoreReader;
 
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
@@ -210,7 +209,7 @@ public class CertificateManagementServiceImpl implements CertificateManagementSe
             metadata = CertificateManagerUtil.getMetadataManagementService().retrieveMetadata(CertificateManagementConstants.CERTIFICATE_DELETE);
             if (metadata != null) {
                 String metaValue = metadata.getMetaValue();
-                if (metaValue != null && !metaValue.isEmpty()) {
+                if (StringUtils.isNotEmpty(metaValue)) {
                     JsonParser parser = new JsonParser();
                     JsonObject jsonObject = parser.parse(metaValue).getAsJsonObject();
                     return jsonObject.get(CertificateManagementConstants.IS_CERTIFICATE_DELETE_ENABLE).getAsBoolean();

@@ -311,20 +311,17 @@ public interface CertificateManagementAdminService {
             @ApiParam(
                     name = "serialNumber",
                     value = "The serial number of the certificates",
-                    required = false,
-                    defaultValue = "0")
+                    required = false)
             @QueryParam("serialNumber") String serialNumber,
             @ApiParam(
                     name = "deviceIdentifier",
                     value = "The device identifier of the certificates",
-                    required = false,
-                    defaultValue = "0")
+                    required = false)
             @QueryParam("deviceIdentifier") String deviceIdentifier,
             @ApiParam(
                     name = "username",
-                    value = "User name of the certificate added user" ,
-                    required = false,
-                    defaultValue = "0")
+                    value = "User name of the certificate added user",
+                    required = false)
             @QueryParam("username") String username,
             @ApiParam(
                     name = "If-Modified-Since",

@@ -27,6 +27,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import io.entgra.device.mgt.core.device.mgt.common.CertificatePaginationRequest;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.certificate.mgt.cert.admin.api.CertificateManagementAdminService;
@@ -138,20 +139,23 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
      */
     @GET
     public Response getAllCertificates(
-            @QueryParam("serialNumber") String serialNumber, @QueryParam("deviceIdentifier") String deviceIdentifier,
-            @QueryParam("username") String username, @HeaderParam("If-Modified-Since") String ifModifiedSince, @QueryParam("offset") int offset,
+            @QueryParam("serialNumber") String serialNumber,
+            @QueryParam("deviceIdentifier") String deviceIdentifier,
+            @QueryParam("username") String username,
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @QueryParam("offset") int offset,
             @QueryParam("limit") int limit) {
         RequestValidationUtil.validatePaginationInfo(offset, limit);
         CertificateManagementService certificateService = CertificateMgtAPIUtils.getCertificateManagementService();
         CertificatePaginationRequest request = new CertificatePaginationRequest(offset, limit);
 
-        if (serialNumber != null && !serialNumber.isEmpty()) {
+        if (StringUtils.isNotEmpty(serialNumber)) {
             request.setSerialNumber(serialNumber);
         }
-        if (deviceIdentifier != null){
+        if (StringUtils.isNotEmpty(deviceIdentifier)){
             request.setDeviceIdentifier(deviceIdentifier);
         }
-        if (username != null){
+        if (StringUtils.isNotEmpty(username)){
             request.setUsername(username);
         }
         try {
@@ -188,18 +192,19 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
                                         serialNumber + "' has been removed").build();
                     }
                 } catch (CertificateManagementException e) {
-                    String msg = "Error occurred while converting PEM file to X509Certificate";
+                    String msg = "Error occurred while removing certificate with the given " +
+                            "serial number '" + serialNumber + "'";
                     log.error(msg, e);
                     return Response.serverError().entity(
                             new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
                 }
             } else {
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        "User not have to access delete certificate " +
+                return Response.status(Response.Status.UNAUTHORIZED).entity(
+                        "User unauthorized to delete certificate with " +
                                 "serial number '" + serialNumber + "'").build();
             }
         } catch (CertificateManagementException e) {
-            String msg = "Error occurred while converting PEM file to X509Certificate";
+            String msg = "Error occurred while getting the metadata entry for certificate deletion.";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
