@@ -15,9 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.entgra.device.mgt.core.device.mgt.core.push.notification.mgt;
+package io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service;
 
-import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.ClusterFormationChangedNotifier;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +40,7 @@ public class ClusterFormationChangedNotifierRepository {
     public void addNotifier(String className) {
         try {
             if (!StringUtils.isEmpty(className)) {
-                Class<?> clz = ClassLoader.getSystemClassLoader()forName(className);
+                Class<?> clz = Class.forName(className);
                 ClusterFormationChangedNotifier notifier = (ClusterFormationChangedNotifier) clz.newInstance();
                 notifiers.put(notifier.getType(), notifier);
             }

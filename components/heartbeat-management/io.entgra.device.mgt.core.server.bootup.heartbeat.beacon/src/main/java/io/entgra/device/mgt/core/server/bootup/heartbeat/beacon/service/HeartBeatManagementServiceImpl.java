@@ -235,6 +235,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                         }
                     } else {
                         //first time execution, elect if not present
+                        heartBeatDAO.purgeCandidates();
                         electCandidate(servers);
                     }
                     HeartBeatBeaconDAOFactory.commitTransaction();
@@ -268,6 +269,10 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                     String serverUUID = HeartBeatBeaconDataHolder.getInstance().getLocalServerUUID();
                     ServerContext serverContext = servers.get(serverUUID);
 
+                    if (log.isDebugEnabled()) {
+                        log.debug("HashIndex (previous, current) : " + lastHashIndex + ", " + serverContext.getIndex());
+                        log.debug("ActiveServerCount (previous, current) : " + lastActiveCount + ", " + servers.size());
+                    }
                     // cluster change can be identified, either by changing hash index or changing active server count
                     if ((lastHashIndex != serverContext.getIndex()) || (lastActiveCount != servers.size())) {
                         lastHashIndex = serverContext.getIndex();
@@ -280,6 +285,9 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                             Runnable r = new Runnable() {
                                 @Override
                                 public void run() {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("notify cluster formation changed : " + notifier.getType());
+                                    }
                                     notifier.notifyClusterFormationChanged(lastHashIndex, lastActiveCount);
                                 }
                             };

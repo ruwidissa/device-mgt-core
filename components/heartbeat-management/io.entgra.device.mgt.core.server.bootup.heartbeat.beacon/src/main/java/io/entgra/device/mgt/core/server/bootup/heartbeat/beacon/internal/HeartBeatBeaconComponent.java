@@ -28,6 +28,7 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBea
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 
 import java.util.List;
@@ -73,7 +74,9 @@ public class HeartBeatBeaconComponent {
                         clusterFormationChangedNotifierRepository);
 
                 //Setting up executors to notify heart beat status */
-                HeartBeatExecutor.setUpNotifiers(HeartBeatBeaconUtils.getServerDetails());
+                HeartBeatExecutor heartBeatExecutor = new HeartBeatExecutor();
+                componentContext.getBundleContext().registerService(
+                        ServerStartupObserver.class.getName(), heartBeatExecutor, null);
             }
 
 
