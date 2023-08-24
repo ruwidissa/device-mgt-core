@@ -41,6 +41,12 @@ public final class CertificateManagementConstants {
     public static final int RSA_KEY_LENGTH = 2048;
     public static final String SIGNING_ALGORITHM = "SHA256withRSA";
 
+    public static final int DEFAULT_PAGE_LIMIT = 50;
+
+    public static final String CERTIFICATE_DELETE = "CERTIFICATE_DELETE";
+    public static final String IS_CERTIFICATE_DELETE_ENABLE = "isCertificateDelete";
+
+
     public static final class DataBaseTypes {
         private DataBaseTypes() {
             throw new AssertionError();

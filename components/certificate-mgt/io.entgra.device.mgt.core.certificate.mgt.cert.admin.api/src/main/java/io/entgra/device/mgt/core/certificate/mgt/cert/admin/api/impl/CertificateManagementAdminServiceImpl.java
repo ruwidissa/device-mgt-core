@@ -18,7 +18,6 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.cert.admin.api.impl;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -26,7 +25,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+
+import io.entgra.device.mgt.core.device.mgt.common.CertificatePaginationRequest;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.certificate.mgt.cert.admin.api.CertificateManagementAdminService;
@@ -84,6 +85,13 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
                 certificate.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                 certificate.setSerial(enrollmentCertificate.getSerial());
                 certificate.setCertificate(certificateService.pemToX509Certificate(enrollmentCertificate.getPem()));
+                CertificateResponse existingCertificate = certificateService.getCertificateBySerial(enrollmentCertificate.getSerial());
+                if (existingCertificate != null) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity("Certificate with serial number " + enrollmentCertificate.getSerial() + " already exists.")
+                            .build();
+                }
+
                 certificates.add(certificate);
             }
             certificateService.saveCertificate(certificates);
@@ -131,13 +139,27 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
      */
     @GET
     public Response getAllCertificates(
+            @QueryParam("serialNumber") String serialNumber,
+            @QueryParam("deviceIdentifier") String deviceIdentifier,
+            @QueryParam("username") String username,
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
             @QueryParam("offset") int offset,
-            @QueryParam("limit") int limit,
-            @HeaderParam("If-Modified-Since") String ifModifiedSince) {
+            @QueryParam("limit") int limit) {
         RequestValidationUtil.validatePaginationInfo(offset, limit);
         CertificateManagementService certificateService = CertificateMgtAPIUtils.getCertificateManagementService();
+        CertificatePaginationRequest request = new CertificatePaginationRequest(offset, limit);
+
+        if (StringUtils.isNotEmpty(serialNumber)) {
+            request.setSerialNumber(serialNumber);
+        }
+        if (StringUtils.isNotEmpty(deviceIdentifier)){
+            request.setDeviceIdentifier(deviceIdentifier);
+        }
+        if (StringUtils.isNotEmpty(username)){
+            request.setUsername(username);
+        }
         try {
-            PaginationResult result = certificateService.getAllCertificates(offset, limit);
+            PaginationResult result = certificateService.getAllCertificates(request);
             CertificateList certificates = new CertificateList();
             certificates.setCount(result.getRecordsTotal());
             certificates.setList((List<CertificateResponse>) result.getData());
@@ -151,23 +173,38 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
     }
 
     @DELETE
-    public Response removeCertificate(@QueryParam("certificateId") String certificateId) {
-        RequestValidationUtil.validateCertificateId(certificateId);
+    public Response removeCertificate(@QueryParam("serialNumber") String serialNumber) {
+        RequestValidationUtil.validateSerialNumber(serialNumber);
 
         CertificateManagementService certificateService = CertificateMgtAPIUtils.getCertificateManagementService();
         try {
-            boolean status = certificateService.removeCertificate(certificateId);
-            if (!status) {
-                return Response.status(Response.Status.NOT_FOUND).entity(
-                        "No certificate is found with the given " +
-                                "certificate id '" + certificateId + "'").build();
+            boolean decision = certificateService.getValidateMetaValue();
+            if (decision) {
+                try {
+                    boolean status = certificateService.removeCertificate(serialNumber);
+                    if (!status) {
+                        return Response.status(Response.Status.NOT_FOUND).entity(
+                                "No certificate is found with the given " +
+                                        "serial number '" + serialNumber + "'").build();
+                    } else {
+                        return Response.status(Response.Status.OK).entity(
+                                "Certificate that carries the serial number '" +
+                                        serialNumber + "' has been removed").build();
+                    }
+                } catch (CertificateManagementException e) {
+                    String msg = "Error occurred while removing certificate with the given " +
+                            "serial number '" + serialNumber + "'";
+                    log.error(msg, e);
+                    return Response.serverError().entity(
+                            new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+                }
             } else {
-                return Response.status(Response.Status.OK).entity(
-                        "Certificate that carries the certificate id '" +
-                                certificateId + "' has been removed").build();
+                return Response.status(Response.Status.UNAUTHORIZED).entity(
+                        "User unauthorized to delete certificate with " +
+                                "serial number '" + serialNumber + "'").build();
             }
         } catch (CertificateManagementException e) {
-            String msg = "Error occurred while converting PEM file to X509Certificate";
+            String msg = "Error occurred while getting the metadata entry for certificate deletion.";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();

@@ -30,14 +30,6 @@ public class RequestValidationUtil {
         }
     }
 
-    public static void validateCertificateId(String certificateId) {
-        if (certificateId == null || certificateId.isEmpty()) {
-            throw new InputValidationException(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(
-                            "Certificate Id cannot be null or empty").build());
-        }
-    }
-
     public static void validatePaginationInfo(int offset, int limit) {
         if (offset < 0) {
             throw new InputValidationException(

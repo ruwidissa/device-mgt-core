@@ -17,6 +17,12 @@
  */
 package io.entgra.device.mgt.core.certificate.mgt.core.service;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
+import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagerUtil;
+import io.entgra.device.mgt.core.device.mgt.common.CertificatePaginationRequest;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateDAO;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOException;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
@@ -27,11 +33,14 @@ import io.entgra.device.mgt.core.certificate.mgt.core.exception.KeystoreExceptio
 import io.entgra.device.mgt.core.certificate.mgt.core.exception.TransactionManagementException;
 import io.entgra.device.mgt.core.certificate.mgt.core.impl.CertificateGenerator;
 import io.entgra.device.mgt.core.certificate.mgt.core.impl.KeyStoreReader;
-import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagementConstants;
-import io.entgra.device.mgt.core.certificate.mgt.core.util.CertificateManagerUtil;
+
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+
 
 import java.io.InputStream;
 import java.security.PrivateKey;
@@ -154,41 +163,65 @@ public class CertificateManagementServiceImpl implements CertificateManagementSe
     }
 
     @Override
-    public PaginationResult getAllCertificates(int rowNum, int limit) throws CertificateManagementException {
+    public PaginationResult getAllCertificates(CertificatePaginationRequest request) throws CertificateManagementException {
         try {
             CertificateManagementDAOFactory.openConnection();
             CertificateDAO certificateDAO = CertificateManagementDAOFactory.getCertificateDAO();
-            return certificateDAO.getAllCertificates(rowNum, CertificateManagerUtil.validateCertificateListPageSize(limit));
+            return certificateDAO.getAllCertificates(request);
         } catch (SQLException e) {
             String msg = "Error occurred while opening a connection to the underlying data source";
             log.error(msg, e);
             throw new CertificateManagementException(msg, e);
         } catch (CertificateManagementDAOException e) {
             String msg = "Error occurred while looking up for the list of certificates managed in the underlying " +
-                         "certificate repository";
+                    "certificate repository";
             log.error(msg, e);
             throw new CertificateManagementException(msg, e);
         } finally {
             CertificateManagementDAOFactory.closeConnection();
         }
     }
-
     @Override
-    public boolean removeCertificate(String certificateId) throws CertificateManagementException {
+    public boolean removeCertificate(String serialNumber) throws CertificateManagementException {
         try {
             CertificateManagementDAOFactory.beginTransaction();
             CertificateDAO certificateDAO = CertificateManagementDAOFactory.getCertificateDAO();
-            boolean status = certificateDAO.removeCertificate(certificateId);
+            boolean status = certificateDAO.removeCertificate(serialNumber);
             CertificateManagementDAOFactory.commitTransaction();
             return status;
         } catch (TransactionManagementException e) {
-            String msg = "Error occurred while removing certificate carrying certificate id '" + certificateId + "'";
+            String msg = "Error occurred while removing certificate carrying serialNumber '" + serialNumber + "'";
             log.error(msg, e);
             throw new CertificateManagementException(msg, e);
         } catch (CertificateManagementDAOException e) {
             CertificateManagementDAOFactory.rollbackTransaction();
-            String msg = "Error occurred while removing the certificate carrying certificate id '" + certificateId +
+            String msg = "Error occurred while removing the certificate carrying serialNumber '" + serialNumber +
                     "' from the certificate repository";
+            log.error(msg, e);
+            throw new CertificateManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public boolean getValidateMetaValue() throws CertificateManagementException {
+        Metadata metadata;
+        try {
+            metadata = CertificateManagerUtil.getMetadataManagementService().retrieveMetadata(CertificateManagementConstants.CERTIFICATE_DELETE);
+            if (metadata != null) {
+                String metaValue = metadata.getMetaValue();
+                if (StringUtils.isNotEmpty(metaValue)) {
+                    JsonParser parser = new JsonParser();
+                    JsonObject jsonObject = parser.parse(metaValue).getAsJsonObject();
+                    return jsonObject.get(CertificateManagementConstants.IS_CERTIFICATE_DELETE_ENABLE).getAsBoolean();
+                }
+            }
+            return false;
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while getting the metadata entry for metaKey: " + CertificateManagementConstants.CERTIFICATE_DELETE;
+            log.error(msg, e);
+            throw new CertificateManagementException(msg, e);
+        } catch (JsonParseException e) {
+            String msg = "Error occurred while parsing the JSON metadata value for metaKey: " + CertificateManagementConstants.CERTIFICATE_DELETE;
             log.error(msg, e);
             throw new CertificateManagementException(msg, e);
         }
