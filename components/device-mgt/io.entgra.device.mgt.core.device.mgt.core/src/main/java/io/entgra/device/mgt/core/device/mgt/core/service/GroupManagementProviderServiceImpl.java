@@ -860,15 +860,15 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             log.debug("Get groups count");
         }
         try {
-            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             GroupManagementDAOFactory.openConnection();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             return groupDAO.getGroupCount(tenantId, null);
-        } catch (GroupManagementDAOException | SQLException e) {
+        } catch (GroupManagementDAOException e) {
             String msg = "Error occurred while retrieving all groups in tenant";
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
-        } catch (Exception e) {
-            String msg = "Error occurred";
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source.";
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
         } finally {
@@ -1000,16 +1000,15 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         UserStoreManager userStoreManager;
         int count;
         try {
+            GroupManagementDAOFactory.openConnection();
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             userStoreManager = DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
                     .getUserStoreManager();
             if (isAdminUser(username, userStoreManager)) {
-                GroupManagementDAOFactory.openConnection();
                 count = groupDAO.getGroupCount(tenantId, null);
                 return count;
-            }else {
+            } else {
                 String[] roleList = userStoreManager.getRoleListOfUser(username);
-                GroupManagementDAOFactory.openConnection();
                 count = groupDAO.getOwnGroupsCount(username, tenantId, parentPath);
                 count += groupDAO.getGroupsCount(roleList, tenantId, parentPath);
                 return count;
