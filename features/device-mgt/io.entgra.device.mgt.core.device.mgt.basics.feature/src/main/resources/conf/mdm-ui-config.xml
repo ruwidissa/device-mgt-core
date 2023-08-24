@@ -40,6 +40,143 @@
         <HideDomainSelectionInSuperTenant>false</HideDomainSelectionInSuperTenant>
         <HideDomainSelectionInSubTenant>true</HideDomainSelectionInSubTenant>
     </Billing>
+    <DeviceInfoConfigurations>
+        <DeviceInfoItem>
+            <DefinedValue>name</DefinedValue>
+            <DisplayValue>label_device</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>type</DefinedValue>
+            <DisplayValue>label_type</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>owner</DefinedValue>
+            <DisplayValue>label_owner</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>serial</DefinedValue>
+            <DisplayValue>label_serialNumber</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>ownership</DefinedValue>
+            <DisplayValue>label_ownership</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>status</DefinedValue>
+            <DisplayValue>label_status</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>dateOfLastUpdate</DefinedValue>
+            <DisplayValue>label_last_updated</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>actions</DefinedValue>
+            <DisplayValue>label_actions</DisplayValue>
+            <Type>default</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>FIRMWARE_VERSION</DefinedValue>
+            <DisplayValue>label_firmware_version</DisplayValue>
+            <Type>deviceDetailsMap</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>FIRMWARE_APP_VERSION</DefinedValue>
+            <DisplayValue>label_app_version</DisplayValue>
+            <Type>deviceDetailsMap</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>FIRMWARE_SYSTEM_VERSION</DefinedValue>
+            <DisplayValue>label_firmware_system_version</DisplayValue>
+            <Type>deviceDetailsMap</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>batteryLevel</DefinedValue>
+            <DisplayValue>label_battery_leve</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>deviceModel</DefinedValue>
+            <DisplayValue>label_deviceModel</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>osVersion</DefinedValue>
+            <DisplayValue>label_os_version</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>vendor</DefinedValue>
+            <DisplayValue>label_vendor</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>availableRAMMemory</DefinedValue>
+            <DisplayValue>label_available_ram_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>connectionType</DefinedValue>
+            <DisplayValue>label_connection_type</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>cpuUsage</DefinedValue>
+            <DisplayValue>label_cpu_usage</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>externalAvailableMemory</DefinedValue>
+            <DisplayValue>label_external_available_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>externalTotalMemory</DefinedValue>
+            <DisplayValue>label_external_tot_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>internalAvailableMemory</DefinedValue>
+            <DisplayValue>label_internal_available_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>internalTotalMemory</DefinedValue>
+            <DisplayValue>label_internal_tot_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>osBuildDate</DefinedValue>
+            <DisplayValue>label_os_build_date</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>pluggedIn</DefinedValue>
+            <DisplayValue>label_plugged_in</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>ssid</DefinedValue>
+            <DisplayValue>label_ssid</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>totalRAMMemory</DefinedValue>
+            <DisplayValue>label_tot_ram_memory</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+        <DeviceInfoItem>
+            <DefinedValue>updatedTime</DefinedValue>
+            <DisplayValue>label_updated_time</DisplayValue>
+            <Type>deviceInfo</Type>
+        </DeviceInfoItem>
+    </DeviceInfoConfigurations>
     <AppRegistration>
         <Tags>
             <Tag>analytics_management</Tag>
@@ -215,6 +352,7 @@
         <Scope>perm:android:google-account</Scope>
         <Scope>perm:android:info</Scope>
         <Scope>perm:windows:lock-devices</Scope>
+        <Scope>perm:windows:enroll</Scope>
         <Scope>perm:windows:disenroll</Scope>
         <Scope>perm:windows:wipe</Scope>
         <Scope>perm:windows:ring</Scope>
@@ -227,7 +365,7 @@
         <Scope>perm:android:clear-application</Scope>
         <Scope>perm:android:suspend-package</Scope>
         <Scope>perm:android:alternate-install</Scope>
-	<Scope>perm:ios:lock</Scope>
+        <Scope>perm:ios:lock</Scope>
         <Scope>perm:ios:location</Scope>
         <Scope>perm:ios:ring</Scope>
         <Scope>perm:ios:clear-passcode</Scope>
@@ -240,6 +378,10 @@
         <Scope>perm:ios:app-configurations</Scope>
         <Scope>perm:mac-os:restart</Scope>
         <Scope>perm:mac-os:shut-down</Scope>
+        <Scope>perm:app:vpp:user:modify</Scope>
+        <Scope>perm:app:vpp:user:view</Scope>
+        <Scope>perm:app:vpp:asset:modify</Scope>
+        <Scope>perm:app:vpp:asset:view</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

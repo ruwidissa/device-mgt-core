@@ -72,6 +72,7 @@ public class APIUtil {
     private static volatile SubscriptionManager subscriptionManager;
     private static volatile ReviewManager reviewManager;
     private static volatile AppmDataHandler appmDataHandler;
+    private static volatile VPPApplicationManager vppApplicationManager;
     private static volatile MetadataManagementService metadataManagementService;
 
     public static SPApplicationManager getSPApplicationManager() {
@@ -112,6 +113,24 @@ public class APIUtil {
             throw new IllegalStateException(msg);
         }
         return applicationManager;
+    }
+
+    public static MetadataManagementService getMetadataManager() {
+        if (metadataManagementService == null) {
+            synchronized (APIUtil.class) {
+                if (metadataManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    metadataManagementService =
+                            (MetadataManagementService) ctx.getOSGiService(MetadataManagementService.class, null);
+                    if (metadataManagementService == null) {
+                        String msg = "MetadataManagement Manager service has not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+        return metadataManagementService;
     }
 
     /**
@@ -201,6 +220,29 @@ public class APIUtil {
 
         return reviewManager;
     }
+
+    public static VPPApplicationManager getVPPManager() {
+        try {
+            if (vppApplicationManager == null) {
+                synchronized (APIUtil.class) {
+                    if (vppApplicationManager == null) {
+                        vppApplicationManager = ApplicationManagementUtil.getVPPManagerInstance();
+                        if (vppApplicationManager == null) {
+                            String msg = "Vpp Manager service has not initialized.";
+                            log.error(msg);
+                            throw new IllegalStateException(msg);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            String msg = "Error occurred while getting the vpp manager";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return vppApplicationManager;
+    }
+
 
     /**
      * To get the DataHandler from the osgi context.
@@ -426,8 +468,12 @@ public class APIUtil {
         }
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         if (ApplicationType.PUBLIC.toString().equals(applicationDTO.getType()) && application.getCategories()
-                .contains("GooglePlaySyncedApp")) {
+                .contains(Constants.GOOGLE_PLAY_SYNCED_APP)) {
             application.setAndroidEnterpriseApp(true);
+        }
+        if (ApplicationType.PUBLIC.toString().equals(applicationDTO.getType()) && application.getCategories()
+                .contains(Constants.ApplicationProperties.APPLE_STORE_SYNCED_APP_CATEGORY)) {
+            application.setExternalAppStoreApp(true);
         }
         for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
             applicationReleases.add(releaseDtoToRelease(applicationReleaseDTO));

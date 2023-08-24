@@ -19,7 +19,14 @@
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
+import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.core.dao.VppApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
+import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.application.mgt.core.util.VppHttpUtil;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.notification.logger.AppInstallLogContext;
 import io.entgra.device.mgt.core.notification.logger.impl.EntgraAppInstallLoggerImpl;
@@ -118,12 +125,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     private static final EntgraLogger log = new EntgraAppInstallLoggerImpl(SubscriptionManagerImpl.class);
     private SubscriptionDAO subscriptionDAO;
     private ApplicationDAO applicationDAO;
+    private VppApplicationDAO vppApplicationDAO;
     private LifecycleStateManager lifecycleStateManager;
 
     public SubscriptionManagerImpl() {
         this.lifecycleStateManager = DataHolder.getInstance().getLifecycleStateManager();
         this.subscriptionDAO = ApplicationManagementDAOFactory.getSubscriptionDAO();
         this.applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
+        this.vppApplicationDAO = ApplicationManagementDAOFactory.getVppApplicationDAO();
     }
 
     @Override
@@ -148,12 +157,58 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         ApplicationDTO applicationDTO = getApplicationDTO(applicationUUID);
         ApplicationSubscriptionInfo applicationSubscriptionInfo = getAppSubscriptionInfo(applicationDTO, subType,
                 params);
+        performExternalStoreSubscription(applicationDTO, applicationSubscriptionInfo);
         ApplicationInstallResponse applicationInstallResponse = performActionOnDevices(
                 applicationSubscriptionInfo.getAppSupportingDeviceTypeName(), applicationSubscriptionInfo.getDevices(),
                 applicationDTO, subType, applicationSubscriptionInfo.getSubscribers(), action, properties, isOperationReExecutingDisabled);
 
         applicationInstallResponse.setErrorDeviceIdentifiers(applicationSubscriptionInfo.getErrorDeviceIdentifiers());
         return applicationInstallResponse;
+    }
+
+    private void performExternalStoreSubscription(ApplicationDTO applicationDTO,
+                                                  ApplicationSubscriptionInfo
+                                                          applicationSubscriptionInfo) throws ApplicationManagementException {
+        try {
+            // Only for iOS devices
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+            if (DeviceTypes.IOS.toString().equalsIgnoreCase(APIUtil.getDeviceTypeData(applicationDTO
+                    .getDeviceTypeId()).getName())) {
+                // TODO: replace getAssetByAppId with the correct one in DAO
+                // Check if the app trying to subscribe is a VPP asset.
+                VppAssetDTO storedAsset = vppApplicationDAO.getAssetByAppId(applicationDTO.getId(), tenantId);
+                if (storedAsset != null) { // This is a VPP asset
+                    List<VppUserDTO> users = new ArrayList<>();
+                    List<Device> devices = applicationSubscriptionInfo.getDevices();// get
+                    // subscribed device list, so that we can extract the users of those devices.
+                    for (Device device : devices) {
+                        VppUserDTO user = vppApplicationDAO.getUserByDMUsername(device.getEnrolmentInfo()
+                                .getOwner(), PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .getTenantId(true));
+                        users.add(user);
+                    }
+                    VPPApplicationManager vppManager = APIUtil.getVPPManager();
+                    vppManager.addAssociation(storedAsset, users);
+                }
+            }
+        } catch (BadRequestException e) {
+            String msg = "Device Type not found";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (UnexpectedServerErrorException e) {
+            String msg = "Unexpected error while getting device type";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error while getting the device user";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementException e) {
+            String msg = "Error while associating user";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+
     }
 
     @Override
@@ -1568,4 +1623,29 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
+
+    @Override
+    public Activity getOperationAppDetails(String id) throws SubscriptionManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        int operationId = Integer.parseInt(
+                id.replace(DeviceManagementConstants.OperationAttributes.ACTIVITY, ""));
+        if (operationId == 0) {
+            throw new IllegalArgumentException("Operation ID cannot be null or zero (0).");
+        }
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return subscriptionDAO.getOperationAppDetails(operationId, tenantId);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while retrieving app details of operation: " + operationId;
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while retrieving the database connection";
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
 }

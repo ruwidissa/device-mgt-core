@@ -19,6 +19,7 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.util;
 
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -28,6 +29,7 @@ import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.DataSour
 import io.entgra.device.mgt.core.certificate.mgt.core.config.datasource.JNDILookupDefinition;
 import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOUtil;
 import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.sql.DataSource;
 import javax.xml.XMLConstants;
@@ -41,6 +43,7 @@ public class CertificateManagerUtil {
 
     public static final String GENERAL_CONFIG_RESOURCE_PATH = "general";
     public static final String MONITORING_FREQUENCY = "notifierFrequency";
+    private static MetadataManagementService metadataManagementService;
     private static final Log log = LogFactory.getLog(CertificateManagerUtil.class);
 
     public static Document convertToDocument(File file) throws CertificateManagementException {
@@ -103,6 +106,28 @@ public class CertificateManagerUtil {
             }
         }
         return limit;
+    }
+
+    /**
+     * Initializing and accessing method for MetadataManagementService.
+     *
+     * @return MetadataManagementService instance
+     * @throws IllegalStateException if metadataManagementService cannot be initialized
+     */
+    public static MetadataManagementService getMetadataManagementService() {
+        if (metadataManagementService == null) {
+            synchronized (CertificateManagerUtil.class) {
+                if (metadataManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    metadataManagementService = (MetadataManagementService) ctx.getOSGiService(
+                            MetadataManagementService.class, null);
+                    if (metadataManagementService == null) {
+                        throw new IllegalStateException("Metadata Management service not initialized.");
+                    }
+                }
+            }
+        }
+        return metadataManagementService;
     }
 
 }

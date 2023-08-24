@@ -981,7 +981,11 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     public Response uninstallation(
             @PathParam("type") @Size(max = 45) String type,
             @PathParam("id") @Size(max = 45) String id,
-            @QueryParam("packageName") String packageName) {
+            @QueryParam("packageName") String packageName,
+            @QueryParam("platform") String platform,
+            @QueryParam("name") String name,
+            @QueryParam("version") String version,
+            @QueryParam("user") String user) {
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
         Operation operation = new Operation();
         try {
@@ -1004,7 +1008,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 //if the applications not installed via entgra store
             } else {
                 if (Constants.ANDROID.equals(type)) {
-                    ApplicationUninstallation applicationUninstallation = new ApplicationUninstallation(packageName, "PUBLIC");
+                    ApplicationUninstallation applicationUninstallation = new ApplicationUninstallation(packageName, "PUBLIC", name, platform, version, user);
                     Gson gson = new Gson();
                     operation.setCode(MDMAppConstants.AndroidConstants.UNMANAGED_APP_UNINSTALL);
                     operation.setType(Operation.Type.PROFILE);

@@ -279,7 +279,7 @@ public abstract class AbstractCertificateDAOImpl implements CertificateDAO{
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            String msg = "Unable to get the read the certificate with serial" + serialNumber;
+            String msg = "Unable to get the read the certificate with serialNumber" + serialNumber;
             log.error(msg, e);
             throw new CertificateManagementDAOException(msg, e);
         } finally {

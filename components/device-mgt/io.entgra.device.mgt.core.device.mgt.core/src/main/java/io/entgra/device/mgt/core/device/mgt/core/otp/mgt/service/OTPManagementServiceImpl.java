@@ -276,9 +276,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
     public OneTimePinDTO generateOneTimePin(OneTimePinDTO oneTimePinDTO, boolean persistPin) throws OTPManagementException {
 
         String otpValue = UUID.randomUUID().toString();
-
-        Gson gson = new Gson();
-        String metaInfo = gson.toJson(oneTimePinDTO.getMetaInfo());
+        String metaInfo = oneTimePinDTO.getMetaInfo();
 
         oneTimePinDTO.setMetaInfo(metaInfo);
         oneTimePinDTO.setOtpToken(otpValue);

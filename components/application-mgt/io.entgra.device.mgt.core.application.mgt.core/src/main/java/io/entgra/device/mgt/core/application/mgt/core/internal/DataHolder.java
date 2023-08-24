@@ -23,6 +23,7 @@ import io.entgra.device.mgt.core.application.mgt.common.services.AppmDataHandler
 import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ntask.core.service.TaskService;
@@ -38,6 +39,8 @@ public class DataHolder {
     private RealmService realmService;
 
     private SPApplicationManager SPApplicationManager;
+
+    private VPPApplicationManager vppApplicationManager;
 
     private ApplicationManager applicationManager;
 
@@ -141,5 +144,13 @@ public class DataHolder {
 
     public void setISApplicationManager(SPApplicationManager SPApplicationManager) {
         this.SPApplicationManager = SPApplicationManager;
+    }
+
+    public VPPApplicationManager getVppApplicationManager() {
+        return vppApplicationManager;
+    }
+
+    public void setVppApplicationManager(VPPApplicationManager vppApplicationManager) {
+        this.vppApplicationManager = vppApplicationManager;
     }
 }

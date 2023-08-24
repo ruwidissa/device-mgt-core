@@ -308,7 +308,17 @@ public interface ActivityInfoProviderService {
                             "Provide the value in the Java Date Format: EEE, d MMM yyyy HH:mm:ss Z\n." +
                             "Example: Mon, 05 Jan 2014 15:10:00 +0200",
                     required = false)
-            @HeaderParam("If-Modified-Since") String ifModifiedSince);
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @ApiParam(
+                    name = "response",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    required = false)
+            @QueryParam("response") Boolean response,
+            @ApiParam(
+                    name = "appInstall",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    required = false)
+            @QueryParam("appInstall") Boolean appInstall);
 
     @GET
     @Path("/type/{operationCode}")

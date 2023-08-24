@@ -18,6 +18,8 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
@@ -146,8 +148,11 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                                         @Size(max = 45) String devicetype,
                                         @PathParam("deviceid")
                                         @Size(max = 45) String deviceid,
-                                        @HeaderParam("If-Modified-Since") String ifModifiedSince) {
-        Activity activity;
+                                        @HeaderParam("If-Modified-Since") String ifModifiedSince,
+                                        @QueryParam("response") Boolean response,
+                                        @QueryParam("appInstall") Boolean appInstall) {
+        Activity activity = new Activity();
+        Activity appActivity = null;
         DeviceManagementProviderService dmService;
         try {
             RequestValidationUtil.validateActivityId(id);
@@ -157,7 +162,29 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
             deviceIdentifier.setType(devicetype);
 
             dmService = DeviceMgtAPIUtils.getDeviceManagementService();
-            activity = dmService.getOperationByActivityIdAndDevice(id, deviceIdentifier);
+
+            if (appInstall != null && appInstall)  {
+                if (response != null && response) {
+                    activity = dmService.getOperationByActivityIdAndDevice(id, deviceIdentifier);
+                }
+                SubscriptionManager subscriptionManager = DeviceMgtAPIUtils.getSubscriptionManager();
+                appActivity = subscriptionManager.getOperationAppDetails(id);
+                if (appActivity != null) {
+                    activity.setUsername(appActivity.getUsername());
+                    activity.setPackageName(appActivity.getPackageName());
+                    activity.setAppName(appActivity.getAppName());
+                    activity.setStatus(appActivity.getStatus());
+                    activity.setAppType(appActivity.getAppType());
+                    activity.setVersion(appActivity.getVersion());
+                    activity.setTriggeredBy(appActivity.getTriggeredBy());
+                } else {
+                    String msg = "Cannot find the app details related to the operation ";
+                    log.error(msg);
+                    Response.status(404).entity(msg).build();
+                }
+            }   else {
+                activity = dmService.getOperationByActivityIdAndDevice(id, deviceIdentifier);
+            }
             if (activity == null) {
                 String msg = "No activity can be " +
                         "found upon the provided activity id '" + id + "'";
@@ -166,6 +193,11 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
             return Response.status(Response.Status.OK).entity(activity).build();
         } catch (OperationManagementException e) {
             String msg = "ErrorResponse occurred while fetching the activity for the supplied id.";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (SubscriptionManagementException e) {
+            String msg = "ErrorResponse occurred while fetching the app details for the supplied id.";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();

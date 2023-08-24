@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.certificate.mgt.core.impl;
 
 import io.entgra.device.mgt.core.certificate.mgt.core.util.CSRGenerator;
 import io.entgra.device.mgt.core.certificate.mgt.core.util.DummyCertificate;
+import io.entgra.device.mgt.core.device.mgt.common.CertificatePaginationRequest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -210,14 +211,15 @@ public class CertificateManagementServiceImplTests extends BaseDeviceManagementC
         X509Certificate x509Certificate = managementService.generateX509Certificate();
         CertificateResponse certificateResponse = managementService.retrieveCertificate(x509Certificate.getSerialNumber().toString());
         Assert.assertNotNull(certificateResponse);
-        Assert.assertEquals(x509Certificate.getSerialNumber(), certificateResponse.getCertificateserial());
+        Assert.assertEquals(x509Certificate.getSerialNumber(), certificateResponse.getCertificateSerial());
     }
 
     @Test(description = "This test case tests the retrieval of Certificates from keystore in desired pagination")
     public void testGetAllCertificatesPaginated() throws CertificateManagementException, KeystoreException {
         managementService.generateX509Certificate();
         managementService.generateX509Certificate();
-        PaginationResult allCertificates = managementService.getAllCertificates(0, 2);
+        CertificatePaginationRequest request = new CertificatePaginationRequest(0,2);
+        PaginationResult allCertificates = managementService.getAllCertificates(request);
         Assert.assertEquals(allCertificates.getData().size(), 2);
         log.info("GetAllCertificatesPaginated Test Successful");
     }

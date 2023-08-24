@@ -23,6 +23,7 @@ import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDT
 import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 
 import java.util.List;
 import java.util.Map;
@@ -252,4 +253,15 @@ public interface SubscriptionDAO {
      * @throws {@link ApplicationManagementDAOException} if connections establishment fails.
      */
     Map<Integer,String> getCurrentInstalledAppVersion(int appId, List<Integer> deviceIdList, String installedVersion) throws ApplicationManagementDAOException;
+
+
+    /**
+     * Retrieves app details by operation id.
+     *
+     * @param operationId ID of the operation which app details needs to be retrieved
+     * @param tenantId ID of tenant
+     * @return {@link Activity}
+     * @throws ApplicationManagementDAOException if error occurred while retrieving the app details
+     */
+    Activity getOperationAppDetails(int operationId, int tenantId) throws ApplicationManagementDAOException;
 }

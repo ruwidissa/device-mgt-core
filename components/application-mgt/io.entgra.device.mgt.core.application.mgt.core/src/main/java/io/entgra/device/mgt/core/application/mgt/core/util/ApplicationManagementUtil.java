@@ -18,15 +18,22 @@
 package io.entgra.device.mgt.core.application.mgt.core.util;
 
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
-import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
-import io.entgra.device.mgt.core.application.mgt.core.config.Extension;
-import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
-import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.common.FileDataHolder;
+import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ItuneAppDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.InvalidConfigurationException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.RequestValidatingException;
+import io.entgra.device.mgt.core.application.mgt.common.response.Application;
+import io.entgra.device.mgt.core.application.mgt.common.response.Category;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppReleaseWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppWrapper;
@@ -35,18 +42,34 @@ import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppRelease
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppReleaseWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppWrapper;
+import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
+import io.entgra.device.mgt.core.application.mgt.core.config.Extension;
+import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.application.mgt.core.impl.VppApplicationManagerImpl;
+import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.common.util.FileUtil;
+import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.application.mgt.common.exception.InvalidConfigurationException;
-import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
-import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
-import io.entgra.device.mgt.core.device.mgt.core.common.util.FileUtil;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -183,6 +206,10 @@ public class ApplicationManagementUtil {
         return getInstance(extension, LifecycleStateManager.class);
     }
 
+    public static VPPApplicationManager getVPPManagerInstance() {
+        // TODO: implement as an extension
+        return new VppApplicationManagerImpl();
+    }
     /**
      * This is useful to delete application artifacts if any error occurred while creating release/application
      * after uploading the artifacts
@@ -246,5 +273,266 @@ public class ApplicationManagementUtil {
             log.error(msg, e);
             throw new InvalidConfigurationException(msg, e);
         }
+    }
+
+    public static void persistApp(ItuneAppDTO product) throws ApplicationManagementException {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        List<Category> categories = applicationManager.getRegisteredCategories();
+        if (product != null && product.getVersion() != null) {
+            // Generate artifacts
+            ApplicationArtifact applicationArtifact = generateArtifacts(product);
+
+            List<String> packageNamesOfApps = new ArrayList<>();
+            packageNamesOfApps.add(product.getPackageName());
+
+            List<Application> existingApps = applicationManager.getApplications(packageNamesOfApps);
+
+            if (existingApps != null && existingApps.size() > 0) {
+                Application app = existingApps.get(0);
+                if (product.getPackageName().equals(app.getPackageName())) {
+                    ApplicationUpdateWrapper applicationUpdateWrapper = generatePubAppUpdateWrapper(product, categories);
+                    applicationManager.updateApplication(app.getId(), applicationUpdateWrapper);
+
+                    PublicAppReleaseWrapper publicAppReleaseWrapper = new PublicAppReleaseWrapper();
+                    if (app.getSubMethod()
+                            .equalsIgnoreCase(Constants.ApplicationProperties.FREE_SUB_METHOD)) {
+                        publicAppReleaseWrapper.setPrice(0.0);
+                    } else {
+                        publicAppReleaseWrapper.setPrice(1.0);
+                    }
+
+                    publicAppReleaseWrapper.setDescription(product.getDescription());
+                    publicAppReleaseWrapper.setReleaseType("ga");
+                    publicAppReleaseWrapper.setVersion(product.getVersion());
+                    publicAppReleaseWrapper.setSupportedOsVersions("4.0-12.3");
+                    applicationManager.updatePubAppRelease(app.getApplicationReleases().get(0).getUuid(),
+                            publicAppReleaseWrapper, applicationArtifact);
+                    return;
+                }
+            } else {
+
+                // Generate App wrapper
+                PublicAppWrapper publicAppWrapper = generatePubAppWrapper(product, categories);
+                PublicAppReleaseWrapper appReleaseWrapper = new PublicAppReleaseWrapper();
+
+                if (publicAppWrapper.getSubMethod()
+                        .equalsIgnoreCase(Constants.ApplicationProperties.FREE_SUB_METHOD)) {
+                    appReleaseWrapper.setPrice(0.0);
+                } else {
+                    appReleaseWrapper.setPrice(1.0);
+                }
+
+                appReleaseWrapper.setDescription(product.getDescription());
+                appReleaseWrapper.setReleaseType("ga");
+                appReleaseWrapper.setVersion(product.getVersion());
+                appReleaseWrapper.setPackageName(product.getPackageName());
+                appReleaseWrapper.setSupportedOsVersions("4.0-12.3");
+
+                publicAppWrapper.setPublicAppReleaseWrappers(
+                        Arrays.asList(new PublicAppReleaseWrapper[]{appReleaseWrapper}));
+
+                try {
+                    updateImages(appReleaseWrapper, applicationArtifact.getIconName(),
+                            applicationArtifact.getIconStream(), applicationArtifact.getScreenshots());
+
+                    Application application = applicationManager.createApplication(publicAppWrapper, false);
+                    if (application != null && (application.getApplicationReleases().get(0).getCurrentStatus() == null
+                            || application.getApplicationReleases().get(0).getCurrentStatus().equals("CREATED"))) {
+                        String uuid = application.getApplicationReleases().get(0).getUuid();
+                        LifecycleChanger lifecycleChanger = new LifecycleChanger();
+                        lifecycleChanger.setAction("IN-REVIEW");
+                        applicationManager.changeLifecycleState(uuid, lifecycleChanger);
+                        lifecycleChanger.setAction("APPROVED");
+                        applicationManager.changeLifecycleState(uuid, lifecycleChanger);
+                        lifecycleChanger.setAction("PUBLISHED");
+                        applicationManager.changeLifecycleState(uuid, lifecycleChanger);
+                    }
+                } catch (IOException e) {
+                    String msg = "Error while downloading images of release.";
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg, e);
+                }
+            }
+        }
+    }
+
+    private static PublicAppWrapper generatePubAppWrapper(ItuneAppDTO product, List<Category> categories) {
+        PublicAppWrapper publicAppWrapper = new PublicAppWrapper();
+        publicAppWrapper.setName(product.getTitle());
+        publicAppWrapper.setDescription(product.getDescription());
+        publicAppWrapper.setCategories(
+                Collections.singletonList(Constants.ApplicationProperties.APPLE_STORE_SYNCED_APP_CATEGORY));//Default category
+        for (Category category : categories) {
+            if (product.getCategory() == null) {
+                List<String> pubAppCategories = new ArrayList<>();
+                pubAppCategories.add(Constants.ApplicationProperties.APPLE_STORE_SYNCED_APP_CATEGORY);
+                publicAppWrapper.setCategories(pubAppCategories);
+                break;
+            } else if (product.getCategory().equalsIgnoreCase(category.getCategoryName())) {
+                List<String> pubAppCategories = new ArrayList<>();
+                pubAppCategories.add(category.getCategoryName());
+                pubAppCategories.add(Constants.ApplicationProperties.APPLE_STORE_SYNCED_APP_CATEGORY);
+                publicAppWrapper.setCategories(pubAppCategories);
+                break;
+            }
+        }
+        if (product.getPaymentMethod().equalsIgnoreCase(Constants.ApplicationProperties.FREE_SUB_METHOD)) {
+            publicAppWrapper.setSubMethod(Constants.ApplicationProperties.FREE_SUB_METHOD);
+        } else {
+            publicAppWrapper.setSubMethod(Constants.ApplicationProperties.PAID_SUB_METHOD);
+        }
+        // TODO: purchase an app from app store and see how to capture the real value for price
+        // field.
+        publicAppWrapper.setPaymentCurrency("$");
+        publicAppWrapper.setDeviceType(DeviceManagementConstants.MobileDeviceTypes.MOBILE_DEVICE_TYPE_IOS);
+        return publicAppWrapper;
+    }
+
+    private static ApplicationUpdateWrapper generatePubAppUpdateWrapper(ItuneAppDTO product, List<Category> categories) {
+        ApplicationUpdateWrapper applicationUpdateWrapper = new ApplicationUpdateWrapper();
+        applicationUpdateWrapper.setName(product.getTitle());
+        applicationUpdateWrapper.setDescription(product.getDescription());
+        applicationUpdateWrapper.setCategories(
+                Collections.singletonList(Constants
+                        .ApplicationProperties.APPLE_STORE_SYNCED_APP_CATEGORY));//Default
+        // add the default APPLE_STORE_SYNCED_APP_CATEGORY
+        for (Category category : categories) {
+            if (product.getCategory() == null) {
+                List<String> pubAppCategories = new ArrayList<>();
+                pubAppCategories.add(Constants.ApplicationProperties.APPLE_STORE_SYNCED_APP_CATEGORY);
+                applicationUpdateWrapper.setCategories(pubAppCategories);
+                break;
+            } else if (product.getCategory().equalsIgnoreCase(category.getCategoryName())) {
+                List<String> pubAppCategories = new ArrayList<>();
+                pubAppCategories.add(category.getCategoryName());
+                pubAppCategories.add(Constants.ApplicationProperties.APPLE_STORE_SYNCED_APP_CATEGORY);
+                applicationUpdateWrapper.setCategories(pubAppCategories);
+                break;
+            }
+        }
+        if (product.getPaymentMethod().equalsIgnoreCase(Constants.ApplicationProperties.FREE_SUB_METHOD)) {
+            applicationUpdateWrapper.setSubMethod(Constants.ApplicationProperties.FREE_SUB_METHOD);
+        } else {
+            applicationUpdateWrapper.setSubMethod(Constants.ApplicationProperties.PAID_SUB_METHOD);
+        }
+        // TODO: purchase an app from Playstore and see how to capture the real value for price field.
+        applicationUpdateWrapper.setPaymentCurrency("$");
+        return applicationUpdateWrapper;
+    }
+
+    private static ApplicationArtifact generateArtifacts(ItuneAppDTO product) throws ApplicationManagementException {
+        ApplicationArtifact applicationArtifact = new ApplicationArtifact();
+        String prefix = product.getPackageName();
+        try {
+            String iconName = prefix + "_icon";
+            applicationArtifact.setIconName(iconName);
+            InputStream iconInputStream = getInputStream(iconName, product.getIconURL());
+            applicationArtifact.setIconStream(iconInputStream);
+            Map<String, InputStream> screenshotMap = new HashMap<>();
+            // TODO: look for a way to get screenshots
+
+            for (int a = 0; a < 3; a++) {
+                String screenshotName = product.getPackageName() + a;
+                InputStream screenshotInputStream = getInputStream(screenshotName, product.getIconURL());
+                screenshotMap.put(screenshotName, screenshotInputStream);
+            }
+
+            applicationArtifact.setScreenshots(screenshotMap);
+            return applicationArtifact;
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while generating Application artifact";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    private static InputStream getInputStream(String filename, String url) throws ApplicationManagementException {
+        URL website;
+        try {
+            website = new URL(url);
+        } catch (MalformedURLException e) {
+            String msg = "Error occurred while converting the url " + url;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }
+        ReadableByteChannel rbc = null;
+        FileOutputStream fos = null;
+        try {
+            rbc = Channels.newChannel(website.openStream());
+            fos = new FileOutputStream(System.getProperty("java.io.tmpdir")
+                    + File.separator + filename);
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        } catch (IOException e) {
+            String msg = "Error occurred while opening stream for url " + url;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            try {
+                fos.close();
+                rbc.close();
+            } catch (IOException e) {
+            }
+        }
+
+        File file = new File(System.getProperty("java.io.tmpdir") + File.separator + filename);
+        InputStream targetStream;
+        try {
+            targetStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            String msg = "Error occurred while reading the tmp file  " + System.getProperty("java.io.tmpdir")
+                    + File.separator + filename;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }
+        file.deleteOnExit();
+        return targetStream;
+    }
+
+    private static void updateImages(PublicAppReleaseWrapper appReleaseWrapper, String iconName,
+                                     InputStream iconStream, Map<String, InputStream>
+                                             screenshotsMaps) throws IOException {
+        List<Base64File> screenshots = new ArrayList<>();
+        Base64File iconFile = new Base64File(iconName,
+                convertStreamToBase64(iconStream));
+        appReleaseWrapper.setIcon(iconFile);
+        if (screenshotsMaps.size() > 0) {
+            for (Map.Entry<String, InputStream> screenshotEntry : screenshotsMaps.entrySet()) {
+                Base64File screenshot = new Base64File(screenshotEntry.getKey(),
+                        convertStreamToBase64(screenshotEntry.getValue()));
+                screenshots.add(screenshot);
+            }
+            appReleaseWrapper.setScreenshots(screenshots);
+        }
+    }
+
+    private static String convertStreamToBase64(InputStream inputStream) throws IOException {
+        final int bufLen = 4 * 0x400; // 4KB
+        byte[] buf = new byte[bufLen];
+        int readLen;
+
+        try {
+            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                while ((readLen = inputStream.read(buf, 0, bufLen)) != -1)
+                    outputStream.write(buf, 0, readLen);
+
+                return Base64.getEncoder().encodeToString(outputStream.toByteArray());
+            }
+        } catch (IOException e) {
+            String msg = "Error while converting image to base64";
+            log.error(msg);
+            throw e;
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+            }
+        }
+    }
+
+    public static List<Application> getAppDetails(String adamId) throws ApplicationManagementException {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        List<String> packageNamesOfApps = new ArrayList<>();
+        packageNamesOfApps.add(adamId);
+        return applicationManager.getApplications(packageNamesOfApps);
     }
 }
