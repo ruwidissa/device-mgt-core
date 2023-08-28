@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>certificate-mgt</artifactId>
-        <version>5.0.30-SNAPSHOT</version>
+        <version>5.0.30</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
