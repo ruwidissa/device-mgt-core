@@ -17,6 +17,9 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.push.notification.mgt.task;
 
+import io.entgra.device.mgt.core.device.mgt.common.ServerCtxInfo;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -63,9 +66,27 @@ public class PushNotificationSchedulerTask implements Runnable {
             try {
                 //Get next available operation list per device batch
                 OperationManagementDAOFactory.openConnection();
-                operationMappingsTenantMap = operationDAO.getOperationMappingsByStatus(Operation.Status
-                        .PENDING, Operation.PushNotificationStatus.SCHEDULED, DeviceConfigurationManager.getInstance()
-                        .getDeviceManagementConfig().getPushNotificationConfiguration().getSchedulerBatchSize());
+                try {
+                    if (DeviceManagementDataHolder.getInstance().getHeartBeatService().isTaskPartitioningEnabled()) {
+                        ServerCtxInfo serverCtxInfo = DeviceManagementDataHolder.getInstance().getHeartBeatService().getServerCtxInfo();
+                        if (serverCtxInfo != null) {
+                            operationMappingsTenantMap = operationDAO.getAllocatedOperationMappingsByStatus(Operation.Status
+                                            .PENDING, Operation.PushNotificationStatus.SCHEDULED, DeviceConfigurationManager.getInstance()
+                                            .getDeviceManagementConfig().getPushNotificationConfiguration().getSchedulerBatchSize(),
+                                    serverCtxInfo.getActiveServerCount(), serverCtxInfo.getLocalServerHashIdx());
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Active server information not recorded yet.");
+                            }
+                        }
+                    } else {
+                        operationMappingsTenantMap = operationDAO.getOperationMappingsByStatus(Operation.Status
+                                .PENDING, Operation.PushNotificationStatus.SCHEDULED, DeviceConfigurationManager.getInstance()
+                                .getDeviceManagementConfig().getPushNotificationConfiguration().getSchedulerBatchSize());
+                    }
+                } catch (HeartBeatManagementException e) {
+                    throw new RuntimeException(e);
+                }
             } catch (OperationManagementDAOException e) {
                 log.error("Unable to retrieve scheduled pending operations for task.", e);
             } finally {

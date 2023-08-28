@@ -70,6 +70,7 @@
                             !io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal,
                             io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.*
                         </Export-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

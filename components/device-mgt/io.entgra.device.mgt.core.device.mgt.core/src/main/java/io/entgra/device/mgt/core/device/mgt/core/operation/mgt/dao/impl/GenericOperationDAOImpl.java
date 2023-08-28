@@ -2010,6 +2010,54 @@ public class GenericOperationDAOImpl implements OperationDAO {
         return operationMappingsTenantMap;
     }
 
+    @Override
+    public Map<Integer, List<OperationMapping>> getAllocatedOperationMappingsByStatus(Operation.Status opStatus,
+        Operation.PushNotificationStatus pushNotificationStatus, int limit, int activeServerCount, int serverIndex)
+            throws OperationManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Connection conn;
+        OperationMapping operationMapping;
+        Map<Integer, List<OperationMapping>> operationMappingsTenantMap = new HashMap<>();
+        try {
+            conn = OperationManagementDAOFactory.getConnection();
+            String sql = "SELECT op.ENROLMENT_ID, op.OPERATION_ID, d.DEVICE_IDENTIFICATION, dt.NAME as DEVICE_TYPE, " +
+                    "d.TENANT_ID FROM DM_DEVICE d, DM_ENROLMENT_OP_MAPPING op, DM_DEVICE_TYPE dt  WHERE op.STATUS = ?" +
+                    " AND op.PUSH_NOTIFICATION_STATUS = ? AND d.DEVICE_TYPE_ID = dt.ID AND d.ID=op.ENROLMENT_ID AND MOD(d.ID, ?) = ? ORDER" +
+                    " BY op.OPERATION_ID LIMIT ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, opStatus.toString());
+            stmt.setString(2, pushNotificationStatus.toString());
+            stmt.setInt(3, activeServerCount);
+            stmt.setInt(4, serverIndex);
+            stmt.setInt(5, limit);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                int tenantID = rs.getInt("TENANT_ID");
+                List<OperationMapping> operationMappings = operationMappingsTenantMap.get(tenantID);
+                if (operationMappings == null) {
+                    operationMappings = new LinkedList<>();
+                    operationMappingsTenantMap.put(tenantID, operationMappings);
+                }
+                operationMapping = new OperationMapping();
+                operationMapping.setOperationId(rs.getInt("OPERATION_ID"));
+                DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
+                deviceIdentifier.setId(rs.getString("DEVICE_IDENTIFICATION"));
+                deviceIdentifier.setType(rs.getString("DEVICE_TYPE"));
+                operationMapping.setDeviceIdentifier(deviceIdentifier);
+                operationMapping.setEnrollmentId(rs.getInt("ENROLMENT_ID"));
+                operationMapping.setTenantId(tenantID);
+                operationMappings.add(operationMapping);
+            }
+        } catch (SQLException e) {
+            throw new OperationManagementDAOException("SQL error while getting operation mappings from database. " +
+                    e.getMessage(), e);
+        } finally {
+            OperationManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return operationMappingsTenantMap;
+    }
+
 
     public List<Activity> getActivities(List<String> deviceTypes, String operationCode, long updatedSince, String operationStatus)
             throws OperationManagementDAOException {
