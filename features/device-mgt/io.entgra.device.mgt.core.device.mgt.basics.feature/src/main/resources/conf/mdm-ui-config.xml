@@ -82,21 +82,6 @@
             <Type>default</Type>
         </DeviceInfoItem>
         <DeviceInfoItem>
-            <DefinedValue>FIRMWARE_VERSION</DefinedValue>
-            <DisplayValue>label_firmware_version</DisplayValue>
-            <Type>deviceDetailsMap</Type>
-        </DeviceInfoItem>
-        <DeviceInfoItem>
-            <DefinedValue>FIRMWARE_APP_VERSION</DefinedValue>
-            <DisplayValue>label_app_version</DisplayValue>
-            <Type>deviceDetailsMap</Type>
-        </DeviceInfoItem>
-        <DeviceInfoItem>
-            <DefinedValue>FIRMWARE_SYSTEM_VERSION</DefinedValue>
-            <DisplayValue>label_firmware_system_version</DisplayValue>
-            <Type>deviceDetailsMap</Type>
-        </DeviceInfoItem>
-        <DeviceInfoItem>
             <DefinedValue>batteryLevel</DefinedValue>
             <DisplayValue>label_battery_leve</DisplayValue>
             <Type>deviceInfo</Type>
