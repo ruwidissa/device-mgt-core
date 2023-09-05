@@ -838,9 +838,9 @@ public interface DeviceManagementService {
     Response getDeviceByIdList(List<String> deviceIds);
 
 
-    @PUT
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{type}/{id}")
+    @Path("/{type}/{id}/status")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
