@@ -513,8 +513,15 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 if (scopeObj.getString("name").equals(scopeMapping[2] != null ?
                                         StringUtils.trim(scopeMapping[2]) : StringUtils.EMPTY)) {
                                     scope.setId(scopeObj.getString("id"));
+
+//                                  Including already existing roles
+                                    JSONArray existingRolesArray = (JSONArray) scopeObj.get("bindings");
+                                    for (int j = 0; j < existingRolesArray.length(); j++) {
+                                        roleString = roleString + "," + existingRolesArray.get(j);
+                                    }
                                 }
                             }
+                            scope.setRoles(roleString);
 
                             if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getKey())) {
                                 publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);
