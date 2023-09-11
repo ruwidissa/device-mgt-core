@@ -23,6 +23,7 @@ import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.cache.LoginCache;
 import io.entgra.device.mgt.core.ui.request.interceptor.cache.OAuthApp;
 import io.entgra.device.mgt.core.ui.request.interceptor.cache.OAuthAppCacheKey;
+import io.entgra.device.mgt.core.ui.request.interceptor.exceptions.LoginException;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.lang.text.StrSubstitutor;
@@ -139,6 +140,8 @@ public class SsoLoginHandler extends HttpServlet {
             log.error("Error while creating the document builder.");
         } catch (SAXException e) {
             log.error("Error while parsing xml file.", e);
+        } catch (LoginException e) {
+            log.error("SSO Login is failed. Application: " + applicationName, e);
         }
     }
 
@@ -149,7 +152,7 @@ public class SsoLoginHandler extends HttpServlet {
      * @param req {@link HttpServletRequest}
      * @param resp {@link HttpServletResponse}
      */
-    private void dynamicClientRegistration(HttpServletRequest req, HttpServletResponse resp) {
+    private void dynamicClientRegistration(HttpServletRequest req, HttpServletResponse resp) throws LoginException {
         try {
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
@@ -165,10 +168,6 @@ public class SsoLoginHandler extends HttpServlet {
             apiRegEndpoint.setEntity(HandlerUtil.constructAppRegPayload(tags, applicationName, adminUsername, adminPassword));
 
             ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
-
-            if (clientAppResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-                HandlerUtil.handleError(resp, clientAppResponse);
-            }
 
             if (clientAppResponse.getCode() == HttpStatus.SC_CREATED) {
                 JsonParser jsonParser = new JsonParser();
@@ -188,71 +187,101 @@ public class SsoLoginHandler extends HttpServlet {
                 // cache the oauth app credentials
                 oAuthApp = new OAuthApp(applicationName, adminUsername, clientId, clientSecret, encodedClientApp);
                 loginCache.addOAuthAppToCache(oAuthAppCacheKey, oAuthApp);
+            } else if (clientAppResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
+                String msg = "Unauthorized attempt to register the client application. " +
+                        "Application Name: " + applicationName + ". Response message: " + clientAppResponse.getData();
+                log.error(msg);
+                HandlerUtil.handleError(resp, clientAppResponse);
+                throw new LoginException(msg);
+            } else {
+                String msg = "Failed the process while registering the client application. " +
+                        "Application Name: " + applicationName + ". Response Code: "
+                        + clientAppResponse.getCode() + ", Response message: " + clientAppResponse.getData();
+                log.error(msg);
+                HandlerUtil.handleError(resp, null);
+                throw new LoginException(msg);
             }
 
             // Get the details of the registered application
-            String getApplicationEndpointUrl = apiMgtUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT +
-                    "?query=" + applicationName;
-            HttpGet getApplicationEndpoint = new HttpGet(getApplicationEndpointUrl);
-            getApplicationEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER +
-                    getAccessToken(resp, encodedClientApp));
-
-            ProxyResponse getApplicationResponse = HandlerUtil.execute(getApplicationEndpoint);
-
-            if (getApplicationResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-                HandlerUtil.handleError(resp, getApplicationResponse);
-                return;
-            }
-
-            if (getApplicationResponse.getCode() == HttpStatus.SC_OK) {
-                JsonParser jsonParser = new JsonParser();
-                JsonElement jAppResult = jsonParser.parse(getApplicationResponse.getData());
-                if (jAppResult.isJsonObject()) {
-                    JsonObject jClientAppResultAsJsonObject = jAppResult.getAsJsonObject();
-                    JsonArray appList = jClientAppResultAsJsonObject.getAsJsonArray("list");
-                    JsonObject app;
-                    for (JsonElement appJson : appList) {
-                        app = appJson.getAsJsonObject();
-                        if (app.get("name").getAsString().equals(applicationName)) {
-                            applicationId = app.get("applicationId").getAsString();
-                            break;
-                        }
-                    }
-                }
-            }
+//            String getApplicationEndpointUrl = apiMgtUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT +
+//                    "?query=" + applicationName;
+//            HttpGet getApplicationEndpoint = new HttpGet(getApplicationEndpointUrl);
+//            getApplicationEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER +
+//                    getAccessToken(resp, encodedClientApp));
+//
+//            ProxyResponse getApplicationResponse = HandlerUtil.execute(getApplicationEndpoint);
+//
+//            if (getApplicationResponse.getCode() == HttpStatus.SC_OK) {
+//                JsonParser jsonParser = new JsonParser();
+//                JsonElement jAppResult = jsonParser.parse(getApplicationResponse.getData());
+//                if (jAppResult.isJsonObject()) {
+//                    JsonObject jClientAppResultAsJsonObject = jAppResult.getAsJsonObject();
+//                    JsonArray appList = jClientAppResultAsJsonObject.getAsJsonArray("list");
+//                    JsonObject app;
+//                    for (JsonElement appJson : appList) {
+//                        app = appJson.getAsJsonObject();
+//                        if (app.get("name").getAsString().equals(applicationName)) {
+//                            applicationId = app.get("applicationId").getAsString();
+//                            break;
+//                        }
+//                    }
+//                }
+//            } else if (getApplicationResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
+//                String msg = "Unauthorized attempt to get registered application data. " +
+//                        "Application Name: " + applicationName + ". Response message: " + clientAppResponse.getData();
+//                log.error(msg);
+//                HandlerUtil.handleError(resp, getApplicationResponse);
+//                throw new LoginException(msg);
+//            } else {
+//                String msg = "Failed the process while getting the data of registered application. " +
+//                        "Application Name: " + applicationName + ". Response Code: "
+//                        + clientAppResponse.getCode() + ", Response message: " + clientAppResponse.getData();
+//                log.error(msg);
+//                HandlerUtil.handleError(resp, null);
+//                throw new LoginException(msg);
+//            }
 
             // Update the grant types of the application
-            String url = apiMgtUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT + "/" + applicationId + "/keys/" +
-                    HandlerConstants.PRODUCTION_KEY;
-            HttpPut updateApplicationGrantTypesEndpoint = new HttpPut(url);
-            updateApplicationGrantTypesEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER +
-                    getAccessToken(resp, encodedClientApp));
-            updateApplicationGrantTypesEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
-            updateApplicationGrantTypesEndpoint.setEntity(constructAppGrantTypeUpdatePayload());
-
-            ProxyResponse updateApplicationGrantTypesEndpointResponse = HandlerUtil.execute(updateApplicationGrantTypesEndpoint);
-
-            // Update app as a SaaS app
-            this.updateSaasApp(applicationId);
-
-            if (updateApplicationGrantTypesEndpointResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-                HandlerUtil.handleError(resp, updateApplicationGrantTypesEndpointResponse);
-                return;
-            }
-
-            if (updateApplicationGrantTypesEndpointResponse.getCode() == HttpStatus.SC_OK) {
-                return;
-            }
-            HandlerUtil.handleError(resp, null);
+//            String url = apiMgtUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT + "/" + applicationId + "/keys/" +
+//                    HandlerConstants.PRODUCTION_KEY;
+//            HttpPut updateApplicationGrantTypesEndpoint = new HttpPut(url);
+//            updateApplicationGrantTypesEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER +
+//                    getAccessToken(resp, encodedClientApp));
+//            updateApplicationGrantTypesEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+//            updateApplicationGrantTypesEndpoint.setEntity(constructAppGrantTypeUpdatePayload());
+//
+//            ProxyResponse updateApplicationGrantTypesEndpointResponse = HandlerUtil.execute(updateApplicationGrantTypesEndpoint);
+//
+//            // Update app as a SaaS app
+//            this.updateSaasApp(applicationId);
+//
+//            if (updateApplicationGrantTypesEndpointResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
+//                String msg = "Unauthorized attempt to update the grant types of the application. " +
+//                        "Application ID: " + applicationId + ". Response message: "
+//                        + updateApplicationGrantTypesEndpointResponse.getData();
+//                log.error(msg);
+//                HandlerUtil.handleError(resp, updateApplicationGrantTypesEndpointResponse);
+//                throw new LoginException(msg);
+//            } else if (updateApplicationGrantTypesEndpointResponse.getCode() != HttpStatus.SC_OK) {
+//                String msg = "Failed the process while updating the grant types of the application. " +
+//                        "Application ID: " + applicationId + ". Response Code: "
+//                        + updateApplicationGrantTypesEndpointResponse.getCode() + ", Response message: "
+//                        + updateApplicationGrantTypesEndpointResponse.getData();
+//                log.error(msg);
+//                HandlerUtil.handleError(resp, null);
+//                throw new LoginException(msg);
+//            }
         } catch (IOException e) {
-            log.error("Error occurred while sending the response into the socket. ", e);
+            throw new LoginException("Error occurred while sending the response into the socket.", e);
         } catch (JsonSyntaxException e) {
-            log.error("Error occurred while parsing the response. ", e);
-        } catch (ParserConfigurationException e) {
-            log.error("Error while creating the document builder.");
-        } catch (SAXException e) {
-            log.error("Error while parsing xml file.", e);
+            throw new LoginException("Error occurred while parsing the response.", e);
         }
+//        catch (ParserConfigurationException e) {
+//            throw new LoginException("Error while creating the document builder.", e);
+//        }
+//        catch (SAXException e) {
+//            throw new LoginException("Error while parsing xml file.", e);
+//        }
     }
 
     /**

@@ -111,13 +111,13 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
     @Override
     public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
-                                                         String keyType,
-                                                         boolean isAllowedAllDomains,
-                                                         String validityTime, String accessToken) throws APIManagerException {
+                                                                             String keyType,
+                                                                             boolean isAllowedAllDomains,
+                                                                             String validityTime, String accessToken) throws APIManagerException {
         TokenInfo tokenInfo = new TokenInfo();
         tokenInfo.setApiApplicationInfo(null);
         tokenInfo.setAccessToken(accessToken);
-        return generateAndRetrieveApplicationKeys(applicationName, tags ,keyType, isAllowedAllDomains, validityTime, tokenInfo);
+        return generateAndRetrieveApplicationKeys(applicationName, tags, keyType, isAllowedAllDomains, validityTime, tokenInfo);
     }
 
     @Override
@@ -127,12 +127,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                                                                              String validityTime, String password)
             throws APIManagerException {
 
-
         ApiApplicationInfo applicationInfo = getApplicationInfo(username, password);
         TokenInfo tokenInfo = new TokenInfo();
         tokenInfo.setApiApplicationInfo(applicationInfo);
         tokenInfo.setAccessToken(null);
-        return generateAndRetrieveApplicationKeys(applicationName, tags, keyType,isAllowedAllDomains, validityTime, tokenInfo);
+        return generateAndRetrieveApplicationKeys(applicationName, tags, keyType, isAllowedAllDomains, validityTime, tokenInfo);
     }
 
     private ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
@@ -149,7 +148,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 headerParams.put("X-WSO2-Tenant", "carbon.super");
             }
 
-            Map <String, APIInfo> uniqueApiSet = new HashMap<>();
+            Map<String, APIInfo> uniqueApiSet = new HashMap<>();
             for (String tag : tags) {
                 Map<String, String> queryParams = new HashMap<>();
                 queryParams.put("tag", tag);
@@ -162,8 +161,6 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
                     consumerRESTAPIServices.getAllApplications(tokenInfo, applicationName);
-            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application;
-            MetadataManagementService metadataManagementService = APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
             if (applications.length == 0) {
                 return handleNewAPIApplication(applicationName, uniqueApiList, tokenInfo, keyType,
                         validityTime);
@@ -171,8 +168,10 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 if (applications.length == 1) {
                     Optional<io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application> applicationOpt =
                             Arrays.stream(applications).findFirst();
-                    application = applicationOpt.get();
+                    io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application =
+                            applicationOpt.get();
 
+                    MetadataManagementService metadataManagementService = APIApplicationManagerExtensionDataHolder.getInstance().getMetadataManagementService();
                     Metadata metaData = metadataManagementService.retrieveMetadata(applicationName);
                     if (metaData == null) {
                         // Todo add a comment
@@ -183,7 +182,10 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         for (Subscription subscription : subscriptions) {
                             uniqueApiList.removeIf(apiInfo -> Objects.equals(apiInfo.getId(), subscription.getApiInfo().getId()));
                         }
-                        addSubscriptions(application, uniqueApiList, tokenInfo);
+
+                        if (!uniqueApiList.isEmpty()) {
+                            addSubscriptions(application, uniqueApiList, tokenInfo);
+                        }
 
                         String[] metaValues = metaData.getMetaValue().split(":");
                         if (metaValues.length != 2) {
@@ -200,7 +202,6 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
                         return apiApplicationKey;
                     }
-
                 } else {
                     String msg = "Found more than one application for application name: " + applicationName;
                     log.error(msg);
@@ -250,11 +251,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 throw new APIManagerException(msg);
             }
 
-            ApiApplicationInfo applicationInfo = getApplicationInfo(null, null);
-            tokenInfo.setApiApplicationInfo(applicationInfo);
-
-            ApplicationKey applicationKey = consumerRESTAPIServices.mapApplicationKeys(tokenInfo, application,
-                    keyManager.getName(), keyType);
+            tokenInfo.setApiApplicationInfo(getApplicationInfo(null, null));
+//            ApplicationKey applicationKey = consumerRESTAPIServices.mapApplicationKeys(tokenInfo, application,
+//                    keyManager.getName(), keyType);
+            ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(tokenInfo, application.getApplicationId(),
+                    keyManager.getName(), validityTime, keyType);
 
             ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
             apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
@@ -294,16 +295,14 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
     }
 
     /**
-     *
      * This method can be used to add a new subscriptions providing the ids of the APIs and the applications.
      *
      * @param application {@link io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application}
-     * @param apiInfos {@link List<APIInfo>}
-     * @param tokenInfo {@link TokenInfo}
-     *
-     * @throws BadRequestException if incorrect data provided to call subscribing REST API.
+     * @param apiInfos    {@link List<APIInfo>}
+     * @param tokenInfo   {@link TokenInfo}
+     * @throws BadRequestException         if incorrect data provided to call subscribing REST API.
      * @throws UnexpectedResponseException if error occurred while processing the subscribing REST API.
-     * @throws APIServicesException if error occurred while invoking the subscribing REST API.
+     * @throws APIServicesException        if error occurred while invoking the subscribing REST API.
      */
     private void addSubscriptions(
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application,
@@ -323,7 +322,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             subscriptionList.add(subscription);
         });
 
-            consumerRESTAPIServices.createSubscriptions(tokenInfo, subscriptionList);
+        consumerRESTAPIServices.createSubscriptions(tokenInfo, subscriptionList);
     }
 
 //    /**
@@ -557,7 +556,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
     @Override
     public AccessTokenInfo getAccessToken(String scopes, String[] tags, String applicationName, String tokenType,
-            String validityPeriod, String username) throws APIManagerException {
+                                          String validityPeriod, String username) throws APIManagerException {
         try {
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
             ApiApplicationKey clientCredentials = getClientCredentials(tenantDomain, tags, applicationName, tokenType,
@@ -605,17 +604,17 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
     /**
      * Get Client credentials of application belongs to tenant admin
      *
-     * @param tenantDomain Tenant Domain
-     * @param tags Tags
+     * @param tenantDomain    Tenant Domain
+     * @param tags            Tags
      * @param applicationName Application Name
-     * @param tokenType Token Type
-     * @param validityPeriod Validity Period
+     * @param tokenType       Token Type
+     * @param validityPeriod  Validity Period
      * @return {@link ApiApplicationKey}
      * @throws APIManagerException if error occurred while generating access token
-     * @throws UserStoreException if error occurred while getting admin username.
+     * @throws UserStoreException  if error occurred while getting admin username.
      */
     private ApiApplicationKey getClientCredentials(String tenantDomain, String[] tags, String applicationName,
-            String tokenType, String validityPeriod) throws APIManagerException, UserStoreException {
+                                                   String tokenType, String validityPeriod) throws APIManagerException, UserStoreException {
 
         APIRegistrationProfile registrationProfile = new APIRegistrationProfile();
         registrationProfile.setAllowedToAllDomains(false);
