@@ -652,6 +652,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         Map<String, DeviceManager> deviceManagerMap = new HashMap<>();
         List<DeviceCacheKey> deviceCacheKeyList = new ArrayList<>();
         List<Device> existingDevices;
+        List<Device> validDevices = new ArrayList<>();;
         int tenantId = this.getTenantId();
 
         try {
@@ -684,6 +685,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             deviceCacheKey.setDeviceType(device.getType());
             deviceCacheKey.setTenantId(tenantId);
             deviceCacheKeyList.add(deviceCacheKey);
+            validDevices.add(device);
             deviceIds.add(device.getId());
             validDeviceIdentifiers.add(device.getDeviceIdentifier());
             enrollmentIds.add(device.getEnrolmentInfo().getId());
@@ -713,7 +715,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         try {
             DeviceManagementDAOFactory.beginTransaction();
             //deleting device from the core
-            deviceDAO.deleteDevices(validDeviceIdentifiers, new ArrayList<>(deviceIds), enrollmentIds);
+            deviceDAO.deleteDevices(validDeviceIdentifiers, new ArrayList<>(deviceIds), enrollmentIds, validDevices);
             for (Map.Entry<String, DeviceManager> entry : deviceManagerMap.entrySet()) {
                 try {
                     // deleting device from the plugin level
@@ -1057,19 +1059,23 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             device.setDeviceStatusInfo(getDeviceStatusHistory(device, null, endDate, true));
                             List<DeviceStatus> deviceStatus = device.getDeviceStatusInfo();
                             if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
-                                if (!deviceStatus.isEmpty() && String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")) {
+                                if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                                        || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
                                     if (deviceStatus.get(0).getUpdateTime().getTime() >= startDate.getTime()) {
                                         dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - startDate.getTime();
                                     }
-                                } else if (!deviceStatus.isEmpty() && !String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")) {
+                                } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                                        && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
                                     dateDiff = endDate.getTime() - startDate.getTime();
                                 }
                             } else {
-                                if (!deviceStatus.isEmpty() && String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")) {
+                                if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                                        || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
                                     if (deviceStatus.get(0).getUpdateTime().getTime() >= device.getEnrolmentInfo().getDateOfEnrolment()) {
                                         dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
                                     }
-                                } else if (!deviceStatus.isEmpty() && !String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")) {
+                                } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                                        && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
                                     dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
                                 }
                             }
