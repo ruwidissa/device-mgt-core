@@ -2233,6 +2233,9 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 }
                 sql.append("?) ");
             }
+            if (activityPaginationRequest.getOperationId() > 0) {
+                sql.append("AND OPERATION_ID = ? ");
+            }
             if (activityPaginationRequest.getOperationCode() != null) {
                 sql.append("AND OPERATION_CODE = ? ");
             }
@@ -2269,6 +2272,9 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getOperationCode() != null) {
                 sql.append("AND eom.OPERATION_CODE = ? ");
             }
+            if (activityPaginationRequest.getOperationId() > 0) {
+                sql.append("AND eom.OPERATION_ID = ? ");
+            }
             if (activityPaginationRequest.getInitiatedBy() != null) {
                 sql.append("AND eom.INITIATED_BY = ? ");
             }
@@ -2301,6 +2307,9 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (activityPaginationRequest.getOperationCode() != null) {
                     stmt.setString(index++, activityPaginationRequest.getOperationCode());
                 }
+                if (activityPaginationRequest.getOperationId() > 0) {
+                    stmt.setInt(index++, activityPaginationRequest.getOperationId());
+                }
                 if (activityPaginationRequest.getInitiatedBy() != null) {
                     stmt.setString(index++, activityPaginationRequest.getInitiatedBy());
                 }
@@ -2332,6 +2341,9 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 }
                 if (activityPaginationRequest.getOperationCode() != null) {
                     stmt.setString(index++, activityPaginationRequest.getOperationCode());
+                }
+                if (activityPaginationRequest.getOperationId() > 0) {
+                    stmt.setInt(index++, activityPaginationRequest.getOperationId());
                 }
                 if (activityPaginationRequest.getInitiatedBy() != null) {
                     stmt.setString(index++, activityPaginationRequest.getInitiatedBy());
@@ -2390,6 +2402,9 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getOperationCode() != null) {
                 sql.append("AND OPERATION_CODE = ? ");
             }
+            if (activityPaginationRequest.getOperationId() > 0) {
+                sql.append("AND OPERATION_ID = ? ");
+            }
             if (activityPaginationRequest.getInitiatedBy() != null) {
                 sql.append("AND INITIATED_BY = ? ");
             }
@@ -2420,6 +2435,9 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 }
                 if (activityPaginationRequest.getOperationCode() != null) {
                     stmt.setString(index++, activityPaginationRequest.getOperationCode());
+                }
+                if (activityPaginationRequest.getOperationId() > 0) {
+                    stmt.setInt(index++, activityPaginationRequest.getOperationId());
                 }
                 if (activityPaginationRequest.getInitiatedBy() != null) {
                     stmt.setString(index++, activityPaginationRequest.getInitiatedBy());

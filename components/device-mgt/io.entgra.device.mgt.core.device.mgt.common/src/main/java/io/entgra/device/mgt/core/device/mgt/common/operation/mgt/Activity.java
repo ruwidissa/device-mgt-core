@@ -50,6 +50,14 @@ public class Activity {
     private String code;
 
     @ApiModelProperty(
+            name = "operationId",
+            value = "Operation Id",
+            required = false,
+            example = "10")
+    @JsonProperty("operationId")
+    private int operationId;
+
+    @ApiModelProperty(
             name = "type",
             value = "Activity type",
             required = true,
@@ -120,6 +128,14 @@ public class Activity {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public int getOperationId() {
+        return operationId;
+    }
+
+    public void setOperationId(int operationId) {
+        this.operationId = operationId;
     }
 
     public Type getType() {
