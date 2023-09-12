@@ -38,23 +38,24 @@ import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherC
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiUriTemplate;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiUriTemplate;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantSearchResult;
@@ -454,6 +455,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             log.error(errorMsg, e);
             throw new APIManagerPublisherException(e);
         }
+        UserStoreManager userStoreManager;
 
         try {
             for (String tenantDomain : tenants) {
@@ -466,20 +468,40 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     String fileName =
                             CarbonUtils.getCarbonConfigDirPath() + File.separator + "etc"
                                     + File.separator + tenantDomain + ".csv";
+                    try {
+                        userStoreManager = APIPublisherDataHolder.getInstance().getUserStoreManager();
+                    } catch (UserStoreException e) {
+                        log.error("Unable to retrieve user store manager for tenant: " + tenantDomain);
+                        return;
+                    }
                     if (Files.exists(Paths.get(fileName))) {
                         BufferedReader br = new BufferedReader(new FileReader(fileName));
                         int lineNumber = 0;
                         Map<Integer, String> roles = new HashMap<>();
-                        String line = "";
+                        Map<String, List<String>> rolePermissions = new HashMap<>();
+                        String line;
                         String splitBy = ",";
-                        while ((line = br.readLine()) != null)   //returns a Boolean value
-                        {
+                        while ((line = br.readLine()) != null) {  //returns a Boolean value
                             lineNumber++;
                             String[] scopeMapping = line.split(splitBy);    // use comma as separator
+                            String role;
                             if (lineNumber == 1) { // skip titles
-                                for (int i = 0; i < scopeMapping.length; i++) {
-                                    if (i > 3) {
-                                        roles.put(i, scopeMapping[i]); // add roles to the map
+                                for (int i = 4; i < scopeMapping.length; i++) {
+                                    role = scopeMapping[i];
+                                    roles.put(i, role); // add roles to the map
+                                    if (!"admin".equals(role)) {
+                                        try {
+                                            if (!userStoreManager.isExistingRole(role)) {
+                                                try {
+                                                    addRole(role);
+                                                } catch (UserStoreException e) {
+                                                    log.error("Error occurred when adding new role: " + role, e);
+                                                }
+                                            }
+                                        } catch (UserStoreException e) {
+                                            log.error("Error occurred when checking the existence of role: " + role, e);
+                                        }
+                                        rolePermissions.put(role, new ArrayList<>());
                                     }
                                 }
                                 continue;
@@ -494,11 +516,15 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     scopeMapping[2] != null ? StringUtils.trim(scopeMapping[2]) : StringUtils.EMPTY);
                             //                        scope.setPermissions(
                             //                                scopeMapping[3] != null ? StringUtils.trim(scopeMapping[3]) : StringUtils.EMPTY);
+                            String permission = scopeMapping[3] != null ? StringUtils.trim(scopeMapping[3]) : StringUtils.EMPTY;
 
                             String roleString = "";
                             for (int i = 4; i < scopeMapping.length; i++) {
                                 if (scopeMapping[i] != null && StringUtils.trim(scopeMapping[i]).equals("Yes")) {
                                     roleString = roleString + "," + roles.get(i);
+                                    if (rolePermissions.containsKey(roles.get(i)) && StringUtils.isNotEmpty(permission)) {
+                                        rolePermissions.get(roles.get(i)).add(permission);
+                                    }
                                 }
                             }
                             if (roleString.length() > 1) {
@@ -532,6 +558,13 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 }
                             }
                         }
+                        for (String role : rolePermissions.keySet()) {
+                            try {
+                                updatePermissions(role, rolePermissions.get(role));
+                            } catch (UserStoreException e) {
+                                log.error("Error occurred when adding permissions to role: " + role, e);
+                            }
+                        }
                     }
                 } catch (IOException | DirectoryIteratorException ex) {
                     log.error("failed to read scopes from file.", ex);
@@ -558,6 +591,28 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         }finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    private void updatePermissions(String role, List<String> permissions) throws UserStoreException {
+        AuthorizationManager authorizationManager = APIPublisherDataHolder.getInstance().getUserRealm()
+                .getAuthorizationManager();
+        if (log.isDebugEnabled()) {
+            log.debug("Updating the role '" + role + "'");
+        }
+        if (permissions != null && !permissions.isEmpty()) {
+            authorizationManager.clearRoleAuthorization(role);
+            for (String permission : permissions) {
+                authorizationManager.authorizeRole(role, permission, CarbonConstants.UI_PERMISSION_ACTION);
+            }
+        }
+    }
+
+    private void addRole(String role) throws UserStoreException {
+        UserStoreManager userStoreManager = APIPublisherDataHolder.getInstance().getUserStoreManager();
+        if (log.isDebugEnabled()) {
+            log.debug("Persisting the role " + role + " in the underlying user store");
+        }
+        userStoreManager.addRole(role, new String[]{"admin"}, new Permission[0]);
     }
 
     private APIInfo getAPI(APIConfig config, boolean includeScopes) {

@@ -187,6 +187,7 @@
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.util,
                             org.wso2.carbon.base;version="1.0",
                             org.wso2.carbon.context;version="4.6",
+                            org.wso2.carbon;version="4.6",
                             org.wso2.carbon.core;version="4.6",
                             org.wso2.carbon.core.util;version="4.6",
                             org.wso2.carbon.registry.core.service;version="1.0",
@@ -195,7 +196,6 @@
                             org.wso2.carbon.user.core.tenant;version="4.6",
                             org.wso2.carbon.utils;version="4.6",
                             org.wso2.carbon.utils.multitenancy;version="4.6",
-                            org.wso2.carbon.apimgt.impl.definitions,
                             org.apache.commons.lang,
                             org.json
                         </Import-Package>
