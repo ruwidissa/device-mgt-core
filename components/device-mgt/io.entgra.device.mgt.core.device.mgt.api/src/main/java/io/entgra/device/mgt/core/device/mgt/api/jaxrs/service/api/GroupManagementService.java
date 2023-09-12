@@ -355,6 +355,52 @@ public interface GroupManagementService {
             @QueryParam("limit")
                     int limit);
 
+    @Path("/hierarchy/count")
+    @GET
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HTTPConstants.HEADER_GET,
+            value = "Getting the Number of Hirarchical Device Groups",
+            notes = "Get the number of hierarchical device groups in the server that the current signed in user can access.",
+            tags = "Device Group Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:count")
+                    })
+            },
+            nickname = "getGroupCountNonAdmin"
+
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the hierarchical device group count.",
+                    response = DeviceGroupList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource has been modified the last time.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client has already the latest version of " +
+                            "the requested resource."),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the group count.",
+                    response = ErrorResponse.class)
+    })
+    Response getHierarchicalGroupCount();
+
     @Path("/count")
     @GET
     @ApiOperation(

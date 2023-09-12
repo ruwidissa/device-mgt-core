@@ -178,6 +178,8 @@ public class Constants {
         public static final String DEVICE_TYPE_ANDROID = "android";
         public static final String COLON = ":";
         public static final String IOT_CORE_HOST = "iot.core.host";
+
+        public static final String IOT_GATEWAY_HOST = "iot.gateway.host";
         public static final String IOT_CORE_PORT = "iot.core.https.port";
         public static final String ENROLLMENT_APP_INSTALL_PROTOCOL = "https://";
         public static final String GOOGLE_APP_INSTALL_URL = "/api/device-mgt/android/v1.0/enterprise/change-app";
