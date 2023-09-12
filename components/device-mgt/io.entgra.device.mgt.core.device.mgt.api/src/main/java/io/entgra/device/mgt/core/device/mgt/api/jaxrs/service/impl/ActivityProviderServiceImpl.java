@@ -253,6 +253,7 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                                   @QueryParam("since") String since,
                                   @QueryParam("initiatedBy") String initiatedBy,
                                   @QueryParam("operationCode") String operationCode,
+                                  @QueryParam("operationId") int operationId,
                                   @QueryParam("deviceType") String deviceType,
                                   @QueryParam("deviceId") List<String> deviceIds,
                                   @QueryParam("type") String type,
@@ -320,6 +321,9 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                 }
                 if (operationCode != null && !operationCode.isEmpty()) {
                     activityPaginationRequest.setOperationCode(operationCode);
+                }
+                if (operationId > 0) {
+                    activityPaginationRequest.setOperationId(operationId);
                 }
                 if (deviceType != null && !deviceType.isEmpty()) {
                     activityPaginationRequest.setDeviceType(deviceType);
