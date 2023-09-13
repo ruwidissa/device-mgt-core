@@ -1034,26 +1034,27 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
      * @return Whether status is changed or not
      * @throws DeviceManagementException on errors while trying to calculate Cost
      */
-    public BillingResponse calculateCost(String tenantDomain, Timestamp startDate, Timestamp endDate, List<Device> allDevices) throws MetadataManagementDAOException, DeviceManagementException {
+    public BillingResponse calculateUsage(String tenantDomain, Timestamp startDate, Timestamp endDate, List<Device> allDevices) throws MetadataManagementDAOException, DeviceManagementException {
 
+        // All code related to cost calculation has being commented out to comply with the current requirements
         BillingResponse billingResponse = new BillingResponse();
         List<Device> deviceStatusNotAvailable = new ArrayList<>();
-        double totalCost = 0.0;
+//        double totalCost = 0.0;
 
         try {
-            MetadataManagementService meta = DeviceManagementDataHolder
-                    .getInstance().getMetadataManagementService();
-            Metadata metadata = meta.retrieveMetadata(DeviceManagementConstants.META_KEY);
-
-            Gson g = new Gson();
-            Collection<Cost> costData = null;
-
-            Type collectionType = new TypeToken<Collection<Cost>>() {
-            }.getType();
-            if (metadata != null) {
-                costData = g.fromJson(metadata.getMetaValue(), collectionType);
-                for (Cost tenantCost : costData) {
-                    if (tenantCost.getTenantDomain().equals(tenantDomain)) {
+//            MetadataManagementService meta = DeviceManagementDataHolder
+//                    .getInstance().getMetadataManagementService();
+//            Metadata metadata = meta.retrieveMetadata(DeviceManagementConstants.META_KEY);
+//
+//            Gson g = new Gson();
+//            Collection<Cost> costData = null;
+//
+//            Type collectionType = new TypeToken<Collection<Cost>>() {
+//            }.getType();
+//            if (metadata != null) {
+//                costData = g.fromJson(metadata.getMetaValue(), collectionType);
+//                for (Cost tenantCost : costData) {
+//                    if (tenantCost.getTenantDomain().equals(tenantDomain)) {
                         for (Device device : allDevices) {
                             long dateDiff = 0;
                             device.setDeviceStatusInfo(getDeviceStatusHistory(device, null, endDate, true));
@@ -1088,9 +1089,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             }
 
                             long dateInDays = (long) dateDiffInDays;
-                            double cost = (tenantCost.getCost() / 365) * dateInDays;
-                            totalCost += cost;
-                            device.setCost(Math.round(cost * 100.0) / 100.0);
+//                            double cost = (tenantCost.getCost() / 365) * dateInDays;
+//                            totalCost += cost;
+//                            device.setCost(Math.round(cost * 100.0) / 100.0);
                             long totalDays = dateInDays + device.getDaysUsed();
                             device.setDaysUsed((int) totalDays);
                             if (deviceStatus.isEmpty()) {
@@ -1098,15 +1099,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             }
                         }
 
-                    }
-                }
-            }
+//                    }
+//                }
+//            }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred calculating cost of devices";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (MetadataManagementException e) {
-            String msg = "Error when retrieving metadata of billing feature";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
@@ -1125,7 +1122,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         billingResponse.setStartDate(startDate.toString());
         billingResponse.setEndDate(endDate.toString());
         billingResponse.setBillPeriod(calStart.get(Calendar.YEAR) + " - " + calEnd.get(Calendar.YEAR));
-        billingResponse.setTotalCostPerYear(Math.round(totalCost * 100.0) / 100.0);
+//        billingResponse.setTotalCostPerYear(Math.round(totalCost * 100.0) / 100.0);
         billingResponse.setDeviceCount(allDevices.size());
 
         return billingResponse;
@@ -1134,6 +1131,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     @Override
     public PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate) throws DeviceManagementException {
 
+        // All code related to cost calculation has being commented out to comply with the current requirements
         PaginationResult paginationResult = new PaginationResult();
         List<Device> allDevices = new ArrayList<>();
         List<BillingResponse> billingResponseList = new ArrayList<>();
@@ -1192,10 +1190,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     // The query returns devices which are enrolled prior this year now in removed state
                     allDevicesPerYear.addAll(deviceDAO.getRemovedPriorYearsDeviceList(tenantId, newStartDate, newEndDate));
 
-                    BillingResponse billingResponse = calculateCost(tenantDomain, newStartDate, newEndDate, allDevicesPerYear);
+                    BillingResponse billingResponse = calculateUsage(tenantDomain, newStartDate, newEndDate, allDevicesPerYear);
                     billingResponseList.add(billingResponse);
                     allDevices.addAll(billingResponse.getDevice());
-                    totalCost = totalCost + billingResponse.getTotalCostPerYear();
+//                    totalCost = totalCost + billingResponse.getTotalCostPerYear();
                     deviceCount = deviceCount + billingResponse.getDeviceCount();
                     LocalDateTime nextStartDate = oneYearAfterStart.plusDays(1).with(LocalTime.of(00, 00, 00));
                     startDate = Timestamp.valueOf(nextStartDate);
@@ -1216,10 +1214,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     // The query returns devices which are enrolled prior this year now in removed state
                     allDevicesPerRemainingDays.addAll(deviceDAO.getRemovedPriorYearsDeviceList(tenantId, startDate, endDate));
 
-                    BillingResponse billingResponse = calculateCost(tenantDomain, startDate, endDate, allDevicesPerRemainingDays);
+                    BillingResponse billingResponse = calculateUsage(tenantDomain, startDate, endDate, allDevicesPerRemainingDays);
                     billingResponseList.add(billingResponse);
                     allDevices.addAll(billingResponse.getDevice());
-                    totalCost = totalCost + billingResponse.getTotalCostPerYear();
+//                    totalCost = totalCost + billingResponse.getTotalCostPerYear();
                     deviceCount = deviceCount + billingResponse.getDeviceCount();
                 }
 
@@ -1231,7 +1229,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 BillingResponse billingResponse = new BillingResponse("all", Math.round(totalCost * 100.0) / 100.0, allDevices, calStart.get(Calendar.YEAR) + " - " + calEnd.get(Calendar.YEAR), initialStartDate.toString(), endDate.toString(), allDevices.size());
                 billingResponseList.add(billingResponse);
                 paginationResult.setData(billingResponseList);
-                paginationResult.setTotalCost(Math.round(totalCost * 100.0) / 100.0);
+//                paginationResult.setTotalCost(Math.round(totalCost * 100.0) / 100.0);
                 paginationResult.setTotalDeviceCount(deviceCount);
                 BillingCacheManagerImpl.getInstance().addBillingToCache(paginationResult, tenantDomain, initialStartDate, endDate);
                 return paginationResult;
