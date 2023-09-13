@@ -728,6 +728,75 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
     }
 
     @Override
+    public ApplicationKey updateGrantType(TokenInfo tokenInfo, String applicationId, String keyMapId, String keyManager,
+                                          String supportedGrantTypes, String callbackUrl)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+
+        ApiApplicationInfo apiApplicationInfo = tokenInfo.getApiApplicationInfo();
+        boolean token = isTokenNull(apiApplicationInfo, tokenInfo.getAccessToken());
+        String getKeyDetails = endPointPrefix + Constants.APPLICATIONS_API + Constants.SLASH + applicationId + "/oauth-keys/" + keyMapId;
+
+        Request.Builder builder = new Request.Builder();
+        builder.url(getKeyDetails);
+        if (!token) {
+            builder.addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                    + apiApplicationInfo.getAccess_token());
+        } else {
+            builder.addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                    + tokenInfo.getAccessToken());
+        }
+
+        String payload = "{\n" +
+                "    \"keyMappingId\": \"" + keyMapId + "\",\n" +
+                "    \"keyManager\": \"" + keyManager + "\",\n" +
+                "    \"supportedGrantTypes\": [\n" +
+                "      \"" + supportedGrantTypes + "\"\n" +
+                "    ],\n" +
+                "    \"callbackUrl\": \"" + callbackUrl + "\",\n" +
+                "    \"additionalProperties\": {}\n" +
+                "}";
+        RequestBody requestBody = RequestBody.create(JSON, payload);
+
+        builder.put(requestBody);
+        Request request = builder.build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                return gson.fromJson(response.body().string(), ApplicationKey.class);
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                if (!token) {
+                    APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                    AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                            generateAccessTokenFromRefreshToken(apiApplicationInfo.getRefresh_token(),
+                                    apiApplicationInfo.getClientId(), apiApplicationInfo.getClientSecret());
+                    ApiApplicationInfo refreshedApiApplicationInfo = returnApplicationInfo(apiApplicationInfo, refreshedAccessToken);
+                    //TODO: max attempt count
+                    TokenInfo refreshedTokenInfo = new TokenInfo();
+                    refreshedTokenInfo.setApiApplicationInfo(refreshedApiApplicationInfo);
+                    refreshedTokenInfo.setAccessToken(null);
+                    return updateGrantType(refreshedTokenInfo, applicationId, keyMapId, keyManager, supportedGrantTypes, callbackUrl);
+                } else {
+                    String msg = "Invalid access token. Unauthorized request";
+                    log.error(msg);
+                    throw new APIServicesException(msg);
+                }
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid request";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(msg, e);
+        }
+    }
+
+    @Override
     public KeyManager[] getAllKeyManagers(TokenInfo tokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
