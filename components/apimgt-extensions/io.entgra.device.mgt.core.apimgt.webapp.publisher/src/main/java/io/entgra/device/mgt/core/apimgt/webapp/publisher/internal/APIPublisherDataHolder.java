@@ -19,7 +19,12 @@ package io.entgra.device.mgt.core.apimgt.webapp.publisher.internal;
 
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIConfig;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -77,6 +82,25 @@ public class APIPublisherDataHolder {
         this.realmService = realmService;
         setTenantManager(realmService != null ?
                 realmService.getTenantManager() : null);
+    }
+
+    public UserStoreManager getUserStoreManager() throws UserStoreException {
+        if (realmService == null) {
+            String msg = "Realm service has not initialized.";
+            throw new IllegalStateException(msg);
+        }
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        return realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+    }
+
+    public UserRealm getUserRealm() throws UserStoreException {
+        UserRealm realm;
+        if (realmService == null) {
+            throw new IllegalStateException("Realm service not initialized");
+        }
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        realm = realmService.getTenantUserRealm(tenantId);
+        return realm;
     }
 
     private void setTenantManager(TenantManager tenantManager) {

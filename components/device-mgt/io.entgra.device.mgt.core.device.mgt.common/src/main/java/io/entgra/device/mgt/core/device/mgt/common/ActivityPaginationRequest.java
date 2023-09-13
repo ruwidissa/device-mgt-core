@@ -32,6 +32,7 @@ public class ActivityPaginationRequest {
     private String deviceType;
     private List<String> deviceIds;
     private String operationCode;
+    private int operationId;
     private String initiatedBy;
     private long since;
     private Operation.Type type;
@@ -131,5 +132,13 @@ public class ActivityPaginationRequest {
 
     public void setEndTimestamp(long endTimestamp) {
         this.endTimestamp = endTimestamp;
+    }
+
+    public int getOperationId() {
+        return operationId;
+    }
+
+    public void setOperationId(int operationId) {
+        this.operationId = operationId;
     }
 }

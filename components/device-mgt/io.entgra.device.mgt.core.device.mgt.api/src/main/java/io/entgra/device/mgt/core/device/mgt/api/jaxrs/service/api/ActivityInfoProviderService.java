@@ -467,6 +467,11 @@ public interface ActivityInfoProviderService {
             )
             @QueryParam("operationCode") String operationCode,
             @ApiParam(
+                    name = "operationId",
+                    value = "Operation Id to filter"
+            )
+            @QueryParam("operationId") int operationId,
+            @ApiParam(
                     name = "deviceType",
                     value = "Device Type to filter"
             )
