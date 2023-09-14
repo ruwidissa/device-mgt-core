@@ -248,7 +248,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
                 devices.setList((List<Device>) result.getData());
                 devices.setDeviceCount(result.getTotalDeviceCount());
                 devices.setMessage(result.getMessage());
-//                devices.setTotalCost(result.getTotalCost());
+                devices.setTotalCost(result.getTotalCost());
                 devices.setBillPeriod(startDate.toString() + " - " + endDate.toString());
                 return Response.status(Response.Status.OK).entity(devices).build();
             }

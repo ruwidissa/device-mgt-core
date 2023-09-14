@@ -1036,74 +1036,37 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
      */
     public BillingResponse calculateUsage(String tenantDomain, Timestamp startDate, Timestamp endDate, List<Device> allDevices) throws MetadataManagementDAOException, DeviceManagementException {
 
-        // All code related to cost calculation has being commented out to comply with the current requirements
         BillingResponse billingResponse = new BillingResponse();
         List<Device> deviceStatusNotAvailable = new ArrayList<>();
-//        double totalCost = 0.0;
+        double totalCost = 0.0;
 
         try {
-//            MetadataManagementService meta = DeviceManagementDataHolder
-//                    .getInstance().getMetadataManagementService();
-//            Metadata metadata = meta.retrieveMetadata(DeviceManagementConstants.META_KEY);
-//
-//            Gson g = new Gson();
-//            Collection<Cost> costData = null;
-//
-//            Type collectionType = new TypeToken<Collection<Cost>>() {
-//            }.getType();
-//            if (metadata != null) {
-//                costData = g.fromJson(metadata.getMetaValue(), collectionType);
-//                for (Cost tenantCost : costData) {
-//                    if (tenantCost.getTenantDomain().equals(tenantDomain)) {
-                        for (Device device : allDevices) {
-                            long dateDiff = 0;
-                            device.setDeviceStatusInfo(getDeviceStatusHistory(device, null, endDate, true));
-                            List<DeviceStatus> deviceStatus = device.getDeviceStatusInfo();
-                            if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
-                                if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                                        || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                                    if (deviceStatus.get(0).getUpdateTime().getTime() >= startDate.getTime()) {
-                                        dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - startDate.getTime();
-                                    }
-                                } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                                        && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                                    dateDiff = endDate.getTime() - startDate.getTime();
-                                }
-                            } else {
-                                if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                                        || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                                    if (deviceStatus.get(0).getUpdateTime().getTime() >= device.getEnrolmentInfo().getDateOfEnrolment()) {
-                                        dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
-                                    }
-                                } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                                        && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                                    dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
-                                }
-                            }
+            MetadataManagementService meta = DeviceManagementDataHolder
+                    .getInstance().getMetadataManagementService();
+            Metadata metadata = meta.retrieveMetadata(DeviceManagementConstants.META_KEY);
 
-                            // Convert dateDiff to days as a decimal value
-                            double dateDiffInDays = (double) dateDiff / (24 * 60 * 60 * 1000);
+            Gson g = new Gson();
+            Collection<Cost> costData = null;
+            int tenantIdContext = CarbonContext.getThreadLocalCarbonContext().getTenantId();
 
-                            if (dateDiffInDays % 1 >= 0.9) {
-                                dateDiffInDays = Math.ceil(dateDiffInDays);
-                            }
-
-                            long dateInDays = (long) dateDiffInDays;
-//                            double cost = (tenantCost.getCost() / 365) * dateInDays;
-//                            totalCost += cost;
-//                            device.setCost(Math.round(cost * 100.0) / 100.0);
-                            long totalDays = dateInDays + device.getDaysUsed();
-                            device.setDaysUsed((int) totalDays);
-                            if (deviceStatus.isEmpty()) {
-                                deviceStatusNotAvailable.add(device);
-                            }
-                        }
-
-//                    }
-//                }
-//            }
+            Type collectionType = new TypeToken<Collection<Cost>>() {
+            }.getType();
+            if (tenantIdContext == MultitenantConstants.SUPER_TENANT_ID && metadata != null) {
+                costData = g.fromJson(metadata.getMetaValue(), collectionType);
+                for (Cost tenantCost : costData) {
+                    if (tenantCost.getTenantDomain().equals(tenantDomain)) {
+                        totalCost = generateCost(allDevices, startDate, endDate, tenantCost, deviceStatusNotAvailable, totalCost);
+                    }
+                }
+            } else {
+                totalCost = generateCost(allDevices, startDate, endDate, null, deviceStatusNotAvailable, totalCost);
+            }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred calculating cost of devices";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (MetadataManagementException e) {
+            String msg = "Error when retrieving metadata of billing feature";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
@@ -1122,16 +1085,65 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         billingResponse.setStartDate(startDate.toString());
         billingResponse.setEndDate(endDate.toString());
         billingResponse.setBillPeriod(calStart.get(Calendar.YEAR) + " - " + calEnd.get(Calendar.YEAR));
-//        billingResponse.setTotalCostPerYear(Math.round(totalCost * 100.0) / 100.0);
+        billingResponse.setTotalCostPerYear(Math.round(totalCost * 100.0) / 100.0);
         billingResponse.setDeviceCount(allDevices.size());
 
         return billingResponse;
     }
 
+    public double generateCost(List<Device> allDevices, Timestamp startDate, Timestamp endDate,  Cost tenantCost, List<Device> deviceStatusNotAvailable, double totalCost) throws DeviceManagementException {
+        for (Device device : allDevices) {
+            long dateDiff = 0;
+            device.setDeviceStatusInfo(getDeviceStatusHistory(device, null, endDate, true));
+            List<DeviceStatus> deviceStatus = device.getDeviceStatusInfo();
+            if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
+                if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                        || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                    if (deviceStatus.get(0).getUpdateTime().getTime() >= startDate.getTime()) {
+                        dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - startDate.getTime();
+                    }
+                } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                        && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                    dateDiff = endDate.getTime() - startDate.getTime();
+                }
+            } else {
+                if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                        || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                    if (deviceStatus.get(0).getUpdateTime().getTime() >= device.getEnrolmentInfo().getDateOfEnrolment()) {
+                        dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
+                    }
+                } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                        && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                    dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
+                }
+            }
+
+            // Convert dateDiff to days as a decimal value
+            double dateDiffInDays = (double) dateDiff / (24 * 60 * 60 * 1000);
+
+            if (dateDiffInDays % 1 >= 0.9) {
+                dateDiffInDays = Math.ceil(dateDiffInDays);
+            }
+
+            long dateInDays = (long) dateDiffInDays;
+            double cost = 0;
+            if (tenantCost != null) {
+                cost = (tenantCost.getCost() / 365) * dateInDays;
+            }
+            totalCost += cost;
+            device.setCost(Math.round(cost * 100.0) / 100.0);
+            long totalDays = dateInDays + device.getDaysUsed();
+            device.setDaysUsed((int) totalDays);
+            if (deviceStatus.isEmpty()) {
+                deviceStatusNotAvailable.add(device);
+            }
+        }
+        return totalCost;
+    }
+
     @Override
     public PaginationResult createBillingFile(int tenantId, String tenantDomain, Timestamp startDate, Timestamp endDate) throws DeviceManagementException {
 
-        // All code related to cost calculation has being commented out to comply with the current requirements
         PaginationResult paginationResult = new PaginationResult();
         List<Device> allDevices = new ArrayList<>();
         List<BillingResponse> billingResponseList = new ArrayList<>();
@@ -1193,7 +1205,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     BillingResponse billingResponse = calculateUsage(tenantDomain, newStartDate, newEndDate, allDevicesPerYear);
                     billingResponseList.add(billingResponse);
                     allDevices.addAll(billingResponse.getDevice());
-//                    totalCost = totalCost + billingResponse.getTotalCostPerYear();
+                    totalCost = totalCost + billingResponse.getTotalCostPerYear();
                     deviceCount = deviceCount + billingResponse.getDeviceCount();
                     LocalDateTime nextStartDate = oneYearAfterStart.plusDays(1).with(LocalTime.of(00, 00, 00));
                     startDate = Timestamp.valueOf(nextStartDate);
@@ -1217,7 +1229,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     BillingResponse billingResponse = calculateUsage(tenantDomain, startDate, endDate, allDevicesPerRemainingDays);
                     billingResponseList.add(billingResponse);
                     allDevices.addAll(billingResponse.getDevice());
-//                    totalCost = totalCost + billingResponse.getTotalCostPerYear();
+                    totalCost = totalCost + billingResponse.getTotalCostPerYear();
                     deviceCount = deviceCount + billingResponse.getDeviceCount();
                 }
 
@@ -1229,7 +1241,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 BillingResponse billingResponse = new BillingResponse("all", Math.round(totalCost * 100.0) / 100.0, allDevices, calStart.get(Calendar.YEAR) + " - " + calEnd.get(Calendar.YEAR), initialStartDate.toString(), endDate.toString(), allDevices.size());
                 billingResponseList.add(billingResponse);
                 paginationResult.setData(billingResponseList);
-//                paginationResult.setTotalCost(Math.round(totalCost * 100.0) / 100.0);
+                paginationResult.setTotalCost(Math.round(totalCost * 100.0) / 100.0);
                 paginationResult.setTotalDeviceCount(deviceCount);
                 BillingCacheManagerImpl.getInstance().addBillingToCache(paginationResult, tenantDomain, initialStartDate, endDate);
                 return paginationResult;
