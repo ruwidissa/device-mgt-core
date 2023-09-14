@@ -24,7 +24,7 @@ import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplication
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
 import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
 import io.entgra.device.mgt.core.apimgt.application.extension.util.APIManagerUtil;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.KeyManager;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.*;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.TokenInfo;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
@@ -36,9 +36,6 @@ import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClie
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIInfo;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.ApplicationKey;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Subscription;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.ApiApplicationInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
@@ -229,7 +226,9 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
 
     private ApiApplicationKey handleNewAPIApplication(String applicationName, List<APIInfo> uniqueApiList,
-                                                      TokenInfo tokenInfo, String keyType, String validityTime) throws APIManagerException {
+                                                      TokenInfo tokenInfo, String keyType, String validityTime,
+                                                      ApplicationGrantTypeUpdater applicationGrantTypeUpdater,
+                                                      boolean isMappingRequired) throws APIManagerException {
         ConsumerRESTAPIServices consumerRESTAPIServices =
                 APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
         io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application = new io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application();
@@ -252,10 +251,26 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             }
 
             tokenInfo.setApiApplicationInfo(getApplicationInfo(null, null));
+            ApplicationKey applicationKey;
+            if (isMappingRequired) {
+
+            }
+
+            if (isMappingRequired) {
+                // If we need to get opaque token instead of the JWT token, we have to do the mapping. Therefore,, if
+                // it is a requirement then we have to call the method with enabling the flag.
+                applicationKey = consumerRESTAPIServices.mapApplicationKeys(tokenInfo, application,
+                    keyManager.getName(), keyType);
+            } else {
+                applicationKey = consumerRESTAPIServices.generateApplicationKeys(tokenInfo, application.getApplicationId(),
+                        keyManager.getName(), validityTime, keyType);
+            }
+
+
 //            ApplicationKey applicationKey = consumerRESTAPIServices.mapApplicationKeys(tokenInfo, application,
 //                    keyManager.getName(), keyType);
-            ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(tokenInfo, application.getApplicationId(),
-                    keyManager.getName(), validityTime, keyType);
+//            ApplicationKey applicationKey = consumerRESTAPIServices.generateApplicationKeys(tokenInfo, application.getApplicationId(),
+//                    keyManager.getName(), validityTime, keyType);
 
             ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
             apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());

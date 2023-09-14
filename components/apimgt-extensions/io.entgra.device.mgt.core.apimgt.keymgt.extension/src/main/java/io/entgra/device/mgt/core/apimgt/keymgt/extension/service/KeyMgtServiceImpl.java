@@ -86,8 +86,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                     .getTenantManager().getTenantId(tenantDomain);
         } catch (UserStoreException e) {
             msg = "Error while loading tenant configuration";
-            log.error(msg);
-            throw new KeyMgtException(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         }
 
         kmConfig = getKeyManagerConfig();
@@ -116,8 +116,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                         .getRealmProperty("reserved_tenant_user_password");
             } catch (UserStoreException e) {
                 msg = "Error while loading user realm configuration";
-                log.error(msg);
-                throw new KeyMgtException(msg);
+                log.error(msg, e);
+                throw new KeyMgtException(msg, e);
             }
             createUserIfNotExists(subTenantUserUsername, subTenantUserPassword);
 
@@ -415,8 +415,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             client.newCall(request).execute();
         } catch (IOException e) {
             msg = "Error occurred while invoking create key manager endpoint";
-            log.error(msg);
-            throw new KeyMgtException(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         }
     }
 
