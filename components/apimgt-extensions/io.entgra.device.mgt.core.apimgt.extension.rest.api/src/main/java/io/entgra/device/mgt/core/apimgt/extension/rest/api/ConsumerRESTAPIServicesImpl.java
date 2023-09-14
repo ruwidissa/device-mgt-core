@@ -729,7 +729,7 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
 
     @Override
     public ApplicationKey updateGrantType(TokenInfo tokenInfo, String applicationId, String keyMapId, String keyManager,
-                                          String supportedGrantTypes, String callbackUrl)
+                                          List<String> supportedGrantTypes, String callbackUrl)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         ApiApplicationInfo apiApplicationInfo = tokenInfo.getApiApplicationInfo();
@@ -746,16 +746,19 @@ public class ConsumerRESTAPIServicesImpl implements ConsumerRESTAPIServices {
                     + tokenInfo.getAccessToken());
         }
 
-        String payload = "{\n" +
-                "    \"keyMappingId\": \"" + keyMapId + "\",\n" +
-                "    \"keyManager\": \"" + keyManager + "\",\n" +
-                "    \"supportedGrantTypes\": [\n" +
-                "      \"" + supportedGrantTypes + "\"\n" +
-                "    ],\n" +
-                "    \"callbackUrl\": \"" + callbackUrl + "\",\n" +
-                "    \"additionalProperties\": {}\n" +
-                "}";
-        RequestBody requestBody = RequestBody.create(JSON, payload);
+        JSONArray supportedGrantTypeList = new JSONArray();
+        for (String string : supportedGrantTypes) {
+            supportedGrantTypeList.put(string);
+        }
+
+        JSONObject payload = new JSONObject();
+        payload.put("keyMappingId", keyMapId);
+        payload.put("keyManager", keyManager);
+        payload.put("supportedGrantTypes", supportedGrantTypeList);
+        payload.put("callbackUrl", (callbackUrl != null ? callbackUrl : ""));
+        payload.put("additionalProperties", new JSONObject());
+
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
 
         builder.put(requestBody);
         Request request = builder.build();

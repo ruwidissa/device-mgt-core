@@ -62,7 +62,7 @@ public interface ConsumerRESTAPIServices {
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     ApplicationKey updateGrantType(TokenInfo tokenInfo, String applicationId, String keyMapId, String keyManager,
-                                   String supportedGrantTypes, String callbackUrl)
+                                   List<String> supportedGrantTypes, String callbackUrl)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     KeyManager[] getAllKeyManagers(TokenInfo tokenInfo)
