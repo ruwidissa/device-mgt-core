@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.Map;
 
 /**
  * This class holds the generic implementation of DeviceDAO which can be used to support ANSI db syntax.
@@ -92,14 +93,40 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "d.DEVICE_IDENTIFICATION, " +
                     "t.NAME AS DEVICE_TYPE ";
 
-            if (serial != null) {
-                sql = sql + "FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_INFO i " +
-                        "WHERE DEVICE_TYPE_ID = t.ID " +
-                        "AND d.ID= i.DEVICE_ID " +
-                        "AND i.KEY_FIELD = 'serial' " +
-                        "AND i.VALUE_FIELD LIKE ? " +
-                        "AND d.TENANT_ID = ? ";
-                isSerialProvided = true;
+            //Filter by serial number or any Custom Property in DM_DEVICE_INFO
+            if (serial != null || !request.getCustomProperty().isEmpty()) {
+                sql = sql +
+                        "FROM DM_DEVICE d " +
+                        "INNER JOIN DM_DEVICE_TYPE t ON d.DEVICE_TYPE_ID = t.ID " +
+                        "WHERE ";
+                if (serial != null) {
+                    sql += "EXISTS (" +
+                            "SELECT VALUE_FIELD " +
+                            "FROM DM_DEVICE_INFO di " +
+                            "WHERE di.DEVICE_ID = d.ID " +
+                            "AND di.KEY_FIELD = 'serial' " +
+                            "AND di.VALUE_FIELD LIKE ? ) ";
+                    isSerialProvided = true;
+                }
+                if (!request.getCustomProperty().isEmpty()) {
+                    if (serial != null) {
+                        sql += "AND ";
+                    }
+                    boolean firstCondition = true;
+                    for (Map.Entry<String, String> entry : request.getCustomProperty().entrySet()) {
+                        if (!firstCondition) {
+                            sql += "AND ";
+                        }
+                        sql += "EXISTS (" +
+                                "SELECT VALUE_FIELD " +
+                                "FROM DM_DEVICE_INFO di " +
+                                "WHERE di.DEVICE_ID = d.ID " +
+                                "AND di.KEY_FIELD = '" + entry.getKey() + "' " +
+                                "AND di.VALUE_FIELD LIKE ? ) ";
+                        firstCondition = false;
+                    }
+                }
+                sql += "AND d.TENANT_ID = ? ";
             } else {
                 sql = sql + "FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ? ";
             }
@@ -137,6 +164,11 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 int paramIdx = 1;
                 if (isSerialProvided) {
                     stmt.setString(paramIdx++, "%" + serial + "%");
+                }
+                if (!request.getCustomProperty().isEmpty()) {
+                    for (Map.Entry<String, String> entry : request.getCustomProperty().entrySet()) {
+                        stmt.setString(paramIdx++, "%" + entry.getValue() + "%");
+                    }
                 }
                 stmt.setInt(paramIdx++, tenantId);
                 if (isDeviceTypeProvided) {
@@ -435,6 +467,8 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
         boolean isStatusProvided = false;
         Date since = request.getSince();
         boolean isSinceProvided = false;
+        String serial = request.getSerialNumber();
+        boolean isSerialProvided = false;
 
         try {
             conn = getConnection();
@@ -502,6 +536,28 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 sql += buildStatusQuery(statusList);
                 isStatusProvided = true;
             }
+            //Filter Group with serial number or any Custom Property in DM_DEVICE_INFO
+            if (serial != null || !request.getCustomProperty().isEmpty()) {
+                if (serial != null) {
+                    sql += "AND EXISTS (" +
+                            "SELECT VALUE_FIELD " +
+                            "FROM DM_DEVICE_INFO di " +
+                            "WHERE di.DEVICE_ID = d1.DEVICE_ID " +
+                            "AND di.KEY_FIELD = 'serial' " +
+                            "AND di.VALUE_FIELD LIKE ?) ";
+                    isSerialProvided = true;
+                }
+                if (!request.getCustomProperty().isEmpty()) {
+                    for (Map.Entry<String, String> entry : request.getCustomProperty().entrySet()) {
+                        sql += "AND EXISTS (" +
+                                "SELECT VALUE_FIELD " +
+                                "FROM DM_DEVICE_INFO di2 " +
+                                "WHERE di2.DEVICE_ID = d1.DEVICE_ID " +
+                                "AND di2.KEY_FIELD = '" + entry.getKey() + "' " +
+                                "AND di2.VALUE_FIELD LIKE ?)";
+                    }
+                }
+            }
             sql = sql + " LIMIT ? OFFSET ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -529,6 +585,14 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 if (isStatusProvided) {
                     for (String status : statusList) {
                         stmt.setString(paramIdx++, status);
+                    }
+                }
+                if (isSerialProvided) {
+                    stmt.setString(paramIdx++, "%" + serial + "%");
+                }
+                if (!request.getCustomProperty().isEmpty()) {
+                    for (Map.Entry<String, String> entry : request.getCustomProperty().entrySet()) {
+                        stmt.setString(paramIdx++, "%" + entry.getValue() + "%");
                     }
                 }
                 stmt.setInt(paramIdx++, request.getRowCount());
@@ -1014,6 +1078,17 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 query += buildStatusQuery(status);
                 isStatusProvided = true;
             }
+            // Loop through custom properties and add conditions
+            if (!request.getCustomProperty().isEmpty()) {
+                for (Map.Entry<String, String> entry : request.getCustomProperty().entrySet()) {
+                    query += " AND EXISTS (" +
+                            "SELECT VALUE_FIELD " +
+                            "FROM DM_DEVICE_INFO di2 " +
+                            "WHERE di2.DEVICE_ID = DM_DEVICE.ID " +
+                            "AND di2.KEY_FIELD = '" + entry.getKey() + "' " +
+                            "AND di2.VALUE_FIELD LIKE ?)";
+                }
+            }
 
             query = query + " LIMIT ? OFFSET ?";
 
@@ -1036,6 +1111,12 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 if (isStatusProvided) {
                     for (String deviceStatus : status) {
                         ps.setString(index++, deviceStatus);
+                    }
+                }
+                // Set custom property values in the loop
+                if (!request.getCustomProperty().isEmpty()) {
+                    for (Map.Entry<String, String> entry : request.getCustomProperty().entrySet()) {
+                        ps.setString(index++, "%" + entry.getValue() + "%");
                     }
                 }
                 ps.setInt(index++, offsetValue);

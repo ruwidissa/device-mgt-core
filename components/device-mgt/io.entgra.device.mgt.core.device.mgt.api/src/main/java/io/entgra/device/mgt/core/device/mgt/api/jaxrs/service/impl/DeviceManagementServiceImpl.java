@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
@@ -29,7 +30,6 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.DCRResponse;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
@@ -64,7 +64,6 @@ import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceStatus;
 import io.entgra.device.mgt.core.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
-import io.entgra.device.mgt.core.device.mgt.core.dao.TrackerManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
@@ -75,10 +74,7 @@ import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchManagerService
 import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchMgtException;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
-import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.DeviceAPIClientService;
-import io.entgra.device.mgt.core.device.mgt.core.traccar.common.TraccarHandlerConstants;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
-import io.entgra.device.mgt.core.device.mgt.core.util.HttpReportingUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceManagementService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
@@ -98,6 +94,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -105,6 +102,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+import java.util.Map;
 
 @Path("/devices")
 public class DeviceManagementServiceImpl implements DeviceManagementService {
@@ -142,6 +140,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("role") String role,
             @QueryParam("ownership") String ownership,
             @QueryParam("serialNumber") String serialNumber,
+            @QueryParam("customProperty") String customProperty,
             @QueryParam("status") List<String> status,
             @QueryParam("groupId") int groupId,
             @QueryParam("since") String since,
@@ -155,6 +154,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
 //            RequestValidationUtil.validateSelectionCriteria(type, user, roleName, ownership, status);
+            final ObjectMapper objectMapper = new ObjectMapper();
             RequestValidationUtil.validatePaginationParameters(offset, limit);
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
             DeviceAccessAuthorizationService deviceAccessAuthorizationService =
@@ -165,6 +165,22 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
             if (name != null && !name.isEmpty()) {
                 request.setDeviceName(name);
+            }
+            if (customProperty != null && !customProperty.isEmpty()) {
+                try {
+                    Map<String, String> customProperties = objectMapper.readValue(customProperty, Map.class);
+                    // Extract and set custom properties
+                    for (Map.Entry<String, String> entry : customProperties.entrySet()) {
+                        String propertyName = entry.getKey();
+                        String propertyValue = entry.getValue();
+                        // Add custom property to the paginationRequest object
+                        request.addCustomProperty(propertyName, propertyValue);
+                    }
+                } catch (IOException e) {
+                    String msg = "Error occurred while converting custom property string to a Java Map";
+                    log.error(msg);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+                }
             }
             if (type != null && !type.isEmpty()) {
                 request.setDeviceType(type);

@@ -41,6 +41,7 @@ public class PaginationRequest {
     private Date since;
     private String filter;
     private String serialNumber;
+    private Map<String, String> customProperty = new HashMap<>();
     private Map<String, Object> property = new HashMap<>();
     private List<String> statusList = new ArrayList<>();
     private OperationLogFilters operationLogFilters = new OperationLogFilters();
@@ -113,6 +114,18 @@ public class PaginationRequest {
 
     public String getOwnership() {
         return ownership;
+    }
+
+    public Map<String, String> getCustomProperty() {
+        return customProperty;
+    }
+
+    public void setCustomProperty(Map<String, String> customProperty) {
+        this.customProperty = customProperty;
+    }
+
+    public void addCustomProperty(String key, String value) {
+        customProperty.put(key, value);
     }
 
     public void setOwnership(String ownership) {

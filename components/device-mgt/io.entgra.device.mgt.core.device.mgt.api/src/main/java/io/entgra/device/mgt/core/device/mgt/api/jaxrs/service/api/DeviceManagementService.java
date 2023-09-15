@@ -65,6 +65,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Device related REST-API. This can be used to manipulated device related details.
@@ -283,6 +284,12 @@ public interface DeviceManagementService {
                     required = false)
             @QueryParam("serialNumber")
                     String serialNumber,
+            @ApiParam(
+                    name = "customProperty",
+                    value = "CustomProperty from device as a JSON encoded string.",
+                    required = false)
+            @QueryParam("customProperty")
+            String customProperty,
             @ApiParam(
                     name = "status",
                     value = "Provide the device status details, such as active or inactive.",
