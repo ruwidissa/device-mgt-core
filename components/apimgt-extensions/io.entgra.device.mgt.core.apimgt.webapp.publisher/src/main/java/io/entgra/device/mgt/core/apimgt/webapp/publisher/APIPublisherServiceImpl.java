@@ -553,9 +553,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);
                             } else {
                                 // todo: come to this level means, that scope is removed from API, but haven't removed from the scope-role-permission-mappings list
-                                if (log.isDebugEnabled()) {
-                                    log.debug(scope.getKey() + " not available as shared scope");
-                                }
+                                log.warn(scope.getKey() + " not available as shared scope");
                             }
                         }
                         for (String role : rolePermissions.keySet()) {
