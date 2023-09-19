@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplic
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.TokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.DCRResponse;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
@@ -827,9 +828,11 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                                 "perm:users:send-invitation");
 
                 APIManagementProviderService apiManagementProviderService = DeviceMgtAPIUtils.getAPIManagementService();
+                TokenInfo tokenInfo = new TokenInfo();
+                tokenInfo.setAccessToken(accessTokenInfo.getAccessToken());
                 apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(applicationName,
                         new String[] {"device_management"}, "PRODUCTION", false, String.valueOf(validityTime),
-                        accessTokenInfo.getAccessToken());
+                        tokenInfo, null, true);
 
             } catch (JWTClientException e) {
                 String msg = "Error while generating an application tokens for Tenant Admin.";

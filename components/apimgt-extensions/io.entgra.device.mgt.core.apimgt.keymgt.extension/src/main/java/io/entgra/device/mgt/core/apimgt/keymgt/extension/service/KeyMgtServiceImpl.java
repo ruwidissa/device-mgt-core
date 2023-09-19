@@ -65,7 +65,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
     String subTenantUserUsername, subTenantUserPassword, keyManagerName, msg = null;
 
     public DCRResponse dynamicClientRegistration(String clientName, String owner, String grantTypes, String callBackUrl,
-                                                 String[] tags, boolean isSaasApp, int validityPeriod, String password) throws KeyMgtException {
+                                                 String[] tags, boolean isSaasApp, int validityPeriod,
+                                                 String password, List<String> supportedGrantTypes, String callbackUrl) throws KeyMgtException {
 
         if (owner == null) {
             PrivilegedCarbonContext threadLocalCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
@@ -94,13 +95,14 @@ public class KeyMgtServiceImpl implements KeyMgtService {
 
         if (KeyMgtConstants.SUPER_TENANT.equals(tenantDomain)) {
             OAuthApplication dcrApplication = createOauthApplication(clientName, kmConfig.getAdminUsername(), tags,
-                    validityPeriod, kmConfig.getAdminPassword());
+                    validityPeriod, kmConfig.getAdminPassword(), supportedGrantTypes, callbackUrl);
             return new DCRResponse(dcrApplication.getClientId(), dcrApplication.getClientSecret());
         } else {
             // super-tenant admin dcr and token generation
+            //todo lasantha null passed in last two params
             OAuthApplication superTenantOauthApp = createOauthApplication(
                     KeyMgtConstants.RESERVED_OAUTH_APP_NAME_PREFIX + KeyMgtConstants.SUPER_TENANT,
-                    kmConfig.getAdminUsername(), null, validityPeriod, kmConfig.getAdminPassword());
+                    kmConfig.getAdminUsername(), null, validityPeriod, kmConfig.getAdminPassword(), null, null);
             String superAdminAccessToken = createAccessToken(superTenantOauthApp);
 
             // create new key manager for the tenant, under super-tenant space
@@ -123,7 +125,10 @@ public class KeyMgtServiceImpl implements KeyMgtService {
 
             // DCR for the requesting user
             //todo lasantha -> need to pass password of user
-            OAuthApplication dcrApplication = createOauthApplication(clientName, owner, tags, validityPeriod, password);
+            //todo lasantha null passed in last two params
+
+            OAuthApplication dcrApplication = createOauthApplication(clientName, owner, tags, validityPeriod,
+                    password, null, null);
             String requestingUserAccessToken = createAccessToken(dcrApplication);
 
             // get application id
@@ -317,9 +322,11 @@ public class KeyMgtServiceImpl implements KeyMgtService {
      * @throws KeyMgtException if any error occurs while creating response object
      */
     private OAuthApplication createOauthApplication (String clientName, String owner, String[] tags,
-                                                     int validityPeriod, String ownerPassword) throws KeyMgtException {
+                                                     int validityPeriod, String ownerPassword,
+                                                     List<String> supportedGrantTypes, String callbackUrl) throws KeyMgtException {
         //todo modify this to pass the password as well
-        String oauthAppCreationPayloadStr = createOauthAppCreationPayload(clientName, owner, tags, validityPeriod, ownerPassword);
+        String oauthAppCreationPayloadStr = createOauthAppCreationPayload(clientName, owner, tags, validityPeriod,
+                ownerPassword, supportedGrantTypes, callbackUrl);
         RequestBody oauthAppCreationPayload = RequestBody.Companion.create(oauthAppCreationPayloadStr, JSON);
         kmConfig = getKeyManagerConfig();
         String dcrEndpoint = kmConfig.getServerUrl() + KeyMgtConstants.DCR_ENDPOINT;
@@ -462,13 +469,15 @@ public class KeyMgtServiceImpl implements KeyMgtService {
     }
 
     private String createOauthAppCreationPayload(String clientName, String owner, String[] tags, int validityPeriod,
-                                                 String password) {
+                                                 String password, List<String> supportedGrantTypes, String callbackUrl) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("applicationName", clientName);
         jsonObject.put("username", owner);
         jsonObject.put("tags", tags);
         jsonObject.put("validityPeriod", validityPeriod);
         jsonObject.put("password", password);
+        jsonObject.put("supportedGrantTypes", supportedGrantTypes);
+        jsonObject.put("callbackUrl", callbackUrl);
         return jsonObject.toString();
     }
 

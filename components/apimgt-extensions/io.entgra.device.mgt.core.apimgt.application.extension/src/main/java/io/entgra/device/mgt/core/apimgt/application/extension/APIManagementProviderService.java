@@ -20,6 +20,8 @@ package io.entgra.device.mgt.core.apimgt.application.extension;
 
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.ApplicationGrantTypeUpdater;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.TokenInfo;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
 
 /**
@@ -53,12 +55,16 @@ public interface APIManagementProviderService {
     ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
                                                          String keyType, String username,
                                                          boolean isAllowedAllDomains,
-                                                         String validityTime, String password) throws APIManagerException;
+                                                         String validityTime, String password,
+                                                         ApplicationGrantTypeUpdater applicationGrantTypeUpdater,
+                                                         boolean isMappingRequired) throws APIManagerException;
 
     ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
                                                          String keyType,
                                                          boolean isAllowedAllDomains,
-                                                         String validityTime, String accessToken) throws APIManagerException;
+                                                         String validityTime, TokenInfo tokenInfo,
+                                                         ApplicationGrantTypeUpdater applicationGrantTypeUpdater,
+                                                         boolean isMappingRequired) throws APIManagerException;
 
 //    /**
 //     * Remove APIM Application.

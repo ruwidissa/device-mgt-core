@@ -49,7 +49,8 @@ public class KeyManagerServiceImpl implements KeyManagerService {
             //todo lasantha - can pass password from here - modify DCRRequest object
             DCRResponse resp = keyMgtService.dynamicClientRegistration(dcrRequest.getApplicationName(), dcrRequest.getUsername(),
                     dcrRequest.getGrantTypes(), dcrRequest.getCallBackUrl(), dcrRequest.getTags(),
-                    dcrRequest.getIsSaasApp(), dcrRequest.getValidityPeriod(), dcrRequest.getPassword());
+                    dcrRequest.getIsSaasApp(), dcrRequest.getValidityPeriod(), dcrRequest.getPassword(),
+                    dcrRequest.getSupportedGrantTypes(), dcrRequest.getCallbackUrl());
             return Response.status(Response.Status.CREATED).entity(gson.toJson(resp)).build();
         } catch (KeyMgtException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();

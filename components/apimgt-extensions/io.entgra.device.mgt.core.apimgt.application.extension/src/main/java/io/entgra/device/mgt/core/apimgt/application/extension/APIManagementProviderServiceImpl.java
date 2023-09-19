@@ -24,7 +24,11 @@ import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplication
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
 import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
 import io.entgra.device.mgt.core.apimgt.application.extension.util.APIManagerUtil;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.*;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.APIInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.ApplicationGrantTypeUpdater;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.ApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.KeyManager;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Subscription;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.TokenInfo;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
@@ -106,35 +110,42 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 //
 //    }
 
-    @Override
-    public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
-                                                                             String keyType,
-                                                                             boolean isAllowedAllDomains,
-                                                                             String validityTime, String accessToken) throws APIManagerException {
-        TokenInfo tokenInfo = new TokenInfo();
-        tokenInfo.setApiApplicationInfo(null);
-        tokenInfo.setAccessToken(accessToken);
-        return generateAndRetrieveApplicationKeys(applicationName, tags, keyType, isAllowedAllDomains, validityTime, tokenInfo);
-    }
+//    @Override
+//    public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
+//                                                                             String keyType,
+//                                                                             boolean isAllowedAllDomains,
+//                                                                             String validityTime, String accessToken) throws APIManagerException {
+//        TokenInfo tokenInfo = new TokenInfo();
+//        tokenInfo.setApiApplicationInfo(null);
+//        tokenInfo.setAccessToken(accessToken);
+//        return generateAndRetrieveApplicationKeys(applicationName, tags, keyType, isAllowedAllDomains, validityTime,
+//                tokenInfo, null, false);
+//    }
 
     @Override
     public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
                                                                              String keyType, String username,
                                                                              boolean isAllowedAllDomains,
-                                                                             String validityTime, String password)
+                                                                             String validityTime, String password,
+                                                                             ApplicationGrantTypeUpdater applicationGrantTypeUpdater,
+                                                                             boolean isMappingRequired)
             throws APIManagerException {
 
         ApiApplicationInfo applicationInfo = getApplicationInfo(username, password);
         TokenInfo tokenInfo = new TokenInfo();
         tokenInfo.setApiApplicationInfo(applicationInfo);
         tokenInfo.setAccessToken(null);
-        return generateAndRetrieveApplicationKeys(applicationName, tags, keyType, isAllowedAllDomains, validityTime, tokenInfo);
+        return generateAndRetrieveApplicationKeys(applicationName, tags, keyType, isAllowedAllDomains, validityTime,
+                tokenInfo, applicationGrantTypeUpdater, isMappingRequired);
     }
 
-    private ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
+    @Override
+    public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
                                                                  String keyType,
                                                                  boolean isAllowedAllDomains,
-                                                                 String validityTime, TokenInfo tokenInfo) throws APIManagerException {
+                                                                 String validityTime, TokenInfo tokenInfo,
+                                                                 ApplicationGrantTypeUpdater applicationGrantTypeUpdater,
+                                                                 boolean isMappingRequired) throws APIManagerException {
 
         ConsumerRESTAPIServices consumerRESTAPIServices =
                 APIApplicationManagerExtensionDataHolder.getInstance().getConsumerRESTAPIServices();
@@ -160,7 +171,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     consumerRESTAPIServices.getAllApplications(tokenInfo, applicationName);
             if (applications.length == 0) {
                 return handleNewAPIApplication(applicationName, uniqueApiList, tokenInfo, keyType,
-                        validityTime);
+                        validityTime, applicationGrantTypeUpdater, isMappingRequired);
             } else {
                 if (applications.length == 1) {
                     Optional<io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application> applicationOpt =
@@ -173,7 +184,8 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     if (metaData == null) {
                         // Todo add a comment
                         consumerRESTAPIServices.deleteApplication(tokenInfo, application.getApplicationId());
-                        return handleNewAPIApplication(applicationName, uniqueApiList, tokenInfo, keyType, validityTime);
+                        return handleNewAPIApplication(applicationName, uniqueApiList, tokenInfo, keyType,
+                                validityTime, applicationGrantTypeUpdater, isMappingRequired);
                     } else {
                         Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(tokenInfo, application.getApplicationId());
                         for (Subscription subscription : subscriptions) {
@@ -264,6 +276,14 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             } else {
                 applicationKey = consumerRESTAPIServices.generateApplicationKeys(tokenInfo, application.getApplicationId(),
                         keyManager.getName(), validityTime, keyType);
+            }
+//            ApplicationKey updateGrantType(TokenInfo tokenInfo, String applicationId, String keyMapId, String keyManager,
+//                    String supportedGrantTypes, String callbackUrl)
+            if (applicationGrantTypeUpdater != null) {
+                applicationKey = consumerRESTAPIServices.updateGrantType(tokenInfo, application.getApplicationId(),
+                        applicationKey.getKeyMappingId(), keyManager.getName(),
+                        applicationGrantTypeUpdater.getSupportedGrantTypes(),
+                        applicationGrantTypeUpdater.getCallbackUrl());
             }
 
 
@@ -651,7 +671,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     registrationProfile.getTags(), tokenType, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
                             .getRealmConfiguration().getAdminUserName(),
                     registrationProfile.isAllowedToAllDomains(), validityPeriod, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
-                            .getRealmConfiguration().getAdminPassword());
+                            .getRealmConfiguration().getAdminPassword(), null, false);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
