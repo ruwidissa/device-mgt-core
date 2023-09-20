@@ -20,8 +20,6 @@ package io.entgra.device.mgt.core.apimgt.application.extension;
 
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.ApplicationGrantTypeUpdater;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.TokenInfo;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
 
 import java.util.ArrayList;
@@ -37,31 +35,6 @@ public interface APIManagementProviderService {
      */
     boolean isTierLoaded();
 
-//    /**
-//     * Generate and retreive application keys. if the application does exist then
-//     * create it and subscribe to apis that are grouped with the tags.
-//     *
-//     * @param apiApplicationName name of the application.
-//     * @param tags               tags of the apis that application needs to be subscribed.
-//     * @param keyType            of the application.
-//     * @param username           to whom the application is created
-//     * @param isAllowedAllDomains application is allowed to all the tenants
-//     * @param validityTime       validity period of the application
-//     * @return consumerkey and secrete of the created application.
-//     * @throws APIManagerException
-//     */
-//    ApiApplicationKey generateAndRetrieveApplicationKeys(String apiApplicationName, String tags[],
-//                                                         String keyType, String username, boolean isAllowedAllDomains,
-//                                                         String validityTime) throws APIManagerException;
-
-//    ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
-//                                                         String keyType, String username,
-//                                                         boolean isAllowedAllDomains,
-//                                                         String validityTime, String password,
-//                                                         ArrayList<String> supportedGrantTypes,
-//                                                         String callbackUrl,
-//                                                         boolean isMappingRequired) throws APIManagerException;
-
     ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
                                                          String keyType, String username,
                                                          boolean isAllowedAllDomains,
@@ -70,11 +43,6 @@ public interface APIManagementProviderService {
                                                          ArrayList<String> supportedGrantTypes,
                                                          String callbackUrl,
                                                          boolean isMappingRequired) throws APIManagerException;
-
-//    /**
-//     * Remove APIM Application.
-//     */
-//    void removeAPIApplication(String applicationName, String username) throws APIManagerException;
 
     /**
      * To get access token for given scopes and for the given validity period
