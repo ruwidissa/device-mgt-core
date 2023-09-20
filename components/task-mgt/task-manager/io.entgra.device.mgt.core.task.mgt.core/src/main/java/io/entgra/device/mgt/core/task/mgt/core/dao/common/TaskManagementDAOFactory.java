@@ -48,6 +48,7 @@ public class TaskManagementDAOFactory {
     public static DynamicTaskDAO getDynamicTaskDAO() {
         if (databaseEngine != null) {
             switch (databaseEngine) {
+                case TaskMgtConstants.DataBaseTypes.DB_TYPE_MSSQL:
                 case TaskMgtConstants.DataBaseTypes.DB_TYPE_H2:
                 case TaskMgtConstants.DataBaseTypes.DB_TYPE_MYSQL:
                     return new DynamicTaskDAOImpl();
@@ -61,6 +62,7 @@ public class TaskManagementDAOFactory {
     public static DynamicTaskPropDAO getDynamicTaskPropDAO() {
         if (databaseEngine != null) {
             switch (databaseEngine) {
+                case TaskMgtConstants.DataBaseTypes.DB_TYPE_MSSQL:
                 case TaskMgtConstants.DataBaseTypes.DB_TYPE_H2:
                 case TaskMgtConstants.DataBaseTypes.DB_TYPE_MYSQL:
                     return new DynamicTaskPropDAOImpl();
