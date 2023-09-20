@@ -66,7 +66,7 @@ public class OAuthUtils {
                             registrationProfile.getTags(), Constants.ApplicationInstall.DEFAULT_TOKEN_TYPE,
                             username, registrationProfile.isAllowedToAllDomains(),
                             Constants.ApplicationInstall.DEFAULT_VALIDITY_PERIOD, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
-                                    .getRealmConfiguration().getAdminPassword(), null, false);
+                                    .getRealmConfiguration().getAdminPassword(), null, null, null, false);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

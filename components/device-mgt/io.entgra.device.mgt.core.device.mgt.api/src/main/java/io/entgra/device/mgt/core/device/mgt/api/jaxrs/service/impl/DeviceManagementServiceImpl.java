@@ -828,11 +828,11 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                                 "perm:users:send-invitation");
 
                 APIManagementProviderService apiManagementProviderService = DeviceMgtAPIUtils.getAPIManagementService();
-                TokenInfo tokenInfo = new TokenInfo();
-                tokenInfo.setAccessToken(accessTokenInfo.getAccessToken());
+//                TokenInfo tokenInfo = new TokenInfo();
+//                tokenInfo.setAccessToken(accessTokenInfo.getAccessToken());
                 apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(applicationName,
-                        new String[] {"device_management"}, "PRODUCTION", false, String.valueOf(validityTime),
-                        tokenInfo, null, true);
+                        new String[] {"device_management"}, "PRODUCTION", null, false, String.valueOf(validityTime),
+                        null, accessTokenInfo.getAccessToken(), null, null,true);
 
             } catch (JWTClientException e) {
                 String msg = "Error while generating an application tokens for Tenant Admin.";

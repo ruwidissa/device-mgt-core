@@ -24,6 +24,8 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.App
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.TokenInfo;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
 
+import java.util.ArrayList;
+
 /**
  * This comprise on operation that is been done with api manager from CDMF. This service needs to be implemented in APIM.
  */
@@ -52,18 +54,21 @@ public interface APIManagementProviderService {
 //                                                         String keyType, String username, boolean isAllowedAllDomains,
 //                                                         String validityTime) throws APIManagerException;
 
+//    ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
+//                                                         String keyType, String username,
+//                                                         boolean isAllowedAllDomains,
+//                                                         String validityTime, String password,
+//                                                         ArrayList<String> supportedGrantTypes,
+//                                                         String callbackUrl,
+//                                                         boolean isMappingRequired) throws APIManagerException;
+
     ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
                                                          String keyType, String username,
                                                          boolean isAllowedAllDomains,
-                                                         String validityTime, String password,
-                                                         ApplicationGrantTypeUpdater applicationGrantTypeUpdater,
-                                                         boolean isMappingRequired) throws APIManagerException;
-
-    ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String[] tags,
-                                                         String keyType,
-                                                         boolean isAllowedAllDomains,
-                                                         String validityTime, TokenInfo tokenInfo,
-                                                         ApplicationGrantTypeUpdater applicationGrantTypeUpdater,
+                                                         String validityTime,
+                                                         String password, String accessToken,
+                                                         ArrayList<String> supportedGrantTypes,
+                                                         String callbackUrl,
                                                          boolean isMappingRequired) throws APIManagerException;
 
 //    /**

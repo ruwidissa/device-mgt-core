@@ -66,7 +66,7 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
                     applicationName, APIUtil.getDefaultTags(),
                     ApiApplicationConstants.DEFAULT_TOKEN_TYPE, username, false,
                     ApiApplicationConstants.DEFAULT_VALIDITY_PERIOD, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
-                            .getRealmConfiguration().getAdminPassword(), null, false);
+                            .getRealmConfiguration().getAdminPassword(), null, null, null, false);
             return Response.status(Response.Status.CREATED).entity(apiApplicationKey.toString()).build();
         } catch (APIManagerException e) {
             String msg = "Error occurred while registering an application '" + applicationName + "'";
@@ -109,23 +109,24 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
 
             if (username.equals(registrationProfile.getUsername())) {
                 synchronized (ApiApplicationRegistrationServiceImpl.class) {
-                    ApplicationGrantTypeUpdater applicationGrantTypeUpdater = null;
-                    if (registrationProfile.getSupportedGrantTypes() != null && !registrationProfile.getSupportedGrantTypes().isEmpty()) {
-                        applicationGrantTypeUpdater = new ApplicationGrantTypeUpdater();
-                        applicationGrantTypeUpdater.setSupportedGrantTypes(registrationProfile.getSupportedGrantTypes());
-
-                    } else if (StringUtils.isNotEmpty(registrationProfile.getCallbackUrl())) {
-                        return Response.status(Response.Status.BAD_REQUEST).entity("Callback URL should be Empty when" +
-                                " request does not contain supported grant types to update grant types of the " +
-                                "application."
-                        ).build();
-                    }
+//                    ApplicationGrantTypeUpdater applicationGrantTypeUpdater = null;
+//                    if (registrationProfile.getSupportedGrantTypes() != null && !registrationProfile.getSupportedGrantTypes().isEmpty()) {
+//                        applicationGrantTypeUpdater = new ApplicationGrantTypeUpdater();
+//                        applicationGrantTypeUpdater.setSupportedGrantTypes(registrationProfile.getSupportedGrantTypes());
+//
+//                    } else if (StringUtils.isNotEmpty(registrationProfile.getCallbackUrl())) {
+//                        return Response.status(Response.Status.BAD_REQUEST).entity("Callback URL should be Empty when" +
+//                                " request does not contain supported grant types to update grant types of the " +
+//                                "application."
+//                        ).build();
+//                    }
 
                     ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
                             applicationName, registrationProfile.getTags(),
                             ApiApplicationConstants.DEFAULT_TOKEN_TYPE, username,
                             registrationProfile.isAllowedToAllDomains(), validityPeriod,
-                            registrationProfile.getPassword(), applicationGrantTypeUpdater, false);
+                            registrationProfile.getPassword(), null, registrationProfile.getSupportedGrantTypes(),
+                            registrationProfile.getCallbackUrl(), false);
                     return Response.status(Response.Status.CREATED).entity(apiApplicationKey.toString()).build();
                 }
             }
@@ -138,7 +139,8 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
                         applicationName, registrationProfile.getTags(),
                         ApiApplicationConstants.DEFAULT_TOKEN_TYPE, registrationProfile.getUsername(),
                         registrationProfile.isAllowedToAllDomains(), validityPeriod,
-                        registrationProfile.getPassword(), null, false);
+                        registrationProfile.getPassword(), null, registrationProfile.getSupportedGrantTypes(),
+                        registrationProfile.getCallbackUrl(), false);
                 return Response.status(Response.Status.CREATED).entity(apiApplicationKey.toString()).build();
             }
         } catch (APIManagerException e) {
