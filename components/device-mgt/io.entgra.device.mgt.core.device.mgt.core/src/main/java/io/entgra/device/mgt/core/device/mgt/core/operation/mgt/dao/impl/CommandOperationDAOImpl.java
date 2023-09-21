@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
@@ -46,7 +47,7 @@ public class CommandOperationDAOImpl extends GenericOperationDAOImpl {
         try {
             Connection connection = OperationManagementDAOFactory.getConnection();
             String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
-                         "INITIATED_BY, ENABLED) VALUES (?, ?, ?, ?, ?, ?)";
+                    "INITIATED_BY, ENABLED, TENANT_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
             stmt = connection.prepareStatement(sql, new String[]{"id"});
             stmt.setString(1, operation.getType().toString());
             stmt.setLong(2, DeviceManagementDAOUtil.getCurrentUTCTime());
@@ -54,6 +55,7 @@ public class CommandOperationDAOImpl extends GenericOperationDAOImpl {
             stmt.setString(4, operation.getCode());
             stmt.setString(5, operation.getInitiatedBy());
             stmt.setBoolean(6, operation.isEnabled());
+            stmt.setInt(7, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
