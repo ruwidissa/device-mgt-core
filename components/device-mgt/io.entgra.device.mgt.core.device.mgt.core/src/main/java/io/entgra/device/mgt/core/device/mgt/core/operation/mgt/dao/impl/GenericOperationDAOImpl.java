@@ -74,7 +74,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
         try {
             Connection connection = OperationManagementDAOFactory.getConnection();
             String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
-                    "INITIATED_BY, OPERATION_DETAILS) VALUES (?, ?, ?, ?, ?, ?)";
+                    "INITIATED_BY, OPERATION_DETAILS, TENANT_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
             stmt = connection.prepareStatement(sql, new String[]{"id"});
             stmt.setString(1, operation.getType().toString());
             stmt.setLong(2, DeviceManagementDAOUtil.getCurrentUTCTime());
@@ -82,6 +82,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
             stmt.setString(4, operation.getCode());
             stmt.setString(5, operation.getInitiatedBy());
             stmt.setObject(6, operation);
+            stmt.setInt(7, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
@@ -2281,7 +2282,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
                     sql.append("AND INITIATED_BY = ? ");
                 }
 
-                sql.append("ORDER BY ID ASC ) dm_ordered " +
+                sql.append("ORDER BY ID ASC limit ? , ? ) dm_ordered " +
                         "ON dm_ordered.OPERATION_ID = eom.OPERATION_ID WHERE eom.TENANT_ID = ? ");
             }
 
@@ -2384,7 +2385,8 @@ public class GenericOperationDAOImpl implements OperationDAO {
                     if (activityPaginationRequest.getInitiatedBy() != null) {
                         stmt.setString(index++, activityPaginationRequest.getInitiatedBy());
                     }
-
+                    stmt.setInt(index++, activityPaginationRequest.getOffset());
+                    stmt.setInt(index++, activityPaginationRequest.getLimit());
                     stmt.setInt(index++, tenantId);
 
                     if (activityPaginationRequest.getDeviceType() != null) {
