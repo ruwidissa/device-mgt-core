@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -39,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Objects;
 
 @MultipartConfig
 @WebServlet("/ssoLoginCallback")
@@ -47,6 +49,7 @@ public class SsoLoginCallbackHandler extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String state = req.getParameter("state");
         String code = req.getParameter("code");
         HttpSession session = req.getSession(false);
 
@@ -66,6 +69,11 @@ public class SsoLoginCallbackHandler extends HttpServlet {
             return;
         }
 
+        if (state == null || !Objects.equals(state, session.getAttribute("state").toString())) {
+            resp.sendError(HttpStatus.SC_BAD_REQUEST, "MismatchingStateError: CSRF Warning! State not equal in request and response");
+            return;
+        }
+
         String scope = session.getAttribute("scope").toString();
 
         HttpPost tokenEndpoint = new HttpPost(keyManagerUrl + HandlerConstants.OAUTH2_TOKEN_ENDPOINT);
@@ -75,7 +83,7 @@ public class SsoLoginCallbackHandler extends HttpServlet {
         String loginCallbackUrl = iotsCoreUrl + req.getContextPath() + HandlerConstants.SSO_LOGIN_CALLBACK;
 
         StringEntity tokenEPPayload = new StringEntity(
-                "grant_type=" + HandlerConstants.CODE_GRANT_TYPE + "&code=" + code + "&state=&scope=" + scope +
+                "grant_type=" + HandlerConstants.CODE_GRANT_TYPE + "&code=" + code + "&scope=" + scope +
                         "&redirect_uri=" + loginCallbackUrl,
                 ContentType.APPLICATION_FORM_URLENCODED);
         tokenEndpoint.setEntity(tokenEPPayload);

@@ -86,6 +86,7 @@ public class SsoLoginHandler extends HttpServlet {
     private LoginCache loginCache;
     private OAuthApp oAuthApp;
     private OAuthAppCacheKey oAuthAppCacheKey;
+    private String state;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
@@ -97,6 +98,7 @@ public class SsoLoginHandler extends HttpServlet {
 
             httpSession = req.getSession(true);
 
+            state = HandlerUtil.generateStateToken();
             initializeAdminCredentials();
             baseContextPath = req.getContextPath();
             applicationName = baseContextPath.substring(1, baseContextPath.indexOf("-ui-request-handler"));
@@ -127,12 +129,11 @@ public class SsoLoginHandler extends HttpServlet {
             String scopesSsoString = HandlerUtil.getScopeString(scopesSsoJson);
             String loginCallbackUrl = iotsCoreUrl + baseContextPath + HandlerConstants.SSO_LOGIN_CALLBACK;
             persistAuthSessionData(req, oAuthApp.getClientId(), oAuthApp.getClientSecret(),
-                    oAuthApp.getEncodedClientApp(), scopesSsoString);
-
+                    oAuthApp.getEncodedClientApp(), scopesSsoString, state);
             resp.sendRedirect(keyManagerUrl + HandlerConstants.AUTHORIZATION_ENDPOINT +
                     "?response_type=code" +
+                    "&state=" + state +
                     "&client_id=" + clientId +
-                    "&state=" +
                     "&scope=openid " + scopesSsoString +
                     "&redirect_uri=" + loginCallbackUrl);
         } catch (IOException e) {
@@ -186,7 +187,7 @@ public class SsoLoginHandler extends HttpServlet {
                     clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
                     encodedClientApp = Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes());
                     String scopesString = HandlerUtil.getScopeString(scopes);
-                    persistAuthSessionData(req, clientId, clientSecret, encodedClientApp, scopesString);
+                    persistAuthSessionData(req, clientId, clientSecret, encodedClientApp, scopesString, state);
                 }
 
                 // cache the oauth app credentials
@@ -287,13 +288,14 @@ public class SsoLoginHandler extends HttpServlet {
      * @param scopes           - User scopes
      */
     private void persistAuthSessionData(HttpServletRequest req, String clientId, String clientSecret,
-                                        String encodedClientApp, String scopes) {
+                                        String encodedClientApp, String scopes, String state) {
         httpSession = req.getSession(false);
         httpSession.setAttribute("clientId", clientId);
         httpSession.setAttribute("clientSecret", clientSecret);
         httpSession.setAttribute("encodedClientApp", encodedClientApp);
         httpSession.setAttribute("scope", scopes);
         httpSession.setAttribute("redirectUrl", req.getParameter("redirect"));
+        httpSession.setAttribute("state", state);
         httpSession.setMaxInactiveInterval(sessionTimeOut);
     }
 

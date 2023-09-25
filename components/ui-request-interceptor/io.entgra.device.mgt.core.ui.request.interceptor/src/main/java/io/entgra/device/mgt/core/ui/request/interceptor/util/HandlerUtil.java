@@ -71,6 +71,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -762,5 +764,9 @@ public class HandlerUtil {
                     .getThreadLocalCarbonContext().getOSGiService(OTPManagementService.class, null);
         }
         return otpManagementService;
+    }
+
+    public static String generateStateToken() {
+        return new BigInteger(130, new SecureRandom()).toString(32);
     }
 }
