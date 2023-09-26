@@ -19,10 +19,14 @@
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.JITEnrollmentData;
+import io.entgra.device.mgt.core.ui.request.interceptor.exceptions.JITEnrollmentException;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.xml.sax.SAXException;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -45,7 +49,6 @@ public class JITEnrollmentHandler extends HttpServlet {
     private String os;
     private String redirectUrl;
     private String tenantDomain;
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         try {

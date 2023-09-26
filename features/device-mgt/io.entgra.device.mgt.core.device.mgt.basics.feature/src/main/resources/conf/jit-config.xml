@@ -18,11 +18,27 @@
   ~ under the License.
   -->
 
-<JITProvisionConfiguration>
-    <!--
-    <TenantConfiguration tenantDomain="">
-        <AdminUsername></AdminUsername>
-        <AdminPassword></AdminPassword>
-    </TenantConfiguration>
-    -->
-</JITProvisionConfiguration>
+<JITConfiguration>
+    <EnrollmentConfiguration>
+            <AndroidEnrollmentScopes>
+                <Scope>perm:metadata:view</Scope>
+                <Scope>perm:metadata:create</Scope>
+                <Scope>perm:metadata:update</Scope>
+                <Scope>perm:android:enroll</Scope>
+                <Scope>perm:device:enroll</Scope>
+                <Scope>perm:android:view-configuration</Scope>
+            </AndroidEnrollmentScopes>
+            <IOSEnrollmentScopes>
+                <!-- <Scope></Scope> -->
+            </IOSEnrollmentScopes>
+            <WindowsEnrollmentScopes>
+                <!-- <Scope></Scope> -->
+            </WindowsEnrollmentScopes>
+    </EnrollmentConfiguration>
+    <ServiceProviderConfiguration>
+        <!--<ServiceProvider tenantDomain="" name="">
+            <ClientId></ClientId>
+            <ClientSecret></ClientSecret>
+        </ServiceProvider>-->
+    </ServiceProviderConfiguration>
+</JITConfiguration>

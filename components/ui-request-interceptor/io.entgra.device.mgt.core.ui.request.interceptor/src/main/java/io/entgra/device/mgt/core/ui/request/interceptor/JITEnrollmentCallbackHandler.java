@@ -36,14 +36,25 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.wso2.carbon.utils.CarbonUtils;
+import org.xml.sax.SAXException;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Objects;
 
 @WebServlet(
         name = "JIT Enrollment callback handler",
@@ -62,7 +73,8 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
     private String clientId;
     private String clientSecret;
     private String scope;
-
+    private String JITConfigurationPath;
+    private JITEnrollmentData JITEnrollmentInfo;
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         gatewayUrl = request.getScheme() + HandlerConstants.SCHEME_SEPARATOR
@@ -71,6 +83,7 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
         keyManagerUrl = request.getScheme() + HandlerConstants.SCHEME_SEPARATOR
                 + System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getKeyManagerPort(request.getScheme());
+        JITConfigurationPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "jit-config.xml";
         HttpSession session = request.getSession(false);
         try {
             if (session == null) {
@@ -84,7 +97,7 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
                 return;
             }
 
-            JITEnrollmentData JITEnrollmentInfo = (JITEnrollmentData)
+            JITEnrollmentInfo = (JITEnrollmentData)
                     session.getAttribute(HandlerConstants.SESSION_JIT_ENROLLMENT_DATA_KEY);
             if (JITEnrollmentInfo == null) {
                 response.sendError(HttpStatus.SC_UNAUTHORIZED);
@@ -92,8 +105,7 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
             }
             applicationName = request.getContextPath().substring(1,
                     request.getContextPath().indexOf("-ui-request-handler"));
-            scope = "perm:metadata:view perm:metadata:create perm:metadata:update perm:android:enroll " +
-                    "perm:device:enroll perm:android:view-configuration";
+            initializeJITEnrollmentConfigurations();
             populateApplicationData(registerApplication());
             persistAuthData(session, getToken());
             response.sendRedirect(JITEnrollmentInfo.getRedirectUrl() + "?ownershipType=" +
@@ -101,6 +113,52 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
                     JITEnrollmentInfo.getUsername() + "&tenantDomain=" + JITEnrollmentInfo.getTenantDomain());
         } catch (JITEnrollmentException | IOException ex) {
             log.error("Error occurred while processing JIT provisioning callback request", ex);
+        }
+    }
+
+    private void initializeJITEnrollmentConfigurations() throws JITEnrollmentException {
+        try {
+            File JITConfigurationFile = new File(JITConfigurationPath);
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document JITConfigurationDoc = documentBuilder.parse(JITConfigurationFile);
+            JITConfigurationDoc.getDocumentElement().normalize();
+            Element enrollmentScopes;
+            if (Objects.equals(JITEnrollmentInfo.getOs(), "android")) {
+                enrollmentScopes = (Element) JITConfigurationDoc.
+                        getElementsByTagName("AndroidEnrollmentScopes").item(0);
+            } else if (Objects.equals(JITEnrollmentInfo.getOs(), "ios")) {
+                enrollmentScopes = (Element) JITConfigurationDoc.
+                        getElementsByTagName("IOSEnrollmentScopes").item(0);
+            } else if (Objects.equals(JITEnrollmentInfo.getOs(), "windows"))  {
+                enrollmentScopes = (Element) JITConfigurationDoc.
+                        getElementsByTagName("IOSEnrollmentScopes").item(0);
+            } else {
+                String msg = "OS type not supported";
+                if (log.isDebugEnabled()) {
+                    log.error(msg);
+                }
+                throw new JITEnrollmentException(msg);
+            }
+            NodeList scopeList = enrollmentScopes.getElementsByTagName("Scope");
+            StringBuilder scopeStr = new StringBuilder();
+            for (int idx = 0; idx < scopeList.getLength(); idx++) {
+                Node scopeNode = scopeList.item(idx);
+                if (scopeNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element scopeElement = (Element) scopeNode;
+                    scopeStr.append(" ").append(scopeElement.getTextContent());
+                }
+            }
+            scope = scopeStr.toString();
+        } catch (ParserConfigurationException ex) {
+            String msg = "Error occurred when document builder creating the file configuration";
+            throw new JITEnrollmentException(msg, ex);
+        } catch (IOException ex) {
+            String msg = "IO error occurred while parsing the JIT config file";
+            throw new JITEnrollmentException(msg, ex);
+        } catch (SAXException ex) {
+            String msg = "Parse error occurred while parsing the JIT config document";
+            throw new JITEnrollmentException(msg, ex);
         }
     }
 

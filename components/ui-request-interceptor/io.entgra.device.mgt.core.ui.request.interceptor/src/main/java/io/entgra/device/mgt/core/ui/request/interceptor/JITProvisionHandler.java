@@ -65,14 +65,10 @@ import java.util.Objects;
 public class JITProvisionHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(JITProvisionHandler.class);
     private String tenantDomain;
-    private String adminUsername;
     private String clientId;
     private String JITServiceProviderName;
-    private String apiManagerUrl;
-    private String encodedAdminCredentials;
     private String encodedClientCredentials;
     private String JITConfigurationPath;
-    private String JITCallbackUrl;
     private String redirectUrl;
 
     @Override
@@ -80,14 +76,11 @@ public class JITProvisionHandler extends HttpServlet {
         String keyManagerUrl = request.getScheme() + HandlerConstants.SCHEME_SEPARATOR
                 + System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getKeyManagerPort(request.getScheme());
-        JITCallbackUrl = request.getScheme() + HandlerConstants.SCHEME_SEPARATOR
+        String JITCallbackUrl = request.getScheme() + HandlerConstants.SCHEME_SEPARATOR
                 + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
                 + HandlerConstants.COLON + HandlerUtil.getCorePort(request.getScheme())
                 + request.getContextPath()
                 + HandlerConstants.JIT_PROVISION_CALLBACK_URL;
-        apiManagerUrl = request.getScheme() + HandlerConstants.SCHEME_SEPARATOR
-                + System.getProperty(HandlerConstants.IOT_APIM_HOST_ENV_VAR)
-                + HandlerConstants.COLON + HandlerUtil.getAPIManagerPort(request.getScheme());
         JITConfigurationPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "jit-config.xml";
         String scope = "openid";
         tenantDomain = request.getParameter("tenantDomain");
@@ -103,7 +96,6 @@ public class JITProvisionHandler extends HttpServlet {
                 return;
             }
 
-            populateServiceProvider();
             persistJITData(request.getSession(true));
             response.sendRedirect(keyManagerUrl + HandlerConstants.AUTHORIZATION_ENDPOINT +
                     "?response_type=code" +
@@ -114,24 +106,6 @@ public class JITProvisionHandler extends HttpServlet {
         } catch (JITProvisionException | IOException ex) {
             log.error("Error occurred while processing JIT provisioning request", ex);
         }
-    }
-
-    /***
-     * Construct dynamic client registration request
-     * @return {@link HttpPost} DCR request
-     */
-    private HttpPost buildDCRRequest() {
-        HttpPost DCRRequest = new HttpPost(apiManagerUrl + HandlerConstants.DCR_URL);
-        DCRRequest.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
-        DCRRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedAdminCredentials);
-        JsonObject payload = new JsonObject();
-        payload.addProperty("clientName", JITServiceProviderName);
-        payload.addProperty("owner", adminUsername);
-        payload.addProperty("saasApp", true);
-        payload.addProperty("grantType", HandlerConstants.CODE_GRANT_TYPE);
-        payload.addProperty("callbackUrl", JITCallbackUrl);
-        DCRRequest.setEntity(new StringEntity(payload.toString(), ContentType.APPLICATION_JSON));
-        return DCRRequest;
     }
 
     /***
@@ -159,55 +133,21 @@ public class JITProvisionHandler extends HttpServlet {
     }
 
     /***
-     * Populate service provider details
-     * @throws JITProvisionException throws when dcr request fails due to IO exception
-     */
-    private void populateServiceProvider() throws JITProvisionException {
-        try {
-            HttpPost DCRRequest = buildDCRRequest();
-            ProxyResponse proxyResponse = HandlerUtil.execute(DCRRequest);
-            if (proxyResponse.getCode() == HttpStatus.SC_OK) {
-                JsonObject serviceProvider = parseResponseData(proxyResponse.getData());
-                clientId = serviceProvider.get("clientId").getAsString();
-                String clientSecret = serviceProvider.get("clientSecret").getAsString();
-                String headerValue = clientId + ':' + clientSecret;
-                encodedClientCredentials = Base64.getEncoder().encodeToString(headerValue.getBytes());
-            }
-        } catch (IOException ex) {
-            String msg = "Error exception occurred while executing proxy request";
-            throw new JITProvisionException(msg, ex);
-        }
-    }
-
-    /***
-     * Parse string data and build json object
-     * @param data  - Json string
-     * @return {@link JsonObject} Json object corresponding to provided json string
-     * @throws JITProvisionException throws when error occurred while parsing
-     */
-    private JsonObject parseResponseData(String data) throws JITProvisionException {
-        JsonParser parser = new JsonParser();
-        JsonElement responseData = parser.parse(data);
-        if (responseData.isJsonObject()) {
-            return responseData.getAsJsonObject();
-        }
-        throw new JITProvisionException("Unexpected response body return");
-    }
-
-    /***
      * Find the tenant based configurations and return
      * @param tenantDomain  - Domain of the tenant
      * @param document      - Config doc
      * @return {@link Element} If config found return configuration element, otherwise null
      */
-    private Element findTenantConfigs(String tenantDomain, Document document) {
-        NodeList tenantConfigurations = document.getElementsByTagName("TenantConfiguration");
-        for (int idx = 0; idx < tenantConfigurations.getLength(); idx++) {
-            Node configNode = tenantConfigurations.item(idx);
+    private Element findServiceProvider(String tenantDomain, Document document) {
+        NodeList serviceProviderConfiguration = document.getElementsByTagName("ServiceProvider");
+        for (int idx = 0; idx < serviceProviderConfiguration.getLength(); idx++) {
+            Node configNode = serviceProviderConfiguration.item(idx);
             if (configNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element configElement = (Element) configNode;
                 if (Objects.equals(configElement.getAttributes().
-                        getNamedItem("tenantDomain").getNodeValue(), tenantDomain)) {
+                        getNamedItem("tenantDomain").getNodeValue(), tenantDomain) &&
+                        Objects.equals(configElement.getAttributes().getNamedItem("name").getNodeValue(),
+                                JITServiceProviderName)) {
                     return configElement;
                 }
             }
@@ -227,12 +167,12 @@ public class JITProvisionHandler extends HttpServlet {
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document JITConfigurationDoc = documentBuilder.parse(JITConfigurationFile);
             JITConfigurationDoc.getDocumentElement().normalize();
-            Element tenantConfig = findTenantConfigs(tenantDomain, JITConfigurationDoc);
-            if (tenantConfig == null) return false;
-            adminUsername = tenantConfig.getElementsByTagName("AdminUsername").item(0).getTextContent();
-            String adminPassword = tenantConfig.getElementsByTagName("AdminPassword").item(0).getTextContent();
-            String headerValue = adminUsername + ":" + adminPassword;
-            encodedAdminCredentials = Base64.getEncoder().encodeToString(headerValue.getBytes());
+            Element serviceProvider = findServiceProvider(tenantDomain, JITConfigurationDoc);
+            if (serviceProvider == null) return false;
+            clientId = serviceProvider.getElementsByTagName("ClientId").item(0).getTextContent();
+            String clientSecret = serviceProvider.getElementsByTagName("ClientSecret").item(0).getTextContent();
+            String headerValue = clientId + ":" + clientSecret;
+            encodedClientCredentials = Base64.getEncoder().encodeToString(headerValue.getBytes());
             return true;
         } catch (ParserConfigurationException ex) {
             String msg = "Error occurred when document builder creating the file configuration";
