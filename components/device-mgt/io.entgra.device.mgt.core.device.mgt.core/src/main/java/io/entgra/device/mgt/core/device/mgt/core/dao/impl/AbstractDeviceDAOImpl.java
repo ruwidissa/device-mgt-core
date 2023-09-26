@@ -2811,18 +2811,16 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
      * @throws DeviceManagementDAOException if refactoring fails
      */
     public void refactorEnrolment(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
-        String updateQuery = "UPDATE DM_ENROLMENT SET OWNER = ?, OWNERSHIP = ?, STATUS = ? WHERE DEVICE_ID = ?";
+        String updateQuery = "UPDATE DM_ENROLMENT SET OWNER = ?, STATUS = ? WHERE DEVICE_ID = ?";
 
         try (PreparedStatement preparedStatement = conn.prepareStatement(updateQuery)) {
             for (int deviceId : deviceIds) {
 
                 String randomOwner = generateRandomString(4);
-                String randomOwnership = generateRandomString(6);
 
                 preparedStatement.setString(1, randomOwner);
-                preparedStatement.setString(2, randomOwnership);
-                preparedStatement.setString(3, String.valueOf(Status.DELETED));
-                preparedStatement.setInt(4, deviceId);
+                preparedStatement.setString(2, String.valueOf(Status.DELETED));
+                preparedStatement.setInt(3, deviceId);
 
                 preparedStatement.executeUpdate();
             }
