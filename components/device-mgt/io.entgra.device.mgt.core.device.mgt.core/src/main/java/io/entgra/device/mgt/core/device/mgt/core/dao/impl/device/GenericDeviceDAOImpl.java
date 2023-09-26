@@ -237,7 +237,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "WHERE " +
                     "e.TENANT_ID=? AND " +
                     "d.ID=e.DEVICE_ID AND " +
-                    "STATUS !='REMOVED' AND " +
+                    "STATUS NOT IN ('REMOVED', 'DELETED') AND " +
                     "(" +
                     "DATE_OF_ENROLMENT BETWEEN ? AND ? " +
                     ")";
@@ -276,7 +276,9 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "from DM_DEVICE d, DM_ENROLMENT e " +
                     "where " +
                     "e.TENANT_ID=? and d.ID=e.DEVICE_ID and " +
-                    "STATUS ='REMOVED' and " +
+                    "(" +
+                    "STATUS = 'REMOVED' OR STATUS = 'DELETED' " +
+                    ") and "  +
                     "(" +
                     "DATE_OF_ENROLMENT between ? and ? " +
                     ") and " +
@@ -319,7 +321,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "where " +
                     "e.TENANT_ID=? and " +
                     "d.ID=e.DEVICE_ID and " +
-                    "STATUS !='REMOVED' and " +
+                    "STATUS NOT IN ('REMOVED', 'DELETED') and " +
                     "(" +
                     "DATE_OF_ENROLMENT < ? " +
                     ")";
@@ -358,7 +360,9 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "from DM_DEVICE d, DM_ENROLMENT e " +
                     "where " +
                     "e.TENANT_ID=? and d.ID=e.DEVICE_ID and " +
-                    "STATUS ='REMOVED' and " +
+                    "(" +
+                    "STATUS = 'REMOVED' OR STATUS = 'DELETED' " +
+                    ") and "  +
                     "(" +
                     "DATE_OF_ENROLMENT < ? " +
                     ") and " +
