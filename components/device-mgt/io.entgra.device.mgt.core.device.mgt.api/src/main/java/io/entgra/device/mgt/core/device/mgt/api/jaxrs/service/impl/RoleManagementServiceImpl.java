@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
@@ -28,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleInfo;
@@ -56,6 +58,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants.PRIMARY_USER_STORE;
 
@@ -277,15 +281,32 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         }
     }
 
-    private UIPermissionNode getAllRolePermissions(String roleName, UserRealm userRealm) throws UserAdminException {
-        org.wso2.carbon.user.core.UserRealm userRealmCore = null;
-        if (userRealm instanceof org.wso2.carbon.user.core.UserRealm) {
-            userRealmCore = (org.wso2.carbon.user.core.UserRealm) userRealm;
+    private List<String> processAndFilterPermissions(UIPermissionNode[] rolePermissions, List<String> permissionPaths, List<String> permissions) {
+
+        for (UIPermissionNode rolePermission : rolePermissions) {
+            if (permissionPaths.isEmpty()) {
+                return permissions;
+            }
+
+            if (rolePermission.getNodeList().length == 0) {
+                if (permissionPaths.contains(rolePermission.getResourcePath())) {
+                    permissions.add(rolePermission.getResourcePath());
+                }
+            }
+            permissionPaths.remove(rolePermission.getResourcePath());
+            if (rolePermission.getNodeList().length != 0) {
+                processAndFilterPermissions(rolePermission.getNodeList(), permissionPaths, permissions);
+            }
         }
-        final UserRealmProxy userRealmProxy = new UserRealmProxy(userRealmCore);
-        final UIPermissionNode rolePermissions =
-                userRealmProxy.getRolePermissions(roleName, MultitenantConstants.SUPER_TENANT_ID);
-        return rolePermissions;
+        return permissions;
+    }
+
+    private String[] getPlatformUIPermissions(String roleName, UserRealm userRealm, String[] permissions)
+            throws UserAdminException {
+        UIPermissionNode uiPermissionNode = getUIPermissionNode(roleName, userRealm);
+        List<String> permissionsArray = processAndFilterPermissions(uiPermissionNode.getNodeList(), new ArrayList<>(Arrays.asList(permissions)),
+                new ArrayList<>());
+        return permissionsArray.toArray(new String[0]);
     }
 
     private UIPermissionNode getUIPermissionNode(String roleName, UserRealm userRealm)
@@ -361,18 +382,6 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         }
     }
 
-    private List<String> getAuthorizedPermissions(UIPermissionNode uiPermissionNode, List<String> list) {
-        for (UIPermissionNode permissionNode : uiPermissionNode.getNodeList()) {
-            if (permissionNode.isSelected()) {
-                list.add(permissionNode.getResourcePath());
-            }
-            if (permissionNode.getNodeList() != null && permissionNode.getNodeList().length > 0) {
-                getAuthorizedPermissions(permissionNode, list);
-            }
-        }
-        return list;
-    }
-
     @POST
     @Override
     public Response addRole(RoleInfo roleInfo) {
@@ -383,6 +392,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             if (log.isDebugEnabled()) {
                 log.debug("Persisting the role in the underlying user store");
             }
+
             Permission[] permissions = null;
             if (roleInfo.getPermissions() != null && roleInfo.getPermissions().length > 0) {
                 permissions = new Permission[roleInfo.getPermissions().length];
@@ -392,7 +402,33 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 }
             }
             userStoreManager.addRole(roleInfo.getRoleName(), roleInfo.getUsers(), permissions);
-            authorizeRoleForAppmgt(roleInfo.getRoleName(), roleInfo.getPermissions());
+            try {
+                if (roleInfo.getPermissions() != null && roleInfo.getPermissions().length > 0) {
+                    String finalRoleName = roleInfo.getRoleName();
+                    String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+                    final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                PrivilegedCarbonContext.startTenantFlow();
+                                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                                DeviceMgtAPIUtils.getApiPublisher().updateScopeRoleMapping(roleInfo.getRoleName(),
+                                        RoleManagementServiceImpl.this.getPlatformUIPermissions(finalRoleName, userRealm, roleInfo.getPermissions()));
+                            } catch (APIManagerPublisherException | UserAdminException e) {
+                                log.error("Error Occurred while updating role scope mapping. ", e);
+                            } finally {
+                                PrivilegedCarbonContext.endTenantFlow();
+                            }
+                        }
+                    });
+                    thread.start();
+                }
+            } catch (UserStoreException e) {
+                String msg = "Error occurred while loading the user store.";
+                log.error(msg, e);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
 
             //TODO fix what's returned in the entity
             return Response.created(new URI(API_BASE_PATH + "/" + URLEncoder.encode(roleInfo.getRoleName(), "UTF-8"))).
@@ -502,11 +538,10 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             final UserStoreManager userStoreManager = userRealm.getUserStoreManager();
             if (!userStoreManager.isExistingRole(roleName)) {
-                String msg = "No role exists with the name : " + roleName ;
+                String msg = "No role exists with the name : " + roleName;
                 return Response.status(404).entity(msg).build();
             }
 
-            final AuthorizationManager authorizationManager = userRealm.getAuthorizationManager();
             if (log.isDebugEnabled()) {
                 log.debug("Updating the role to user store");
             }
@@ -528,31 +563,24 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             }
 
             if (roleInfo.getPermissions() != null) {
-                // Get all role permissions
-                final UIPermissionNode rolePermissions = this.getAllRolePermissions(roleName, userRealm);
-                List<String> permissions = new ArrayList<String>();
-                final UIPermissionNode emmRolePermissions = (UIPermissionNode) this.getRolePermissions(roleName);
-                List<String> emmConsolePermissions = new ArrayList<String>();
-                this.getAuthorizedPermissions(emmRolePermissions, emmConsolePermissions);
-                emmConsolePermissions.removeAll(new ArrayList<String>(Arrays.asList(roleInfo.getPermissions())));
-                this.getAuthorizedPermissions(rolePermissions, permissions);
-                for (String permission : roleInfo.getPermissions()) {
-                    permissions.add(permission);
-                }
-                permissions.removeAll(emmConsolePermissions);
-                String[] allApplicablePerms = new String[permissions.size()];
-                allApplicablePerms = permissions.toArray(allApplicablePerms);
-                roleInfo.setPermissions(allApplicablePerms);
-
-                // Delete all authorizations for the current role before authorizing the permission tree
-                authorizationManager.clearRoleAuthorization(roleName);
-                if (roleInfo.getPermissions().length > 0) {
-                    for (int i = 0; i < roleInfo.getPermissions().length; i++) {
-                        String permission = roleInfo.getPermissions()[i];
-                        authorizationManager.authorizeRole(roleName, permission, CarbonConstants.UI_PERMISSION_ACTION);
+                String finalRoleName = roleName;
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            PrivilegedCarbonContext.startTenantFlow();
+                            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                            DeviceMgtAPIUtils.getApiPublisher().updateScopeRoleMapping(roleInfo.getRoleName(),
+                                    RoleManagementServiceImpl.this.getPlatformUIPermissions(finalRoleName, userRealm, roleInfo.getPermissions()));
+                        } catch (APIManagerPublisherException | UserAdminException e) {
+                            log.error("Error Occurred while updating role scope mapping. ", e);
+                        } finally {
+                            PrivilegedCarbonContext.endTenantFlow();
+                        }
                     }
-                }
-                authorizeRoleForAppmgt(roleName, roleInfo.getPermissions());
+                });
+                thread.start();
             }
             //TODO: Need to send the updated role information in the entity back to the client
             return Response.status(Response.Status.OK).entity("Role '" + roleInfo.getRoleName() + "' has " +
@@ -569,70 +597,12 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 String msg = "Role already exists with name : " + role + ". Try with another role name.";
                 log.warn(msg);
                 return Response.status(Response.Status.CONFLICT).entity(msg).build();
-            }else{
+            } else {
                 String msg = "Error occurred while updating role '" + roleName + "'";
                 log.error(msg, e);
                 return Response.serverError().entity(
                         new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
             }
-        } catch (UserAdminException e) {
-            String msg = "Error occurred while updating permissions of the role '" + roleName + "'";
-            log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-        }
-    }
-
-    /**
-     * When presented with role and a set of permissions, if given role has permission to
-     * perform mobile app management, said role will be given rights mobile app collection in the
-     * governance registry.
-     *
-     * @param role
-     * @param permissions
-     * @return state of role update Operation
-     */
-    private boolean authorizeRoleForAppmgt(String role, String[] permissions) {
-        String permissionString =
-                "ra^true:rd^false:wa^true:wd^false:da^true:dd^false:aa^true:ad^false";
-        String resourcePath = "/_system/governance/mobileapps/";
-        boolean appmPermAvailable = false;
-
-        if (permissions != null) {
-            for (int i = 0; i < permissions.length; i++)
-                switch (permissions[i]) {
-                    case "/permission/admin/manage/mobileapp":
-                        appmPermAvailable = true;
-                        break;
-                    case "/permission/admin/manage/mobileapp/create":
-                        appmPermAvailable = true;
-                        break;
-                    case "/permission/admin/manage/mobileapp/publish":
-                        appmPermAvailable = true;
-                        break;
-                }
-        }
-
-        if (appmPermAvailable) {
-            try {
-                Registry registry = CarbonContext.getThreadLocalCarbonContext().
-                        getRegistry(RegistryType.SYSTEM_GOVERNANCE);
-                ChangeRolePermissionsUtil.changeRolePermissions((UserRegistry) registry,
-                        resourcePath, role + ":" + permissionString);
-
-                return true;
-            } catch (Exception e) {
-                String msg = "Error while retrieving user registry in order to update permissions "
-                        + "for resource : " + resourcePath;
-                log.error(msg, e);
-                return false;
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Mobile App Management permissions not selected, therefore role : " +
-                        role + " not given permission for registry collection : " + resourcePath);
-            }
-            return false;
         }
     }
 
