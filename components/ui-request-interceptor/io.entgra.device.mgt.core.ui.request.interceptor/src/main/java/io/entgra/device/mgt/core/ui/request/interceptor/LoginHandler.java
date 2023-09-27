@@ -86,7 +86,8 @@ public class LoginHandler extends HttpServlet {
                 apiRegEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
                         .encodeToString((username + HandlerConstants.COLON + password).getBytes()));
                 apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
-                apiRegEndpoint.setEntity(HandlerUtil.constructAppRegPayload(tags, HandlerConstants.PUBLISHER_APPLICATION_NAME, username, password));
+                apiRegEndpoint.setEntity(HandlerUtil.constructAppRegPayload(tags, HandlerConstants.PUBLISHER_APPLICATION_NAME,
+                        username, password, null, null));
 
                 ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
 

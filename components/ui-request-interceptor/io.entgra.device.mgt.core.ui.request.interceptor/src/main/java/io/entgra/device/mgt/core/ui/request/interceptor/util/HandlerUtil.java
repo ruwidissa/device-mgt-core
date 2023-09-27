@@ -461,15 +461,25 @@ public class HandlerUtil {
      * @param tags - tags which are retrieved by reading app manager configuration
      * @param username - username provided from login form or admin username
      * @param password - password provided from login form or admin password
+     * @param callbackUrl - callback url
+     * @param supportedGrantTypes - supported grant types
      * @return {@link StringEntity} of the payload to create the client application
      */
-    public static StringEntity constructAppRegPayload(JsonArray tags, String appName, String username, String password) {
+    public static StringEntity constructAppRegPayload(JsonArray tags, String appName, String username, String password,
+                                                      String callbackUrl, JsonArray supportedGrantTypes) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(HandlerConstants.APP_NAME_KEY, appName);
         jsonObject.addProperty(HandlerConstants.USERNAME, username);
         jsonObject.addProperty(HandlerConstants.PASSWORD, password);
         jsonObject.addProperty(HandlerConstants.IS_ALLOWED_TO_ALL_DOMAINS_KEY, "false");
         jsonObject.add(HandlerConstants.TAGS_KEY, tags);
+        if (callbackUrl != null) {
+            jsonObject.addProperty(HandlerConstants.CALLBACK_URL_KEY, callbackUrl);
+        }
+        if (supportedGrantTypes != null) {
+            jsonObject.add(HandlerConstants.GRANT_TYPE_KEY, supportedGrantTypes);
+
+        }
         String payload = jsonObject.toString();
         return new StringEntity(payload, ContentType.APPLICATION_JSON);
     }
