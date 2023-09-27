@@ -367,6 +367,7 @@
         <Scope>perm:app:vpp:user:view</Scope>
         <Scope>perm:app:vpp:asset:modify</Scope>
         <Scope>perm:app:vpp:asset:view</Scope>
+        <Scope>perm:android:enroll</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
