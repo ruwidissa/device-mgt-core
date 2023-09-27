@@ -54,7 +54,7 @@ public class DeviceStatusDAOImpl implements DeviceStatusDAO {
       }
 
       if (billingStatus) {
-        sql += " ORDER BY UPDATE_TIME DESC";
+        sql += " ORDER BY ID DESC";
       }
 
       stmt = conn.prepareStatement(sql);

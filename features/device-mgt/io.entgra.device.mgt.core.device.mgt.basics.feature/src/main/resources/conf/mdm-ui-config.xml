@@ -370,6 +370,7 @@
         <Scope>am:store:vpp:user:view</Scope>
         <Scope>am:store:vpp:assets:modify</Scope>
         <Scope>am:store:vpp:assets:view</Scope>
+        <Scope>and:devices:enroll</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

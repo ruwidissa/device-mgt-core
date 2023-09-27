@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.Random;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
@@ -2155,7 +2156,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
-    public void deleteDevices(List<String> deviceIdentifiers, List<Integer> deviceIds, List<Integer> enrollmentIds)
+    public void deleteDevices(List<String> deviceIdentifiers, List<Integer> deviceIds, List<Integer> enrollmentIds, List<Device> validDevices)
             throws DeviceManagementDAOException {
         Connection conn;
         try {
@@ -2210,7 +2211,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                             "operation response, enrollment operation mapping data of " +
                             "devices with identifiers:  " + deviceIdentifiers);
                 }
-                removeDeviceEnrollment(conn, deviceIds);
+                refactorEnrolment(conn, deviceIds);
+                refactorDeviceStatus(conn, validDevices);
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully removed device enrollment data of devices: " + deviceIdentifiers);
                 }
@@ -2218,7 +2220,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully removed device group mapping data of devices: " + deviceIdentifiers);
                 }
-                removeDevice(conn, deviceIds);
+                refactorDevice(conn, deviceIds);
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully permanently deleted the device of devices: " + deviceIdentifiers);
                 }
@@ -2750,30 +2752,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     /***
-     * This method removes records of a given list of enrollments from the DM_ENROLMENT table
-     * @param conn Connection object
-     * @param enrollmentIds list of enrollment ids (primary keys)
-     * @throws DeviceManagementDAOException if deletion fails
-     */
-    private void removeDeviceEnrollment(Connection conn, List<Integer> enrollmentIds)
-            throws DeviceManagementDAOException {
-        String sql = "DELETE FROM DM_ENROLMENT WHERE DEVICE_ID = ?";
-        try {
-            if (!executeBatchOperation(conn, sql, enrollmentIds)) {
-                String msg = "Failed to remove enrollments of devices with enrollmentIds : " + enrollmentIds
-                        + " while executing batch operation";
-                log.error(msg);
-                throw new DeviceManagementDAOException(msg);
-            }
-        } catch (SQLException e) {
-            String msg = "SQL error occurred while removing enrollments of devices with enrollmentIds : "
-                    + enrollmentIds;
-            log.error(msg, e);
-            throw new DeviceManagementDAOException(msg, e);
-        }
-    }
-
-    /***
      * This method removes records of a given list of devices from the DM_DEVICE_GROUP_MAP table
      * @param conn Connection object
      * @param deviceIds list of device ids (primary keys)
@@ -2797,24 +2775,111 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     /***
-     * This method removes records of a given list of devices from the DM_DEVICE table
+     * This method refactors some attributes of a given list of devices which are being deleted by the user
      * @param conn Connection object
      * @param deviceIds list of device ids (primary keys)
-     * @throws DeviceManagementDAOException if deletion fails
+     * @throws DeviceManagementDAOException if refactoring fails
      */
-    private void removeDevice(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
-        String sql = "DELETE FROM DM_DEVICE WHERE ID = ?";
-        try {
-            if (!executeBatchOperation(conn, sql, deviceIds)) {
-                String msg = "Failed to remove devices with deviceIds : " + deviceIds + " while executing batch operation";
-                log.error(msg);
-                throw new DeviceManagementDAOException(msg);
+    public void refactorDevice(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
+        String updateQuery = "UPDATE DM_DEVICE SET DEVICE_IDENTIFICATION = ?, NAME = ? WHERE ID = ?";
+
+        try (PreparedStatement preparedStatement = conn.prepareStatement(updateQuery)) {
+            for (int deviceId : deviceIds) {
+
+                String randomIdentification = generateRandomString(10);
+                String randomName = generateRandomString(20);
+
+                preparedStatement.setString(1, randomIdentification);
+                preparedStatement.setString(2, randomName);
+                preparedStatement.setInt(3, deviceId);
+
+                preparedStatement.executeUpdate();
             }
+
         } catch (SQLException e) {
-            String msg = "SQL error occurred while removing devices with deviceIds : " + deviceIds;
+            String msg = "SQL error occurred while refactoring device properties of deviceIds: " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
+    }
+
+
+    /***
+     * This method refactors some attributes of a given list of devices in the DM_ENROLMENT table
+     * @param conn Connection object
+     * @param deviceIds list of device ids (primary keys)
+     * @throws DeviceManagementDAOException if refactoring fails
+     */
+    public void refactorEnrolment(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
+        String updateQuery = "UPDATE DM_ENROLMENT SET OWNER = ?, STATUS = ? WHERE DEVICE_ID = ?";
+
+        try (PreparedStatement preparedStatement = conn.prepareStatement(updateQuery)) {
+            for (int deviceId : deviceIds) {
+
+                String randomOwner = generateRandomString(4);
+
+                preparedStatement.setString(1, randomOwner);
+                preparedStatement.setString(2, String.valueOf(Status.DELETED));
+                preparedStatement.setInt(3, deviceId);
+
+                preparedStatement.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while refactoring device enrolment properties of deviceIds: " + deviceIds;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    /***
+     * This method updates the status of a given list of devices to DELETED state in the DM_DEVICE_STATUS table
+     * @param conn Connection object
+     * @param validDevices list of devices
+     * @throws DeviceManagementDAOException if updating fails
+     */
+    public void refactorDeviceStatus(Connection conn, List<Device> validDevices) throws DeviceManagementDAOException {
+        String updateQuery = "UPDATE DM_DEVICE_STATUS SET STATUS = ? WHERE ID = ?";
+        String selectLastMatchingRecordQuery = "SELECT ID FROM DM_DEVICE_STATUS WHERE ENROLMENT_ID = ? AND DEVICE_ID = ? ORDER BY ID DESC LIMIT 1";
+
+        try (PreparedStatement selectStatement = conn.prepareStatement(selectLastMatchingRecordQuery);
+             PreparedStatement updateStatement = conn.prepareStatement(updateQuery)) {
+
+            for (Device device : validDevices) {
+
+                selectStatement.setInt(1, device.getEnrolmentInfo().getId());
+                selectStatement.setInt(2, device.getId());
+
+                ResultSet resultSet = selectStatement.executeQuery();
+                int lastRecordId = 0;
+                if (resultSet.next()) {
+                    lastRecordId = resultSet.getInt("ID");
+                }
+
+                updateStatement.setString(1, String.valueOf(Status.DELETED));
+                updateStatement.setInt(2, lastRecordId);
+                updateStatement.execute();
+            }
+
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while updating device status properties.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    private String generateRandomString(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder randomString = new StringBuilder();
+
+        Random random = new Random();
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(characters.length());
+            randomString.append(characters.charAt(index));
+        }
+
+        return randomString.toString();
     }
 
     /***
