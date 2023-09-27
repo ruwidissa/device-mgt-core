@@ -75,21 +75,21 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "View groups",
                         description = "",
-                        key = "perm:admin-groups:view",
+                        key = "gm:admin:groups:view",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/groups/view"}
                 ),
                 @Scope(
                         name = "Count groups",
                         description = "",
-                        key = "perm:admin-groups:count",
+                        key = "gm:admin:groups:count",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/groups/view"}
                 ),
                 @Scope(
                         name = "Add groups",
                         description = "",
-                        key = "perm:admin-groups:add",
+                        key = "gm:admin:groups:add",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/groups/add"}
                 )
@@ -106,7 +106,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:admin:groups:view")
                     })
             }
     )
@@ -182,7 +182,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:admin:groups:view")
                     })
             }
     )
@@ -266,7 +266,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:count")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:admin:groups:count")
                     })
             }
     )
@@ -318,7 +318,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:count")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:admin:groups:count")
                     })
             }
     )
@@ -369,7 +369,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:add")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:admin:groups:add")
                     })
             }
     )
@@ -439,7 +439,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:add")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:add")
                     })
             }
     )

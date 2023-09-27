@@ -69,14 +69,14 @@ import java.util.List;
                 @Scope(
                         name = "Add or Delete Event Definition for device type",
                         description = "Add or Delete Event Definition for device type",
-                        key = "perm:device-types:events",
+                        key = "dm:device-type:event:modify",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/device-type/add"}
                 ),
                 @Scope(
                         name = "Get Events Details of a Device Type",
                         description = "Get Events Details of a Device Type",
-                        key = "perm:device-types:events:view",
+                        key = "dm:device-type:event:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 )
@@ -98,7 +98,7 @@ public interface DeviceEventManagementService {
             tags = "Device Event Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:event:modify")
                     })
             }
     )
@@ -157,7 +157,7 @@ public interface DeviceEventManagementService {
             tags = "Device Event Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:event:modify")
                     })
             }
     )
@@ -209,7 +209,7 @@ public interface DeviceEventManagementService {
 //            tags = "Device Event Management",
 //            extensions = {
 //                    @Extension(properties = {
-//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events:view")
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:event:view")
 //                    })
 //            }
 //    )
@@ -271,7 +271,7 @@ public interface DeviceEventManagementService {
 //            tags = "Device Event Management",
 //            extensions = {
 //                    @Extension(properties = {
-//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events:view")
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:event:view")
 //                    })
 //            }
 //    )
@@ -327,7 +327,7 @@ public interface DeviceEventManagementService {
 //            tags = "Device Event Management",
 //            extensions = {
 //                    @Extension(properties = {
-//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events:view")
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:event:view")
 //                    })
 //            }
 //    )
@@ -387,7 +387,7 @@ public interface DeviceEventManagementService {
             tags = "Device Event Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:events:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:event:view")
                     })
             }
     )

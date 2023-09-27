@@ -67,49 +67,49 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Create Event Stream Artifact",
                         description = "Create Event Stream Artifact",
-                        key = "perm:analytics:artifacts:stream",
+                        key = "dm:an:artifacts:stream:add",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/stream/add"}),
                 @Scope(
                         name = "Delete Stream Artifact",
                         description = "Delete Stream Artifact",
-                        key = "perm:analytics:artifacts:stream:delete",
+                        key = "dm:an:artifacts:stream:delete",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/stream/delete"}),
                 @Scope(
                         name = "Create Event Receiver Artifact",
                         description = "Create Event Receiver Artifact",
-                        key = "perm:analytics:artifacts:receiver",
+                        key = "dm:an:artifacts:rcv:add",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/receiver/add"}),
                 @Scope(
                         name = "Delete Receiver Artifact",
                         description = "Delete Receiver Artifact",
-                        key = "perm:analytics:artifacts:receiver:delete",
+                        key = "dm:an:artifacts:rcv:delete",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/receiver/delete"}),
                 @Scope(
                         name = "Create Event Publisher Artifact",
                         description = "Create Event Publisher Artifact",
-                        key = "perm:analytics:artifacts:publisher",
+                        key = "dm:an:artifacts:pub:add",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/publisher/add"}),
                 @Scope(
                         name = "Delete Publisher Artifact",
                         description = "Delete Publisher Artifact",
-                        key = "perm:analytics:artifacts:publisher:delete",
+                        key = "dm:an:artifacts:pub:delete",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/publisher/delete"}),
                 @Scope(
                         name = "Create Siddhi Script Artifact",
                         description = "Create Siddhi Script Artifact",
-                        key = "perm:analytics:artifacts:siddhi",
+                        key = "dm:an:artifacts:siddhi:add",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/siddhi-script/add"}),
                 @Scope(
                         name = "Delete Siddhi Script Artifact",
                         description = "Delete Siddhi Script Artifact",
-                        key = "perm:analytics:artifacts:siddhi:delete",
+                        key = "dm:an:artifacts:siddhi:delete",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/analytics/artifacts/siddhi-script/delete"})
         }
@@ -134,7 +134,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:stream"
+                                    value = "dm:an:artifacts:stream:add"
                             )})
             }
     )
@@ -192,7 +192,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:stream"
+                                    value = "dm:an:artifacts:stream:add"
                             )})
             }
     )
@@ -238,7 +238,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:stream:delete"
+                                    value = "dm:an:artifacts:stream:delete"
                             )})
             }
     )
@@ -291,7 +291,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:receiver"
+                                    value = "dm:an:artifacts:rcv:add"
                             )})
             }
     )
@@ -343,7 +343,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:receiver"
+                                    value = "dm:an:artifacts:rcv:add"
                             )})
             }
     )
@@ -390,7 +390,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:receiver:delete"
+                                    value = "dm:an:artifacts:rcv:delete"
                             )})
             }
     )
@@ -437,7 +437,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:publisher"
+                                    value = "dm:an:artifacts:pub:add"
                             )})
             }
     )
@@ -489,7 +489,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:publisher"
+                                    value = "dm:an:artifacts:pub:add"
                             )})
             }
     )
@@ -536,7 +536,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:publisher:delete"
+                                    value = "dm:an:artifacts:pub:delete"
                             )})
             }
     )
@@ -580,7 +580,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:siddhi"
+                                    value = "dm:an:artifacts:siddhi:add"
                             )})
             }
     )
@@ -631,7 +631,7 @@ public interface AnalyticsArtifactsManagementService {
                     @Extension(properties = {
                             @ExtensionProperty(
                                     name = Constants.SCOPE,
-                                    value = "perm:analytics:artifacts:siddhi:delete"
+                                    value = "dm:an:artifacts:siddhi:delete"
                             )
                     })
             }

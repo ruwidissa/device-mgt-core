@@ -67,14 +67,14 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "View Whitelabel",
                         description = "View whitelabel details",
-                        key = "perm:whitelabel:view",
+                        key = "dm:whitelable:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/whitelabel/view"}
                 ),
                 @Scope(
                         name = "Update Whitelabel",
                         description = "Updating whitelabel",
-                        key = "perm:whitelabel:update",
+                        key = "dm:whitelable:update",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/whitelabel/update"}
                 ),
@@ -210,7 +210,7 @@ public interface WhiteLabelService {
             tags = "Tenant Metadata Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:whitelabel:update")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:whitelable:update")
                     })
             }
     )
@@ -250,7 +250,7 @@ public interface WhiteLabelService {
             tags = "Tenant Metadata Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:whitelabel:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:whitelable:view")
                     })
             }
     )
@@ -291,7 +291,7 @@ public interface WhiteLabelService {
             tags = "Tenant Metadata Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:whitelabel:update")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:whitelable:update")
                     })
             }
     )

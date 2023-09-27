@@ -80,91 +80,91 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Adding a User",
                         description = "Adding a User",
-                        key = "perm:users:add",
+                        key = "um:users:add",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/manage"}
                 ),
                 @Scope(
                         name = "Getting Details of a User",
                         description = "Getting Details of a User",
-                        key = "perm:users:details",
+                        key = "um:users:details:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Updating Details of a User",
                         description = "Updating Details of a User",
-                        key = "perm:users:update",
+                        key = "um:users:update",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/manage"}
                 ),
                 @Scope(
                         name = "Deleting a User",
                         description = "Deleting a User",
-                        key = "perm:users:delete",
+                        key = "um:users:delete",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/manage"}
                 ),
                 @Scope(
                         name = "Getting the Role Details of a User",
                         description = "Getting the Role Details of a User",
-                        key = "perm:users:roles",
+                        key = "um:roles:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Getting Details of Users",
                         description = "Getting Details of Users",
-                        key = "perm:users:user-details",
+                        key = "um:users:user-details:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Getting the User Count",
                         description = "Getting the User Count",
-                        key = "perm:users:count",
+                        key = "um:users:count",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Getting the User existence status",
                         description = "Getting the User existence status",
-                        key = "perm:users:is-exist",
+                        key = "um:users:is-exist",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Searching for a User Name",
                         description = "Searching for a User Name",
-                        key = "perm:users:search",
+                        key = "um:users:search",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/view"}
                 ),
                 @Scope(
                         name = "Changing the User Password",
                         description = "Adding a User",
-                        key = "perm:users:credentials",
+                        key = "um:users:cred:change",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/login"}
                 ),
                 @Scope(
                         name = "Sending Enrollment Invitations to Users",
                         description = "Sending Enrollment Invitations to Users",
-                        key = "perm:users:send-invitation",
+                        key = "um:users:invite",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/users/manage"}
                 ),
                 @Scope(
                         name = "Get activities",
                         description = "Get activities",
-                        key = "perm:get-activity",
+                        key = "um:activity:get",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Getting the Permissions of the User",
                         description = "Getting the Permissions of the User",
-                        key = "perm:user:permission-view",
+                        key = "um:users:permission:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/login"}
                 )
@@ -187,7 +187,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:add")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:users:add")
                 })
             }
     )
@@ -246,7 +246,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:details")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:users:details:view")
                 })
             }
     )
@@ -317,7 +317,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:update")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:users:update")
                 })
             }
     )
@@ -384,7 +384,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:delete")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:users:delete")
                 })
             }
     )
@@ -429,7 +429,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:roles")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:roles:view")
                 })
             }
     )
@@ -494,7 +494,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:user-details")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:users:user-details:view")
                 })
             }
     )
@@ -572,7 +572,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:user-details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:users:user-details:view")
                     })
             },
             nickname = "getUsersByFilter"
@@ -658,7 +658,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:count")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:users:count")
                     })
             }
     )
@@ -694,7 +694,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:is-exist")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:users:is-exist")
                 })
             }
     )
@@ -738,7 +738,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:search")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:users:search")
                 })
             }
     )
@@ -817,7 +817,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:credentials")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:users:cred:change")
                 })
             }
     )
@@ -864,7 +864,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:send-invitation")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:users:invite")
                 })
             }
     )
@@ -907,7 +907,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:send-invitation")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:users:invite")
                     })
             }
     )
@@ -955,7 +955,7 @@ public interface UserManagementService {
             tags = "Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:activity:get")
                     })
             }
     )
@@ -1031,7 +1031,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:users:details:view")
                     })
             }
     )
@@ -1091,7 +1091,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:users:details:view")
                     })
             }
     )
@@ -1147,7 +1147,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:users:details:view")
                     })
             }
     )
@@ -1203,7 +1203,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:user:permission-view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:users:permission:view")
                     })
             }
     )
@@ -1250,7 +1250,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:user-details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:users:user-details:view")
                     })
             }
     )

@@ -77,28 +77,28 @@ import java.util.List;
                 @Scope(
                         name = "Getting Details of a Device",
                         description = "Getting Details of a Device",
-                        key = "perm:admin:devices:view",
+                        key = "dm:admin:devices:view",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Update the Device Owner",
                         description = "Update the ownership of the device",
-                        key = "perm:admin:devices:update-enrollment",
+                        key = "dm:admin:enrollment:update",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/devices/update-enrollment"}
                 ),
                 @Scope(
                         name = "Permanently Delete the device specified by device id",
                         description = "Permanently Delete the device specified by device id",
-                        key = "perm:devices:permanent-delete",
+                        key = "dm:admin:devices:permanent-delete",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/devices/permanent-delete"}
                 ),
                 @Scope(
                         name = "Get Usage of Devices",
                         description = "Get Usage of Devices",
-                        key = "perm:admin:usage:view",
+                        key = "dm:admin:devices:usage:view",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/devices/usage/view"}
                 ),
@@ -117,7 +117,7 @@ public interface DeviceManagementAdminService {
             tags = "Device Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:devices:view")
                     })
             }
     )
@@ -211,7 +211,7 @@ public interface DeviceManagementAdminService {
             tags = "Device Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:devices:view")
                     })
             }
     )
@@ -264,7 +264,7 @@ public interface DeviceManagementAdminService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:devices:update-enrollment")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:enrollment:update")
                     })
             }
     )
@@ -315,7 +315,7 @@ public interface DeviceManagementAdminService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:permanent-delete")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:devices:permanent-delete")
                     })
             }
     )
@@ -366,7 +366,7 @@ public interface DeviceManagementAdminService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:android:enroll")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "and:devices:enroll")
                     })
             }
     )
@@ -425,7 +425,7 @@ public interface DeviceManagementAdminService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:usage:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:devices:usage:view")
                     })
             }
     )

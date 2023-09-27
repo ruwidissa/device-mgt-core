@@ -55,7 +55,7 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Devicetype deployment",
                         description = "Deploy devicetype",
-                        key = "perm:devicetype:deployment",
+                        key = "dm:device-type:deploy",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/devicetype/deploy"}
                 )
@@ -74,7 +74,7 @@ public interface DeviceAnalyticsArtifactUploaderAdminService {
             tags = "Devicetype Deployment Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devicetype:deployment")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:deploy")
                     })
             })
 

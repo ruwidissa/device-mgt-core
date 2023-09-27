@@ -73,28 +73,28 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "View metadata records",
                         description = "View metadata records",
-                        key = "perm:metadata:view",
+                        key = "dm:metadata:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/metadata/view"}
                 ),
                 @Scope(
                         name = "Create a metadata record",
                         description = "Create a metadata record",
-                        key = "perm:metadata:create",
+                        key = "dm:metadata:create",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/metadata/create"}
                 ),
                 @Scope(
                         name = "Update a metadata record",
                         description = "Updating a specified metadata record",
-                        key = "perm:metadata:update",
+                        key = "dm:metadata:update",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/metadata/update"}
                 ),
                 @Scope(
                         name = "Delete a metadata record",
                         description = "Delete a specified metadata record",
-                        key = "perm:metadata:remove",
+                        key = "dm:metadata:remove",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/metadata/remove"}
                 )
@@ -115,7 +115,7 @@ public interface MetadataService {
             tags = "Device Metadata Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:metadata:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:metadata:view")
                     })
             }
     )
@@ -171,7 +171,7 @@ public interface MetadataService {
             tags = "Device Metadata Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:metadata:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:metadata:view")
                     })
             }
     )
@@ -216,7 +216,7 @@ public interface MetadataService {
             tags = "Device Metadata Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:metadata:create")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:metadata:create")
                     })
             }
     )
@@ -267,7 +267,7 @@ public interface MetadataService {
             tags = "Device Metadata Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:metadata:update")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:metadata:update")
                     })
             }
     )
@@ -314,7 +314,7 @@ public interface MetadataService {
             tags = "Device Metadata Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:metadata:remove")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:metadata:remove")
                     })
             }
     )
