@@ -157,7 +157,7 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Get activities",
                         description = "Get activities",
-                        key = "um:activity:get",
+                        key = "dm:activity:get",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
@@ -955,7 +955,7 @@ public interface UserManagementService {
             tags = "Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "um:activity:get")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                     })
             }
     )

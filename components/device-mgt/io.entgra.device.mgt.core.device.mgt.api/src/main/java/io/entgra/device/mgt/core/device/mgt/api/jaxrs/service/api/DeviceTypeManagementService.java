@@ -89,7 +89,7 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Getting Details of Policies",
                         description = "Getting Details of Policies",
-                        key = "dm:device-type:policies:view",
+                        key = "dm:policies:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/view"}
                 )

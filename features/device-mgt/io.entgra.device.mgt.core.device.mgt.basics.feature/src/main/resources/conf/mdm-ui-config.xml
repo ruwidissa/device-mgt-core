@@ -231,7 +231,6 @@
         <Scope>dm:devices:update</Scope>
         <Scope>dm:devices:view</Scope>
         <Scope>dm:devices:enrollment-guide:view</Scope>
-        <Scope>rep:devices:view</Scope>
         <Scope>dm:conf:view</Scope>
         <Scope>dm:conf:manage</Scope>
         <Scope>pm:policies:remove</Scope>
@@ -242,8 +241,7 @@
         <Scope>pm:policies:activate</Scope>
         <Scope>pm:policies:update</Scope>
         <Scope>pm:policies:change</Scope>
-        <Scope>pm:policies:view</Scope>
-        <Scope>dm:device-type:policies:view</Scope>
+        <Scope>dm:policies:view</Scope>
         <Scope>um:users:add</Scope>
         <Scope>um:users:details:view</Scope>
         <Scope>um:users:count</Scope>
@@ -256,7 +254,6 @@
         <Scope>um:users:update</Scope>
         <Scope>um:users:invite</Scope>
         <Scope>um:admin:users:view</Scope>
-        <Scope>um:activity:get</Scope>
         <Scope>dm:admin:enrollment:update</Scope>
         <Scope>gm:devices:view</Scope>
         <Scope>gm:groups:update</Scope>

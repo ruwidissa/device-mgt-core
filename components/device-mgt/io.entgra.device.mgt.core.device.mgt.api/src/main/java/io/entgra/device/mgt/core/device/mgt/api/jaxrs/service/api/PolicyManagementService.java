@@ -84,7 +84,7 @@ import java.util.List;
                 @Scope(
                         name = "Getting Details of Policies",
                         description = "Getting Details of Policies",
-                        key = "pm:policies:view",
+                        key = "dm:policies:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/view"}
                 ),
@@ -306,7 +306,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:view")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "dm:policies:view")
                 })
             }
     )
@@ -790,7 +790,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:policies:view")
                     })
             },
             nickname = "getPoliciesFilteredByType"
@@ -874,7 +874,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:policies:view")
                     })
             }
     )
