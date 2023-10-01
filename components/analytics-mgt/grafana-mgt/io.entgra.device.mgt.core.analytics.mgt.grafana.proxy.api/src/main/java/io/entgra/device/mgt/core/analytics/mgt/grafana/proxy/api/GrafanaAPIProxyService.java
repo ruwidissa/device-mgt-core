@@ -59,8 +59,8 @@ import javax.ws.rs.core.UriInfo;
                         name = "Using Grafana APIs required for Grafana iframes",
                         description = "Grafana API proxy to validate requests.",
                         key = "grafana:api:view",
-                        roles = {"Internal/grafanamgt-user"},
-                        permissions = {"/analytics-mgt/grafana-mgt/api/view"}
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/device-mgt/grafana/view"}
                 )
         }
 )
