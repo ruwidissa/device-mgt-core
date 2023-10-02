@@ -21,6 +21,7 @@ package io.entgra.device.mgt.core.device.mgt.core.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -31,6 +32,7 @@ import org.json.JSONObject;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.EventPublishingException;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import java.io.IOException;
+import java.net.ConnectException;
 
 public class HttpReportingUtil {
 
@@ -56,6 +58,9 @@ public class HttpReportingUtil {
             apiEndpoint.setEntity(requestEntity);
             HttpResponse response = client.execute(apiEndpoint);
             return response.getStatusLine().getStatusCode();
+        } catch (ConnectException e) {
+            log.error("Connection refused to API endpoint: " + endpoint, e);
+            return HttpStatus.SC_SERVICE_UNAVAILABLE;
         } catch (IOException e) {
             throw new EventPublishingException("Error occurred when " +
                     "invoking API. API endpoint: " + endpoint, e);
