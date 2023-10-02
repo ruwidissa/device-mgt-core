@@ -76,7 +76,7 @@ import java.util.List;
         @Scope(
                 name = "Get activities",
                 description = "Get activities",
-                key = "perm:get-activity",
+                key = "dm:activity:get",
                 roles = {"Internal/devicemgt-user"},
                 permissions = {"/device-mgt/devices/owning-device/view"}
                 )
@@ -97,7 +97,7 @@ public interface ActivityInfoProviderService {
             tags = "Activity Info Provider",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                 })
             }
     )
@@ -171,7 +171,7 @@ public interface ActivityInfoProviderService {
             tags = "Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                     })
             },
             nickname = "getActivitiesByActivityIdList"
@@ -234,7 +234,7 @@ public interface ActivityInfoProviderService {
             tags = "Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                     })
             }
     )
@@ -331,7 +331,7 @@ public interface ActivityInfoProviderService {
             tags = "Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                     })
             },
             nickname = "getActivitiesByOperationCode"
@@ -395,7 +395,7 @@ public interface ActivityInfoProviderService {
             tags = "Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                     })
             },
             nickname = "getActivitiesWithFilters"

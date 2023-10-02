@@ -70,28 +70,28 @@ import java.util.List;
         @Scope(
                 name = "View configurations",
                 description = "",
-                key = "perm:view-configuration",
+                key = "dm:conf:view",
                 roles = {"Internal/devicemgt-user"},
                 permissions = {"/device-mgt/platform-configurations/view"}
         ),
         @Scope(
                 name = "Manage configurations",
                 description = "",
-                key = "perm:manage-configuration",
+                key = "dm:conf:manage",
                 roles = {"Internal/devicemgt-user"},
                 permissions = {"/device-mgt/platform-configurations/manage"}
         ),
         @Scope(
                 name = "Getting Details of Device tenants",
                 description = "Getting Details of Device tenants",
-                key = "perm:admin:tenant:view",
+                key = "admin:tenant:view",
                 roles = {"Internal/devicemgt-user"},
                 permissions = {"/tenants/view"}
         ),
         @Scope(
                 name = "Add a permission to the permission tree",
                 description = "Add a permission to the permission tree",
-                key = "perm:admin:permissions:add",
+                key = "admin:permissions:add",
                 roles = {"Internal/devicemgt-user"},
                 permissions = {"/permissions/add"}
         )
@@ -173,7 +173,7 @@ public interface DeviceManagementConfigService {
             tags = "Device Management Configuration",
             extensions = {
             @Extension(properties = {
-                    @ExtensionProperty(name = "scope", value = "perm:manage-configuration")
+                    @ExtensionProperty(name = "scope", value = "dm:conf:manage")
             })
     }
     )
@@ -257,7 +257,7 @@ public interface DeviceManagementConfigService {
             tags = "Device Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = "scope", value ="perm:admin:tenant:view")
+                            @ExtensionProperty(name = "scope", value ="admin:tenant:view")
                     })
             }
     )
@@ -305,7 +305,7 @@ public interface DeviceManagementConfigService {
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = "scope", value =
-                                    "perm:admin:permissions:add")
+                                    "admin:permissions:add")
                     })
             }
     )

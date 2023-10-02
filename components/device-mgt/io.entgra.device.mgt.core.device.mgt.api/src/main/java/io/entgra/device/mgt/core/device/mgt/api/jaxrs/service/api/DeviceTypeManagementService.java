@@ -68,28 +68,28 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Getting the Supported Device Platforms",
                         description = "Getting the Supported Device Platforms",
-                        key = "perm:device-types:types",
+                        key = "dm:device-type:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/device-type/view"}
                 ),
                 @Scope(
                         name = "Get Feature Details of a Device Type",
                         description = "Get Feature Details of a Device Type",
-                        key = "perm:device-types:features",
+                        key = "dm:device-type:features:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/device-type/features/view"}
                 ),
                 @Scope(
                         name = "Get Config Details of a Device Type",
                         description = "Get Config Details of a Device Type",
-                        key = "perm:device-types:configs",
+                        key = "dm:device-type:conf:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/device-type/config/view"}
                 ),
                 @Scope(
                         name = "Getting Details of Policies",
                         description = "Getting Details of Policies",
-                        key = "perm:policies:get-details",
+                        key = "dm:policies:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/view"}
                 )
@@ -111,7 +111,7 @@ public interface DeviceTypeManagementService {
             tags = "Device Type Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:types")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:view")
                     })
             },
             nickname = "getAllDeviceTypesPaginated"
@@ -193,7 +193,7 @@ public interface DeviceTypeManagementService {
             tags = "Device Type Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:types")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:view")
                     })
             },
             nickname = "getDeviceTypeByDeviceTypeName"
@@ -248,7 +248,7 @@ public interface DeviceTypeManagementService {
             tags = "Device Type Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:features")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:features:view")
                 })
             }
     )
@@ -327,7 +327,7 @@ public interface DeviceTypeManagementService {
             tags = "Device Type Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:configs")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device-type:conf:view")
                     })
             }
     )

@@ -63,7 +63,7 @@ import javax.ws.rs.core.Response;
         @Scope(
                 name = "View configurations",
                 description = "",
-                key = "perm:sms-handler:view-configuration",
+                key = "conf:sms-handler:view",
                 roles = {"Internal/devicemgt-user"},
                 permissions = {"/sms-handler/platform-configurations/view"}
         )
@@ -79,7 +79,7 @@ public interface ConfigurationManagementService {
             tags = "SMS Configuration Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SMSHandlerConstants.SCOPE, value = "perm:sms-handler:view-configuration")
+                            @ExtensionProperty(name = SMSHandlerConstants.SCOPE, value = "conf:sms-handler:view")
                     })
             }
     )

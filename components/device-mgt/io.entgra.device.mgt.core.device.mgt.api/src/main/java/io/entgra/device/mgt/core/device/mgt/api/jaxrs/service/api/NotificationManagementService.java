@@ -71,14 +71,14 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Getting All Device Notification Details",
                         description = "Getting All Device Notification Details",
-                        key = "perm:notifications:view",
+                        key = "dm:notifications:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/notifications/view"}
                 ),
                 @Scope(
                         name = "Updating the Device Notification Status",
                         description = "Updating the Device Notification Status",
-                        key = "perm:notifications:mark-checked",
+                        key = "dm:notif:mark-checked",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/notifications/view"}
                 )
@@ -99,7 +99,7 @@ public interface NotificationManagementService {
             tags = "Device Notification Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:notifications:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:notifications:view")
                     })
             }
     )
@@ -188,7 +188,7 @@ public interface NotificationManagementService {
             tags = "Device Notification Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:notifications:mark-checked")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:notif:mark-checked")
                     })
             }
     )
@@ -228,7 +228,7 @@ public interface NotificationManagementService {
             tags = "Device Notification Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:notifications:mark-checked")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:notif:mark-checked")
                     })
             }
     )

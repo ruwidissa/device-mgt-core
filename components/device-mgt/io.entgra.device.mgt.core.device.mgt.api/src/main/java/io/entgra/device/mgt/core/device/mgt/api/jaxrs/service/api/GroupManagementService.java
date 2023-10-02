@@ -82,112 +82,105 @@ import java.util.List;
                 @Scope(
                         name = "Get the list of groups belongs to current user.",
                         description = "Get the list of groups belongs to current user.",
-                        key = "perm:groups:groups",
+                        key = "gm:groups:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/view"}
                 ),
                 @Scope(
                         name = "Get the count of groups belongs to current user.",
                         description = "Get the count of groups belongs to current user.",
-                        key = "perm:groups:count",
+                        key = "gm:groups:count",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/view"}
                 ),
                 @Scope(
                         name = "Add new device group to the system.",
                         description = "Add new device group to the system.",
-                        key = "perm:groups:add",
+                        key = "gm:groups:add",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/add"}
                 ),
                 @Scope(
                         name = "View group specified",
                         description = "View group specified",
-                        key = "perm:groups:groups-view",
+                        key = "gm:groups:groups-view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/view"}
                 ),
                 @Scope(
                         name = "Update a group",
                         description = "Update a group",
-                        key = "perm:groups:update",
+                        key = "gm:groups:update",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/update"}
                 ),
                 @Scope(
                         name = "Delete a group",
                         description = "Delete a group",
-                        key = "perm:groups:remove",
+                        key = "gm:groups:remove",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/remove"}
                 ),
                 @Scope(
                         name = "Manage group sharing with a user",
                         description = "Manage group sharing with a user",
-                        key = "perm:groups:share",
+                        key = "gm:roles:share",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/share"}
                 ),
                 @Scope(
                         name = "View list of roles of a device group",
                         description = "View list of roles of a device group",
-                        key = "perm:groups:roles",
+                        key = "gm:roles:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/roles/view"}
                 ),
                 @Scope(
                         name = "View list of devices in the device group",
                         description = "View list of devices in the device group",
-                        key = "perm:groups:devices",
+                        key = "gm:devices:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/view"}
                 ),
                 @Scope(
                         name = "View list of device count in the device group",
                         description = "View list of device count in the device group",
-                        key = "perm:groups:devices-count",
+                        key = "gm:devices:count",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/view"}
                 ),
                 @Scope(
                         name = "Add devices to group",
                         description = "Add devices to group",
-                        key = "perm:groups:devices-add",
+                        key = "gm:devices:add",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/add"}
                 ),
                 @Scope(
                         name = "Remove devices from group",
                         description = "Remove devices from group",
-                        key = "perm:groups:devices-remove",
+                        key = "gm:devices:remove",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/remove"}
                 ),
                 @Scope(
                         name = "Assign devices to groups",
                         description = "Assign devices to groups",
-                        key = "perm:groups:assign",
+                        key = "gm:devices:assign",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/add"}
                 ),
                 @Scope(
                         name = "List of groups that have the device",
                         description = "List of groups that have the device",
-                        key = "perm:groups:device",
+                        key = "gm:groups:device:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/devices/view"}
                 ),
                 @Scope(
                         name = "View whether the groups has relevant device types",
                         description = "View whether the groups has relevant device types",
-                        key = "perm:groups:devices-types",
-                        roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/groups/devices/types"}
-                ),
-                @Scope(
-                        name = "View whether the groups has relevant device types",
-                        description = "View whether the groups has relevant device types",
-                        key = "perm:groups:add",
+                        key = "gm:devices-types:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/groups/device-types"}
                 )
@@ -209,7 +202,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:groups")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:view")
                     })
             },
             nickname = "getGroupsWithFilter"
@@ -284,7 +277,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:groups")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:view")
                     })
             },
             nickname = "getGroupsWithHierarchyNonAdmin"
@@ -365,7 +358,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:count")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:count")
                     })
             },
             nickname = "getGroupCountNonAdmin"
@@ -411,7 +404,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:count")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:count")
                     })
             },
             nickname = "getGroupCountNonAdmin"
@@ -456,7 +449,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:add")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:add")
                     })
             },
             nickname = "createGroupByGroupObject"
@@ -525,7 +518,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:groups-view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:groups-view")
                     })
             }
     )
@@ -598,7 +591,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:groups-view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:groups-view")
                     })
             },
             nickname = "getGroupByGroupNameFilter"
@@ -665,7 +658,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:update")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:update")
                     })
             }
     )
@@ -723,7 +716,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:remove")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:remove")
                     })
             }
     )
@@ -780,7 +773,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:share")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:roles:share")
                     })
             }
     )
@@ -837,7 +830,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:roles")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:roles:view")
                     })
             }
     )
@@ -889,7 +882,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:devices")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:devices:view")
                     })
             }
     )
@@ -963,7 +956,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:devices-count")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:devices:count")
                     })
             }
     )
@@ -1016,7 +1009,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:devices-add")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:devices:add")
                     })
             }
     )
@@ -1072,7 +1065,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:devices-remove")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:devices:remove")
                     })
             }
     )
@@ -1129,7 +1122,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:assign")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:devices:assign")
                     })
             }
     )
@@ -1184,7 +1177,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:device")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:device:view")
                     })
             },
             nickname = "getGroupsNonAdmin"
@@ -1246,7 +1239,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:devices-types")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:devices-types:view")
                     })
             },
             nickname = "getGroupByGroupNameFilter"
@@ -1301,7 +1294,7 @@ public interface GroupManagementService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:add")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:add")
                     })
             }
     )

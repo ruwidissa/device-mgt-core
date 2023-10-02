@@ -75,35 +75,35 @@ import java.util.Map;
                 @Scope(
                         name = "Enroll Device",
                         description = "Register a device",
-                        key = "perm:device:enroll",
+                        key = "dm:device:enroll",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/add"}
                 ),
                 @Scope(
                         name = "Modify Device",
                         description = "Modify a device",
-                        key = "perm:device:modify",
+                        key = "dm:device:modify",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/modify"}
                 ),
                 @Scope(
                         name = "Disenroll Device",
                         description = "Disenroll a device",
-                        key = "perm:device:disenroll",
+                        key = "dm:device:disenroll",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/remove"}
                 ),
                 @Scope(
                         name = "Publish Event",
                         description = "publish device event",
-                        key = "perm:device:publish-event",
+                        key = "dm:device:event:publish",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/event"}
                 ),
                 @Scope(
                         name = "Getting Device Operation Details",
                         description = "Getting Device Operation Details",
-                        key = "perm:device:operations",
+                        key = "dm:ops:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 )
@@ -121,7 +121,7 @@ public interface DeviceAgentService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:enroll")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device:enroll")
                     })
             }
     )
@@ -173,7 +173,7 @@ public interface DeviceAgentService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:disenroll")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device:disenroll")
                     })
             }
     )
@@ -203,7 +203,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:modify")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device:modify")
                     })
             }
     )
@@ -261,7 +261,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:publish-event")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device:event:publish")
                     })
             },
             nickname = "publishEventFromAgent"
@@ -327,7 +327,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:publish-event")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device:event:publish")
                     })
             },
             nickname = "publishEventsByTypeAndDevice"
@@ -394,7 +394,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:operations")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:ops:view")
                     })
             }
     )
@@ -453,7 +453,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:operations")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:ops:view")
                     })
             }
     )
@@ -511,7 +511,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:operations")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:ops:view")
                     })
             }
     )
@@ -570,7 +570,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:modify")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device:modify")
                     })
             }
     )
@@ -630,7 +630,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:operations")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:ops:view")
                     })
             }
     )

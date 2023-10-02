@@ -60,7 +60,7 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Remote Session Connection",
                         description = "",
-                        key = "perm:remote-session-service:connect",
+                        key = "dm:remote:connect",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/remote-session"}
                 )
@@ -85,7 +85,7 @@ public interface RemoteSessionService {
             tags = "Remote Session Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:remote-session-service:connect")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:remote:connect")
                     })
             }
     )

@@ -62,35 +62,35 @@ import javax.ws.rs.core.Response;
         @Scope(
                 name = "Adding a new SSL certificate",
                 description = "Adding a new SSL certificate",
-                key = "perm:admin:certificates:add",
+                key = "cm:cert:add",
                 roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/add"}
         ),
         @Scope(
                 name = "Getting Details of an SSL Certificate",
                 description = "Getting Details of an SSL Certificate",
-                key = "perm:admin:certificates:details",
+                key = "cm:cert:details:get",
                 roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/details"}
         ),
         @Scope(
                 name = "Getting Details of Certificates",
                 description = "Getting Details of Certificates",
-                key = "perm:admin:certificates:view",
+                key = "cm:cert:view",
                 roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/view"}
         ),
         @Scope(
                 name = "Deleting an SSL Certificate",
                 description = "Deleting an SSL Certificate",
-                key = "perm:admin:certificates:delete",
+                key = "cm:cert:delete",
                 roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/delete"}
         ),
         @Scope(
                 name = "Verify SSL certificate",
                 description = "Verify SSL certificate",
-                key = "perm:admin:certificates:verify",
+                key = "cm:cert:verify",
                 roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/verify"}
         )
@@ -119,7 +119,7 @@ public interface CertificateManagementAdminService {
             tags = "Certificate Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:admin:certificates:add")
+                            @ExtensionProperty(name = SCOPE, value = "cm:cert:add")
                     })
             }
     )
@@ -188,7 +188,7 @@ public interface CertificateManagementAdminService {
             tags = "Certificate Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:admin:certificates:details")
+                            @ExtensionProperty(name = SCOPE, value = "cm:cert:details:get")
                     })
             }
     )
@@ -260,7 +260,7 @@ public interface CertificateManagementAdminService {
             tags = "Certificate Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:admin:certificates:view")
+                            @ExtensionProperty(name = SCOPE, value = "cm:cert:view")
                     })
             }
     )
@@ -353,7 +353,7 @@ public interface CertificateManagementAdminService {
             tags = "Certificate Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:admin:certificates:delete")
+                            @ExtensionProperty(name = SCOPE, value = "cm:cert:delete")
                     })
             }
     )
@@ -399,7 +399,7 @@ public interface CertificateManagementAdminService {
             tags = "Certificate Management",
             extensions = {
             @Extension(properties = {
-                    @ExtensionProperty(name = SCOPE, value = "perm:admin:certificates:verify")
+                    @ExtensionProperty(name = SCOPE, value = "cm:cert:verify")
             })
             }
     )

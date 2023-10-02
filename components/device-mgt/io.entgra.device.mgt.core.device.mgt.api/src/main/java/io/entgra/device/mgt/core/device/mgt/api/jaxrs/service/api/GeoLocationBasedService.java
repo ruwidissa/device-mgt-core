@@ -72,21 +72,21 @@ import java.util.List;
                 @Scope(
                         name = "View Analytics",
                         description = "",
-                        key = "perm:geo-service:analytics-view",
+                        key = "dm:geo:an:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view-analytics"}
                 ),
                 @Scope(
                         name = "Manage Alerts",
                         description = "",
-                        key = "perm:geo-service:alerts-manage",
+                        key = "dm:geo:alerts:manage",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/manage-alerts"}
                 ),
                 @Scope(
                         name = "Manage Geo Fences",
                         description = "",
-                        key = "perm:geo-service:geo-fence",
+                        key = "dm:geo:geo-fence:manage",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/manage-geo-fence"}
                 )
@@ -111,7 +111,7 @@ public interface GeoLocationBasedService {
 //            tags = "Geo Service Management",
 //            extensions = {
 //                    @Extension(properties = {
-//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:analytics-view")
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:an:view")
 //                    })
 //            }
 //    )
@@ -180,7 +180,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:analytics-view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:an:view")
                     })
             }
     )
@@ -264,7 +264,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:analytics-view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:an:view")
                     })
             }
     )
@@ -381,7 +381,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:alerts:manage")
                     })
             }
     )
@@ -447,7 +447,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:alerts:manage")
                     })
             }
     )
@@ -500,7 +500,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:alerts:manage")
                     })
             }
     )
@@ -565,7 +565,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:alerts:manage")
                     })
             }
     )
@@ -618,7 +618,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:alerts:manage")
                     })
             }
     )
@@ -682,7 +682,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:alerts:manage")
                     })
             }
     )
@@ -735,7 +735,7 @@ public interface GeoLocationBasedService {
 //            tags = "Geo Service Management",
 //            extensions = {
 //                    @Extension(properties = {
-//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:alerts:manage")
 //                    })
 //            }
 //    )
@@ -804,7 +804,7 @@ public interface GeoLocationBasedService {
 //            tags = "Geo Service Management",
 //            extensions = {
 //                    @Extension(properties = {
-//                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+//                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:alerts:manage")
 //                    })
 //            }
 //    )
@@ -863,7 +863,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:alerts:manage")
                     })
             }
     )
@@ -928,7 +928,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:alerts-manage")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:alerts:manage")
                     })
             }
     )
@@ -978,7 +978,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:geo-fence:manage")
                     })
             }
     )
@@ -1020,7 +1020,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:geo-fence:manage")
                     })
             },
             nickname = "getGeofenceByFenceId"
@@ -1071,7 +1071,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:geo-fence:manage")
                     })
             }
     )
@@ -1123,7 +1123,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:geo-fence:manage")
                     })
             }
     )
@@ -1169,7 +1169,7 @@ public interface GeoLocationBasedService {
             tags = "Geo Service Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:geo-service:geo-fence")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:geo:geo-fence:manage")
                     })
             }
     )

@@ -86,7 +86,7 @@ public class AnnotationProcessor {
     private static final String ANNOTATIONS_SCOPES = "scopes";
     private static final String ANNOTATIONS_SCOPE = "scope";
     private static final String DEFAULT_SCOPE_NAME = "default admin scope";
-    private static final String DEFAULT_SCOPE_KEY = "perm:admin";
+    private static final String DEFAULT_SCOPE_KEY = "dm:admin";
     private static final String DEFAULT_SCOPE_PERMISSION = "/permision/device-mgt";
     private static final String DEFAULT_SCOPE_ROLE = "admin";
 
