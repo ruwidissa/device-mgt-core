@@ -55,7 +55,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
             + Constants.COLON + port;
 
     @Override
-    public JSONObject getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    public Scope[] getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllScopesUrl = endPointPrefix + Constants.GET_ALL_SCOPES;
@@ -69,8 +69,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray scopeList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(scopeList.toString(), Scope[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -144,16 +144,16 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         String addNewSharedScopeEndPoint = endPointPrefix + Constants.SCOPE_API_ENDPOINT;
 
         JSONArray bindings = new JSONArray();
-        for (String str : scope.getRoles()) {
+        for (String str : scope.getBindings()) {
             bindings.put(str);
         }
 
         JSONObject payload = new JSONObject();
-        payload.put("name", scope.getKey());
-        payload.put("displayName", scope.getName());
-        payload.put("description", scope.getDescription());
-        payload.put("bindings", bindings);
-        payload.put("usageCount", scope.getUsageCount());
+        payload.put("name", (scope.getName() != null ? scope.getName() : ""));
+        payload.put("displayName", (scope.getDisplayName() != null ? scope.getDisplayName() : ""));
+        payload.put("description", (scope.getDescription() != null ? scope.getDescription() : ""));
+        payload.put("bindings", (bindings != null ? bindings : ""));
+        payload.put("usageCount", (scope.getUsageCount() != 0 ? scope.getUsageCount() : 0));
 
         RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
@@ -196,16 +196,16 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         String updateScopeUrl = endPointPrefix + Constants.SCOPE_API_ENDPOINT + scope.getId();
 
         JSONArray bindings = new JSONArray();
-        for (String str : scope.getRoles()) {
+        for (String str : scope.getBindings()) {
             bindings.put(str);
         }
 
         JSONObject payload = new JSONObject();
-        payload.put("name", scope.getKey());
-        payload.put("displayName", scope.getName());
-        payload.put("description", scope.getDescription());
-        payload.put("bindings", bindings);
-        payload.put("usageCount", scope.getUsageCount());
+        payload.put("name", (scope.getName() != null ? scope.getName() : ""));
+        payload.put("displayName", (scope.getDisplayName() != null ? scope.getDisplayName() : ""));
+        payload.put("description", (scope.getDescription() != null ? scope.getDescription() : ""));
+        payload.put("bindings", (bindings != null ? bindings : ""));
+        payload.put("usageCount", (scope.getUsageCount() != 0 ? scope.getUsageCount() : 0));
 
         RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
@@ -453,7 +453,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 "    \"endpointConfig\": " + api.getEndpointConfig().toString() + ",\n" +
                 "    \"endpointImplementationType\": \"ENDPOINT\",\n" +
                 "    \"scopes\": " + api.getScopes().toString() + ",\n" +
-                "    \"operations\": " + (api.getOperations() != null? api.getOperations().toString() : null) + ",\n" +
+                "    \"operations\": " + (api.getOperations() != null ? api.getOperations().toString() : null) + ",\n" +
                 "    \"threatProtectionPolicies\": null,\n" +
                 "    \"categories\": [],\n" +
                 "    \"keyManagers\": " + gson.toJson(api.getKeyManagers()) + ",\n" +
@@ -632,7 +632,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public boolean deleteApiSpecificMediationPolicy(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                           String uuid, Mediation mediation)
+                                                    String uuid, Mediation mediation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String deleteApiMediationEndPOint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/mediation-policies/" + mediation.getUuid();

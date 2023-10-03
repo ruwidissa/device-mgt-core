@@ -100,7 +100,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
     public static final String SUBSCRIPTION_TO_CURRENT_TENANT = "CURRENT_TENANT";
     public static final String API_GLOBAL_VISIBILITY = "PUBLIC";
     public static final String API_PRIVATE_VISIBILITY = "PRIVATE";
-    private static final String ADMIN_ROLE_KEY = ",admin";
+    private static final String ADMIN_ROLE_KEY = "admin";
 
     private static final Log log = LogFactory.getLog(APIPublisherServiceImpl.class);
 
@@ -184,10 +184,12 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
                                         apiScope.getKey())) {
                                     Scope scope = new Scope();
-                                    scope.setName(apiScope.getName());
+                                    scope.setDisplayName(apiScope.getName());
                                     scope.setDescription(apiScope.getDescription());
-                                    scope.setKey(apiScope.getKey());
-                                    scope.setRoles(apiScope.getRoles() + ADMIN_ROLE_KEY);
+                                    scope.setName(apiScope.getKey());
+                                    List<String> bindings = apiScope.getRoles();
+                                    bindings.add(ADMIN_ROLE_KEY);
+                                    scope.setBindings(bindings);
                                     publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
                                 }
                             }
@@ -257,10 +259,12 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                         } else {
                                             // if new scope add as shared scope
                                             Scope scope = new Scope();
-                                            scope.setName(apiScope.getName());
+                                            scope.setName(apiScope.getKey());
                                             scope.setDescription(apiScope.getDescription());
-                                            scope.setKey(apiScope.getKey());
-                                            scope.setRoles(apiScope.getRoles() + ADMIN_ROLE_KEY);
+                                            scope.setDisplayName(apiScope.getName());
+                                            List<String> bindings = apiScope.getRoles();
+                                            bindings.add(ADMIN_ROLE_KEY);
+                                            scope.setBindings(bindings);
                                             publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
 
                                         }
@@ -278,10 +282,12 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
                                     for (ApiScope apiScope : scopesToMoveAsSharedScopes) {
                                         Scope scope = new Scope();
-                                        scope.setName(apiScope.getName());
+                                        scope.setName(apiScope.getKey());
                                         scope.setDescription(apiScope.getDescription());
-                                        scope.setKey(apiScope.getKey());
-                                        scope.setRoles(apiScope.getRoles() + ADMIN_ROLE_KEY);
+                                        scope.setDisplayName(apiScope.getName());
+                                        List<String> bindings = apiScope.getRoles();
+                                        bindings.add(ADMIN_ROLE_KEY);
+                                        scope.setBindings(bindings);
                                         publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
                                     }
                                 }
@@ -458,10 +464,15 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             for (DefaultPermission defaultPermission: defaultPermissions.getDefaultPermissions()) {
                 //todo check whether scope is available or not
                 ScopeMapping scopeMapping = defaultPermission.getScopeMapping();
-                scope.setName(scopeMapping.getName());
+
+                String[] roles = scopeMapping.getDefaultRoles().split(",");
+                List<String> bindings = Arrays.asList(roles);
+                bindings.add(ADMIN_ROLE_KEY);
+
+                scope.setName(scopeMapping.getKey());
                 scope.setDescription(scopeMapping.getName());
-                scope.setKey(scopeMapping.getKey());
-                scope.setRoles(scopeMapping.getDefaultRoles() + ADMIN_ROLE_KEY);
+                scope.setDisplayName(scopeMapping.getName());
+                scope.setBindings(bindings);
                 publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
             }
         } catch (BadRequestException | UnexpectedResponseException | APIServicesException e) {
@@ -497,7 +508,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
-                JSONObject scopeObject = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
 
                 try {
                     String fileName =
@@ -543,11 +553,11 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             }
 
                             Scope scope = new Scope();
-                            scope.setName(
+                            scope.setDisplayName(
                                     scopeMapping[0] != null ? StringUtils.trim(scopeMapping[0]) : StringUtils.EMPTY);
                             scope.setDescription(
                                     scopeMapping[1] != null ? StringUtils.trim(scopeMapping[1]) : StringUtils.EMPTY);
-                            scope.setKey(
+                            scope.setName(
                                     scopeMapping[2] != null ? StringUtils.trim(scopeMapping[2]) : StringUtils.EMPTY);
                             //                        scope.setPermissions(
                             //                                scopeMapping[3] != null ? StringUtils.trim(scopeMapping[3]) : StringUtils.EMPTY);
@@ -562,30 +572,24 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     }
                                 }
                             }
-                            scope.setRoles(rolesList);
-
-                            //Set scope id which related to the scope key
-                            JSONArray scopeList = (JSONArray) scopeObject.get("list");
-                            for (int i = 0; i < scopeList.length(); i++) {
-                                JSONObject scopeObj = scopeList.getJSONObject(i);
-                                if (scopeObj.getString("name").equals(StringUtils.trim(scopeMapping[2]))) {
-                                    scope.setId(scopeObj.getString("id"));
-                                    scope.setUsageCount(scopeObj.getInt("usageCount"));
-
-//                                  Including already existing roles
-                                    JSONArray existingRolesArray = (JSONArray) scopeObj.get("bindings");
-                                    for (int j = 0; j < existingRolesArray.length(); j++) {
-                                        rolesList.add(existingRolesArray.getString(j));
-                                    }
+                            //Set scope details which related to the scope key
+                            Scope[] scopes = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
+                            for (int i = 0; i < scopes.length; i++) {
+                                Scope relatedScope = scopes[i];
+                                if (relatedScope.getName().equals(scopeMapping[2].toString())) {
+                                    scope.setId(relatedScope.getId());
+                                    scope.setUsageCount(relatedScope.getUsageCount());
+                                    //Including already existing roles
+                                    rolesList.addAll(relatedScope.getBindings());
                                 }
                             }
-                            scope.setRoles(rolesList);
+                            scope.setBindings(rolesList);
 
-                            if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getKey())) {
+                            if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getName())) {
                                 publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);
                             } else {
                                 // todo: come to this level means, that scope is removed from API, but haven't removed from the scope-role-permission-mappings list
-                                log.warn(scope.getKey() + " not available as shared scope");
+                                log.warn(scope.getName() + " not available as shared scope");
                             }
                         }
                         for (String role : rolePermissions.keySet()) {
@@ -598,12 +602,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     }
                 } catch (IOException | DirectoryIteratorException ex) {
                     log.error("failed to read scopes from file.", ex);
-                } catch (APIServicesException | BadRequestException e) {
-                    String errorMsg = "Error while calling APIs";
-                    log.error(errorMsg, e);
-                    throw new APIManagerPublisherException(e);
                 }
-
             }
         } catch (APIServicesException e) {
             String errorMsg = "Error while processing Publisher REST API response";
@@ -639,13 +638,14 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
         try {
             PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
-            JSONObject scopeObject = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
+            Scope[] scopeList = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
+
             Map<String, String> permScopeMap = APIPublisherDataHolder.getInstance().getPermScopeMapping();
             if (permissions.length != 0) {
-                updateScopes(roleName, publisherRESTAPIServices, apiApplicationKey, accessTokenInfo, scopeObject, permissions, permScopeMap, false);
+                updateScopes(roleName, publisherRESTAPIServices, apiApplicationKey, accessTokenInfo, scopeList, permissions, permScopeMap, false);
             }
             if (removedPermissions.length != 0) {
-                updateScopes(roleName, publisherRESTAPIServices, apiApplicationKey, accessTokenInfo, scopeObject, removedPermissions, permScopeMap, true);
+                updateScopes(roleName, publisherRESTAPIServices, apiApplicationKey, accessTokenInfo, scopeList, removedPermissions, permScopeMap, true);
             }
 
             try {
@@ -677,7 +677,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
      * @param publisherRESTAPIServices {@link PublisherRESTAPIServices}
      * @param apiApplicationKey {@link APIApplicationKey}
      * @param accessTokenInfo {@link AccessTokenInfo}
-     * @param scopeObject scope object returning from APIM
+     * @param scopeList scope list returning from APIM
      * @param permissions List of permissions
      * @param permScopeMap Permission Scope map
      * @param removingPermissions if list of permissions has to be removed from the role send true, otherwise sends false.
@@ -685,7 +685,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
      */
     private void updateScopes (String roleName, PublisherRESTAPIServices publisherRESTAPIServices,
                       APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                      JSONObject scopeObject, String[] permissions, Map<String, String> permScopeMap, boolean removingPermissions )
+                      Scope[] scopeList, String[] permissions, Map<String, String> permScopeMap, boolean removingPermissions )
             throws APIManagerPublisherException {
         for (String permission : permissions) {
             String scopeValue = permScopeMap.get(permission);
@@ -696,22 +696,21 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 throw new APIManagerPublisherException(msg);
             }
 
-            JSONArray scopeList = (JSONArray) scopeObject.get("list");
-            for (int i = 0; i < scopeList.length(); i++) {
-                JSONObject scopeObj = scopeList.getJSONObject(i);
-                if (scopeObj.getString("name").equals(scopeValue)) {
+            for (int i = 0; i < scopeList.length; i++) {
+                Scope scopeObj = scopeList[i];
+                if (scopeObj.getName().equals(scopeValue)) {
                     Scope scope = new Scope();
-                    scope.setName(scopeObj.getString("name"));
-                    scope.setKey(scopeObj.getString("name"));
-                    scope.setDescription(scopeObj.getString("description"));
-                    scope.setId(scopeObj.getString("id"));
+                    scope.setName(scopeObj.getName());
+                    scope.setDisplayName(scopeObj.getDisplayName());
+                    scope.setDescription(scopeObj.getDescription());
+                    scope.setId(scopeObj.getId());
 
                     // Including already existing roles
-                    JSONArray existingRolesArray = (JSONArray) scopeObj.get("bindings");
-                    List<String> existingRoleList = new ArrayList<String>();
+                    List<String> existingRoleList = new ArrayList<>();
+                    existingRoleList.addAll(scopeObj.getBindings());
 
-                    for (int j = 0; j < existingRolesArray.length(); j++) {
-                        existingRoleList.add((String) existingRolesArray.get(j));
+                    if (!existingRoleList.contains(roleName)) {
+                        existingRoleList.add(roleName);
                     }
 
                     if (removingPermissions) {
@@ -721,14 +720,14 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             existingRoleList.add(roleName);
                         }
                     }
-                    scope.setRoles(String.join(",", existingRoleList));
+                    scope.setBindings(existingRoleList);
 
                     try {
-                        if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getKey())) {
+                        if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getName())) {
                             publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);
                         } else {
                             // todo: come to this level means, that scope is removed from API, but haven't removed from the scope-role-permission-mappings list
-                            log.warn(scope.getKey() + " not available as shared scope");
+                            log.warn(scope.getName() + " not available as shared scope");
                         }
                     } catch (APIServicesException | BadRequestException | UnexpectedResponseException  e) {
                         log.error("Error occurred while updating role scope mapping via APIM REST endpoint.", e);

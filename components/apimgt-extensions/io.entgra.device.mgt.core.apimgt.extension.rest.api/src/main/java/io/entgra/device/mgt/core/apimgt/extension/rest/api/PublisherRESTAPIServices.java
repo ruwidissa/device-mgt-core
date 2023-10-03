@@ -35,7 +35,7 @@ import java.util.List;
 
 public interface PublisherRESTAPIServices {
 
-    JSONObject getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    Scope[] getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean isSharedScopeNameExists(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String key)
@@ -107,7 +107,7 @@ public interface PublisherRESTAPIServices {
                                  String uuid, String documentID)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation addDocumentation(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+    Documentation addDocumentation(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                    String uuid, Documentation documentation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
