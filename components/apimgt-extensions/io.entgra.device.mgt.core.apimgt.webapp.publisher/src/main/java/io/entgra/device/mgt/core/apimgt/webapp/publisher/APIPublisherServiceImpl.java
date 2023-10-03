@@ -553,36 +553,33 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             //                                scopeMapping[3] != null ? StringUtils.trim(scopeMapping[3]) : StringUtils.EMPTY);
                             String permission = scopeMapping[3] != null ? StringUtils.trim(scopeMapping[3]) : StringUtils.EMPTY;
 
-                            String roleString = "";
+                            List<String> rolesList = new ArrayList<>();
                             for (int i = 4; i < scopeMapping.length; i++) {
                                 if (scopeMapping[i] != null && StringUtils.trim(scopeMapping[i]).equals("Yes")) {
-                                    roleString = roleString + "," + roles.get(i);
+                                    rolesList.add(roles.get(i));
                                     if (rolePermissions.containsKey(roles.get(i)) && StringUtils.isNotEmpty(permission)) {
                                         rolePermissions.get(roles.get(i)).add(permission);
                                     }
                                 }
                             }
-                            if (roleString.length() > 1) {
-                                roleString = roleString.substring(1); // remove first , (comma)
-                            }
-                            scope.setRoles(roleString);
+                            scope.setRoles(rolesList);
 
                             //Set scope id which related to the scope key
                             JSONArray scopeList = (JSONArray) scopeObject.get("list");
                             for (int i = 0; i < scopeList.length(); i++) {
                                 JSONObject scopeObj = scopeList.getJSONObject(i);
-                                if (scopeObj.getString("name").equals(scopeMapping[2] != null ?
-                                        StringUtils.trim(scopeMapping[2]) : StringUtils.EMPTY)) {
+                                if (scopeObj.getString("name").equals(StringUtils.trim(scopeMapping[2]))) {
                                     scope.setId(scopeObj.getString("id"));
+                                    scope.setUsageCount(scopeObj.getInt("usageCount"));
 
 //                                  Including already existing roles
                                     JSONArray existingRolesArray = (JSONArray) scopeObj.get("bindings");
                                     for (int j = 0; j < existingRolesArray.length(); j++) {
-                                        roleString = roleString + "," + existingRolesArray.get(j);
+                                        rolesList.add(existingRolesArray.getString(j));
                                     }
                                 }
                             }
-                            scope.setRoles(roleString);
+                            scope.setRoles(rolesList);
 
                             if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getKey())) {
                                 publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);

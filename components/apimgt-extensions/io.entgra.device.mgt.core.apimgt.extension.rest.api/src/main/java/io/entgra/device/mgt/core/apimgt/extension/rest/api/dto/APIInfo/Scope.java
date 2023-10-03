@@ -18,7 +18,7 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo;
 
 import java.io.Serializable;
-import java.util.Objects;
+import java.util.*;
 
 public class Scope implements Serializable{
 
@@ -26,7 +26,7 @@ public class Scope implements Serializable{
 
     String key;
     String name;
-    String roles;
+    List<String> roles;
     String description;
     String id;
     int usageCount;
@@ -47,12 +47,12 @@ public class Scope implements Serializable{
         this.name = name;
     }
 
-    public String getRoles() {
+    public List<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(String roles) {
-        this.roles = roles;
+    public void setRoles(List<String> roles) {
+        this.roles = removeDuplicatesFromRoleString(roles);
     }
 
     public String getDescription() {
@@ -96,5 +96,13 @@ public class Scope implements Serializable{
     @Override
     public int hashCode() {
         return Objects.hash(key, name, roles, description, id);
+    }
+
+    private static List<String> removeDuplicatesFromRoleString(List<String> roles) {
+        Set<String> roleSet = new HashSet<>();
+        for(String role : roles) {
+            roleSet.add(role.trim());
+        }
+        return new ArrayList<>(roleSet);
     }
 }

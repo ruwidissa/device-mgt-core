@@ -32,7 +32,6 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIService
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.ScopeUtils;
 import okhttp3.*;
 import okhttp3.Request.Builder;
 import org.apache.commons.httpclient.HttpStatus;
@@ -144,14 +143,19 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         String addNewSharedScopeEndPoint = endPointPrefix + Constants.SCOPE_API_ENDPOINT;
 
-        ScopeUtils scopeUtil = new ScopeUtils();
-        scopeUtil.setKey(scope.getKey());
-        scopeUtil.setName(scope.getName());
-        scopeUtil.setDescription(scope.getDescription());
-        scopeUtil.setRoles(scope.getRoles());
-        String scopeString = scopeUtil.toJSON();
+        JSONArray bindings = new JSONArray();
+        for (String str : scope.getRoles()) {
+            bindings.put(str);
+        }
 
-        RequestBody requestBody = RequestBody.create(JSON, scopeString);
+        JSONObject payload = new JSONObject();
+        payload.put("name", scope.getKey());
+        payload.put("displayName", scope.getName());
+        payload.put("description", scope.getDescription());
+        payload.put("bindings", bindings);
+        payload.put("usageCount", scope.getUsageCount());
+
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(addNewSharedScopeEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -191,14 +195,19 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         String updateScopeUrl = endPointPrefix + Constants.SCOPE_API_ENDPOINT + scope.getId();
 
-        ScopeUtils scopeUtil = new ScopeUtils();
-        scopeUtil.setKey(scope.getKey());
-        scopeUtil.setName(scope.getName());
-        scopeUtil.setDescription(scope.getDescription());
-        scopeUtil.setRoles(scope.getRoles());
-        String scopeString = scopeUtil.toJSON();
+        JSONArray bindings = new JSONArray();
+        for (String str : scope.getRoles()) {
+            bindings.put(str);
+        }
 
-        RequestBody requestBody = RequestBody.create(JSON, scopeString);
+        JSONObject payload = new JSONObject();
+        payload.put("name", scope.getKey());
+        payload.put("displayName", scope.getName());
+        payload.put("description", scope.getDescription());
+        payload.put("bindings", bindings);
+        payload.put("usageCount", scope.getUsageCount());
+
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(updateScopeUrl)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
