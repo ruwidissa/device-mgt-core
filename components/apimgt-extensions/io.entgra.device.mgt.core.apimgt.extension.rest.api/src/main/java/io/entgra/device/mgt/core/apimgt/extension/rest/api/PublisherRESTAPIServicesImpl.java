@@ -21,12 +21,7 @@ package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Mediation;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevision;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevisionDeployment;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.*;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
@@ -123,7 +118,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else if (HttpStatus.SC_NOT_FOUND == response.code()) {
-                String msg = "Shared scope key not found";
+                String msg = "Shared scope key not found : " + key;
                 log.info(msg);
                 return false;
             } else {
@@ -144,8 +139,10 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         String addNewSharedScopeEndPoint = endPointPrefix + Constants.SCOPE_API_ENDPOINT;
 
         JSONArray bindings = new JSONArray();
-        for (String str : scope.getBindings()) {
-            bindings.put(str);
+        if (scope.getBindings() != null) {
+            for (String str : scope.getBindings()) {
+                bindings.put(str);
+            }
         }
 
         JSONObject payload = new JSONObject();
@@ -196,8 +193,10 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         String updateScopeUrl = endPointPrefix + Constants.SCOPE_API_ENDPOINT + scope.getId();
 
         JSONArray bindings = new JSONArray();
-        for (String str : scope.getBindings()) {
-            bindings.put(str);
+        if (scope.getBindings() != null) {
+            for (String str : scope.getBindings()) {
+                bindings.put(str);
+            }
         }
 
         JSONObject payload = new JSONObject();
@@ -242,7 +241,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String apiUuid)
+    public APIInfo getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllApi = endPointPrefix + Constants.API_ENDPOINT + apiUuid;
@@ -256,8 +255,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                return gson.fromJson(response.body().string(), APIInfo.class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -281,7 +279,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    public APIInfo[] getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllApis = endPointPrefix + Constants.GET_ALL_APIS;
@@ -295,8 +293,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray apiList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(apiList.toString(), APIInfo[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -320,59 +318,111 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
+    public APIInfo addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String addAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT;
 
-        String apiString = "{\n" +
-                "    \"name\": \"" + api.getName() + "\",\n" +
-                "   \"description\":\"" + api.getDescription() + "\",\n" +
-                "   \"context\":\"" + api.getContext() + "\",\n" +
-                "   \"version\":\"" + api.getVersion() + "\",\n" +
-                "   \"provider\":\"" + api.getProvider() + "\",\n" +
-                "   \"lifeCycleStatus\":\"" + api.getLifeCycleStatus() + "\",\n" +
-                "    \"wsdlInfo\": " + api.getWsdlInfo() + ",\n" +
-                "   \"wsdlUrl\":" + api.getWsdlUrl() + ",\n" +
-                "    \"responseCachingEnabled\": " + api.isResponseCachingEnabled() + ",\n" +
-                "    \"cacheTimeout\": " + api.getCacheTimeout() + ",\n" +
-                "    \"hasThumbnail\": " + api.isHasThumbnail() + ",\n" +
-                "    \"isDefaultVersion\": " + api.isDefaultVersion() + ",\n" +
-                "    \"isRevision\": " + api.isRevision() + ",\n" +
-                "    \"revisionedApiId\": " + api.getRevisionedApiId() + ",\n" +
-                "    \"revisionId\": " + api.getRevisionId() + ",\n" +
-                "    \"enableSchemaValidation\": " + api.isEnableSchemaValidation() + ",\n" +
-                "    \"type\": \"" + api.getType() + "\",\n" +
-                "    \"transport\": " + gson.toJson(api.getTransport()) + ",\n" +
-                "    \"tags\": " + gson.toJson(api.getTags()) + ",\n" +
-                "    \"policies\": " + gson.toJson(api.getPolicies()) + ",\n" +
-                "    \"apiThrottlingPolicy\": " + api.getApiThrottlingPolicy() + ",\n" +
-                "    \"authorizationHeader\": \"" + api.getAuthorizationHeader() + "\",\n" +
-                "    \"visibility\": \"" + api.getVisibility() + "\",\n" +
-                "    \"mediationPolicies\": " + (api.getInSequence() != null ? "[{\"name\": \"" + api.getInSequence() + "\",\"type\": \"in\"}]" : null) + ",\n" +
-                "    \"subscriptionAvailability\": \"" + api.getSubscriptionAvailability() + "\",\n" +
-                "    \"subscriptionAvailableTenants\": [],\n" +
-                "    \"additionalProperties\": [],\n" +
-                "    \"monetization\": " + api.getMonetization() + ",\n" +
-                "    \"corsConfiguration\": " + gson.toJson(api.getCorsConfiguration()) + ",\n" +
-                "    \"websubSubscriptionConfiguration\": {\n" +
-                "        \"enable\": false,\n" +
-                "        \"secret\": \"\",\n" +
-                "        \"signingAlgorithm\": \"SHA1\",\n" +
-                "        \"signatureHeader\": \"x-hub-signature\"\n" +
-                "    },\n" +
-                "    \"workflowStatus\": null,\n" +
-                "    \"endpointConfig\": " + api.getEndpointConfig().toString() + ",\n" +
-                "    \"endpointImplementationType\": \"ENDPOINT\",\n" +
-                "    \"scopes\": " + api.getScopes().toString() + ",\n" +
-                "    \"operations\": " + (api.getOperations() != null ? api.getOperations().toString() : null) + ",\n" +
-                "    \"threatProtectionPolicies\": null,\n" +
-                "    \"categories\": [],\n" +
-                "    \"keyManagers\": " + gson.toJson(api.getKeyManagers()) + ",\n" +
-                "    \"serviceInfo\": " + api.getServiceInfo() + "\n" +
-                "}";
+        JSONObject payload = new JSONObject();
+        payload.put("name", api.getName());
+        payload.put("description", api.getDescription());
+        payload.put("context", api.getContext());
+        payload.put("version", api.getVersion());
+        payload.put("provider", api.getProvider());
+        payload.put("lifeCycleStatus", api.getLifeCycleStatus());
+        payload.put("wsdlInfo", (api.getWsdlInfo() != null ? api.getWsdlInfo() : null));
+        payload.put("wsdlUrl", (api.getWsdlUrl() != null ? api.getWsdlUrl() : null));
+        payload.put("responseCachingEnabled", api.isResponseCachingEnabled());
+        payload.put("cacheTimeout", api.getCacheTimeout());
+        payload.put("hasThumbnail", api.isHasThumbnail());
+        payload.put("isDefaultVersion", api.isDefaultVersion());
+        payload.put("isRevision", api.isRevision());
+        payload.put("revisionedApiId", (api.getRevisionedApiId() != null ? api.getRevisionedApiId() : null));
+        payload.put("revisionId", api.getRevisionId());
+        payload.put("enableSchemaValidation", api.isEnableSchemaValidation());
+        payload.put("type", api.getType());
+        payload.put("apiThrottlingPolicy", api.getApiThrottlingPolicy());
+        payload.put("authorizationHeader", api.getAuthorizationHeader());
+        payload.put("visibility", api.getVisibility());
+        payload.put("subscriptionAvailability", (api.getSubscriptionAvailability() != null ? api.getSubscriptionAvailability() : ""));
 
-        RequestBody requestBody = RequestBody.create(JSON, apiString);
+        //Lists
+        if (api.getTransport() != null) {
+            JSONArray transport = new JSONArray();
+            for (String str : api.getTransport()) {
+                transport.put(str);
+            }
+            payload.put("transport", transport);
+        }
+        if (api.getTags() != null) {
+            JSONArray tags = new JSONArray();
+            for (String str : api.getTags()) {
+                tags.put(str);
+            }
+            payload.put("tags", tags);
+        }
+        if (api.getPolicies() != null) {
+            JSONArray policies = new JSONArray();
+            for (String str : api.getPolicies()) {
+                policies.put(str);
+            }
+            payload.put("policies", policies);
+        }
+        if (api.getMediationPolicies() != null) {
+            JSONArray mediationPolicies = new JSONArray();
+            for (MediationPolicy object : api.getMediationPolicies()) {
+                mediationPolicies.put(new JSONObject(gson.toJson(object)));
+            }
+            payload.put("mediationPolicies", mediationPolicies);
+        }
+        if (api.getSubscriptionAvailableTenants() != null) {
+            JSONArray subscriptionAvailableTenants = new JSONArray();
+            for (String str : api.getSubscriptionAvailableTenants()) {
+                subscriptionAvailableTenants.put(str);
+            }
+            payload.put("subscriptionAvailableTenants", subscriptionAvailableTenants);
+        }
+        if (api.getAdditionalProperties() != null) {
+            JSONArray additionalProperties = new JSONArray();
+            for (AdditionalProperties str : api.getAdditionalProperties()) {
+                additionalProperties.put(str);
+            }
+            payload.put("additionalProperties", additionalProperties);
+        }
+        if (api.getScopes() != null) {
+            JSONArray scopes = new JSONArray();
+            for (JSONObject object : api.getScopes()) {
+                scopes.put(object);
+            }
+            payload.put("scopes", scopes);
+        }
+        if (api.getOperations() != null) {
+            JSONArray operations = new JSONArray();
+            for (Operations operation : api.getOperations()) {
+                operations.put(new JSONObject(gson.toJson(operation)));
+            }
+            payload.put("operations", operations);
+        }
+        if (api.getCategories() != null) {
+            JSONArray categories = new JSONArray();
+            for (String str : api.getCategories()) {
+                categories.put(str);
+            }
+            payload.put("categories", categories);
+        }
+
+        //objects
+        payload.put("monetization", (api.getMonetization() != null ? new JSONObject(gson.toJson(api.getMonetization())) : null));
+        payload.put("corsConfiguration", (api.getCorsConfiguration() != null ? new JSONObject(gson.toJson(api.getCorsConfiguration())) : null));
+        payload.put("websubSubscriptionConfiguration", (api.getWebsubSubscriptionConfiguration() != null ? new JSONObject(gson.toJson(api.getWebsubSubscriptionConfiguration())) : null));
+        payload.put("workflowStatus", (api.getWorkflowStatus() != null ? api.getWorkflowStatus() : null));
+        payload.put("endpointConfig", (api.getEndpointConfig() != null ? api.getEndpointConfig() : null));
+        payload.put("endpointImplementationType", (api.getEndpointImplementationType() != null ? api.getEndpointImplementationType() : null));
+        payload.put("threatProtectionPolicies", (api.getThreatProtectionPolicies() != null ? api.getThreatProtectionPolicies() : null));
+        payload.put("serviceInfo", (api.getServiceInfo() != null ? new JSONObject(gson.toJson(api.getServiceInfo())) : null));
+        payload.put("advertiseInfo", (api.getAdvertiseInfo() != null ? new JSONObject(gson.toJson(api.getAdvertiseInfo())) : null));
+
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(addAPIEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -383,8 +433,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_CREATED == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                return gson.fromJson(response.body().string(), APIInfo.class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -413,54 +462,106 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         String updateAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getId();
 
-        String apiString = "{\n" +
-                "    \"name\": \"" + api.getName() + "\",\n" +
-                "   \"description\":\"" + api.getDescription() + "\",\n" +
-                "   \"context\":\"" + api.getContext() + "\",\n" +
-                "   \"version\":\"" + api.getVersion() + "\",\n" +
-                "   \"provider\":\"" + api.getProvider() + "\",\n" +
-                "   \"lifeCycleStatus\":\"" + api.getLifeCycleStatus() + "\",\n" +
-                "    \"wsdlInfo\": " + api.getWsdlInfo() + ",\n" +
-                "   \"wsdlUrl\":" + api.getWsdlUrl() + ",\n" +
-                "    \"responseCachingEnabled\": " + api.isResponseCachingEnabled() + ",\n" +
-                "    \"cacheTimeout\": " + api.getCacheTimeout() + ",\n" +
-                "    \"hasThumbnail\": " + api.isHasThumbnail() + ",\n" +
-                "    \"isDefaultVersion\": " + api.isDefaultVersion() + ",\n" +
-                "    \"isRevision\": " + api.isRevision() + ",\n" +
-                "    \"revisionedApiId\": " + api.getRevisionedApiId() + ",\n" +
-                "    \"revisionId\": " + api.getRevisionId() + ",\n" +
-                "    \"enableSchemaValidation\": " + api.isEnableSchemaValidation() + ",\n" +
-                "    \"type\": \"" + api.getType() + "\",\n" +
-                "    \"transport\": " + gson.toJson(api.getTransport()) + ",\n" +
-                "    \"tags\": " + gson.toJson(api.getTags()) + ",\n" +
-                "    \"policies\": " + gson.toJson(api.getPolicies()) + ",\n" +
-                "    \"apiThrottlingPolicy\": " + api.getApiThrottlingPolicy() + ",\n" +
-                "    \"authorizationHeader\": \"" + api.getAuthorizationHeader() + "\",\n" +
-                "    \"visibility\": \"" + api.getVisibility() + "\",\n" +
-                "    \"mediationPolicies\": " + (api.getInSequence() != null ? "[{\"name\": \"" + api.getInSequence() + "\",\"type\": \"in\"}]" : null) + ",\n" +
-                "    \"subscriptionAvailability\": \"" + api.getSubscriptionAvailability() + "\",\n" +
-                "    \"subscriptionAvailableTenants\": [],\n" +
-                "    \"additionalProperties\": [],\n" +
-                "    \"monetization\": " + api.getMonetization() + ",\n" +
-                "    \"corsConfiguration\": " + gson.toJson(api.getCorsConfiguration()) + ",\n" +
-                "    \"websubSubscriptionConfiguration\": {\n" +
-                "        \"enable\": false,\n" +
-                "        \"secret\": \"\",\n" +
-                "        \"signingAlgorithm\": \"SHA1\",\n" +
-                "        \"signatureHeader\": \"x-hub-signature\"\n" +
-                "    },\n" +
-                "    \"workflowStatus\": null,\n" +
-                "    \"endpointConfig\": " + api.getEndpointConfig().toString() + ",\n" +
-                "    \"endpointImplementationType\": \"ENDPOINT\",\n" +
-                "    \"scopes\": " + api.getScopes().toString() + ",\n" +
-                "    \"operations\": " + (api.getOperations() != null ? api.getOperations().toString() : null) + ",\n" +
-                "    \"threatProtectionPolicies\": null,\n" +
-                "    \"categories\": [],\n" +
-                "    \"keyManagers\": " + gson.toJson(api.getKeyManagers()) + ",\n" +
-                "    \"serviceInfo\": " + api.getServiceInfo() + "\n" +
-                "}";
+        JSONObject payload = new JSONObject();
+        payload.put("name", api.getName());
+        payload.put("description", api.getDescription());
+        payload.put("context", api.getContext());
+        payload.put("version", api.getVersion());
+        payload.put("provider", api.getProvider());
+        payload.put("lifeCycleStatus", api.getLifeCycleStatus());
+        payload.put("wsdlInfo", (api.getWsdlInfo() != null ? api.getWsdlInfo() : null));
+        payload.put("wsdlUrl", (api.getWsdlUrl() != null ? api.getWsdlUrl() : null));
+        payload.put("responseCachingEnabled", api.isResponseCachingEnabled());
+        payload.put("cacheTimeout", api.getCacheTimeout());
+        payload.put("hasThumbnail", api.isHasThumbnail());
+        payload.put("isDefaultVersion", api.isDefaultVersion());
+        payload.put("isRevision", api.isRevision());
+        payload.put("revisionedApiId", (api.getRevisionedApiId() != null ? api.getRevisionedApiId() : null));
+        payload.put("revisionId", api.getRevisionId());
+        payload.put("enableSchemaValidation", api.isEnableSchemaValidation());
+        payload.put("type", api.getType());
+        payload.put("apiThrottlingPolicy", api.getApiThrottlingPolicy());
+        payload.put("authorizationHeader", api.getAuthorizationHeader());
+        payload.put("visibility", api.getVisibility());
+        payload.put("subscriptionAvailability", (api.getSubscriptionAvailability() != null ? api.getSubscriptionAvailability() : ""));
 
-        RequestBody requestBody = RequestBody.create(JSON, apiString);
+        //Lists
+        if (api.getTransport() != null) {
+            JSONArray transport = new JSONArray();
+            for (String str : api.getTransport()) {
+                transport.put(str);
+            }
+            payload.put("transport", transport);
+        }
+        if (api.getTags() != null) {
+            JSONArray tags = new JSONArray();
+            for (String str : api.getTags()) {
+                tags.put(str);
+            }
+            payload.put("tags", tags);
+        }
+        if (api.getPolicies() != null) {
+            JSONArray policies = new JSONArray();
+            for (String str : api.getPolicies()) {
+                policies.put(str);
+            }
+            payload.put("policies", policies);
+        }
+        if (api.getMediationPolicies() != null) {
+            JSONArray mediationPolicies = new JSONArray();
+            for (MediationPolicy object : api.getMediationPolicies()) {
+                mediationPolicies.put(new JSONObject(gson.toJson(object)));
+            }
+            payload.put("mediationPolicies", mediationPolicies);
+        }
+        if (api.getSubscriptionAvailableTenants() != null) {
+            JSONArray subscriptionAvailableTenants = new JSONArray();
+            for (String str : api.getSubscriptionAvailableTenants()) {
+                subscriptionAvailableTenants.put(str);
+            }
+            payload.put("subscriptionAvailableTenants", subscriptionAvailableTenants);
+        }
+        if (api.getAdditionalProperties() != null) {
+            JSONArray additionalProperties = new JSONArray();
+            for (AdditionalProperties str : api.getAdditionalProperties()) {
+                additionalProperties.put(str);
+            }
+            payload.put("additionalProperties", additionalProperties);
+        }
+        if (api.getScopes() != null) {
+            JSONArray scopes = new JSONArray();
+            for (JSONObject object : api.getScopes()) {
+                scopes.put(object);
+            }
+            payload.put("scopes", scopes);
+        }
+        if (api.getOperations() != null) {
+            JSONArray operations = new JSONArray();
+            for (Operations operation : api.getOperations()) {
+                operations.put(new JSONObject(gson.toJson(operation)));
+            }
+            payload.put("operations", operations);
+        }
+        if (api.getCategories() != null) {
+            JSONArray categories = new JSONArray();
+            for (String str : api.getCategories()) {
+                categories.put(str);
+            }
+            payload.put("categories", categories);
+        }
+
+        //objects
+        payload.put("monetization", (api.getMonetization() != null ? new JSONObject(gson.toJson(api.getMonetization())) : null));
+        payload.put("corsConfiguration", (api.getCorsConfiguration() != null ? new JSONObject(gson.toJson(api.getCorsConfiguration())) : null));
+        payload.put("websubSubscriptionConfiguration", (api.getWebsubSubscriptionConfiguration() != null ? new JSONObject(gson.toJson(api.getWebsubSubscriptionConfiguration())) : null));
+        payload.put("workflowStatus", (api.getWorkflowStatus() != null ? api.getWorkflowStatus() : null));
+        payload.put("endpointConfig", (api.getEndpointConfig() != null ? api.getEndpointConfig() : null));
+        payload.put("endpointImplementationType", (api.getEndpointImplementationType() != null ? api.getEndpointImplementationType() : null));
+        payload.put("threatProtectionPolicies", (api.getThreatProtectionPolicies() != null ? api.getThreatProtectionPolicies() : null));
+        payload.put("serviceInfo", (api.getServiceInfo() != null ? new JSONObject(gson.toJson(api.getServiceInfo())) : null));
+        payload.put("advertiseInfo", (api.getAdvertiseInfo() != null ? new JSONObject(gson.toJson(api.getAdvertiseInfo())) : null));
+
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(updateAPIEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -472,7 +573,6 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
                 return true;
-
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.

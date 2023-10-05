@@ -47,13 +47,13 @@ public interface PublisherRESTAPIServices {
     boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String apiUuid)
+    APIInfo getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    APIInfo[] getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
+    APIInfo addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean updateApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
@@ -91,7 +91,7 @@ public interface PublisherRESTAPIServices {
                               String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeploymentList)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    abstract boolean undeployAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+    boolean undeployAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                                    JSONObject apiRevisionDeployment, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 

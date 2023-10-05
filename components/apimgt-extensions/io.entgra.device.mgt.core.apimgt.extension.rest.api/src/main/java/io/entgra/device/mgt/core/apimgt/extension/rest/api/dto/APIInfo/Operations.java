@@ -18,7 +18,8 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo;
 
-import java.util.Set;
+import org.json.JSONObject;
+import java.util.List;
 
 /**
  * This hold the api operations information.
@@ -29,8 +30,8 @@ public class Operations {
     private String verb;
     private String authType;
     private String throttlingPolicy;
-    private Set<String> scopes;
-    private String usedProductIds;
+    private List<String> scopes;
+    private List<String> usedProductIds;
     private String amznResourceName;
     private String amznResourceTimeout;
     private String payloadSchema;
@@ -78,19 +79,19 @@ public class Operations {
         this.throttlingPolicy = throttlingPolicy;
     }
 
-    public Set<String> getScopes() {
+    public List<String> getScopes() {
         return scopes;
     }
 
-    public void setScopes(Set<String> scopes) {
+    public void setScopes(List<String> scopes) {
         this.scopes = scopes;
     }
 
-    public String getUsedProductIds() {
+    public List<String> getUsedProductIds() {
         return usedProductIds;
     }
 
-    public void setUsedProductIds(String usedProductIds) {
+    public void setUsedProductIds(List<String> usedProductIds) {
         this.usedProductIds = usedProductIds;
     }
 

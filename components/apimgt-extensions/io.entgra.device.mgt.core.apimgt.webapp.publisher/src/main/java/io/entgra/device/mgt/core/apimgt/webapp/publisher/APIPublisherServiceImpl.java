@@ -17,19 +17,15 @@
  */
 package io.entgra.device.mgt.core.apimgt.webapp.publisher;
 
+import com.google.gson.Gson;
+import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Mediation;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevision;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevisionDeployment;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.CORSConfiguration;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.*;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
@@ -91,6 +87,7 @@ import java.util.Date;
  */
 public class APIPublisherServiceImpl implements APIPublisherService {
     public static final APIManagerFactory API_MANAGER_FACTORY = APIManagerFactory.getInstance();
+    private static final Gson gson = new Gson();
     private static final String UNLIMITED_TIER = "Unlimited";
     private static final String WS_UNLIMITED_TIER = "AsyncUnlimited";
     private static final String API_PUBLISH_ENVIRONMENT = "Default";
@@ -166,14 +163,14 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 apiConfig.getName(), apiConfig.getVersion());
 
                         PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
-                        JSONArray apiList = (JSONArray) publisherRESTAPIServices.getApis(apiApplicationKey, accessTokenInfo).get("list");
+                        APIInfo[] apiList = publisherRESTAPIServices.getApis(apiApplicationKey, accessTokenInfo);
                         boolean apiFound = false;
-                        for (int i = 0; i < apiList.length(); i++) {
-                            JSONObject apiObj = apiList.getJSONObject(i);
-                            if (apiObj.getString("name").equals(apiIdentifier.getApiName().replace(Constants.SPACE,
+                        for (int i = 0; i < apiList.length; i++) {
+                            APIInfo apiObj = apiList[i];
+                            if (apiObj.getName().equals(apiIdentifier.getApiName().replace(Constants.SPACE,
                                     Constants.EMPTY_STRING))) {
                                 apiFound = true;
-                                apiIdentifier.setUuid(apiObj.getString("id"));
+                                apiIdentifier.setUuid(apiObj.getId());
                                 break;
                             }
                         }
@@ -194,13 +191,13 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 }
                             }
                             APIInfo api = getAPI(apiConfig, true);
-                            JSONObject createdAPI = publisherRESTAPIServices.addAPI(apiApplicationKey, accessTokenInfo, api);
-                            apiUuid = createdAPI.getString("id");
+                            APIInfo createdAPI = publisherRESTAPIServices.addAPI(apiApplicationKey, accessTokenInfo, api);
+                            apiUuid = createdAPI.getId();
                             if (apiConfig.getEndpointType() != null && "WS".equals(apiConfig.getEndpointType())) {
                                 publisherRESTAPIServices.saveAsyncApiDefinition(apiApplicationKey, accessTokenInfo,
                                         apiUuid, apiConfig.getAsyncApiDefinition());
                             }
-                            if (CREATED_STATUS.equals(createdAPI.getString("lifeCycleStatus"))) {
+                            if (CREATED_STATUS.equals(createdAPI.getLifeCycleStatus())) {
                                 // if endpoint type "dynamic" and then add in sequence
                                 if ("dynamic".equals(apiConfig.getEndpointType())) {
                                     Mediation mediation = new Mediation();
@@ -272,12 +269,12 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 }
 
                                 // Get existing API
-                                JSONObject existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo,
+                                APIInfo existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo,
                                         apiUuid);
                                 if (scopesToMoveAsSharedScopes.size() > 0) {
                                     // update API to remove local scopes
                                     APIInfo api = getAPI(apiConfig, false);
-                                    api.setLifeCycleStatus(existingAPI.getString("lifeCycleStatus"));
+                                    api.setLifeCycleStatus(existingAPI.getLifeCycleStatus());
                                     publisherRESTAPIServices.updateApi(apiApplicationKey, accessTokenInfo, api);
 
                                     for (ApiScope apiScope : scopesToMoveAsSharedScopes) {
@@ -294,7 +291,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
                                 existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo, apiUuid);
                                 APIInfo api = getAPI(apiConfig, true);
-                                api.setLastUpdatedTime(existingAPI.getString("lifeCycleStatus"));
+                                api.setLifeCycleStatus(existingAPI.getLifeCycleStatus());
                                 api.setId(apiUuid);
                                 publisherRESTAPIServices.updateApi(apiApplicationKey, accessTokenInfo, api);
 
@@ -375,7 +372,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 publisherRESTAPIServices.deployAPIRevision(apiApplicationKey, accessTokenInfo,
                                         apiUuid, apiRevisionId, apiRevisionDeploymentList);
 
-                                if (CREATED_STATUS.equals(existingAPI.getString("lifeCycleStatus"))) {
+                                if (CREATED_STATUS.equals(existingAPI.getLifeCycleStatus())) {
                                     publisherRESTAPIServices.changeLifeCycleStatus(apiApplicationKey, accessTokenInfo,
                                             apiUuid, PUBLISH_ACTION);
                                 }
@@ -779,55 +776,49 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         apiInfo.setRevisionedApiId(null);
         apiInfo.setEnableSchemaValidation(false);
 
-        Set<String> tags = new HashSet<>();
+        List<String> tags = new ArrayList<>();
         tags.addAll(Arrays.asList(config.getTags()));
         apiInfo.setTags(tags);
 
-        Set<String> availableTiers = new HashSet<>();
+        List<String> availableTiers = new ArrayList<>();
         if (config.getEndpointType() != null && "WS".equals(config.getEndpointType())) {
             availableTiers.add(WS_UNLIMITED_TIER);
         } else {
             availableTiers.add(UNLIMITED_TIER);
         }
         apiInfo.setPolicies(availableTiers);
-
-        if (config.getEndpointType() != null && "WS".equals(config.getEndpointType())) {
-            apiInfo.setAsyncApiDefinition(config.getAsyncApiDefinition());
-        }
+        apiInfo.setApiThrottlingPolicy(UNLIMITED_TIER);
 
         //set operations and scopes
-        List<JSONObject> operations = new ArrayList();
+        List<Operations> operations = new ArrayList();
         List<JSONObject> scopeSet = new ArrayList();
         Iterator<ApiUriTemplate> iterator;
+
         for (iterator = config.getUriTemplates().iterator(); iterator.hasNext(); ) {
             ApiUriTemplate apiUriTemplate = iterator.next();
-            JSONObject operation = new JSONObject();
-            operation.put("target", apiUriTemplate.getUriTemplate());
-            operation.put("verb", apiUriTemplate.getHttpVerb());
-            operation.put("authType", apiUriTemplate.getAuthType());
-            operation.put("throttlingPolicy", UNLIMITED_TIER);
-            operation.put("uriMapping", apiUriTemplate.getUriMapping());
+            Operations operation = new Operations();
+            operation.setTarget(apiUriTemplate.getUriTemplate());
+            operation.setVerb(apiUriTemplate.getHttpVerb());
+            operation.setAuthType(apiUriTemplate.getAuthType());
+            operation.setThrottlingPolicy(UNLIMITED_TIER);
+            operation.setUriMapping(apiUriTemplate.getUriMapping());
             if (includeScopes) {
                 if (apiUriTemplate.getScope() != null) {
-                    String scopeString = "{\n" +
-                            "            \"scope\": {\n" +
-                            "                \"id\": null,\n" +
-                            "                \"name\": \"" + apiUriTemplate.getScope().getKey() + "\",\n" +
-                            "                \"displayName\": \"" + apiUriTemplate.getScope().getName() + "\",\n" +
-                            "                \"description\": \"" + apiUriTemplate.getScope().getDescription() + "\",\n" +
-                            "                \"bindings\": [\n" +
-                            "                    \"" + apiUriTemplate.getScope().getRoles() + "\"\n" +
-                            "                ],\n" +
-                            "                \"usageCount\": null\n" +
-                            "            },\n" +
-                            "            \"shared\": true\n" +
-                            "        }";
-                    JSONObject scope = new JSONObject(scopeString);
-                    scopeSet.add(scope);
+                    Scope scope = new Scope();
+                    scope.setName(apiUriTemplate.getScope().getKey());
+                    scope.setDisplayName(apiUriTemplate.getScope().getName());
+                    scope.setDescription(apiUriTemplate.getScope().getDescription());
+                    scope.setBindings(apiUriTemplate.getScope().getRoles());
 
-                    Set<String> scopes = new HashSet<>();
-                    scopes.add(apiUriTemplate.getScope().getKey());
-                    operation.put("scopes", scopes);
+                    JSONObject scopeObject = new JSONObject();
+                    scopeObject.put("scope", new JSONObject(gson.toJson(scope)));
+                    scopeObject.put("shared", true);
+
+                    scopeSet.add(scopeObject);
+
+                    List<String> scopes = new ArrayList<>();
+                    scopes.addAll(Arrays.asList(apiUriTemplate.getScope().getKey()));
+                    operation.setScopes(scopes);
                 }
             }
             operations.add(operation);
@@ -855,8 +846,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 "    }";
         JSONObject endPointConfig = new JSONObject(endpointConfig);
 
-        Set<String> transports = new HashSet<>();
-        transports.addAll(Arrays.asList(config.getTransports()));
+        List<String> transports = new ArrayList<>();
+        transports.addAll(Arrays.asList(config.getTransports().split(",")));
         apiInfo.setTransport(transports);
 
         apiInfo.setType("HTTP");
@@ -872,7 +863,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     "        }\n" +
                     "    }";
             endPointConfig = new JSONObject(endpointConfig);
-            apiInfo.setInSequence(config.getInSequenceName());
+            apiInfo.setEndpointImplementationType("ENDPOINT");
         }
 
         // if ws endpoint
@@ -888,7 +879,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     "    }";
             endPointConfig = new JSONObject(endpointConfig);
 
-            transports.addAll(Arrays.asList("wss,ws"));
+            transports.add("wss");
+            transports.add("ws");
             apiInfo.setTransport(transports);
             apiInfo.setType("WS");
         }
@@ -922,6 +914,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         apiInfo.setEnableSchemaValidation(false);
         apiInfo.setMonetization(null);
         apiInfo.setServiceInfo(null);
+        apiInfo.setWebsubSubscriptionConfiguration(null);
+        apiInfo.setAdvertiseInfo(null);
 
         return apiInfo;
     }
