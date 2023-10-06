@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
+import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceDetailsWrapper;
@@ -232,9 +233,19 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                     deviceDetailsWrapper.setGroups(groups);
                 }
 
-                String[] rolesOfUser = DeviceManagerUtil.getRolesOfUser(CarbonContext
-                        .getThreadLocalCarbonContext()
-                        .getUsername());
+                String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+                if (StringUtils.isEmpty(username)) {
+                    boolean isUserAuthorized = DeviceManagementDataHolder.getInstance().
+                            getDeviceAccessAuthorizationService().isUserAuthorized(
+                                    new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()),
+                                    device.getEnrolmentInfo().getOwner()
+                            );
+                    if (isUserAuthorized) {
+                        username = device.getEnrolmentInfo().getOwner();
+                    }
+                }
+
+                String[] rolesOfUser = DeviceManagerUtil.getRolesOfUser(username);
                 if (rolesOfUser != null && rolesOfUser.length > 0) {
                     deviceDetailsWrapper.setRole(rolesOfUser);
                 }
@@ -248,6 +259,10 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 log.error("Error occurred while getting group list", e);
             } catch (UserStoreException e) {
                 log.error("Error occurred while getting role list", e);
+            } catch (DeviceAccessAuthorizationException e) {
+                log.error("User with name '" + device.getEnrolmentInfo().getOwner() +
+                        "' is unauthorized to publish events for device with the id '" +
+                        device.getDeviceIdentifier() + "'", e);
             }
         } else {
             if(log.isTraceEnabled()) {
