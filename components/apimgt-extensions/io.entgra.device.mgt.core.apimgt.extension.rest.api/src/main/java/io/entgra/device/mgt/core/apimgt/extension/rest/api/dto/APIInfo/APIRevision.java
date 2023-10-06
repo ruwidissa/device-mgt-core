@@ -17,26 +17,26 @@
  */
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo;
 
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class APIRevision implements Serializable {
     private static final long serialVersionUID = 1L;
-    private int id;
+    private String id;
     private String apiUUID;
     private String revisionUUID;
     private String description;
+    private String displayName;
     private String createdBy;
     private String createdTime;
-    private List<APIRevisionDeployment>  apiRevisionDeploymentList;
+    private APIInfo apiInfo;
+    private List<APIRevisionDeployment> deploymentInfo;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -80,11 +80,28 @@ public class APIRevision implements Serializable {
         this.createdTime = createdTime;
     }
 
-    public List<APIRevisionDeployment> getApiRevisionDeploymentList() {
-        return apiRevisionDeploymentList;
+    public List<APIRevisionDeployment> getDeploymentInfo() {
+        return deploymentInfo;
     }
 
-    public void setApiRevisionDeploymentList(List<APIRevisionDeployment> apiRevisionDeploymentList) {
-        this.apiRevisionDeploymentList = apiRevisionDeploymentList;
+    public void setDeploymentInfo(List<APIRevisionDeployment> deploymentInfo) {
+        this.deploymentInfo = deploymentInfo;
     }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public APIInfo getApiInfo() {
+        return apiInfo;
+    }
+
+    public void setApiInfo(APIInfo apiInfo) {
+        this.apiInfo = apiInfo;
+    }
+
 }

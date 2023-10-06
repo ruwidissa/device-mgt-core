@@ -215,10 +215,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 apiRevision.setApiUUID(apiUuid);
                                 apiRevision.setDescription("Initial Revision");
                                 String apiRevisionId = publisherRESTAPIServices.addAPIRevision(apiApplicationKey,
-                                        accessTokenInfo, apiRevision).getString("id");
+                                        accessTokenInfo, apiRevision).getId();
 
                                 APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                                apiRevisionDeployment.setDeployment(API_PUBLISH_ENVIRONMENT);
+                                apiRevisionDeployment.setName(API_PUBLISH_ENVIRONMENT);
                                 apiRevisionDeployment.setVhost(System.getProperty("iot.gateway.host"));
                                 apiRevisionDeployment.setDisplayOnDevportal(true);
 
@@ -308,15 +308,14 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     mediation.setType("in");
                                     mediation.setGlobal(false);
 
-                                    JSONArray mediationList = (JSONArray) publisherRESTAPIServices
-                                            .getAllApiSpecificMediationPolicies(apiApplicationKey, accessTokenInfo,
-                                                    apiUuid).get("list");
+                                    MediationPolicy[] mediationList = publisherRESTAPIServices
+                                            .getAllApiSpecificMediationPolicies(apiApplicationKey, accessTokenInfo, apiUuid);
 
                                     boolean isMediationPolicyFound = false;
-                                    for (int i = 0; i < mediationList.length(); i++) {
-                                        JSONObject mediationObj = mediationList.getJSONObject(i);
-                                        if (apiConfig.getInSequenceName().equals(mediationObj.getString("name"))) {
-                                            mediation.setUuid(mediationObj.getString("id"));
+                                    for (int i = 0; i < mediationList.length; i++) {
+                                        MediationPolicy mediationPolicy = mediationList[i];
+                                        if (apiConfig.getInSequenceName().equals(mediationPolicy.getName())) {
+                                            mediation.setUuid(mediationPolicy.getId());
                                             publisherRESTAPIServices.deleteApiSpecificMediationPolicy(apiApplicationKey,
                                                     accessTokenInfo, apiUuid, mediation);
                                             publisherRESTAPIServices.addApiSpecificMediationPolicy(apiApplicationKey,
@@ -331,24 +330,22 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     }
                                 }
 
-                                int apiRevisionCount = (int) publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
-                                        accessTokenInfo, apiUuid, null).get("count");
+                                int apiRevisionCount = publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
+                                        accessTokenInfo, apiUuid, null).length;
                                 if (apiRevisionCount >= 5) {
                                     // This will retrieve the deployed revision
-                                    JSONArray revisionDeploymentList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(
-                                            apiApplicationKey, accessTokenInfo, apiUuid,
-                                            true).get("list");
-                                    if (revisionDeploymentList.length() > 0) {
-                                        JSONObject latestRevisionDeployment = revisionDeploymentList.getJSONObject(0);
+                                    APIRevision[] revisionDeploymentList = publisherRESTAPIServices.getAPIRevisions(
+                                            apiApplicationKey, accessTokenInfo, apiUuid, true);
+                                    if (revisionDeploymentList.length > 0) {
+                                        APIRevision latestRevisionDeployment = revisionDeploymentList[0];
                                         publisherRESTAPIServices.undeployAPIRevisionDeployment(apiApplicationKey,
                                                 accessTokenInfo, latestRevisionDeployment, apiUuid);
                                     }
-                                    // This will retrieve the un deployed revision list
-                                    JSONArray undeployedRevisionList = (JSONArray) publisherRESTAPIServices.getAPIRevisions(
-                                            apiApplicationKey, accessTokenInfo, apiUuid,
-                                            false).get("list");
-                                    if (undeployedRevisionList.length() > 0) {
-                                        JSONObject earliestUndeployRevision = undeployedRevisionList.getJSONObject(0);
+                                    // This will retrieve the undeployed revision list
+                                    APIRevision[] undeployedRevisionList = publisherRESTAPIServices.getAPIRevisions(apiApplicationKey,
+                                            accessTokenInfo, apiUuid, false);
+                                    if (undeployedRevisionList.length > 0) {
+                                        APIRevision earliestUndeployRevision = undeployedRevisionList[0];
                                         publisherRESTAPIServices.deleteAPIRevision(apiApplicationKey, accessTokenInfo,
                                                 earliestUndeployRevision, apiUuid);
                                     }
@@ -359,10 +356,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 apiRevision.setApiUUID(apiUuid);
                                 apiRevision.setDescription("Updated Revision");
                                 String apiRevisionId = publisherRESTAPIServices.addAPIRevision(apiApplicationKey,
-                                        accessTokenInfo, apiRevision).getString("id");
+                                        accessTokenInfo, apiRevision).getId();
 
                                 APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                                apiRevisionDeployment.setDeployment(API_PUBLISH_ENVIRONMENT);
+                                apiRevisionDeployment.setName(API_PUBLISH_ENVIRONMENT);
                                 apiRevisionDeployment.setVhost(System.getProperty("iot.gateway.host"));
                                 apiRevisionDeployment.setDisplayOnDevportal(true);
 

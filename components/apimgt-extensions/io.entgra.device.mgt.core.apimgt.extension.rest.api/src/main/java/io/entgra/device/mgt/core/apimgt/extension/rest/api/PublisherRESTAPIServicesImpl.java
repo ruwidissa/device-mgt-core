@@ -643,7 +643,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+    public MediationPolicy[] getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                                          String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
@@ -658,8 +658,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray mediationPolicyList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(mediationPolicyList.toString(), MediationPolicy[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -814,7 +814,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getAPIRevisions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
+    public APIRevision[] getAPIRevisions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
                                       Boolean deploymentStatus)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
@@ -831,8 +831,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray revisionList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(revisionList.toString(), APIRevision[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -856,16 +856,15 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIRevision apiRevision)
+    public APIRevision addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIRevision apiRevision)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String addNewScope = endPointPrefix + Constants.API_ENDPOINT + apiRevision.getApiUUID() + "/revisions";
 
-        String apiRevisionDescription = "{\n" +
-                "   \"description\":\"" + apiRevision.getDescription() + "\"\n" +
-                "}";
+        JSONObject payload = new JSONObject();
+        payload.put("description", (apiRevision.getDescription() != null ? apiRevision.getDescription() : null));
 
-        RequestBody requestBody = RequestBody.create(JSON, apiRevisionDescription);
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(addNewScope)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -876,8 +875,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_CREATED == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                return gson.fromJson(response.body().string(), APIRevision.class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -908,15 +906,14 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         String deployAPIRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/deploy-revision?revisionId=" + apiRevisionId;
         APIRevisionDeployment apiRevisionDeployment = apiRevisionDeploymentList.get(0);
 
-        String revision = "[\n" +
-                "    {\n" +
-                "        \"name\": \"" + apiRevisionDeployment.getDeployment() + "\",\n" +
-                "        \"vhost\": \"" + apiRevisionDeployment.getVhost() + "\",\n" +
-                "        \"displayOnDevportal\": " + apiRevisionDeployment.isDisplayOnDevportal() + "\n" +
-                "    }\n" +
-                "]";
+        JSONArray payload = new JSONArray();
+        JSONObject revision = new JSONObject();
+        revision.put("name", (apiRevisionDeployment.getName() != null ? apiRevisionDeployment.getName() : ""));
+        revision.put("vhost", (apiRevisionDeployment.getVhost() != null ? apiRevisionDeployment.getVhost() : ""));
+        revision.put("displayOnDevportal", apiRevisionDeployment.isDisplayOnDevportal());
+        payload.put(revision);
 
-        RequestBody requestBody = RequestBody.create(JSON, revision);
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(deployAPIRevisionEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -953,23 +950,22 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public boolean undeployAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                 JSONObject apiRevisionDeployment, String uuid)
+                                                 APIRevision apiRevisionDeployment, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String undeployAPIRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/undeploy-revision?revisionId="
-                + apiRevisionDeployment.getString("id");
-        JSONArray array = apiRevisionDeployment.getJSONArray("deploymentInfo");
-        JSONObject obj = array.getJSONObject(0);
+                + apiRevisionDeployment.getId();
+        List<APIRevisionDeployment> apiRevisionDeployments = apiRevisionDeployment.getDeploymentInfo();
+        APIRevisionDeployment earliestDeployment = apiRevisionDeployments.get(0);
 
-        String revision = "[\n" +
-                "    {\n" +
-                "        \"name\": \"" + obj.getString("name") + "\",\n" +
-                "        \"vhost\": \"" + obj.getString("vhost") + "\",\n" +
-                "        \"displayOnDevportal\": " + obj.get("displayOnDevportal") + "\n" +
-                "    }\n" +
-                "]";
+        JSONArray payload = new JSONArray();
+        JSONObject revision = new JSONObject();
+        revision.put("name", (earliestDeployment.getName() != null ? earliestDeployment.getName() : ""));
+        revision.put("vhost", (earliestDeployment.getVhost() != null ? earliestDeployment.getVhost() : ""));
+        revision.put("displayOnDevportal", earliestDeployment.isDisplayOnDevportal());
+        payload.put(revision);
 
-        RequestBody requestBody = RequestBody.create(JSON, revision);
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(undeployAPIRevisionEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -1005,11 +1001,11 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public boolean deleteAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                     JSONObject apiRevision, String uuid)
+                                     APIRevision apiRevision, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String apiRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions/" +
-                apiRevision.getString("id");
+                apiRevision.getId();
 
         Request request = new Request.Builder()
                 .url(apiRevisionEndPoint)
