@@ -185,6 +185,8 @@
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.exception,
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.listener,
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.util,
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions,
+                            io.entgra.device.mgt.core.device.mgt.common.metadata.mgt,
                             org.wso2.carbon.base;version="1.0",
                             org.wso2.carbon.context;version="4.6",
                             org.wso2.carbon;version="4.6",
