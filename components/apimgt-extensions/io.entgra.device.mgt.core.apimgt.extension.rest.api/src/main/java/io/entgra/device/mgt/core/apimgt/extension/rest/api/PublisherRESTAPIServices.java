@@ -94,7 +94,7 @@ public interface PublisherRESTAPIServices {
                               APIRevision apiRevision, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+    Documentation[] getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                  String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 

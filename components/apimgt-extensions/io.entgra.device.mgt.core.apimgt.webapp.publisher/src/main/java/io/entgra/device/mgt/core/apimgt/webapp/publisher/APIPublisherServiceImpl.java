@@ -397,27 +397,27 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             apiDocumentation.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
                             apiDocumentation.setSourceType(Documentation.DocumentSourceType.MARKDOWN);
                             apiDocumentation.setCreatedDate(new Date());
-                            apiDocumentation.setLastUpdated(new Date());
+                            apiDocumentation.setLastUpdatedTime(new Date());
                             apiDocumentation.setSummary(apiConfig.getApiDocumentationSummary());
                             apiDocumentation.setOtherTypeName(null);
 
-                            JSONArray documentList = (JSONArray) publisherRESTAPIServices.getDocumentations(apiApplicationKey,
-                                    accessTokenInfo, apiUuid).get("list");
+                            Documentation[] documentList = publisherRESTAPIServices.getDocumentations(apiApplicationKey,
+                                    accessTokenInfo, apiUuid);
 
-                            if (documentList.length() > 0) {
-                                for (int i = 0; i < documentList.length(); i++) {
-                                    JSONObject existingDoc = documentList.getJSONObject(i);
-                                    if (existingDoc.getString("name").equals(apiConfig.getApiDocumentationName())
-                                            && existingDoc.getString("type").equals(Documentation.DocumentationType.HOWTO.name())) {
+                            if (documentList.length > 0) {
+                                for (int i = 0; i < documentList.length; i++) {
+                                    Documentation existingDoc = documentList[i];
+                                    if (existingDoc.getName().equals(apiConfig.getApiDocumentationName())
+                                            && existingDoc.getType().equals(Documentation.DocumentationType.HOWTO.name())) {
                                         publisherRESTAPIServices.deleteDocumentations(apiApplicationKey, accessTokenInfo,
-                                                apiUuid, existingDoc.getString("documentId"));
+                                                apiUuid, existingDoc.getDocumentId());
                                     }
                                 }
                             } else {
                                 log.info("There is no any existing api documentation.");
                             }
 
-                            io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation createdDoc = publisherRESTAPIServices.addDocumentation(apiApplicationKey, accessTokenInfo,
+                            Documentation createdDoc = publisherRESTAPIServices.addDocumentation(apiApplicationKey, accessTokenInfo,
                                     apiUuid, apiDocumentation);
 
                             publisherRESTAPIServices.addDocumentationContent(apiApplicationKey, accessTokenInfo, apiUuid,

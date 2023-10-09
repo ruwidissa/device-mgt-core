@@ -644,7 +644,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public MediationPolicy[] getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                         String apiUuid)
+                                                                String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAPIMediationEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiUuid + "/mediation-policies";
@@ -815,7 +815,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public APIRevision[] getAPIRevisions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
-                                      Boolean deploymentStatus)
+                                         Boolean deploymentStatus)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAPIRevisionsEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions?query=deployed:"
@@ -1041,7 +1041,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
+    public Documentation[] getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getDocumentationsEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/documents?limit=1000";
@@ -1056,8 +1056,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray documentList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(documentList.toString(), Documentation[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -1127,17 +1127,16 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         String addNewScope = endPointPrefix + Constants.API_ENDPOINT + uuid + "/documents";
 
-        String document = "{\n" +
-                "  \"name\": \"" + documentation.getName() + "\",\n" +
-                "  \"type\": \"" + documentation.getType() + "\",\n" +
-                "  \"summary\": \"" + documentation.getSummary() + "\",\n" +
-                "  \"sourceType\": \"" + documentation.getSourceType() + "\",\n" +
-                "  \"inlineContent\": \"" + documentation.getSourceType() + "\",\n" +
-                "  \"visibility\": \"" + documentation.getVisibility() + "\",\n" +
-                "  \"createdBy\": \"admin\"\n" +
-                "}";
+        JSONObject payload = new JSONObject();
+        payload.put("name", documentation.getName());
+        payload.put("type", documentation.getType());
+        payload.put("summary", documentation.getSummary());
+        payload.put("sourceType", documentation.getSourceType());
+        payload.put("inlineContent", documentation.getSourceType());
+        payload.put("visibility", documentation.getVisibility());
+        payload.put("createdBy", documentation.getCreatedBy());
 
-        RequestBody requestBody = RequestBody.create(JSON, document);
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(addNewScope)
                 .addHeader(Constants.HEADER_CONTENT_TYPE, Constants.APPLICATION_JSON)
