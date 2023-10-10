@@ -128,6 +128,11 @@ public interface OperationManager {
     int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
             throws OperationManagementException;
 
+    List<DeviceActivity> getDeviceActivities(ActivityPaginationRequest activityPaginationRequest) throws OperationManagementException;
+
+    int getDeviceActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException;
+
     List<Activity> getFilteredActivities(String operationCode, int limit, int offset) throws OperationManagementException;
 
     int getTotalCountOfFilteredActivities(String operationCode) throws OperationManagementException;

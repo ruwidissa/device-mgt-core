@@ -26,6 +26,7 @@ import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityHolder;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityStatus;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationResponse;
@@ -397,6 +398,51 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 }
             }
         }
+    }
+
+    public OperationResponse populateResponse(ResultSet rs) throws SQLException {
+        OperationResponse response = new OperationResponse();
+
+        DeviceActivity deviceActivity = new DeviceActivity();
+        int responseId = 0;
+        List<OperationResponse> operationResponses = new ArrayList<>();
+        List<Integer> largeResponseIDs = new ArrayList<>();
+
+        if (rs.getTimestamp("RECEIVED_TIMESTAMP") != null) {
+            Timestamp receivedTimestamp = rs.getTimestamp("RECEIVED_TIMESTAMP");
+            response.setReceivedTimeStamp(new Date(receivedTimestamp.getTime()).toString());
+        }
+        response.setResponse(rs.getString("OPERATION_RESPONSE"));
+
+        int deviceOpId = rs.getInt("OPERATION_ID");
+        String deviceActivityId = DeviceManagementConstants.OperationAttributes.ACTIVITY + deviceOpId;
+        String deviceIdentifierId = rs.getString("DEVICE_IDENTIFICATION");
+
+        if (rs.getInt("UPDATED_TIMESTAMP") != 0) {
+            responseId = rs.getInt("OP_RES_ID");
+            if (rs.getBoolean("IS_LARGE_RESPONSE")) {
+                largeResponseIDs.add(responseId);
+            } else {
+                deviceActivity.setResponses(operationResponses);
+            }
+        }
+        if (!largeResponseIDs.isEmpty()) {
+            Map<String, Map<String, List<OperationResponse>>> largeOperationResponses = null;
+            try {
+                largeOperationResponses = getLargeOperationResponsesInBulk(largeResponseIDs);
+                if (!largeOperationResponses.isEmpty()) {
+                    Map<String, List<OperationResponse>> largeResponse = largeOperationResponses.get(deviceActivityId);
+                    if (largeResponse != null) {
+                        response = largeResponse.get(deviceIdentifierId).get(0);
+                    }
+                }
+            } catch (OperationManagementDAOException e) {
+                log.warn("Unable to get operation response for Operation ID: " + deviceOpId +
+                        ", Error: " + e.getErrorMessage());
+            }
+        }
+
+        return response;
     }
 
     @Override
@@ -2566,4 +2612,222 @@ public class GenericOperationDAOImpl implements OperationDAO {
         return 0;
     }
 
+    @Override
+    public List<DeviceActivity> getDeviceActivities(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementDAOException {
+        List<DeviceActivity> finalizedActivitiesList = new ArrayList<>();
+        try {
+            boolean isTimeDurationFilteringProvided = false;
+            Connection conn = OperationManagementDAOFactory.getConnection();
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            StringBuilder sql = new StringBuilder("SELECT " +
+                    "    eom.*," +
+                    "    opr.ID AS OP_RES_ID," +
+                    "    opr.RECEIVED_TIMESTAMP," +
+                    "    opr.OPERATION_RESPONSE, " +
+                    "    opr.IS_LARGE_RESPONSE " +
+                    "FROM(" +
+                    "   SELECT * " +
+                    "   FROM " +
+                    "       DM_ENROLMENT_OP_MAPPING " +
+                    "   WHERE " +
+                    "       TENANT_ID = ? ");
+
+            if (activityPaginationRequest.getStartTimestamp() > 0 && activityPaginationRequest.getEndTimestamp() > 0) {
+                isTimeDurationFilteringProvided = true;
+                sql.append("AND CREATED_TIMESTAMP BETWEEN ? AND ? ");
+            }
+            if (activityPaginationRequest.getDeviceType() != null) {
+                sql.append("AND DEVICE_TYPE = ? ");
+            }
+            if (activityPaginationRequest.getDeviceIds() != null && !activityPaginationRequest.getDeviceIds().isEmpty()) {
+                sql.append("AND DEVICE_IDENTIFICATION IN (");
+                for (int i = 0; i < activityPaginationRequest.getDeviceIds().size() - 1; i++) {
+                    sql.append("?, ");
+                }
+                sql.append("?) ");
+            }
+            if (activityPaginationRequest.getOperationId() > 0) {
+                sql.append("AND OPERATION_ID = ? ");
+            }
+            if (activityPaginationRequest.getOperationCode() != null) {
+                sql.append("AND OPERATION_CODE = ? ");
+            }
+            if (activityPaginationRequest.getInitiatedBy() != null) {
+                sql.append("AND INITIATED_BY = ? ");
+            }
+            if (activityPaginationRequest.getSince() != 0) {
+                sql.append("AND UPDATED_TIMESTAMP > ? ");
+            }
+            if (activityPaginationRequest.getType() != null) {
+                sql.append("AND TYPE = ? ");
+            }
+            if (activityPaginationRequest.getStatus() != null) {
+                sql.append("AND STATUS = ? ");
+            }
+
+            sql.append("ORDER BY ID ASC limit ? , ? ) eom " +
+                    "LEFT JOIN DM_DEVICE_OPERATION_RESPONSE opr ON eom.ID = opr.EN_OP_MAP_ID");
+
+            int index = 1;
+            try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+                stmt.setInt(index++, tenantId);
+                if (isTimeDurationFilteringProvided) {
+                    stmt.setLong(index++, activityPaginationRequest.getStartTimestamp());
+                    stmt.setLong(index++, activityPaginationRequest.getEndTimestamp());
+                }
+                if (activityPaginationRequest.getDeviceType() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getDeviceType());
+                }
+                if (activityPaginationRequest.getDeviceIds() != null && !activityPaginationRequest.getDeviceIds().isEmpty()) {
+                    for (String deviceId : activityPaginationRequest.getDeviceIds()) {
+                        stmt.setString(index++, deviceId);
+                    }
+                }
+                if (activityPaginationRequest.getOperationId() > 0) {
+                    stmt.setInt(index++, activityPaginationRequest.getOperationId());
+                }
+                if (activityPaginationRequest.getOperationCode() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getOperationCode());
+                }
+
+                if (activityPaginationRequest.getInitiatedBy() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getInitiatedBy());
+                }
+                if (activityPaginationRequest.getSince() != 0) {
+                    stmt.setLong(index++, activityPaginationRequest.getSince());
+                }
+                if (activityPaginationRequest.getType() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getType().name());
+                }
+                if (activityPaginationRequest.getStatus() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getStatus().name());
+                }
+
+                stmt.setInt(index++, activityPaginationRequest.getOffset());
+                stmt.setInt(index, activityPaginationRequest.getLimit());
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    Map<Integer, DeviceActivity> activities = new HashMap<>();
+
+                    while (rs.next()) {
+                        int activityId = rs.getInt("ID");
+                        DeviceActivity deviceActivity = activities.get(activityId);
+                        if (deviceActivity == null) {
+                            deviceActivity = OperationDAOUtil.populateActivity(rs);
+                            activities.put(activityId, deviceActivity);
+                        }
+                        deviceActivity.getResponses().add(populateResponse(rs));
+                    }
+                    for (int activityId : activities.keySet()) {
+                        DeviceActivity deviceActivity = activities.get(activityId);
+                        finalizedActivitiesList.add(deviceActivity);
+                    }
+                }
+
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting the operation details from the database.";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
+        }
+        return finalizedActivitiesList;
+    }
+
+
+    @Override
+    public int getDeviceActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementDAOException {
+        try {
+            boolean isTimeDurationFilteringProvided = false;
+            Connection conn = OperationManagementDAOFactory.getConnection();
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            StringBuilder sql = new StringBuilder();
+
+
+            sql.append("SELECT count(DISTINCT ID) AS ACTIVITY_COUNT " +
+                    "FROM DM_ENROLMENT_OP_MAPPING WHERE TENANT_ID = ? ");
+
+            if (activityPaginationRequest.getDeviceType() != null) {
+                sql.append("AND DEVICE_TYPE = ? ");
+            }
+            if (activityPaginationRequest.getDeviceIds() != null && !activityPaginationRequest.getDeviceIds().isEmpty()) {
+                sql.append("AND DEVICE_IDENTIFICATION IN (");
+                for (int i = 0; i < activityPaginationRequest.getDeviceIds().size() - 1; i++) {
+                    sql.append("?, ");
+                }
+                sql.append("?) ");
+            }
+            if (activityPaginationRequest.getOperationCode() != null) {
+                sql.append("AND OPERATION_CODE = ? ");
+            }
+            if (activityPaginationRequest.getOperationId() > 0) {
+                sql.append("AND OPERATION_ID = ? ");
+            }
+            if (activityPaginationRequest.getInitiatedBy() != null) {
+                sql.append("AND INITIATED_BY = ? ");
+            }
+            if (activityPaginationRequest.getSince() != 0) {
+                sql.append("AND UPDATED_TIMESTAMP > ? ");
+            }
+            if (activityPaginationRequest.getType() != null) {
+                sql.append("AND TYPE = ? ");
+            }
+            if (activityPaginationRequest.getStatus() != null) {
+                sql.append("AND STATUS = ? ");
+            }
+
+            if (activityPaginationRequest.getStartTimestamp() > 0 && activityPaginationRequest.getEndTimestamp() > 0) {
+                isTimeDurationFilteringProvided = true;
+                sql.append("AND CREATED_TIMESTAMP BETWEEN ? AND ? ");
+            }
+
+            int index = 1;
+            try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+                stmt.setInt(index++, tenantId);
+                if (activityPaginationRequest.getDeviceType() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getDeviceType());
+                }
+                if (activityPaginationRequest.getDeviceIds() != null && !activityPaginationRequest.getDeviceIds().isEmpty()) {
+                    for (String deviceId : activityPaginationRequest.getDeviceIds()) {
+                        stmt.setString(index++, deviceId);
+                    }
+                }
+                if (activityPaginationRequest.getOperationCode() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getOperationCode());
+                }
+                if (activityPaginationRequest.getOperationId() > 0) {
+                    stmt.setInt(index++, activityPaginationRequest.getOperationId());
+                }
+                if (activityPaginationRequest.getInitiatedBy() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getInitiatedBy());
+                }
+                if (activityPaginationRequest.getSince() != 0) {
+                    stmt.setLong(index++, activityPaginationRequest.getSince());
+                }
+                if (activityPaginationRequest.getType() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getType().name());
+                }
+                if (activityPaginationRequest.getStatus() != null) {
+                    stmt.setString(index++, activityPaginationRequest.getStatus().name());
+                }
+
+                if (isTimeDurationFilteringProvided) {
+                    stmt.setLong(index++, activityPaginationRequest.getStartTimestamp());
+                    stmt.setLong(index, activityPaginationRequest.getEndTimestamp());
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("ACTIVITY_COUNT");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting the operation details from the database.";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
+        }
+        return 0;
+    }
 }
