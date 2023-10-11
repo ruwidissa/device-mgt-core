@@ -187,7 +187,6 @@
         <Scope>am:store:app:modify</Scope>
         <Scope>am:store:app:sub:install</Scope>
         <Scope>am:store:app:sub:uninstall</Scope>
-        <Scope>am:admin:pub:app:review:update</Scope>
         <Scope>am:admin:pub:app:review:view</Scope>
         <Scope>am:admin:pub:app:update</Scope>
         <Scope>am:admin:store:app:review:update</Scope>
@@ -196,12 +195,8 @@
         <Scope>dm:device-type:view</Scope>
         <Scope>and:enterprise:modify</Scope>
         <Scope>and:enterprise:view</Scope>
-        <Scope>and:work:customer</Scope>
-        <Scope>and:work:admin</Scope>
-        <Scope>app:command:modify</Scope>
         <Scope>dm:sign-csr</Scope>
         <Scope>dm:admin:devices:view</Scope>
-        <Scope>dm:admin:topics:view</Scope>
         <Scope>rm:roles:add</Scope>
         <Scope>rm:users:add</Scope>
         <Scope>rm:roles:update</Scope>
@@ -210,15 +205,6 @@
         <Scope>rm:roles:view</Scope>
         <Scope>rm:roles:combined:add</Scope>
         <Scope>rm:roles:delete</Scope>
-        <Scope>an:db:vulnerabilities</Scope>
-        <Scope>an:db:non-compliant:count</Scope>
-        <Scope>an:db:non-compliant</Scope>
-        <Scope>an:db:by-groups</Scope>
-        <Scope>an:db:device:count</Scope>
-        <Scope>an:db:feature-non-compliant</Scope>
-        <Scope>an:db:overview:count</Scope>
-        <Scope>an:db:filtered-count</Scope>
-        <Scope>an:db:details</Scope>
         <Scope>dm:activity:get</Scope>
         <Scope>dm:devices:delete</Scope>
         <Scope>dm:devices:app:view</Scope>
@@ -295,7 +281,6 @@
         <Scope>dm:device:enroll</Scope>
         <Scope>dm:geo:an:view</Scope>
         <Scope>dm:geo:alerts:manage</Scope>
-        <Scope>appm:read</Scope>
         <Scope>dm:admin:devices:permanent-delete</Scope>
         <Scope>and:conf:manage</Scope>
         <Scope>and:conf:view</Scope>
@@ -345,7 +330,6 @@
         <Scope>win:ops:reboot</Scope>
         <Scope>win:ops:location</Scope>
         <Scope>admin:tenant:view</Scope>
-        <Scope>dm:admin:metadata:view</Scope>
         <Scope>dm:admin:devices:usage:view</Scope>
         <Scope>and:ops:clear-app</Scope>
         <Scope>and:ops:suspend-package</Scope>
