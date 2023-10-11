@@ -114,11 +114,6 @@ public class UserManagementServiceImpl implements UserManagementService {
     private static final String API_BASE_PATH = "/users";
     private static final Log log = LogFactory.getLog(UserManagementServiceImpl.class);
 
-    private static final String ADMIN_ROLE = "admin";
-    private static final String DEFAULT_DEVICE_USER = "Internal/devicemgt-user";
-    private static final String DEFAULT_DEVICE_ADMIN = "Internal/devicemgt-admin";
-    private static final String DEFAULT_SUBSCRIBER = "Internal/subscriber";
-
     // Permissions that are given for a normal device user.
     private static final Permission[] PERMISSIONS_FOR_DEVICE_USER = {
             new Permission("/permission/admin/Login", "ui.execute"),
@@ -155,51 +150,9 @@ public class UserManagementServiceImpl implements UserManagementService {
             Map<String, String> defaultUserClaims =
                     this.buildDefaultUserClaims(userInfo.getFirstname(), userInfo.getLastname(),
                             userInfo.getEmailAddress(), true);
-            // calling addUser method of carbon user api
-            List<String> tmpRoles = new ArrayList<>();
-            String[] userInfoRoles = userInfo.getRoles();
-            tmpRoles.add(DEFAULT_DEVICE_USER);
-
-            boolean subscriberFound = false;
-            boolean adminFound = false;
-
-            if (userInfoRoles != null) {
-                //check if subscriber role is coming in the payload
-                for (String r : userInfoRoles) {
-                    if (!subscriberFound || !adminFound) {
-                        if (DEFAULT_SUBSCRIBER.equals(r)) {
-                            subscriberFound = true;
-                        } else if (ADMIN_ROLE.equals(r)) {
-                            tmpRoles.add(DEFAULT_DEVICE_ADMIN);
-                            adminFound = true;
-                        }
-                    } else {
-                        break;
-                    }
-                }
-                tmpRoles.addAll(Arrays.asList(userInfoRoles));
-            }
-
-            if (!subscriberFound) {
-                // Add Internal/subscriber role to new users
-                if (userStoreManager.isExistingRole(DEFAULT_SUBSCRIBER)) {
-                    tmpRoles.add(DEFAULT_SUBSCRIBER);
-                } else {
-                    log.warn("User: " + userInfo.getUsername() + " will not be able to enroll devices as '" +
-                             DEFAULT_SUBSCRIBER + "' is missing in the system");
-                }
-            }
-
-            String[] roles = new String[tmpRoles.size()];
-            tmpRoles.toArray(roles);
-
-            // If the normal device user role does not exist, create a new role with the minimal permissions
-            if (!userStoreManager.isExistingRole(DEFAULT_DEVICE_USER)) {
-                userStoreManager.addRole(DEFAULT_DEVICE_USER, null, PERMISSIONS_FOR_DEVICE_USER);
-            }
 
             userStoreManager.addUser(userInfo.getUsername(), initialUserPassword,
-                    roles, defaultUserClaims, null);
+                    userInfo.getRoles(), defaultUserClaims, null);
             // Outputting debug message upon successful addition of user
             if (log.isDebugEnabled()) {
                 log.debug("User '" + userInfo.getUsername() + "' has successfully been added.");

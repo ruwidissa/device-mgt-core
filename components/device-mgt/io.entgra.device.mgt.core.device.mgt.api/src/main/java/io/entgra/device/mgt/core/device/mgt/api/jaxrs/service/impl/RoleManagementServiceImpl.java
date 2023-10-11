@@ -30,7 +30,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.context.RegistryType;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleInfo;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
@@ -40,9 +39,6 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestV
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.SetReferenceTransformer;
-import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.resource.services.utils.ChangeRolePermissionsUtil;
 import org.wso2.carbon.user.api.*;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.constants.UserCoreErrorConstants.ErrorMessages;
@@ -57,9 +53,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants.PRIMARY_USER_STORE;
 
@@ -404,25 +402,9 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             userStoreManager.addRole(roleInfo.getRoleName(), roleInfo.getUsers(), permissions);
             try {
                 if (roleInfo.getPermissions() != null && roleInfo.getPermissions().length > 0) {
-                    String finalRoleName = roleInfo.getRoleName();
-                    String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
-                    final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
-                    Thread thread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                PrivilegedCarbonContext.startTenantFlow();
-                                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                                DeviceMgtAPIUtils.getApiPublisher().updateScopeRoleMapping(roleInfo.getRoleName(),
-                                        RoleManagementServiceImpl.this.getPlatformUIPermissions(finalRoleName, userRealm, roleInfo.getPermissions()));
-                            } catch (APIManagerPublisherException | UserAdminException e) {
-                                log.error("Error Occurred while updating role scope mapping. ", e);
-                            } finally {
-                                PrivilegedCarbonContext.endTenantFlow();
-                            }
-                        }
-                    });
-                    thread.start();
+                    String[] roleName = roleInfo.getRoleName().split("/");
+                    addPermissions(roleName[roleName.length - 1], roleInfo.getPermissions(),
+                            DeviceMgtAPIUtils.getUserRealm());
                 }
             } catch (UserStoreException e) {
                 String msg = "Error occurred while loading the user store.";
@@ -563,24 +545,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             }
 
             if (roleInfo.getPermissions() != null) {
-                String finalRoleName = roleName;
-                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            PrivilegedCarbonContext.startTenantFlow();
-                            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                            DeviceMgtAPIUtils.getApiPublisher().updateScopeRoleMapping(roleInfo.getRoleName(),
-                                    RoleManagementServiceImpl.this.getPlatformUIPermissions(finalRoleName, userRealm, roleInfo.getPermissions()));
-                        } catch (APIManagerPublisherException | UserAdminException e) {
-                            log.error("Error Occurred while updating role scope mapping. ", e);
-                        } finally {
-                            PrivilegedCarbonContext.endTenantFlow();
-                        }
-                    }
-                });
-                thread.start();
+                String[] roleDetails = roleName.split("/");
+                addPermissions(roleDetails[roleDetails.length - 1], roleInfo.getPermissions(), userRealm);
             }
             //TODO: Need to send the updated role information in the entity back to the client
             return Response.status(Response.Status.OK).entity("Role '" + roleInfo.getRoleName() + "' has " +
@@ -729,5 +695,26 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             }
         }
         return rolePermissions;
+    }
+
+    private void addPermissions(String roleName, String[] permissions, UserRealm userRealm) {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                    DeviceMgtAPIUtils.getApiPublisher().updateScopeRoleMapping(roleName,
+                            RoleManagementServiceImpl.this.getPlatformUIPermissions(roleName, userRealm,
+                                    permissions));
+                } catch (APIManagerPublisherException | UserAdminException e) {
+                    log.error("Error Occurred while updating role scope mapping. ", e);
+                } finally {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
+        });
+        thread.start();
     }
 }
