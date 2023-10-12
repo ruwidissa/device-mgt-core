@@ -51,6 +51,7 @@
         <module>components/subtype-mgt</module>
         <module>components/tenant-mgt</module>
         <module>components/operation-template-mgt</module>
+        <module>components/cea-mgt</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -68,6 +69,7 @@
         <module>features/subtype-mgt</module>
         <module>features/tenant-mgt</module>
         <module>features/operation-template-mgt-plugin-feature</module>
+        <module>features/cea-mgt-feature</module>
 
     </modules>
 
@@ -383,6 +385,27 @@
                 <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <!-- End of Operation Template Management dependencies -->
+
+            <!-- Conditional Email Access Management dependencies -->
+            <dependency>
+                <groupId>io.entgra.device.mgt.core</groupId>
+                <artifactId>io.entgra.device.mgt.core.cea.mgt.common</artifactId>
+                <version>${io.entgra.device.mgt.core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.entgra.device.mgt.core</groupId>
+                <artifactId>io.entgra.device.mgt.core.cea.mgt.core</artifactId>
+                <version>${io.entgra.device.mgt.core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.entgra.device.mgt.core</groupId>
+                <artifactId>io.entgra.device.mgt.core.cea.mgt.enforce</artifactId>
+                <version>${io.entgra.device.mgt.core.version}</version>
+            </dependency>
+            <!-- End of Conditional Email Access dependencies -->
+
             <!-- Governance dependencies -->
             <dependency>
                 <groupId>org.wso2.carbon</groupId>

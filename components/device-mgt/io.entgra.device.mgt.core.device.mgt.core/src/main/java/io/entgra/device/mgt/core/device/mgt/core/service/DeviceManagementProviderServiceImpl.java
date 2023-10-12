@@ -159,17 +159,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -5156,5 +5146,45 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throw new DeviceManagementException(msg);
         }
         return newApplicationList;
+    }
+
+    @Override
+    public List<Device> getEnrolledDevicesSince(Date since) throws DeviceManagementException {
+        List<Device> devices;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            devices = deviceDAO.getDevicesEnrolledSince(since);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while getting devices enrolled device since " + since.getTime();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return devices;
+    }
+
+    @Override
+    public List<Device> getEnrolledDevicesPriorTo(Date priorTo) throws DeviceManagementException {
+        List<Device> devices;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            devices = deviceDAO.getDevicesEnrolledPriorTo(priorTo);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while getting devices enrolled device prior to " + priorTo.getTime();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return devices;
     }
 }

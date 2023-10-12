@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~  Copyright (c) 2018 - 2024, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+  ~
+  ~ Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  ~
+  -->
+
+<CEAPolicyUIConfiguration>
+    <ServerUIConfigurations>
+        <ServerUIConfiguration server="Microsoft Exchange Online Server">
+            <Name>label_exchangeOnlineServerName</Name>
+            <Key>exchange-online</Key>
+            <Description>label_exchangeOnlineServerDescription</Description>
+            <PolicyEntries>
+                <ActiveSyncServerEntries>
+                    <Entry>
+                        <Code>gatewayUrl</Code>
+                        <Required>true</Required>
+                        <Hidden>false</Hidden>
+                        <Label>label_exchangeOnlineAuthorityUrl</Label>
+                        <Tooltip>label_tooltipExchangeOnlineAuthorityUrl</Tooltip>
+                        <DocLink />
+                        <Supportability>
+                            <Support>true</Support>
+                            <InfoText />
+                            <DefaultValue />
+                        </Supportability>
+                        <Input>
+                            <Name>gatewayUrl</Name>
+                            <Type>url</Type>
+                            <Placeholder>label_placeholderExchangeOnlineAuthorityUrl</Placeholder>
+                        </Input>
+                    </Entry>
+                    <Entry>
+                        <Code>client</Code>
+                        <Required>true</Required>
+                        <Hidden>false</Hidden>
+                        <Label>label_azureADClientID</Label>
+                        <Tooltip>label_tooltipAzureADClientID</Tooltip>
+                        <DocLink />
+                        <Supportability>
+                            <Support>true</Support>
+                            <InfoText />
+                            <DefaultValue />
+                        </Supportability>
+                        <Input>
+                            <Name>client</Name>
+                            <Type>text</Type>
+                            <Placeholder>label_placeholderClientID</Placeholder>
+                        </Input>
+                    </Entry>
+                    <Entry>
+                        <Code>secret</Code>
+                        <Required>true</Required>
+                        <Hidden>false</Hidden>
+                        <Label>label_azureADClientSecret</Label>
+                        <Tooltip>label_tooltipAzureADClientSecret</Tooltip>
+                        <DocLink />
+                        <Supportability>
+                            <Support>true</Support>
+                            <InfoText />
+                            <DefaultValue />
+                        </Supportability>
+                        <Input>
+                            <Name>secret</Name>
+                            <Type>password</Type>
+                            <Placeholder>label_placeholderClientSecret</Placeholder>
+                        </Input>
+                    </Entry>
+                </ActiveSyncServerEntries>
+                <ConditionalAccessPolicyEntries>
+                    <Entry>
+                        <Code>defaultAccessPolicy</Code>
+                        <Required>true</Required>
+                        <Hidden>false</Hidden>
+                        <Label>label_defaultGlobalAccessPolicy</Label>
+                        <Tooltip>label_tooltipDefaultGlobalAccessPolicy</Tooltip>
+                        <DocLink />
+                        <Supportability>
+                            <Support>true</Support>
+                            <InfoText />
+                            <DefaultValue />
+                        </Supportability>
+                        <Select>
+                            <Name>defaultAccessPolicy</Name>
+                            <Placeholder>label_placeholderDefaultGlobalAccessPolicy</Placeholder>
+                            <Options>
+                                <Option>
+                                    <Label>label_ceaPolicyValueLabelAllow</Label>
+                                    <Value>ALLOW</Value>
+                                </Option>
+                                <Option>
+                                    <Label>label_ceaPolicyValueLabelBlock</Label>
+                                    <Value>BLOCK</Value>
+                                </Option>
+                                <Option>
+                                    <Label>label_ceaPolicyValueLabelQuarantine</Label>
+                                    <Value>QUARANTINE</Value>
+                                </Option>
+                            </Options>
+                        </Select>
+                    </Entry>
+                    <Entry>
+                        <Code>emailOutlookAccessPolicy</Code>
+                        <Required>true</Required>
+                        <Hidden>false</Hidden>
+                        <Label>label_emailOutlookAccessPolicy</Label>
+                        <Tooltip>label_tooltipEmailOutlookAccessPolicy</Tooltip>
+                        <DocLink />
+                        <Supportability>
+                            <Support>true</Support>
+                            <InfoText />
+                            <DefaultValue />
+                        </Supportability>
+                        <CheckboxGroup>
+                            <Name>emailOutlookAccessPolicy</Name>
+                            <Checkboxes>
+                                <Checkbox>
+                                    <Label>label_ceaPolicyValueLabelMobileOutlookBlock</Label>
+                                    <Value>MOBILE_OUTLOOK_BLOCK</Value>
+                                </Checkbox>
+                                <Checkbox>
+                                    <Label>label_ceaPolicyValueLabelWindowsOutlookBlock</Label>
+                                    <Value>WINDOWS_OUTLOOK_BLOCK</Value>
+                                </Checkbox>
+                                <Checkbox>
+                                    <Label>label_ceaPolicyValueLabelMacOutlookBlock</Label>
+                                    <Value>MAC_OUTLOOK_BLOCK</Value>
+                                </Checkbox>
+                            </Checkboxes>
+                        </CheckboxGroup>
+                    </Entry>
+                    <Entry>
+                        <Code>webOutlookAccessPolicy</Code>
+                        <Required>true</Required>
+                        <Hidden>false</Hidden>
+                        <Label>label_webOutlookAccessPolicy</Label>
+                        <Tooltip>label_tooltipWebOutlookAccessPolicy</Tooltip>
+                        <DocLink />
+                        <Supportability>
+                            <Support>true</Support>
+                            <InfoText />
+                            <DefaultValue />
+                        </Supportability>
+                        <Switch>
+                            <Name>webOutlookAccessPolicy</Name>
+                            <Toggle>
+                                <ToggleOnLabel>label_ceaPolicyValueLabelBlock</ToggleOnLabel>
+                                <ToggleOnValue>BLOCK</ToggleOnValue>
+                                <ToggleOffLabel>label_ceaPolicyValueLabelAllow</ToggleOffLabel>
+                                <ToggleOffValue>ALLOW</ToggleOffValue>
+                            </Toggle>
+                        </Switch>
+                    </Entry>
+                    <Entry>
+                        <Code>POPIMAPAccessPolicy</Code>
+                        <Required>true</Required>
+                        <Hidden>false</Hidden>
+                        <Label>label_popImapAccessPolicy</Label>
+                        <Tooltip>label_tooltipPopImapAccessPolicy</Tooltip>
+                        <DocLink />
+                        <Supportability>
+                            <Support>true</Support>
+                            <InfoText />
+                            <DefaultValue />
+                        </Supportability>
+                        <Switch>
+                            <Name>POPIMAPAccessPolicy</Name>
+                            <Toggle>
+                                <ToggleOnLabel>label_ceaPolicyValueLabelBlock</ToggleOnLabel>
+                                <ToggleOnValue>BLOCK</ToggleOnValue>
+                                <ToggleOffLabel>label_ceaPolicyValueLabelAllow</ToggleOffLabel>
+                                <ToggleOffValue>ALLOW</ToggleOffValue>
+                            </Toggle>
+                        </Switch>
+                    </Entry>
+                </ConditionalAccessPolicyEntries>
+                <GracePeriodEntries>
+                    <Entry>
+                        <Code>gracePeriod</Code>
+                        <Required>true</Required>
+                        <Hidden>false</Hidden>
+                        <Label>label_gracePeriod</Label>
+                        <Tooltip>label_tooltipGracePeriod</Tooltip>
+                        <DocLink />
+                        <Supportability>
+                            <Support>true</Support>
+                            <InfoText />
+                            <DefaultValue />
+                        </Supportability>
+                        <Input>
+                            <Name>gracePeriod</Name>
+                            <Type>number</Type>
+                            <Placeholder>label_placeholderGracePeriod</Placeholder>
+                        </Input>
+                    </Entry>
+                    <Entry>
+                        <Code>graceAllowedPolicy</Code>
+                        <Required>true</Required>
+                        <Hidden>false</Hidden>
+                        <Label>label_graceAllowedPolicy</Label>
+                        <Tooltip>label_tooltipGraceAllowedPolicy</Tooltip>
+                        <DocLink />
+                        <Supportability>
+                            <Support>true</Support>
+                            <InfoText />
+                            <DefaultValue />
+                        </Supportability>
+                        <Select>
+                            <Name>graceAllowedPolicy</Name>
+                            <Placeholder>label_placeholderGraceAllowedPolicy</Placeholder>
+                            <Options>
+                                <Option>
+                                    <Label>label_ceaPolicyValueLabelNewOnly</Label>
+                                    <Value>NEW_ONLY</Value>
+                                </Option>
+                                <Option>
+                                    <Label>label_ceaPolicyValueLabelExistingOnly</Label>
+                                    <Value>EXISTING_ONLY</Value>
+                                </Option>
+                                <Option>
+                                    <Label>label_ceaPolicyValueLabelNewAndExisting</Label>
+                                    <Value>NEW_AND_EXISTING</Value>
+                                </Option>
+                                <Option>
+                                    <Label>label_ceaPolicyValueLabelNotAllowed</Label>
+                                    <Value>NOT_ALLOWED</Value>
+                                </Option>
+                            </Options>
+                        </Select>
+                    </Entry>
+                </GracePeriodEntries>
+            </PolicyEntries>
+        </ServerUIConfiguration>
+    </ServerUIConfigurations>
+</CEAPolicyUIConfiguration>
