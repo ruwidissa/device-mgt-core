@@ -71,14 +71,14 @@ import java.util.List;
                         description = "Add or Delete Event Definition for device type",
                         key = "dm:device-type:event:modify",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/device-type/add"}
+                        permissions = {"/device-mgt/devices/owning-device/event/modify"}
                 ),
                 @Scope(
                         name = "Get Events Details of a Device Type",
                         description = "Get Events Details of a Device Type",
                         key = "dm:device-type:event:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/event/view"}
                 )
         }
 )

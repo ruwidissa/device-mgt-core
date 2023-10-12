@@ -409,7 +409,7 @@ deviceModule = function () {
 					var jwtClient = JWTClientManagerService.getJWTClient();
 					// returning access token by JWT grant type
 					var deviceScope = "device_" + type.replace(" ", "") + "_" + deviceId + " dm:device:enroll " +
-						"dm:device:disenroll dm:device:modify dm:ops:view dm:device:event:publish";
+						"dm:device:disenroll dm:device:modify dm:devices:ops:view dm:device:event:publish";
 					var tokenInfo = jwtClient.getAccessToken(config.clientId, config.clientSecret,
 						userName, deviceScope);
 					config.accessToken = tokenInfo.getAccessToken();

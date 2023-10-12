@@ -91,21 +91,21 @@ import java.util.Map;
                         description = "Disenroll a device",
                         key = "dm:device:disenroll",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/remove"}
+                        permissions = {"/device-mgt/devices/owning-device/disenroll"}
                 ),
                 @Scope(
                         name = "Publish Event",
                         description = "publish device event",
                         key = "dm:device:event:publish",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/event"}
+                        permissions = {"/device-mgt/devices/owning-device/event/publish"}
                 ),
                 @Scope(
                         name = "Getting Device Operation Details",
                         description = "Getting Device Operation Details",
-                        key = "dm:ops:view",
+                        key = "dm:devices:ops:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/operations/view"}
                 )
         }
 )
@@ -394,7 +394,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:ops:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:ops:view")
                     })
             }
     )
@@ -453,7 +453,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:ops:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:ops:view")
                     })
             }
     )
@@ -511,7 +511,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:ops:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:ops:view")
                     })
             }
     )
@@ -630,7 +630,7 @@ public interface DeviceAgentService {
             tags = "Device Agent Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:ops:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:ops:view")
                     })
             }
     )

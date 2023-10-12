@@ -78,7 +78,7 @@ import java.util.List;
                 description = "Get activities",
                 key = "dm:activity:get",
                 roles = {"Internal/devicemgt-user"},
-                permissions = {"/device-mgt/devices/owning-device/view"}
+                permissions = {"/device-mgt/devices/owning-device/activities/view"}
                 )
         }
 )

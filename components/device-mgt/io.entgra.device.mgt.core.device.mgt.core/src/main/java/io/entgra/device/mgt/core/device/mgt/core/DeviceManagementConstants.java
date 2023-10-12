@@ -38,7 +38,7 @@ public final class DeviceManagementConstants {
         private ConfigurationManagement(){
             throw new AssertionError();
         }
-        public static final String SCOPES_FOR_TOKEN = "dm:ops:view dm:device:event:publish win:devices:enroll";
+        public static final String SCOPES_FOR_TOKEN = "dm:devices:ops:view dm:device:event:publish win:devices:enroll";
         public static final String IOT_GATEWAY_HOST = "iot.gateway.host";
         public static final String IOT_GATEWAY_HTTPS_PORT = "iot.gateway.https.port";
         public static final String IOT_CORE_HOST = "iot.core.host";
@@ -156,6 +156,7 @@ public final class DeviceManagementConstants {
                 new Permission("/permission/admin/device-mgt/devices/enroll", "ui.execute"),
                 new Permission("/permission/admin/device-mgt/devices/disenroll", "ui.execute"),
                 new Permission("/permission/admin/device-mgt/devices/owning-device/view", "ui.execute"),
+                new Permission("/permission/admin/device-mgt/devices/owning-device/operations/view", "ui.execute"),
                 new Permission("/permission/admin/device-mgt/metadata", "ui.execute"),
                 new Permission("/permission/admin/manage/portal", "ui.execute")
         };
