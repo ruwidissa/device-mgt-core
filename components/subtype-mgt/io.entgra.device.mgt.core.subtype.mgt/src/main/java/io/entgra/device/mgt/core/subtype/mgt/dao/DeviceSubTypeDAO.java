@@ -26,20 +26,20 @@ import java.util.List;
 public interface DeviceSubTypeDAO {
     boolean addDeviceSubType(DeviceSubType deviceSubType) throws SubTypeMgtDAOException;
 
-    boolean updateDeviceSubType(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType, String subTypeName,
+    boolean updateDeviceSubType(String subTypeId, int tenantId, String deviceType, String subTypeName,
                                 String typeDefinition) throws SubTypeMgtDAOException;
 
-    DeviceSubType getDeviceSubType(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
+    DeviceSubType getDeviceSubType(String subTypeId, int tenantId, String deviceType)
             throws SubTypeMgtDAOException;
 
-    List<DeviceSubType> getAllDeviceSubTypes(int tenantId, DeviceSubType.DeviceType deviceType)
+    List<DeviceSubType> getAllDeviceSubTypes(int tenantId, String deviceType)
             throws SubTypeMgtDAOException;
 
-    int getDeviceSubTypeCount(DeviceSubType.DeviceType deviceType) throws SubTypeMgtDAOException;
+    int getDeviceSubTypeCount(String deviceType) throws SubTypeMgtDAOException;
 
-    boolean checkDeviceSubTypeExist(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
+    boolean checkDeviceSubTypeExist(String subTypeId, int tenantId, String deviceType)
             throws SubTypeMgtDAOException;
 
-    DeviceSubType getDeviceSubTypeByProvider(String subTypeName, int tenantId, DeviceSubType.DeviceType deviceType)
+    DeviceSubType getDeviceSubTypeByProvider(String subTypeName, int tenantId, String deviceType)
             throws SubTypeMgtDAOException;
 }

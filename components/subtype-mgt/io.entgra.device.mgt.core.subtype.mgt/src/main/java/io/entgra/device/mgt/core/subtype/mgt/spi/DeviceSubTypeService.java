@@ -27,20 +27,20 @@ public interface DeviceSubTypeService {
 
     boolean addDeviceSubType(DeviceSubType deviceSubType) throws SubTypeMgtPluginException;
 
-    boolean updateDeviceSubType(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType, String subTypeName,
+    boolean updateDeviceSubType(String subTypeId, int tenantId, String deviceType, String subTypeName,
                                 String typeDefinition) throws SubTypeMgtPluginException;
 
-    DeviceSubType getDeviceSubType(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
+    DeviceSubType getDeviceSubType(String subTypeId, int tenantId, String deviceType)
             throws SubTypeMgtPluginException;
 
-    List<DeviceSubType> getAllDeviceSubTypes(int tenantId, DeviceSubType.DeviceType deviceType)
+    List<DeviceSubType> getAllDeviceSubTypes(int tenantId, String deviceType)
             throws SubTypeMgtPluginException;
 
-    int getDeviceSubTypeCount(DeviceSubType.DeviceType deviceType) throws SubTypeMgtPluginException;
+    int getDeviceSubTypeCount(String deviceType) throws SubTypeMgtPluginException;
 
-    DeviceSubType getDeviceSubTypeByProvider(String subTypeName, int tenantId, DeviceSubType.DeviceType deviceType)
+    DeviceSubType getDeviceSubTypeByProvider(String subTypeName, int tenantId, String deviceType)
             throws SubTypeMgtPluginException;
 
-    boolean checkDeviceSubTypeExist(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
+    boolean checkDeviceSubTypeExist(String subTypeId, int tenantId, String deviceType)
             throws SubTypeMgtPluginException;
 }
