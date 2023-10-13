@@ -383,5 +383,87 @@
             <Mail>Replace with mail</Mail>
             {% endif %}
     </EnrollmentGuideConfiguration>
+    <DefaultPermissions>
+            <DefaultPermission>
+                <Name>/permission/admin/device-mgt/devices/any-device/permitted-actions-under-owning-device</Name>
+                <MappedScopeDetails>
+                    <Name>Apply permitted actions on any device</Name>
+                    <Key>dm:devices:any:permitted</Key>
+                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
+                </MappedScopeDetails>
+            </DefaultPermission>
+            <DefaultPermission>
+                <Name>/permission/admin/device-mgt/device/api/subscribe</Name>
+                <MappedScopeDetails>
+                    <Name>Subscribe APIs</Name>
+                    <Key>dm:device:api:subscribe</Key>
+                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
+                </MappedScopeDetails>
+            </DefaultPermission>
+            <DefaultPermission>
+                <Name>/permission/admin/app-mgt/life-cycle/application/approve</Name>
+                <MappedScopeDetails>
+                    <Name>Approve Applications</Name>
+                    <Key>am:admin:lc:app:approve</Key>
+                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
+                </MappedScopeDetails>
+            </DefaultPermission>
+            <DefaultPermission>
+                <Name>/permission/admin/app-mgt/life-cycle/application/create</Name>
+                <MappedScopeDetails>
+                    <Name>Create Applications</Name>
+                    <Key>am:admin:lc:app:create</Key>
+                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
+                </MappedScopeDetails>
+            </DefaultPermission>
+            <DefaultPermission>
+                <Name>/permission/admin/app-mgt/life-cycle/application/reject</Name>
+                <MappedScopeDetails>
+                    <Name>Reject Applications</Name>
+                    <Key>am:admin:lc:app:reject</Key>
+                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
+                </MappedScopeDetails>
+            </DefaultPermission>
+            <DefaultPermission>
+                <Name>/permission/admin/app-mgt/life-cycle/application/block</Name>
+                <MappedScopeDetails>
+                    <Name>Block Applications</Name>
+                    <Key>am:admin:lc:app:block</Key>
+                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
+                </MappedScopeDetails>
+            </DefaultPermission>
+            <DefaultPermission>
+                <Name>/permission/admin/app-mgt/life-cycle/application/review</Name>
+                <MappedScopeDetails>
+                    <Name>Review Applications</Name>
+                    <Key>am:admin:lc:app:review</Key>
+                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
+                </MappedScopeDetails>
+            </DefaultPermission>
+            <DefaultPermission>
+                <Name>/permission/admin/app-mgt/life-cycle/application/retire</Name>
+                <MappedScopeDetails>
+                    <Name>Retire Applications</Name>
+                    <Key>am:admin:lc:app:retire</Key>
+                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
+                </MappedScopeDetails>
+            </DefaultPermission>
+            <DefaultPermission>
+                <Name>/permission/admin/app-mgt/life-cycle/application/deprecate</Name>
+                <MappedScopeDetails>
+                    <Name>Deprecate Application</Name>
+                    <Key>am:admin:lc:app:deprecate</Key>
+                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
+                </MappedScopeDetails>
+            </DefaultPermission>
+            <DefaultPermission>
+                <Name>/permission/admin/app-mgt/life-cycle/application/publish</Name>
+                <MappedScopeDetails>
+                    <Name>Publish Applications</Name>
+                    <Key>am:admin:lc:app:publish</Key>
+                    <DefaultRoles>Internal/devicemgt-user</DefaultRoles>
+                </MappedScopeDetails>
+            </DefaultPermission>
+        </DefaultPermissions>
 </DeviceMgtConfiguration>
 

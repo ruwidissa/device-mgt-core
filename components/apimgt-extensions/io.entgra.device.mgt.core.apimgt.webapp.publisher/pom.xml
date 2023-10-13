@@ -130,6 +130,10 @@
             <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
+        </dependency>
     </dependencies>
 
 
@@ -187,6 +191,8 @@
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.util,
                             io.entgra.device.mgt.core.device.mgt.common.exceptions,
                             io.entgra.device.mgt.core.device.mgt.common.metadata.mgt,
+                            io.entgra.device.mgt.core.device.mgt.core.config,
+                            io.entgra.device.mgt.core.device.mgt.core.config.permission,
                             org.wso2.carbon.base;version="1.0",
                             org.wso2.carbon.context;version="4.6",
                             org.wso2.carbon;version="4.6",
