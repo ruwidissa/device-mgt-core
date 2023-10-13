@@ -91,7 +91,7 @@ import java.util.List;
                         description = "Get the count of groups belongs to current user.",
                         key = "gm:groups:count",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/groups/view"}
+                        permissions = {"/device-mgt/groups/count"}
                 ),
                 @Scope(
                         name = "Add new device group to the system.",
@@ -105,7 +105,7 @@ import java.util.List;
                         description = "View group specified",
                         key = "gm:groups:groups-view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/groups/view"}
+                        permissions = {"/device-mgt/groups/specified-groups/view"}
                 ),
                 @Scope(
                         name = "Update a group",
@@ -147,7 +147,7 @@ import java.util.List;
                         description = "View list of device count in the device group",
                         key = "gm:devices:count",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/groups/devices/view"}
+                        permissions = {"/device-mgt/groups/devices/count"}
                 ),
                 @Scope(
                         name = "Add devices to group",
@@ -168,21 +168,21 @@ import java.util.List;
                         description = "Assign devices to groups",
                         key = "gm:devices:assign",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/groups/devices/add"}
+                        permissions = {"/device-mgt/groups/devices/assign"}
                 ),
                 @Scope(
                         name = "List of groups that have the device",
                         description = "List of groups that have the device",
                         key = "gm:groups:device:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/groups/devices/view"}
+                        permissions = {"/device-mgt/groups/device-groups/view"}
                 ),
                 @Scope(
                         name = "View whether the groups has relevant device types",
                         description = "View whether the groups has relevant device types",
                         key = "gm:devices-types:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/groups/device-types"}
+                        permissions = {"/device-mgt/groups/device-types/view"}
                 )
         }
 )

@@ -79,7 +79,7 @@ import java.util.List;
                         description = "Adding a Policy",
                         key = "pm:policies:add",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/add"}
                 ),
                 @Scope(
                         name = "Getting Details of Policies",
@@ -93,56 +93,56 @@ import java.util.List;
                         description = "Getting Details of a Policy",
                         key = "pm:policies:details:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/view"}
+                        permissions = {"/device-mgt/policies/view-details"}
                 ),
                 @Scope(
                         name = "Updating a Policy",
                         description = "Updating a Policy",
                         key = "pm:policies:update",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/update"}
                 ),
                 @Scope(
                         name = "Removing Multiple Policies",
                         description = "Removing Multiple Policies",
                         key = "pm:policies:remove",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/remove"}
                 ),
                 @Scope(
                         name = "Activating Policies",
                         description = "Activating Policies",
                         key = "pm:policies:activate",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/activate"}
                 ),
                 @Scope(
                         name = "Deactivating Policies",
                         description = "Deactivating Policies",
                         key = "pm:policies:deactivate",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/deactivate"}
                 ),
                 @Scope(
                         name = "Applying Changes on Policies",
                         description = "Applying Changes on Policies",
                         key = "pm:policies:change",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/apply-changes"}
                 ),
                 @Scope(
                         name = "Updating the Policy Priorities",
                         description = "Updating the Policy Priorities",
                         key = "pm:policies:priorities:update",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/update-priority"}
                 ),
                 @Scope(
                         name = "Fetching the Effective Policy",
                         description = "Fetching the Effective Policy",
                         key = "pm:policies:effective-policy",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/view"}
+                        permissions = {"/device-mgt/policies/view-effective-policy"}
                 )
         }
 )

@@ -60,49 +60,49 @@ import java.util.List;
                         description = "Getting Permission Details of a Role",
                         key = "rm:roles:permissions:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/view"}
+                        permissions = {"/device-mgt/roles/view-permissions"}
                 ),
                 @Scope(
                         name = "Getting the List of Roles",
                         description = "Getting the List of Roles",
                         key = "rm:roles:details:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/view"}
+                        permissions = {"/device-mgt/roles/view-details"}
                 ),
                 @Scope(
                         name = "Adding a Role",
                         description = "Adding a Role",
                         key = "rm:roles:add",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/manage"}
+                        permissions = {"/device-mgt/roles/add"}
                 ),
                 @Scope(
                         name = "Adding a combined Role",
                         description = "Adding a combined Role",
                         key = "rm:roles:combined:add",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/manage"}
+                        permissions = {"/device-mgt/roles/combined-role/add"}
                 ),
                 @Scope(
                         name = "Updating Role Details",
                         description = "Updating Role Details",
                         key = "rm:roles:update",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/manage"}
+                        permissions = {"/device-mgt/roles/update"}
                 ),
                 @Scope(
                         name = "Deleting a Role",
                         description = "Deleting a Role",
                         key = "rm:roles:delete",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/manage"}
+                        permissions = {"/device-mgt/roles/delete"}
                 ),
                 @Scope(
                         name = "Adding Users to a Role",
                         description = "Adding Users to a Role",
                         key = "rm:users:add",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/manage"}
+                        permissions = {"/device-mgt/roles/assign-user"}
                 )
         }
 )

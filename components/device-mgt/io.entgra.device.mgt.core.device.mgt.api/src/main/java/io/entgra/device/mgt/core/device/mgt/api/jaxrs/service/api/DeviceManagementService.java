@@ -99,63 +99,63 @@ import java.util.Map;
                         description = "Getting Details of a Device",
                         key = "dm:devices:details",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/details/view"}
                 ),
                 @Scope(
                         name = "Update the device specified by device id",
                         description = "Update the device specified by device id",
                         key = "dm:devices:update",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/update"}
                 ),
                 @Scope(
                         name = "Delete the device specified by device id",
                         description = "Delete the device specified by device id",
                         key = "dm:devices:delete",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/delete"}
                 ),
                 @Scope(
                         name = "Getting Feature Details of a Device",
                         description = "Getting Feature Details of a Device",
                         key = "dm:devices:features:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/features/view"}
                 ),
                 @Scope(
                         name = "Advanced Search for Devices",
                         description = "Advanced Search for Devices",
                         key = "dm:devices:search",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/search"}
                 ),
                 @Scope(
                         name = "Getting Installed Application Details of a Device",
                         description = "Getting Installed Application Details of a Device",
                         key = "dm:devices:app:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/apps/view"}
                 ),
                 @Scope(
                         name = "Getting Device Operation Details",
                         description = "Getting Device Operation Details",
                         key = "dm:devices:ops:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/operations/view"}
                 ),
                 @Scope(
                         name = "Get the details of the policy that is enforced on a device.",
                         description = "Get the details of the policy that is enforced on a device.",
                         key = "dm:devices:policy:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/policies/view"}
                 ),
                 @Scope(
                         name = "Getting Policy Compliance Details of a Device",
                         description = "Getting Policy Compliance Details of a Device",
                         key = "dm:devices:compliance:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/compliance/view"}
                 ),
                 @Scope(
                         name = "Change device status.",
