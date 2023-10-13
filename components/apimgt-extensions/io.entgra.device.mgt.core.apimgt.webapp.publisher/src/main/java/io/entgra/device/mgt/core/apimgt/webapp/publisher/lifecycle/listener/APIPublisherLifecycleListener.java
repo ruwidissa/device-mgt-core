@@ -18,17 +18,14 @@
 package io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.listener;
 
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServicesImpl;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
+import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermission;
+import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermissions;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleListener;
@@ -47,7 +44,10 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.servlet.ServletContext;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public class APIPublisherLifecycleListener implements LifecycleListener {
@@ -128,45 +128,26 @@ public class APIPublisherLifecycleListener implements LifecycleListener {
                                         "' and version '" + apiConfig.getVersion() + "'", e);
                             }
                         }
-                        apiPublisherDataHolder.setPermScopeMapping(permScopeMap);
 
-                        Map<String, String> permScopeMapping = apiPublisherDataHolder.getPermScopeMapping();
-                        if (!permScopeMapping.isEmpty()) {
-                            Metadata existingMetaData = metadataManagementService.retrieveMetadata("perm-scope" +
-                                    "-mapping");
-                            if (existingMetaData != null) {
-                                existingMetaData.setMetaValue(new Gson().toJson(apiPublisherDataHolder.getPermScopeMapping()
-                                ));
-                                metadataManagementService.updateMetadata(existingMetaData);
-                            } else {
-                                Metadata newMetaData = new Metadata();
-                                newMetaData.setMetaKey("perm-scope-mapping");
-                                permScopeMapping =
-                                        apiPublisherDataHolder.getPermScopeMapping();
+                        Metadata existingMetaData = metadataManagementService.retrieveMetadata("perm-scope" +
+                                "-mapping");
+                        if (existingMetaData != null) {
+                            existingMetaData.setMetaValue(new Gson().toJson(permScopeMap));
+                            metadataManagementService.updateMetadata(existingMetaData);
+                        } else {
+                            Metadata newMetaData = new Metadata();
+                            newMetaData.setMetaKey("perm-scope-mapping");
 
-                                //Todo fix this properly with a config
-                                Map<String, String> defaultScopePermMap = new HashMap<>();
-                                defaultScopePermMap.put("/permission/admin/device-mgt/devices/any-device/permitted-actions-under-owning-device", "dm:devices:any:permitted");
-                                defaultScopePermMap.put("/permission/admin/device-mgt/device/api/subscribe", "dm:device:api:subscribe");
-                                defaultScopePermMap.put("/permission/admin/app-mgt/life-cycle/application/approve", "am:admin:lc:app:approve");
-                                defaultScopePermMap.put("/permission/admin/app-mgt/life-cycle/application/create", "am:admin:lc:app:create");
-                                defaultScopePermMap.put("/permission/admin/app-mgt/life-cycle/application/reject", "am:admin:lc:app:reject");
-                                defaultScopePermMap.put("/permission/admin/app-mgt/life-cycle/application/block", "am:admin:lc:app:block");
-                                defaultScopePermMap.put("/permission/admin/app-mgt/life-cycle/application/review", "am:admin:lc:app:review");
-                                defaultScopePermMap.put("/permission/admin/app-mgt/life-cycle/application/retire", "am:admin:lc:app:retire");
-                                defaultScopePermMap.put("/permission/admin/app-mgt/life-cycle/application/deprecate", "am:admin:lc:app:deprecate");
-                                defaultScopePermMap.put("/permission/admin/app-mgt/life-cycle/application/publish", "am:admin:lc:app:publish");
+                            DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+                            DefaultPermissions defaultPermissions = deviceManagementConfig.getDefaultPermissions();
 
-                                for (Map.Entry<String,String> mapElement : defaultScopePermMap.entrySet()) {
-                                    String key = mapElement.getKey();
-                                    String value = mapElement.getValue();
-                                    permScopeMapping.put(key,value);
-                                }
-                                apiPublisherDataHolder.setPermScopeMapping(permScopeMapping);
-                                newMetaData.setMetaValue(new Gson().toJson(permScopeMapping));
-                                metadataManagementService.createMetadata(newMetaData);
+                            for (DefaultPermission defaultPermission : defaultPermissions.getDefaultPermissions()) {
+                                permScopeMap.put(defaultPermission.getName(), defaultPermission.getScopeMapping().getKey());
                             }
+                            newMetaData.setMetaValue(new Gson().toJson(permScopeMap));
+                            metadataManagementService.createMetadata(newMetaData);
                         }
+                        apiPublisherDataHolder.setPermScopeMapping(permScopeMap);
                     } catch (IOException e) {
                         log.error("Error encountered while discovering annotated classes", e);
                     } catch (ClassNotFoundException e) {

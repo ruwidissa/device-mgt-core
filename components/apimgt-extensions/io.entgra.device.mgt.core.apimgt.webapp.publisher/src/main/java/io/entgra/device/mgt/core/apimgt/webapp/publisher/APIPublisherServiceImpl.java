@@ -17,7 +17,6 @@
  */
 package io.entgra.device.mgt.core.apimgt.webapp.publisher;
 
-import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
@@ -40,6 +39,11 @@ import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiUriTemplate;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
+import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermission;
+import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermissions;
+import io.entgra.device.mgt.core.device.mgt.core.config.permission.ScopeMapping;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -437,18 +441,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
     }
 
     public void addDefaultScopesIfNotExist() {
-        ArrayList<String> defaultScopes = new ArrayList<>();
-        defaultScopes.add("dm:devices:any:permitted");
-        defaultScopes.add("dm:device:api:subscribe");
-        defaultScopes.add("am:admin:lc:app:approve");
-        defaultScopes.add("am:admin:lc:app:create");
-        defaultScopes.add("am:admin:lc:app:reject");
-        defaultScopes.add("am:admin:lc:app:block");
-        defaultScopes.add("am:admin:lc:app:review");
-        defaultScopes.add("am:admin:lc:app:retire");
-        defaultScopes.add("am:admin:lc:app:deprecate");
-        defaultScopes.add("am:admin:lc:app:publish");
-
+        DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        DefaultPermissions defaultPermissions = deviceManagementConfig.getDefaultPermissions();
         APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
         try {
             APIApplicationKey apiApplicationKey =
@@ -460,12 +454,13 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
 
             Scope scope = new Scope();
-            for (String defaultScope: defaultScopes) {
+            for (DefaultPermission defaultPermission: defaultPermissions.getDefaultPermissions()) {
                 //todo check whether scope is available or not
-                scope.setName(defaultScope);
-                scope.setDescription(defaultScope);
-                scope.setKey(defaultScope);
-                scope.setRoles("Internal/devicemgt-user");
+                ScopeMapping scopeMapping = defaultPermission.getScopeMapping();
+                scope.setName(scopeMapping.getName());
+                scope.setDescription(scopeMapping.getName());
+                scope.setKey(scopeMapping.getKey());
+                scope.setRoles(scopeMapping.getDefaultRoles());
                 publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
             }
         } catch (BadRequestException | UnexpectedResponseException | APIServicesException e) {
