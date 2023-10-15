@@ -100,6 +100,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
     public static final String SUBSCRIPTION_TO_CURRENT_TENANT = "CURRENT_TENANT";
     public static final String API_GLOBAL_VISIBILITY = "PUBLIC";
     public static final String API_PRIVATE_VISIBILITY = "PRIVATE";
+    private static final String ADMIN_ROLE_KEY = ",admin";
 
     private static final Log log = LogFactory.getLog(APIPublisherServiceImpl.class);
 
@@ -186,7 +187,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     scope.setName(apiScope.getName());
                                     scope.setDescription(apiScope.getDescription());
                                     scope.setKey(apiScope.getKey());
-                                    scope.setRoles(apiScope.getRoles());
+                                    scope.setRoles(apiScope.getRoles() + ADMIN_ROLE_KEY);
                                     publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
                                 }
                             }
@@ -259,7 +260,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                             scope.setName(apiScope.getName());
                                             scope.setDescription(apiScope.getDescription());
                                             scope.setKey(apiScope.getKey());
-                                            scope.setRoles(apiScope.getRoles());
+                                            scope.setRoles(apiScope.getRoles() + ADMIN_ROLE_KEY);
                                             publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
 
                                         }
@@ -280,7 +281,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                         scope.setName(apiScope.getName());
                                         scope.setDescription(apiScope.getDescription());
                                         scope.setKey(apiScope.getKey());
-                                        scope.setRoles(apiScope.getRoles());
+                                        scope.setRoles(apiScope.getRoles() + ADMIN_ROLE_KEY);
                                         publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
                                     }
                                 }
@@ -460,7 +461,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 scope.setName(scopeMapping.getName());
                 scope.setDescription(scopeMapping.getName());
                 scope.setKey(scopeMapping.getKey());
-                scope.setRoles(scopeMapping.getDefaultRoles());
+                scope.setRoles(scopeMapping.getDefaultRoles() + ADMIN_ROLE_KEY);
                 publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
             }
         } catch (BadRequestException | UnexpectedResponseException | APIServicesException e) {
