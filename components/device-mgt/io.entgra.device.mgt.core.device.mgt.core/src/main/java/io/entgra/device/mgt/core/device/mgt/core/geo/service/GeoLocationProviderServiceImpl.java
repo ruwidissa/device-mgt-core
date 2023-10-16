@@ -1747,6 +1747,32 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
         }
     }
 
+    @Override
+    public int getGeoFenceCount() throws GeoLocationBasedServiceException {
+        int tenantId;
+        try {
+            tenantId = DeviceManagementDAOUtil.getTenantId();
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving tenant id while get geofence data";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        }
+        try {
+            EventManagementDAOFactory.openConnection();
+            return geofenceDAO.getGeofenceCount(tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving geofence data for the tenant " + tenantId;
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Failed to open the DB connection to retrieve Geofence";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } finally {
+            EventManagementDAOFactory.closeConnection();
+        }
+    }
+
     /**
      * Delete events of geofence
      *

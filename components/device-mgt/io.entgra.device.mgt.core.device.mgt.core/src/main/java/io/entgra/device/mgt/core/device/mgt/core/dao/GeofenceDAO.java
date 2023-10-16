@@ -174,4 +174,12 @@ public interface GeofenceDAO {
      * @throws DeviceManagementDAOException
      */
     GeofenceData getGeofence(int fenceId, boolean requireGroupData) throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to get the geofence count by tenant id.
+     * @param tenantId tenant id.
+     * @return returns the geofence count of tenant.
+     * @throws DeviceManagementDAOException
+     */
+    int getGeofenceCount(int tenantId) throws DeviceManagementDAOException;
 }
