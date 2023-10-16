@@ -39,6 +39,7 @@ import io.entgra.device.mgt.core.device.mgt.core.config.push.notification.PushNo
 import io.entgra.device.mgt.core.device.mgt.core.config.remote.session.RemoteSessionConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.status.task.DeviceStatusTaskConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.task.TaskConfiguration;
+import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermissions;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -74,6 +75,8 @@ public final class DeviceManagementConfig {
     private OperationTimeoutConfiguration operationTimeoutConfiguration;
     private MetaDataConfiguration metaDataConfiguration;
     private EnrollmentGuideConfiguration enrollmentGuideConfiguration;
+
+    private DefaultPermissions defaultPermissions;
 
     @XmlElement(name = "ManagementRepository", required = true)
     public DeviceManagementConfigRepository getDeviceManagementConfigRepository() {
@@ -286,6 +289,15 @@ public final class DeviceManagementConfig {
 
     public void setEnrollmentGuideConfiguration(EnrollmentGuideConfiguration enrollmentGuideConfiguration) {
         this.enrollmentGuideConfiguration = enrollmentGuideConfiguration;
+    }
+
+    @XmlElement(name = "DefaultPermissions", required = true)
+    public DefaultPermissions getDefaultPermissions() {
+        return defaultPermissions;
+    }
+
+    public void setDefaultPermissions(DefaultPermissions defaultPermissions) {
+        this.defaultPermissions = defaultPermissions;
     }
 }
 

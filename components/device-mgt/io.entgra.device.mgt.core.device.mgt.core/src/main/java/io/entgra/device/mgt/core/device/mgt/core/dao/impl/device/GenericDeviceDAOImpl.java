@@ -94,7 +94,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "t.NAME AS DEVICE_TYPE ";
 
             //Filter by serial number or any Custom Property in DM_DEVICE_INFO
-            if (serial != null || !request.getCustomProperty().isEmpty()) {
+            if ((serial != null) || (request.getCustomProperty() != null && !request.getCustomProperty().isEmpty())) {
                 sql = sql +
                         "FROM DM_DEVICE d " +
                         "INNER JOIN DM_DEVICE_TYPE t ON d.DEVICE_TYPE_ID = t.ID " +
@@ -170,7 +170,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 if (isSerialProvided) {
                     stmt.setString(paramIdx++, "%" + serial + "%");
                 }
-                if (!request.getCustomProperty().isEmpty()) {
+                if (request.getCustomProperty() != null && !request.getCustomProperty().isEmpty()) {
                     for (Map.Entry<String, String> entry : request.getCustomProperty().entrySet()) {
                         stmt.setString(paramIdx++, "%" + entry.getValue() + "%");
                     }

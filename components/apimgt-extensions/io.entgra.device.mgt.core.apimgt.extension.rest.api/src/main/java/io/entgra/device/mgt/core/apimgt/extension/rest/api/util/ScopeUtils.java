@@ -18,6 +18,9 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.util;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * This class represents the scope data.
  */
@@ -53,7 +56,7 @@ public class ScopeUtils {
     }
 
     public void setRoles(String roles) {
-        this.roles = roles;
+        this.roles = removeDuplicatesFromRoleString(roles);
     }
 
     public String getDescription() {
@@ -74,5 +77,14 @@ public class ScopeUtils {
                 "   ]\n" +
                 "}";
         return jsonString;
+    }
+
+    private static String removeDuplicatesFromRoleString(String roleString) {
+        String[] roles = roleString.split(",");
+        Set<String> roleSet = new HashSet<>();
+        for(String role : roles) {
+            roleSet.add(role.trim());
+        }
+        return String.join(",", roleSet);
     }
 }

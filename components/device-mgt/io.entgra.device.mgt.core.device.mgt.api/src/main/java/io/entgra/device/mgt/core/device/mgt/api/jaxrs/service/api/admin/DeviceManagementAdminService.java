@@ -79,7 +79,7 @@ import java.util.List;
                         description = "Getting Details of a Device",
                         key = "dm:admin:devices:view",
                         roles = {"Internal/devicemgt-admin"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/admin/devices/view"}
                 ),
                 @Scope(
                         name = "Update the Device Owner",
