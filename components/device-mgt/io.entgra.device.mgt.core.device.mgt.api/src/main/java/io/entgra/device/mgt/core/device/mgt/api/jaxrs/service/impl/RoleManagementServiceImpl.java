@@ -403,8 +403,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             try {
                 if (roleInfo.getPermissions() != null && roleInfo.getPermissions().length > 0) {
                     String[] roleName = roleInfo.getRoleName().split("/");
-                    addPermissions(roleName[roleName.length - 1], roleInfo.getPermissions(),
-                            DeviceMgtAPIUtils.getUserRealm());
+                    roleInfo.setRemovedPermissions(new String[0]);
+                    updatePermissions(roleName[roleName.length - 1], roleInfo, DeviceMgtAPIUtils.getUserRealm());
                 }
             } catch (UserStoreException e) {
                 String msg = "Error occurred while loading the user store.";
@@ -546,7 +546,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
 
             if (roleInfo.getPermissions() != null) {
                 String[] roleDetails = roleName.split("/");
-                addPermissions(roleDetails[roleDetails.length - 1], roleInfo.getPermissions(), userRealm);
+                updatePermissions(roleDetails[roleDetails.length - 1], roleInfo, userRealm);
             }
             //TODO: Need to send the updated role information in the entity back to the client
             return Response.status(Response.Status.OK).entity("Role '" + roleInfo.getRoleName() + "' has " +
@@ -697,7 +697,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         return rolePermissions;
     }
 
-    private void addPermissions(String roleName, String[] permissions, UserRealm userRealm) {
+    private void updatePermissions(String roleName, RoleInfo roleInfo, UserRealm userRealm) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -707,7 +707,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                     DeviceMgtAPIUtils.getApiPublisher().updateScopeRoleMapping(roleName,
                             RoleManagementServiceImpl.this.getPlatformUIPermissions(roleName, userRealm,
-                                    permissions));
+                                    roleInfo.getPermissions()), RoleManagementServiceImpl.this.getPlatformUIPermissions(roleName, userRealm,
+                                    roleInfo.getRemovedPermissions()));
                 } catch (APIManagerPublisherException | UserAdminException e) {
                     log.error("Error Occurred while updating role scope mapping. ", e);
                 } finally {

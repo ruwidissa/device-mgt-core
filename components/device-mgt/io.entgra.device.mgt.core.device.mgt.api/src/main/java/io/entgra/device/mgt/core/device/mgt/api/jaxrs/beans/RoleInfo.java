@@ -33,6 +33,11 @@ public class RoleInfo {
     @ApiModelProperty(name = "permissions", value = "Lists out all the permissions associated with roles.",
             required = true, dataType = "List[java.lang.String]")
     private String[] permissions;
+
+    @ApiModelProperty(name = "removedPermissions", value = "Lists out all the permissions unassociated with roles.",
+            required = true, dataType = "List[java.lang.String]")
+    private String[] removedPermissions;
+
     @ApiModelProperty(name = "users", value = "The list of users assigned to the selected role.",
             required = true, dataType = "List[java.lang.String]")
     private String[] users;
@@ -76,4 +81,7 @@ public class RoleInfo {
         this.permissionList = permissionList;
     }
 
+    public String[] getRemovedPermissions() { return removedPermissions; }
+
+    public void setRemovedPermissions(String[] removedPermissions) { this.removedPermissions = removedPermissions; }
 }

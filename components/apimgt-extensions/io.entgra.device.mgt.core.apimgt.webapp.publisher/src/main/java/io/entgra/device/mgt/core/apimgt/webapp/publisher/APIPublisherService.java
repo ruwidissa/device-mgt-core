@@ -38,6 +38,6 @@ public interface APIPublisherService {
 
     void addDefaultScopesIfNotExist();
 
-    void updateScopeRoleMapping(String roleName, String[] permissions) throws APIManagerPublisherException;
+    void updateScopeRoleMapping(String roleName, String[] permissions, String[] removedPermissions) throws APIManagerPublisherException;
 
 }
