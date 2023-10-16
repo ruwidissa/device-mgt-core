@@ -22,7 +22,7 @@ import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubTypeCacheKey;
 import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
 
 public class DeviceSubTypeMgtUtil {
-    public static String setDeviceSubTypeCacheKey(int tenantId, String subTypeId, DeviceSubType.DeviceType deviceType) {
+    public static String setDeviceSubTypeCacheKey(int tenantId, String subTypeId, String deviceType) {
         return tenantId + "|" + subTypeId + "|" + deviceType.toString();
     }
 
@@ -30,7 +30,7 @@ public class DeviceSubTypeMgtUtil {
         String[] keys = key.split("\\|");
         int tenantId = Integer.parseInt(keys[0]);
         String subTypeId = keys[1];
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.valueOf(keys[2]);
+        String deviceType = keys[2];
 
         DeviceSubTypeCacheKey deviceSubTypesCacheKey = new DeviceSubTypeCacheKey();
         deviceSubTypesCacheKey.setTenantId(tenantId);

@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.subtype.mgt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
 import io.entgra.device.mgt.core.subtype.mgt.exception.SubTypeMgtPluginException;
 import io.entgra.device.mgt.core.subtype.mgt.impl.DeviceSubTypeServiceImpl;
@@ -48,13 +49,13 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
     public void testGetDeviceType() throws SubTypeMgtPluginException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeviceSubType subTypeActual = deviceSubTypeService.getDeviceSubType("1", tenantId,
-                DeviceSubType.DeviceType.METER);
+                "METER");
         TestUtils.verifyDeviceSubType(subTypeActual);
     }
 
     @Test(dependsOnMethods = "testAddDeviceSubType")
     public void testGetAllDeviceTypes() throws SubTypeMgtPluginException {
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.METER;
+        String deviceType = "METER";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         List<DeviceSubType> subTypesActual = deviceSubTypeService.getAllDeviceSubTypes(tenantId, deviceType);
         log.info(deviceType + " sub types count should be " + subTypesActual.size());
@@ -66,17 +67,17 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
         String subTypeId = "1";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         String subTypeName = "TestSubType";
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.METER;
+        String deviceType = "METER";
         String typeDefinition = TestUtils.createNewDeviceSubType(subTypeId);
 
         DeviceSubType deviceSubType = new DeviceSubType() {
             @Override
-            public <T> DeviceSubType setDeviceSubType(T objType, String typeDef) {
+            public <T> DeviceSubType convertToDeviceSubType() {
                 return null;
             }
 
             @Override
-            public String parseSubTypeToJson(Object objType) {
+            public String parseSubTypeToJson() throws JsonProcessingException {
                 return null;
             }
         };
@@ -96,7 +97,7 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
     public void testUpdateDeviceSubType() throws SubTypeMgtPluginException {
         String subTypeId = "1";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.METER;
+        String deviceType = "METER";
         String subTypeName = "TestSubType";
         String subTypeExpected = TestUtils.createUpdateDeviceSubType(subTypeId);
 
@@ -111,7 +112,7 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
     @Test(dependsOnMethods = "testAddDeviceSubType")
     public void testGetDeviceTypeByProvider() throws SubTypeMgtPluginException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.METER;
+        String deviceType = "METER";
         String subTypeName = "TestSubType";
         DeviceSubType subTypeActual = deviceSubTypeService.getDeviceSubTypeByProvider(subTypeName, tenantId,
                 deviceType);
@@ -120,7 +121,7 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
 
     @Test(dependsOnMethods = "testAddDeviceSubType")
     public void testGetDeviceTypeCount() throws SubTypeMgtPluginException {
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.METER;
+        String deviceType = "METER";
         int subTypeCount = deviceSubTypeService.getDeviceSubTypeCount(deviceType);
         log.info(deviceType + " Device subtypes count: " + subTypeCount);
     }

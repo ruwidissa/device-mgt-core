@@ -26,16 +26,31 @@ import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.subtype.mgt.dao.util.ConnectionManagerUtil;
 import io.entgra.device.mgt.core.device.mgt.core.config.datasource.DataSourceConfig;
 
+import javax.sql.DataSource;
+import java.sql.SQLException;
+
 public class DeviceSubTypeDAOFactory {
     private static final Log log = LogFactory.getLog(DeviceSubTypeDAOFactory.class);
     private static String databaseEngine;
 
+    private static DataSource dataSource;
     public static void init(DataSourceConfig dataSourceConfiguration) {
         if (log.isDebugEnabled()) {
             log.debug("Initializing Device SubType Mgt Data Source");
         }
         ConnectionManagerUtil.resolveDataSource(dataSourceConfiguration);
         databaseEngine = ConnectionManagerUtil.getDatabaseType();
+    }
+
+    public static void init(DataSource dtSource) {
+        dataSource = dtSource;
+
+        try {
+            databaseEngine = dataSource.getConnection().getMetaData().getDatabaseProductName();
+        } catch (SQLException var2) {
+            log.error("Error occurred while retrieving config.datasource connection", var2);
+        }
+
     }
 
     public static DeviceSubTypeDAO getDeviceSubTypeDAO() {
