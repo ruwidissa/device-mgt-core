@@ -171,4 +171,11 @@ public interface GeoLocationProviderService {
      * @throws GeoLocationBasedServiceException any errors occurred while reading event records to geofence
      */
     List<EventConfig> getEventsOfGeoFence(int geoFenceId) throws GeoLocationBasedServiceException;
+
+    /**
+     * Get geo fence count by tenant id
+     * @return returns the geofence count of tenant.
+     * @throws GeoLocationBasedServiceException any errors occurred while reading event records to geofence
+     */
+    int getGeoFenceCount() throws GeoLocationBasedServiceException;
 }

@@ -652,7 +652,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         Map<String, DeviceManager> deviceManagerMap = new HashMap<>();
         List<DeviceCacheKey> deviceCacheKeyList = new ArrayList<>();
         List<Device> existingDevices;
-        List<Device> validDevices = new ArrayList<>();;
+        List<Device> validDevices = new ArrayList<>();
         int tenantId = this.getTenantId();
 
         try {

@@ -870,6 +870,14 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         PaginationResult paginationResult = new PaginationResult();
         paginationResult.setData(geofenceList);
         paginationResult.setRecordsTotal(geofenceList.size());
+        try {
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            paginationResult.setTotalDeviceCount(geoService.getGeoFenceCount());
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Failed to retrieve geofence data";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
         return Response.status(Response.Status.OK).entity(paginationResult).build();
     }
 

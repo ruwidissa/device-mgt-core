@@ -82,35 +82,35 @@ import javax.ws.rs.core.Response;
                         description = "Adding a User",
                         key = "um:users:add",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/users/manage"}
+                        permissions = {"/device-mgt/users/add"}
                 ),
                 @Scope(
                         name = "Getting Details of a User",
                         description = "Getting Details of a User",
                         key = "um:users:details:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/users/view"}
+                        permissions = {"/device-mgt/users/details/view"}
                 ),
                 @Scope(
                         name = "Updating Details of a User",
                         description = "Updating Details of a User",
                         key = "um:users:update",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/users/manage"}
+                        permissions = {"/device-mgt/users/update"}
                 ),
                 @Scope(
                         name = "Deleting a User",
                         description = "Deleting a User",
                         key = "um:users:delete",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/users/manage"}
+                        permissions = {"/device-mgt/users/delete"}
                 ),
                 @Scope(
                         name = "Getting the Role Details of a User",
                         description = "Getting the Role Details of a User",
                         key = "um:roles:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/users/view"}
+                        permissions = {"/device-mgt/users/roles/view"}
                 ),
                 @Scope(
                         name = "Getting Details of Users",
@@ -124,42 +124,42 @@ import javax.ws.rs.core.Response;
                         description = "Getting the User Count",
                         key = "um:users:count",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/users/view"}
+                        permissions = {"/device-mgt/users/count"}
                 ),
                 @Scope(
                         name = "Getting the User existence status",
                         description = "Getting the User existence status",
                         key = "um:users:is-exist",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/users/view"}
+                        permissions = {"/device-mgt/users/existence/view"}
                 ),
                 @Scope(
                         name = "Searching for a User Name",
                         description = "Searching for a User Name",
                         key = "um:users:search",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/users/view"}
+                        permissions = {"/device-mgt/users/search"}
                 ),
                 @Scope(
                         name = "Changing the User Password",
                         description = "Adding a User",
                         key = "um:users:cred:change",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/login"}
+                        permissions = {"/login/password/update"}
                 ),
                 @Scope(
                         name = "Sending Enrollment Invitations to Users",
                         description = "Sending Enrollment Invitations to Users",
                         key = "um:users:invite",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/users/manage"}
+                        permissions = {"/device-mgt/users/invite"}
                 ),
                 @Scope(
                         name = "Get activities",
                         description = "Get activities",
                         key = "dm:activity:get",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/activities/view"}
                 ),
                 @Scope(
                         name = "Getting the Permissions of the User",

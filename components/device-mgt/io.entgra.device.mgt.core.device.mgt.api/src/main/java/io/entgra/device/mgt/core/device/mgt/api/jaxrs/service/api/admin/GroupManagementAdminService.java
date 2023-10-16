@@ -84,7 +84,7 @@ import javax.ws.rs.core.Response;
                         description = "",
                         key = "gm:admin:groups:count",
                         roles = {"Internal/devicemgt-admin"},
-                        permissions = {"/device-mgt/admin/groups/view"}
+                        permissions = {"/device-mgt/admin/groups/count"}
                 ),
                 @Scope(
                         name = "Add groups",

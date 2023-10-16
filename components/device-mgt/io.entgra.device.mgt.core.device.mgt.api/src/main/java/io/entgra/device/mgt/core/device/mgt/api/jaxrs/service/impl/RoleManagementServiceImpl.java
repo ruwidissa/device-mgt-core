@@ -279,6 +279,14 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         }
     }
 
+    /**
+     * Retrieve filtered permissions by analyzing all the permission paths.
+     *
+     * @param rolePermissions All the permission paths
+     * @param permissionPaths Permission paths that needs to filter
+     * @param permissions List of filtered permissions
+     * @return {@link List<String>}
+     */
     private List<String> processAndFilterPermissions(UIPermissionNode[] rolePermissions, List<String> permissionPaths, List<String> permissions) {
 
         for (UIPermissionNode rolePermission : rolePermissions) {
@@ -299,6 +307,15 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         return permissions;
     }
 
+    /**
+     * Getting platform permissions
+     *
+     * @param roleName Role Name
+     * @param userRealm {@link UserRealm}
+     * @param permissions list of permissions
+     * @return {@link List<String>}
+     * @throws UserAdminException if error occurred when getting {@link UIPermissionNode}
+     */
     private String[] getPlatformUIPermissions(String roleName, UserRealm userRealm, String[] permissions)
             throws UserAdminException {
         UIPermissionNode uiPermissionNode = getUIPermissionNode(roleName, userRealm);
@@ -403,8 +420,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             try {
                 if (roleInfo.getPermissions() != null && roleInfo.getPermissions().length > 0) {
                     String[] roleName = roleInfo.getRoleName().split("/");
-                    addPermissions(roleName[roleName.length - 1], roleInfo.getPermissions(),
-                            DeviceMgtAPIUtils.getUserRealm());
+                    roleInfo.setRemovedPermissions(new String[0]);
+                    updatePermissions(roleName[roleName.length - 1], roleInfo, DeviceMgtAPIUtils.getUserRealm());
                 }
             } catch (UserStoreException e) {
                 String msg = "Error occurred while loading the user store.";
@@ -546,7 +563,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
 
             if (roleInfo.getPermissions() != null) {
                 String[] roleDetails = roleName.split("/");
-                addPermissions(roleDetails[roleDetails.length - 1], roleInfo.getPermissions(), userRealm);
+                updatePermissions(roleDetails[roleDetails.length - 1], roleInfo, userRealm);
             }
             //TODO: Need to send the updated role information in the entity back to the client
             return Response.status(Response.Status.OK).entity("Role '" + roleInfo.getRoleName() + "' has " +
@@ -697,7 +714,14 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         return rolePermissions;
     }
 
-    private void addPermissions(String roleName, String[] permissions, UserRealm userRealm) {
+    /**
+     * Update the role's permissions. This will function in the fire and forget pattern and run on a new thread.
+     *
+     * @param roleName Role Name
+     * @param roleInfo {@link RoleInfo}
+     * @param userRealm {@link UserRealm}
+     */
+    private void updatePermissions(String roleName, RoleInfo roleInfo, UserRealm userRealm) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -707,7 +731,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                     DeviceMgtAPIUtils.getApiPublisher().updateScopeRoleMapping(roleName,
                             RoleManagementServiceImpl.this.getPlatformUIPermissions(roleName, userRealm,
-                                    permissions));
+                                    roleInfo.getPermissions()), RoleManagementServiceImpl.this.getPlatformUIPermissions(roleName, userRealm,
+                                    roleInfo.getRemovedPermissions()));
                 } catch (APIManagerPublisherException | UserAdminException e) {
                     log.error("Error Occurred while updating role scope mapping. ", e);
                 } finally {

@@ -80,7 +80,7 @@ import javax.ws.rs.core.Response;
                         description = "Updating the Device Notification Status",
                         key = "dm:notif:mark-checked",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/notifications/view"}
+                        permissions = {"/device-mgt/notifications/update"}
                 )
         }
 )
