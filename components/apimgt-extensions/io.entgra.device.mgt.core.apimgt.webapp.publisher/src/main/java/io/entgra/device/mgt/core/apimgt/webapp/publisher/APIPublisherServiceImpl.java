@@ -673,6 +673,19 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         }
     }
 
+    /**
+     * Update Scopes
+     *
+     * @param roleName Role Name
+     * @param publisherRESTAPIServices {@link PublisherRESTAPIServices}
+     * @param apiApplicationKey {@link APIApplicationKey}
+     * @param accessTokenInfo {@link AccessTokenInfo}
+     * @param scopeObject scope object returning from APIM
+     * @param permissions List of permissions
+     * @param permScopeMap Permission Scope map
+     * @param removingPermissions if list of permissions has to be removed from the role send true, otherwise sends false.
+     * @throws APIManagerPublisherException If the method receives invalid permission to update.
+     */
     private void updateScopes (String roleName, PublisherRESTAPIServices publisherRESTAPIServices,
                       APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                       JSONObject scopeObject, String[] permissions, Map<String, String> permScopeMap, boolean removingPermissions )

@@ -279,6 +279,14 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         }
     }
 
+    /**
+     * Retrieve filtered permissions by analyzing all the permission paths.
+     *
+     * @param rolePermissions All the permission paths
+     * @param permissionPaths Permission paths that needs to filter
+     * @param permissions List of filtered permissions
+     * @return {@link List<String>}
+     */
     private List<String> processAndFilterPermissions(UIPermissionNode[] rolePermissions, List<String> permissionPaths, List<String> permissions) {
 
         for (UIPermissionNode rolePermission : rolePermissions) {
@@ -299,6 +307,15 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         return permissions;
     }
 
+    /**
+     * Getting platform permissions
+     *
+     * @param roleName Role Name
+     * @param userRealm {@link UserRealm}
+     * @param permissions list of permissions
+     * @return {@link List<String>}
+     * @throws UserAdminException if error occurred when getting {@link UIPermissionNode}
+     */
     private String[] getPlatformUIPermissions(String roleName, UserRealm userRealm, String[] permissions)
             throws UserAdminException {
         UIPermissionNode uiPermissionNode = getUIPermissionNode(roleName, userRealm);
@@ -697,6 +714,13 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         return rolePermissions;
     }
 
+    /**
+     * Update the role's permissions. This will function in the fire and forget pattern and run on a new thread.
+     *
+     * @param roleName Role Name
+     * @param roleInfo {@link RoleInfo}
+     * @param userRealm {@link UserRealm}
+     */
     private void updatePermissions(String roleName, RoleInfo roleInfo, UserRealm userRealm) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
         Thread thread = new Thread(new Runnable() {
