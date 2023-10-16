@@ -626,7 +626,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
     }
 
     @Override
-    public void updateScopeRoleMapping(String roleName, String[] permissions) throws APIManagerPublisherException {
+    public void updateScopeRoleMapping(String roleName, String[] permissions, String[] removedPermissions) throws APIManagerPublisherException {
         APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
         APIApplicationKey apiApplicationKey;
         AccessTokenInfo accessTokenInfo;
@@ -643,49 +643,14 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         try {
             PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
             JSONObject scopeObject = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
-
             Map<String, String> permScopeMap = APIPublisherDataHolder.getInstance().getPermScopeMapping();
-            for (String permission : permissions) {
-                String scopeValue = permScopeMap.get(permission);
-                if (scopeValue == null) {
-                    String msg = "Found invalid permission: " + permission + ". Hence aborting the scope role " +
-                            "mapping process";
-                    log.error(msg);
-                    throw new APIManagerPublisherException(msg);
-                }
-
-                JSONArray scopeList = (JSONArray) scopeObject.get("list");
-                for (int i = 0; i < scopeList.length(); i++) {
-                    JSONObject scopeObj = scopeList.getJSONObject(i);
-                    if (scopeObj.getString("name").equals(scopeValue)) {
-                        Scope scope = new Scope();
-                        scope.setName(scopeObj.getString("name"));
-                        scope.setKey(scopeObj.getString("name"));
-                        scope.setDescription(scopeObj.getString("description"));
-                        scope.setId(scopeObj.getString("id"));
-
-                        // Including already existing roles
-                        JSONArray existingRolesArray = (JSONArray) scopeObj.get("bindings");
-                        List<String> existingRoleList = new ArrayList<String>();
-
-                        for (int j = 0; j < existingRolesArray.length(); j++) {
-                            existingRoleList.add((String) existingRolesArray.get(j));
-                        }
-                        if (!existingRoleList.contains(roleName)) {
-                            existingRoleList.add(roleName);
-                        }
-                        scope.setRoles(String.join(",", existingRoleList));
-
-                        if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getKey())) {
-                            publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);
-                        } else {
-                            // todo: come to this level means, that scope is removed from API, but haven't removed from the scope-role-permission-mappings list
-                            log.warn(scope.getKey() + " not available as shared scope");
-                        }
-                        break;
-                    }
-                }
+            if (permissions.length != 0) {
+                updateScopes(roleName, publisherRESTAPIServices, apiApplicationKey, accessTokenInfo, scopeObject, permissions, permScopeMap, false);
             }
+            if (removedPermissions.length != 0) {
+                updateScopes(roleName, publisherRESTAPIServices, apiApplicationKey, accessTokenInfo, scopeObject, removedPermissions, permScopeMap, true);
+            }
+
             try {
                 updatePermissions(roleName, Arrays.asList(permissions));
             } catch (UserStoreException e) {
@@ -705,6 +670,75 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             String errorMsg = "Unexpected response from the server";
             log.error(errorMsg, e);
             throw new APIManagerPublisherException(errorMsg, e);
+        }
+    }
+
+    /**
+     * Update Scopes
+     *
+     * @param roleName Role Name
+     * @param publisherRESTAPIServices {@link PublisherRESTAPIServices}
+     * @param apiApplicationKey {@link APIApplicationKey}
+     * @param accessTokenInfo {@link AccessTokenInfo}
+     * @param scopeObject scope object returning from APIM
+     * @param permissions List of permissions
+     * @param permScopeMap Permission Scope map
+     * @param removingPermissions if list of permissions has to be removed from the role send true, otherwise sends false.
+     * @throws APIManagerPublisherException If the method receives invalid permission to update.
+     */
+    private void updateScopes (String roleName, PublisherRESTAPIServices publisherRESTAPIServices,
+                      APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                      JSONObject scopeObject, String[] permissions, Map<String, String> permScopeMap, boolean removingPermissions )
+            throws APIManagerPublisherException {
+        for (String permission : permissions) {
+            String scopeValue = permScopeMap.get(permission);
+            if (scopeValue == null) {
+                String msg = "Found invalid permission: " + permission + ". Hence aborting the scope role " +
+                        "mapping process";
+                log.error(msg);
+                throw new APIManagerPublisherException(msg);
+            }
+
+            JSONArray scopeList = (JSONArray) scopeObject.get("list");
+            for (int i = 0; i < scopeList.length(); i++) {
+                JSONObject scopeObj = scopeList.getJSONObject(i);
+                if (scopeObj.getString("name").equals(scopeValue)) {
+                    Scope scope = new Scope();
+                    scope.setName(scopeObj.getString("name"));
+                    scope.setKey(scopeObj.getString("name"));
+                    scope.setDescription(scopeObj.getString("description"));
+                    scope.setId(scopeObj.getString("id"));
+
+                    // Including already existing roles
+                    JSONArray existingRolesArray = (JSONArray) scopeObj.get("bindings");
+                    List<String> existingRoleList = new ArrayList<String>();
+
+                    for (int j = 0; j < existingRolesArray.length(); j++) {
+                        existingRoleList.add((String) existingRolesArray.get(j));
+                    }
+
+                    if (removingPermissions) {
+                        existingRoleList.remove(roleName);
+                    } else {
+                        if (!existingRoleList.contains(roleName)) {
+                            existingRoleList.add(roleName);
+                        }
+                    }
+                    scope.setRoles(String.join(",", existingRoleList));
+
+                    try {
+                        if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getKey())) {
+                            publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                        } else {
+                            // todo: come to this level means, that scope is removed from API, but haven't removed from the scope-role-permission-mappings list
+                            log.warn(scope.getKey() + " not available as shared scope");
+                        }
+                    } catch (APIServicesException | BadRequestException | UnexpectedResponseException  e) {
+                        log.error("Error occurred while updating role scope mapping via APIM REST endpoint.", e);
+                    }
+                    break;
+                }
+            }
         }
     }
 
