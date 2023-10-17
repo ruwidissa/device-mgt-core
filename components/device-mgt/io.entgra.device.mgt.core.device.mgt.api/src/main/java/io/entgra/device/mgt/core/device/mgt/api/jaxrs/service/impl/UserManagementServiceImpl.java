@@ -19,6 +19,7 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -320,32 +321,42 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Consumes(MediaType.WILDCARD)
     @Override
     public Response removeUser(@QueryParam("username") String username, @QueryParam("domain") String domain) {
+        boolean nameWithDomain = false;
         if (domain != null && !domain.isEmpty()) {
             username = domain + '/' + username;
+            nameWithDomain = true;
         }
         try {
+            int deviceCount;
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
             if (!userStoreManager.isExistingUser(username)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("User by username: " + username + " does not exist for removal.");
+                    log.debug("User by user: " + username + " does not exist for removal.");
                 }
-                String msg = "User by username: " + username + " does not exist for removal.";
+                String msg = "User by user: " + username + " does not exist for removal.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
-            // Un-enroll all devices for the user
             DeviceManagementProviderService deviceManagementService = DeviceMgtAPIUtils.getDeviceManagementService();
-            deviceManagementService.setStatus(username, EnrolmentInfo.Status.REMOVED);
-
-            userStoreManager.deleteUser(username);
-            if (log.isDebugEnabled()) {
-                log.debug("User '" + username + "' was successfully removed.");
+            if (nameWithDomain) {
+                deviceCount = deviceManagementService.getDeviceCount(username.split("/")[1]);
+            } else {
+                deviceCount = deviceManagementService.getDeviceCount(username);
             }
-            return Response.status(Response.Status.OK).build();
+            if (deviceCount == 0) {
+                userStoreManager.deleteUser(username);
+                if (log.isDebugEnabled()) {
+                    log.debug("User '" + username + "' was successfully removed.");
+                }
+                return Response.status(Response.Status.OK).build();
+            } else {
+                String msg = "There are enrolled devices for user: " + username + ". Please remove them before deleting the user.";
+                log.error(msg);
+                return Response.status(400).entity(msg).build();
+            }
         } catch (DeviceManagementException | UserStoreException e) {
-            String msg = "Exception in trying to remove user by username: " + username;
+            String msg = "Exception in trying to remove user by user: " + username;
             log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(400).entity(msg).build();
         }
     }
 
