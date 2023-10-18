@@ -2039,13 +2039,6 @@
 
         <jboss-transaction-api.version>1.0.0.Final</jboss-transaction-api.version>
 
-        <!-- Jaggery -->
-        <jaggery.version>0.12.8</jaggery.version>
-        <jaggery.extensions.version>1.5.6</jaggery.extensions.version>
-        <jaggery.extensions.sso.version>1.5.6</jaggery.extensions.sso.version>
-        <jaggery.extensions.carbon.version>1.5.6</jaggery.extensions.carbon.version>
-        <jaggery.extensions.test.version>1.5.6</jaggery.extensions.test.version>
-
         <!-- Testing -->
         <automation.test.framework.version>4.3.1</automation.test.framework.version>
         <automation.utils.version>4.4.2</automation.utils.version>
