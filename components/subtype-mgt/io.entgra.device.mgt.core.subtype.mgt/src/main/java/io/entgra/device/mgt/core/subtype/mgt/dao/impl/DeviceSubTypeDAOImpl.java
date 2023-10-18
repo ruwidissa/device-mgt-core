@@ -67,7 +67,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     }
 
     @Override
-    public boolean updateDeviceSubType(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType,
+    public boolean updateDeviceSubType(String subTypeId, int tenantId, String deviceType,
                                        String subTypeName, String typeDefinition)
             throws SubTypeMgtDAOException {
         try {
@@ -80,7 +80,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
                 stmt.setString(2, subTypeName);
                 stmt.setString(3, subTypeId);
                 stmt.setInt(4, tenantId);
-                stmt.setString(5, deviceType.toString());
+                stmt.setString(5, deviceType);
                 return stmt.executeUpdate() > 0;
             }
 
@@ -98,7 +98,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     }
 
     @Override
-    public DeviceSubType getDeviceSubType(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
+    public DeviceSubType getDeviceSubType(String subTypeId, int tenantId, String deviceType)
             throws SubTypeMgtDAOException {
         try {
             String sql = "SELECT * FROM DM_DEVICE_SUB_TYPE WHERE SUB_TYPE_ID = ? AND TENANT_ID = ? AND DEVICE_TYPE = ?";
@@ -107,7 +107,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, subTypeId);
                 stmt.setInt(2, tenantId);
-                stmt.setString(3, deviceType.toString());
+                stmt.setString(3, deviceType);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         return DAOUtil.loadDeviceSubType(rs);
@@ -130,7 +130,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     }
 
     @Override
-    public List<DeviceSubType> getAllDeviceSubTypes(int tenantId, DeviceSubType.DeviceType deviceType)
+    public List<DeviceSubType> getAllDeviceSubTypes(int tenantId, String deviceType)
             throws SubTypeMgtDAOException {
         try {
             String sql = "SELECT * FROM DM_DEVICE_SUB_TYPE WHERE TENANT_ID = ? AND DEVICE_TYPE = ? ORDER BY " +
@@ -139,7 +139,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
             Connection conn = ConnectionManagerUtil.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
-                stmt.setString(2, deviceType.toString());
+                stmt.setString(2, deviceType);
                 try (ResultSet rs = stmt.executeQuery()) {
                     return DAOUtil.loadDeviceSubTypes(rs);
                 }
@@ -159,13 +159,13 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     }
 
     @Override
-    public int getDeviceSubTypeCount(DeviceSubType.DeviceType deviceType) throws SubTypeMgtDAOException {
+    public int getDeviceSubTypeCount(String deviceType) throws SubTypeMgtDAOException {
         try {
             String sql = "SELECT COUNT(*) as DEVICE_COUNT FROM DM_DEVICE_SUB_TYPE WHERE DEVICE_TYPE = ? ";
 
             Connection conn = ConnectionManagerUtil.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, deviceType.toString());
+                stmt.setString(1, deviceType);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         return rs.getInt("DEVICE_COUNT");
@@ -188,7 +188,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     }
 
     @Override
-    public boolean checkDeviceSubTypeExist(String subTypeId, int tenantId, DeviceSubType.DeviceType deviceType)
+    public boolean checkDeviceSubTypeExist(String subTypeId, int tenantId, String deviceType)
             throws SubTypeMgtDAOException {
         try {
             String sql = "SELECT * FROM DM_DEVICE_SUB_TYPE WHERE SUB_TYPE_ID = ? AND TENANT_ID = ? AND DEVICE_TYPE " +
@@ -198,7 +198,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, subTypeId);
                 stmt.setInt(2, tenantId);
-                stmt.setString(3, deviceType.toString());
+                stmt.setString(3, deviceType);
                 try (ResultSet rs = stmt.executeQuery()) {
                     return rs.next();
                 }
@@ -219,7 +219,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
 
     @Override
     public DeviceSubType getDeviceSubTypeByProvider(String subTypeName, int tenantId,
-                                                    DeviceSubType.DeviceType deviceType)
+                                                    String deviceType)
             throws SubTypeMgtDAOException {
         try {
             String sql = "SELECT * FROM DM_DEVICE_SUB_TYPE WHERE SUB_TYPE_NAME = ? AND TENANT_ID = ? AND DEVICE_TYPE " +
@@ -229,7 +229,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, subTypeName);
                 stmt.setInt(2, tenantId);
-                stmt.setString(3, deviceType.toString());
+                stmt.setString(3, deviceType);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         return DAOUtil.loadDeviceSubType(rs);

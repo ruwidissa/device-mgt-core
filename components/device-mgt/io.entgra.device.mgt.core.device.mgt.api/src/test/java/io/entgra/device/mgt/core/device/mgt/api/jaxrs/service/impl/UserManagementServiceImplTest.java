@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.Device;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -272,7 +273,7 @@ public class UserManagementServiceImplTest {
                 .toReturn(this.userStoreManager);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
-        Mockito.doReturn(true).when(deviceManagementProviderService).setStatus(Mockito.anyString(), Mockito.any());
+        Mockito.doReturn(0).when(deviceManagementProviderService).getDeviceCount(TEST_USERNAME);
         Mockito.doNothing().when(userStoreManager).deleteUser(Mockito.anyString());
         Response response = userManagementService.removeUser(TEST_USERNAME, null);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
@@ -337,7 +338,7 @@ public class UserManagementServiceImplTest {
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "Response returned successful for a user updating request with problematic inputs");
         response = userManagementService.removeUser(TEST3_USERNAME, null);
-        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+        Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode(),
                 "Response returned successful for a user removal request with problematic inputs");
         response = userManagementService.getRolesOfUser(TEST3_USERNAME, null);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
