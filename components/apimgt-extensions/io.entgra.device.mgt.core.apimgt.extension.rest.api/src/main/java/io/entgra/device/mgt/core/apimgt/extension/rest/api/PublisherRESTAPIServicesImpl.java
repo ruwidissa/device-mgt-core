@@ -21,18 +21,12 @@ package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Mediation;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevision;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevisionDeployment;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.*;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.ScopeUtils;
 import okhttp3.*;
 import okhttp3.Request.Builder;
 import org.apache.commons.httpclient.HttpStatus;
@@ -56,7 +50,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
             + Constants.COLON + port;
 
     @Override
-    public JSONObject getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    public Scope[] getScopes(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllScopesUrl = endPointPrefix + Constants.GET_ALL_SCOPES;
@@ -70,8 +64,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray scopeList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(scopeList.toString(), Scope[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -124,7 +118,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 log.error(msg);
                 throw new BadRequestException(msg);
             } else if (HttpStatus.SC_NOT_FOUND == response.code()) {
-                String msg = "Shared scope key not found";
+                String msg = "Shared scope key not found : " + key;
                 log.info(msg);
                 return false;
             } else {
@@ -144,14 +138,21 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         String addNewSharedScopeEndPoint = endPointPrefix + Constants.SCOPE_API_ENDPOINT;
 
-        ScopeUtils scopeUtil = new ScopeUtils();
-        scopeUtil.setKey(scope.getKey());
-        scopeUtil.setName(scope.getName());
-        scopeUtil.setDescription(scope.getDescription());
-        scopeUtil.setRoles(scope.getRoles());
-        String scopeString = scopeUtil.toJSON();
+        JSONArray bindings = new JSONArray();
+        if (scope.getBindings() != null) {
+            for (String str : scope.getBindings()) {
+                bindings.put(str);
+            }
+        }
 
-        RequestBody requestBody = RequestBody.create(JSON, scopeString);
+        JSONObject payload = new JSONObject();
+        payload.put("name", (scope.getName() != null ? scope.getName() : ""));
+        payload.put("displayName", (scope.getDisplayName() != null ? scope.getDisplayName() : ""));
+        payload.put("description", (scope.getDescription() != null ? scope.getDescription() : ""));
+        payload.put("bindings", (bindings != null ? bindings : ""));
+        payload.put("usageCount", (scope.getUsageCount() != 0 ? scope.getUsageCount() : 0));
+
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(addNewSharedScopeEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -191,14 +192,21 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         String updateScopeUrl = endPointPrefix + Constants.SCOPE_API_ENDPOINT + scope.getId();
 
-        ScopeUtils scopeUtil = new ScopeUtils();
-        scopeUtil.setKey(scope.getKey());
-        scopeUtil.setName(scope.getName());
-        scopeUtil.setDescription(scope.getDescription());
-        scopeUtil.setRoles(scope.getRoles());
-        String scopeString = scopeUtil.toJSON();
+        JSONArray bindings = new JSONArray();
+        if (scope.getBindings() != null) {
+            for (String str : scope.getBindings()) {
+                bindings.put(str);
+            }
+        }
 
-        RequestBody requestBody = RequestBody.create(JSON, scopeString);
+        JSONObject payload = new JSONObject();
+        payload.put("name", (scope.getName() != null ? scope.getName() : ""));
+        payload.put("displayName", (scope.getDisplayName() != null ? scope.getDisplayName() : ""));
+        payload.put("description", (scope.getDescription() != null ? scope.getDescription() : ""));
+        payload.put("bindings", (bindings != null ? bindings : ""));
+        payload.put("usageCount", (scope.getUsageCount() != 0 ? scope.getUsageCount() : 0));
+
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(updateScopeUrl)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -233,7 +241,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String apiUuid)
+    public APIInfo getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllApi = endPointPrefix + Constants.API_ENDPOINT + apiUuid;
@@ -247,8 +255,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                return gson.fromJson(response.body().string(), APIInfo.class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -272,7 +279,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
+    public APIInfo[] getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAllApis = endPointPrefix + Constants.GET_ALL_APIS;
@@ -286,8 +293,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray apiList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(apiList.toString(), APIInfo[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -311,59 +318,111 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
+    public APIInfo addAPI(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIInfo api)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String addAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT;
 
-        String apiString = "{\n" +
-                "    \"name\": \"" + api.getName() + "\",\n" +
-                "   \"description\":\"" + api.getDescription() + "\",\n" +
-                "   \"context\":\"" + api.getContext() + "\",\n" +
-                "   \"version\":\"" + api.getVersion() + "\",\n" +
-                "   \"provider\":\"" + api.getProvider() + "\",\n" +
-                "   \"lifeCycleStatus\":\"" + api.getLifeCycleStatus() + "\",\n" +
-                "    \"wsdlInfo\": " + api.getWsdlInfo() + ",\n" +
-                "   \"wsdlUrl\":" + api.getWsdlUrl() + ",\n" +
-                "    \"responseCachingEnabled\": " + api.isResponseCachingEnabled() + ",\n" +
-                "    \"cacheTimeout\": " + api.getCacheTimeout() + ",\n" +
-                "    \"hasThumbnail\": " + api.isHasThumbnail() + ",\n" +
-                "    \"isDefaultVersion\": " + api.isDefaultVersion() + ",\n" +
-                "    \"isRevision\": " + api.isRevision() + ",\n" +
-                "    \"revisionedApiId\": " + api.getRevisionedApiId() + ",\n" +
-                "    \"revisionId\": " + api.getRevisionId() + ",\n" +
-                "    \"enableSchemaValidation\": " + api.isEnableSchemaValidation() + ",\n" +
-                "    \"type\": \"" + api.getType() + "\",\n" +
-                "    \"transport\": " + gson.toJson(api.getTransport()) + ",\n" +
-                "    \"tags\": " + gson.toJson(api.getTags()) + ",\n" +
-                "    \"policies\": " + gson.toJson(api.getPolicies()) + ",\n" +
-                "    \"apiThrottlingPolicy\": " + api.getApiThrottlingPolicy() + ",\n" +
-                "    \"authorizationHeader\": \"" + api.getAuthorizationHeader() + "\",\n" +
-                "    \"visibility\": \"" + api.getVisibility() + "\",\n" +
-                "    \"mediationPolicies\": " + (api.getInSequence() != null ? "[{\"name\": \"" + api.getInSequence() + "\",\"type\": \"in\"}]" : null) + ",\n" +
-                "    \"subscriptionAvailability\": \"" + api.getSubscriptionAvailability() + "\",\n" +
-                "    \"subscriptionAvailableTenants\": [],\n" +
-                "    \"additionalProperties\": [],\n" +
-                "    \"monetization\": " + api.getMonetization() + ",\n" +
-                "    \"corsConfiguration\": " + gson.toJson(api.getCorsConfiguration()) + ",\n" +
-                "    \"websubSubscriptionConfiguration\": {\n" +
-                "        \"enable\": false,\n" +
-                "        \"secret\": \"\",\n" +
-                "        \"signingAlgorithm\": \"SHA1\",\n" +
-                "        \"signatureHeader\": \"x-hub-signature\"\n" +
-                "    },\n" +
-                "    \"workflowStatus\": null,\n" +
-                "    \"endpointConfig\": " + api.getEndpointConfig().toString() + ",\n" +
-                "    \"endpointImplementationType\": \"ENDPOINT\",\n" +
-                "    \"scopes\": " + api.getScopes().toString() + ",\n" +
-                "    \"operations\": " + (api.getOperations() != null ? api.getOperations().toString() : null) + ",\n" +
-                "    \"threatProtectionPolicies\": null,\n" +
-                "    \"categories\": [],\n" +
-                "    \"keyManagers\": " + gson.toJson(api.getKeyManagers()) + ",\n" +
-                "    \"serviceInfo\": " + api.getServiceInfo() + "\n" +
-                "}";
+        JSONObject payload = new JSONObject();
+        payload.put("name", api.getName());
+        payload.put("description", api.getDescription());
+        payload.put("context", api.getContext());
+        payload.put("version", api.getVersion());
+        payload.put("provider", api.getProvider());
+        payload.put("lifeCycleStatus", api.getLifeCycleStatus());
+        payload.put("wsdlInfo", (api.getWsdlInfo() != null ? api.getWsdlInfo() : null));
+        payload.put("wsdlUrl", (api.getWsdlUrl() != null ? api.getWsdlUrl() : null));
+        payload.put("responseCachingEnabled", api.isResponseCachingEnabled());
+        payload.put("cacheTimeout", api.getCacheTimeout());
+        payload.put("hasThumbnail", api.isHasThumbnail());
+        payload.put("isDefaultVersion", api.isDefaultVersion());
+        payload.put("isRevision", api.isRevision());
+        payload.put("revisionedApiId", (api.getRevisionedApiId() != null ? api.getRevisionedApiId() : null));
+        payload.put("revisionId", api.getRevisionId());
+        payload.put("enableSchemaValidation", api.isEnableSchemaValidation());
+        payload.put("type", api.getType());
+        payload.put("apiThrottlingPolicy", api.getApiThrottlingPolicy());
+        payload.put("authorizationHeader", api.getAuthorizationHeader());
+        payload.put("visibility", api.getVisibility());
+        payload.put("subscriptionAvailability", (api.getSubscriptionAvailability() != null ? api.getSubscriptionAvailability() : ""));
 
-        RequestBody requestBody = RequestBody.create(JSON, apiString);
+        //Lists
+        if (api.getTransport() != null) {
+            JSONArray transport = new JSONArray();
+            for (String str : api.getTransport()) {
+                transport.put(str);
+            }
+            payload.put("transport", transport);
+        }
+        if (api.getTags() != null) {
+            JSONArray tags = new JSONArray();
+            for (String str : api.getTags()) {
+                tags.put(str);
+            }
+            payload.put("tags", tags);
+        }
+        if (api.getPolicies() != null) {
+            JSONArray policies = new JSONArray();
+            for (String str : api.getPolicies()) {
+                policies.put(str);
+            }
+            payload.put("policies", policies);
+        }
+        if (api.getMediationPolicies() != null) {
+            JSONArray mediationPolicies = new JSONArray();
+            for (MediationPolicy object : api.getMediationPolicies()) {
+                mediationPolicies.put(new JSONObject(gson.toJson(object)));
+            }
+            payload.put("mediationPolicies", mediationPolicies);
+        }
+        if (api.getSubscriptionAvailableTenants() != null) {
+            JSONArray subscriptionAvailableTenants = new JSONArray();
+            for (String str : api.getSubscriptionAvailableTenants()) {
+                subscriptionAvailableTenants.put(str);
+            }
+            payload.put("subscriptionAvailableTenants", subscriptionAvailableTenants);
+        }
+        if (api.getAdditionalProperties() != null) {
+            JSONArray additionalProperties = new JSONArray();
+            for (AdditionalProperties str : api.getAdditionalProperties()) {
+                additionalProperties.put(str);
+            }
+            payload.put("additionalProperties", additionalProperties);
+        }
+        if (api.getScopes() != null) {
+            JSONArray scopes = new JSONArray();
+            for (JSONObject object : api.getScopes()) {
+                scopes.put(object);
+            }
+            payload.put("scopes", scopes);
+        }
+        if (api.getOperations() != null) {
+            JSONArray operations = new JSONArray();
+            for (Operations operation : api.getOperations()) {
+                operations.put(new JSONObject(gson.toJson(operation)));
+            }
+            payload.put("operations", operations);
+        }
+        if (api.getCategories() != null) {
+            JSONArray categories = new JSONArray();
+            for (String str : api.getCategories()) {
+                categories.put(str);
+            }
+            payload.put("categories", categories);
+        }
+
+        //objects
+        payload.put("monetization", (api.getMonetization() != null ? new JSONObject(gson.toJson(api.getMonetization())) : null));
+        payload.put("corsConfiguration", (api.getCorsConfiguration() != null ? new JSONObject(gson.toJson(api.getCorsConfiguration())) : null));
+        payload.put("websubSubscriptionConfiguration", (api.getWebsubSubscriptionConfiguration() != null ? new JSONObject(gson.toJson(api.getWebsubSubscriptionConfiguration())) : null));
+        payload.put("workflowStatus", (api.getWorkflowStatus() != null ? api.getWorkflowStatus() : null));
+        payload.put("endpointConfig", (api.getEndpointConfig() != null ? api.getEndpointConfig() : null));
+        payload.put("endpointImplementationType", (api.getEndpointImplementationType() != null ? api.getEndpointImplementationType() : null));
+        payload.put("threatProtectionPolicies", (api.getThreatProtectionPolicies() != null ? api.getThreatProtectionPolicies() : null));
+        payload.put("serviceInfo", (api.getServiceInfo() != null ? new JSONObject(gson.toJson(api.getServiceInfo())) : null));
+        payload.put("advertiseInfo", (api.getAdvertiseInfo() != null ? new JSONObject(gson.toJson(api.getAdvertiseInfo())) : null));
+
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(addAPIEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -374,8 +433,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_CREATED == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                return gson.fromJson(response.body().string(), APIInfo.class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -404,54 +462,106 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         String updateAPIEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getId();
 
-        String apiString = "{\n" +
-                "    \"name\": \"" + api.getName() + "\",\n" +
-                "   \"description\":\"" + api.getDescription() + "\",\n" +
-                "   \"context\":\"" + api.getContext() + "\",\n" +
-                "   \"version\":\"" + api.getVersion() + "\",\n" +
-                "   \"provider\":\"" + api.getProvider() + "\",\n" +
-                "   \"lifeCycleStatus\":\"" + api.getLifeCycleStatus() + "\",\n" +
-                "    \"wsdlInfo\": " + api.getWsdlInfo() + ",\n" +
-                "   \"wsdlUrl\":" + api.getWsdlUrl() + ",\n" +
-                "    \"responseCachingEnabled\": " + api.isResponseCachingEnabled() + ",\n" +
-                "    \"cacheTimeout\": " + api.getCacheTimeout() + ",\n" +
-                "    \"hasThumbnail\": " + api.isHasThumbnail() + ",\n" +
-                "    \"isDefaultVersion\": " + api.isDefaultVersion() + ",\n" +
-                "    \"isRevision\": " + api.isRevision() + ",\n" +
-                "    \"revisionedApiId\": " + api.getRevisionedApiId() + ",\n" +
-                "    \"revisionId\": " + api.getRevisionId() + ",\n" +
-                "    \"enableSchemaValidation\": " + api.isEnableSchemaValidation() + ",\n" +
-                "    \"type\": \"" + api.getType() + "\",\n" +
-                "    \"transport\": " + gson.toJson(api.getTransport()) + ",\n" +
-                "    \"tags\": " + gson.toJson(api.getTags()) + ",\n" +
-                "    \"policies\": " + gson.toJson(api.getPolicies()) + ",\n" +
-                "    \"apiThrottlingPolicy\": " + api.getApiThrottlingPolicy() + ",\n" +
-                "    \"authorizationHeader\": \"" + api.getAuthorizationHeader() + "\",\n" +
-                "    \"visibility\": \"" + api.getVisibility() + "\",\n" +
-                "    \"mediationPolicies\": " + (api.getInSequence() != null ? "[{\"name\": \"" + api.getInSequence() + "\",\"type\": \"in\"}]" : null) + ",\n" +
-                "    \"subscriptionAvailability\": \"" + api.getSubscriptionAvailability() + "\",\n" +
-                "    \"subscriptionAvailableTenants\": [],\n" +
-                "    \"additionalProperties\": [],\n" +
-                "    \"monetization\": " + api.getMonetization() + ",\n" +
-                "    \"corsConfiguration\": " + gson.toJson(api.getCorsConfiguration()) + ",\n" +
-                "    \"websubSubscriptionConfiguration\": {\n" +
-                "        \"enable\": false,\n" +
-                "        \"secret\": \"\",\n" +
-                "        \"signingAlgorithm\": \"SHA1\",\n" +
-                "        \"signatureHeader\": \"x-hub-signature\"\n" +
-                "    },\n" +
-                "    \"workflowStatus\": null,\n" +
-                "    \"endpointConfig\": " + api.getEndpointConfig().toString() + ",\n" +
-                "    \"endpointImplementationType\": \"ENDPOINT\",\n" +
-                "    \"scopes\": " + api.getScopes().toString() + ",\n" +
-                "    \"operations\": " + (api.getOperations() != null? api.getOperations().toString() : null) + ",\n" +
-                "    \"threatProtectionPolicies\": null,\n" +
-                "    \"categories\": [],\n" +
-                "    \"keyManagers\": " + gson.toJson(api.getKeyManagers()) + ",\n" +
-                "    \"serviceInfo\": " + api.getServiceInfo() + "\n" +
-                "}";
+        JSONObject payload = new JSONObject();
+        payload.put("name", api.getName());
+        payload.put("description", api.getDescription());
+        payload.put("context", api.getContext());
+        payload.put("version", api.getVersion());
+        payload.put("provider", api.getProvider());
+        payload.put("lifeCycleStatus", api.getLifeCycleStatus());
+        payload.put("wsdlInfo", (api.getWsdlInfo() != null ? api.getWsdlInfo() : null));
+        payload.put("wsdlUrl", (api.getWsdlUrl() != null ? api.getWsdlUrl() : null));
+        payload.put("responseCachingEnabled", api.isResponseCachingEnabled());
+        payload.put("cacheTimeout", api.getCacheTimeout());
+        payload.put("hasThumbnail", api.isHasThumbnail());
+        payload.put("isDefaultVersion", api.isDefaultVersion());
+        payload.put("isRevision", api.isRevision());
+        payload.put("revisionedApiId", (api.getRevisionedApiId() != null ? api.getRevisionedApiId() : null));
+        payload.put("revisionId", api.getRevisionId());
+        payload.put("enableSchemaValidation", api.isEnableSchemaValidation());
+        payload.put("type", api.getType());
+        payload.put("apiThrottlingPolicy", api.getApiThrottlingPolicy());
+        payload.put("authorizationHeader", api.getAuthorizationHeader());
+        payload.put("visibility", api.getVisibility());
+        payload.put("subscriptionAvailability", (api.getSubscriptionAvailability() != null ? api.getSubscriptionAvailability() : ""));
 
-        RequestBody requestBody = RequestBody.create(JSON, apiString);
+        //Lists
+        if (api.getTransport() != null) {
+            JSONArray transport = new JSONArray();
+            for (String str : api.getTransport()) {
+                transport.put(str);
+            }
+            payload.put("transport", transport);
+        }
+        if (api.getTags() != null) {
+            JSONArray tags = new JSONArray();
+            for (String str : api.getTags()) {
+                tags.put(str);
+            }
+            payload.put("tags", tags);
+        }
+        if (api.getPolicies() != null) {
+            JSONArray policies = new JSONArray();
+            for (String str : api.getPolicies()) {
+                policies.put(str);
+            }
+            payload.put("policies", policies);
+        }
+        if (api.getMediationPolicies() != null) {
+            JSONArray mediationPolicies = new JSONArray();
+            for (MediationPolicy object : api.getMediationPolicies()) {
+                mediationPolicies.put(new JSONObject(gson.toJson(object)));
+            }
+            payload.put("mediationPolicies", mediationPolicies);
+        }
+        if (api.getSubscriptionAvailableTenants() != null) {
+            JSONArray subscriptionAvailableTenants = new JSONArray();
+            for (String str : api.getSubscriptionAvailableTenants()) {
+                subscriptionAvailableTenants.put(str);
+            }
+            payload.put("subscriptionAvailableTenants", subscriptionAvailableTenants);
+        }
+        if (api.getAdditionalProperties() != null) {
+            JSONArray additionalProperties = new JSONArray();
+            for (AdditionalProperties str : api.getAdditionalProperties()) {
+                additionalProperties.put(str);
+            }
+            payload.put("additionalProperties", additionalProperties);
+        }
+        if (api.getScopes() != null) {
+            JSONArray scopes = new JSONArray();
+            for (JSONObject object : api.getScopes()) {
+                scopes.put(object);
+            }
+            payload.put("scopes", scopes);
+        }
+        if (api.getOperations() != null) {
+            JSONArray operations = new JSONArray();
+            for (Operations operation : api.getOperations()) {
+                operations.put(new JSONObject(gson.toJson(operation)));
+            }
+            payload.put("operations", operations);
+        }
+        if (api.getCategories() != null) {
+            JSONArray categories = new JSONArray();
+            for (String str : api.getCategories()) {
+                categories.put(str);
+            }
+            payload.put("categories", categories);
+        }
+
+        //objects
+        payload.put("monetization", (api.getMonetization() != null ? new JSONObject(gson.toJson(api.getMonetization())) : null));
+        payload.put("corsConfiguration", (api.getCorsConfiguration() != null ? new JSONObject(gson.toJson(api.getCorsConfiguration())) : null));
+        payload.put("websubSubscriptionConfiguration", (api.getWebsubSubscriptionConfiguration() != null ? new JSONObject(gson.toJson(api.getWebsubSubscriptionConfiguration())) : null));
+        payload.put("workflowStatus", (api.getWorkflowStatus() != null ? api.getWorkflowStatus() : null));
+        payload.put("endpointConfig", (api.getEndpointConfig() != null ? api.getEndpointConfig() : null));
+        payload.put("endpointImplementationType", (api.getEndpointImplementationType() != null ? api.getEndpointImplementationType() : null));
+        payload.put("threatProtectionPolicies", (api.getThreatProtectionPolicies() != null ? api.getThreatProtectionPolicies() : null));
+        payload.put("serviceInfo", (api.getServiceInfo() != null ? new JSONObject(gson.toJson(api.getServiceInfo())) : null));
+        payload.put("advertiseInfo", (api.getAdvertiseInfo() != null ? new JSONObject(gson.toJson(api.getAdvertiseInfo())) : null));
+
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(updateAPIEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -463,7 +573,6 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
                 return true;
-
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -534,8 +643,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                         String apiUuid)
+    public MediationPolicy[] getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                                                String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAPIMediationEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiUuid + "/mediation-policies";
@@ -549,8 +658,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray mediationPolicyList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(mediationPolicyList.toString(), MediationPolicy[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -623,7 +732,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public boolean deleteApiSpecificMediationPolicy(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                           String uuid, Mediation mediation)
+                                                    String uuid, Mediation mediation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String deleteApiMediationEndPOint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/mediation-policies/" + mediation.getUuid();
@@ -705,8 +814,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getAPIRevisions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
-                                      Boolean deploymentStatus)
+    public APIRevision[] getAPIRevisions(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid,
+                                         Boolean deploymentStatus)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getAPIRevisionsEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions?query=deployed:"
@@ -722,8 +831,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray revisionList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(revisionList.toString(), APIRevision[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -747,16 +856,15 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIRevision apiRevision)
+    public APIRevision addAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIRevision apiRevision)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String addNewScope = endPointPrefix + Constants.API_ENDPOINT + apiRevision.getApiUUID() + "/revisions";
 
-        String apiRevisionDescription = "{\n" +
-                "   \"description\":\"" + apiRevision.getDescription() + "\"\n" +
-                "}";
+        JSONObject payload = new JSONObject();
+        payload.put("description", (apiRevision.getDescription() != null ? apiRevision.getDescription() : null));
 
-        RequestBody requestBody = RequestBody.create(JSON, apiRevisionDescription);
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(addNewScope)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -767,8 +875,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_CREATED == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                return gson.fromJson(response.body().string(), APIRevision.class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -799,15 +906,14 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         String deployAPIRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/deploy-revision?revisionId=" + apiRevisionId;
         APIRevisionDeployment apiRevisionDeployment = apiRevisionDeploymentList.get(0);
 
-        String revision = "[\n" +
-                "    {\n" +
-                "        \"name\": \"" + apiRevisionDeployment.getDeployment() + "\",\n" +
-                "        \"vhost\": \"" + apiRevisionDeployment.getVhost() + "\",\n" +
-                "        \"displayOnDevportal\": " + apiRevisionDeployment.isDisplayOnDevportal() + "\n" +
-                "    }\n" +
-                "]";
+        JSONArray payload = new JSONArray();
+        JSONObject revision = new JSONObject();
+        revision.put("name", (apiRevisionDeployment.getName() != null ? apiRevisionDeployment.getName() : ""));
+        revision.put("vhost", (apiRevisionDeployment.getVhost() != null ? apiRevisionDeployment.getVhost() : ""));
+        revision.put("displayOnDevportal", apiRevisionDeployment.isDisplayOnDevportal());
+        payload.put(revision);
 
-        RequestBody requestBody = RequestBody.create(JSON, revision);
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(deployAPIRevisionEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -844,23 +950,22 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public boolean undeployAPIRevisionDeployment(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                 JSONObject apiRevisionDeployment, String uuid)
+                                                 APIRevision apiRevisionDeployment, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String undeployAPIRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/undeploy-revision?revisionId="
-                + apiRevisionDeployment.getString("id");
-        JSONArray array = apiRevisionDeployment.getJSONArray("deploymentInfo");
-        JSONObject obj = array.getJSONObject(0);
+                + apiRevisionDeployment.getId();
+        List<APIRevisionDeployment> apiRevisionDeployments = apiRevisionDeployment.getDeploymentInfo();
+        APIRevisionDeployment earliestDeployment = apiRevisionDeployments.get(0);
 
-        String revision = "[\n" +
-                "    {\n" +
-                "        \"name\": \"" + obj.getString("name") + "\",\n" +
-                "        \"vhost\": \"" + obj.getString("vhost") + "\",\n" +
-                "        \"displayOnDevportal\": " + obj.get("displayOnDevportal") + "\n" +
-                "    }\n" +
-                "]";
+        JSONArray payload = new JSONArray();
+        JSONObject revision = new JSONObject();
+        revision.put("name", (earliestDeployment.getName() != null ? earliestDeployment.getName() : ""));
+        revision.put("vhost", (earliestDeployment.getVhost() != null ? earliestDeployment.getVhost() : ""));
+        revision.put("displayOnDevportal", earliestDeployment.isDisplayOnDevportal());
+        payload.put(revision);
 
-        RequestBody requestBody = RequestBody.create(JSON, revision);
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(undeployAPIRevisionEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -896,11 +1001,11 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public boolean deleteAPIRevision(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                     JSONObject apiRevision, String uuid)
+                                     APIRevision apiRevision, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String apiRevisionEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/revisions/" +
-                apiRevision.getString("id");
+                apiRevision.getId();
 
         Request request = new Request.Builder()
                 .url(apiRevisionEndPoint)
@@ -936,7 +1041,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
+    public Documentation[] getDocumentations(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String uuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
         String getDocumentationsEndPoint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/documents?limit=1000";
@@ -951,8 +1056,8 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         try {
             Response response = client.newCall(request).execute();
             if (HttpStatus.SC_OK == response.code()) {
-                JSONObject jsonObject = new JSONObject(response.body().string());
-                return jsonObject;
+                JSONArray documentList = (JSONArray) new JSONObject(response.body().string()).get("list");
+                return gson.fromJson(documentList.toString(), Documentation[].class);
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
                 AccessTokenInfo refreshedAccessToken = apiApplicationServices.
@@ -1022,17 +1127,16 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
         String addNewScope = endPointPrefix + Constants.API_ENDPOINT + uuid + "/documents";
 
-        String document = "{\n" +
-                "  \"name\": \"" + documentation.getName() + "\",\n" +
-                "  \"type\": \"" + documentation.getType() + "\",\n" +
-                "  \"summary\": \"" + documentation.getSummary() + "\",\n" +
-                "  \"sourceType\": \"" + documentation.getSourceType() + "\",\n" +
-                "  \"inlineContent\": \"" + documentation.getSourceType() + "\",\n" +
-                "  \"visibility\": \"" + documentation.getVisibility() + "\",\n" +
-                "  \"createdBy\": \"admin\"\n" +
-                "}";
+        JSONObject payload = new JSONObject();
+        payload.put("name", documentation.getName());
+        payload.put("type", documentation.getType());
+        payload.put("summary", documentation.getSummary());
+        payload.put("sourceType", documentation.getSourceType());
+        payload.put("inlineContent", documentation.getSourceType());
+        payload.put("visibility", documentation.getVisibility());
+        payload.put("createdBy", documentation.getCreatedBy());
 
-        RequestBody requestBody = RequestBody.create(JSON, document);
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
         Request request = new Request.Builder()
                 .url(addNewScope)
                 .addHeader(Constants.HEADER_CONTENT_TYPE, Constants.APPLICATION_JSON)
