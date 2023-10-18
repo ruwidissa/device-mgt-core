@@ -34,6 +34,9 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
+import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.authorization.DeviceAccessAuthorizationServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
@@ -47,6 +50,7 @@ import io.entgra.device.mgt.core.policy.mgt.core.util.PolicyManagerUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -63,6 +67,12 @@ public class ActivityProviderServiceImplTest {
     private static final Log log = LogFactory.getLog(ActivityProviderServiceImplTest.class);
     private static final String TEST_ACTIVITY_ID = "ACTIVITY_1";
     private static final String IF_MODIFIED_SINCE = "01Aug2018";
+    private static final String SINCE = "Fri, 06 Oct 2023 15:30:00 GMT";
+    private static final String DEVICE_TYPE_2 = "power-meter";
+    private static final Operation.Status STATUS = Operation.Status.NOTNOW;
+    private static final Operation.Type TYPE = Operation.Type.PROFILE;
+    private static final String INITIATED_BY = "admin";
+    private static final int OPERATION_ID = 158572;
     private static final String DEVICE_TYPE = "android";
     private static final String DEVICE_ID = "1234567";
     private static final String OPERATION_CODE = "111222";
@@ -71,7 +81,10 @@ public class ActivityProviderServiceImplTest {
     private static final String TEST_ACTIVITY_ID_LIST = "ACTIVITY_1,ACTIVITY_2";
     private static final List<String> idList = new ArrayList();
     private static final List<Activity> activities = new ArrayList<>();
+    private static final List<DeviceActivity> deviceActivities = new ArrayList<>();
     private static final ActivityIdList activityList = new ActivityIdList(TEST_ACTIVITY_ID_LIST);
+
+    private static final ActivityPaginationRequest activityPaginationRequest = new ActivityPaginationRequest(LIMIT,OFFSET);
     private static final ActivityIdList activityListEmpty = new ActivityIdList("");
 
     private List<String> idList1;
@@ -108,6 +121,23 @@ public class ActivityProviderServiceImplTest {
         activity2.setActivityId("ACTIVITY_2");
         activities.add(activity1);
         activities.add(activity2);
+        DeviceActivity deviceActivity1 = new DeviceActivity();
+        DeviceActivity deviceActivity2 = new DeviceActivity();
+        deviceActivity1.setActivityId("ACTIVITY_3");
+        deviceActivity2.setActivityId("ACTIVITY_4");
+        deviceActivities.add(deviceActivity1);
+        deviceActivities.add(deviceActivity2);
+        activityPaginationRequest.setDeviceIds(Collections.singletonList(DEVICE_ID));
+        activityPaginationRequest.setOperationCode(OPERATION_CODE);
+        activityPaginationRequest.setDeviceType(DEVICE_TYPE_2);
+        activityPaginationRequest.setOperationId(OPERATION_ID);
+        activityPaginationRequest.setInitiatedBy(INITIATED_BY);
+        activityPaginationRequest.setStatus(STATUS);
+        activityPaginationRequest.setType(TYPE);
+        activityPaginationRequest.setStartTimestamp(0);
+        activityPaginationRequest.setEndTimestamp(0);
+        activityPaginationRequest.setLimit(LIMIT);
+        activityPaginationRequest.setOffset(OFFSET);
     }
 
     @Test(description =
@@ -183,6 +213,70 @@ public class ActivityProviderServiceImplTest {
         Response response = this.activityInfoProviderService.getActivities(activityListEmpty);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
+        Mockito.reset(this.deviceManagementProviderService);
+    }
+
+    @Test(description = "This method tests trying to get details activity IDs when call with data")
+    public void testGetActivitiesWithActivityPaginationRequest() throws OperationManagementException {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "isAdmin")).toReturn(true);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+
+        Mockito.when(this.deviceManagementProviderService.getActivitiesCount(Mockito.any())).thenReturn(2);
+        Mockito.when(this.deviceManagementProviderService.getActivities(Mockito.any())).thenReturn(activities);
+        Response response = this.activityInfoProviderService.getActivities(
+                OFFSET, LIMIT, SINCE, INITIATED_BY, OPERATION_CODE, OPERATION_ID,
+                DEVICE_TYPE_2, Collections.singletonList(DEVICE_ID), TYPE.toString(), STATUS.toString(), null, 0, 0);
+
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+        Assert.assertNotNull(response);
+        Mockito.reset(this.deviceManagementProviderService);
+    }
+
+    @Test(description = "This method tests trying to get details device activity IDs when call with empty data")
+    public void testGetActivitiesWithEmptyActivityPaginationRequest() throws OperationManagementException {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "isAdmin")).toReturn(true);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+
+        Response response = this.activityInfoProviderService.getActivities(
+                OFFSET, 0, null, null, null, 0,
+                null, null, null, null, null, 0, 0);
+
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+        Assert.assertEquals(response.getEntity().toString(), "{\"count\":0}");
+        Mockito.reset(this.deviceManagementProviderService);
+    }
+
+    @Test(description = "This method tests trying to get details device activity IDs when call with data")
+    public void testGetDeviceActivitiesWithActivityPaginationRequest() throws OperationManagementException {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "isAdmin")).toReturn(true);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+
+        Mockito.when(this.deviceManagementProviderService.getDeviceActivitiesCount(Mockito.any())).thenReturn(2);
+        Mockito.when(this.deviceManagementProviderService.getDeviceActivities(Mockito.any())).thenReturn(deviceActivities);
+        Response response = this.activityInfoProviderService.getDeviceActivities(
+                OFFSET, LIMIT, SINCE, INITIATED_BY, OPERATION_CODE, OPERATION_ID,
+                DEVICE_TYPE_2, Collections.singletonList(DEVICE_ID), TYPE.toString(), STATUS.toString(), null, 0, 0);
+
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+        Assert.assertNotNull(response);
+        Mockito.reset(this.deviceManagementProviderService);
+    }
+
+    @Test(description = "This method tests trying to get details activity IDs when call with empty data")
+    public void testGetDeviceActivitiesWithEmptyActivityPaginationRequest() {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "isAdmin")).toReturn(true);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+
+        Response response = this.activityInfoProviderService.getDeviceActivities(
+                OFFSET, 0, null, null, null, 0,
+                null, null, null, null, null, 0, 0);
+
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+        Assert.assertEquals(response.getEntity().toString(), "{\"count\":0}");
         Mockito.reset(this.deviceManagementProviderService);
     }
 

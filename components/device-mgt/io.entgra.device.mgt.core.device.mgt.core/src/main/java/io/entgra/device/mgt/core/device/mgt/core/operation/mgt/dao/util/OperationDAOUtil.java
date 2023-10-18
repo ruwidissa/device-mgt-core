@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityHolder;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityMapper;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityStatus;
@@ -38,6 +39,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -136,8 +139,9 @@ public class OperationDAOUtil {
     public static OperationResponse getLargeOperationResponse(ResultSet rs) throws
                                                                        ClassNotFoundException, IOException, SQLException {
         OperationResponse response = new OperationResponse();
-        if (rs.getTimestamp("RECEIVED_TIMESTAMP") != (null)) {
-            response.setReceivedTimeStamp(rs.getTimestamp("RECEIVED_TIMESTAMP").toString());
+        if (rs.getTimestamp("RECEIVED_TIMESTAMP") != null) {
+            Timestamp receivedTimestamp = rs.getTimestamp("RECEIVED_TIMESTAMP");
+            response.setReceivedTimeStamp(new Date(receivedTimestamp.getTime()).toString());
         }
         ByteArrayInputStream bais = null;
         ObjectInputStream ois = null;
@@ -171,8 +175,9 @@ public class OperationDAOUtil {
 
     public static OperationResponse getOperationResponse(ResultSet rs) throws SQLException {
         OperationResponse response = new OperationResponse();
-        if (rs.getTimestamp("RECEIVED_TIMESTAMP") != (null)) {
-            response.setReceivedTimeStamp(rs.getTimestamp("RECEIVED_TIMESTAMP").toString());
+        if (rs.getTimestamp("RECEIVED_TIMESTAMP") != null) {
+            Timestamp receivedTimestamp = rs.getTimestamp("RECEIVED_TIMESTAMP");
+            response.setReceivedTimeStamp(new Date(receivedTimestamp.getTime()).toString());
         }
         if (rs.getString("OPERATION_RESPONSE") != null) {
             response.setResponse(rs.getString("OPERATION_RESPONSE"));
@@ -301,5 +306,28 @@ public class OperationDAOUtil {
             log.error(msg, e);
             throw new OperationManagementDAOException(msg, e);
         }
+    }
+
+    public static DeviceActivity populateActivity(ResultSet rs) throws SQLException {
+        DeviceActivity deviceActivity = new DeviceActivity();
+        List<OperationResponse> operationResponses = new ArrayList<>();
+
+        deviceActivity.setType(DeviceActivity.Type.valueOf(rs.getString("TYPE")));
+        deviceActivity.setCreatedTimeStamp(new Date(rs.getLong(("CREATED_TIMESTAMP")) * 1000).toString());
+        deviceActivity.setActivityId(OperationDAOUtil.getActivityId(rs.getInt("OPERATION_ID")));
+        deviceActivity.setCode(rs.getString("OPERATION_CODE"));
+        deviceActivity.setOperationId(rs.getInt("OPERATION_ID"));
+        deviceActivity.setInitiatedBy(rs.getString("INITIATED_BY"));
+
+        DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
+        deviceIdentifier.setId(rs.getString("DEVICE_IDENTIFICATION"));
+        deviceIdentifier.setType(rs.getString("DEVICE_TYPE"));
+        deviceActivity.setDeviceIdentifier(deviceIdentifier);
+        deviceActivity.setStatus(DeviceActivity.Status.valueOf(rs.getString("STATUS")));
+        if (rs.getInt("UPDATED_TIMESTAMP") != 0) {
+            deviceActivity.setResponses(operationResponses);
+        }
+        deviceActivity.setUpdatedTimestamp(new Date(rs.getLong(("UPDATED_TIMESTAMP")) * 1000).toString());
+        return deviceActivity;
     }
 }
