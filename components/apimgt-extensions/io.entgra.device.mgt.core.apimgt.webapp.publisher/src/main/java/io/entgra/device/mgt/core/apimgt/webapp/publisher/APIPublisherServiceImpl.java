@@ -184,7 +184,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                     scope.setDisplayName(apiScope.getName());
                                     scope.setDescription(apiScope.getDescription());
                                     scope.setName(apiScope.getKey());
-                                    List<String> bindings = apiScope.getRoles();
+                                    List<String> bindings = new ArrayList<>(apiScope.getRoles());
                                     bindings.add(ADMIN_ROLE_KEY);
                                     scope.setBindings(bindings);
                                     publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
@@ -259,7 +259,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                             scope.setName(apiScope.getKey());
                                             scope.setDescription(apiScope.getDescription());
                                             scope.setDisplayName(apiScope.getName());
-                                            List<String> bindings = apiScope.getRoles();
+                                            List<String> bindings = new ArrayList<>(apiScope.getRoles());
                                             bindings.add(ADMIN_ROLE_KEY);
                                             scope.setBindings(bindings);
                                             publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
@@ -282,7 +282,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                         scope.setName(apiScope.getKey());
                                         scope.setDescription(apiScope.getDescription());
                                         scope.setDisplayName(apiScope.getName());
-                                        List<String> bindings = apiScope.getRoles();
+                                        List<String> bindings = new ArrayList<>(apiScope.getRoles());
                                         bindings.add(ADMIN_ROLE_KEY);
                                         scope.setBindings(bindings);
                                         publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
@@ -459,10 +459,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 //todo check whether scope is available or not
                 ScopeMapping scopeMapping = defaultPermission.getScopeMapping();
 
-                String[] roles = scopeMapping.getDefaultRoles().split(",");
-                List<String> bindings = Arrays.asList(roles);
-                bindings.add(ADMIN_ROLE_KEY);
-
+                List<String> bindings = new ArrayList<>(
+                        Arrays.asList(scopeMapping.getDefaultRoles().split(",")));
                 scope.setName(scopeMapping.getKey());
                 scope.setDescription(scopeMapping.getName());
                 scope.setDisplayName(scopeMapping.getName());
