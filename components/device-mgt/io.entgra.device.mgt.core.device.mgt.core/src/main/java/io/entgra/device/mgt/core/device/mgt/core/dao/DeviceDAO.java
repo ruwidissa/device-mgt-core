@@ -634,7 +634,7 @@ public interface DeviceDAO {
      * @param enrollmentIds list of enrollment ids.
      * @throws DeviceManagementDAOException when no enrolments are found for the given device.
      */
-    void deleteDevices(List<String> deviceIdentifiers, List<Integer> deviceIds, List<Integer> enrollmentIds) throws DeviceManagementDAOException;
+    void deleteDevices(List<String> deviceIdentifiers, List<Integer> deviceIds, List<Integer> enrollmentIds, List<Device> validDevices) throws DeviceManagementDAOException;
 
     boolean transferDevice(String deviceType, String deviceId, String owner, int destinationTenantId)
             throws DeviceManagementDAOException, SQLException;

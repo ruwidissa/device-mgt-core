@@ -22,6 +22,11 @@ import com.google.gson.Gson;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Mediation;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevision;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevisionDeployment;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
@@ -29,6 +34,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.Unexpected
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.ScopeUtils;
 import okhttp3.*;
+import okhttp3.Request.Builder;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -228,10 +234,10 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
     }
 
     @Override
-    public JSONObject getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+    public JSONObject getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getAllApi = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID();
+        String getAllApi = endPointPrefix + Constants.API_ENDPOINT + apiUuid;
         Request request = new Request.Builder()
                 .url(getAllApi)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -250,7 +256,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return getApi(apiApplicationKey, refreshedAccessToken, apiIdentifier);
+                return getApi(apiApplicationKey, refreshedAccessToken, apiUuid);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid request";
                 log.error(msg);
@@ -335,6 +341,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 "    \"apiThrottlingPolicy\": " + api.getApiThrottlingPolicy() + ",\n" +
                 "    \"authorizationHeader\": \"" + api.getAuthorizationHeader() + "\",\n" +
                 "    \"visibility\": \"" + api.getVisibility() + "\",\n" +
+                "    \"mediationPolicies\": " + (api.getInSequence() != null ? "[{\"name\": \"" + api.getInSequence() + "\",\"type\": \"in\"}]" : null) + ",\n" +
                 "    \"subscriptionAvailability\": \"" + api.getSubscriptionAvailability() + "\",\n" +
                 "    \"subscriptionAvailableTenants\": [],\n" +
                 "    \"additionalProperties\": [],\n" +
@@ -350,7 +357,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 "    \"endpointConfig\": " + api.getEndpointConfig().toString() + ",\n" +
                 "    \"endpointImplementationType\": \"ENDPOINT\",\n" +
                 "    \"scopes\": " + api.getScopes().toString() + ",\n" +
-                "    \"operations\": " + api.getOperations().toString() + ",\n" +
+                "    \"operations\": " + (api.getOperations() != null ? api.getOperations().toString() : null) + ",\n" +
                 "    \"threatProtectionPolicies\": null,\n" +
                 "    \"categories\": [],\n" +
                 "    \"keyManagers\": " + gson.toJson(api.getKeyManagers()) + ",\n" +
@@ -422,6 +429,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 "    \"apiThrottlingPolicy\": " + api.getApiThrottlingPolicy() + ",\n" +
                 "    \"authorizationHeader\": \"" + api.getAuthorizationHeader() + "\",\n" +
                 "    \"visibility\": \"" + api.getVisibility() + "\",\n" +
+                "    \"mediationPolicies\": " + (api.getInSequence() != null ? "[{\"name\": \"" + api.getInSequence() + "\",\"type\": \"in\"}]" : null) + ",\n" +
                 "    \"subscriptionAvailability\": \"" + api.getSubscriptionAvailability() + "\",\n" +
                 "    \"subscriptionAvailableTenants\": [],\n" +
                 "    \"additionalProperties\": [],\n" +
@@ -437,7 +445,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 "    \"endpointConfig\": " + api.getEndpointConfig().toString() + ",\n" +
                 "    \"endpointImplementationType\": \"ENDPOINT\",\n" +
                 "    \"scopes\": " + api.getScopes().toString() + ",\n" +
-                "    \"operations\": " + api.getOperations().toString() + ",\n" +
+                "    \"operations\": " + (api.getOperations() != null? api.getOperations().toString() : null) + ",\n" +
                 "    \"threatProtectionPolicies\": null,\n" +
                 "    \"categories\": [],\n" +
                 "    \"keyManagers\": " + gson.toJson(api.getKeyManagers()) + ",\n" +
@@ -484,11 +492,16 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                           String uuid, String asyncApiDefinition)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addNewScope = endPointPrefix + Constants.API_ENDPOINT + uuid;
+        String saveAsyncAPI = endPointPrefix + Constants.API_ENDPOINT + uuid + "/asyncapi";
 
-        RequestBody requestBody = RequestBody.create(JSON, asyncApiDefinition);
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("apiDefinition", asyncApiDefinition)
+                .build();
+
         Request request = new Request.Builder()
-                .url(addNewScope)
+                .url(saveAsyncAPI)
+                .addHeader(Constants.HEADER_CONTENT_TYPE, "multipart/form-data")
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .put(requestBody)
@@ -523,10 +536,10 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public JSONObject getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                         APIIdentifier apiIdentifier)
+                                                         String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String getAPIMediationEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiIdentifier.getUUID() + "/mediation-policies";
+        String getAPIMediationEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiUuid + "/mediation-policies";
         Request request = new Request.Builder()
                 .url(getAPIMediationEndPoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
@@ -545,7 +558,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return getAllApiSpecificMediationPolicies(apiApplicationKey, refreshedAccessToken, apiIdentifier);
+                return getAllApiSpecificMediationPolicies(apiApplicationKey, refreshedAccessToken, apiUuid);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid request";
                 log.error(msg);
@@ -566,12 +579,17 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                                                  String uuid, Mediation mediation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addAPIMediation = endPointPrefix + Constants.API_ENDPOINT + uuid + "/mediation-policies/" + mediation.getUuid()
-                + "/content";
+        String addAPIMediation = endPointPrefix + Constants.API_ENDPOINT + uuid + "/mediation-policies";
 
-        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(mediation));
-        Request request = new Request.Builder()
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("inlineContent", mediation.getConfig())
+                .addFormDataPart("type", mediation.getType())
+                .build();
+
+        Request request = new Builder()
                 .url(addAPIMediation)
+                .addHeader(Constants.HEADER_CONTENT_TYPE, "multipart/form-data")
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -604,26 +622,23 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     }
 
-
     @Override
-    public boolean updateApiSpecificMediationPolicyContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+    public boolean deleteApiSpecificMediationPolicy(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                                            String uuid, Mediation mediation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String updateApiMediationEndPOint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/mediation-policies/" + mediation.getUuid()
-                + "/content";
+        String deleteApiMediationEndPOint = endPointPrefix + Constants.API_ENDPOINT + uuid + "/mediation-policies/" + mediation.getUuid();
 
-        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(mediation));
         Request request = new Request.Builder()
-                .url(updateApiMediationEndPOint)
+                .url(deleteApiMediationEndPOint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
-                .put(requestBody)
+                .delete()
                 .build();
 
         try {
             Response response = client.newCall(request).execute();
-            if (HttpStatus.SC_CREATED == response.code()) { // Check response status
+            if (HttpStatus.SC_NO_CONTENT == response.code()) { // Check response status
                 return true;
             } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
                 APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
@@ -631,7 +646,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return updateApiSpecificMediationPolicyContent(apiApplicationKey, refreshedAccessToken, uuid, mediation);
+                return deleteApiSpecificMediationPolicy(apiApplicationKey, refreshedAccessToken, uuid, mediation);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid mediation policy";
                 log.error(msg);
@@ -1009,18 +1024,19 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
         String addNewScope = endPointPrefix + Constants.API_ENDPOINT + uuid + "/documents";
 
         String document = "{\n" +
-                "  \"name\": \" " + documentation.getName() + " \",\n" +
-                "  \"type\": \" " + documentation.getType() + " \",\n" +
-                "  \"summary\": \" " + documentation.getSummary() + " \",\n" +
-                "  \"sourceType\": \" " + documentation.getSourceType() + " \",\n" +
-                "  \"inlineContent\": \" " + documentation.getSourceType() + " \",\n" +
-                "  \"visibility\": \" " + documentation.getVisibility() + " \",\n" +
-                "  \"createdBy\": \" admin \"\n" +
+                "  \"name\": \"" + documentation.getName() + "\",\n" +
+                "  \"type\": \"" + documentation.getType() + "\",\n" +
+                "  \"summary\": \"" + documentation.getSummary() + "\",\n" +
+                "  \"sourceType\": \"" + documentation.getSourceType() + "\",\n" +
+                "  \"inlineContent\": \"" + documentation.getSourceType() + "\",\n" +
+                "  \"visibility\": \"" + documentation.getVisibility() + "\",\n" +
+                "  \"createdBy\": \"admin\"\n" +
                 "}";
 
         RequestBody requestBody = RequestBody.create(JSON, document);
         Request request = new Request.Builder()
                 .url(addNewScope)
+                .addHeader(Constants.HEADER_CONTENT_TYPE, Constants.APPLICATION_JSON)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -1054,14 +1070,19 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
 
     @Override
     public boolean addDocumentationContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                           APIInfo api, String docId, String docContent)
+                                           String apiUuid, String docId, String docContent)
             throws APIServicesException, BadRequestException, UnexpectedResponseException {
 
-        String addDocumentationContentEndPoint = endPointPrefix + Constants.API_ENDPOINT + api.getId() + "/documents/" + docId;
+        String addDocumentationContentEndPoint = endPointPrefix + Constants.API_ENDPOINT + apiUuid + "/documents/" + docId + "/content";
 
-        RequestBody requestBody = RequestBody.create(JSON, docContent);
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("inlineContent", docContent)
+                .build();
+
         Request request = new Request.Builder()
                 .url(addDocumentationContentEndPoint)
+                .addHeader(Constants.HEADER_CONTENT_TYPE, "multipart/form-data")
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
                         + accessTokenInfo.getAccess_token())
                 .post(requestBody)
@@ -1077,7 +1098,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                         generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
                                 apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
                 //TODO: max attempt count
-                return addDocumentationContent(apiApplicationKey, refreshedAccessToken, api, docId, docContent);
+                return addDocumentationContent(apiApplicationKey, refreshedAccessToken, apiUuid, docId, docContent);
             } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
                 String msg = "Bad Request, Invalid documentation request body";
                 log.error(msg);

@@ -86,6 +86,7 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
 
                 try {
                     publisher.updateScopeRoleMapping();
+                    publisher.addDefaultScopesIfNotExist();
                 } catch (APIManagerPublisherException e) {
                     log.error("failed to update scope role mapping.", e);
                 }

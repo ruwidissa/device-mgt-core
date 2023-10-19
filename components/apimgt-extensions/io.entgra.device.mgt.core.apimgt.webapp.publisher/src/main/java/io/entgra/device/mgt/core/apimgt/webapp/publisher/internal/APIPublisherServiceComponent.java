@@ -17,18 +17,21 @@
  */
 package io.entgra.device.mgt.core.apimgt.webapp.publisher.internal;
 
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherServiceImpl;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherStartupHandler;
-import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherServiceImpl;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherStartupHandler;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
 import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
+
+import java.util.HashMap;
 
 @Component(
         name = "io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherServiceComponent",
@@ -52,6 +55,7 @@ public class APIPublisherServiceComponent {
 
             /* Registering declarative service instances exposed by DeviceManagementServiceComponent */
             this.registerServices(componentContext);
+            APIPublisherDataHolder.getInstance().setPermScopeMapping(new HashMap<>());
 
             if (log.isDebugEnabled()) {
                 log.debug("Webapp publisher bundle has been successfully initialized");
@@ -114,6 +118,17 @@ public class APIPublisherServiceComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
         APIPublisherDataHolder.getInstance().setRegistryService(null);
+    }
+
+    protected void setMetaDataMgtService(MetadataManagementService metadataManagementService) {
+        if (metadataManagementService != null && log.isDebugEnabled()) {
+            log.debug("Meta data mgt mgt service initialized");
+        }
+        APIPublisherDataHolder.getInstance().setMetadataManagementService(metadataManagementService);
+    }
+
+    protected void unsetMetaDataMgtService(MetadataManagementService metadataManagementService) {
+        APIPublisherDataHolder.getInstance().setMetadataManagementService(null);
     }
 
 }

@@ -58,9 +58,9 @@ import java.util.List;
         @Scope(
                 name = "Get activities",
                 description = "Get activities",
-                key = "perm:get-activity",
+                key = "dm:activity:get",
                 roles = {"Internal/devicemgt-user"},
-                permissions = {"/device-mgt/devices/owning-device/view"}
+                permissions = {"/device-mgt/devices/owning-device/activities/view"}
                 )
         }
 )
@@ -79,7 +79,7 @@ public interface ActivityInfoProviderService {
             tags = "Activity Info Provider",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                 })
             }
     )
@@ -153,7 +153,7 @@ public interface ActivityInfoProviderService {
             tags = "Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                     })
             },
             nickname = "getActivitiesByActivityIdList"
@@ -216,7 +216,7 @@ public interface ActivityInfoProviderService {
             tags = "Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                     })
             }
     )
@@ -290,7 +290,17 @@ public interface ActivityInfoProviderService {
                             "Provide the value in the Java Date Format: EEE, d MMM yyyy HH:mm:ss Z\n." +
                             "Example: Mon, 05 Jan 2014 15:10:00 +0200",
                     required = false)
-            @HeaderParam("If-Modified-Since") String ifModifiedSince);
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @ApiParam(
+                    name = "response",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    required = false)
+            @QueryParam("response") Boolean response,
+            @ApiParam(
+                    name = "appInstall",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    required = false)
+            @QueryParam("appInstall") Boolean appInstall);
 
     @GET
     @Path("/type/{operationCode}")
@@ -303,7 +313,7 @@ public interface ActivityInfoProviderService {
             tags = "Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                     })
             },
             nickname = "getActivitiesByOperationCode"
@@ -367,7 +377,7 @@ public interface ActivityInfoProviderService {
             tags = "Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                     })
             },
             nickname = "getActivitiesWithFilters"
@@ -438,6 +448,11 @@ public interface ActivityInfoProviderService {
                     value = "Operation Code to filter"
             )
             @QueryParam("operationCode") String operationCode,
+            @ApiParam(
+                    name = "operationId",
+                    value = "Operation Id to filter"
+            )
+            @QueryParam("operationId") int operationId,
             @ApiParam(
                     name = "deviceType",
                     value = "Device Type to filter"

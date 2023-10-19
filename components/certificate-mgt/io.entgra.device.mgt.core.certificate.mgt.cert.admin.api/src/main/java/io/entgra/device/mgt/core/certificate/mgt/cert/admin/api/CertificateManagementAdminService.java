@@ -62,35 +62,35 @@ import javax.ws.rs.core.Response;
         @Scope(
                 name = "Adding a new SSL certificate",
                 description = "Adding a new SSL certificate",
-                key = "perm:admin:certificates:add",
+                key = "cm:cert:add",
                 roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/add"}
         ),
         @Scope(
                 name = "Getting Details of an SSL Certificate",
                 description = "Getting Details of an SSL Certificate",
-                key = "perm:admin:certificates:details",
+                key = "cm:cert:details:get",
                 roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/details"}
         ),
         @Scope(
                 name = "Getting Details of Certificates",
                 description = "Getting Details of Certificates",
-                key = "perm:admin:certificates:view",
+                key = "cm:cert:view",
                 roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/view"}
         ),
         @Scope(
                 name = "Deleting an SSL Certificate",
                 description = "Deleting an SSL Certificate",
-                key = "perm:admin:certificates:delete",
+                key = "cm:cert:delete",
                 roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/delete"}
         ),
         @Scope(
                 name = "Verify SSL certificate",
                 description = "Verify SSL certificate",
-                key = "perm:admin:certificates:verify",
+                key = "cm:cert:verify",
                 roles = {"Internal/devicemgt-admin"},
                 permissions = {"/device-mgt/admin/certificates/verify"}
         )
@@ -119,7 +119,7 @@ public interface CertificateManagementAdminService {
             tags = "Certificate Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:admin:certificates:add")
+                            @ExtensionProperty(name = SCOPE, value = "cm:cert:add")
                     })
             }
     )
@@ -188,7 +188,7 @@ public interface CertificateManagementAdminService {
             tags = "Certificate Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:admin:certificates:details")
+                            @ExtensionProperty(name = SCOPE, value = "cm:cert:details:get")
                     })
             }
     )
@@ -247,19 +247,20 @@ public interface CertificateManagementAdminService {
      *
      * @return paginated result of certificate.
      */
+
     @GET
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "Getting Details of Certificates",
-            notes = "Get all the details of the certificates you have used for mutual SSL. In a situation where you wish to "
-                    + "view all the certificate details, it is not feasible to show all the details on one "
+            value = "Getting Details of search Certificates",
+            notes = "Get all the details of the search certificates you have used for mutual SSL. In a situation where you wish to "
+                    + "view all the search certificate details, it is not feasible to show all the details on one "
                     + "page. Therefore, the details are paginated.",
             tags = "Certificate Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:admin:certificates:view")
+                            @ExtensionProperty(name = SCOPE, value = "cm:cert:view")
                     })
             }
     )
@@ -308,6 +309,28 @@ public interface CertificateManagementAdminService {
     })
     Response getAllCertificates(
             @ApiParam(
+                    name = "serialNumber",
+                    value = "The serial number of the certificates",
+                    required = false)
+            @QueryParam("serialNumber") String serialNumber,
+            @ApiParam(
+                    name = "deviceIdentifier",
+                    value = "The device identifier of the certificates",
+                    required = false)
+            @QueryParam("deviceIdentifier") String deviceIdentifier,
+            @ApiParam(
+                    name = "username",
+                    value = "User name of the certificate added user",
+                    required = false)
+            @QueryParam("username") String username,
+            @ApiParam(
+                    name = "If-Modified-Since",
+                    value = "Checks if the requested variant was modified, since the specified date-time. \n" +
+                            "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
+                    required = false)
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @ApiParam(
                     name = "offset",
                     value = "The starting pagination index for the complete list of qualified items.",
                     required = false,
@@ -318,14 +341,7 @@ public interface CertificateManagementAdminService {
                     value = "Provide how many certificate details you require from the starting pagination index/offset.",
                     required = false,
                     defaultValue = "5")
-            @QueryParam("limit") int limit,
-            @ApiParam(
-                    name = "If-Modified-Since",
-                    value = "Checks if the requested variant was modified, since the specified date-time. \n" +
-                            "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
-                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
-                    required = false)
-            @HeaderParam("If-Modified-Since") String ifModifiedSince);
+            @QueryParam("limit") int limit);
 
     @DELETE
     @ApiOperation(
@@ -337,7 +353,7 @@ public interface CertificateManagementAdminService {
             tags = "Certificate Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:admin:certificates:delete")
+                            @ExtensionProperty(name = SCOPE, value = "cm:cert:delete")
                     })
             }
     )
@@ -383,7 +399,7 @@ public interface CertificateManagementAdminService {
             tags = "Certificate Management",
             extensions = {
             @Extension(properties = {
-                    @ExtensionProperty(name = SCOPE, value = "perm:admin:certificates:verify")
+                    @ExtensionProperty(name = SCOPE, value = "cm:cert:verify")
             })
             }
     )

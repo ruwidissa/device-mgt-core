@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>certificate-mgt</artifactId>
-        <version>5.0.29-SNAPSHOT</version>
+        <version>5.0.31-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -57,6 +57,11 @@
                             io.entgra.device.mgt.core.certificate.mgt.core.util
                         </Private-Package>
                         <Import-Package>
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.apache.commons.lang,
+                            org.apache.commons.logging,
+                            org.apache.commons.collections.map,
                             io.entgra.device.mgt.core.certificate.mgt.core.*,
                             io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
                             io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
@@ -90,6 +95,22 @@
                             org.bouncycastle.util;version="[1.70,2)",
                             org.jscep.message,
                             org.jscep.transaction,
+                            org.w3c.dom,
+                            org.xml.sax,
+                            javax.sql,
+                            <!--javax.cache,-->
+                            javax.naming,
+                            javax.xml.bind.annotation,
+                            javax.xml.bind,
+                            org.wso2.carbon.utils.*,
+                            io.entgra.device.mgt.core.device.mgt.common.*,
+                            io.swagger.annotations.*;resolution:=optional,
+                            io.entgra.device.mgt.core.device.mgt.core.*,
+                            org.wso2.carbon.registry.indexing.*,
+                            javax.cache.*,
+                            javax.naming.ldap,
+                            com.google.gson.*,
+                            <!--org.bouncycastle.pkcs.jcajce-->
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.w3c.dom,org.wso2.carbon.context;version="[4.8,5)",
@@ -252,6 +273,10 @@
         <dependency>
             <groupId>org.wso2.orbit.javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -17,14 +17,7 @@
  */
 package io.entgra.device.mgt.core.application.mgt.common.services;
 
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
-import io.entgra.device.mgt.core.application.mgt.common.Filter;
-import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
-import io.entgra.device.mgt.core.application.mgt.common.LifecycleState;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.RequestValidatingException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ResourceManagementException;
@@ -34,8 +27,21 @@ import io.entgra.device.mgt.core.application.mgt.common.response.Category;
 import io.entgra.device.mgt.core.application.mgt.common.response.Tag;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.*;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
+import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
+import io.entgra.device.mgt.core.application.mgt.common.Filter;
+import io.entgra.device.mgt.core.application.mgt.common.LifecycleState;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.CustomAppReleaseWrapper;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.EntAppReleaseWrapper;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.ApplicationUpdateWrapper;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppReleaseWrapper;
+import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppReleaseWrapper;
 import java.util.List;
 
 /**
@@ -268,6 +274,17 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException if error occurred application data from the database.
      */
     ApplicationDTO getApplication(int applicationId) throws ApplicationManagementException;
+
+    /**
+     * This method is responsible to provide application data for given deviceId.
+     *
+     * @param  deviceId id of the device
+     * @return {@link ApplicationDTO}
+     * @throws ApplicationManagementException
+     * if an error occurred while getting subscribed app details for relevant device id,
+     */
+    ApplicationList getSubscribedAppsOfDevice(int deviceId, PaginationRequest request)
+            throws ApplicationManagementException;
 
     /**
      * To get the Application for given Id.

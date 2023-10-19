@@ -120,7 +120,7 @@
             -d '{  "applicationName":"testme", "isAllowedToAllDomains":false, "tags":["device_agent"]}'</code>
         </li>
         <li class="padding-top-double"><span><h4 class="uppercase">Generate Token</h4></span>
-            <code>curl -k -d "grant_type=password&username=%username%&password=%password%&scope=perm:device:enroll perm:device:disenroll perm:device:modify perm:device:operations perm:device:publish-event"
+            <code>curl -k -d "grant_type=password&username=%username%&password=%password%&scope=dm:device:enroll dm:device:disenroll dm:device:modify dm:devices:ops:view dm:device:event:publish"
             -H "Authorization: Basic Base64(client_id:client_secret)"
             -H "Content-Type: application/x-www-form-urlencoded" {{httpsGateway}}/token</code>
         </li>

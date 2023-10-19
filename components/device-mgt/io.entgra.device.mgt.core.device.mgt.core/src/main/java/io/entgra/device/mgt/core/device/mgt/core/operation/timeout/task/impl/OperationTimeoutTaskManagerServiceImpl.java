@@ -57,14 +57,14 @@ public class OperationTimeoutTaskManagerServiceImpl implements OperationTimeoutT
                 log.debug("Operation timeout task is started for the device type(s) : " + config.getDeviceTypes()
                         + ", operation code : " + config.getInitialStatus());
                 log.debug(
-                        "Operation timeout task is at frequency of : " + config.getTimeout() + " minutes");
+                        "Operation timeout task is at frequency of : " + config.getTimeout() + " milliseconds");
             }
 
             TaskManager taskManager = taskService.getTaskManager(OPERATION_TIMEOUT_TASK);
 
             TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
             //Convert to milli seconds
-            triggerInfo.setIntervalMillis(config.getTimeout() * 60 * 1000);
+            triggerInfo.setIntervalMillis(config.getTimeout());
             triggerInfo.setRepeatCount(-1);
 
             Gson gson = new Gson();
@@ -125,7 +125,7 @@ public class OperationTimeoutTaskManagerServiceImpl implements OperationTimeoutT
             if (taskManager.isTaskScheduled(taskName)) {
                 taskManager.deleteTask(taskName);
                 TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
-                triggerInfo.setIntervalMillis(config.getTimeout() * 60 * 1000);
+                triggerInfo.setIntervalMillis(config.getTimeout());
                 triggerInfo.setRepeatCount(-1);
 
                 Map<String, String> properties = new HashMap<>();

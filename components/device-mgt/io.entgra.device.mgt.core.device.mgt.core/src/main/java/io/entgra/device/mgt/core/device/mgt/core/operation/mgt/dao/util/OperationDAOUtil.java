@@ -241,6 +241,7 @@ public class OperationDAOUtil {
                     activity.setCreatedTimeStamp(
                             new java.util.Date(rs.getLong(("CREATED_TIMESTAMP")) * 1000).toString());
                     activity.setCode(rs.getString("OPERATION_CODE"));
+                    activity.setOperationId(rs.getInt("OPERATION_ID"));
                     activity.setInitiatedBy(rs.getString("INITIATED_BY"));
 
                     DeviceIdentifier deviceIdentifier = new DeviceIdentifier();

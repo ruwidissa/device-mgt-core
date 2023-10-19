@@ -19,11 +19,16 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Mediation;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevision;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevisionDeployment;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.model.*;
 
@@ -43,7 +48,7 @@ public interface PublisherRESTAPIServices {
     boolean updateSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    JSONObject getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, APIIdentifier apiIdentifier)
+    JSONObject getApi(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     JSONObject getApis(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo)
@@ -60,15 +65,15 @@ public interface PublisherRESTAPIServices {
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     JSONObject getAllApiSpecificMediationPolicies(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                  APIIdentifier apiIdentifier)
+                                                  String apiUuid)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean addApiSpecificMediationPolicy(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                           String uuid, Mediation mediation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    boolean updateApiSpecificMediationPolicyContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                                    String uuid, Mediation mediation)
+    boolean deleteApiSpecificMediationPolicy(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+                                            String uuid, Mediation mediation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean changeLifeCycleStatus(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
@@ -103,11 +108,11 @@ public interface PublisherRESTAPIServices {
                                  String uuid, String documentID)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
-    Documentation addDocumentation(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
+    io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation addDocumentation(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
                                    String uuid, Documentation documentation)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 
     boolean addDocumentationContent(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo,
-                                    APIInfo api, String docId, String docContent)
+                                    String apiUuid, String docId, String docContent)
             throws APIServicesException, BadRequestException, UnexpectedResponseException;
 }

@@ -3,14 +3,14 @@
         "label": "Windows",
         "category": "mobile",
         "scopes" : [
-          "perm:windows:enroll",
-            "perm:windows:lock-devices",
-            "perm:windows:ring",
-            "perm:windows:wipe",
-            "perm:windows:lock-reset",
-            "perm:windows:reboot",
-            "perm:windows:location",
-            "perm:windows:disenroll"
+          "win:devices:enroll",
+            "win:ops:lock-devices",
+            "win:ops:ring",
+            "win:ops:wipe",
+            "win:ops:lock-reset",
+            "win:ops:reboot",
+            "win:ops:location",
+            "win:ops:disenroll"
         ],
         "analyticsEnabled": "false",
         "groupingEnabled": "false",

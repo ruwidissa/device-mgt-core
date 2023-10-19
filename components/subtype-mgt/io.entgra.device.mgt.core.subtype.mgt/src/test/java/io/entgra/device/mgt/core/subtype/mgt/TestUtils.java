@@ -47,7 +47,7 @@ public class TestUtils {
     public static void verifyDeviceSubType(DeviceSubType deviceSubType) {
         String typeDefExpected = TestUtils.createNewDeviceSubType("1");
         Assert.assertEquals(deviceSubType.getSubTypeId(), "1");
-        Assert.assertEquals(deviceSubType.getDeviceType(), DeviceSubType.DeviceType.valueOf("METER"));
+        Assert.assertEquals(deviceSubType.getDeviceType(), "METER");
         Assert.assertEquals(deviceSubType.getSubTypeName(), "TestSubType");
         Assert.assertEquals(deviceSubType.getTypeDefinition(), typeDefExpected);
     }
@@ -55,7 +55,7 @@ public class TestUtils {
     public static void verifyDeviceSubTypeDAO(DeviceSubType deviceSubType) {
         String typeDefExpected = TestUtils.createNewDeviceSubType("1");
         Assert.assertEquals(deviceSubType.getSubTypeId(), "1");
-        Assert.assertEquals(deviceSubType.getDeviceType(), DeviceSubType.DeviceType.valueOf("COM"));
+        Assert.assertEquals(deviceSubType.getDeviceType(), "COM");
         Assert.assertEquals(deviceSubType.getSubTypeName(), "TestSubType");
         Assert.assertEquals(deviceSubType.getTypeDefinition(), typeDefExpected);
     }
@@ -63,7 +63,7 @@ public class TestUtils {
     public static void verifyUpdatedDeviceSubType(DeviceSubType deviceSubType) {
         String typeDefExpected = TestUtils.createUpdateDeviceSubType("1");
         Assert.assertEquals(deviceSubType.getSubTypeId(), "1");
-        Assert.assertEquals(deviceSubType.getDeviceType(), DeviceSubType.DeviceType.valueOf("METER"));
+        Assert.assertEquals(deviceSubType.getDeviceType(), "METER");
         Assert.assertEquals(deviceSubType.getSubTypeName(), "TestSubType");
         Assert.assertEquals(deviceSubType.getTypeDefinition(), typeDefExpected);
     }
@@ -71,7 +71,7 @@ public class TestUtils {
     public static void verifyUpdatedDeviceSubTypeDAO(DeviceSubType deviceSubType) {
         String typeDefExpected = TestUtils.createUpdateDeviceSubType("1");
         Assert.assertEquals(deviceSubType.getSubTypeId(), "1");
-        Assert.assertEquals(deviceSubType.getDeviceType(), DeviceSubType.DeviceType.valueOf("COM"));
+        Assert.assertEquals(deviceSubType.getDeviceType(), "COM");
         Assert.assertEquals(deviceSubType.getSubTypeName(), "TestSubType");
         Assert.assertEquals(deviceSubType.getTypeDefinition(), typeDefExpected);
     }

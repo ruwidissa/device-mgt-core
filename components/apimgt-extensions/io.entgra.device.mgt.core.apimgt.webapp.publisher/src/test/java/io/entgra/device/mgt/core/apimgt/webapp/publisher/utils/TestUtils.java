@@ -37,7 +37,7 @@ public class TestUtils {
         template.setResourceURI("https://localhost:9443/api/device-mgt/windows/v1.0/admin/devices/reboot");
         template.setUriTemplate(uriTemplate);
         ApiScope scope = new ApiScope();
-        scope.setKey("perm:windows:reboot");
+        scope.setKey("win:ops:reboot");
         scope.setName("Reboot");
         scope.setRoles("/permission/admin/device-mgt/devices/owning-device/operations/windows/reboot");
         scope.setDescription("Lock reset on Windows devices");
