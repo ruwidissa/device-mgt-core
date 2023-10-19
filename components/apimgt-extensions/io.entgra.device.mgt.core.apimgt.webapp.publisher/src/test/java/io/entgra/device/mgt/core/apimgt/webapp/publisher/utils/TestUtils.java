@@ -39,7 +39,7 @@ public class TestUtils {
         ApiScope scope = new ApiScope();
         scope.setKey("win:ops:reboot");
         scope.setName("Reboot");
-        scope.setRoles("/permission/admin/device-mgt/devices/owning-device/operations/windows/reboot");
+        scope.setPermissions("/permission/admin/device-mgt/devices/owning-device/operations/windows/reboot");
         scope.setDescription("Lock reset on Windows devices");
         template.setScope(scope);
         uriTemplates.add(template);

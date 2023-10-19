@@ -219,10 +219,9 @@ public class AnnotationProcessor {
         String permissions[];
         StringBuilder aggregatedPermissions;
         String roles[];
-        StringBuilder aggregatedRoles;
+        List<String> aggregatedRoles;
         for (int i = 0; i < annotatedScopes.length; i++) {
             aggregatedPermissions = new StringBuilder();
-            aggregatedRoles = new StringBuilder();
             methodHandler = Proxy.getInvocationHandler(annotatedScopes[i]);
             scope = new ApiScope();
             scope.setName(invokeMethod(scopeClass
@@ -241,11 +240,8 @@ public class AnnotationProcessor {
             scope.setPermissions(aggregatedPermissions.toString().trim());
             roles = (String[]) methodHandler.invoke(annotatedScopes[i], scopeClass
                     .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_ROLES, null), null);
-            for (String role : roles) {
-                aggregatedRoles.append(role);
-                aggregatedRoles.append(",");
-            }
-            scope.setRoles(aggregatedRoles.substring(0, aggregatedRoles.lastIndexOf(",")));
+            aggregatedRoles = Arrays.asList(roles);
+            scope.setRoles(aggregatedRoles);
             scopes.put(scope.getKey(), scope);
         }
         return scopes;
@@ -296,11 +292,13 @@ public class AnnotationProcessor {
 //                        } else {
 //                            log.warn("Scope is not defined for '" + makeContextURLReady(resourceRootContext) +
 //                                    makeContextURLReady(subCtx) + "' endpoint, hence assigning the default scope");
+//                            List<String> roles = new ArrayList<>();
+//                            roles.add(DEFAULT_SCOPE_ROLE);
 //                            scope = new ApiScope();
 //                            scope.setName(DEFAULT_SCOPE_NAME);
 //                            scope.setDescription(DEFAULT_SCOPE_NAME);
 //                            scope.setKey(DEFAULT_SCOPE_KEY);
-//                            scope.setRoles(DEFAULT_SCOPE_ROLE);
+//                            scope.setRoles(roles);
 //                            scope.setPermissions(DEFAULT_SCOPE_PERMISSION);
 //                            resource.setScope(scope);
 //                        }
@@ -534,11 +532,13 @@ public class AnnotationProcessor {
                     } else {
 //                        log.warn("Scope is not defined for '" + makeContextURLReady(resourceRootContext) +
 //                                makeContextURLReady(subCtx) + "' endpoint, hence assigning the default scope");
+                        List<String> roles = new ArrayList<>();
+                        roles.add(DEFAULT_SCOPE_ROLE);
                         scope = new ApiScope();
                         scope.setName(DEFAULT_SCOPE_NAME);
                         scope.setDescription(DEFAULT_SCOPE_NAME);
                         scope.setKey(DEFAULT_SCOPE_KEY);
-                        scope.setRoles(DEFAULT_SCOPE_ROLE);
+                        scope.setRoles(roles);
                         scope.setPermissions(DEFAULT_SCOPE_PERMISSION);
                         apiResource.setScope(scope);
                     }

@@ -16,24 +16,17 @@
  * under the License.
  */
 
-package io.entgra.device.mgt.core.apimgt.webapp.publisher.dto;
+package io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo;
 
-import java.util.List;
+public class ServiceInfo {
 
-public class ApiScope {
-
-    String key;
-    String name;
-    List<String> roles;
-    String permissions;
-    String description;
-    int id;
-
-    public ApiScope() {
-    }
+    private String key;
+    private String name;
+    private String version;
+    private boolean outdated;
 
     public String getKey() {
-        return this.key;
+        return key;
     }
 
     public void setKey(String key) {
@@ -41,34 +34,26 @@ public class ApiScope {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public List<String> getRoles() {
-        return this.roles;
+    public String getVersion() {
+        return version;
     }
 
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
-    public String getDescription() {
-        return this.description;
+    public boolean isOutdated() {
+        return outdated;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(String permissions) {
-        this.permissions = permissions;
+    public void setOutdated(boolean outdated) {
+        this.outdated = outdated;
     }
 }

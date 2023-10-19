@@ -77,6 +77,7 @@ import io.entgra.device.mgt.core.device.mgt.common.license.mgt.LicenseManagement
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManager;
@@ -139,6 +140,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -2562,6 +2564,19 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throws OperationManagementException {
         return DeviceManagementDataHolder.getInstance().getOperationManager()
                 .getActivitiesCount(activityPaginationRequest);
+    }
+
+    @Override
+    public List<DeviceActivity> getDeviceActivities(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException {
+        return DeviceManagementDataHolder.getInstance().getOperationManager().getDeviceActivities(activityPaginationRequest);
+    }
+
+    @Override
+    public int getDeviceActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException {
+        return DeviceManagementDataHolder.getInstance().getOperationManager()
+                .getDeviceActivitiesCount(activityPaginationRequest);
     }
 
     @Override
