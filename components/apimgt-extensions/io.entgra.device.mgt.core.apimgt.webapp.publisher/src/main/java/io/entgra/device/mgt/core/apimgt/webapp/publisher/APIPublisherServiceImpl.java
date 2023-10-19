@@ -461,6 +461,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
                 List<String> bindings = new ArrayList<>(
                         Arrays.asList(scopeMapping.getDefaultRoles().split(",")));
+                bindings.add(ADMIN_ROLE_KEY);
                 scope.setName(scopeMapping.getKey());
                 scope.setDescription(scopeMapping.getName());
                 scope.setDisplayName(scopeMapping.getName());
