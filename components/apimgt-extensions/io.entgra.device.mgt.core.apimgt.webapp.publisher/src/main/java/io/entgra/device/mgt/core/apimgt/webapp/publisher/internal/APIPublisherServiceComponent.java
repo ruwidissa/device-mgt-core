@@ -120,6 +120,12 @@ public class APIPublisherServiceComponent {
         APIPublisherDataHolder.getInstance().setRegistryService(null);
     }
 
+    @Reference(
+            name = "io.entgra.meta.mgt",
+            service = io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetMetaDataMgtService")
     protected void setMetaDataMgtService(MetadataManagementService metadataManagementService) {
         if (metadataManagementService != null && log.isDebugEnabled()) {
             log.debug("Meta data mgt mgt service initialized");
