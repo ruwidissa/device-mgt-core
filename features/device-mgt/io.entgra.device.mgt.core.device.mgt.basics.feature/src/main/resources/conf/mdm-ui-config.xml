@@ -318,6 +318,7 @@
         <Scope>dm:metadata:create</Scope>
         <Scope>dm:metadata:update</Scope>
         <Scope>and:ops:add-google-acc</Scope>
+        <Scope>and:ops:authenticate-acc</Scope>
         <Scope>and:ops:update-default-sim</Scope>
         <Scope>and:ops:add-google-acc</Scope>
         <Scope>and:ops:device-info</Scope>
