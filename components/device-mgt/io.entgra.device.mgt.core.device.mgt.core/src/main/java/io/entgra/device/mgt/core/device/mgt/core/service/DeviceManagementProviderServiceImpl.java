@@ -1093,10 +1093,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     public double generateCost(List<Device> allDevices, Timestamp startDate, Timestamp endDate,  Cost tenantCost, List<Device> deviceStatusNotAvailable, double totalCost) throws DeviceManagementException {
+        List<DeviceStatus> deviceStatus;
         for (Device device : allDevices) {
             long dateDiff = 0;
-            device.setDeviceStatusInfo(getDeviceStatusHistory(device, null, endDate, true));
-            List<DeviceStatus> deviceStatus = device.getDeviceStatusInfo();
+            deviceStatus = getDeviceStatusHistory(device, null, endDate, true);
             if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
                 if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
                         || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
