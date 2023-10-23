@@ -84,6 +84,7 @@ public class Constants {
 		public static final String LOGIN = "/permission/admin/login";
 		public static final String DEVICE_MGT = "/permission/admin/device-mgt";
 		public static final String APP_MGT = "/permission/admin/app-mgt";
+		public static final String TENANT = "/permission/admin/tenants";
 	}
 
 }

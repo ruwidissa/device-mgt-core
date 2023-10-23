@@ -340,7 +340,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 for (UIPermissionNode node : permissionNode.getNodeList()) {
                     if (Constants.Permission.LOGIN.equals(node.getResourcePath()) ||
                             Constants.Permission.DEVICE_MGT.equals(node.getResourcePath()) ||
-                            Constants.Permission.APP_MGT.equals(node.getResourcePath())) {
+                            Constants.Permission.APP_MGT.equals(node.getResourcePath()) ||
+                            Constants.Permission.TENANT.equals(node.getResourcePath())) {
                         deviceMgtPermissionsList.add(node);
                     }
                 }
