@@ -18,6 +18,13 @@
 package io.entgra.device.mgt.core.application.mgt.core.internal;
 
 import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.AppmDataHandler;
+import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.*;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
@@ -88,6 +95,12 @@ public class ApplicationManagementServiceComponent {
             AppmDataHandler configManager = new AppmDataHandlerImpl();
             DataHolder.getInstance().setConfigManager(configManager);
             bundleContext.registerService(AppmDataHandler.class.getName(), configManager, null);
+
+            // TODO: Get the new instance from extension like others
+            VPPApplicationManager vppApplicationManager = ApplicationManagementUtil
+                    .getVPPManagerInstance();
+            DataHolder.getInstance().setVppApplicationManager(vppApplicationManager);
+            bundleContext.registerService(VPPApplicationManager.class.getName(), vppApplicationManager, null);
 
             ScheduledAppSubscriptionTaskManager taskManager = new ScheduledAppSubscriptionTaskManager();
             // todo: taskManager.scheduleCleanupTask();

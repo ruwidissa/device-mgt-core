@@ -526,6 +526,14 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             stmt.setInt(1, groupId);
             stmt.setInt(2, tenantId);
             stmt.executeUpdate();
+            sql = "DELETE FROM DM_DEVICE_EVENT_GROUP_MAPPING WHERE GROUP_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, groupId);
+            stmt.executeUpdate();
+            sql = "DELETE FROM DM_GEOFENCE_GROUP_MAPPING WHERE GROUP_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, groupId);
+            stmt.executeUpdate();
         } catch (SQLException e) {
             throw new GroupManagementDAOException("Error occurred while removing mappings for group.'", e);
         } finally {

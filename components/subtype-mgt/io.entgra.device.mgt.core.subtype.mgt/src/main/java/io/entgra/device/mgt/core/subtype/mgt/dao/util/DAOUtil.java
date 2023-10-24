@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.subtype.mgt.dao.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
 
 import java.sql.ResultSet;
@@ -30,17 +31,19 @@ public class DAOUtil {
     public static DeviceSubType loadDeviceSubType(ResultSet rs) throws SQLException {
         DeviceSubType deviceSubType = new DeviceSubType() {
             @Override
-            public <T> DeviceSubType setDeviceSubType(T objType, String typeDef) {
+            public <T> DeviceSubType convertToDeviceSubType() {
                 return null;
             }
 
             @Override
-            public String parseSubTypeToJson(Object objType) { return null; }
+            public String parseSubTypeToJson() throws JsonProcessingException {
+                return null;
+            }
         };
         deviceSubType.setTenantId(rs.getInt("TENANT_ID"));
         deviceSubType.setSubTypeId(rs.getString("SUB_TYPE_ID"));
         deviceSubType.setSubTypeName(rs.getString("SUB_TYPE_NAME"));
-        deviceSubType.setDeviceType(DeviceSubType.DeviceType.valueOf(rs.getString("DEVICE_TYPE")));
+        deviceSubType.setDeviceType(rs.getString("DEVICE_TYPE"));
         deviceSubType.setTypeDefinition(rs.getString("TYPE_DEFINITION"));
         return deviceSubType;
     }

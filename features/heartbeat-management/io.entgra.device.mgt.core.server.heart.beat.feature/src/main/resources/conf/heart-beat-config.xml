@@ -49,4 +49,7 @@
     <NotifierFrequencyInSeconds>300</NotifierFrequencyInSeconds>
     <TimeSkewInSeconds>5</TimeSkewInSeconds>
     <ServerTimeOutIntervalInSeconds>600</ServerTimeOutIntervalInSeconds>
+    <ClusterFormationChangedNotifiers>
+        <Notifier></Notifier>
+    </ClusterFormationChangedNotifiers>
 </HeartBeatBeaconConfig>

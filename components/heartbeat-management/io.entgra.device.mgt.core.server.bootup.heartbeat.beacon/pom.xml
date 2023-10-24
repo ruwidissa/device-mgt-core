@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>heartbeat-management</artifactId>
-        <version>5.0.29-SNAPSHOT</version>
+        <version>5.0.31-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -82,6 +82,7 @@
                             !io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal,
                             io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.*
                         </Export-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

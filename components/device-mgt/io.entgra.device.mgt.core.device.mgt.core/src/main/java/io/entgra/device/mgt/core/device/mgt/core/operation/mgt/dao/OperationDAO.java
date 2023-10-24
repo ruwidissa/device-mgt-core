@@ -22,6 +22,7 @@ import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationResponse;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.OperationResponseMeta;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMapping;
@@ -105,6 +106,10 @@ public interface OperationDAO {
     Map<Integer, List<OperationMapping>> getOperationMappingsByStatus(Operation.Status opStatus, Operation.PushNotificationStatus pushNotificationStatus,
                                                                       int limit) throws OperationManagementDAOException;
 
+    Map<Integer, List<OperationMapping>> getAllocatedOperationMappingsByStatus(Operation.Status opStatus,
+            Operation.PushNotificationStatus pushNotificationStatus, int limit, int activeServerCount, int serverIndex)
+            throws OperationManagementDAOException;
+
     List<Activity> getActivities(List<String> deviceTypes, String operationCode, long updatedSince, String operationStatus)
             throws OperationManagementDAOException;
 
@@ -114,4 +119,9 @@ public interface OperationDAO {
     int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
             throws OperationManagementDAOException;
 
+    List<DeviceActivity> getDeviceActivities(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementDAOException;
+
+    int getDeviceActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementDAOException;
 }

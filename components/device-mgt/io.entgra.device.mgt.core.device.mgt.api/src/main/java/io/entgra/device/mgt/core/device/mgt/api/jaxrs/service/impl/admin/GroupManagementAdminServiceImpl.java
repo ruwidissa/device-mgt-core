@@ -134,6 +134,23 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
     }
 
     @Override
+    public Response getHierarchicalGroupCount(String status) {
+        try {
+            int count;
+            if (status == null || status.isEmpty()) {
+                count = DeviceMgtAPIUtils.getGroupManagementProviderService().getHierarchicalGroupCount();
+            } else {
+                count = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroupCountByStatus(status);
+            }
+            return Response.status(Response.Status.OK).entity(count).build();
+        } catch (GroupManagementException e) {
+            String msg = "ErrorResponse occurred while retrieving hierarchical group count.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @Override
     public Response getGroupCount(String status) {
         try {
             int count;

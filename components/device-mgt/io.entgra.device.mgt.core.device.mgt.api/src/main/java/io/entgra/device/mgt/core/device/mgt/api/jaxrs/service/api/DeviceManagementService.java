@@ -41,6 +41,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Device related REST-API. This can be used to manipulated device related details.
@@ -65,91 +66,91 @@ import java.util.List;
                 @Scope(
                         name = "Getting Details of Registered Devices",
                         description = "Getting Details of Registered Devices",
-                        key = "perm:devices:view",
+                        key = "dm:devices:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 ),
                 @Scope(
                         name = "Getting Details of a Device",
                         description = "Getting Details of a Device",
-                        key = "perm:devices:details",
+                        key = "dm:devices:details",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/details/view"}
                 ),
                 @Scope(
                         name = "Update the device specified by device id",
                         description = "Update the device specified by device id",
-                        key = "perm:devices:update",
+                        key = "dm:devices:update",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/update"}
                 ),
                 @Scope(
                         name = "Delete the device specified by device id",
                         description = "Delete the device specified by device id",
-                        key = "perm:devices:delete",
+                        key = "dm:devices:delete",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/delete"}
                 ),
                 @Scope(
                         name = "Getting Feature Details of a Device",
                         description = "Getting Feature Details of a Device",
-                        key = "perm:devices:features",
+                        key = "dm:devices:features:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/features/view"}
                 ),
                 @Scope(
                         name = "Advanced Search for Devices",
                         description = "Advanced Search for Devices",
-                        key = "perm:devices:search",
+                        key = "dm:devices:search",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/search"}
                 ),
                 @Scope(
                         name = "Getting Installed Application Details of a Device",
                         description = "Getting Installed Application Details of a Device",
-                        key = "perm:devices:applications",
+                        key = "dm:devices:app:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/apps/view"}
                 ),
                 @Scope(
                         name = "Getting Device Operation Details",
                         description = "Getting Device Operation Details",
-                        key = "perm:devices:operations",
+                        key = "dm:devices:ops:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/operations/view"}
                 ),
                 @Scope(
                         name = "Get the details of the policy that is enforced on a device.",
                         description = "Get the details of the policy that is enforced on a device.",
-                        key = "perm:devices:effective-policy",
+                        key = "dm:devices:policy:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/policies/view"}
                 ),
                 @Scope(
                         name = "Getting Policy Compliance Details of a Device",
                         description = "Getting Policy Compliance Details of a Device",
-                        key = "perm:devices:compliance-data",
+                        key = "dm:devices:compliance:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/devices/owning-device/compliance/view"}
                 ),
                 @Scope(
                         name = "Change device status.",
                         description = "Change device status.",
-                        key = "perm:devices:change-status",
+                        key = "dm:devices:status:change",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/change-status"}
                 ),
                 @Scope(
                         name = "Enroll Device",
                         description = "Register a device",
-                        key = "perm:device:enroll",
+                        key = "dm:device:enroll",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/owning-device/add"}
                 ),
                 @Scope(
                         name = "Viewing Enrollment Guide",
                         description = "Show enrollment guide to users",
-                        key = "perm:devices:enrollment-guide:view",
+                        key = "dm:devices:enrollment-guide:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/devices/enrollment-guide/view"}
                 ),
@@ -170,7 +171,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:view")
                     })
             }
     )
@@ -260,6 +261,12 @@ public interface DeviceManagementService {
             @QueryParam("serialNumber")
                     String serialNumber,
             @ApiParam(
+                    name = "customProperty",
+                    value = "CustomProperty from device as a JSON encoded string.",
+                    required = false)
+            @QueryParam("customProperty")
+            String customProperty,
+            @ApiParam(
                     name = "status",
                     value = "Provide the device status details, such as active or inactive.",
                     required = false)
@@ -319,7 +326,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:view")
                     })
             }
     )
@@ -395,7 +402,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:details")
                     })
             }
     )
@@ -485,7 +492,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:details")
                     })
             }
     )
@@ -573,7 +580,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:details")
                     })
             }
     )
@@ -649,7 +656,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:details")
                     })
             }
     )
@@ -727,7 +734,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:enrollment-guide:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:enrollment-guide:view")
                     })
             }
     )
@@ -778,7 +785,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:details")
                     })
             }
     )
@@ -814,9 +821,9 @@ public interface DeviceManagementService {
     Response getDeviceByIdList(List<String> deviceIds);
 
 
-    @PUT
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{type}/{id}")
+    @Path("/{type}/{id}/status")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -825,7 +832,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:view")
                     })
             },
             nickname = "isEnrolledByType"
@@ -882,7 +889,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:details")
                     })
             }
     )
@@ -959,7 +966,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:details")
                     })
             }
     )
@@ -1035,7 +1042,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:details")
                     })
             }
     )
@@ -1115,7 +1122,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:update")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:update")
                     })
             }
     )
@@ -1190,7 +1197,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:delete")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:delete")
                     })
             },
             nickname = "deleteDeviceByTypeAndId"
@@ -1261,7 +1268,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:features")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:features:view")
                     })
             }
     )
@@ -1343,7 +1350,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:search")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:search")
                     })
             }
     )
@@ -1423,7 +1430,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:search")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:search")
                     })
             }
     )
@@ -1501,7 +1508,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:applications")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:app:view")
                     })
 
             }
@@ -1606,7 +1613,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:applications")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:app:view")
                     })
             })
     @ApiResponses(
@@ -1633,7 +1640,31 @@ public interface DeviceManagementService {
                     value = "The package name of the app user want to uninstall",
                     required = true)
             @QueryParam("packageName")
-                    String packageName);
+                    String packageName,
+            @ApiParam(
+                    name = "platform",
+                    value = "The platform of the app user want to uninstall",
+                    required = false)
+            @QueryParam("platform")
+            String platform,
+            @ApiParam(
+                    name = "name",
+                    value = "The name of the app user want to uninstall",
+                    required = false)
+            @QueryParam("name")
+            String name,
+            @ApiParam(
+                    name = "version",
+                    value = "The version of the app user want to uninstall",
+                    required = false)
+            @QueryParam("version")
+            String version,
+            @ApiParam(
+                    name = "user",
+                    value = "The user who triggered the app uninstall",
+                    required = false)
+            @QueryParam("user")
+            String user);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -1646,7 +1677,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:operations")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:ops:view")
                     })
             }
     )
@@ -1788,7 +1819,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:effective-policy")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:policy:view")
                     })
             }
     )
@@ -1877,7 +1908,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:compliance-data")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:compliance:view")
                     })
             }
     )
@@ -1924,7 +1955,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:view")
                     })
             }
     )
@@ -1992,7 +2023,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:view")
                     })
             }
     )
@@ -2062,7 +2093,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:change-status")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:status:change")
                     })
             }
     )
@@ -2138,7 +2169,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:operations")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:ops:view")
                     })
             }
     )
@@ -2195,7 +2226,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:view")
                     })
             }
     )
@@ -2264,7 +2295,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:view")
                     })
             }
     )
@@ -2334,7 +2365,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:change-status")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:status:change")
                     })
             }
     )
@@ -2395,7 +2426,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:compliance-data")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:compliance:view")
                     })
             }
     )
@@ -2463,7 +2494,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:compliance-data")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:compliance:view")
                     })
             }
     )
@@ -2503,7 +2534,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:applications")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:app:view")
                     })
             }
     )
@@ -2570,7 +2601,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:applications")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:app:view")
                     })
             }
     )
@@ -2615,7 +2646,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:operations")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:ops:view")
                     })
             }
     )
@@ -2667,7 +2698,7 @@ public interface DeviceManagementService {
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:view")
                     })
             }
     )
@@ -2706,7 +2737,7 @@ public interface DeviceManagementService {
             notes = "Getting the default access token by using given client ID and the client secret value.",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:enroll")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:device:enroll")
                     })
             }
     )

@@ -43,6 +43,9 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
 
     private final HeartBeatDAO heartBeatDAO;
 
+    private static int lastActiveCount = -1;
+    private static int lastHashIndex = -1;
+
     public HeartBeatManagementServiceImpl() {
         this.heartBeatDAO = HeartBeatBeaconDAOFactory.getHeartBeatDAO();
     }
@@ -227,6 +230,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                         }
                     } else {
                         //first time execution, elect if not present
+                        heartBeatDAO.purgeCandidates();
                         electCandidate(servers);
                     }
                     HeartBeatBeaconDAOFactory.commitTransaction();
@@ -249,6 +253,62 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
             throw new HeartBeatManagementException(msg);
         }
     }
+    @Override
+    public void notifyClusterFormationChanged(int elapsedTimeInSeconds) throws HeartBeatManagementException {
+        if (HeartBeatBeaconConfig.getInstance().isEnabled()) {
+            try {
+                HeartBeatBeaconDAOFactory.beginTransaction();
+                Map<String, ServerContext> servers = heartBeatDAO.getActiveServerDetails(elapsedTimeInSeconds);
+                HeartBeatBeaconDAOFactory.commitTransaction();
+                if (servers != null && !servers.isEmpty()) {
+                    String serverUUID = HeartBeatBeaconDataHolder.getInstance().getLocalServerUUID();
+                    ServerContext serverContext = servers.get(serverUUID);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("HashIndex (previous, current) : " + lastHashIndex + ", " + serverContext.getIndex());
+                        log.debug("ActiveServerCount (previous, current) : " + lastActiveCount + ", " + servers.size());
+                    }
+                    // cluster change can be identified, either by changing hash index or changing active server count
+                    if ((lastHashIndex != serverContext.getIndex()) || (lastActiveCount != servers.size())) {
+                        lastHashIndex = serverContext.getIndex();
+                        lastActiveCount = servers.size();
+
+                        ClusterFormationChangedNotifierRepository repository = HeartBeatBeaconDataHolder.getInstance().getClusterFormationChangedNotifierRepository();
+                        Map<String, ClusterFormationChangedNotifier> notifiers = repository.getNotifiers();
+                        for (String type : notifiers.keySet()) {
+                            ClusterFormationChangedNotifier notifier = notifiers.get(type);
+                            Runnable r = new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("notify cluster formation changed : " + notifier.getType());
+                                    }
+                                    notifier.notifyClusterFormationChanged(lastHashIndex, lastActiveCount);
+                                }
+                            };
+                            new Thread(r).start();
+                        }
+                    }
+                }
+            } catch (HeartBeatDAOException e) {
+                String msg = "Error occurred while notifyClusterFormationChanged.";
+                log.error(msg, e);
+                throw new HeartBeatManagementException(msg, e);
+            } catch (TransactionManagementException e) {
+                HeartBeatBeaconDAOFactory.rollbackTransaction();
+                String msg = "Error occurred while electing candidate for dynamic task execution. Issue in opening a connection to the underlying data source";
+                log.error(msg, e);
+                throw new HeartBeatManagementException(msg, e);
+            } finally {
+                HeartBeatBeaconDAOFactory.closeConnection();
+            }
+        } else {
+            String msg = "Heart Beat Configuration Disabled. Error while notifyClusterFormationChanged.";
+            log.error(msg);
+            throw new HeartBeatManagementException(msg);
+        }
+    }
+
 
     private void electCandidate(Map<String, ServerContext> servers) throws HeartBeatDAOException {
         String electedCandidate = getRandomElement(servers.keySet());

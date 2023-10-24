@@ -18,6 +18,11 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.impl;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
+import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceDetailsWrapper;
@@ -41,10 +46,6 @@ import io.entgra.device.mgt.core.device.mgt.core.report.mgt.Constants;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.HttpReportingUtil;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import java.sql.SQLException;
@@ -232,9 +233,19 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                     deviceDetailsWrapper.setGroups(groups);
                 }
 
-                String[] rolesOfUser = DeviceManagerUtil.getRolesOfUser(CarbonContext
-                        .getThreadLocalCarbonContext()
-                        .getUsername());
+                String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+                if (StringUtils.isEmpty(username)) {
+                    boolean isUserAuthorized = DeviceManagementDataHolder.getInstance().
+                            getDeviceAccessAuthorizationService().isUserAuthorized(
+                                    new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()),
+                                    device.getEnrolmentInfo().getOwner()
+                            );
+                    if (isUserAuthorized) {
+                        username = device.getEnrolmentInfo().getOwner();
+                    }
+                }
+
+                String[] rolesOfUser = DeviceManagerUtil.getRolesOfUser(username);
                 if (rolesOfUser != null && rolesOfUser.length > 0) {
                     deviceDetailsWrapper.setRole(rolesOfUser);
                 }
@@ -248,6 +259,10 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 log.error("Error occurred while getting group list", e);
             } catch (UserStoreException e) {
                 log.error("Error occurred while getting role list", e);
+            } catch (DeviceAccessAuthorizationException e) {
+                log.error("User with name '" + device.getEnrolmentInfo().getOwner() +
+                        "' is unauthorized to publish events for device with the id '" +
+                        device.getDeviceIdentifier() + "'", e);
             }
         } else {
             if(log.isTraceEnabled()) {
@@ -363,13 +378,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             DeviceManagementDAOFactory.beginTransaction();
             DeviceLocation previousLocation = deviceDetailsDAO.getDeviceLocation(device.getId(),
                     device.getEnrolmentInfo().getId());
-            if (previousLocation == null) {
-                deviceDetailsDAO.addDeviceLocation(deviceLocation, device.getEnrolmentInfo().getId());
-            } else {
-                deviceDetailsDAO.updateDeviceLocation(deviceLocation, device.getEnrolmentInfo().getId());
-            }
-            deviceDetailsDAO.addDeviceLocationInfo(device, deviceLocation,
-                    CarbonContext.getThreadLocalCarbonContext().getTenantId());
             if (DeviceManagerUtil.isPublishLocationResponseEnabled()) {
                 Object[] metaData = {device.getDeviceIdentifier(), device.getEnrolmentInfo().getOwner(), device.getType()};
                 Object[] payload = new Object[]{
@@ -382,11 +390,17 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                         deviceLocation.getDistance()
                 };
             }
-
             //Tracker update GPS Location
             if (HttpReportingUtil.isLocationPublishing() && HttpReportingUtil.isTrackerEnabled()) {
                 DeviceManagementDataHolder.getInstance().getTraccarManagementService().updateLocation(device, deviceLocation);
             } else {
+                if (previousLocation == null) {
+                    deviceDetailsDAO.addDeviceLocation(deviceLocation, device.getEnrolmentInfo().getId());
+                } else {
+                    deviceDetailsDAO.updateDeviceLocation(deviceLocation, device.getEnrolmentInfo().getId());
+                }
+                deviceDetailsDAO.addDeviceLocationInfo(device, deviceLocation,
+                        CarbonContext.getThreadLocalCarbonContext().getTenantId());
                 if(!HttpReportingUtil.isLocationPublishing()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Location publishing is disabled");
@@ -453,29 +467,29 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             DeviceManagementDAOFactory.beginTransaction();
             boolean previousLocation = deviceDetailsDAO.hasLocations(device.getId(),
                     device.getEnrolmentInfo().getId());
-            if (previousLocation) {
-                deviceDetailsDAO.updateDeviceLocation(mostRecentDeviceLocation, device.getEnrolmentInfo().getId());
-            } else {
-                deviceDetailsDAO.addDeviceLocation(mostRecentDeviceLocation, device.getEnrolmentInfo().getId());
-            }
-
-            deviceDetailsDAO.addDeviceLocationsInfo(device, deviceLocations,
-                    CarbonContext.getThreadLocalCarbonContext().getTenantId());
-
-            for (DeviceLocation deviceLocation: deviceLocations) {
-                //Tracker update GPS Location
-                if (HttpReportingUtil.isLocationPublishing() && HttpReportingUtil.isTrackerEnabled()) {
-                    DeviceManagementDataHolder.getInstance().getTraccarManagementService().updateLocation(device, deviceLocation);
+            if(!HttpReportingUtil.isTrackerEnabled()) {
+                if (previousLocation) {
+                    deviceDetailsDAO.updateDeviceLocation(mostRecentDeviceLocation, device.getEnrolmentInfo().getId());
                 } else {
-                    if(!HttpReportingUtil.isLocationPublishing()) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Location publishing is disabled");
-                        }
+                    deviceDetailsDAO.addDeviceLocation(mostRecentDeviceLocation, device.getEnrolmentInfo().getId());
+                }
+                deviceDetailsDAO.addDeviceLocationsInfo(device, deviceLocations,
+                        CarbonContext.getThreadLocalCarbonContext().getTenantId());
+            }
+            if (HttpReportingUtil.isLocationPublishing() && HttpReportingUtil.isTrackerEnabled()) {
+                for (DeviceLocation deviceLocation: deviceLocations) {
+                    //Tracker update GPS Location
+                    DeviceManagementDataHolder.getInstance().getTraccarManagementService().updateLocation(device, deviceLocation);
+                }
+            } else {
+                if(!HttpReportingUtil.isLocationPublishing()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Location publishing is disabled");
                     }
-                    if (!HttpReportingUtil.isTrackerEnabled()) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Traccar is disabled");
-                        }
+                }
+                if (!HttpReportingUtil.isTrackerEnabled()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Traccar is disabled");
                     }
                 }
             }

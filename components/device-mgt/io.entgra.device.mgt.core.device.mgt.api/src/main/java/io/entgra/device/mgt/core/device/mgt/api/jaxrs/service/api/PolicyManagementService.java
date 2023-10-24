@@ -59,72 +59,72 @@ import java.util.List;
                 @Scope(
                         name = "Adding a Policy",
                         description = "Adding a Policy",
-                        key = "perm:policies:manage",
+                        key = "pm:policies:add",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/add"}
                 ),
                 @Scope(
                         name = "Getting Details of Policies",
                         description = "Getting Details of Policies",
-                        key = "perm:policies:get-details",
+                        key = "dm:policies:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/policies/view"}
                 ),
                 @Scope(
                         name = "Getting Details of a Policy",
                         description = "Getting Details of a Policy",
-                        key = "perm:policies:get-policy-details",
+                        key = "pm:policies:details:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/view"}
+                        permissions = {"/device-mgt/policies/view-details"}
                 ),
                 @Scope(
                         name = "Updating a Policy",
                         description = "Updating a Policy",
-                        key = "perm:policies:update",
+                        key = "pm:policies:update",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/update"}
                 ),
                 @Scope(
                         name = "Removing Multiple Policies",
                         description = "Removing Multiple Policies",
-                        key = "perm:policies:remove",
+                        key = "pm:policies:remove",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/remove"}
                 ),
                 @Scope(
                         name = "Activating Policies",
                         description = "Activating Policies",
-                        key = "perm:policies:activate",
+                        key = "pm:policies:activate",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/activate"}
                 ),
                 @Scope(
                         name = "Deactivating Policies",
                         description = "Deactivating Policies",
-                        key = "perm:policies:deactivate",
+                        key = "pm:policies:deactivate",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/deactivate"}
                 ),
                 @Scope(
                         name = "Applying Changes on Policies",
                         description = "Applying Changes on Policies",
-                        key = "perm:policies:changes",
+                        key = "pm:policies:change",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/apply-changes"}
                 ),
                 @Scope(
                         name = "Updating the Policy Priorities",
                         description = "Updating the Policy Priorities",
-                        key = "perm:policies:priorities",
+                        key = "pm:policies:priorities:update",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/manage"}
+                        permissions = {"/device-mgt/policies/update-priority"}
                 ),
                 @Scope(
                         name = "Fetching the Effective Policy",
                         description = "Fetching the Effective Policy",
-                        key = "perm:policies:effective-policy",
+                        key = "pm:policies:effective-policy",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/policies/view"}
+                        permissions = {"/device-mgt/policies/view-effective-policy"}
                 )
         }
 )
@@ -148,7 +148,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:manage")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:add")
                 })
             }
     )
@@ -219,7 +219,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:manage")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:add")
                     })
             }
     )
@@ -288,7 +288,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:get-details")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "dm:policies:view")
                 })
             }
     )
@@ -364,7 +364,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:get-policy-details")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:details:view")
                 })
             }
     )
@@ -433,7 +433,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:update")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:update")
                 })
             }
     )
@@ -502,7 +502,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:remove")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:remove")
                 })
             }
     )
@@ -550,7 +550,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:activate")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:activate")
                 })
             }
     )
@@ -592,7 +592,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:deactivate")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:deactivate")
                 })
             }
     )
@@ -638,7 +638,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:changes")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:change")
                 })
             }
     )
@@ -666,7 +666,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
             @Extension(properties = {
-                    @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:priorities")
+                    @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:priorities:update")
             })
     }
     )
@@ -702,7 +702,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:effective-policy")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "pm:policies:effective-policy")
                     })
             }
     )
@@ -772,7 +772,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:get-details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:policies:view")
                     })
             },
             nickname = "getPoliciesFilteredByType"
@@ -856,7 +856,7 @@ public interface PolicyManagementService {
             tags = "Device Policy Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:get-details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:policies:view")
                     })
             }
     )

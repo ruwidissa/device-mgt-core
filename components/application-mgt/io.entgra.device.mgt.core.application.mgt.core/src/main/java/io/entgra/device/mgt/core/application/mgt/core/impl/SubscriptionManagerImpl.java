@@ -19,6 +19,29 @@
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
+import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.core.dao.VppApplicationDAO;
+import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
+import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.AppInstallLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraAppInstallLoggerImpl;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.lang.StringUtils;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
@@ -46,7 +69,6 @@ import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
-import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ForbiddenException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.NotFoundException;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
@@ -60,10 +82,7 @@ import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
-import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.MobileAppTypes;
@@ -82,18 +101,11 @@ import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProvider
 import io.entgra.device.mgt.core.device.mgt.core.util.MDMAndroidOperationUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.MDMIOSOperationUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.MDMWindowsOperationUtil;
-import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
-import io.entgra.device.mgt.core.notification.logger.AppInstallLogContext;
-import io.entgra.device.mgt.core.notification.logger.impl.EntgraAppInstallLoggerImpl;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -105,6 +117,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -124,12 +139,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     private static final EntgraLogger log = new EntgraAppInstallLoggerImpl(SubscriptionManagerImpl.class);
     private SubscriptionDAO subscriptionDAO;
     private ApplicationDAO applicationDAO;
+    private VppApplicationDAO vppApplicationDAO;
     private LifecycleStateManager lifecycleStateManager;
 
     public SubscriptionManagerImpl() {
         this.lifecycleStateManager = DataHolder.getInstance().getLifecycleStateManager();
         this.subscriptionDAO = ApplicationManagementDAOFactory.getSubscriptionDAO();
         this.applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
+        this.vppApplicationDAO = ApplicationManagementDAOFactory.getVppApplicationDAO();
     }
 
     @Override
@@ -154,12 +171,58 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         ApplicationDTO applicationDTO = getApplicationDTO(applicationUUID);
         ApplicationSubscriptionInfo applicationSubscriptionInfo = getAppSubscriptionInfo(applicationDTO, subType,
                 params);
+        performExternalStoreSubscription(applicationDTO, applicationSubscriptionInfo);
         ApplicationInstallResponse applicationInstallResponse = performActionOnDevices(
                 applicationSubscriptionInfo.getAppSupportingDeviceTypeName(), applicationSubscriptionInfo.getDevices(),
                 applicationDTO, subType, applicationSubscriptionInfo.getSubscribers(), action, properties, isOperationReExecutingDisabled);
 
         applicationInstallResponse.setErrorDeviceIdentifiers(applicationSubscriptionInfo.getErrorDeviceIdentifiers());
         return applicationInstallResponse;
+    }
+
+    private void performExternalStoreSubscription(ApplicationDTO applicationDTO,
+                                                  ApplicationSubscriptionInfo
+                                                          applicationSubscriptionInfo) throws ApplicationManagementException {
+        try {
+            // Only for iOS devices
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+            if (DeviceTypes.IOS.toString().equalsIgnoreCase(APIUtil.getDeviceTypeData(applicationDTO
+                    .getDeviceTypeId()).getName())) {
+                // TODO: replace getAssetByAppId with the correct one in DAO
+                // Check if the app trying to subscribe is a VPP asset.
+                VppAssetDTO storedAsset = vppApplicationDAO.getAssetByAppId(applicationDTO.getId(), tenantId);
+                if (storedAsset != null) { // This is a VPP asset
+                    List<VppUserDTO> users = new ArrayList<>();
+                    List<Device> devices = applicationSubscriptionInfo.getDevices();// get
+                    // subscribed device list, so that we can extract the users of those devices.
+                    for (Device device : devices) {
+                        VppUserDTO user = vppApplicationDAO.getUserByDMUsername(device.getEnrolmentInfo()
+                                .getOwner(), PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .getTenantId(true));
+                        users.add(user);
+                    }
+                    VPPApplicationManager vppManager = APIUtil.getVPPManager();
+                    vppManager.addAssociation(storedAsset, users);
+                }
+            }
+        } catch (BadRequestException e) {
+            String msg = "Device Type not found";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (UnexpectedServerErrorException e) {
+            String msg = "Unexpected error while getting device type";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error while getting the device user";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementException e) {
+            String msg = "Error while associating user";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+
     }
 
     @Override
@@ -1268,38 +1331,37 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
-    private int invokeIOTCoreAPI(HttpMethodBase request) throws UserStoreException, APIManagerException, IOException {
-        HttpClient httpClient;
+    private int invokeIOTCoreAPI(HttpPost request) throws UserStoreException, APIManagerException, IOException,
+            ApplicationManagementException {
+        CloseableHttpClient httpClient = getHttpClient();
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         ApiApplicationKey apiApplicationKey = OAuthUtils.getClientCredentials(tenantDomain);
         String username =
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration()
                         .getAdminUserName() + Constants.ApplicationInstall.AT + tenantDomain;
         AccessTokenInfo tokenInfo = OAuthUtils.getOAuthCredentials(apiApplicationKey, username);
-        request.addRequestHeader(Constants.ApplicationInstall.AUTHORIZATION,
+        request.addHeader(Constants.ApplicationInstall.AUTHORIZATION,
                 Constants.ApplicationInstall.AUTHORIZATION_HEADER_VALUE + tokenInfo.getAccessToken());
-        httpClient = new HttpClient();
-        httpClient.executeMethod(request);
-        return request.getStatusCode();
+        HttpResponse response = httpClient.execute(request);
+        return response.getStatusLine().getStatusCode();
     }
 
     public int installEnrollmentApplications(ApplicationPolicyDTO applicationPolicyDTO)
             throws ApplicationManagementException {
-
-        PostMethod request;
+        String requestUrl =null;
         try {
-            String requestUrl = Constants.ApplicationInstall.ENROLLMENT_APP_INSTALL_PROTOCOL + System
-                    .getProperty(Constants.ApplicationInstall.IOT_CORE_HOST) + Constants.ApplicationInstall.COLON
+            requestUrl = Constants.ApplicationInstall.ENROLLMENT_APP_INSTALL_PROTOCOL + System
+                    .getProperty(Constants.ApplicationInstall.IOT_GATEWAY_HOST) + Constants.ApplicationInstall.COLON
                     + System.getProperty(Constants.ApplicationInstall.IOT_CORE_PORT)
                     + Constants.ApplicationInstall.GOOGLE_APP_INSTALL_URL;
             Gson gson = new Gson();
             String payload = gson.toJson(applicationPolicyDTO);
+            HttpPost httpPost = new HttpPost(requestUrl);
 
-            StringRequestEntity requestEntity = new StringRequestEntity(payload, MediaType.APPLICATION_JSON,
-                    Constants.ApplicationInstall.ENCODING);
-            request = new PostMethod(requestUrl);
-            request.setRequestEntity(requestEntity);
-            return invokeIOTCoreAPI(request);
+            StringEntity stringEntity = new StringEntity(payload, Constants.ApplicationInstall.ENCODING);
+            httpPost.addHeader("Content-Type",MediaType.APPLICATION_JSON);
+            httpPost.setEntity(stringEntity);
+            return invokeIOTCoreAPI(httpPost);
         } catch (UserStoreException e) {
             String msg = "Error while accessing user store for user with Android device.";
             log.error(msg, e);
@@ -1308,18 +1370,38 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             String msg = "Error while retrieving access token for Android device";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (HttpException e) {
-            String msg = "Error while calling the app store to install enrollment app with id: " + applicationPolicyDTO
-                    .getApplicationDTO().getId() + " on device";
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
         } catch (IOException e) {
             String msg =
                     "Error while installing the enrollment with id: " + applicationPolicyDTO.getApplicationDTO().getId()
-                            + " on device";
+                            + " on device: request URL: " + requestUrl;
+            log.error(msg + "request url: " + requestUrl, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    private CloseableHttpClient getHttpClient() throws ApplicationManagementException {
+        try {
+            SSLContextBuilder builder = new SSLContextBuilder();
+            builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
+            return HttpClients.custom().setSSLSocketFactory(sslsf).useSystemProperties().build();
+        }  catch (NoSuchAlgorithmException e) {
+            String msg = "Failed while building the http client for EntApp installation. " +
+                    "Used SSL algorithm not available";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (KeyStoreException e) {
+            String msg = "Failed while building the http client for EntApp installation. " +
+                    "Failed to load required key stores";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (KeyManagementException e) {
+            String msg = "Failed while building the http client for EntApp installation. " +
+                    "Failed while building SSL context";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
+
     }
 
     private String getIOTCoreBaseUrl() {
@@ -1594,4 +1676,29 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
+
+    @Override
+    public Activity getOperationAppDetails(String id) throws SubscriptionManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        int operationId = Integer.parseInt(
+                id.replace(DeviceManagementConstants.OperationAttributes.ACTIVITY, ""));
+        if (operationId == 0) {
+            throw new IllegalArgumentException("Operation ID cannot be null or zero (0).");
+        }
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return subscriptionDAO.getOperationAppDetails(operationId, tenantId);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while retrieving app details of operation: " + operationId;
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while retrieving the database connection";
+            log.error(msg, e);
+            throw new SubscriptionManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
 }

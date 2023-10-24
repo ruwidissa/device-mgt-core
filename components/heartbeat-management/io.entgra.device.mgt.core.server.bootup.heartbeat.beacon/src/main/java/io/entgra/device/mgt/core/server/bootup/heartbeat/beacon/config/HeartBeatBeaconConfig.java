@@ -22,6 +22,7 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.HeartBeatBeaconC
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.HeartBeatBeaconUtils;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.InvalidConfigurationStateException;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.ClusterFormationChangedNotifier;
 import org.w3c.dom.Document;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -29,8 +30,10 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;
+import java.util.List;
 
 @XmlRootElement(name = "HeartBeatBeaconConfig")
 public class HeartBeatBeaconConfig {
@@ -50,6 +53,7 @@ public class HeartBeatBeaconConfig {
     private static final String SERVER_UUID_FILE_LOCATION =
             CarbonUtils.getCarbonConfigDirPath() + File.separator + "server-credentials.properties";
 
+    private List<String> notifiers;
     private HeartBeatBeaconConfig() {
     }
 
@@ -135,4 +139,13 @@ public class HeartBeatBeaconConfig {
         }
     }
 
+    @XmlElementWrapper(name = "ClusterFormationChangedNotifiers", required = true)
+    @XmlElement(name = "Notifier", required = true)
+    public List<String> getNotifiers() {
+        return notifiers;
+    }
+
+    public void setNotifiers(List<String> notifiers) {
+        this.notifiers = notifiers;
+    }
 }

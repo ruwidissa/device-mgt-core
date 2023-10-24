@@ -54,7 +54,7 @@ public class AnnotationProcessor {
     private static final String PACKAGE_ORG_APACHE = "org.apache";
     private static final String PACKAGE_ORG_CODEHAUS = "org.codehaus";
     private static final String PACKAGE_ORG_SPRINGFRAMEWORK = "org.springframework";
-    public static final String WILD_CARD = "/*";
+    public static final String WILD_CARD = "/";
     private static final String SWAGGER_ANNOTATIONS_INFO = "info";
     private static final String SWAGGER_ANNOTATIONS_TAGS = "tags";
     private static final String SWAGGER_ANNOTATIONS_EXTENSIONS = "extensions";
@@ -77,7 +77,7 @@ public class AnnotationProcessor {
     private static final String ANNOTATIONS_SCOPES = "scopes";
     private static final String ANNOTATIONS_SCOPE = "scope";
     private static final String DEFAULT_SCOPE_NAME = "default admin scope";
-    private static final String DEFAULT_SCOPE_KEY = "perm:admin";
+    private static final String DEFAULT_SCOPE_KEY = "dm:admin";
     private static final String DEFAULT_SCOPE_PERMISSION = "/permision/device-mgt";
     private static final String DEFAULT_SCOPE_ROLE = "admin";
 
@@ -219,10 +219,9 @@ public class AnnotationProcessor {
         String permissions[];
         StringBuilder aggregatedPermissions;
         String roles[];
-        StringBuilder aggregatedRoles;
+        List<String> aggregatedRoles;
         for (int i = 0; i < annotatedScopes.length; i++) {
             aggregatedPermissions = new StringBuilder();
-            aggregatedRoles = new StringBuilder();
             methodHandler = Proxy.getInvocationHandler(annotatedScopes[i]);
             scope = new ApiScope();
             scope.setName(invokeMethod(scopeClass
@@ -241,11 +240,8 @@ public class AnnotationProcessor {
             scope.setPermissions(aggregatedPermissions.toString().trim());
             roles = (String[]) methodHandler.invoke(annotatedScopes[i], scopeClass
                     .getMethod(SWAGGER_ANNOTATIONS_PROPERTIES_ROLES, null), null);
-            for (String role : roles) {
-                aggregatedRoles.append(role);
-                aggregatedRoles.append(",");
-            }
-            scope.setRoles(aggregatedRoles.substring(0, aggregatedRoles.lastIndexOf(",")));
+            aggregatedRoles = Arrays.asList(roles);
+            scope.setRoles(aggregatedRoles);
             scopes.put(scope.getKey(), scope);
         }
         return scopes;
@@ -296,11 +292,13 @@ public class AnnotationProcessor {
 //                        } else {
 //                            log.warn("Scope is not defined for '" + makeContextURLReady(resourceRootContext) +
 //                                    makeContextURLReady(subCtx) + "' endpoint, hence assigning the default scope");
+//                            List<String> roles = new ArrayList<>();
+//                            roles.add(DEFAULT_SCOPE_ROLE);
 //                            scope = new ApiScope();
 //                            scope.setName(DEFAULT_SCOPE_NAME);
 //                            scope.setDescription(DEFAULT_SCOPE_NAME);
 //                            scope.setKey(DEFAULT_SCOPE_KEY);
-//                            scope.setRoles(DEFAULT_SCOPE_ROLE);
+//                            scope.setRoles(roles);
 //                            scope.setPermissions(DEFAULT_SCOPE_PERMISSION);
 //                            resource.setScope(scope);
 //                        }
@@ -534,11 +532,13 @@ public class AnnotationProcessor {
                     } else {
 //                        log.warn("Scope is not defined for '" + makeContextURLReady(resourceRootContext) +
 //                                makeContextURLReady(subCtx) + "' endpoint, hence assigning the default scope");
+                        List<String> roles = new ArrayList<>();
+                        roles.add(DEFAULT_SCOPE_ROLE);
                         scope = new ApiScope();
                         scope.setName(DEFAULT_SCOPE_NAME);
                         scope.setDescription(DEFAULT_SCOPE_NAME);
                         scope.setKey(DEFAULT_SCOPE_KEY);
-                        scope.setRoles(DEFAULT_SCOPE_ROLE);
+                        scope.setRoles(roles);
                         scope.setPermissions(DEFAULT_SCOPE_PERMISSION);
                         apiResource.setScope(scope);
                     }
