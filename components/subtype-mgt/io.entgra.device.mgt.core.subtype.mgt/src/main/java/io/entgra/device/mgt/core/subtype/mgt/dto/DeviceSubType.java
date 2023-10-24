@@ -26,9 +26,20 @@ public abstract class DeviceSubType {
 
     private String subTypeId;
     private int tenantId;
-    private DeviceType deviceType;
+    private String deviceType;
     private String subTypeName;
     private String typeDefinition;
+
+    public DeviceSubType() {
+    }
+
+    public DeviceSubType(String subTypeId, int tenantId, String deviceType, String subTypeName, String typeDefinition) {
+        this.subTypeId = subTypeId;
+        this.tenantId = tenantId;
+        this.deviceType = deviceType;
+        this.subTypeName = subTypeName;
+        this.typeDefinition = typeDefinition;
+    }
 
     public String getSubTypeId() {
         return subTypeId;
@@ -46,11 +57,11 @@ public abstract class DeviceSubType {
         this.tenantId = tenantId;
     }
 
-    public DeviceType getDeviceType() {
+    public String getDeviceType() {
         return deviceType;
     }
 
-    public void setDeviceType(DeviceType deviceType) {
+    public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
     }
 
@@ -70,11 +81,8 @@ public abstract class DeviceSubType {
         this.typeDefinition = typeDefinition;
     }
 
-    public abstract <T> DeviceSubType setDeviceSubType(T objType, String typeDef);
+    public abstract <T> DeviceSubType convertToDeviceSubType();
 
-    public abstract String parseSubTypeToJson(Object objType) throws JsonProcessingException;
+    public abstract String parseSubTypeToJson() throws JsonProcessingException;
 
-    public enum DeviceType {
-        COM, METER, SIM
-    }
 }

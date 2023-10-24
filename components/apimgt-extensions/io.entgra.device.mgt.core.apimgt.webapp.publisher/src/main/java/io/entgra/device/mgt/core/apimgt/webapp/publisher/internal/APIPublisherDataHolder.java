@@ -19,11 +19,19 @@ package io.entgra.device.mgt.core.apimgt.webapp.publisher.internal;
 
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIConfig;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 public class APIPublisherDataHolder {
@@ -35,6 +43,10 @@ public class APIPublisherDataHolder {
     private RegistryService registryService;
     private boolean isServerStarted;
     private Stack<APIConfig> unpublishedApis = new Stack<>();
+    private Map<String, String> permScopeMapping;
+
+    private MetadataManagementService metadataManagementService;
+
     private static APIPublisherDataHolder thisInstance = new APIPublisherDataHolder();
 
     private APIPublisherDataHolder() {
@@ -79,6 +91,25 @@ public class APIPublisherDataHolder {
                 realmService.getTenantManager() : null);
     }
 
+    public UserStoreManager getUserStoreManager() throws UserStoreException {
+        if (realmService == null) {
+            String msg = "Realm service has not initialized.";
+            throw new IllegalStateException(msg);
+        }
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        return realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+    }
+
+    public UserRealm getUserRealm() throws UserStoreException {
+        UserRealm realm;
+        if (realmService == null) {
+            throw new IllegalStateException("Realm service not initialized");
+        }
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        realm = realmService.getTenantUserRealm(tenantId);
+        return realm;
+    }
+
     private void setTenantManager(TenantManager tenantManager) {
         this.tenantManager = tenantManager;
     }
@@ -114,4 +145,15 @@ public class APIPublisherDataHolder {
         this.unpublishedApis = unpublishedApis;
     }
 
+    public Map<String, String> getPermScopeMapping() {return permScopeMapping;}
+
+    public void setPermScopeMapping(Map<String, String> permScopeMapping) {this.permScopeMapping = permScopeMapping;}
+
+    public MetadataManagementService getMetadataManagementService() {
+        return metadataManagementService;
+    }
+
+    public void setMetadataManagementService(MetadataManagementService metadataManagementService) {
+        this.metadataManagementService = metadataManagementService;
+    }
 }

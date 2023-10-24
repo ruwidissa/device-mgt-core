@@ -55,14 +55,14 @@ import javax.ws.rs.core.Response;
         @Scope(
                 name = "View configurations",
                 description = "",
-                key = "perm:view-configuration",
+                key = "dm:conf:view",
                 roles = {"Internal/devicemgt-user"},
                 permissions = {"/device-mgt/platform-configurations/view"}
         ),
         @Scope(
                 name = "Manage configurations",
                 description = "",
-                key = "perm:manage-configuration",
+                key = "dm:conf:manage",
                 roles = {"Internal/devicemgt-user"},
                 permissions = {"/device-mgt/platform-configurations/manage"}
         )
@@ -81,7 +81,7 @@ public interface ConfigurationManagementService {
             tags = "Configuration Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:view-configuration")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:conf:view")
                     })
             }
     )
@@ -141,7 +141,7 @@ public interface ConfigurationManagementService {
             tags = "Configuration Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:manage-configuration")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:conf:manage")
                     })
             }
     )

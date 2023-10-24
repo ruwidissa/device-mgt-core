@@ -18,10 +18,7 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.impl;
 
-import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
-import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
-import io.entgra.device.mgt.core.certificate.mgt.core.exception.TransactionManagementException;
-import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.common.CertificatePaginationRequest;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -33,6 +30,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
 import org.wso2.carbon.base.MultitenantConstants;
+import io.entgra.device.mgt.core.certificate.mgt.core.dao.CertificateManagementDAOFactory;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.TransactionManagementException;
+import io.entgra.device.mgt.core.certificate.mgt.core.service.CertificateManagementServiceImpl;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.sql.DataSource;
@@ -110,7 +111,8 @@ public class CertificateManagementServiceImplNegativeTests extends PowerMockTest
     public void negativeTestGetAllCertificates() throws Exception {
         PowerMockito.mockStatic(CertificateManagementDAOFactory.class);
         PowerMockito.doThrow(new SQLException()).when(CertificateManagementDAOFactory.class, "openConnection");
-        instance.getAllCertificates(1, 2);
+        CertificatePaginationRequest request = new CertificatePaginationRequest(0, 2);
+        instance.getAllCertificates(request);
     }
 
     @Test(description = "This test case tests behaviour when an error occurs getting the list of certificates from repository"
@@ -118,7 +120,8 @@ public class CertificateManagementServiceImplNegativeTests extends PowerMockTest
     public void negativeTestGetAllCertificates2() throws Exception {
         CertificateManagementDAOFactory.init(daoExceptionDatasource);
         CertificateManagementServiceImpl instance1 = CertificateManagementServiceImpl.getInstance();
-        instance1.getAllCertificates(1, 2);
+        CertificatePaginationRequest request = new CertificatePaginationRequest(0, 2);
+        instance.getAllCertificates(request);
     }
 
     @Test(description = "This test case tests behaviour when data source transaction error occurs when removing the certificate"

@@ -18,8 +18,10 @@
 
 package io.entgra.device.mgt.core.certificate.mgt.core.dao;
 
+import io.entgra.device.mgt.core.device.mgt.common.CertificatePaginationRequest;
 import io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate;
 import io.entgra.device.mgt.core.certificate.mgt.core.dto.CertificateResponse;
+import io.entgra.device.mgt.core.certificate.mgt.core.exception.CertificateManagementException;
 import io.entgra.device.mgt.core.certificate.mgt.core.service.PaginationResult;
 
 import java.util.List;
@@ -75,13 +77,12 @@ public interface CertificateDAO {
     /**
      * Get all the certificates in a paginated manner.
      *
-     * @param rowNum Stating index of the paginated result.
-     * @param limit Number of records to return.
+     * @param request index of the paginated result.
      * @return Pagination result with data and the count of results.
      * @throws CertificateManagementDAOException
      *
      */
-    PaginationResult getAllCertificates(int rowNum, int limit) throws CertificateManagementDAOException;
+    PaginationResult getAllCertificates(CertificatePaginationRequest request) throws CertificateManagementDAOException;
 
     /**
      * Get all the certificates.
@@ -95,7 +96,7 @@ public interface CertificateDAO {
     /**
      * Delete a certificate identified by a serial number()
      *
-     * @param serialNumber serial number
+     * @param serialNumber number
      * @return whether the certificate was removed or not.
      */
     boolean removeCertificate(String serialNumber) throws CertificateManagementDAOException;

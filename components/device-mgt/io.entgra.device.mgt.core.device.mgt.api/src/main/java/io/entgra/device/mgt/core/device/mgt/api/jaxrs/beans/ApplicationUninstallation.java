@@ -41,12 +41,61 @@ public class ApplicationUninstallation {
     @Pattern(regexp = "^[A-Za-z]*$")
     String type;
 
+    String name;
+
+    String platform;
+
+    String version;
+
+    String user;
+
     public ApplicationUninstallation() {
     }
 
     public ApplicationUninstallation(String appIdentifier, String type) {
         this.appIdentifier = appIdentifier;
         this.type = type;
+    }
+
+    public ApplicationUninstallation(String appIdentifier, String type, String name, String platform, String version, String user) {
+        this.appIdentifier = appIdentifier;
+        this.type = type;
+        this.name = name;
+        this.platform = platform;
+        this.version = version;
+        this.user = user;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
     }
 
     public String getAppIdentifier() {

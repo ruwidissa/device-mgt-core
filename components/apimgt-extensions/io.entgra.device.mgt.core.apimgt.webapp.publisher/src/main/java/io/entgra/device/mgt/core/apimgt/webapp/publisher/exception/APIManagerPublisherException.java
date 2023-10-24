@@ -28,4 +28,12 @@ public class APIManagerPublisherException extends Exception {
     public APIManagerPublisherException(Throwable cause) {
         super(cause);
     }
+
+    public APIManagerPublisherException(String errorMessage) {
+        super(errorMessage);
+    }
+
+    public APIManagerPublisherException(String errorMessage, Throwable cause) {
+        super(errorMessage, cause);
+    }
 }

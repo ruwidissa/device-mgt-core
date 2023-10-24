@@ -18,11 +18,13 @@
 
 package io.entgra.device.mgt.core.apimgt.webapp.publisher.dto;
 
+import java.util.List;
+
 public class ApiScope {
 
     String key;
     String name;
-    String roles;
+    List<String> roles;
     String permissions;
     String description;
     int id;
@@ -46,11 +48,11 @@ public class ApiScope {
         this.name = name;
     }
 
-    public String getRoles() {
+    public List<String> getRoles() {
         return this.roles;
     }
 
-    public void setRoles(String roles) {
+    public void setRoles(List<String> roles) {
         this.roles = roles;
     }
 

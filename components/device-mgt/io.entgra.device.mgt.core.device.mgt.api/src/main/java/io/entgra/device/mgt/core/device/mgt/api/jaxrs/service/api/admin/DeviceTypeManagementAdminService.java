@@ -56,21 +56,21 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Manage a Device Type",
                         description = "Add, Edit or View a Device Type",
-                        key = "perm:admin:device-type",
+                        key = "dm:admin:device-type:modify",
                         roles = {"Internal/devicemgt-admin"},
-                        permissions = {"/device-mgt/admin/device-type"}
+                        permissions = {"/device-mgt/admin/device-type/modify"}
                 ),
                 @Scope(
                         name = "Getting Details of a Device Type",
                         description = "Getting Details of a Device Type",
-                        key = "perm:admin:device-type:view",
+                        key = "dm:admin:device-type:view",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/device-type/view"}
                 ),
                 @Scope(
                         name = "Add Device Type Config",
                         description = "Add Platform Config of a Device Type",
-                        key = "perm:admin:device-type:configs",
+                        key = "dm:admin:device-type:conf:add",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/device-type/config"}
                 )
@@ -88,7 +88,7 @@ public interface DeviceTypeManagementAdminService {
             tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:view")
                     })
             }
     )
@@ -142,7 +142,7 @@ public interface DeviceTypeManagementAdminService {
             tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:view")
                     })
             }
     )
@@ -195,7 +195,7 @@ public interface DeviceTypeManagementAdminService {
             tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:modify")
                     })
             }
     )
@@ -248,7 +248,7 @@ public interface DeviceTypeManagementAdminService {
             tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:modify")
                     })
             }
     )
@@ -304,7 +304,7 @@ public interface DeviceTypeManagementAdminService {
             tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type:configs")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:conf:add")
                     })
             }
     )
@@ -362,7 +362,7 @@ public interface DeviceTypeManagementAdminService {
             tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:modify")
                     })
             }
     )
@@ -416,7 +416,7 @@ public interface DeviceTypeManagementAdminService {
             tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:modify")
                     })
             }
     )
@@ -468,7 +468,7 @@ public interface DeviceTypeManagementAdminService {
             tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:modify")
                     })
             }
     )
@@ -522,7 +522,7 @@ public interface DeviceTypeManagementAdminService {
             tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:modify")
                     })
             }
     )
@@ -575,7 +575,7 @@ public interface DeviceTypeManagementAdminService {
             tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:admin:device-type:modify")
                     })
             }
     )

@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.subtype.mgt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.entgra.device.mgt.core.subtype.mgt.dao.DeviceSubTypeDAO;
 import io.entgra.device.mgt.core.subtype.mgt.dao.DeviceSubTypeDAOFactory;
 import io.entgra.device.mgt.core.subtype.mgt.dao.util.ConnectionManagerUtil;
@@ -48,12 +49,12 @@ public class DAONegativeTest extends BaseDeviceSubTypePluginTest {
     public void testAddDeviceSubType() throws SubTypeMgtDAOException {
         DeviceSubType deviceSubType = new DeviceSubType() {
             @Override
-            public <T> DeviceSubType setDeviceSubType(T objType, String typeDef) {
+            public <T> DeviceSubType convertToDeviceSubType() {
                 return null;
             }
 
             @Override
-            public String parseSubTypeToJson(Object objType) {
+            public String parseSubTypeToJson() throws JsonProcessingException {
                 return null;
             }
         };
@@ -85,18 +86,18 @@ public class DAONegativeTest extends BaseDeviceSubTypePluginTest {
         String subTypeName = "TestSubType";
         DeviceSubType deviceSubType = new DeviceSubType() {
             @Override
-            public <T> DeviceSubType setDeviceSubType(T objType, String typeDef) {
+            public <T> DeviceSubType convertToDeviceSubType() {
                 return null;
             }
 
             @Override
-            public String parseSubTypeToJson(Object objType) {
+            public String parseSubTypeToJson() throws JsonProcessingException {
                 return null;
             }
         };
         deviceSubType.setSubTypeId(subTypeId);
         deviceSubType.setSubTypeName(subTypeName);
-        deviceSubType.setDeviceType(DeviceSubType.DeviceType.COM);
+        deviceSubType.setDeviceType("COM");
         try {
             ConnectionManagerUtil.beginDBTransaction();
             deviceSubTypeDAO.addDeviceSubType(deviceSubType);
@@ -127,17 +128,17 @@ public class DAONegativeTest extends BaseDeviceSubTypePluginTest {
         String typeDefinition = TestUtils.createNewDeviceSubType(subTypeId);
         DeviceSubType deviceSubType = new DeviceSubType() {
             @Override
-            public <T> DeviceSubType setDeviceSubType(T objType, String typeDef) {
+            public <T> DeviceSubType convertToDeviceSubType() {
                 return null;
             }
 
             @Override
-            public String parseSubTypeToJson(Object objType) {
+            public String parseSubTypeToJson() throws JsonProcessingException {
                 return null;
             }
         };
         deviceSubType.setSubTypeName(subTypeName);
-        deviceSubType.setDeviceType(DeviceSubType.DeviceType.COM);
+        deviceSubType.setDeviceType("COM");
         deviceSubType.setTenantId(tenantId);
         deviceSubType.setTypeDefinition(typeDefinition);
         try {

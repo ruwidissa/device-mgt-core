@@ -57,7 +57,7 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Verify device authorization",
                         description = "Verify device authorization",
-                        key = "perm:authorization:verify",
+                        key = "dm:authorization:verify",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/authorization/verify"}
                 )
@@ -81,7 +81,7 @@ public interface DeviceAccessAuthorizationAdminService {
             tags = "Authorization Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:authorization:verify")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:authorization:verify")
                     })
             })
 
@@ -120,7 +120,7 @@ public interface DeviceAccessAuthorizationAdminService {
             tags = "Authorization Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:authorization:verify")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:authorization:verify")
                     })
             })
 

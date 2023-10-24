@@ -56,16 +56,16 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Installing an Application (Internal API)",
                         description = "Installing an Application (Internal API)",
-                        key = "perm:applications:install",
+                        key = "am:admin:app:install",
                         roles = {"Internal/devicemgt-admin"},
-                        permissions = {"/device-mgt/applications/manage"}
+                        permissions = {"/device-mgt/admin/applications/install"}
                 ),
                 @Scope(
                         name = "Uninstalling an Application (Internal API)",
                         description = "Uninstalling an Application (Internal API)",
-                        key = "perm:applications:uninstall",
+                        key = "am:admin:app:uninstall",
                         roles = {"Internal/devicemgt-admin"},
-                        permissions = {"/device-mgt/applications/manage"}
+                        permissions = {"/device-mgt/admin/applications/uninstall"}
                 )
         }
 )
@@ -85,7 +85,7 @@ public interface ApplicationManagementAdminService {
             tags = "Application Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:applications:install")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "am:admin:app:install")
                     })
             }
     )
@@ -129,7 +129,7 @@ public interface ApplicationManagementAdminService {
             tags = "Application Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:applications:uninstall")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "am:admin:app:uninstall")
                     })
             }
     )

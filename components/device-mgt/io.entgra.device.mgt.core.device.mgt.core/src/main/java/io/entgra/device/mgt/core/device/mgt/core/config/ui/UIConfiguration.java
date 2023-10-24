@@ -36,6 +36,8 @@ public class UIConfiguration {
     private Billing billing;
     private HubspotChat hubspotChat;
 
+    private DeviceInfoConfigurations deviceInfoConfigurations;
+
     @XmlElement(name = "AppRegistration", required=true)
     public AppRegistration getAppRegistration() {
         return appRegistration;
@@ -97,5 +99,14 @@ public class UIConfiguration {
 
     public void setLoginCacheCapacity(int loginCacheCapacity) {
         this.loginCacheCapacity = loginCacheCapacity;
+    }
+
+    @XmlElement(name = "DeviceInfoConfigurations", required = true)
+    public DeviceInfoConfigurations getDeviceInfoConfigurations() {
+        return deviceInfoConfigurations;
+    }
+
+    public void setDeviceInfoConfigurations(DeviceInfoConfigurations deviceInfoConfigurations) {
+        this.deviceInfoConfigurations = deviceInfoConfigurations;
     }
 }

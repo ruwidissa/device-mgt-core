@@ -108,6 +108,12 @@ public class Application {
             value = "if the app is favoured by the user")
     private boolean isFavourite;
 
+    @ApiModelProperty(name = "isExternalAppStoreApp",
+            value = "Is the app coming from an external application store",
+            required = true,
+            example = "true or false")
+    private boolean isExternalAppStoreApp;
+
     public String getPackageName() {
         return packageName;
     }
@@ -193,5 +199,13 @@ public class Application {
 
     public void setFavourite(boolean favourite) {
         isFavourite = favourite;
+    }
+
+    public boolean isExternalAppStoreApp() {
+        return isExternalAppStoreApp;
+    }
+
+    public void setExternalAppStoreApp(boolean externalAppStoreApp) {
+        isExternalAppStoreApp = externalAppStoreApp;
     }
 }

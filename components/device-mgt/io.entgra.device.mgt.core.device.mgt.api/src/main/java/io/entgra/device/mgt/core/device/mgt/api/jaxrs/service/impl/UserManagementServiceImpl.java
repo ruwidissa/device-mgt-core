@@ -19,6 +19,15 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
+import org.eclipse.wst.common.uriresolver.internal.util.URIEncoder;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.UserManagementService;
@@ -28,7 +37,6 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.CredentialManagementR
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.OTPManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
@@ -37,13 +45,6 @@ import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.EmailMetaInfo;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
-import org.eclipse.wst.common.uriresolver.internal.util.URIEncoder;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.claim.metadata.mgt.ClaimMetadataManagementAdminService;
 import org.wso2.carbon.identity.claim.metadata.mgt.dto.AttributeMappingDTO;
 import org.wso2.carbon.identity.claim.metadata.mgt.dto.ClaimPropertyDTO;
@@ -83,11 +84,6 @@ public class UserManagementServiceImpl implements UserManagementService {
     private static final String API_BASE_PATH = "/users";
     private static final Log log = LogFactory.getLog(UserManagementServiceImpl.class);
 
-    private static final String ADMIN_ROLE = "admin";
-    private static final String DEFAULT_DEVICE_USER = "Internal/devicemgt-user";
-    private static final String DEFAULT_DEVICE_ADMIN = "Internal/devicemgt-admin";
-    private static final String DEFAULT_SUBSCRIBER = "Internal/subscriber";
-
     // Permissions that are given for a normal device user.
     private static final Permission[] PERMISSIONS_FOR_DEVICE_USER = {
             new Permission("/permission/admin/Login", "ui.execute"),
@@ -124,51 +120,9 @@ public class UserManagementServiceImpl implements UserManagementService {
             Map<String, String> defaultUserClaims =
                     this.buildDefaultUserClaims(userInfo.getFirstname(), userInfo.getLastname(),
                             userInfo.getEmailAddress(), true);
-            // calling addUser method of carbon user api
-            List<String> tmpRoles = new ArrayList<>();
-            String[] userInfoRoles = userInfo.getRoles();
-            tmpRoles.add(DEFAULT_DEVICE_USER);
-
-            boolean subscriberFound = false;
-            boolean adminFound = false;
-
-            if (userInfoRoles != null) {
-                //check if subscriber role is coming in the payload
-                for (String r : userInfoRoles) {
-                    if (!subscriberFound || !adminFound) {
-                        if (DEFAULT_SUBSCRIBER.equals(r)) {
-                            subscriberFound = true;
-                        } else if (ADMIN_ROLE.equals(r)) {
-                            tmpRoles.add(DEFAULT_DEVICE_ADMIN);
-                            adminFound = true;
-                        }
-                    } else {
-                        break;
-                    }
-                }
-                tmpRoles.addAll(Arrays.asList(userInfoRoles));
-            }
-
-            if (!subscriberFound) {
-                // Add Internal/subscriber role to new users
-                if (userStoreManager.isExistingRole(DEFAULT_SUBSCRIBER)) {
-                    tmpRoles.add(DEFAULT_SUBSCRIBER);
-                } else {
-                    log.warn("User: " + userInfo.getUsername() + " will not be able to enroll devices as '" +
-                             DEFAULT_SUBSCRIBER + "' is missing in the system");
-                }
-            }
-
-            String[] roles = new String[tmpRoles.size()];
-            tmpRoles.toArray(roles);
-
-            // If the normal device user role does not exist, create a new role with the minimal permissions
-            if (!userStoreManager.isExistingRole(DEFAULT_DEVICE_USER)) {
-                userStoreManager.addRole(DEFAULT_DEVICE_USER, null, PERMISSIONS_FOR_DEVICE_USER);
-            }
 
             userStoreManager.addUser(userInfo.getUsername(), initialUserPassword,
-                    roles, defaultUserClaims, null);
+                    userInfo.getRoles(), defaultUserClaims, null);
             // Outputting debug message upon successful addition of user
             if (log.isDebugEnabled()) {
                 log.debug("User '" + userInfo.getUsername() + "' has successfully been added.");
@@ -336,32 +290,42 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Consumes(MediaType.WILDCARD)
     @Override
     public Response removeUser(@QueryParam("username") String username, @QueryParam("domain") String domain) {
+        boolean nameWithDomain = false;
         if (domain != null && !domain.isEmpty()) {
             username = domain + '/' + username;
+            nameWithDomain = true;
         }
         try {
+            int deviceCount;
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
             if (!userStoreManager.isExistingUser(username)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("User by username: " + username + " does not exist for removal.");
+                    log.debug("User by user: " + username + " does not exist for removal.");
                 }
-                String msg = "User by username: " + username + " does not exist for removal.";
+                String msg = "User by user: " + username + " does not exist for removal.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             }
-            // Un-enroll all devices for the user
             DeviceManagementProviderService deviceManagementService = DeviceMgtAPIUtils.getDeviceManagementService();
-            deviceManagementService.setStatus(username, EnrolmentInfo.Status.REMOVED);
-
-            userStoreManager.deleteUser(username);
-            if (log.isDebugEnabled()) {
-                log.debug("User '" + username + "' was successfully removed.");
+            if (nameWithDomain) {
+                deviceCount = deviceManagementService.getDeviceCount(username.split("/")[1]);
+            } else {
+                deviceCount = deviceManagementService.getDeviceCount(username);
             }
-            return Response.status(Response.Status.OK).build();
+            if (deviceCount == 0) {
+                userStoreManager.deleteUser(username);
+                if (log.isDebugEnabled()) {
+                    log.debug("User '" + username + "' was successfully removed.");
+                }
+                return Response.status(Response.Status.OK).build();
+            } else {
+                String msg = "There are enrolled devices for user: " + username + ". Please remove them before deleting the user.";
+                log.error(msg);
+                return Response.status(400).entity(msg).build();
+            }
         } catch (DeviceManagementException | UserStoreException e) {
-            String msg = "Exception in trying to remove user by username: " + username;
+            String msg = "Exception in trying to remove user by user: " + username;
             log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(400).entity(msg).build();
         }
     }
 

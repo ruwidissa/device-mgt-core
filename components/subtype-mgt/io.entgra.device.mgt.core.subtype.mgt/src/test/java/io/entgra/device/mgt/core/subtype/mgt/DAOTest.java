@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.subtype.mgt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.entgra.device.mgt.core.subtype.mgt.dao.DeviceSubTypeDAO;
 import io.entgra.device.mgt.core.subtype.mgt.dao.DeviceSubTypeDAOFactory;
 import io.entgra.device.mgt.core.subtype.mgt.dao.util.ConnectionManagerUtil;
@@ -50,14 +51,14 @@ public class DAOTest extends BaseDeviceSubTypePluginTest {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         ConnectionManagerUtil.openDBConnection();
         DeviceSubType subTypeActual = deviceSubTypeDAO.getDeviceSubType("1", tenantId,
-                DeviceSubType.DeviceType.COM);
+                "COM");
         ConnectionManagerUtil.closeDBConnection();
         Assert.assertNotNull(subTypeActual, "Should not be null");
     }
 
     @Test(dependsOnMethods = "testAddDeviceSubType")
     public void testGetAllDeviceSubTypes() throws DBConnectionException, SubTypeMgtDAOException {
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
+        String deviceType = "COM";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         ConnectionManagerUtil.openDBConnection();
         List<DeviceSubType> subTypesActual = deviceSubTypeDAO.getAllDeviceSubTypes(tenantId, deviceType);
@@ -71,17 +72,17 @@ public class DAOTest extends BaseDeviceSubTypePluginTest {
         String subTypeId = "1";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         String subTypeName = "TestSubType";
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
+        String deviceType = "COM";
         String typeDefinition = TestUtils.createNewDeviceSubType(subTypeId);
 
         DeviceSubType deviceSubType = new DeviceSubType() {
             @Override
-            public <T> DeviceSubType setDeviceSubType(T objType, String typeDef) {
+            public <T> DeviceSubType convertToDeviceSubType() {
                 return null;
             }
 
             @Override
-            public String parseSubTypeToJson(Object objType) {
+            public String parseSubTypeToJson() throws JsonProcessingException {
                 return null;
             }
         };
@@ -104,7 +105,7 @@ public class DAOTest extends BaseDeviceSubTypePluginTest {
     public void testUpdateDeviceSubType() throws DBConnectionException, SubTypeMgtDAOException {
         String subTypeId = "1";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
+        String deviceType = "COM";
         String subTypeName = "TestSubType";
         String subTypeExpected = TestUtils.createUpdateDeviceSubType(subTypeId);
 
@@ -121,7 +122,7 @@ public class DAOTest extends BaseDeviceSubTypePluginTest {
     @Test(dependsOnMethods = "testAddDeviceSubType")
     public void testGetDeviceTypeByProvider() throws DBConnectionException, SubTypeMgtDAOException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
+        String deviceType = "COM";
         String subTypeName = "TestSubType";
         ConnectionManagerUtil.openDBConnection();
         DeviceSubType subTypeActual = deviceSubTypeDAO.getDeviceSubTypeByProvider(subTypeName, tenantId, deviceType);
@@ -131,7 +132,7 @@ public class DAOTest extends BaseDeviceSubTypePluginTest {
 
     @Test(dependsOnMethods = "testAddDeviceSubType")
     public void testGetDeviceTypeCount() throws DBConnectionException, SubTypeMgtDAOException {
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.COM;
+        String deviceType = "COM";
         ConnectionManagerUtil.openDBConnection();
         int subTypeCount = deviceSubTypeDAO.getDeviceSubTypeCount(deviceType);
         ConnectionManagerUtil.closeDBConnection();

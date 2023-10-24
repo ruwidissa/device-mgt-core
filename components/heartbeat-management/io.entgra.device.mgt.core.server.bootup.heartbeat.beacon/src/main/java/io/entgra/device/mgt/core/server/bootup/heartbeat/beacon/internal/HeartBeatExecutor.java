@@ -26,13 +26,16 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dto.ServerContex
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.core.ServerStartupObserver;
 
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class HeartBeatExecutor {
+public class HeartBeatExecutor implements ServerStartupObserver {
 
     private static Log log = LogFactory.getLog(HeartBeatExecutor.class);
     private static final int DEFAULT__NOTIFIER_INTERVAL = 5;
@@ -41,6 +44,20 @@ public class HeartBeatExecutor {
 
     static {
         CONFIG = HeartBeatBeaconConfig.getInstance();
+    }
+
+    @Override
+    public void completingServerStartup() {
+
+    }
+
+    @Override
+    public void completedServerStartup() {
+        try {
+            setUpNotifiers(HeartBeatBeaconUtils.getServerDetails());
+        } catch (HeartBeatBeaconConfigurationException | UnknownHostException | SocketException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     static void setUpNotifiers(ServerContext ctx) throws HeartBeatBeaconConfigurationException {
@@ -69,6 +86,7 @@ public class HeartBeatExecutor {
                     try {
                         recordHeartBeat(designatedUUID);
                         electDynamicTaskExecutionCandidate(cumilativeTimeOut);
+                        notifyClusterFormationChanged(cumilativeTimeOut);
                     } catch (Exception e) {
                         log.error("Error while executing record heart beat task. This will result in schedule operation malfunction.", e);
                     }
@@ -98,5 +116,8 @@ public class HeartBeatExecutor {
         HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().electCandidate(cumilativeTimeOut);
     }
 
+    static void notifyClusterFormationChanged(int cumilativeTimeOut) throws HeartBeatManagementException {
+        HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().notifyClusterFormationChanged(cumilativeTimeOut);
+    }
 
 }

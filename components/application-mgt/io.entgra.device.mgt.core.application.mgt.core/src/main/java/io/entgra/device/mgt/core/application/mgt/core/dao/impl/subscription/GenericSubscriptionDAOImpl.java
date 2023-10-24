@@ -17,19 +17,20 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.dao.impl.subscription;
 
+import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
+import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
+import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
 import io.entgra.device.mgt.core.application.mgt.common.SubAction;
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
 import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
-import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
-import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
-import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
 import java.util.*;
@@ -1421,6 +1422,46 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting current installed version of the app for given " +
                     "app id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    public Activity getOperationAppDetails(int operationId, int tenantId) throws ApplicationManagementDAOException {
+        try {
+        String sql = "SELECT "
+                + "AP.NAME, "
+                + "AP.TYPE, "
+                + "AR.PACKAGE_NAME, "
+                + "AR.VERSION, "
+                + "DS.SUBSCRIBED_BY, "
+                + "DS.STATUS, "
+                + "DS.ACTION_TRIGGERED_FROM "
+                + "FROM AP_APP_SUB_OP_MAPPING SOP "
+                + "JOIN AP_DEVICE_SUBSCRIPTION DS ON SOP.AP_DEVICE_SUBSCRIPTION_ID = DS.ID "
+                + "JOIN AP_APP_RELEASE AR ON DS.AP_APP_RELEASE_ID = AR.ID "
+                + "JOIN AP_APP AP ON AP.ID = AR.AP_APP_ID "
+                + " WHERE SOP.OPERATION_ID = ? AND SOP.TENANT_ID = ?";
+
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, operationId);
+                stmt.setInt(2,tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return DAOUtil.loadOperationActivity(rs);
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg =
+                    "Error occurred while getting the app details from the database related to operation " + operationId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when processing SQL to retrieve app details of operation" + operationId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }  catch (UnexpectedServerErrorException e) {
+            String msg = "More than one app for operation " + operationId;
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
