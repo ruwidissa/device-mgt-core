@@ -43,6 +43,7 @@ public class HandlerConstants {
     public static final String SESSION_DEFAULT_AUTH_DATA_KEY = "defaultAuthInfo";
     public static final String UI_CONFIG_KEY = "ui-config";
     public static final String CALLBACK_URL_KEY = "callbackUrl";
+    public static final String GRANT_TYPE_KEY = "supportedGrantTypes";
     public static final String IS_ALLOWED_TO_ALL_DOMAINS_KEY = "isAllowedToAllDomains";
     public static final String JSESSIONID_KEY = "JSESSIONID";
     public static final String COMMON_AUTH_ID_KEY = "commonAuthId";
