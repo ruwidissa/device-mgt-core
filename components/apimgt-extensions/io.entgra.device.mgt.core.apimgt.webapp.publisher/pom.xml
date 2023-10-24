@@ -22,7 +22,7 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.0.29-SNAPSHOT</version>
+        <version>5.0.31-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -133,6 +133,10 @@
             <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.device.mgt.core</artifactId>
+        </dependency>
     </dependencies>
 
 
@@ -173,6 +177,10 @@
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.config,
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.dto,
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.exception,
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions,
+                            io.entgra.device.mgt.core.device.mgt.common.metadata.mgt,
+                            io.entgra.device.mgt.core.device.mgt.core.config,
+                            io.entgra.device.mgt.core.device.mgt.core.config.permission,
                             io.swagger.annotations;version="[1.6,2)",
                             javax.servlet;version="[2.6,3)",
                             javax.xml.bind;version="[0.0,1)",

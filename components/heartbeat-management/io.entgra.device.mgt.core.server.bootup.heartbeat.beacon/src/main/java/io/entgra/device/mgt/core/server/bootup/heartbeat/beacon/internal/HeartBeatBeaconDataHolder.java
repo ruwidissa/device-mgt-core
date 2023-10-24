@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.internal;
 
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.ClusterFormationChangedNotifierRepository;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 
 public class HeartBeatBeaconDataHolder {
@@ -27,6 +28,7 @@ public class HeartBeatBeaconDataHolder {
 
     private static HeartBeatBeaconDataHolder thisInstance = new HeartBeatBeaconDataHolder();
 
+    private ClusterFormationChangedNotifierRepository clusterFormationChangedNotifierRepository;
     private HeartBeatBeaconDataHolder() {}
 
     public static HeartBeatBeaconDataHolder getInstance() {
@@ -47,5 +49,13 @@ public class HeartBeatBeaconDataHolder {
 
     public void setLocalServerUUID(String localServerUUID) {
         this.localServerUUID = localServerUUID;
+    }
+
+    public ClusterFormationChangedNotifierRepository getClusterFormationChangedNotifierRepository() {
+        return clusterFormationChangedNotifierRepository;
+    }
+
+    public void setClusterFormationChangedNotifierRepository(ClusterFormationChangedNotifierRepository clusterFormationChangedNotifierRepository) {
+        this.clusterFormationChangedNotifierRepository = clusterFormationChangedNotifierRepository;
     }
 }

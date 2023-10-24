@@ -184,6 +184,14 @@ public interface GroupManagementProviderService {
             boolean requireGroupProps) throws GroupManagementException;
 
     /**
+     * Get all hierarchical device groups count in tenant
+     *
+     * @return hierarchical group count
+     * @throws GroupManagementException
+     */
+    int getHierarchicalGroupCount() throws GroupManagementException;
+
+    /**
      * Get all device group count in tenant
      *
      * @return group count
@@ -208,6 +216,16 @@ public interface GroupManagementProviderService {
      * @throws GroupManagementException
      */
     int getGroupCount(String username, String parentPath) throws GroupManagementException;
+
+    /**
+     * Get hierarchical device groups count of user
+     *
+     * @param username of the user
+     * @param parentPath of the group
+     * @return hierarchical group count
+     * @throws GroupManagementException
+     */
+    int getHierarchicalGroupCount(String username, String parentPath) throws GroupManagementException;
 
     /**
      * Manage device group sharing with user with list of roles.

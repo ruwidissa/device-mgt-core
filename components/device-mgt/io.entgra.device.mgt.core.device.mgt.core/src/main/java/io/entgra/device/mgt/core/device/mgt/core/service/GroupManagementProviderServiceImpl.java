@@ -843,6 +843,28 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
     }
 
     @Override
+    public int getHierarchicalGroupCount() throws GroupManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Get groups count");
+        }
+        try {
+            GroupManagementDAOFactory.openConnection();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            return groupDAO.getGroupCount(tenantId, null);
+        } catch (GroupManagementDAOException e) {
+            String msg = "Error occurred while retrieving all groups in tenant";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
     public int getGroupCount() throws GroupManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Get groups count");
@@ -933,6 +955,52 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             count = groupDAO.getOwnGroupsCount(username, tenantId, parentPath);
             count += groupDAO.getGroupsCount(roleList, tenantId, parentPath);
             return count;
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while retrieving role list of user '" + username + "'";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening db connection to get group count.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (GroupManagementDAOException e) {
+            String msg = "Error occurred while retrieving group count of user '" + username + "'";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getHierarchicalGroupCount(String username, String parentPath) throws GroupManagementException {
+        if (username == null || username.isEmpty()) {
+            String msg = "Received empty user name for getHierarchicalGroupCount";
+            log.error(msg);
+            throw new GroupManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get groups count of '" + username + "'");
+        }
+        UserStoreManager userStoreManager;
+        int count;
+        try {
+            GroupManagementDAOFactory.openConnection();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            userStoreManager = DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                    .getUserStoreManager();
+            if (isAdminUser(username, userStoreManager)) {
+                count = groupDAO.getGroupCount(tenantId, null);
+                return count;
+            } else {
+                String[] roleList = userStoreManager.getRoleListOfUser(username);
+                count = groupDAO.getOwnGroupsCount(username, tenantId, parentPath);
+                count += groupDAO.getGroupsCount(roleList, tenantId, parentPath);
+                return count;
+            }
         } catch (UserStoreException e) {
             String msg = "Error occurred while retrieving role list of user '" + username + "'";
             log.error(msg, e);

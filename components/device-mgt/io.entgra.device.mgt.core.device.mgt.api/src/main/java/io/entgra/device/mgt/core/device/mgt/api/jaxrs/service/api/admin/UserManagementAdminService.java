@@ -51,16 +51,16 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "View Users",
                         description = "View Users",
-                        key = "perm:admin-users:view",
+                        key = "um:admin:users:view",
                         roles = {"Internal/devicemgt-admin"},
-                        permissions = {"/device-mgt/users/manage"}
+                        permissions = {"/device-mgt/admin/users/view"}
                 ),
                 @Scope(
                         name = "Delete Users Device Information",
                         description = "Delete users device details",
-                        key = "perm:admin-users:remove",
+                        key = "um:admin:users:remove",
                         roles = {"Internal/devicemgt-admin"},
-                        permissions = {"/device-mgt/users/manage"}
+                        permissions = {"/device-mgt/admin/users/delete"}
                 )
         }
 )
@@ -84,7 +84,7 @@ public interface UserManagementAdminService {
             tags = "User Management Administrative Service",
             extensions = {
                 @Extension(properties = {
-                        @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-users:view")
+                        @ExtensionProperty(name = Constants.SCOPE, value = "um:admin:users:view")
                 })
             }
     )
@@ -143,7 +143,7 @@ public interface UserManagementAdminService {
             tags = "Device details remove",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-users:remove")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:admin:users:remove")
                     })
             }
     )
@@ -201,7 +201,7 @@ public interface UserManagementAdminService {
             tags = "Device details remove privacy compliance",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-users:remove")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:admin:users:remove")
                     })
             }
     )

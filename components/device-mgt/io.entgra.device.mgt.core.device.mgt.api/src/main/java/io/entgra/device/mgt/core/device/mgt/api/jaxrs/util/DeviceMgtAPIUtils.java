@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
@@ -160,6 +161,7 @@ public class DeviceMgtAPIUtils {
     private static volatile APIApplicationServices apiApplicationServices;
     private static volatile ConsumerRESTAPIServices consumerRESTAPIServices;
     private static volatile APIManagementProviderService apiManagementProviderService;
+    private static volatile APIPublisherService apiPublisher;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -237,6 +239,24 @@ public class DeviceMgtAPIUtils {
             }
         }
         return applicationManager;
+    }
+
+    public static APIPublisherService getApiPublisher() {
+        if (apiPublisher == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (apiPublisher == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    apiPublisher =
+                            (APIPublisherService) ctx.getOSGiService(APIPublisherService.class, null);
+                    if (apiPublisher == null) {
+                        String msg = "Application Manager service has not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+        return apiPublisher;
     }
 
     public static void scheduleTaskService(int notifierFrequency) {

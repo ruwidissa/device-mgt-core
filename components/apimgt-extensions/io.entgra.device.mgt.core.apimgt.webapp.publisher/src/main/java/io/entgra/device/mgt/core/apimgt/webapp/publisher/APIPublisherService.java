@@ -35,4 +35,22 @@ public interface APIPublisherService {
     void publishAPI(APIConfig api) throws APIManagerPublisherException;
 
     void updateScopeRoleMapping() throws APIManagerPublisherException;
+
+    /**
+     * Add default scopes defined in the cdm-config.xml
+     */
+    void addDefaultScopesIfNotExist();
+
+    /**
+     * If the permissions are in the permission list, identify the relevant scopes of the supplied permission list
+     * and put the role there; if the permissions are in the removedPermission list, update the relevant scopes by
+     * deleting the role from those scopes.
+     *
+     * @param roleName Role Name
+     * @param permissions List of adding permissions
+     * @param removedPermissions List of removing permissions
+     * @throws APIManagerPublisherException If error occurred while updating the scope role mapping
+     */
+    void updateScopeRoleMapping(String roleName, String[] permissions, String[] removedPermissions) throws APIManagerPublisherException;
+
 }

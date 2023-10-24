@@ -17,14 +17,15 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.PolicyOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.sql.*;
@@ -49,7 +50,7 @@ public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
             operation.setEnabled(true);
             Connection connection = OperationManagementDAOFactory.getConnection();
             String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
-                         "INITIATED_BY, OPERATION_DETAILS, ENABLED) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    "INITIATED_BY, OPERATION_DETAILS, ENABLED, TENANT_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             stmt = connection.prepareStatement(sql, new String[]{"id"});
             stmt.setString(1, operation.getType().toString());
             stmt.setLong(2, DeviceManagementDAOUtil.getCurrentUTCTime());
@@ -63,6 +64,7 @@ public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
 
             stmt.setBytes(6, bao.toByteArray());
             stmt.setBoolean(7, operation.isEnabled());
+            stmt.setInt(8, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();

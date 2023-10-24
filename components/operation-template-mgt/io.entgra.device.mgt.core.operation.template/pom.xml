@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>operation-template-mgt</artifactId>
-        <version>5.0.29-SNAPSHOT</version>
+        <version>5.0.31-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -71,8 +71,7 @@
                             io.entgra.device.mgt.core.operation.template.util,
                             javax.naming,
                             javax.sql,
-                            javax.xml.bind;version="[2.3,3)",
-                            javax.xml.bind.annotation;version="[2.3,3)",
+                            javax.xml.bind.*;version="${javax.xml.bind.imp.pkg.version}",
                             javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}",
                             org.apache.commons.lang;version="[2.4,3)",
                             org.apache.commons.logging;version="[1.2,2)",
@@ -299,6 +298,8 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>

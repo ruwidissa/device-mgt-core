@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>certificate-mgt</artifactId>
-        <version>5.0.29-SNAPSHOT</version>
+        <version>5.0.31-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -57,6 +57,62 @@
                             io.entgra.device.mgt.core.certificate.mgt.core.util
                         </Private-Package>
                         <Import-Package>
+<!--                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",-->
+<!--                            org.osgi.service.*;version="${imp.package.version.osgi.service}",-->
+<!--                            org.apache.commons.lang,-->
+<!--                            org.apache.commons.logging,-->
+<!--                            org.apache.commons.collections.map,-->
+<!--                            io.entgra.device.mgt.core.certificate.mgt.core.*,-->
+<!--                            io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",-->
+<!--                            io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",-->
+<!--                            io.entgra.device.mgt.core.device.mgt.core.config;version="[5.0,6)",-->
+<!--                            io.entgra.device.mgt.core.device.mgt.core.config.cache;version="[5.0,6)",-->
+<!--                            io.entgra.device.mgt.core.device.mgt.core.service;version="[5.0,6)",-->
+<!--                            io.swagger.annotations;version="[1.6,2)",-->
+<!--                            javax.cache;version="[1.0,2)",-->
+<!--                            javax.naming,-->
+<!--                            javax.naming.ldap,-->
+<!--                            javax.security.auth.x500,-->
+<!--                            javax.xml.bind;version="[0.0,1)",-->
+<!--                            javax.xml.bind.annotation;version="[0.0,1)",-->
+<!--                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}",-->
+<!--                            org.apache.commons.codec.binary;version="[1.4,2)",-->
+<!--                            org.apache.commons.collections.map;version="[3.2,4)",-->
+<!--                            org.apache.commons.logging;version="[1.2,2)",-->
+<!--                            org.bouncycastle.asn1;version="[1.70,2)",-->
+<!--                            org.bouncycastle.asn1.pkcs;version="[1.70,2)",-->
+<!--                            org.bouncycastle.asn1.x500;version="[1.70,2)",-->
+<!--                            org.bouncycastle.asn1.x500.style;version="[1.70,2)",-->
+<!--                            org.bouncycastle.asn1.x509;version="[1.70,2)",-->
+<!--                            org.bouncycastle.cert;version="[1.70,2)",-->
+<!--                            org.bouncycastle.cert.jcajce;version="[1.70,2)",-->
+<!--                            org.bouncycastle.cms;version="[1.70,2)",-->
+<!--                            org.bouncycastle.jce.provider;version="[1.70,2)",-->
+<!--                            org.bouncycastle.operator;version="[1.70,2)",-->
+<!--                            org.bouncycastle.operator.jcajce;version="[1.70,2)",-->
+<!--                            org.bouncycastle.pkcs;version="[1.70,2)",-->
+<!--                            org.bouncycastle.util;version="[1.70,2)",-->
+<!--                            org.jscep.message,-->
+<!--                            org.jscep.transaction,-->
+<!--                            org.w3c.dom,-->
+<!--                            org.xml.sax,-->
+<!--                            javax.sql,-->
+<!--                            &lt;!&ndash;javax.cache,&ndash;&gt;-->
+<!--                            javax.naming,-->
+<!--                            javax.xml.bind.annotation,-->
+<!--                            javax.xml.bind,-->
+<!--                            org.wso2.carbon.utils.*,-->
+<!--&lt;!&ndash;                            io.entgra.device.mgt.core.device.mgt.common.*,&ndash;&gt;-->
+<!--&lt;!&ndash;                            io.swagger.annotations.*;resolution:=optional,&ndash;&gt;-->
+<!--&lt;!&ndash;                            io.entgra.device.mgt.core.device.mgt.core.*,&ndash;&gt;-->
+<!--                            org.wso2.carbon.registry.indexing.*,-->
+<!--                            &lt;!&ndash;org.bouncycastle.pkcs.jcajce&ndash;&gt;-->
+<!--                            org.w3c.dom,org.wso2.carbon.context;version="[4.8,5)",-->
+<!--                            org.wso2.carbon.user.api;version="[1.0,2)",-->
+<!--                            org.wso2.carbon.user.core.service;version="[4.8,5)",-->
+<!--                            org.wso2.carbon.user.core.tenant;version="[4.8,5)",-->
+<!--                            org.wso2.carbon.utils;version="[4.8,5)",-->
+<!--                            org.wso2.carbon.utils.dbcreator;version="[4.8,5)"-->
                             io.entgra.device.mgt.core.certificate.mgt.core.*,
                             io.entgra.device.mgt.core.device.mgt.common;version="[5.0,6)",
                             io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
@@ -252,6 +308,10 @@
         <dependency>
             <groupId>org.wso2.orbit.javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <artifactId>json-simple</artifactId>
         </dependency>
     </dependencies>
 </project>

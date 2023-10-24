@@ -51,58 +51,58 @@ import java.util.List;
                 @Scope(
                         name = "Getting the List of Roles",
                         description = "Getting the List of Roles",
-                        key = "perm:roles:view",
+                        key = "rm:roles:view",
                         roles = {"Internal/devicemgt-user"},
                         permissions = {"/device-mgt/roles/view"}
                 ),
                 @Scope(
                         name = "Getting Permission Details of a Role",
                         description = "Getting Permission Details of a Role",
-                        key = "perm:roles:permissions",
+                        key = "rm:roles:permissions:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/view"}
+                        permissions = {"/device-mgt/roles/view-permissions"}
                 ),
                 @Scope(
                         name = "Getting the List of Roles",
                         description = "Getting the List of Roles",
-                        key = "perm:roles:details",
+                        key = "rm:roles:details:view",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/view"}
+                        permissions = {"/device-mgt/roles/view-details"}
                 ),
                 @Scope(
                         name = "Adding a Role",
                         description = "Adding a Role",
-                        key = "perm:roles:add",
+                        key = "rm:roles:add",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/manage"}
+                        permissions = {"/device-mgt/roles/add"}
                 ),
                 @Scope(
                         name = "Adding a combined Role",
                         description = "Adding a combined Role",
-                        key = "perm:roles:create-combined-role",
+                        key = "rm:roles:combined:add",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/manage"}
+                        permissions = {"/device-mgt/roles/combined-role/add"}
                 ),
                 @Scope(
                         name = "Updating Role Details",
                         description = "Updating Role Details",
-                        key = "perm:roles:update",
+                        key = "rm:roles:update",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/manage"}
+                        permissions = {"/device-mgt/roles/update"}
                 ),
                 @Scope(
                         name = "Deleting a Role",
                         description = "Deleting a Role",
-                        key = "perm:roles:delete",
+                        key = "rm:roles:delete",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/manage"}
+                        permissions = {"/device-mgt/roles/delete"}
                 ),
                 @Scope(
                         name = "Adding Users to a Role",
                         description = "Adding Users to a Role",
-                        key = "perm:roles:add-users",
+                        key = "rm:users:add",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/device-mgt/roles/manage"}
+                        permissions = {"/device-mgt/roles/assign-user"}
                 )
         }
 )
@@ -122,7 +122,7 @@ public interface RoleManagementService {
             tags = "Role Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "rm:roles:view")
                     })
             }
     )
@@ -198,7 +198,7 @@ public interface RoleManagementService {
             tags = "Role Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "rm:roles:view")
                     })
             }
     )
@@ -296,7 +296,7 @@ public interface RoleManagementService {
                 tags = "Role Management",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:view")
+                                @ExtensionProperty(name = Constants.SCOPE, value = "rm:roles:view")
                         })
                 }
         )
@@ -382,7 +382,7 @@ public interface RoleManagementService {
                 tags = "Role Management",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:permissions")
+                                @ExtensionProperty(name = Constants.SCOPE, value = "rm:roles:permissions:view")
                         })
                 }
         )
@@ -457,7 +457,7 @@ public interface RoleManagementService {
                 tags = "Role Management",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:details")
+                                @ExtensionProperty(name = Constants.SCOPE, value = "rm:roles:details:view")
                         })
                 }
         )
@@ -531,7 +531,7 @@ public interface RoleManagementService {
                 tags = "Role Management",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:add")
+                                @ExtensionProperty(name = Constants.SCOPE, value = "rm:roles:add")
                         })
                 }
         )
@@ -593,7 +593,7 @@ public interface RoleManagementService {
                 tags = "Role Management",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:create-combined-role")
+                                @ExtensionProperty(name = Constants.SCOPE, value = "rm:roles:combined:add")
                         })
                 }
         )
@@ -657,7 +657,7 @@ public interface RoleManagementService {
                 tags = "Role Management",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:update")
+                                @ExtensionProperty(name = Constants.SCOPE, value = "rm:roles:update")
                         })
                 }
         )
@@ -727,7 +727,7 @@ public interface RoleManagementService {
                 tags = "Role Management",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:delete")
+                                @ExtensionProperty(name = Constants.SCOPE, value = "rm:roles:delete")
                         })
                 }
         )
@@ -779,7 +779,7 @@ public interface RoleManagementService {
                 tags = "Role Management",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = Constants.SCOPE, value = "perm:roles:add-users")
+                                @ExtensionProperty(name = Constants.SCOPE, value = "rm:users:add")
                         })
                 }
         )

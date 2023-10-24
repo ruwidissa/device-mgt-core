@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
@@ -40,12 +41,10 @@ import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionMa
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceManagementService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
@@ -83,16 +82,18 @@ import io.entgra.device.mgt.core.device.mgt.core.search.mgt.SearchMgtException;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.GroupManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.DeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.JWTClient;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.exception.JWTClientException;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyManagementException;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -102,12 +103,15 @@ import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.Map;
 
 @Path("/devices")
 public class DeviceManagementServiceImpl implements DeviceManagementService {
@@ -145,6 +149,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("role") String role,
             @QueryParam("ownership") String ownership,
             @QueryParam("serialNumber") String serialNumber,
+            @QueryParam("customProperty") String customProperty,
             @QueryParam("status") List<String> status,
             @QueryParam("groupId") int groupId,
             @QueryParam("since") String since,
@@ -158,6 +163,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
 //            RequestValidationUtil.validateSelectionCriteria(type, user, roleName, ownership, status);
+            final ObjectMapper objectMapper = new ObjectMapper();
             RequestValidationUtil.validatePaginationParameters(offset, limit);
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
             DeviceAccessAuthorizationService deviceAccessAuthorizationService =
@@ -168,6 +174,22 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
             if (name != null && !name.isEmpty()) {
                 request.setDeviceName(name);
+            }
+            if (customProperty != null && !customProperty.isEmpty()) {
+                try {
+                    Map<String, String> customProperties = objectMapper.readValue(customProperty, Map.class);
+                    // Extract and set custom properties
+                    for (Map.Entry<String, String> entry : customProperties.entrySet()) {
+                        String propertyName = entry.getKey();
+                        String propertyValue = entry.getValue();
+                        // Add custom property to the paginationRequest object
+                        request.addCustomProperty(propertyName, propertyValue);
+                    }
+                } catch (IOException e) {
+                    String msg = "Error occurred while converting custom property string to a Java Map";
+                    log.error(msg);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+                }
             }
             if (type != null && !type.isEmpty()) {
                 request.setDeviceType(type);
@@ -1024,7 +1046,11 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     public Response uninstallation(
             @PathParam("type") @Size(max = 45) String type,
             @PathParam("id") @Size(max = 45) String id,
-            @QueryParam("packageName") String packageName) {
+            @QueryParam("packageName") String packageName,
+            @QueryParam("platform") String platform,
+            @QueryParam("name") String name,
+            @QueryParam("version") String version,
+            @QueryParam("user") String user) {
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
         Operation operation = new Operation();
         try {
@@ -1047,7 +1073,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 //if the applications not installed via entgra store
             } else {
                 if (Constants.ANDROID.equals(type)) {
-                    ApplicationUninstallation applicationUninstallation = new ApplicationUninstallation(packageName, "PUBLIC");
+                    ApplicationUninstallation applicationUninstallation = new ApplicationUninstallation(packageName, "PUBLIC", name, platform, version, user);
                     Gson gson = new Gson();
                     operation.setCode(MDMAppConstants.AndroidConstants.UNMANAGED_APP_UNINSTALL);
                     operation.setType(Operation.Type.PROFILE);

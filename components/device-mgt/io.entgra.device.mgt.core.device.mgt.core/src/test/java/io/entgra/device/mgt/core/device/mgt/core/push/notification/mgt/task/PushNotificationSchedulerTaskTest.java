@@ -31,6 +31,8 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationMana
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mockito.Mockito;
@@ -52,13 +54,16 @@ public class PushNotificationSchedulerTaskTest extends BaseDeviceManagementTest 
     private PushNotificationSchedulerTask pushNotificationSchedulerTask;
     private OperationDAO operationDAO;
 
+    private HeartBeatManagementService heartBeatManagementService;
     @BeforeClass
     public void init() throws DeviceManagementException, RegistryException {
         DeviceConfigurationManager.getInstance().initConfig();
         log.info("Initializing Push Notification Scheduler Test Class");
         DeviceManagementServiceComponent.notifyStartupListeners();
         this.deviceMgtProviderService = Mockito.mock(DeviceManagementProviderServiceImpl.class, Mockito.CALLS_REAL_METHODS);
+        this.heartBeatManagementService = Mockito.mock(HeartBeatManagementService.class, Mockito.CALLS_REAL_METHODS);
         DeviceManagementDataHolder.getInstance().setDeviceManagementProvider(this.deviceMgtProviderService);
+        DeviceManagementDataHolder.getInstance().setHeartBeatService(this.heartBeatManagementService);
         this.operationDAO = OperationManagementDAOFactory.getOperationDAO();
         this.pushNotificationSchedulerTask = new PushNotificationSchedulerTask();
     }
@@ -69,6 +74,7 @@ public class PushNotificationSchedulerTaskTest extends BaseDeviceManagementTest 
             OperationManagementDAOException {
         try {
             log.info("Attempting to execute push notification task scheduler");
+            Mockito.when(this.heartBeatManagementService.isTaskPartitioningEnabled()).thenReturn(false);
             Mockito.doReturn(new TestNotificationStrategy()).when(this.deviceMgtProviderService)
                     .getNotificationStrategyByDeviceType(Mockito.anyString());
             Mockito.doReturn(new io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation())
@@ -81,6 +87,8 @@ public class PushNotificationSchedulerTaskTest extends BaseDeviceManagementTest 
                                     .getPushNotificationConfiguration().getSchedulerBatchSize());
             Assert.assertEquals(operationMappingsTenantMap.size(), 0);
             log.info("Push notification task execution complete.");
+        } catch (HeartBeatManagementException e) {
+            throw new RuntimeException(e);
         } finally {
             OperationManagementDAOFactory.closeConnection();
         }
