@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.internal;
 
 import io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.UserStoreRoleMappingConfigManager;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserRealm;
@@ -31,7 +32,7 @@ public class UserStoreRoleMappingDataHolder {
     private ConfigurationContextService configurationContextService;
     private RealmService realmService;
     private UserStoreRoleMappingConfigManager userStoreRoleMappingConfigManager;
-
+    private HeartBeatManagementService heartBeatService;
     private static final UserStoreRoleMappingDataHolder thisInstance = new UserStoreRoleMappingDataHolder();
 
     private UserStoreRoleMappingDataHolder() {}
@@ -81,5 +82,13 @@ public class UserStoreRoleMappingDataHolder {
 
     public void setUserStoreRoleMappingConfigManager(UserStoreRoleMappingConfigManager userStoreRoleMappingConfigManager) {
         this.userStoreRoleMappingConfigManager = userStoreRoleMappingConfigManager;
+    }
+
+    public HeartBeatManagementService getHeartBeatService() {
+        return heartBeatService;
+    }
+
+    public void setHeartBeatService(HeartBeatManagementService heartBeatService) {
+        this.heartBeatService = heartBeatService;
     }
 }

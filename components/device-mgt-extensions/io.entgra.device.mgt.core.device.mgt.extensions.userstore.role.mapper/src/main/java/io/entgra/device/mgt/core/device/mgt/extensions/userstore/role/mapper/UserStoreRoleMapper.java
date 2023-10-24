@@ -20,10 +20,12 @@ package io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper;
 import io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.bean.RoleMapping;
 import io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.bean.UserStoreRoleMappingConfig;
 import io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.internal.UserStoreRoleMappingDataHolder;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerStartupObserver;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -36,6 +38,8 @@ import java.util.concurrent.TimeUnit;
 
 public class UserStoreRoleMapper implements ServerStartupObserver {
     private static final Log log = LogFactory.getLog(UserStoreRoleMapper.class);
+
+    private UserStoreRoleMappingConfig config = null;
     @Override
     public void completingServerStartup() {
 
@@ -43,17 +47,31 @@ public class UserStoreRoleMapper implements ServerStartupObserver {
 
     @Override
     public void completedServerStartup() {
-        Runnable periodicTask = new Runnable() {
-            public void run() {
-                updateRoleMapping();
-                log.info("UserStoreRoleMapper executed....");
+
+        config = UserStoreRoleMappingDataHolder.getInstance()
+                .getUserStoreRoleMappingConfigManager().getUserStoreRoleMappingConfig();
+
+        try {
+            if ((config.isEnabled() &&
+                    UserStoreRoleMappingDataHolder.getInstance().getHeartBeatService().isTaskPartitioningEnabled() &&
+                    UserStoreRoleMappingDataHolder.getInstance().getHeartBeatService().isQualifiedToExecuteTask())
+                || (config.isEnabled() &&
+                    !UserStoreRoleMappingDataHolder.getInstance().getHeartBeatService().isTaskPartitioningEnabled())) {
+                Runnable periodicTask = new Runnable() {
+                    public void run() {
+                        updateRoleMapping();
+                        log.info("UserStoreRoleMapper executed....");
+                    }
+                };
+
+                ScheduledExecutorService executor =
+                        Executors.newSingleThreadScheduledExecutor();
+
+                executor.scheduleAtFixedRate(periodicTask, config.getInitialDelayInSeconds(), config.getPeriodInSeconds(), TimeUnit.SECONDS);
             }
-        };
-
-        ScheduledExecutorService executor =
-                Executors.newSingleThreadScheduledExecutor();
-
-        executor.scheduleAtFixedRate(periodicTask,30, 60, TimeUnit.SECONDS);
+        } catch (HeartBeatManagementException e) {
+            log.error("Error while accessing heart beat service " + e.getMessage());
+        }
     }
 
     private void updateRoleMapping() {
@@ -63,9 +81,6 @@ public class UserStoreRoleMapper implements ServerStartupObserver {
                     MultitenantConstants.SUPER_TENANT_ID);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-
-            UserStoreRoleMappingConfig config = UserStoreRoleMappingDataHolder.getInstance()
-                    .getUserStoreRoleMappingConfigManager().getUserStoreRoleMappingConfig();
 
             List<RoleMapping> roleMappings = config.getMappings();
 
@@ -115,7 +130,7 @@ public class UserStoreRoleMapper implements ServerStartupObserver {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (UserStoreException e) {
             log.error("Error while getting user store..." + e.getMessage());
         } finally {
             PrivilegedCarbonContext.endTenantFlow();

@@ -75,7 +75,9 @@
                             org.wso2.carbon.user.api,
                             org.wso2.carbon.user.core.common,
                             org.wso2.carbon.user.core.service,
-                            org.wso2.carbon.user.mgt.common
+                            org.wso2.carbon.user.mgt.common,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service,
+                            io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.internal,
@@ -218,6 +220,11 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.server.bootup.heartbeat.beacon</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

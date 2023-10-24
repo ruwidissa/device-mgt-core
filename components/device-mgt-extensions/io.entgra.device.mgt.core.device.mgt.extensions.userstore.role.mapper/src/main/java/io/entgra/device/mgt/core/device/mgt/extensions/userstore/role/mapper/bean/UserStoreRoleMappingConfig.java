@@ -27,7 +27,23 @@ import java.util.List;
 )
 public class UserStoreRoleMappingConfig {
 
+    private boolean enabled;
     private List<RoleMapping> mappings;
+
+    private long initialDelayInSeconds;
+
+    private long periodInSeconds;
+
+    @XmlElement(
+            name = "enabled"
+    )
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     @XmlElementWrapper(
             name = "mappings"
@@ -41,5 +57,27 @@ public class UserStoreRoleMappingConfig {
 
     public void setMappings(List<RoleMapping> mappings) {
         this.mappings = mappings;
+    }
+
+    @XmlElement(
+            name = "initialDelayInSeconds"
+    )
+    public long getInitialDelayInSeconds() {
+        return initialDelayInSeconds;
+    }
+
+    public void setInitialDelayInSeconds(long initialDelayInSeconds) {
+        this.initialDelayInSeconds = initialDelayInSeconds;
+    }
+
+    @XmlElement(
+            name = "periodInSeconds"
+    )
+    public long getPeriodInSeconds() {
+        return periodInSeconds;
+    }
+
+    public void setPeriodInSeconds(long periodInSeconds) {
+        this.periodInSeconds = periodInSeconds;
     }
 }

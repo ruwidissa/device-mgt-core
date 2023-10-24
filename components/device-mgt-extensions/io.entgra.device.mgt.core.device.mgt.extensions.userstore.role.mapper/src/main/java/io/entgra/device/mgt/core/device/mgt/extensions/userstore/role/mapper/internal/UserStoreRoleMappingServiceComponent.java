@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.in
 
 import io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.UserStoreRoleMapper;
 import io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.UserStoreRoleMappingConfigManager;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -43,6 +44,12 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * policy="dynamic"
  * bind="setConfigurationContextService"
  * unbind="unsetConfigurationContextService"
+ * @scr.reference name="entgra.heart.beat.service"
+ * interface="io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
+ * cardinality="0..1"
+ * policy="dynamic"
+ * bind="setHeartBeatService"
+ * unbind="unsetHeartBeatService"
  */
 public class UserStoreRoleMappingServiceComponent {
 
@@ -108,5 +115,21 @@ public class UserStoreRoleMappingServiceComponent {
             log.debug("Unsetting Realm Service");
         }
         UserStoreRoleMappingDataHolder.getInstance().setRealmService(null);
+    }
+
+    @SuppressWarnings("unused")
+    protected void setHeartBeatService(HeartBeatManagementService heartBeatService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting heart beat service");
+        }
+        UserStoreRoleMappingDataHolder.getInstance().setHeartBeatService(heartBeatService);
+    }
+
+    @SuppressWarnings("unused")
+    protected void unsetHeartBeatService(HeartBeatManagementService heartBeatManagementService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Removing heart beat service");
+        }
+        UserStoreRoleMappingDataHolder.getInstance().setHeartBeatService(null);
     }
 }

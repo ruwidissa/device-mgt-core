@@ -17,21 +17,18 @@
   ~ under the License.
   -->
 <UserStoreRoleMappingConfig>
+    <enabled>false</enabled>
+    <initialDelayInSeconds>30</initialDelayInSeconds>
+    <periodInSeconds>3600</periodInSeconds>
     <mappings>
         <mapping secondaryRole="ENTGRA.IO/css_galle">
             <internalRoles>
-                <role>branch_css</role>
-                <role>lb_03</role>
-                <role>ld_03_01</role>
-                <role>ld_03_02</role>
+                <role>Internal/branch_css</role>
             </internalRoles>
         </mapping>
         <mapping secondaryRole="ENTGRA.IO/css_nugegoda">
             <internalRoles>
-                <role>branch_css</role>
-                <role>lb_05</role>
-                <role>ld_05_01</role>
-                <role>ld_05_02</role>
+                <role>Internal/branch_css</role>
             </internalRoles>
         </mapping>
     </mappings>
