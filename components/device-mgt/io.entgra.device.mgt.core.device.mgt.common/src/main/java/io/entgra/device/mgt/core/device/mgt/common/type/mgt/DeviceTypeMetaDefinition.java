@@ -42,6 +42,8 @@ public class DeviceTypeMetaDefinition {
 
     private boolean longLivedToken = false;
 
+    private boolean storeVisibilityEnabled = true;
+
     public String getDescription() {
         return description;
     }
@@ -121,5 +123,13 @@ public class DeviceTypeMetaDefinition {
 
     public void setLongLivedToken(boolean longLivedToken) {
         this.longLivedToken = longLivedToken;
+    }
+
+    public boolean isStoreVisibilityEnabled() {
+        return storeVisibilityEnabled;
+    }
+
+    public void setStoreVisibilityEnabled(boolean storeVisibilityEnabled) {
+        this.storeVisibilityEnabled = storeVisibilityEnabled;
     }
 }
