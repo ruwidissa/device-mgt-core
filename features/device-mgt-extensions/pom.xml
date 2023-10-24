@@ -41,6 +41,7 @@
         <module>io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager.feature</module>
         <module>io.entgra.device.mgt.core.device.mgt.extensions.logger.feature</module>
         <module>io.entgra.device.mgt.core.device.mgt.extensions.stateengine.feature</module>
+        <module>io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper</module>
     </modules>
 
 </project>
