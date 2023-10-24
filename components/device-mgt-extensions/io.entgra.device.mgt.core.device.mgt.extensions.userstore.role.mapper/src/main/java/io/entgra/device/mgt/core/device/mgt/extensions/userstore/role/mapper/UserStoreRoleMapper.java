@@ -116,7 +116,7 @@ public class UserStoreRoleMapper implements ServerStartupObserver {
                 }
             }
         } catch (Exception e) {
-            log.error("Error while getting user store...", e);
+            log.error("Error while getting user store..." + e.getMessage());
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
