@@ -18,7 +18,7 @@
   -->
 <UserStoreRoleMappingConfig>
     <mappings>
-        <mapping secondaryRole="LECO.COM/css_galle">
+        <mapping secondaryRole="ENTGRA.IO/css_galle">
             <internalRoles>
                 <role>branch_css</role>
                 <role>lb_03</role>
@@ -26,7 +26,7 @@
                 <role>ld_03_02</role>
             </internalRoles>
         </mapping>
-        <mapping secondaryRole="LECO.COM/css_nugegoda">
+        <mapping secondaryRole="ENTGRA.IO/css_nugegoda">
             <internalRoles>
                 <role>branch_css</role>
                 <role>lb_05</role>
