@@ -24,16 +24,21 @@ public class Documentation {
     private static final long serialVersionUID = 1L;
     private String id;
     private String documentId;
-    private DocumentationType type;
     private String name;
+    private DocumentationType type;
     private String summary;
     private DocumentSourceType sourceType;
     private String sourceUrl;
-    private DocumentVisibility visibility;
-    private Date lastUpdated;
+    private String fileName;
     private String filePath;
-    private Date createdDate;
+    private String inlineContent;
     private String otherTypeName;
+    private DocumentVisibility visibility;
+    private String createdTime;
+    private Date createdDate;
+    private String createdBy;
+    private Date lastUpdatedTime;
+    private String lastUpdatedBy;
 
     public String getOtherTypeName() {
         return this.otherTypeName;
@@ -113,12 +118,12 @@ public class Documentation {
         return result;
     }
 
-    public Date getLastUpdated() {
-        return this.lastUpdated;
+    public Date getLastUpdatedTime() {
+        return this.lastUpdatedTime;
     }
 
-    public void setLastUpdated(Date lastUpdated) {
-        this.lastUpdated = lastUpdated;
+    public void setLastUpdatedTime(Date lastUpdatedTime) {
+        this.lastUpdatedTime = lastUpdatedTime;
     }
 
     public String getId() {
@@ -143,6 +148,46 @@ public class Documentation {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getInlineContent() {
+        return inlineContent;
+    }
+
+    public void setInlineContent(String inlineContent) {
+        this.inlineContent = inlineContent;
+    }
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getLastUpdatedBy() {
+        return lastUpdatedBy;
+    }
+
+    public void setLastUpdatedBy(String lastUpdatedBy) {
+        this.lastUpdatedBy = lastUpdatedBy;
     }
 
     public static enum DocumentVisibility {

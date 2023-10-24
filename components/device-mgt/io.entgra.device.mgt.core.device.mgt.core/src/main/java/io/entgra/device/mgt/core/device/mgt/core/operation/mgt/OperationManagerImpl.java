@@ -41,6 +41,7 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.InvalidDeviceExcep
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityStatus;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManagementException;
@@ -1298,6 +1299,36 @@ public class OperationManagerImpl implements OperationManager {
             throw new OperationManagementException("Error occurred while opening a connection to the data source.", e);
         } catch (OperationManagementDAOException e) {
             throw new OperationManagementException("Error occurred while getting the activity count.", e);
+        } finally {
+            OperationManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public List<DeviceActivity> getDeviceActivities(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException {
+        try {
+            OperationManagementDAOFactory.openConnection();
+            return operationDAO.getDeviceActivities(activityPaginationRequest);
+        } catch (SQLException e) {
+            throw new OperationManagementException("Error occurred while opening a connection to the data source.", e);
+        } catch (OperationManagementDAOException e) {
+            throw new OperationManagementException("Error occurred while getting the device activity list.", e);
+        } finally {
+            OperationManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public int getDeviceActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException {
+        try {
+            OperationManagementDAOFactory.openConnection();
+            return operationDAO.getDeviceActivitiesCount(activityPaginationRequest);
+        } catch (SQLException e) {
+            throw new OperationManagementException("Error occurred while opening a connection to the data source.", e);
+        } catch (OperationManagementDAOException e) {
+            throw new OperationManagementException("Error occurred while getting the device activity count.", e);
         } finally {
             OperationManagementDAOFactory.closeConnection();
         }

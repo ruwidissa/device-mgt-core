@@ -23,10 +23,10 @@ import java.io.Serializable;
 public class APIRevisionDeployment implements Serializable {
     private static final long serialVersionUID = 1L;
     private int id;
-    private String revisionUUID;
-    private String deployment;
+    private String revisionUuid;
+    private String name;
     private String vhost;
-    private boolean isDisplayOnDevportal;
+    private boolean displayOnDevportal;
     private String deployedTime;
 
     public int getId() {
@@ -37,20 +37,20 @@ public class APIRevisionDeployment implements Serializable {
         this.id = id;
     }
 
-    public String getRevisionUUID() {
-        return revisionUUID;
+    public String getRevisionUuid() {
+        return revisionUuid;
     }
 
-    public void setRevisionUUID(String revisionUUID) {
-        this.revisionUUID = revisionUUID;
+    public void setRevisionUuid(String revisionUuid) {
+        this.revisionUuid = revisionUuid;
     }
 
-    public String getDeployment() {
-        return deployment;
+    public String getName() {
+        return name;
     }
 
-    public void setDeployment(String deployment) {
-        this.deployment = deployment;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getVhost() {
@@ -62,11 +62,11 @@ public class APIRevisionDeployment implements Serializable {
     }
 
     public boolean isDisplayOnDevportal() {
-        return isDisplayOnDevportal;
+        return displayOnDevportal;
     }
 
     public void setDisplayOnDevportal(boolean displayOnDevportal) {
-        isDisplayOnDevportal = displayOnDevportal;
+        this.displayOnDevportal = displayOnDevportal;
     }
 
     public String getDeployedTime() {

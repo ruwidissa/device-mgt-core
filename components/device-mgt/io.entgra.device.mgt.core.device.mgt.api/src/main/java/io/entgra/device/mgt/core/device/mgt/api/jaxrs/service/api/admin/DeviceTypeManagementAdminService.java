@@ -75,7 +75,7 @@ import javax.ws.rs.core.Response;
                         description = "Add, Edit or View a Device Type",
                         key = "dm:admin:device-type:modify",
                         roles = {"Internal/devicemgt-admin"},
-                        permissions = {"/device-mgt/admin/device-type"}
+                        permissions = {"/device-mgt/admin/device-type/modify"}
                 ),
                 @Scope(
                         name = "Getting Details of a Device Type",

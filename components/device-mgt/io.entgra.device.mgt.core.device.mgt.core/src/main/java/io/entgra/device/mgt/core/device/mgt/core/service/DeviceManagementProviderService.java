@@ -39,6 +39,7 @@ import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyMonitoringManager;
@@ -1002,6 +1003,11 @@ public interface DeviceManagementProviderService {
     List<Activity> getActivities(ActivityPaginationRequest activityPaginationRequest) throws OperationManagementException;
 
     int getActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException;
+
+    List<DeviceActivity> getDeviceActivities(ActivityPaginationRequest activityPaginationRequest) throws OperationManagementException;
+
+    int getDeviceActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
             throws OperationManagementException;
 
     License getLicenseConfig (String deviceTypeName) throws DeviceManagementException;

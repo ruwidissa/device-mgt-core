@@ -18,25 +18,29 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Scope implements Serializable{
 
     private static final long serialVersionUID = 1L;
 
-    String key;
-    String name;
-    String roles;
-    String description;
     String id;
+    String name;
+    String displayName;
+    String description;
+    List<String> bindings;
     int usageCount;
 
-    public String getKey() {
-        return key;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getName() {
@@ -47,12 +51,12 @@ public class Scope implements Serializable{
         this.name = name;
     }
 
-    public String getRoles() {
-        return roles;
+    public List<String> getBindings() {
+        return bindings;
     }
 
-    public void setRoles(String roles) {
-        this.roles = roles;
+    public void setBindings(List<String> bindings) {
+        this.bindings = removeDuplicatesFromRoleString(bindings);
     }
 
     public String getDescription() {
@@ -87,14 +91,22 @@ public class Scope implements Serializable{
         Scope scope = (Scope) o;
 
         if (id != null ? !id.equals(scope.id) : scope.id != null) return false;
-        if (!key.equals(scope.key)) return false;
         if (!name.equals(scope.name)) return false;
-        if (roles != null ? !roles.equals(scope.roles) : scope.roles != null) return false;
+        if (!displayName.equals(scope.displayName)) return false;
+        if (bindings != null ? !bindings.equals(scope.bindings) : scope.bindings != null) return false;
         return description != null ? description.equals(scope.description) : scope.description == null;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, name, roles, description, id);
+        return Objects.hash(name, displayName, bindings, description, id);
+    }
+
+    private static List<String> removeDuplicatesFromRoleString(List<String> roles) {
+        Set<String> roleSet = new HashSet<>();
+        for(String role : roles) {
+            roleSet.add(role.trim());
+        }
+        return new ArrayList<>(roleSet);
     }
 }

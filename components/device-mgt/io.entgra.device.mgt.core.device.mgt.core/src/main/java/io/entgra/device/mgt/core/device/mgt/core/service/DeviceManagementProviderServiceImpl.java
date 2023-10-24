@@ -93,6 +93,7 @@ import io.entgra.device.mgt.core.device.mgt.common.license.mgt.LicenseManagement
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManager;
@@ -2562,6 +2563,19 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throws OperationManagementException {
         return DeviceManagementDataHolder.getInstance().getOperationManager()
                 .getActivitiesCount(activityPaginationRequest);
+    }
+
+    @Override
+    public List<DeviceActivity> getDeviceActivities(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException {
+        return DeviceManagementDataHolder.getInstance().getOperationManager().getDeviceActivities(activityPaginationRequest);
+    }
+
+    @Override
+    public int getDeviceActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementException {
+        return DeviceManagementDataHolder.getInstance().getOperationManager()
+                .getDeviceActivitiesCount(activityPaginationRequest);
     }
 
     @Override
