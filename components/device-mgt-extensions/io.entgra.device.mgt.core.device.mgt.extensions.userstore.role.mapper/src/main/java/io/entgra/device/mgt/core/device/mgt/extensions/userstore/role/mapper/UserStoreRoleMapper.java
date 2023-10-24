@@ -75,38 +75,40 @@ public class UserStoreRoleMapper implements ServerStartupObserver {
                                 .getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getUserStoreManager();
 
                 for (RoleMapping mapping : roleMappings) {
-                    String[] users = userStoreManager.getUserListOfRole(mapping.getSecondaryRole());
-                    if (users != null && users.length > 0) {
-                        List<String> primaryRoles = mapping.getInternalRoles();
-                        for (String role : primaryRoles) {
-                            if (userStoreManager.isExistingRole(role)) {
-                                String[] existingUsers = userStoreManager.getUserListOfRole(role);
-                                List<String> existingUserList = new ArrayList<>(Arrays.asList(existingUsers));
-                                List<String> newUserList = new ArrayList<>();
-                                for (String user: users) {
-                                    if (existingUserList.contains(user)) {
-                                        // if contains, remove from existing list
-                                        existingUserList.remove(user);
-                                    } else {
-                                        // new user
-                                        newUserList.add(user);
-                                    }
-                                }
-
-                                List<String> deleteUserList = new ArrayList<>();
-                                if (!existingUserList.isEmpty()) {
-                                    String domain = mapping.getSecondaryRole().substring(0,mapping.getSecondaryRole().indexOf("/"));
-                                    for (String user : existingUserList) {
-                                        if (user.startsWith(domain.toUpperCase())) {
-                                            deleteUserList.add(user);
+                    if (userStoreManager.isExistingRole(mapping.getSecondaryRole())) {
+                        String[] users = userStoreManager.getUserListOfRole(mapping.getSecondaryRole());
+                        if (users != null && users.length > 0) {
+                            List<String> primaryRoles = mapping.getInternalRoles();
+                            for (String role : primaryRoles) {
+                                if (userStoreManager.isExistingRole(role)) {
+                                    String[] existingUsers = userStoreManager.getUserListOfRole(role);
+                                    List<String> existingUserList = new ArrayList<>(Arrays.asList(existingUsers));
+                                    List<String> newUserList = new ArrayList<>();
+                                    for (String user : users) {
+                                        if (existingUserList.contains(user)) {
+                                            // if contains, remove from existing list
+                                            existingUserList.remove(user);
+                                        } else {
+                                            // new user
+                                            newUserList.add(user);
                                         }
                                     }
-                                }
 
-                                // update user list of given role
-                                if (!newUserList.isEmpty() || !deleteUserList.isEmpty()) {
-                                    userStoreManager.updateUserListOfRole(role, deleteUserList.toArray(new String[0]), newUserList.toArray(new String[0]));
-                                    log.info("update user role mapping executed.....");
+                                    List<String> deleteUserList = new ArrayList<>();
+                                    if (!existingUserList.isEmpty()) {
+                                        String domain = mapping.getSecondaryRole().substring(0, mapping.getSecondaryRole().indexOf("/"));
+                                        for (String user : existingUserList) {
+                                            if (user.startsWith(domain.toUpperCase())) {
+                                                deleteUserList.add(user);
+                                            }
+                                        }
+                                    }
+
+                                    // update user list of given role
+                                    if (!newUserList.isEmpty() || !deleteUserList.isEmpty()) {
+                                        userStoreManager.updateUserListOfRole(role, deleteUserList.toArray(new String[0]), newUserList.toArray(new String[0]));
+                                        log.info("update user role mapping executed.....");
+                                    }
                                 }
                             }
                         }
