@@ -741,6 +741,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         authorizationManager.clearRoleAuthorization(role);
         for (String permission : permissions) {
             authorizationManager.authorizeRole(role, permission, CarbonConstants.UI_PERMISSION_ACTION);
+            authorizationManager.refreshAllowedRolesForResource(permission);
         }
     }
 
