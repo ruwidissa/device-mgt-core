@@ -63,7 +63,7 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
                     "FROM DM_DEVICE_CERTIFICATE " +
                     "WHERE TENANT_ID = ? ";
             if (StringUtils.isNotEmpty(serialNumber)) {
-                query += "AND SERIAL_NUMBER = ? ";
+                query += "AND SERIAL_NUMBER LIKE ? ";
                 isCertificateSerialNumberProvided = true;
             }
 
@@ -83,7 +83,7 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
                 int paramIdx = 1;
                 stmt.setInt(paramIdx++, tenantId);
                 if (isCertificateSerialNumberProvided) {
-                    stmt.setString(paramIdx++, serialNumber);
+                    stmt.setString(paramIdx++, "%" + serialNumber+ "%");
                 }
                 if (isCertificateDeviceIdentifierProvided) {
                     stmt.setString(paramIdx++, deviceIdentifier);
@@ -136,7 +136,7 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
                     "WHERE TENANT_ID = ?";
 
             if (StringUtils.isNotEmpty(serialNumber)) {
-                sql += " AND SERIAL_NUMBER = ?";
+                sql += " AND SERIAL_NUMBER LIKE ?";
             }
 
             if (StringUtils.isNotEmpty(deviceIdentifier)) {
@@ -152,7 +152,7 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
 
                 int paramIdx = 2;
                 if (StringUtils.isNotEmpty(serialNumber)) {
-                    stmt.setString(paramIdx++, serialNumber);
+                    stmt.setString(paramIdx++, "%" + serialNumber + "%");
                 }
 
                 if (StringUtils.isNotEmpty(deviceIdentifier)) {
