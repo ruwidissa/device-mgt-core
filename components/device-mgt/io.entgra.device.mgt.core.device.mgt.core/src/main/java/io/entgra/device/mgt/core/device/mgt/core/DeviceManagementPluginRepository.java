@@ -85,7 +85,7 @@ public class DeviceManagementPluginRepository implements DeviceManagerStartupLis
             if (isInitiated) {
                 /* Initializing Device Management Service Provider */
                 provider.init();
-                DeviceTypeMetaDefinition deviceTypeDefinition = null;
+                DeviceTypeMetaDefinition deviceTypeDefinition;
                 if (provider instanceof DeviceTypeDefinitionProvider) {
                     DeviceTypeServiceIdentifier deviceTypeIdentifier = new DeviceTypeServiceIdentifier(
                             provider.getType());
@@ -102,6 +102,8 @@ public class DeviceManagementPluginRepository implements DeviceManagerStartupLis
                     if (existingProvider != null) {
                         removeDeviceManagementProvider(provider);
                     }
+                } else {
+                    deviceTypeDefinition = provider.getDeviceTypeMetaDefinition();
                 }
 
                 DeviceManagerUtil.registerDeviceType(deviceType, tenantId, isSharedWithAllTenants, deviceTypeDefinition);
