@@ -145,7 +145,7 @@ import javax.ws.rs.core.Response;
                         description = "Adding a User",
                         key = "um:users:cred:change",
                         roles = {"Internal/devicemgt-user"},
-                        permissions = {"/login/password/update"}
+                        permissions = {"/device-mgt/users/password/update"}
                 ),
                 @Scope(
                         name = "Sending Enrollment Invitations to Users",
