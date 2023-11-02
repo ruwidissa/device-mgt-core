@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Objects;
 
 @WebServlet(
         name = "JIT callback handler",
@@ -45,6 +46,7 @@ public class JITProvisionCallbackHandler extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        String state = request.getParameter("state");
         HttpSession session = request.getSession(false);
         String JITProvisionCallbackURL = request.getScheme() + HandlerConstants.SCHEME_SEPARATOR
                 + System.getProperty(HandlerConstants.IOT_CORE_HOST_ENV_VAR)
@@ -54,6 +56,12 @@ public class JITProvisionCallbackHandler extends HttpServlet {
         try {
             if (session == null) {
                 response.sendError(HttpStatus.SC_UNAUTHORIZED);
+                return;
+            }
+
+            if (state == null || !Objects.equals(state, session.getAttribute("state").toString())) {
+                response.sendError(org.apache.http.HttpStatus.SC_BAD_REQUEST, "MismatchingStateError: CSRF Warning! " +
+                        "State not equal in request and response");
                 return;
             }
 

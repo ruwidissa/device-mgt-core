@@ -70,6 +70,7 @@ public class JITProvisionHandler extends HttpServlet {
     private String encodedClientCredentials;
     private String JITConfigurationPath;
     private String redirectUrl;
+    private String state;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
@@ -83,6 +84,7 @@ public class JITProvisionHandler extends HttpServlet {
                 + HandlerConstants.JIT_PROVISION_CALLBACK_URL;
         JITConfigurationPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "jit-config.xml";
         String scope = "openid";
+        state = HandlerUtil.generateStateToken();
         tenantDomain = request.getParameter("tenantDomain");
         redirectUrl = request.getParameter("redirectUrl");
         JITServiceProviderName = request.getParameter("sp");
@@ -100,7 +102,7 @@ public class JITProvisionHandler extends HttpServlet {
             response.sendRedirect(keyManagerUrl + HandlerConstants.AUTHORIZATION_ENDPOINT +
                     "?response_type=code" +
                     "&client_id=" + clientId +
-                    "&state=" +
+                    "&state=" + state +
                     "&scope=" + scope +
                     "&redirect_uri=" + JITCallbackUrl);
         } catch (JITProvisionException | IOException ex) {
@@ -129,6 +131,7 @@ public class JITProvisionHandler extends HttpServlet {
         JITInfo.setRedirectUrl(redirectUrl);
         JITInfo.setSp(JITServiceProviderName);
         session.setMaxInactiveInterval(3600);
+        session.setAttribute("state", state);
         session.setAttribute(HandlerConstants.SESSION_JIT_DATA_KEY, JITInfo);
     }
 
