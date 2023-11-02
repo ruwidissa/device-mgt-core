@@ -21,12 +21,12 @@
 <JITConfiguration>
     <EnrollmentConfiguration>
             <AndroidEnrollmentScopes>
-                <Scope>perm:metadata:view</Scope>
-                <Scope>perm:metadata:create</Scope>
-                <Scope>perm:metadata:update</Scope>
-                <Scope>perm:android:enroll</Scope>
-                <Scope>perm:device:enroll</Scope>
-                <Scope>perm:android:view-configuration</Scope>
+                <Scope>dm:metadata:view</Scope>
+                <Scope>dm:metadata:create</Scope>
+                <Scope>dm:metadata:update</Scope>
+                <Scope>and:devices:enroll</Scope>
+                <Scope>dm:device:enroll</Scope>
+                <Scope>and:conf:view</Scope>
             </AndroidEnrollmentScopes>
             <IOSEnrollmentScopes>
                 <!-- <Scope></Scope> -->
