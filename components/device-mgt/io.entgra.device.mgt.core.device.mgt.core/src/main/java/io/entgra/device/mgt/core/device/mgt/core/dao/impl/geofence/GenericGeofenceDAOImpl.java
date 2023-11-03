@@ -143,7 +143,7 @@ public class GenericGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(index++, tenantId);
                 if (isNameProvided) {
-                    stmt.setString(index++, request.getProperty(DeviceManagementConstants.GeoServices.FENCE_NAME).toString() + "%");
+                    stmt.setString(index++, request.getProperty("%" + DeviceManagementConstants.GeoServices.FENCE_NAME).toString() + "%");
                 }
                 stmt.setInt(index++, request.getRowCount());
                 stmt.setInt(index, request.getStartIndex());
@@ -180,7 +180,7 @@ public class GenericGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
                     "WHERE FENCE_NAME LIKE ?" +
                     "AND TENANT_ID = ? ";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, fenceName + "%");
+                stmt.setString(1,"%" + fenceName + "%");
                 stmt.setInt(2, tenantId);
                 try (ResultSet rst = stmt.executeQuery()) {
                     geofenceData = extractGeofenceData(rst);

@@ -71,7 +71,7 @@ public class SQLServerGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(index++, tenantId);
                 if (isNameProvided) {
-                    stmt.setString(index++, request.getProperty(DeviceManagementConstants.GeoServices.FENCE_NAME).toString() + "%");
+                    stmt.setString(index++, "%" + request.getProperty(DeviceManagementConstants.GeoServices.FENCE_NAME).toString() + "%");
                 }
                 stmt.setInt(index++, request.getStartIndex());
                 stmt.setInt(index, request.getRowCount());
