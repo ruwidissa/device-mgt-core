@@ -26,6 +26,7 @@ import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.ConfigOperati
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -52,7 +53,7 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
             operation.setCreatedTimeStamp(new Timestamp(new Date().getTime()).toString());
             Connection connection = OperationManagementDAOFactory.getConnection();
             String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
-                    "INITIATED_BY, OPERATION_DETAILS) VALUES (?, ?, ?, ?, ?, ?)";
+                    "INITIATED_BY, OPERATION_DETAILS, TENANT_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"id"})) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -64,6 +65,7 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
                 stmt.setString(4, operation.getCode());
                 stmt.setString(5, operation.getInitiatedBy());
                 stmt.setBytes(6, operationBytes);
+                stmt.setInt(7, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                 stmt.executeUpdate();
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     int id = -1;
