@@ -18,7 +18,10 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl.device;
 
-import io.entgra.device.mgt.core.device.mgt.common.*;
+import io.entgra.device.mgt.core.device.mgt.common.Count;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
