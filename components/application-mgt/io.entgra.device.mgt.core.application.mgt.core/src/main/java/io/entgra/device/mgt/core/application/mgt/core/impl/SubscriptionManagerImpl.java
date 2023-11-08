@@ -177,23 +177,26 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         try {
             // Only for iOS devices
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-            if (DeviceTypes.IOS.toString().equalsIgnoreCase(APIUtil.getDeviceTypeData(applicationDTO
-                    .getDeviceTypeId()).getName())) {
-                // TODO: replace getAssetByAppId with the correct one in DAO
-                // Check if the app trying to subscribe is a VPP asset.
-                VppAssetDTO storedAsset = vppApplicationDAO.getAssetByAppId(applicationDTO.getId(), tenantId);
-                if (storedAsset != null) { // This is a VPP asset
-                    List<VppUserDTO> users = new ArrayList<>();
-                    List<Device> devices = applicationSubscriptionInfo.getDevices();// get
-                    // subscribed device list, so that we can extract the users of those devices.
-                    for (Device device : devices) {
-                        VppUserDTO user = vppApplicationDAO.getUserByDMUsername(device.getEnrolmentInfo()
-                                .getOwner(), PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                                .getTenantId(true));
-                        users.add(user);
+            // Ignore checking device type if app is a web clip
+            if(!applicationDTO.getType().equals("WEB_CLIP")){
+                if (DeviceTypes.IOS.toString().equalsIgnoreCase(APIUtil.getDeviceTypeData(applicationDTO
+                        .getDeviceTypeId()).getName())) {
+                    // TODO: replace getAssetByAppId with the correct one in DAO
+                    // Check if the app trying to subscribe is a VPP asset.
+                    VppAssetDTO storedAsset = vppApplicationDAO.getAssetByAppId(applicationDTO.getId(), tenantId);
+                    if (storedAsset != null) { // This is a VPP asset
+                        List<VppUserDTO> users = new ArrayList<>();
+                        List<Device> devices = applicationSubscriptionInfo.getDevices();// get
+                        // subscribed device list, so that we can extract the users of those devices.
+                        for (Device device : devices) {
+                            VppUserDTO user = vppApplicationDAO.getUserByDMUsername(device.getEnrolmentInfo()
+                                    .getOwner(), PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                    .getTenantId(true));
+                            users.add(user);
+                        }
+                        VPPApplicationManager vppManager = APIUtil.getVPPManager();
+                        vppManager.addAssociation(storedAsset, users);
                     }
-                    VPPApplicationManager vppManager = APIUtil.getVPPManager();
-                    vppManager.addAssociation(storedAsset, users);
                 }
             }
         } catch (BadRequestException e) {
