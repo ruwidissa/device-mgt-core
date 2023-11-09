@@ -18,13 +18,13 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl.device;
 
+import io.entgra.device.mgt.core.device.mgt.common.Count;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.Count;
-import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceBilling;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -1474,4 +1474,35 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
         return geoClusters;
     }
      */
+
+    @Override
+    public void refactorDeviceStatus(Connection conn, List<Device> validDevices) throws DeviceManagementDAOException {
+        String updateQuery = "UPDATE DM_DEVICE_STATUS SET STATUS = ? WHERE ID = ?";
+        String selectLastMatchingRecordQuery = "SELECT TOP 1 ID FROM DM_DEVICE_STATUS WHERE ENROLMENT_ID = ? AND DEVICE_ID = ? ORDER BY ID DESC";
+
+        try (PreparedStatement selectStatement = conn.prepareStatement(selectLastMatchingRecordQuery);
+             PreparedStatement updateStatement = conn.prepareStatement(updateQuery)) {
+
+            for (Device device : validDevices) {
+
+                selectStatement.setInt(1, device.getEnrolmentInfo().getId());
+                selectStatement.setInt(2, device.getId());
+
+                ResultSet resultSet = selectStatement.executeQuery();
+                int lastRecordId = 0;
+                if (resultSet.next()) {
+                    lastRecordId = resultSet.getInt("ID");
+                }
+
+                updateStatement.setString(1, String.valueOf(EnrolmentInfo.Status.DELETED));
+                updateStatement.setInt(2, lastRecordId);
+                updateStatement.execute();
+            }
+
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while updating device status properties.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
 }
