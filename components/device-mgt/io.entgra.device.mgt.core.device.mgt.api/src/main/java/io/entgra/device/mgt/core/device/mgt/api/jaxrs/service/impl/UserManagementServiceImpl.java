@@ -480,7 +480,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         try {
             if (StringUtils.isNotEmpty(username)) {
-                commonUsers = getUserList(null, username);
+                commonUsers = getUserList(null, "*" + username + "*");
             }
             if (commonUsers != null) {
                 commonUsers.remove(Constants.APIM_RESERVED_USER);
@@ -488,7 +488,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             }
 
             if (!skipSearch(commonUsers) && StringUtils.isNotEmpty(firstName)) {
-                tempList = getUserList(Constants.USER_CLAIM_FIRST_NAME, firstName);
+                tempList = getUserList(Constants.USER_CLAIM_FIRST_NAME, "*" + firstName + "*");
                 if (commonUsers == null) {
                     commonUsers = tempList;
                 } else {
@@ -497,7 +497,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             }
 
             if (!skipSearch(commonUsers) && StringUtils.isNotEmpty(lastName)) {
-                tempList = getUserList(Constants.USER_CLAIM_LAST_NAME, lastName);
+                tempList = getUserList(Constants.USER_CLAIM_LAST_NAME, "*" + lastName + "*");
                 if (commonUsers == null || commonUsers.size() == 0) {
                     commonUsers = tempList;
                 } else {
@@ -506,7 +506,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             }
 
             if (!skipSearch(commonUsers) && StringUtils.isNotEmpty(emailAddress)) {
-                tempList = getUserList(Constants.USER_CLAIM_EMAIL_ADDRESS, emailAddress);
+                tempList = getUserList(Constants.USER_CLAIM_EMAIL_ADDRESS, "*" + emailAddress + "*");
                 if (commonUsers == null || commonUsers.size() == 0) {
                     commonUsers = tempList;
                 } else {
