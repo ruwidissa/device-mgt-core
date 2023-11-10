@@ -68,7 +68,7 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
             }
 
             if (StringUtils.isNotEmpty(deviceIdentifier)) {
-                query += "AND DEVICE_IDENTIFIER = ? ";
+                query += "AND DEVICE_IDENTIFIER LIKE ? ";
                 isCertificateDeviceIdentifierProvided = true;
             }
 
@@ -83,10 +83,10 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
                 int paramIdx = 1;
                 stmt.setInt(paramIdx++, tenantId);
                 if (isCertificateSerialNumberProvided) {
-                    stmt.setString(paramIdx++, "%" + serialNumber+ "%");
+                    stmt.setString(paramIdx++, "%" + serialNumber + "%");
                 }
                 if (isCertificateDeviceIdentifierProvided) {
-                    stmt.setString(paramIdx++, deviceIdentifier);
+                    stmt.setString(paramIdx++, "%" + deviceIdentifier + "%");
                 }
                 if (isCertificateUsernameProvided) {
                     stmt.setString(paramIdx++, "%" + username + "%");
@@ -140,7 +140,7 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
             }
 
             if (StringUtils.isNotEmpty(deviceIdentifier)) {
-                sql += " AND DEVICE_IDENTIFIER = ?";
+                sql += " AND DEVICE_IDENTIFIER LIKE ?";
             }
 
             if (StringUtils.isNotEmpty(username)) {
@@ -156,7 +156,7 @@ public class OracleCertificateDAOImpl extends AbstractCertificateDAOImpl {
                 }
 
                 if (StringUtils.isNotEmpty(deviceIdentifier)) {
-                    stmt.setString(paramIdx++, deviceIdentifier);
+                    stmt.setString(paramIdx++, "%" + deviceIdentifier + "%");
                 }
 
                 if (StringUtils.isNotEmpty(username)) {
