@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DisenrollRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -1279,6 +1280,49 @@ public interface DeviceManagementService {
             @Size(max = 45)
                     String deviceId);
 
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/disenroll")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "Remove Multiple Devices Specified by Device IDs and Device Type",
+            notes = "Deletes multiple devices of the specified device type specified by their device IDs" +
+                    " and returns the status of the dis-enrollment operation.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:delete")
+                    })
+            },
+            nickname = "deleteMultipleDevicesByType"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully deleted the devices.",
+                            response = Device.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body")
+                            }),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred while deleting devices.",
+                            response = ErrorResponse.class)
+            })
+    Response disenrollMultipleDevices(@ApiParam(
+            name = "deviceTypeWithDeviceIds",
+            value = "Device type and corresponding device IDs for disenrollment",
+            required = true)
+                                      DisenrollRequest deviceTypeWithDeviceIds);
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/device-type/{type}/features")

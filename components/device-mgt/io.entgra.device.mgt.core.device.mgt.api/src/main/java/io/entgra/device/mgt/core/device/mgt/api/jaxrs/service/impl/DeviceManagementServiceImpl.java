@@ -26,6 +26,7 @@ import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionMa
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DisenrollRequest;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -101,8 +102,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @Path("/devices")
 public class DeviceManagementServiceImpl implements DeviceManagementService {
@@ -474,6 +476,64 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         }
     }
 
+    @PUT
+    @Override
+    @Path("/disenroll")
+    public Response disenrollMultipleDevices(DisenrollRequest deviceTypeWithDeviceIds) {
+
+        if (deviceTypeWithDeviceIds == null) {
+            String errorMsg = "Invalid request. The request body must not be null.";
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorMsg).build();
+        }
+        DeviceManagementProviderService deviceManagementProviderService = DeviceMgtAPIUtils.getDeviceManagementService();
+
+        List<DeviceIdentifier> successfullyDisenrolledDevices = new ArrayList<>();
+        List<DeviceIdentifier> failedToDisenrollDevices = new ArrayList<>();
+
+        Map<String, List<String>> list = deviceTypeWithDeviceIds.getDeviceTypeWithDeviceIds();
+        String deviceType;
+        List<String> deviceIds;
+        DeviceIdentifier deviceIdentifier;
+        Device persistedDevice;
+        boolean response;
+
+        for (Map.Entry<String, List<String>> entry : list.entrySet()) {
+            deviceType = entry.getKey();
+            deviceIds = entry.getValue();
+
+            for (String deviceId : deviceIds) {
+                deviceIdentifier = new DeviceIdentifier(deviceId, deviceType);
+                try {
+                    persistedDevice = deviceManagementProviderService.getDevice(deviceIdentifier, true);
+                    if (persistedDevice != null) {
+                        response = deviceManagementProviderService.disenrollDevice(deviceIdentifier);
+                        if (response) {
+                            successfullyDisenrolledDevices.add(deviceIdentifier);
+                        } else {
+                            failedToDisenrollDevices.add(deviceIdentifier);
+                        }
+                    } else {
+                        failedToDisenrollDevices.add(deviceIdentifier);
+                        if(log.isDebugEnabled()){
+                            String msg = "Error encountered while dis-enrolling device of type: " + deviceType + " with " + deviceId;
+                            log.error(msg);
+                        }
+                    }
+                } catch (DeviceManagementException e) {
+                    String msg = "Error encountered while dis-enrolling device of type: " + deviceType + " with " + deviceId;
+                    log.error(msg, e);
+                    failedToDisenrollDevices.add(deviceIdentifier);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+                }
+            }
+        }
+
+        Map<String, List<DeviceIdentifier>> responseMap = new HashMap<>();
+        responseMap.put("successfullyDisenrollDevices", successfullyDisenrolledDevices);
+        responseMap.put("failedToDisenrollDevices", failedToDisenrollDevices);
+
+        return Response.status(Response.Status.OK).entity(responseMap).build();
+    }
     @POST
     @Override
     @Path("/type/{deviceType}/id/{deviceId}/rename")
