@@ -1287,7 +1287,8 @@ public interface DeviceManagementService {
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
             value = "Remove Multiple Devices Specified by Device IDs and Device Type",
-            notes = "Deletes multiple devices of the specified device type specified by their device IDs and returns the status of the deletion operation.",
+            notes = "Deletes multiple devices of the specified device type specified by their device IDs" +
+                    " and returns the status of the dis-enrollment operation.",
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
@@ -1319,7 +1320,7 @@ public interface DeviceManagementService {
             })
     Response disenrollMultipleDevices(@ApiParam(
             name = "deviceTypeWithDeviceIds",
-            value = "The properties to advanced search devices.",
+            value = "Device type and corresponding device IDs for disenrollment",
             required = true)
                                       DisenrollRequest deviceTypeWithDeviceIds);
     @GET

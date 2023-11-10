@@ -491,17 +491,22 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         List<DeviceIdentifier> failedToDisenrollDevices = new ArrayList<>();
 
         Map<String, List<String>> list = deviceTypeWithDeviceIds.getDeviceTypeWithDeviceIds();
+        String deviceType;
+        List<String> deviceIds;
+        DeviceIdentifier deviceIdentifier;
+        Device persistedDevice;
+        boolean response;
 
         for (Map.Entry<String, List<String>> entry : list.entrySet()) {
-            String deviceType = entry.getKey();
-            List<String> deviceIds = entry.getValue();
+            deviceType = entry.getKey();
+            deviceIds = entry.getValue();
 
             for (String deviceId : deviceIds) {
-                DeviceIdentifier deviceIdentifier = new DeviceIdentifier(deviceId, deviceType);
+                deviceIdentifier = new DeviceIdentifier(deviceId, deviceType);
                 try {
-                    Device persistedDevice = deviceManagementProviderService.getDevice(deviceIdentifier, true);
+                    persistedDevice = deviceManagementProviderService.getDevice(deviceIdentifier, true);
                     if (persistedDevice != null) {
-                        boolean response = deviceManagementProviderService.disenrollDevice(deviceIdentifier);
+                        response = deviceManagementProviderService.disenrollDevice(deviceIdentifier);
                         if (response) {
                             successfullyDisenrolledDevices.add(deviceIdentifier);
                         } else {
@@ -509,6 +514,10 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                         }
                     } else {
                         failedToDisenrollDevices.add(deviceIdentifier);
+                        if(log.isDebugEnabled()){
+                            String msg = "Error encountered while dis-enrolling device of type: " + deviceType + " with " + deviceId;
+                            log.error(msg);
+                        }
                     }
                 } catch (DeviceManagementException e) {
                     String msg = "Error encountered while dis-enrolling device of type: " + deviceType + " with " + deviceId;
