@@ -27,7 +27,7 @@ public interface APIApplicationServices {
     APIApplicationKey createAndRetrieveApplicationCredentials(String clientName, String grantType)
             throws APIServicesException;
 
-    APIApplicationKey generateAndRetrieveApplicationKeys(String clientName, String username, String password, String grantType)
+    APIApplicationKey createAndRetrieveApplicationCredentialsWithUser(String clientName, String username, String password, String grantType)
             throws APIServicesException;
 
     AccessTokenInfo generateAccessTokenFromRegisteredApplication(String clientId, String clientSecret) throws APIServicesException;

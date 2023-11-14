@@ -57,7 +57,7 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
 
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH, PARENT_GROUP_ID FROM DM_GROUP "
                     + "WHERE TENANT_ID = ?";
             if (groupName != null && !groupName.isEmpty()) {
                 sql += " AND GROUP_NAME LIKE ?";
@@ -129,7 +129,7 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
 
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH FROM DM_GROUP "
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS, PARENT_PATH, PARENT_GROUP_ID FROM DM_GROUP "
                     + "WHERE TENANT_ID = ?";
             if (groupName != null && !groupName.isEmpty()) {
                 sql += " AND GROUP_NAME LIKE ?";

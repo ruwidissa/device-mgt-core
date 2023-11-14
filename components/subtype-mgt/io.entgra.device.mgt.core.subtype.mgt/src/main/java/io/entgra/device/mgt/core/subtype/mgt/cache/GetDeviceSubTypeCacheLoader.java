@@ -47,7 +47,7 @@ public class GetDeviceSubTypeCacheLoader extends CacheLoader<String, DeviceSubTy
         DeviceSubTypeCacheKey deviceSubTypeCacheKey = DeviceSubTypeMgtUtil.getDeviceSubTypeCacheKey(key);
         int tenantId = deviceSubTypeCacheKey.getTenantId();
         String subTypeId = deviceSubTypeCacheKey.getSubTypeId();
-        DeviceSubType.DeviceType deviceType = deviceSubTypeCacheKey.getDeviceType();
+        String deviceType = deviceSubTypeCacheKey.getDeviceType();
 
         if (log.isTraceEnabled()) {
             log.trace("Loading Device subtype for " + deviceType + " subtype & subtype Id : " + subTypeId);

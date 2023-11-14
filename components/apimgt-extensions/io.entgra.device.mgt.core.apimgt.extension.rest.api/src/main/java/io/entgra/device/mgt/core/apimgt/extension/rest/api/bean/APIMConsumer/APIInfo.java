@@ -18,7 +18,6 @@
 
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer;
 
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.ScopeUtils;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;

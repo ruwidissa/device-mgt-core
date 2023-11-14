@@ -23,7 +23,7 @@
     <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>io.entgra.device.mgt.core.parent</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.29-SNAPSHOT</version>
+    <version>5.0.31-SNAPSHOT</version>
     <name>WSO2 Carbon - Device Management - Parent</name>
     <url>https://entgra.io</url>
     <description>WSO2 Connected Device Manager Components</description>
@@ -1961,6 +1961,8 @@
         <axis2.orbit.version>1.6.1-wso2v85</axis2.orbit.version>
         <axis2-transports.version>1.1.0-wso2v10</axis2-transports.version>
 
+        <jboss-transaction-api.version>1.0.0.Final</jboss-transaction-api.version>
+
         <!-- Testing -->
         <junit.version>4.13.1</junit.version>
 
@@ -1996,7 +1998,7 @@
         <axiom.wso2.version>1.2.11-wso2v25</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <io.entgra.device.mgt.core.version>5.0.29-SNAPSHOT</io.entgra.device.mgt.core.version>
+        <io.entgra.device.mgt.core.version>5.0.31-SNAPSHOT</io.entgra.device.mgt.core.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.9.2</carbon.commons.version>
@@ -2025,6 +2027,11 @@
         <cxf.version>3.5.5</cxf.version>
         <json-simple.version>1.1.wso2v1</json-simple.version>
         <jackson.version>1.9.13</jackson.version>
+
+        <!-- Subtype Management -->
+        <json.version>20220924</json.version>
+        <fasterxml.jackson.version>2.4.5</fasterxml.jackson.version>
+        <guava.version>27.0.1-jre</guava.version>
 
         <!-- BouncyCastle -->
         <bcprov.wso2.version>1.70.0.wso2v1</bcprov.wso2.version>

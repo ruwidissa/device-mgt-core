@@ -23,9 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
-import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.cache.LoginCache;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -34,9 +32,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.http.Consts;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
@@ -64,7 +59,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
+import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import org.xml.sax.SAXException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -73,7 +70,14 @@ import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -465,15 +469,25 @@ public class HandlerUtil {
      * @param tags - tags which are retrieved by reading app manager configuration
      * @param username - username provided from login form or admin username
      * @param password - password provided from login form or admin password
+     * @param callbackUrl - callback url
+     * @param supportedGrantTypes - supported grant types
      * @return {@link StringEntity} of the payload to create the client application
      */
-    public static StringEntity constructAppRegPayload(JsonArray tags, String appName, String username, String password) {
+    public static StringEntity constructAppRegPayload(JsonArray tags, String appName, String username, String password,
+                                                      String callbackUrl, JsonArray supportedGrantTypes) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(HandlerConstants.APP_NAME_KEY, appName);
         jsonObject.addProperty(HandlerConstants.USERNAME, username);
         jsonObject.addProperty(HandlerConstants.PASSWORD, password);
         jsonObject.addProperty(HandlerConstants.IS_ALLOWED_TO_ALL_DOMAINS_KEY, "false");
         jsonObject.add(HandlerConstants.TAGS_KEY, tags);
+        if (callbackUrl != null) {
+            jsonObject.addProperty(HandlerConstants.CALLBACK_URL_KEY, callbackUrl);
+        }
+        if (supportedGrantTypes != null) {
+            jsonObject.add(HandlerConstants.GRANT_TYPE_KEY, supportedGrantTypes);
+
+        }
         String payload = jsonObject.toString();
         return new StringEntity(payload, ContentType.APPLICATION_JSON);
     }
@@ -765,5 +779,9 @@ public class HandlerUtil {
                     .getThreadLocalCarbonContext().getOSGiService(OTPManagementService.class, null);
         }
         return otpManagementService;
+    }
+
+    public static String generateStateToken() {
+        return new BigInteger(130, new SecureRandom()).toString(32);
     }
 }

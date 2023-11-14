@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.subtype.mgt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
 import io.entgra.device.mgt.core.subtype.mgt.exception.SubTypeMgtPluginException;
 import io.entgra.device.mgt.core.subtype.mgt.impl.DeviceSubTypeServiceImpl;
@@ -45,12 +46,12 @@ public class ServiceNegativeTest extends BaseDeviceSubTypePluginTest {
     public void testAddDeviceSubType() throws SubTypeMgtPluginException {
         DeviceSubType deviceSubType = new DeviceSubType() {
             @Override
-            public <T> DeviceSubType setDeviceSubType(T objType, String typeDef) {
+            public <T> DeviceSubType convertToDeviceSubType() {
                 return null;
             }
 
             @Override
-            public String parseSubTypeToJson(Object objType) {
+            public String parseSubTypeToJson() throws JsonProcessingException {
                 return null;
             }
         };
@@ -65,16 +66,16 @@ public class ServiceNegativeTest extends BaseDeviceSubTypePluginTest {
     public void testAddDeviceSubTypes() throws SubTypeMgtPluginException {
         String subTypeId = "1";
         String subTypeName = "TestSubType";
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.SIM;
+        String deviceType = "SIM";
 
         DeviceSubType deviceSubType = new DeviceSubType() {
             @Override
-            public <T> DeviceSubType setDeviceSubType(T objType, String typeDef) {
+            public <T> DeviceSubType convertToDeviceSubType() {
                 return null;
             }
 
             @Override
-            public String parseSubTypeToJson(Object objType) {
+            public String parseSubTypeToJson() throws JsonProcessingException {
                 return null;
             }
         };
@@ -91,7 +92,7 @@ public class ServiceNegativeTest extends BaseDeviceSubTypePluginTest {
     public void testUpdateDeviceSubTypes() throws SubTypeMgtPluginException {
         String subTypeId = "15";
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        DeviceSubType.DeviceType deviceType = DeviceSubType.DeviceType.SIM;
+        String deviceType = "SIM";
         String subTypeName = "TestSubType";
         String subTypeExpected = TestUtils.createUpdateDeviceSubType(subTypeId);
 

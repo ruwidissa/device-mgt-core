@@ -26,7 +26,6 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.API
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.ApplicationKey;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.KeyManager;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Subscription;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.TokenInfo;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataKeyAlreadyExistsException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
@@ -96,12 +95,11 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                                                                              boolean isMappingRequired)
             throws APIManagerException {
 
-        TokenInfo tokenInfo = new TokenInfo();
+        ApiApplicationInfo apiApplicationInfo = new ApiApplicationInfo();
         if (StringUtils.isEmpty(accessToken)) {
-            ApiApplicationInfo applicationInfo = getApplicationInfo(username, password);
-            tokenInfo.setApiApplicationInfo(applicationInfo);
+            apiApplicationInfo = getApplicationInfo(username, password);
         } else {
-            tokenInfo.setAccessToken(accessToken);
+            apiApplicationInfo.setAccess_token(accessToken);
         }
 
         ConsumerRESTAPIServices consumerRESTAPIServices =
@@ -118,16 +116,16 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 Map<String, String> queryParams = new HashMap<>();
                 queryParams.put("tag", tag);
 
-                APIInfo[] apiInfos = consumerRESTAPIServices.getAllApis(tokenInfo, queryParams, headerParams);
+                APIInfo[] apiInfos = consumerRESTAPIServices.getAllApis(apiApplicationInfo, queryParams, headerParams);
                 Arrays.stream(apiInfos).forEach(apiInfo -> uniqueApiSet.putIfAbsent(apiInfo.getName(), apiInfo));
             }
 
             List<APIInfo> uniqueApiList = new ArrayList<>(uniqueApiSet.values());
 
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
-                    consumerRESTAPIServices.getAllApplications(tokenInfo, applicationName);
+                    consumerRESTAPIServices.getAllApplications(apiApplicationInfo, applicationName);
             if (applications.length == 0) {
-                return handleNewAPIApplication(applicationName, uniqueApiList, tokenInfo, keyType,
+                return handleNewAPIApplication(applicationName, uniqueApiList, apiApplicationInfo, keyType,
                         validityTime, supportedGrantTypes, callbackUrl, isMappingRequired);
             } else {
                 if (applications.length == 1) {
@@ -140,17 +138,17 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                     Metadata metaData = metadataManagementService.retrieveMetadata(applicationName);
                     if (metaData == null) {
                         // Todo add a comment
-                        consumerRESTAPIServices.deleteApplication(tokenInfo, application.getApplicationId());
-                        return handleNewAPIApplication(applicationName, uniqueApiList, tokenInfo, keyType,
+                        consumerRESTAPIServices.deleteApplication(apiApplicationInfo, application.getApplicationId());
+                        return handleNewAPIApplication(applicationName, uniqueApiList, apiApplicationInfo, keyType,
                                 validityTime, supportedGrantTypes, callbackUrl, isMappingRequired);
                     } else {
-                        Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(tokenInfo, application.getApplicationId());
+                        Subscription[] subscriptions = consumerRESTAPIServices.getAllSubscriptions(apiApplicationInfo, application.getApplicationId());
                         for (Subscription subscription : subscriptions) {
                             uniqueApiList.removeIf(apiInfo -> Objects.equals(apiInfo.getId(), subscription.getApiInfo().getId()));
                         }
 
                         if (!uniqueApiList.isEmpty()) {
-                            addSubscriptions(application, uniqueApiList, tokenInfo);
+                            addSubscriptions(application, uniqueApiList, apiApplicationInfo);
                         }
 
                         String[] metaValues = metaData.getMetaValue().split(":");
@@ -162,7 +160,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         }
                         String applicationId = metaValues[0];
                         String keyMappingId = metaValues[1];
-                        ApplicationKey applicationKey = consumerRESTAPIServices.getKeyDetails(tokenInfo, applicationId, keyMappingId);
+                        ApplicationKey applicationKey = consumerRESTAPIServices.getKeyDetails(apiApplicationInfo, applicationId, keyMappingId);
                         ApiApplicationKey apiApplicationKey = new ApiApplicationKey();
                         apiApplicationKey.setConsumerKey(applicationKey.getConsumerKey());
                         apiApplicationKey.setConsumerSecret(applicationKey.getConsumerSecret());
@@ -195,7 +193,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
 
 
     private ApiApplicationKey handleNewAPIApplication(String applicationName, List<APIInfo> uniqueApiList,
-                                                      TokenInfo tokenInfo, String keyType, String validityTime,
+                                                      ApiApplicationInfo apiApplicationInfo, String keyType, String validityTime,
                                                       ArrayList<String> supportedGrantTypes, String callbackUrl,
                                                       boolean isMappingRequired) throws APIManagerException {
         ConsumerRESTAPIServices consumerRESTAPIServices =
@@ -205,10 +203,10 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         application.setThrottlingPolicy(UNLIMITED_TIER);
 
         try {
-            application = consumerRESTAPIServices.createApplication(tokenInfo, application);
-            addSubscriptions(application, uniqueApiList, tokenInfo);
+            application = consumerRESTAPIServices.createApplication(apiApplicationInfo, application);
+            addSubscriptions(application, uniqueApiList, apiApplicationInfo);
 
-            KeyManager[] keyManagers = consumerRESTAPIServices.getAllKeyManagers(tokenInfo);
+            KeyManager[] keyManagers = consumerRESTAPIServices.getAllKeyManagers(apiApplicationInfo);
             KeyManager keyManager;
             if (keyManagers.length == 1) {
                 keyManager = keyManagers[0];
@@ -219,21 +217,29 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                 throw new APIManagerException(msg);
             }
 
-            tokenInfo.setApiApplicationInfo(getApplicationInfo(null, null));
             ApplicationKey applicationKey;
 
-
             if (isMappingRequired) {
-                // If we need to get opaque token instead of the JWT token, we have to do the mapping. Therefore,, if
+                // If we need to get opaque token instead of the JWT token, we have to do the mapping. Therefore, if
                 // it is a requirement then we have to call the method with enabling the flag.
-                applicationKey = consumerRESTAPIServices.mapApplicationKeys(tokenInfo, application,
-                    keyManager.getName(), keyType);
+                APIApplicationServices apiApplicationServices = APIApplicationManagerExtensionDataHolder.getInstance()
+                        .getApiApplicationServices();
+
+                APIApplicationKey apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                        "ClientForMapping",
+                        "client_credentials password refresh_token urn:ietf:params:oauth:grant-type:jwt-bearer");
+
+                apiApplicationInfo.setClientId(apiApplicationKey.getClientId());
+                apiApplicationInfo.setClientSecret(apiApplicationKey.getClientSecret());
+
+                applicationKey = consumerRESTAPIServices.mapApplicationKeys(apiApplicationInfo, application,
+                        keyManager.getName(), keyType);
             } else {
-                applicationKey = consumerRESTAPIServices.generateApplicationKeys(tokenInfo, application.getApplicationId(),
+                applicationKey = consumerRESTAPIServices.generateApplicationKeys(apiApplicationInfo, application.getApplicationId(),
                         keyManager.getName(), validityTime, keyType);
             }
             if (supportedGrantTypes != null || StringUtils.isNotEmpty(callbackUrl)) {
-                applicationKey = consumerRESTAPIServices.updateGrantType(tokenInfo, application.getApplicationId(),
+                applicationKey = consumerRESTAPIServices.updateGrantType(apiApplicationInfo, application.getApplicationId(),
                         applicationKey.getKeyMappingId(), keyManager.getName(), supportedGrantTypes, callbackUrl);
             }
 
@@ -277,16 +283,16 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
     /**
      * This method can be used to add a new subscriptions providing the ids of the APIs and the applications.
      *
-     * @param application {@link io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application}
-     * @param apiInfos    {@link List<APIInfo>}
-     * @param tokenInfo   {@link TokenInfo}
+     * @param application        {@link io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application}
+     * @param apiInfos           {@link List<APIInfo>}
+     * @param apiApplicationInfo {@link ApiApplicationInfo}
      * @throws BadRequestException         if incorrect data provided to call subscribing REST API.
      * @throws UnexpectedResponseException if error occurred while processing the subscribing REST API.
      * @throws APIServicesException        if error occurred while invoking the subscribing REST API.
      */
     private void addSubscriptions(
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application,
-            List<APIInfo> apiInfos, TokenInfo tokenInfo)
+            List<APIInfo> apiInfos, ApiApplicationInfo apiApplicationInfo)
             throws BadRequestException, UnexpectedResponseException, APIServicesException {
 
         ConsumerRESTAPIServices consumerRESTAPIServices =
@@ -302,7 +308,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             subscriptionList.add(subscription);
         });
 
-        consumerRESTAPIServices.createSubscriptions(tokenInfo, subscriptionList);
+        consumerRESTAPIServices.createSubscriptions(apiApplicationInfo, subscriptionList);
     }
 
     @Override
@@ -407,7 +413,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                         "ClientForConsumerRestCalls",
                         "client_credentials password refresh_token urn:ietf:params:oauth:grant-type:jwt-bearer");
             } else {
-                apiApplicationKey = apiApplicationServices.generateAndRetrieveApplicationKeys(
+                apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentialsWithUser(
                         "ClientForConsumerRestCalls",
                         username, password,
                         "client_credentials password refresh_token urn:ietf:params:oauth:grant-type:jwt-bearer");

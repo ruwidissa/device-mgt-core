@@ -134,6 +134,19 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     }
 
     @Override
+    public Response getHierarchicalGroupCount() {
+        try {
+            String currentUser = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+            int count = DeviceMgtAPIUtils.getGroupManagementProviderService().getHierarchicalGroupCount(currentUser, null);
+            return Response.status(Response.Status.OK).entity(count).build();
+        } catch (GroupManagementException e) {
+            String msg = "Error occurred while retrieving hierarchical group count.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @Override
     public Response getGroupCount() {
         try {
             String currentUser = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();

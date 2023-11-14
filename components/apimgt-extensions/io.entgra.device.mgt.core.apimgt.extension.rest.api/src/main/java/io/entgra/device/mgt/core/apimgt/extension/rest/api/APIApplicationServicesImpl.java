@@ -75,7 +75,7 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
     }
 
     @Override
-    public APIApplicationKey generateAndRetrieveApplicationKeys(String clientName, String username, String password, String grantType)
+    public APIApplicationKey createAndRetrieveApplicationCredentialsWithUser(String clientName, String username, String password, String grantType)
             throws APIServicesException {
 
         String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);

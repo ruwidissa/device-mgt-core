@@ -75,21 +75,21 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "View groups",
                         description = "",
-                        key = "perm:admin-groups:view",
+                        key = "gm:admin:groups:view",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/groups/view"}
                 ),
                 @Scope(
                         name = "Count groups",
                         description = "",
-                        key = "perm:admin-groups:count",
+                        key = "gm:admin:groups:count",
                         roles = {"Internal/devicemgt-admin"},
-                        permissions = {"/device-mgt/admin/groups/view"}
+                        permissions = {"/device-mgt/admin/groups/count"}
                 ),
                 @Scope(
                         name = "Add groups",
                         description = "",
-                        key = "perm:admin-groups:add",
+                        key = "gm:admin:groups:add",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/groups/add"}
                 )
@@ -106,7 +106,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:admin:groups:view")
                     })
             }
     )
@@ -182,7 +182,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:admin:groups:view")
                     })
             }
     )
@@ -256,6 +256,58 @@ public interface GroupManagementAdminService {
             @QueryParam("limit")
                     int limit);
 
+    @Path("/hierarchy/count")
+    @GET
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HTTPConstants.HEADER_GET,
+            value = "Get the count of all hierarchical groups belongs to current admin user.",
+            notes = "Returns count of all permitted hierarchical groups enrolled with the system.",
+            tags = "Device Group Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:admin:groups:count")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the hierarchical device group count.",
+                    response = Integer.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource has been modified the last time.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client has already the latest version of " +
+                            "the requested resource."),
+            @ApiResponse(
+                    code = 404,
+                    message = "No groups found.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the group count.",
+                    response = ErrorResponse.class)
+    })
+    Response getHierarchicalGroupCount(@ApiParam(
+            name = "status",
+            value = "status of hierarchical groups of which count should be retrieved")
+                           @QueryParam("status")
+                           String status);
+
     @Path("/count")
     @GET
     @ApiOperation(
@@ -266,7 +318,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:count")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:admin:groups:count")
                     })
             }
     )
@@ -317,7 +369,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:add")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:admin:groups:add")
                     })
             }
     )
@@ -387,7 +439,7 @@ public interface GroupManagementAdminService {
             tags = "Device Group Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:add")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "gm:groups:add")
                     })
             }
     )

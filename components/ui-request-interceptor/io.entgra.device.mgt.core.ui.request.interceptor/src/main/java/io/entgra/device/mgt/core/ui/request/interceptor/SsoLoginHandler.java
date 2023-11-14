@@ -38,7 +38,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -83,6 +82,7 @@ public class SsoLoginHandler extends HttpServlet {
     private LoginCache loginCache;
     private OAuthApp oAuthApp;
     private OAuthAppCacheKey oAuthAppCacheKey;
+    private String state;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
@@ -94,6 +94,7 @@ public class SsoLoginHandler extends HttpServlet {
 
             httpSession = req.getSession(true);
 
+            state = HandlerUtil.generateStateToken();
             initializeAdminCredentials();
             baseContextPath = req.getContextPath();
             applicationName = baseContextPath.substring(1, baseContextPath.indexOf("-ui-request-handler"));
@@ -124,12 +125,11 @@ public class SsoLoginHandler extends HttpServlet {
             String scopesSsoString = HandlerUtil.getScopeString(scopesSsoJson);
             String loginCallbackUrl = iotsCoreUrl + baseContextPath + HandlerConstants.SSO_LOGIN_CALLBACK;
             persistAuthSessionData(req, oAuthApp.getClientId(), oAuthApp.getClientSecret(),
-                    oAuthApp.getEncodedClientApp(), scopesSsoString);
-
+                    oAuthApp.getEncodedClientApp(), scopesSsoString, state);
             resp.sendRedirect(keyManagerUrl + HandlerConstants.AUTHORIZATION_ENDPOINT +
                     "?response_type=code" +
+                    "&state=" + state +
                     "&client_id=" + clientId +
-                    "&state=" +
                     "&scope=openid " + scopesSsoString +
                     "&redirect_uri=" + loginCallbackUrl);
         } catch (IOException e) {
@@ -157,6 +157,8 @@ public class SsoLoginHandler extends HttpServlet {
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
             sessionTimeOut = Integer.parseInt(String.valueOf(uiConfigJsonObject.get("sessionTimeOut")));
+            JsonArray supportedGrantTypes = constructAppGrantTypeUpdateArray();
+            String callbackUrl = iotsCoreUrl + baseContextPath + HandlerConstants.SSO_LOGIN_CALLBACK;
 
             // Register the client application
             HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
@@ -165,7 +167,8 @@ public class SsoLoginHandler extends HttpServlet {
             apiRegEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +
                     encodedAdminCredentials);
             apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
-            apiRegEndpoint.setEntity(HandlerUtil.constructAppRegPayload(tags, applicationName, adminUsername, adminPassword));
+            apiRegEndpoint.setEntity(HandlerUtil.constructAppRegPayload(tags, applicationName, adminUsername, adminPassword,
+                    callbackUrl, supportedGrantTypes));
 
             ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
 
@@ -181,7 +184,7 @@ public class SsoLoginHandler extends HttpServlet {
                     clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
                     encodedClientApp = Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes());
                     String scopesString = HandlerUtil.getScopeString(scopes);
-                    persistAuthSessionData(req, clientId, clientSecret, encodedClientApp, scopesString);
+                    persistAuthSessionData(req, clientId, clientSecret, encodedClientApp, scopesString, state);
                 }
 
                 // cache the oauth app credentials
@@ -201,87 +204,11 @@ public class SsoLoginHandler extends HttpServlet {
                 HandlerUtil.handleError(resp, null);
                 throw new LoginException(msg);
             }
-
-            // Get the details of the registered application
-//            String getApplicationEndpointUrl = apiMgtUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT +
-//                    "?query=" + applicationName;
-//            HttpGet getApplicationEndpoint = new HttpGet(getApplicationEndpointUrl);
-//            getApplicationEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER +
-//                    getAccessToken(resp, encodedClientApp));
-//
-//            ProxyResponse getApplicationResponse = HandlerUtil.execute(getApplicationEndpoint);
-//
-//            if (getApplicationResponse.getCode() == HttpStatus.SC_OK) {
-//                JsonParser jsonParser = new JsonParser();
-//                JsonElement jAppResult = jsonParser.parse(getApplicationResponse.getData());
-//                if (jAppResult.isJsonObject()) {
-//                    JsonObject jClientAppResultAsJsonObject = jAppResult.getAsJsonObject();
-//                    JsonArray appList = jClientAppResultAsJsonObject.getAsJsonArray("list");
-//                    JsonObject app;
-//                    for (JsonElement appJson : appList) {
-//                        app = appJson.getAsJsonObject();
-//                        if (app.get("name").getAsString().equals(applicationName)) {
-//                            applicationId = app.get("applicationId").getAsString();
-//                            break;
-//                        }
-//                    }
-//                }
-//            } else if (getApplicationResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-//                String msg = "Unauthorized attempt to get registered application data. " +
-//                        "Application Name: " + applicationName + ". Response message: " + clientAppResponse.getData();
-//                log.error(msg);
-//                HandlerUtil.handleError(resp, getApplicationResponse);
-//                throw new LoginException(msg);
-//            } else {
-//                String msg = "Failed the process while getting the data of registered application. " +
-//                        "Application Name: " + applicationName + ". Response Code: "
-//                        + clientAppResponse.getCode() + ", Response message: " + clientAppResponse.getData();
-//                log.error(msg);
-//                HandlerUtil.handleError(resp, null);
-//                throw new LoginException(msg);
-//            }
-
-            // Update the grant types of the application
-//            String url = apiMgtUrl + HandlerConstants.APIM_APPLICATIONS_ENDPOINT + "/" + applicationId + "/keys/" +
-//                    HandlerConstants.PRODUCTION_KEY;
-//            HttpPut updateApplicationGrantTypesEndpoint = new HttpPut(url);
-//            updateApplicationGrantTypesEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER +
-//                    getAccessToken(resp, encodedClientApp));
-//            updateApplicationGrantTypesEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
-//            updateApplicationGrantTypesEndpoint.setEntity(constructAppGrantTypeUpdatePayload());
-//
-//            ProxyResponse updateApplicationGrantTypesEndpointResponse = HandlerUtil.execute(updateApplicationGrantTypesEndpoint);
-//
-//            // Update app as a SaaS app
-//            this.updateSaasApp(applicationId);
-//
-//            if (updateApplicationGrantTypesEndpointResponse.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-//                String msg = "Unauthorized attempt to update the grant types of the application. " +
-//                        "Application ID: " + applicationId + ". Response message: "
-//                        + updateApplicationGrantTypesEndpointResponse.getData();
-//                log.error(msg);
-//                HandlerUtil.handleError(resp, updateApplicationGrantTypesEndpointResponse);
-//                throw new LoginException(msg);
-//            } else if (updateApplicationGrantTypesEndpointResponse.getCode() != HttpStatus.SC_OK) {
-//                String msg = "Failed the process while updating the grant types of the application. " +
-//                        "Application ID: " + applicationId + ". Response Code: "
-//                        + updateApplicationGrantTypesEndpointResponse.getCode() + ", Response message: "
-//                        + updateApplicationGrantTypesEndpointResponse.getData();
-//                log.error(msg);
-//                HandlerUtil.handleError(resp, null);
-//                throw new LoginException(msg);
-//            }
         } catch (IOException e) {
             throw new LoginException("Error occurred while sending the response into the socket.", e);
         } catch (JsonSyntaxException e) {
             throw new LoginException("Error occurred while parsing the response.", e);
         }
-//        catch (ParserConfigurationException e) {
-//            throw new LoginException("Error while creating the document builder.", e);
-//        }
-//        catch (SAXException e) {
-//            throw new LoginException("Error while parsing xml file.", e);
-//        }
     }
 
     /**
@@ -312,34 +239,31 @@ public class SsoLoginHandler extends HttpServlet {
      * @param scopes           - User scopes
      */
     private void persistAuthSessionData(HttpServletRequest req, String clientId, String clientSecret,
-                                        String encodedClientApp, String scopes) {
+                                        String encodedClientApp, String scopes, String state) {
         httpSession = req.getSession(false);
         httpSession.setAttribute("clientId", clientId);
         httpSession.setAttribute("clientSecret", clientSecret);
         httpSession.setAttribute("encodedClientApp", encodedClientApp);
         httpSession.setAttribute("scope", scopes);
         httpSession.setAttribute("redirectUrl", req.getParameter("redirect"));
+        httpSession.setAttribute("state", state);
         httpSession.setMaxInactiveInterval(sessionTimeOut);
     }
 
     /***
      * Generates payload for application grant_type update payload
      *
-     * @return {@link StringEntity} of the payload to update application grant type
+     * @return {@link JsonArray} of the payload to update application grant type
      */
-    private StringEntity constructAppGrantTypeUpdatePayload() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("supportedGrantTypes",
-                new JSONArray(new Object[]{
-                        HandlerConstants.CODE_GRANT_TYPE,
-                        HandlerConstants.REFRESH_TOKEN_GRANT_TYPE,
-                        HandlerConstants.PASSWORD_GRANT_TYPE,
-                        HandlerConstants.JWT_BEARER_GRANT_TYPE
-                })
-        );
-        jsonObject.put(HandlerConstants.CALLBACK_URL_KEY, iotsCoreUrl + baseContextPath + HandlerConstants.SSO_LOGIN_CALLBACK);
-        String payload = jsonObject.toString();
-        return new StringEntity(payload, ContentType.APPLICATION_JSON);
+    private JsonArray constructAppGrantTypeUpdateArray() {
+        JsonArray jsonArray = new JsonArray();
+
+        jsonArray.add(HandlerConstants.CODE_GRANT_TYPE);
+        jsonArray.add(HandlerConstants.REFRESH_TOKEN_GRANT_TYPE);
+        jsonArray.add(HandlerConstants.PASSWORD_GRANT_TYPE);
+        jsonArray.add(HandlerConstants.JWT_BEARER_GRANT_TYPE);
+
+        return jsonArray;
     }
 
     /***
@@ -388,109 +312,5 @@ public class SsoLoginHandler extends HttpServlet {
 
         JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
         return jTokenResultAsJsonObject.get("access_token").getAsString();
-    }
-
-    /***
-     * Updates Application
-     *
-     * @param appName - Application name
-     * @throws IOException IO exception throws if an error occurred when invoking token endpoint
-     * @throws ParserConfigurationException,SAXException throws if an error occurred when parsing xml
-     */
-    private void updateSaasApp(String appName) throws ParserConfigurationException, IOException, SAXException {
-        File getAppRequestXmlFile = new File(HandlerConstants.PAYLOADS_DIR + "/get-app-request.xml");
-        String identityAppMgtUrl = apiMgtUrl + HandlerConstants.IDENTITY_APP_MGT_ENDPOINT;
-
-        HttpPost getApplicationEndpoint = new HttpPost(identityAppMgtUrl);
-        getApplicationEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +
-                encodedAdminCredentials);
-        getApplicationEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.TEXT_XML.toString());
-        getApplicationEndpoint.setHeader(HandlerConstants.SOAP_ACTION_HEADER, "urn:getApplication");
-
-        String requestBodyString = HandlerUtil.xmlToString(getAppRequestXmlFile);
-
-        Map<String, String> data = new HashMap<>();
-        appName = adminUsername + HandlerConstants.UNDERSCORE + appName + HandlerConstants.UNDERSCORE +
-                HandlerConstants.PRODUCTION_KEY;
-        data.put("applicationName", appName);
-        requestBodyString = StrSubstitutor.replace(requestBodyString, data);
-        getApplicationEndpoint.setEntity(new StringEntity(requestBodyString, ContentType.TEXT_XML));
-
-        ProxyResponse getApplicationEndpointResponse = HandlerUtil.execute(getApplicationEndpoint);
-
-        Document doc = DocumentBuilderFactory.newInstance()
-                .newDocumentBuilder()
-                .parse(new InputSource(new StringReader(getApplicationEndpointResponse.getData())));
-        NodeList nodeList = doc.getElementsByTagName(HandlerConstants.AX_PREFIX + "inboundAuthenticationConfig");
-        NodeList childNodeList;
-        String nodeName;
-
-        data.clear();
-        data.put("applicationId", doc.getElementsByTagName(HandlerConstants.AX_PREFIX + "applicationID").item(0).getTextContent());
-        data.put("applicationName", doc.getElementsByTagName(HandlerConstants.AX_PREFIX + "applicationName").item(0).getTextContent());
-        data.put("description", doc.getElementsByTagName(HandlerConstants.AX_PREFIX + "description").item(0).getTextContent());
-        data.put("saasApp", "true");
-
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            childNodeList = nodeList.item(i).getChildNodes();
-            for (int j = 0; j < childNodeList.getLength(); j++) {
-                if (childNodeList.item(j).getNodeName().equalsIgnoreCase(HandlerConstants.AX_PREFIX + "inboundAuthenticationRequestConfigs")) {
-                    NodeList inboundAuthRequestConfigs = childNodeList.item(j).getChildNodes();
-                    for (int k = 0; k < inboundAuthRequestConfigs.getLength(); k++) {
-                        nodeName = inboundAuthRequestConfigs.item(k).getNodeName();
-                        if (nodeName.equalsIgnoreCase(HandlerConstants.AX_PREFIX + "inboundAuthKey")) {
-                            data.put("inboundAuthKey", inboundAuthRequestConfigs.item(k).getTextContent());
-                        }
-                        if (nodeName.equalsIgnoreCase(HandlerConstants.AX_PREFIX + "inboundAuthType")) {
-                            data.put("inboundAuthType", inboundAuthRequestConfigs.item(k).getTextContent());
-                        }
-                        if (nodeName.equalsIgnoreCase(HandlerConstants.AX_PREFIX + "inboundConfigType")) {
-                            data.put("inboundConfigType", inboundAuthRequestConfigs.item(k).getTextContent());
-                        }
-                    }
-                }
-            }
-        }
-
-        nodeList = doc.getElementsByTagName(HandlerConstants.AX_PREFIX + "owner");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            childNodeList = nodeList.item(i).getChildNodes();
-            for (int j = 0; j < childNodeList.getLength(); j++) {
-                switch (childNodeList.item(j).getNodeName()) {
-                    case HandlerConstants.AX_PREFIX + "tenantDomain":
-                        data.put("tenantDomain", childNodeList.item(j).getTextContent());
-                        break;
-                    case HandlerConstants.AX_PREFIX + "userName":
-                        data.put("userName", childNodeList.item(j).getTextContent());
-                        break;
-                    case HandlerConstants.AX_PREFIX + "userStoreDomain":
-                        data.put("userStoreDomain", childNodeList.item(j).getTextContent());
-                        break;
-                }
-            }
-        }
-
-        nodeList = doc.getElementsByTagName(HandlerConstants.AX_PREFIX + "spProperties");
-        for (int k = 0; k < nodeList.getLength(); k++) {
-            childNodeList = nodeList.item(k).getChildNodes();
-            for (int l = 0; l < childNodeList.getLength(); l++) {
-                if (childNodeList.item(l).getNodeName().equalsIgnoreCase(HandlerConstants.AX_PREFIX + "value")) {
-                    data.put("displayName", childNodeList.item(l).getTextContent());
-                }
-            }
-        }
-
-        File appUpdateRequest = new File(HandlerConstants.PAYLOADS_DIR + "/update-app-request.xml");
-        String docStr = HandlerUtil.xmlToString(appUpdateRequest);
-        requestBodyString = StrSubstitutor.replace(docStr, data);
-
-        HttpPost updateApplicationEndpoint = new HttpPost(identityAppMgtUrl);
-        updateApplicationEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +
-                encodedAdminCredentials);
-        updateApplicationEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.TEXT_XML.toString());
-        updateApplicationEndpoint.setHeader(HandlerConstants.SOAP_ACTION_HEADER, "urn:updateApplication");
-        updateApplicationEndpoint.setEntity(new StringEntity(requestBodyString, ContentType.TEXT_XML));
-
-        HandlerUtil.execute(updateApplicationEndpoint);
     }
 }
