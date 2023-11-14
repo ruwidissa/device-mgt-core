@@ -34,6 +34,9 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.http.Consts;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
@@ -44,6 +47,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.cookie.SM;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.ContentType;
@@ -359,7 +363,7 @@ public class HandlerUtil {
         boolean isIgnoreHostnameVerification = Boolean.parseBoolean(System.
                 getProperty("org.wso2.ignoreHostnameVerification"));
         if (isIgnoreHostnameVerification) {
-            return HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+            return HttpClients.custom().setHostnameVerifier((X509HostnameVerifier) NoopHostnameVerifier.INSTANCE).build();
         } else {
             return HttpClients.createDefault();
         }
