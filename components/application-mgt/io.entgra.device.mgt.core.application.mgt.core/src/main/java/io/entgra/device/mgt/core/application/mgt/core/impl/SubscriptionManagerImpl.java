@@ -40,6 +40,7 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.TrustStrategy;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
@@ -120,6 +121,8 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1385,7 +1388,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     private CloseableHttpClient getHttpClient() throws ApplicationManagementException {
         try {
             SSLContextBuilder builder = new SSLContextBuilder();
-            builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
+            builder.loadTrustMaterial(null, new TrustStrategy() {
+                        @Override
+                        public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                            return true;
+                        }
+                    });
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
             return HttpClients.custom().setSSLSocketFactory(sslsf).useSystemProperties().build();
         }  catch (NoSuchAlgorithmException e) {
