@@ -849,6 +849,7 @@ public class CertificateGenerator {
                     new io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate();
             List<io.entgra.device.mgt.core.certificate.mgt.core.bean.Certificate> certificates = new ArrayList<>();
             certificate.setTenantId(tenantId);
+            certificate.setDeviceIdentifier(commonName);
             certificate.setCertificate(issuedCert);
             certificates.add(certificate);
             saveCertInKeyStore(certificates);

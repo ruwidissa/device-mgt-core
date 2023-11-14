@@ -22,7 +22,7 @@
     <parent>
         <artifactId>io.entgra.device.mgt.core.parent</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.0.31-SNAPSHOT</version>
+        <version>5.0.33-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -43,6 +43,7 @@
         <module>io.entgra.device.mgt.core.device.mgt.extensions.logger</module>
         <module>io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager</module>
         <module>io.entgra.device.mgt.core.device.mgt.extensions.stateengine</module>
+        <module>io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper</module>
     </modules>
 
 </project>

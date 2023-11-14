@@ -17,13 +17,18 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManager;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceStatusTaskPluginConfig;
 import io.entgra.device.mgt.core.device.mgt.common.InitialOperationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.MonitoringOperation;
+import io.entgra.device.mgt.core.device.mgt.common.OperationMonitoringTaskConfig;
 import io.entgra.device.mgt.core.device.mgt.common.ProvisioningConfig;
-import io.entgra.device.mgt.core.device.mgt.common.*;
+import io.entgra.device.mgt.core.device.mgt.common.StartupOperationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDetails;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManager;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.general.GeneralConfig;
 import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
@@ -31,6 +36,7 @@ import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyMonitoringMa
 import io.entgra.device.mgt.core.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.Feature;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config.*;
@@ -70,6 +76,7 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     private DeviceTypePlatformDetails deviceTypePlatformDetails;
     private DeviceEnrollmentInvitationDetails deviceEnrollmentInvitationDetails;
     private GeneralConfig generalConfig;
+    private DeviceTypeMetaDefinition deviceTypeMetaDefinition;
     private boolean isRegistryBasedConfigs = false;
     private boolean isScheduled = false;
     private String notifierType;
@@ -97,6 +104,8 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         this.setDeviceEnrollmentInvitationDetails(deviceTypeConfiguration);
         this.licenseConfig = new License();
         this.setLicenseConfig(deviceTypeConfiguration);
+        this.deviceTypeMetaDefinition = new DeviceTypeMetaDefinition();
+        this.setDeviceTypeMetaDefinition(deviceTypeConfiguration);
     }
 
     @Override
@@ -250,6 +259,11 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         return licenseConfig;
     }
 
+    @Override
+    public DeviceTypeMetaDefinition getDeviceTypeMetaDefinition() {
+        return deviceTypeMetaDefinition;
+    }
+
     private void setProvisioningConfig(String tenantDomain, DeviceTypeConfiguration deviceTypeConfiguration) {
         if (deviceTypeConfiguration.getProvisioningConfig() != null) {
             boolean sharedWithAllTenants = deviceTypeConfiguration.getProvisioningConfig().isSharedWithAllTenants();
@@ -375,6 +389,13 @@ public class DeviceTypeManagerService implements DeviceManagementService {
             licenseConfig.setLanguage(license.getLanguage());
             licenseConfig.setVersion(license.getVersion());
             licenseConfig.setText(license.getText());
+        }
+    }
+
+    public void setDeviceTypeMetaDefinition(DeviceTypeConfiguration deviceTypeConfiguration) {
+        DeviceTypeMetaDetails deviceTypeMetaDefinitions = deviceTypeConfiguration.getDeviceTypeMetaDetails();
+        if (deviceTypeMetaDefinitions != null) {
+            deviceTypeMetaDefinition.setStoreVisibilityEnabled(deviceTypeMetaDefinitions.isStoreVisibilityEnabled());
         }
     }
 }

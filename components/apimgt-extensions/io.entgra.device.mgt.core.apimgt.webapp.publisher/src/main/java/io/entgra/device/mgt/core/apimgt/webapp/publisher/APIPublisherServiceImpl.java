@@ -716,16 +716,16 @@ public class APIPublisherServiceImpl implements APIPublisherService {
     }
 
     private void updatePermissions(String role, List<String> permissions) throws UserStoreException {
+        if (role == null || permissions == null) return;
         AuthorizationManager authorizationManager = APIPublisherDataHolder.getInstance().getUserRealm()
                 .getAuthorizationManager();
         if (log.isDebugEnabled()) {
             log.debug("Updating the role '" + role + "'");
         }
-        if (permissions != null && !permissions.isEmpty()) {
-            authorizationManager.clearRoleAuthorization(role);
-            for (String permission : permissions) {
-                authorizationManager.authorizeRole(role, permission, CarbonConstants.UI_PERMISSION_ACTION);
-            }
+        authorizationManager.clearRoleAuthorization(role);
+        for (String permission : permissions) {
+            authorizationManager.authorizeRole(role, permission, CarbonConstants.UI_PERMISSION_ACTION);
+            authorizationManager.refreshAllowedRolesForResource(permission);
         }
     }
 

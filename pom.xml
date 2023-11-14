@@ -23,7 +23,7 @@
     <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>io.entgra.device.mgt.core.parent</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.31-SNAPSHOT</version>
+    <version>5.0.33-SNAPSHOT</version>
     <name>WSO2 Carbon - Device Management - Parent</name>
     <url>https://entgra.io</url>
     <description>WSO2 Connected Device Manager Components</description>
@@ -1526,6 +1526,11 @@
             </dependency>
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper</artifactId>
+                <version>${io.entgra.device.mgt.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.logger</artifactId>
                 <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
@@ -1998,7 +2003,7 @@
         <axiom.wso2.version>1.2.11-wso2v25</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <io.entgra.device.mgt.core.version>5.0.31-SNAPSHOT</io.entgra.device.mgt.core.version>
+        <io.entgra.device.mgt.core.version>5.0.33-SNAPSHOT</io.entgra.device.mgt.core.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.9.2</carbon.commons.version>

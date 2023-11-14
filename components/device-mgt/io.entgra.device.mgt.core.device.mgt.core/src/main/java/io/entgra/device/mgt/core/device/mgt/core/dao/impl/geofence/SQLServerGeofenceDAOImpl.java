@@ -71,7 +71,7 @@ public class SQLServerGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(index++, tenantId);
                 if (isNameProvided) {
-                    stmt.setString(index++, request.getProperty(DeviceManagementConstants.GeoServices.FENCE_NAME).toString() + "%");
+                    stmt.setString(index++, "%" + request.getProperty(DeviceManagementConstants.GeoServices.FENCE_NAME).toString() + "%");
                 }
                 stmt.setInt(index++, request.getStartIndex());
                 stmt.setInt(index, request.getRowCount());
@@ -162,6 +162,50 @@ public class SQLServerGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
             }
         } catch (SQLException e) {
             String msg = "Error occurred while retrieving Geo fence data " + fenceId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<GeofenceData> getGeoFences(int groupId, int tenantId) throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "SELECT " +
+                    "G.ID AS FENCE_ID, " +
+                    "FENCE_NAME, " +
+                    "DESCRIPTION, " +
+                    "LATITUDE, " +
+                    "LONGITUDE, " +
+                    "RADIUS, " +
+                    "GEO_JSON, " +
+                    "FENCE_SHAPE " +
+                    "FROM DM_GEOFENCE G " +
+                    "JOIN DM_GEOFENCE_GROUP_MAPPING M ON G.ID = M.FENCE_ID " +
+                    "WHERE M.GROUP_ID = ? AND TENANT_ID = ?";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, groupId);
+                stmt.setInt(2, tenantId);
+                ResultSet rst = stmt.executeQuery();
+                List <GeofenceData> geofenceDataList = new ArrayList<>();
+                while (rst.next()) {
+                    GeofenceData geofenceData = new GeofenceData();
+                    geofenceData.setId(rst.getInt("FENCE_ID"));
+                    geofenceData.setFenceName(rst.getString("FENCE_NAME"));
+                    geofenceData.setDescription(rst.getString("DESCRIPTION"));
+                    geofenceData.setLatitude(rst.getDouble("LATITUDE"));
+                    geofenceData.setLongitude(rst.getDouble("LONGITUDE"));
+                    geofenceData.setRadius(rst.getFloat("RADIUS"));
+                    geofenceData.setGeoJson(rst.getString("GEO_JSON"));
+                    geofenceData.setFenceShape(rst.getString("FENCE_SHAPE"));
+                    geofenceDataList.add(geofenceData);
+                }
+                return geofenceDataList;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving Geo fences of group " + groupId
+                    + " and tenant " + tenantId;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
