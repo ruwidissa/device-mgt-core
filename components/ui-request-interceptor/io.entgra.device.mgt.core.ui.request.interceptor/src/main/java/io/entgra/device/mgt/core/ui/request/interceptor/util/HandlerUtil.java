@@ -42,7 +42,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.cookie.SM;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.ContentType;
@@ -367,7 +366,7 @@ public class HandlerUtil {
         boolean isIgnoreHostnameVerification = Boolean.parseBoolean(System.
                 getProperty("org.wso2.ignoreHostnameVerification"));
         if (isIgnoreHostnameVerification) {
-            return HttpClients.custom().setHostnameVerifier((X509HostnameVerifier) NoopHostnameVerifier.INSTANCE).build();
+            return HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
         } else {
             return HttpClients.createDefault();
         }
