@@ -18,6 +18,9 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor.util;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -32,27 +35,25 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.mime.InputStreamBody;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.io.entity.BufferedHttpEntity;
+import org.apache.hc.core5.http.io.entity.InputStreamEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.http.Consts;
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.cookie.SM;
-import org.apache.http.entity.BufferedHttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.json.JSONArray;
@@ -70,13 +71,11 @@ import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.math.BigInteger;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.List;
@@ -96,71 +95,75 @@ public class HandlerUtil {
      * @return response as string
      * @throws IOException IO exception returns if error occurs when executing the httpMethod
      */
-    public static ProxyResponse execute(HttpRequestBase httpRequest) throws IOException {
-        try (CloseableHttpClient client = getHttpClient()) {
-            HttpResponse response = client.execute(httpRequest);
-            ProxyResponse proxyResponse = new ProxyResponse();
+    public static ProxyResponse execute(ClassicHttpRequest httpRequest) throws IOException {
 
-            if (response == null) {
-                log.error("Received null response for http request : " + httpRequest.getMethod() + " " + httpRequest
-                        .getURI().toString());
-                proxyResponse.setCode(HandlerConstants.INTERNAL_ERROR_CODE);
-                proxyResponse.setStatus(ProxyResponse.Status.ERROR);
-                proxyResponse.setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(
-                        HandlerConstants.INTERNAL_ERROR_CODE));
-                return proxyResponse;
-            } else {
-                int statusCode = response.getStatusLine().getStatusCode();
-                String jsonString = getResponseString(response);
-                if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
-                    proxyResponse.setCode(statusCode);
-                    proxyResponse.setData(jsonString);
-                    proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
-                    proxyResponse.setExecutorResponse("SUCCESS");
-                    proxyResponse.setHeaders(response.getAllHeaders());
-                    return proxyResponse;
-                } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                    if (isTokenExpired(jsonString)) {
-                        proxyResponse.setCode(statusCode);
-                        proxyResponse.setStatus(ProxyResponse.Status.ERROR);
-                        proxyResponse.setExecutorResponse(HandlerConstants.TOKEN_IS_EXPIRED);
-                    } else {
-                        log.error(
-                                "Received " + statusCode + " response for http request : " + httpRequest.getMethod()
-                                        + " " + httpRequest.getURI().toString() + ". Error message: " + jsonString);
-                        proxyResponse.setCode(statusCode);
-                        proxyResponse.setData(jsonString);
-                        proxyResponse.setStatus(ProxyResponse.Status.ERROR);
-                        proxyResponse.setExecutorResponse(
-                                HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
-                    }
-                    return proxyResponse;
+        try (CloseableHttpClient client = getHttpClient()) {
+
+            JsonFactory jsonFactory = new JsonFactory();
+            ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+
+            return client.execute(httpRequest, response -> {
+                final HttpEntity responseEntity = response.getEntity();
+                ProxyResponse handlerResponse = new ProxyResponse();
+                int statusCode = response.getCode();
+                if (responseEntity == null) {
+                    log.error("Received null response for http request : " + httpRequest.getMethod() + " " + httpRequest.getRequestUri());
+                    handlerResponse.setCode(HandlerConstants.INTERNAL_ERROR_CODE);
+                    handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                    handlerResponse.setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(
+                            HandlerConstants.INTERNAL_ERROR_CODE));
+                    return handlerResponse;
                 }
-                log.error("Received " + statusCode +
-                        " response for http request : " + httpRequest.getMethod() + " " + httpRequest.getURI()
-                        .toString() + ". Error message: " + jsonString);
-                proxyResponse.setCode(statusCode);
-                proxyResponse.setData(jsonString);
-                proxyResponse.setStatus(ProxyResponse.Status.ERROR);
-                proxyResponse
-                        .setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
-                return proxyResponse;
-            }
+                try (InputStream inputStream = responseEntity.getContent()) {
+                    JsonNode responseData = objectMapper.readTree(inputStream);
+                    if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
+                        handlerResponse.setCode(statusCode);
+                        handlerResponse.setData(responseData);
+                        handlerResponse.setStatus(ProxyResponse.Status.SUCCESS);
+                        handlerResponse.setExecutorResponse("SUCCESS");
+                        handlerResponse.setHeaders(response.getHeaders());
+                        return handlerResponse;
+                    } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                        if (isTokenExpired(responseData)) {
+                            handlerResponse.setCode(statusCode);
+                            handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                            handlerResponse.setExecutorResponse(HandlerConstants.TOKEN_IS_EXPIRED);
+                        } else {
+                            log.error(
+                                    "Received " + statusCode + " response for http request : " + httpRequest.getMethod()
+                                            + " " + httpRequest.getRequestUri() + ". Error message: " + responseData.textValue());
+                            handlerResponse.setCode(statusCode);
+                            handlerResponse.setData(responseData);
+                            handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                            handlerResponse.setExecutorResponse(
+                                    HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
+                        }
+                        return handlerResponse;
+                    }
+                    log.error("Received " + statusCode + " response for http request : " + httpRequest.getMethod()
+                            + " " + httpRequest.getRequestUri() + ". Error message: " + responseData.textValue());
+                    handlerResponse.setCode(statusCode);
+                    handlerResponse.setData(responseData);
+                    handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                    handlerResponse
+                            .setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
+                    return handlerResponse;
+                }
+            });
         }
     }
 
-    public static boolean isTokenExpired(String jsonBody) {
-        return jsonBody.contains("Access token expired") || jsonBody
+    public static boolean isTokenExpired(JsonNode jsonBody) {
+        return jsonBody.textValue().contains("Access token expired") || jsonBody.textValue()
                 .contains("Invalid input. Access token validation failed");
     }
 
     public static String getMemeType(HttpResponse response) {
-        String memeType = "";
         Header contentType = response.getEntity().getContentType();
         if (contentType != null) {
-            memeType = contentType.getValue().split(";")[0].trim();
+            return contentType.getValue().split(";")[0].trim();
         }
-        return memeType;
+        return "";
     }
 
     /***
@@ -367,7 +370,21 @@ public class HandlerUtil {
         boolean isIgnoreHostnameVerification = Boolean.parseBoolean(System.
                 getProperty("org.wso2.ignoreHostnameVerification"));
         if (isIgnoreHostnameVerification) {
-            return HttpClients.custom().setHostnameVerifier((X509HostnameVerifier) NoopHostnameVerifier.INSTANCE).build();
+            try {
+                return HttpClients.custom()
+                        .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                                .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                                        .setSslContext(SSLContextBuilder.create()
+                                                .loadTrustMaterial(TrustAllStrategy.INSTANCE)
+                                                .build())
+                                        .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                                        .build())
+                                .build())
+                        .build();
+            } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+                log.error("Error Occurred while creating the custom http client", e);
+                throw new RuntimeException(e);
+            }
         } else {
             return HttpClients.createDefault();
         }

@@ -18,6 +18,10 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -31,11 +35,11 @@ import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.io.entity.HttpEntities;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -44,7 +48,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 
 @MultipartConfig
 @WebServlet("/user")
@@ -85,7 +92,22 @@ public class UserHandler extends HttpServlet {
             StringEntity tokenEPPayload = new StringEntity("token=" + accessToken,
                     ContentType.APPLICATION_FORM_URLENCODED);
             tokenEndpoint.setEntity(tokenEPPayload);
-            ProxyResponse tokenStatus = HandlerUtil.execute(tokenEndpoint);
+
+            JsonFactory jsonFactory = new JsonFactory();
+            ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+
+            List<NameValuePair> nvps = new ArrayList<>();
+            nvps.add(new BasicNameValuePair("token", accessToken));
+//            nvps.add(new BasicNameValuePair("password", "secret"));
+
+            ClassicHttpRequest httpPost = ClassicRequestBuilder.post(keymanagerUrl + HandlerConstants.INTROSPECT_ENDPOINT)
+                    .setEntity(new UrlEncodedFormEntity(nvps))
+                    .setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
+                    .setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder().encodeToString((adminUsername + HandlerConstants.COLON + adminPassword).getBytes()))
+                    .build();
+
+
+            ProxyResponse tokenStatus = HandlerUtil.execute(httpPost);
 
             if (tokenStatus.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                 if (tokenStatus.getCode() == HttpStatus.SC_UNAUTHORIZED) {
@@ -100,29 +122,52 @@ public class UserHandler extends HttpServlet {
                     return;
                 }
             }
-            String tokenData = tokenStatus.getData();
+            JsonNode tokenData = tokenStatus.getData();
             if (tokenData == null) {
                 log.error("Invalid token data is received.");
                 HandlerUtil.handleError(resp, tokenStatus);
                 return;
             }
-            JsonParser jsonParser = new JsonParser();
-            JsonElement jTokenResult = jsonParser.parse(tokenData);
-            if (jTokenResult.isJsonObject()) {
-                JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
-                if (!jTokenResultAsJsonObject.get("active").getAsBoolean()) {
-                    HandlerUtil.sendUnAuthorizeResponse(resp);
-                    return;
-                }
-                ProxyResponse proxyResponse = new ProxyResponse();
-                proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
-                proxyResponse.setCode(HttpStatus.SC_OK);
-                proxyResponse.setData(
-                        jTokenResultAsJsonObject.get("username").getAsString().replaceAll("@carbon.super", ""));
-                HandlerUtil.handleSuccess(resp, proxyResponse);
-                httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, jTokenResultAsJsonObject.get("username").getAsString());
-                log.info("Customer login", userLogContextBuilder.setUserName(proxyResponse.getData()).setUserRegistered(true).build());
+
+            if (!tokenData.get("active").asBoolean()) {
+                HandlerUtil.sendUnAuthorizeResponse(resp);
+                return;
             }
+            ProxyResponse proxyResponse = new ProxyResponse();
+            proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
+            proxyResponse.setCode(HttpStatus.SC_OK);
+//            proxyResponse.setData(
+//                    tokenData.get("username").textValue().replaceAll("@carbon.super", ""));
+
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> nodeMap = mapper.convertValue(tokenData, new TypeReference<Map<String, Object>>(){});
+            nodeMap.put("username", tokenData.get("username").textValue().replaceAll("@carbon.super", ""));
+            proxyResponse.setData(mapper.convertValue(nodeMap, JsonNode.class));
+//            tokenData = ;
+
+
+
+            HandlerUtil.handleSuccess(resp, proxyResponse);
+            httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, jTokenResultAsJsonObject.get("username").getAsString());
+            log.info("Customer login", userLogContextBuilder.setUserName(proxyResponse.getData()).setUserRegistered(true).build());
+
+//            JsonParser jsonParser = new JsonParser();
+//            JsonElement jTokenResult = jsonParser.parse(tokenData);
+//            if (jTokenResult.isJsonObject()) {
+//                JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
+//                if (!jTokenResultAsJsonObject.get("active").getAsBoolean()) {
+//                    HandlerUtil.sendUnAuthorizeResponse(resp);
+//                    return;
+//                }
+//                ProxyResponse proxyResponse = new ProxyResponse();
+//                proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
+//                proxyResponse.setCode(HttpStatus.SC_OK);
+//                proxyResponse.setData(
+//                        jTokenResultAsJsonObject.get("username").getAsString().replaceAll("@carbon.super", ""));
+//                HandlerUtil.handleSuccess(resp, proxyResponse);
+//                httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, jTokenResultAsJsonObject.get("username").getAsString());
+//                log.info("Customer login", userLogContextBuilder.setUserName(proxyResponse.getData()).setUserRegistered(true).build());
+//            }
         } catch (IOException e) {
             log.error("Error occurred while sending the response into the socket. ", e);
         } catch (JsonSyntaxException e) {
