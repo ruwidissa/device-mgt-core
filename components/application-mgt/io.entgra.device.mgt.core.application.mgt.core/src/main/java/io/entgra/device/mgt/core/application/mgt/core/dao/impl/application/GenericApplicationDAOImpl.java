@@ -180,6 +180,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         if (deviceTypeId != -1) {
             sql += "AND AP_APP.DEVICE_TYPE_ID = ? ";
         }
+        if (filter.isNotRetired()) {
+            sql +=  "AND AP_APP.STATUS != 'RETIRED' ";
+        }
         sql += "GROUP BY AP_APP.ID ORDER BY AP_APP.ID ";
         if (StringUtils.isNotEmpty(filter.getSortBy())) {
             sql += filter.getSortBy() +" ";
@@ -307,6 +310,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
         if (deviceTypeId != -1) {
             sql += " AND AP_APP.DEVICE_TYPE_ID = ?";
+        }
+        if (filter.isNotRetired()) {
+            sql +=  " AND AP_APP.STATUS != 'RETIRED'";
         }
 
         try {

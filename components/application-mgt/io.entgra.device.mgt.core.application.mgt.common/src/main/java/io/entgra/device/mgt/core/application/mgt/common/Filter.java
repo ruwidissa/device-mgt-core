@@ -113,6 +113,11 @@ public class Filter {
      */
     private String favouredBy;
 
+    /**
+     * Checking if retired apps needs to be excluded
+     */
+    private boolean isNotRetired;
+
     public int getLimit() {
         return limit;
     }
@@ -207,5 +212,13 @@ public class Filter {
 
     public void setFavouredBy(String favouredBy) {
         this.favouredBy = favouredBy;
+    }
+
+    public boolean isNotRetired() {
+        return isNotRetired;
+    }
+
+    public void setNotRetired(boolean notRetired) {
+        isNotRetired = notRetired;
     }
 }
