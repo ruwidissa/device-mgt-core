@@ -177,12 +177,12 @@ public class SQLServerOperationDAOImpl extends GenericOperationDAOImpl {
                         operation = new Operation();
                         operation.setId(rs.getInt("ID"));
                         operation.setType(Operation.Type.valueOf(rs.getString("TYPE")));
-                        operation.setCreatedTimeStamp(new Timestamp(rs.getLong("CREATED_TIMESTAMP") * 1000L).toString());
+                        operation.setCreatedTimeStamp(new Timestamp(rs.getLong("CREATED_TIMESTAMP") * 1000L).toInstant().toString());
                         if (rs.getLong("UPDATED_TIMESTAMP") == 0) {
                             operation.setReceivedTimeStamp("");
                         } else {
                             operation.setReceivedTimeStamp(
-                                    new java.sql.Timestamp((rs.getLong("UPDATED_TIMESTAMP") * 1000)).toString());
+                                    new java.sql.Timestamp((rs.getLong("UPDATED_TIMESTAMP") * 1000)).toInstant().toString());
                         }
                         operation.setCode(rs.getString("OPERATION_CODE"));
                         operation.setStatus(Operation.Status.valueOf(rs.getString("STATUS")));
