@@ -18,13 +18,9 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
@@ -36,8 +32,11 @@ import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
-import org.apache.hc.core5.http.*;
-import org.apache.hc.core5.http.io.entity.HttpEntities;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 
@@ -63,7 +62,7 @@ public class UserHandler extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            String keymanagerUrl =
+            String keyManagerUrl =
                     req.getScheme() + HandlerConstants.SCHEME_SEPARATOR +
                             System.getProperty(HandlerConstants.IOT_KM_HOST_ENV_VAR)
                             + HandlerConstants.COLON + HandlerUtil.getKeyManagerPort(req.getScheme());
@@ -80,39 +79,24 @@ public class UserHandler extends HttpServlet {
             }
 
             String accessToken = authData.getAccessToken();
-//            String accessTokenWithoutPrefix = accessToken.substring(accessToken.indexOf("_") + 1);
-
-            HttpPost tokenEndpoint = new HttpPost(keymanagerUrl + HandlerConstants.INTROSPECT_ENDPOINT);
-            tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
             DeviceManagementConfig dmc = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
             String adminUsername = dmc.getKeyManagerConfigurations().getAdminUsername();
             String adminPassword = dmc.getKeyManagerConfigurations().getAdminPassword();
-            tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
-                    .encodeToString((adminUsername + HandlerConstants.COLON + adminPassword).getBytes()));
-            StringEntity tokenEPPayload = new StringEntity("token=" + accessToken,
-                    ContentType.APPLICATION_FORM_URLENCODED);
-            tokenEndpoint.setEntity(tokenEPPayload);
 
-            JsonFactory jsonFactory = new JsonFactory();
-            ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+            List<NameValuePair> nameValuePairs = new ArrayList<>();
+            nameValuePairs.add(new BasicNameValuePair("token", accessToken));
 
-            List<NameValuePair> nvps = new ArrayList<>();
-            nvps.add(new BasicNameValuePair("token", accessToken));
-//            nvps.add(new BasicNameValuePair("password", "secret"));
-
-            ClassicHttpRequest httpPost = ClassicRequestBuilder.post(keymanagerUrl + HandlerConstants.INTROSPECT_ENDPOINT)
-                    .setEntity(new UrlEncodedFormEntity(nvps))
+            ClassicHttpRequest introspectCall = ClassicRequestBuilder.post(keyManagerUrl + HandlerConstants.INTROSPECT_ENDPOINT)
+                    .setEntity(new UrlEncodedFormEntity(nameValuePairs))
                     .setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString())
                     .setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder().encodeToString((adminUsername + HandlerConstants.COLON + adminPassword).getBytes()))
                     .build();
 
-
-            ProxyResponse tokenStatus = HandlerUtil.execute(httpPost);
-
+            ProxyResponse tokenStatus = HandlerUtil.execute(introspectCall);
             if (tokenStatus.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                 if (tokenStatus.getCode() == HttpStatus.SC_UNAUTHORIZED) {
-                    tokenStatus = HandlerUtil.retryRequestWithRefreshedToken(req, tokenEndpoint, keymanagerUrl);
-                    if(!HandlerUtil.isResponseSuccessful(tokenStatus)) {
+                    tokenStatus = HandlerUtil.retryRequestWithRefreshedToken(req, introspectCall, keyManagerUrl);
+                    if (!HandlerUtil.isResponseSuccessful(tokenStatus)) {
                         HandlerUtil.handleError(resp, tokenStatus);
                         return;
                     }
@@ -136,38 +120,17 @@ public class UserHandler extends HttpServlet {
             ProxyResponse proxyResponse = new ProxyResponse();
             proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
             proxyResponse.setCode(HttpStatus.SC_OK);
-//            proxyResponse.setData(
-//                    tokenData.get("username").textValue().replaceAll("@carbon.super", ""));
 
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> nodeMap = mapper.convertValue(tokenData, new TypeReference<Map<String, Object>>(){});
+            Map<String, Object> nodeMap = mapper.convertValue(tokenData, new TypeReference<>() {
+            });
             nodeMap.put("username", tokenData.get("username").textValue().replaceAll("@carbon.super", ""));
             proxyResponse.setData(mapper.convertValue(nodeMap, JsonNode.class));
-//            tokenData = ;
-
-
 
             HandlerUtil.handleSuccess(resp, proxyResponse);
-            httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, jTokenResultAsJsonObject.get("username").getAsString());
-            log.info("Customer login", userLogContextBuilder.setUserName(proxyResponse.getData()).setUserRegistered(true).build());
-
-//            JsonParser jsonParser = new JsonParser();
-//            JsonElement jTokenResult = jsonParser.parse(tokenData);
-//            if (jTokenResult.isJsonObject()) {
-//                JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
-//                if (!jTokenResultAsJsonObject.get("active").getAsBoolean()) {
-//                    HandlerUtil.sendUnAuthorizeResponse(resp);
-//                    return;
-//                }
-//                ProxyResponse proxyResponse = new ProxyResponse();
-//                proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
-//                proxyResponse.setCode(HttpStatus.SC_OK);
-//                proxyResponse.setData(
-//                        jTokenResultAsJsonObject.get("username").getAsString().replaceAll("@carbon.super", ""));
-//                HandlerUtil.handleSuccess(resp, proxyResponse);
-//                httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, jTokenResultAsJsonObject.get("username").getAsString());
-//                log.info("Customer login", userLogContextBuilder.setUserName(proxyResponse.getData()).setUserRegistered(true).build());
-//            }
+            httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, nodeMap.get("username").toString());
+            log.info("Customer login",
+                    userLogContextBuilder.setUserName(nodeMap.get("username").toString()).setUserRegistered(true).build());
         } catch (IOException e) {
             log.error("Error occurred while sending the response into the socket. ", e);
         } catch (JsonSyntaxException e) {

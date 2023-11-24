@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.*;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
@@ -68,7 +69,8 @@ public class LoginHandler extends HttpServlet {
             }
             httpSession = req.getSession(true);
 
-            JsonObject uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession, resp);
+            JsonNode uiConfigJsonObject = HandlerUtil.getUIConfigAndPersistInSession(uiConfigUrl, gatewayUrl, httpSession,
+                    resp);
             JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
             JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
             int sessionTimeOut = Integer.parseInt(String.valueOf(uiConfigJsonObject.get("sessionTimeOut")));
@@ -225,7 +227,7 @@ public class LoginHandler extends HttpServlet {
      * @return Invoke token endpoint and return the response as string.
      * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
-    private ProxyResponse getTokenResult(String encodedClientApp, JsonArray scopes) throws IOException {
+    private ProxyResponse getTokenResult(String encodedClientApp, JsonNode scopes) throws IOException {
         HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.INTERNAL_TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
