@@ -285,32 +285,37 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                         "MEMORY_USAGE, " +
                         "IS_ACTIVE, " +
                         "TENANT_ID " +
-                    "FROM DM_APPLICATION  " +
-                    "WHERE NOT EXISTS " +
-                        "(SELECT " +
-                            "ID " +
-                        "FROM DM_APPLICATION A " +
-                        "WHERE A.NAME = DM_APPLICATION.NAME " +
-                        "AND A.ID < DM_APPLICATION.ID) " +
-                    "AND PLATFORM = ? " +
-                    "AND TENANT_ID = ? ";
+                    "FROM DM_APPLICATION " +
+                    "WHERE PLATFORM = ? AND " +
+                    "TENANT_ID = ? AND " +
+                    "NOT EXISTS (SELECT ID " +
+                    "FROM DM_APPLICATION A " +
+                    "WHERE A.NAME = DM_APPLICATION.NAME " +
+                    "AND A.ID < DM_APPLICATION.ID AND " +
+                    "PLATFORM = ? AND TENANT_ID = ?) ";
+
         try {
             String filter = request.getFilter();
             if (filter != null) {
                 sql = sql + "AND NAME LIKE ? ";
             }
-            sql = sql + "LIMIT ? OFFSET ?";
+            if (request != null && request.getRowCount() != -1) {
+                sql = sql + "LIMIT ? OFFSET ?";
+            }
             Connection conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;
                 stmt.setString(paramIdx++, request.getDeviceType());
                 stmt.setInt(paramIdx++, tenantId);
+                stmt.setString(paramIdx++, request.getDeviceType());
+                stmt.setInt(paramIdx++, tenantId);
                 if (filter != null){
                     stmt.setString(paramIdx++, filter);
                 }
-                stmt.setInt(paramIdx++, request.getRowCount());
-                stmt.setInt(paramIdx, request.getStartIndex());
-
+                if (request != null && request.getRowCount() != -1) {
+                    stmt.setInt(paramIdx++, request.getRowCount());
+                    stmt.setInt(paramIdx, request.getStartIndex());
+                }
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         application = loadApplication(rs);
