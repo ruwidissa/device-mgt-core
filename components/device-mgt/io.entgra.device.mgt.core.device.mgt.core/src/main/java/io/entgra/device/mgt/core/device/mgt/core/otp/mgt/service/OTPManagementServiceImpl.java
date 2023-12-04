@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.device.mgt.core.otp.mgt.service;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,9 +29,6 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionExcept
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.OTPManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
-import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
-import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentType;
 import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.OTPEmailTypes;
 import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
@@ -47,13 +45,7 @@ import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 public class OTPManagementServiceImpl implements OTPManagementService {
 
@@ -218,53 +210,12 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         }
     }
 
-
     @Override
     public void sendDeviceEnrollmentInvitationMail(DeviceEnrollmentInvitation deviceEnrollmentInvitation)
-            throws OTPManagementException {
-        DeviceManagementProviderService dms = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider();
-        StringBuilder enrollmentSteps = new StringBuilder();
-        DeviceEnrollmentInvitationDetails deviceEnrollmentInvitationDetails;
-        for (DeviceEnrollmentType deviceEnrollmentType : deviceEnrollmentInvitation.getDeviceEnrollmentTypes()) {
-            deviceEnrollmentInvitationDetails = dms.getDeviceEnrollmentInvitationDetails(
-                    deviceEnrollmentType.getDeviceType());
-            if (deviceEnrollmentInvitationDetails != null &&
-                    deviceEnrollmentInvitationDetails.getEnrollmentDetails() != null) {
-                for (String enrollmentType : deviceEnrollmentType.getEnrollmentType()) {
-                    deviceEnrollmentInvitationDetails.getEnrollmentDetails().stream()
-                            .filter(details -> enrollmentType.equals(details.getEnrollmentType())).findFirst()
-                            .ifPresent(details -> enrollmentSteps.append(details.getEnrollmentSteps()));
-                }
-            }
-        }
-        Properties props = new Properties();
-        props.setProperty("enrollment-steps", enrollmentSteps.toString());
-        try {
-            ConnectionManagerUtil.beginDBTransaction();
-            for (String username : deviceEnrollmentInvitation.getUsernames()) {
-                String emailAddress = DeviceManagerUtil.getUserClaimValue(
-                        username, DeviceManagementConstants.User.CLAIM_EMAIL_ADDRESS);
-                props.setProperty("first-name", DeviceManagerUtil.
-                        getUserClaimValue(username, DeviceManagementConstants.User.CLAIM_FIRST_NAME));
-                props.setProperty("username", username);
-                sendMail(props, emailAddress, DeviceManagementConstants.EmailAttributes.USER_ENROLLMENT_TEMPLATE);
-            }
-            ConnectionManagerUtil.commitDBTransaction();
-        } catch (UserStoreException e) {
-            String msg = "Error occurred while getting claim values to invite user";
-            log.error(msg, e);
-            throw new OTPManagementException(msg, e);
-        } catch (DBConnectionException e) {
-            String msg = "Error occurred while getting database connection to add OPT data.";
-            log.error(msg, e);
-            throw new OTPManagementException(msg, e);
-        } catch (TransactionManagementException e) {
-            String msg = "SQL Error occurred when adding OPT data to send device enrollment Invitation.";
-            log.error(msg, e);
-            throw new OTPManagementException(msg, e);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
-        }
+        throws OTPManagementException {
+        List<EnrollmentTypeMail> enrollmentTypeMails =
+                getEnrollmentTypeMails(deviceEnrollmentInvitation.getDeviceEnrollmentTypes());
+        sendEnrollmentTypeMails(deviceEnrollmentInvitation.getUsernames(), enrollmentTypeMails);
     }
 
     /**
@@ -379,5 +330,104 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
+    }
+
+    /**
+     * Send enrollment type mails to users
+     * @param usernames List of usernames to send enrollment type mails
+     * @param enrollmentTypeMails List of enrollment types
+     * @throws OTPManagementException Throws when error occurred while sending emails
+     */
+    private void sendEnrollmentTypeMails(List<String> usernames, List<EnrollmentTypeMail> enrollmentTypeMails)
+            throws OTPManagementException {
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            for (String username : usernames) {
+                populateUserAttributes(getUserMailAttributes(username), enrollmentTypeMails);
+                for (EnrollmentTypeMail enrollmentTypeMail : enrollmentTypeMails) {
+                    sendMail(enrollmentTypeMail);
+                }
+            }
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while populating user attributes";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting database connection to add OTP data.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "SQL Error occurred when adding OPT data to send device enrollment Invitation.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    /**
+     * Send enrollment type mail
+     * @param enrollmentTypeMail Data related to the enrollment mail
+     * @throws OTPManagementException Throws when error occurred while sending email
+     */
+    private void sendMail(EnrollmentTypeMail enrollmentTypeMail) throws OTPManagementException {
+        sendMail(enrollmentTypeMail.getProperties(), enrollmentTypeMail.getRecipient(), enrollmentTypeMail.getTemplate());
+    }
+
+    /**
+     * Get user claims based on the username
+     * @param username Username
+     * @return {@link UserMailAttributes}
+     * @throws UserStoreException Throws when error occurred while retrieving user claims
+     */
+    private UserMailAttributes getUserMailAttributes(String username) throws UserStoreException {
+        UserMailAttributes userMailAttributes = new UserMailAttributes();
+        userMailAttributes.setEmail(DeviceManagerUtil.getUserClaimValue(
+                username, DeviceManagementConstants.User.CLAIM_EMAIL_ADDRESS));
+        userMailAttributes.setFirstName(DeviceManagerUtil.
+                getUserClaimValue(username, DeviceManagementConstants.User.CLAIM_FIRST_NAME));
+        userMailAttributes.setUsername(username);
+        return userMailAttributes;
+    }
+
+    private void populateUserAttributes(UserMailAttributes userMailAttributes, List<EnrollmentTypeMail> enrollmentTypeMails) {
+        for (EnrollmentTypeMail enrollmentTypeMail : enrollmentTypeMails) {
+            Properties properties = new Properties();
+            properties.setProperty(userMailAttributes.getEmailPlaceholder(), userMailAttributes.getEmail());
+            properties.setProperty(userMailAttributes.getFirstNamePlaceholder(), userMailAttributes.getFirstName());
+            properties.setProperty(userMailAttributes.getUsernamePlaceholder(), userMailAttributes.getUsername());
+            enrollmentTypeMail.setProperties(properties);
+            enrollmentTypeMail.setUsername(userMailAttributes.getUsername());
+            enrollmentTypeMail.setRecipient(userMailAttributes.getEmail());
+        }
+    }
+
+    /**
+     * Generate enrollment type mail
+     * @param deviceType Device type of the enrollment type
+     * @param enrollmentType Enrollment type
+     * @return {@link EnrollmentTypeMail}
+     */
+    private EnrollmentTypeMail getEnrollmentTypeMail(String deviceType, String enrollmentType) {
+        EnrollmentTypeMail enrollmentTypeMail = new EnrollmentTypeMail();
+        enrollmentTypeMail.setUsername(enrollmentTypeMail.getUsername());
+        enrollmentTypeMail.setTemplate(String.join(DeviceManagementConstants.EmailAttributes.TEMPLATE_NAME_PART_JOINER,
+                deviceType.toLowerCase(), enrollmentType.toLowerCase().
+                        replace(DeviceManagementConstants.EmailAttributes.ENROLLMENT_TYPE_SPLITTER,
+                                DeviceManagementConstants.EmailAttributes.TEMPLATE_NAME_PART_JOINER),
+                DeviceManagementConstants.EmailAttributes.DEVICE_ENROLLMENT_MAIL_KEY));
+        return enrollmentTypeMail;
+    }
+
+    private List<EnrollmentTypeMail> getEnrollmentTypeMails(List<DeviceEnrollmentType> deviceEnrollmentTypes) {
+        List<EnrollmentTypeMail> enrollmentTypeMails = new ArrayList<>();
+        for (DeviceEnrollmentType deviceEnrollmentType : deviceEnrollmentTypes) {
+            String deviceType = deviceEnrollmentType.getDeviceType();
+            for (String enrollmentType : deviceEnrollmentType.getEnrollmentType()) {
+                enrollmentTypeMails.add(getEnrollmentTypeMail(deviceType, enrollmentType));
+            }
+        }
+        return enrollmentTypeMails;
     }
 }
