@@ -41,9 +41,11 @@ public class EnrollmentTypeMail {
     public void setUsername(String username) {
         this.username = username;
     }
+
     public String getRecipient() {
         return recipient;
     }
+
     public void setRecipient(String recipient) {
         this.recipient = recipient;
     }
@@ -51,6 +53,7 @@ public class EnrollmentTypeMail {
     public Properties getProperties() {
         return properties;
     }
+
     public void setProperties(Properties properties) {
         this.properties = properties;
     }

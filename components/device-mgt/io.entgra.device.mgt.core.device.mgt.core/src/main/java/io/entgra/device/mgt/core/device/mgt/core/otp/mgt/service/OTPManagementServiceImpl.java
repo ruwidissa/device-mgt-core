@@ -18,18 +18,12 @@
 package io.entgra.device.mgt.core.device.mgt.core.otp.mgt.service;
 
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.*;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.BadRequestException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DBConnectionException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.OTPManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.OTPEmailTypes;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.*;
+import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
+import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentType;
+import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.EnrollmentTypeMail;
+import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.UserMailAttributes;
 import io.entgra.device.mgt.core.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import io.entgra.device.mgt.core.device.mgt.common.spi.OTPManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
@@ -38,9 +32,11 @@ import io.entgra.device.mgt.core.device.mgt.core.otp.mgt.dao.OTPManagementDAO;
 import io.entgra.device.mgt.core.device.mgt.core.otp.mgt.dao.OTPManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.otp.mgt.util.ConnectionManagerUtil;
-import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.EmailMetaInfo;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -212,7 +208,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
 
     @Override
     public void sendDeviceEnrollmentInvitationMail(DeviceEnrollmentInvitation deviceEnrollmentInvitation)
-        throws OTPManagementException {
+            throws OTPManagementException {
         List<EnrollmentTypeMail> enrollmentTypeMails =
                 getEnrollmentTypeMails(deviceEnrollmentInvitation.getDeviceEnrollmentTypes());
         sendEnrollmentTypeMails(deviceEnrollmentInvitation.getUsernames(), enrollmentTypeMails);
@@ -247,7 +243,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
                 throw new OTPManagementException(msg, e);
             } catch (OTPManagementDAOException e) {
                 ConnectionManagerUtil.rollbackDBTransaction();
-                String msg = "Error occurred while saving the OTP data for given email" ;
+                String msg = "Error occurred while saving the OTP data for given email";
                 log.error(msg, e);
                 throw new OTPManagementException(msg, e);
             } finally {
@@ -263,7 +259,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
      * @return {@link OneTimePinDTO}
      * @throws OTPManagementException if error occurred while getting OTP data for given OTP in DB
      */
-    private OneTimePinDTO getOTPDataByToken (String oneTimeToken) throws OTPManagementException {
+    private OneTimePinDTO getOTPDataByToken(String oneTimeToken) throws OTPManagementException {
         try {
             ConnectionManagerUtil.openDBConnection();
             return otpManagementDAO.getOTPDataByToken(oneTimeToken);
@@ -284,7 +280,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
      * If OTP expired, resend the user verifying mail with renewed OTP
      * @param props Mail body properties
      * @param mailAddress Mail Address of the User
-     * @param template Mail template to be used
+     * @param template    Mail template to be used
      * @throws OTPManagementException if error occurred while resend the user verifying mail
      */
     private void sendMail(Properties props, String mailAddress, String template) throws OTPManagementException {
@@ -306,7 +302,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
     /**
      * Renew the OTP
      * @param oneTimePinDTO {@link OneTimePinDTO}
-     * @param renewedOTP Renewed OTP
+     * @param renewedOTP    Renewed OTP
      * @throws OTPManagementException if error occurred while renew the OTP
      */
     private void renewOTP(OneTimePinDTO oneTimePinDTO, String renewedOTP) throws OTPManagementException {
@@ -391,6 +387,11 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         return userMailAttributes;
     }
 
+    /**
+     * Populate enrollment type mails with provided user attributes
+     * @param userMailAttributes User attributes
+     * @param enrollmentTypeMails Enrollment type mails
+     */
     private void populateUserAttributes(UserMailAttributes userMailAttributes, List<EnrollmentTypeMail> enrollmentTypeMails) {
         for (EnrollmentTypeMail enrollmentTypeMail : enrollmentTypeMails) {
             Properties properties = new Properties();
@@ -420,6 +421,11 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         return enrollmentTypeMail;
     }
 
+    /**
+     * Generate enrollment type mails from device enrollment types
+     * @param deviceEnrollmentTypes List of device enrollment types
+     * @return List of enrollment type mails
+     */
     private List<EnrollmentTypeMail> getEnrollmentTypeMails(List<DeviceEnrollmentType> deviceEnrollmentTypes) {
         List<EnrollmentTypeMail> enrollmentTypeMails = new ArrayList<>();
         for (DeviceEnrollmentType deviceEnrollmentType : deviceEnrollmentTypes) {
