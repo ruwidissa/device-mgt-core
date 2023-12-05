@@ -121,6 +121,9 @@ public final class DeviceManagementConstants {
         public static final String USER_WELCOME_TEMPLATE = "user-welcome";
         public static final String DEFAULT_ENROLLMENT_TEMPLATE = "default-enrollment-invitation";
         public static final String ENROLLMENT_GUIDE_TEMPLATE = "enrollment-guide";
+        public static final String DEVICE_ENROLLMENT_MAIL_KEY = "enrollment";
+        public static final String TEMPLATE_NAME_PART_JOINER = "-";
+        public static final String ENROLLMENT_TYPE_SPLITTER = "_";
     }
 
     public static final class OperationAttributes {
