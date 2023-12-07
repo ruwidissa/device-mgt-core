@@ -21,12 +21,16 @@ package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantManager;
 
 public class APIManagerServiceDataHolder {
 
     private APIApplicationServices apiApplicationServices;
     private APIManagerConfigurationService apiManagerConfigurationService;
     private PublisherRESTAPIServices publisherRESTAPIServices;
+    private RealmService realmService;
+    private TenantManager tenantManager;
 
     private static APIManagerServiceDataHolder thisInstance = new APIManagerServiceDataHolder();
 
@@ -62,5 +66,28 @@ public class APIManagerServiceDataHolder {
 
     public void setPublisherRESTAPIServices(PublisherRESTAPIServices publisherRESTAPIServices) {
         this.publisherRESTAPIServices = publisherRESTAPIServices;
+    }
+
+    public RealmService getRealmService() {
+        if (realmService == null) {
+            throw new IllegalStateException("Realm service is not initialized properly");
+        }
+        return realmService;
+    }
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
+        this.setTenantManager(realmService);
+    }
+
+    public TenantManager getTenantManager() {
+        return tenantManager;
+    }
+
+    private void setTenantManager(RealmService realmService) {
+        if (realmService == null) {
+            throw new IllegalStateException("Realm service is not initialized properly");
+        }
+        this.tenantManager = realmService.getTenantManager();
     }
 }

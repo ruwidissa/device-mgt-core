@@ -19,6 +19,7 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.internal.APIManagerServiceDataHolder;
 import org.json.JSONObject;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
@@ -35,7 +36,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class APIApplicationServicesImpl implements APIApplicationServices {
 
@@ -51,9 +62,27 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
     public APIApplicationKey createAndRetrieveApplicationCredentials()
             throws APIServicesException {
 
+        String serverUser = null;
+        String serverPassword = null;
+        try {
+            UserRealm userRealm = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm();
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            UserStoreManager userStoreManager = userRealm.getUserStoreManager();
+
+            createUserIfNotExists(Constants.RESERVED_USER_NAME, Constants.RESERVED_USER_PASSWORD, userStoreManager);
+
+            if(tenantDomain.equals("carbon.super")) {
+                serverUser = config.getFirstProperty(Constants.SERVER_USER);
+                serverPassword = config.getFirstProperty(Constants.SERVER_PASSWORD);
+            } else {
+                serverUser = Constants.RESERVED_USER_NAME + "@" + tenantDomain;
+                serverPassword = Constants.RESERVED_USER_PASSWORD;
+            }
+        } catch (UserStoreException e) {
+            throw new RuntimeException(e);
+        }
+
         String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);
-        String serverUser = config.getFirstProperty(Constants.SERVER_USER);
-        String serverPassword = config.getFirstProperty(Constants.SERVER_PASSWORD);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
@@ -69,8 +98,9 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
                 .post(requestBody)
                 .build();
         try {
-            Response response = client.newCall(request).execute();
-            return gson.fromJson(response.body().string(), APIApplicationKey.class);
+            try (Response response = client.newCall(request).execute()) {
+                return gson.fromJson(response.body().string(), APIApplicationKey.class);
+            }
         } catch (IOException e) {
             msg = "Error occurred while processing the response";
             log.error(msg, e);
@@ -82,8 +112,16 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
     public AccessTokenInfo generateAccessTokenFromRegisteredApplication(String consumerKey, String consumerSecret)
             throws APIServicesException {
 
-        String userName = config.getFirstProperty(Constants.SERVER_USER);
-        String userPassword = config.getFirstProperty(Constants.SERVER_PASSWORD);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userName = null;
+        String userPassword = null;
+        if(tenantDomain.equals("carbon.super")) {
+            userName = config.getFirstProperty(Constants.SERVER_USER);
+            userPassword = config.getFirstProperty(Constants.SERVER_PASSWORD);
+        } else {
+            userName = "shamalka@shamalka.com";
+            userPassword = "admin";
+        }
 
         JSONObject params = new JSONObject();
         params.put(Constants.GRANT_TYPE_PARAM_NAME, Constants.PASSWORD_GRANT_TYPE);
@@ -124,5 +162,40 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             log.error(msg, e);
             throw new APIServicesException(e);
         }
+    }
+
+    private void createUserIfNotExists(String username, String password, UserStoreManager userStoreManager) {
+
+        try {
+            if (!userStoreManager.isExistingUser(MultitenantUtils.getTenantAwareUsername(username))) {
+                String[] roles = {"admin"};
+                userStoreManager.addUser(MultitenantUtils.getTenantAwareUsername(username), password, roles, null, "");
+
+//                userStoreManager.updateCredential(MultitenantUtils.getTenantAwareUsername(username), "reservedpwd", password);
+            }
+        } catch (UserStoreException e) {
+            String msg = "Error when trying to fetch tenant details";
+            log.error(msg);
+        }
+    }
+
+    private String generateInitialUserPassword() {
+        int passwordLength = 6;
+        //defining the pool of characters to be used for initial password generation
+        String lowerCaseCharset = "abcdefghijklmnopqrstuvwxyz";
+        String upperCaseCharset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String numericCharset = "0123456789";
+        SecureRandom randomGenerator = new SecureRandom();
+        String totalCharset = lowerCaseCharset + upperCaseCharset + numericCharset;
+        int totalCharsetLength = totalCharset.length();
+        StringBuilder initialUserPassword = new StringBuilder();
+        for (int i = 0; i < passwordLength; i++) {
+            initialUserPassword.append(
+                    totalCharset.charAt(randomGenerator.nextInt(totalCharsetLength)));
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Initial user password is created for new user: " + initialUserPassword);
+        }
+        return initialUserPassword.toString();
     }
 }

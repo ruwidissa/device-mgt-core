@@ -17,12 +17,24 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants.User;
+import org.wso2.carbon.stratos.common.exception.TenantManagementClientException;
+import org.wso2.carbon.tenant.mgt.exception.TenantManagementException;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.UserRealm;
@@ -30,12 +42,17 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.security.SecureRandom;
+import java.util.Stack;
 
 /**
  * Load configuration files to tenant's registry.
  */
 public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObserver {
     private static final Log log = LogFactory.getLog(TenantCreateObserver.class);
+
 
     /**
      * Create configuration context.
@@ -82,6 +99,29 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
             userStoreManager.updateRoleListOfUser(tenantAdminName, null,
                     new String[] {DeviceManagementConstants.User.DEFAULT_DEVICE_ADMIN,
                             DeviceManagementConstants.User.DEFAULT_DEVICE_USER});
+
+//            String password = this.generateInitialUserPassword();
+
+//            createUserIfNotExists("test_reserved_user", password, userStoreManager);
+
+
+            PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
+            APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+            APIApplicationKey apiApplicationKey = null;
+            AccessTokenInfo accessTokenInfo = null;
+            try {
+                apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+                accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
+                        apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+            } catch (APIServicesException e) {
+                String errorMsg = "Error occurred while generating the API application";
+                log.error(errorMsg, e);
+                throw new TenantManagementException(errorMsg, e);
+            }
+            Scope[] scopes = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
+
+
+
             if (log.isDebugEnabled()) {
                 log.debug("Device management roles: " + User.DEFAULT_DEVICE_USER + ", " + User.DEFAULT_DEVICE_ADMIN +
                                   " created for the tenant:" + tenantDomain + "."
@@ -90,8 +130,50 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
                                   " is assigned to the role:" + User.DEFAULT_DEVICE_ADMIN + "."
                 );
             }
-        } catch (UserStoreException e) {
+        } catch (UserStoreException | TenantManagementException e) {
             log.error("Error occurred while creating roles for the tenant: " + tenantDomain + ".");
+        } catch (BadRequestException e) {
+            throw new RuntimeException(e);
+        } catch (UnexpectedResponseException e) {
+            throw new RuntimeException(e);
+        } catch (APIServicesException e) {
+            throw new RuntimeException(e);
         }
     }
+
+    private void createUserIfNotExists(String username, String password, UserStoreManager userStoreManager) {
+
+        try {
+            if (!userStoreManager.isExistingUser(MultitenantUtils.getTenantAwareUsername(username))) {
+                String[] roles = {"admin"};
+                userStoreManager.addUser(MultitenantUtils.getTenantAwareUsername(username), password, roles, null, "");
+
+                userStoreManager.updateCredential(MultitenantUtils.getTenantAwareUsername(username), "reservedpwd", password);
+            }
+        } catch (UserStoreException e) {
+            String msg = "Error when trying to fetch tenant details";
+            log.error(msg);
+        }
+    }
+
+    private String generateInitialUserPassword() {
+        int passwordLength = 6;
+        //defining the pool of characters to be used for initial password generation
+        String lowerCaseCharset = "abcdefghijklmnopqrstuvwxyz";
+        String upperCaseCharset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String numericCharset = "0123456789";
+        SecureRandom randomGenerator = new SecureRandom();
+        String totalCharset = lowerCaseCharset + upperCaseCharset + numericCharset;
+        int totalCharsetLength = totalCharset.length();
+        StringBuilder initialUserPassword = new StringBuilder();
+        for (int i = 0; i < passwordLength; i++) {
+            initialUserPassword.append(
+                    totalCharset.charAt(randomGenerator.nextInt(totalCharsetLength)));
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Initial user password is created for new user: " + initialUserPassword);
+        }
+        return initialUserPassword.toString();
+    }
+
 }

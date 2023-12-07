@@ -65,6 +65,8 @@ public final class Constants {
     public static final String SCOPE_API_ENDPOINT = "/api/am/publisher/v2/scopes/";
     public static final String API_ENDPOINT = "/api/am/publisher/v2/apis/";
     public static final String GET_ALL_APIS = "/api/am/publisher/v2/apis?limit=1000";
+    public static final String RESERVED_USER_NAME = "test_reserved_user";
+    public static final String RESERVED_USER_PASSWORD = "reserved_user";
 }
 
 

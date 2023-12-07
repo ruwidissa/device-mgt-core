@@ -109,17 +109,9 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
         APIApplicationServices apiApplicationServices = APIPublisherDataHolder.getInstance().getApiApplicationServices();
         PublisherRESTAPIServices publisherRESTAPIServices = APIPublisherDataHolder.getInstance().getPublisherRESTAPIServices();
-        APIApplicationKey apiApplicationKey;
-        AccessTokenInfo accessTokenInfo;
-        try {
-            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
-            accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
-                    apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
-        } catch (APIServicesException e) {
-            String errorMsg = "Error occurred while generating the API application";
-            log.error(errorMsg, e);
-            throw new APIManagerPublisherException(e);
-        }
+        APIApplicationKey apiApplicationKey = null;
+        AccessTokenInfo accessTokenInfo = null;
+
 
         try {
             boolean tenantFound = false;
@@ -151,8 +143,19 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                 }
 
                 if (tenantFound) {
+
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(apiConfig.getOwner());
                     int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+                    try {
+                        apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+                        accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                    } catch (APIServicesException e) {
+                        String errorMsg = "Error occurred while generating the API application";
+                        log.error(errorMsg, e);
+                        throw new APIManagerPublisherException(e);
+                    }
 
                     try {
                         apiConfig.setOwner(APIUtil.getTenantAdminUserName(tenantDomain));
