@@ -575,4 +575,50 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         }
         return applicationList;
     }
+
+    public List<Application> getInstalledApplicationListOnDevice(int deviceId, int enrolmentId, int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        List<Application> applicationList = new ArrayList<>();
+        Application application;
+        String sql = "SELECT " +
+                "ID, " +
+                "NAME, " +
+                "APP_IDENTIFIER, " +
+                "PLATFORM, " +
+                "CATEGORY, " +
+                "VERSION, " +
+                "TYPE, " +
+                "LOCATION_URL, " +
+                "IMAGE_URL, " +
+                "APP_PROPERTIES, " +
+                "MEMORY_USAGE, " +
+                "IS_ACTIVE, " +
+                "TENANT_ID " +
+                "FROM DM_APPLICATION " +
+                "WHERE DEVICE_ID = ? AND " +
+                "ENROLMENT_ID = ? AND " +
+                "TENANT_ID = ? ";
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, deviceId);
+                stmt.setInt(2, enrolmentId);
+                stmt.setInt(3, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        application = loadApplication(rs);
+                        applicationList.add(application);
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while retrieving the list of Applications " +
+                    "installed in device id '" + deviceId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+        return applicationList;
+    }
 }
