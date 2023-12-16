@@ -20,22 +20,22 @@ package io.entgra.device.mgt.core.notification.logger;
 
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.LogContext;
 
-public class UserLogContext extends LogContext {
+public class UserLoginLogContext extends LogContext {
     private final String userName;
     private final String userEmail;
     private final String metaInfo;
     private final String tenantID;
     private final boolean isUserRegistered;
-    private final boolean isDeviceRegisterged;
+    private final boolean isDeviceRegistered;
     private final String tenantDomain;
 
-    private UserLogContext(Builder builder) {
+    private UserLoginLogContext(Builder builder) {
         this.userEmail = builder.userEmail;
         this.userName = builder.userName;
         this.metaInfo = builder.metaInfo;
         this.tenantID = builder.tenantID;
         this.isUserRegistered = builder.isUserRegistered;
-        this.isDeviceRegisterged = builder.isDeviceRegisterged;
+        this.isDeviceRegistered = builder.isDeviceRegistered;
         this.tenantDomain = builder.tenantDomain;
     }
 
@@ -59,8 +59,8 @@ public class UserLogContext extends LogContext {
         return isUserRegistered;
     }
 
-    public boolean isDeviceRegisterged() {
-        return isDeviceRegisterged;
+    public boolean isDeviceRegistered() {
+        return isDeviceRegistered;
     }
 
     public String getTenantDomain() {
@@ -73,7 +73,7 @@ public class UserLogContext extends LogContext {
         private String metaInfo;
         private String tenantID;
         private boolean isUserRegistered;
-        private boolean isDeviceRegisterged;
+        private boolean isDeviceRegistered;
         private String tenantDomain;
 
         public Builder() {
@@ -124,12 +124,12 @@ public class UserLogContext extends LogContext {
             return this;
         }
 
-        public boolean getIsDeviceRegisterged() {
-            return isDeviceRegisterged;
+        public boolean getIsDeviceRegistered() {
+            return isDeviceRegistered;
         }
 
-        public Builder setDeviceRegisterged(boolean deviceRegisterged) {
-            isDeviceRegisterged = deviceRegisterged;
+        public Builder setDeviceRegistered(boolean deviceRegistered) {
+            isDeviceRegistered = deviceRegistered;
             return this;
         }
 
@@ -142,8 +142,8 @@ public class UserLogContext extends LogContext {
             return this;
         }
 
-        public UserLogContext build() {
-            return new UserLogContext(this);
+        public UserLoginLogContext build() {
+            return new UserLoginLogContext(this);
         }
 
     }

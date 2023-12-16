@@ -37,7 +37,7 @@ public final class MDCContextUtil {
         }
     }
 
-    public static void populateUserMDCContext(final UserLogContext mdcContext) {
+    public static void populateUserMDCContext(final UserLoginLogContext mdcContext) {
         if (mdcContext.getUserName() != null) {
             MDC.put("UserName", mdcContext.getUserName());
         }
@@ -53,8 +53,8 @@ public final class MDCContextUtil {
         if (mdcContext.isUserRegistered()) {
             MDC.put("IsUserRegistered", "Registered");
         }
-        if (mdcContext.isDeviceRegisterged()) {
-            MDC.put("IsDeviceRegistered", mdcContext.isDeviceRegisterged());
+        if (mdcContext.isDeviceRegistered()) {
+            MDC.put("IsDeviceRegistered", mdcContext.isDeviceRegistered());
         }
         if (mdcContext.getTenantDomain() != null) {
             MDC.put("TenantDomain", mdcContext.getTenantDomain());
@@ -160,6 +160,88 @@ public final class MDCContextUtil {
             MDC.put("UserName", mdcContext.getUserName());
         }
     }
+
+    public static void populateRoleMgtMDCContext(final RoleMgtLogContext mdcContext) {
+        if (mdcContext.getUserStoreDomain() != null) {
+            MDC.put("UserStoreDomain", mdcContext.getUserStoreDomain());
+        }
+        if (mdcContext.getRoleName() != null) {
+            MDC.put("RoleName", mdcContext.getRoleName());
+        }
+        if (mdcContext.getUsers() != null) {
+            MDC.put("Users", mdcContext.getUsers());
+        }
+        if (mdcContext.getActionTag() != null) {
+            MDC.put("ActionTag", mdcContext.getActionTag());
+        }
+        if (mdcContext.getUserName() != null) {
+            MDC.put("UserName", mdcContext.getUserName());
+        }
+        if (mdcContext.getTenantDomain() != null) {
+            MDC.put("TenantDomain", mdcContext.getTenantDomain());
+        }
+        if (mdcContext.getTenantID() != null) {
+            MDC.put("TenantId", mdcContext.getTenantID());
+        }
+    }
+
+    public static void populateUserMgtMDCContext(final UserMgtLogContext mdcContext) {
+        if (mdcContext.getUserStoreDomain() != null) {
+            MDC.put("UserStoreDomain", mdcContext.getUserStoreDomain());
+        }
+        if (mdcContext.getFirstName() != null) {
+            MDC.put("FirstName", mdcContext.getFirstName());
+        }
+        if (mdcContext.getLastName() != null) {
+            MDC.put("LastName", mdcContext.getLastName());
+        }
+        if (mdcContext.getEmail() != null) {
+            MDC.put("Email", mdcContext.getEmail());
+        }
+        if (mdcContext.getUserRoles() != null) {
+            MDC.put("UserRoles", mdcContext.getUserRoles());
+        }
+        if (mdcContext.getActionTag() != null) {
+            MDC.put("ActionTag", mdcContext.getActionTag());
+        }
+        if (mdcContext.getUserName() != null) {
+            MDC.put("UserName", mdcContext.getUserName());
+        }
+        if (mdcContext.getTenantDomain() != null) {
+            MDC.put("TenantDomain", mdcContext.getTenantDomain());
+        }
+        if (mdcContext.getTenantID() != null) {
+            MDC.put("TenantId", mdcContext.getTenantID());
+        }
+    }
+
+    public static void populateGroupMgtMDCContext(final GroupMgtLogContext mdcContext) {
+        if (mdcContext.getGroupId() != null) {
+            MDC.put("GroupId", mdcContext.getGroupId());
+        }
+        if (mdcContext.getName() != null) {
+            MDC.put("Name", mdcContext.getName());
+        }
+        if (mdcContext.getOwner() != null) {
+            MDC.put("Owner", mdcContext.getOwner());
+        }
+        if (mdcContext.getActionTag() != null) {
+            MDC.put("ActionTag", mdcContext.getActionTag());
+        }
+        if (mdcContext.getDeviceCount() != null) {
+            MDC.put("DeviceCount", mdcContext.getDeviceCount());
+        }
+        if (mdcContext.getDevices() != null) {
+            MDC.put("Devices", mdcContext.getDevices());
+        }
+        if (mdcContext.getUserName() != null) {
+            MDC.put("UserName", mdcContext.getUserName());
+        }
+        if (mdcContext.getTenantDomain() != null) {
+            MDC.put("TenantDomain", mdcContext.getTenantDomain());
+        }
+        if (mdcContext.getTenantID() != null) {
+            MDC.put("TenantId", mdcContext.getTenantID());
+        }
+    }
 }
-
-
