@@ -349,9 +349,9 @@ public class UserManagementServiceImpl implements UserManagementService {
                 }
                 return Response.status(Response.Status.OK).build();
             } else {
-                String msg = "There are enrolled devices for user: " + username + ". Please remove them before deleting the user.";
+                String msg = "Before deleting this user, ensure there are no devices assigned to the user. You can either remove the devices or change their owner through an update enrollment operation.";
                 log.error(msg);
-                return Response.status(400).entity(msg).build();
+                return Response.status(409).entity(msg).build();
             }
         } catch (DeviceManagementException | UserStoreException e) {
             String msg = "Exception in trying to remove user by user: " + username;
