@@ -62,4 +62,35 @@ public interface EnrollmentDAO {
     boolean updateOwnerOfEnrollment(List<Device> devices, String owner, int tenantId)
             throws DeviceManagementDAOException;
 
+    /***
+     *This method is used to add the device status of the enrollment for given set of devices to given user.
+     *
+     * @param currentOwner of device.
+     * @param status going to add
+     * @param tenantId tenant id.
+     * @return either (1) true, if device status is succeeded or false.
+     * @throws DeviceManagementDAOException if an error occurs when updating device owner.
+     */
+    boolean addDeviceStatus(String currentOwner, EnrolmentInfo.Status status, int tenantId) throws DeviceManagementDAOException;
+
+    /***
+     *This method is used to add the device status of the enrollment for given set of devices to given user.
+     *
+     * @param config of Enrollment.
+     * @return either (1) true, if device status is succeeded or false.
+     * @throws DeviceManagementDAOException if an error occurs when updating device owner.
+     */
+    boolean addDeviceStatus(EnrolmentInfo config) throws DeviceManagementDAOException;
+
+    /***
+     *This method is used to add the device status of the enrollment for given set of devices to given user.
+     *
+     * @param enrolmentId of device.
+     * @param status going to add
+     * @return either (1) true, if device status is succeeded or false.
+     * @throws DeviceManagementDAOException if an error occurs when updating device owner.
+     */
+    boolean addDeviceStatus(int enrolmentId, EnrolmentInfo.Status status) throws DeviceManagementDAOException;
+
+
 }

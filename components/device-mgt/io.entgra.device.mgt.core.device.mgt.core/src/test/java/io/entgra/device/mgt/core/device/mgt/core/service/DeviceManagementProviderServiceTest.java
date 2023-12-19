@@ -18,6 +18,9 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.service;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.config.ui.UIConfigurationManager;
 import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,6 +64,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
@@ -78,6 +82,8 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
     private static final String ALTERNATE_DEVICE_ID = "1128";
     private static final String DEVICE_TYPE = "RANDOM_DEVICE_TYPE";
     private final DeviceDetailsDAO deviceDetailsDAO = DeviceManagementDAOFactory.getDeviceDetailsDAO();
+    private static final String MDM_CONFIG_LOCATION = "src" + File.separator + "test" + File.separator + "resources" +
+            File.separator + "config" + File.separator + "operation" + File.separator + "mdm-ui-config.xml";
 
     DeviceManagementProviderService deviceMgtService;
 
@@ -96,6 +102,7 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
         DeviceManagementDataHolder.getInstance().setDeviceTaskManagerService(null);
         deviceMgtService.registerDeviceType(new TestDeviceManagementService(DEVICE_TYPE,
                 MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
+        UIConfigurationManager.getInstance().initConfig(MDM_CONFIG_LOCATION);
     }
 
     private RegistryService getRegistryService() throws RegistryException {
@@ -204,8 +211,11 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
 
 
     @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"})
-    public void testReEnrollmentofSameDeviceUnderSameUser() throws DeviceManagementException {
+    public void testReEnrollmentofSameDeviceUnderSameUser() throws DeviceManagementException, MetadataManagementException {
         if (!isMock()) {
+            DeviceStatusManagementService deviceStatusManagementService = DeviceManagementDataHolder
+                    .getInstance().getDeviceStatusManagementService();
+            deviceStatusManagementService.addDefaultDeviceStatusFilterIfNotExist(MultitenantConstants.SUPER_TENANT_ID);
             Device device = TestDataHolder.generateDummyDeviceData(new DeviceIdentifier(DEVICE_ID, DEVICE_TYPE));
             boolean enrollment = deviceMgtService.enrollDevice(device);
             Assert.assertTrue(enrollment);

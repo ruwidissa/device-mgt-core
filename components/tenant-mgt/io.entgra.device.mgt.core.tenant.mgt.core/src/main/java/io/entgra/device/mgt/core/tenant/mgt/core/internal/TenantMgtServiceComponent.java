@@ -18,6 +18,8 @@
 package io.entgra.device.mgt.core.tenant.mgt.core.internal;
 
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerService;
 import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
 import io.entgra.device.mgt.core.tenant.mgt.core.impl.TenantManagerImpl;
@@ -64,6 +66,10 @@ public class TenantMgtServiceComponent {
             componentContext.getBundleContext().registerService(WhiteLabelManagementServiceImpl.class.getName(),
                     whiteLabelManagementService, null);
             TenantMgtDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
+            DeviceStatusManagementService deviceStatusManagementService = new DeviceStatusManagementServiceImpl();
+            componentContext.getBundleContext().registerService(DeviceStatusManagementService.class.getName(),
+                    deviceStatusManagementService, null);
+            TenantMgtDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagementService);
             DeviceMgtTenantListener deviceMgtTenantListener = new DeviceMgtTenantListener();
             if(log.isDebugEnabled()) {
                 log.info("Tenant management listener is registering");

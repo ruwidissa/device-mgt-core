@@ -88,9 +88,6 @@ public class GenericEnrollmentDAOImpl extends AbstractEnrollmentDAOImpl {
             stmt.setInt(4, enrolmentInfo.getId());
             stmt.setInt(5, tenantId);
             int updatedCount = stmt.executeUpdate();
-            if (updatedCount == 1){
-                addDeviceStatus(enrolmentInfo.getId(), enrolmentInfo.getStatus());
-            }
             return updatedCount;
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while updating enrolment configuration", e);
@@ -126,9 +123,6 @@ public class GenericEnrollmentDAOImpl extends AbstractEnrollmentDAOImpl {
             }
             if (updateStatus > 0) {
                 status = true;
-                for (EnrolmentInfo enrolmentInfo : enrolmentInfos) {
-                    addDeviceStatus(enrolmentInfo);
-                }
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while updating enrolment status of given device-list.", e);
@@ -251,11 +245,11 @@ public class GenericEnrollmentDAOImpl extends AbstractEnrollmentDAOImpl {
         return true;
     }
 
-    private boolean addDeviceStatus(EnrolmentInfo config) throws DeviceManagementDAOException {
+    public boolean addDeviceStatus(EnrolmentInfo config) throws DeviceManagementDAOException {
         return addDeviceStatus(config.getId(), config.getStatus());
     }
 
-    private boolean addDeviceStatus(String currentOwner, EnrolmentInfo.Status status, int tenantId) throws DeviceManagementDAOException {
+    public boolean addDeviceStatus(String currentOwner, EnrolmentInfo.Status status, int tenantId) throws DeviceManagementDAOException {
         Connection conn;
         String changedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (changedBy == null){
@@ -318,7 +312,7 @@ public class GenericEnrollmentDAOImpl extends AbstractEnrollmentDAOImpl {
         return true;
     }
 
-    private boolean addDeviceStatus(int enrolmentId, EnrolmentInfo.Status status) throws DeviceManagementDAOException {
+    public boolean addDeviceStatus(int enrolmentId, EnrolmentInfo.Status status) throws DeviceManagementDAOException {
         Connection conn;
         String changedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (changedBy == null){

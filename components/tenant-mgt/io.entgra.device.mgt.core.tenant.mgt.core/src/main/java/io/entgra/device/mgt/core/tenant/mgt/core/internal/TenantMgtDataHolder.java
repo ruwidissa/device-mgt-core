@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.tenant.mgt.core.internal;
 
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.WhiteLabelManagementService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -31,6 +32,8 @@ public class TenantMgtDataHolder {
     private WhiteLabelManagementService whiteLabelManagementService;
 
     private RealmService realmService;
+
+    private DeviceStatusManagementService deviceStatusManagementService;
 
     public RealmService getRealmService() {
         return realmService;
@@ -66,5 +69,13 @@ public class TenantMgtDataHolder {
 
     public static TenantMgtDataHolder getInstance() {
         return instance;
+    }
+
+    public DeviceStatusManagementService getDeviceStatusManagementService() {
+        return deviceStatusManagementService;
+    }
+
+    public void setDeviceStatusManagementService(DeviceStatusManagementService deviceStatusManagementService) {
+        this.deviceStatusManagementService = deviceStatusManagementService;
     }
 }

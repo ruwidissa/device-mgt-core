@@ -19,6 +19,9 @@
 package io.entgra.device.mgt.core.device.mgt.core.status.task.impl;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
@@ -33,6 +36,7 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOExceptio
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.status.task.DeviceStatusTaskException;
 import io.entgra.device.mgt.core.device.mgt.core.task.impl.DynamicPartitionedScheduleTask;
+import org.wso2.carbon.context.CarbonContext;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -135,11 +139,26 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
     private boolean updateDeviceStatus(List<EnrolmentInfo> enrolmentInfos) throws
             DeviceStatusTaskException {
         boolean updateStatus;
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        DeviceStatusManagementService deviceStatusManagementService = DeviceManagementDataHolder
+                .getInstance().getDeviceStatusManagementService();
         try {
             DeviceManagementDAOFactory.beginTransaction();
             updateStatus = DeviceManagementDAOFactory.getEnrollmentDAO().updateEnrollmentStatus(enrolmentInfos);
+            boolean isEnableDeviceStatusCheck = deviceStatusManagementService.getDeviceStatusCheck(tenantId);
+            if (updateStatus) {
+                for (EnrolmentInfo enrolmentInfo : enrolmentInfos) {
+                    if (isEnableDeviceStatusCheck) {
+                        if (deviceStatusManagementService.isDeviceStatusValid(this.deviceType, enrolmentInfo.getStatus().name(), tenantId)) {
+                            DeviceManagementDAOFactory.getEnrollmentDAO().addDeviceStatus(enrolmentInfo);
+                        }
+                    } else {
+                        DeviceManagementDAOFactory.getEnrollmentDAO().addDeviceStatus(enrolmentInfo);
+                    }
+                }
+            }
             DeviceManagementDAOFactory.commitTransaction();
-        } catch (DeviceManagementDAOException e) {
+        } catch (DeviceManagementDAOException | MetadataManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceStatusTaskException("Error occurred while updating enrollment status of devices of type '"
                     + deviceType + "'", e);

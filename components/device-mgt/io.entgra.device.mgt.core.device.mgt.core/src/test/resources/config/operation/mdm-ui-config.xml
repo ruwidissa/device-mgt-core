@@ -163,7 +163,7 @@
         </DeviceInfoItem>
     </DeviceInfoConfigurations>
     <DeviceStatusConfigurations>
-        <EnableDeviceStatusCheck>false</EnableDeviceStatusCheck>
+        <EnableDeviceStatusCheck>true</EnableDeviceStatusCheck>
         <DeviceStatusItem>
             <Type>android</Type>
             <AllowedStatus>
@@ -363,8 +363,6 @@
         <Scope>dm:geo:geo-fence:manage</Scope>
         <Scope>dm:whitelable:view</Scope>
         <Scope>dm:whitelable:update</Scope>
-        <Scope>dm:devicestatusfilter:view</Scope>
-        <Scope>dm:devicestatusfilter:update</Scope>
         <Scope>dm:metadata:view</Scope>
         <Scope>dm:metadata:create</Scope>
         <Scope>dm:metadata:update</Scope>
@@ -410,4 +408,3 @@
         <Issuer>device-mgt</Issuer>
     </SSOConfiguration>
 </UIConfiguration>
-

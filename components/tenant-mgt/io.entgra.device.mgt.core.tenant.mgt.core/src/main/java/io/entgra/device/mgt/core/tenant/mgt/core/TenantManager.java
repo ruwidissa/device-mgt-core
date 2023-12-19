@@ -36,4 +36,11 @@ public interface TenantManager {
      * @throws TenantMgtException Throws when error occurred while adding default application categories
      */
     void addDefaultAppCategories(TenantInfoBean tenantInfoBean) throws TenantMgtException;
+
+    /**
+     * Add default device status filters to a tenant described by the tenant info bean
+     * @param tenantInfoBean The info bean that provides tenant info
+     * @throws TenantMgtException Throws when error occurred while adding default application categories
+     */
+    void addDefaultDeviceStatusFilters(TenantInfoBean tenantInfoBean) throws TenantMgtException;
 }
