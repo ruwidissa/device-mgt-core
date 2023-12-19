@@ -25,6 +25,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIService
 public interface APIApplicationServices {
 
     APIApplicationKey createAndRetrieveApplicationCredentials() throws APIServicesException;
+    void createAndRetrieveApplicationCredentialsAndGenerateToken() throws APIServicesException;
 
     AccessTokenInfo generateAccessTokenFromRegisteredApplication(String clientId, String clientSecret) throws APIServicesException;
 

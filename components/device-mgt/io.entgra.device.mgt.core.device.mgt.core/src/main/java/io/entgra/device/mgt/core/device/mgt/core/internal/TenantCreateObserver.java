@@ -46,12 +46,16 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.security.SecureRandom;
 import java.util.Stack;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Load configuration files to tenant's registry.
  */
 public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObserver {
     private static final Log log = LogFactory.getLog(TenantCreateObserver.class);
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
 
 
     /**
@@ -104,22 +108,26 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
 
 //            createUserIfNotExists("test_reserved_user", password, userStoreManager);
 
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        createApplication(tenantDomain);
+                    } catch (TenantManagementException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+            thread.start();
 
-            PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
-            APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
-            APIApplicationKey apiApplicationKey = null;
-            AccessTokenInfo accessTokenInfo = null;
-            try {
-                apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
-                accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
-                        apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
-            } catch (APIServicesException e) {
-                String errorMsg = "Error occurred while generating the API application";
-                log.error(errorMsg, e);
-                throw new TenantManagementException(errorMsg, e);
-            }
-            Scope[] scopes = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
 
+//            executor.submit(() -> {
+//                try {
+//                    createApplication();
+//                } catch (TenantManagementException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            });
 
 
             if (log.isDebugEnabled()) {
@@ -130,17 +138,33 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
                                   " is assigned to the role:" + User.DEFAULT_DEVICE_ADMIN + "."
                 );
             }
-        } catch (UserStoreException | TenantManagementException e) {
+        } catch (UserStoreException e) {
             log.error("Error occurred while creating roles for the tenant: " + tenantDomain + ".");
-        } catch (BadRequestException e) {
-            throw new RuntimeException(e);
-        } catch (UnexpectedResponseException e) {
-            throw new RuntimeException(e);
-        } catch (APIServicesException e) {
-            throw new RuntimeException(e);
         }
     }
 
+
+    private void createApplication(String tenantDomain) throws TenantManagementException {
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
+        PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
+        APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+        APIApplicationKey apiApplicationKey = null;
+        AccessTokenInfo accessTokenInfo = null;
+        try {
+            apiApplicationServices.createAndRetrieveApplicationCredentialsAndGenerateToken();
+//            log.error("apiApplicationKey: " + apiApplicationKey.getClientId());
+//            log.error("apiApplicationKey: " + apiApplicationKey.getClientSecret());
+//            accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
+//                    apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+        } catch (APIServicesException e) {
+            String errorMsg = "Error occurred while generating the API application";
+            log.error(errorMsg, e);
+            throw new TenantManagementException(errorMsg, e);
+        }
+//        Scope[] scopes = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
+    }
     private void createUserIfNotExists(String username, String password, UserStoreManager userStoreManager) {
 
         try {

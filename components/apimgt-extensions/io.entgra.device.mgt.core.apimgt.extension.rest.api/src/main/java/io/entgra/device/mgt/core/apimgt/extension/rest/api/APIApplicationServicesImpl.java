@@ -19,6 +19,9 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.internal.APIManagerServiceDataHolder;
 import org.json.JSONObject;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.HttpsTrustManagerUtils;
@@ -62,9 +65,12 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
     public APIApplicationKey createAndRetrieveApplicationCredentials()
             throws APIServicesException {
 
+        log.error("=====createAndRetrieveApplicationCredentials=====1");
+
         String serverUser = null;
         String serverPassword = null;
         try {
+            log.error("=====createAndRetrieveApplicationCredentials=====2");
             UserRealm userRealm = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm();
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             UserStoreManager userStoreManager = userRealm.getUserStoreManager();
@@ -72,9 +78,11 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             createUserIfNotExists(Constants.RESERVED_USER_NAME, Constants.RESERVED_USER_PASSWORD, userStoreManager);
 
             if(tenantDomain.equals("carbon.super")) {
+                log.error("=====createAndRetrieveApplicationCredentials=====3");
                 serverUser = config.getFirstProperty(Constants.SERVER_USER);
                 serverPassword = config.getFirstProperty(Constants.SERVER_PASSWORD);
             } else {
+                log.error("=====createAndRetrieveApplicationCredentials=====4");
                 serverUser = Constants.RESERVED_USER_NAME + "@" + tenantDomain;
                 serverPassword = Constants.RESERVED_USER_PASSWORD;
             }
@@ -84,6 +92,8 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
 
         String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);
 
+        log.error("=====createAndRetrieveApplicationCredentials=====5");
+
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
         jsonObject.put("clientName", Constants.CLIENT_NAME);
@@ -91,15 +101,97 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
         jsonObject.put("owner", serverUser);
         jsonObject.put("saasApp", true);
 
+        log.error("=====createAndRetrieveApplicationCredentials=====6");
+
         RequestBody requestBody = RequestBody.Companion.create(jsonObject.toString(), JSON);
         Request request = new Request.Builder()
                 .url(applicationEndpoint)
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Credentials.basic(serverUser, serverPassword))
                 .post(requestBody)
                 .build();
+
+        log.error("=====createAndRetrieveApplicationCredentials=====7");
+
         try {
+            log.error("=====createAndRetrieveApplicationCredentials=====8");
             try (Response response = client.newCall(request).execute()) {
+                log.error("=====createAndRetrieveApplicationCredentials=====9");
                 return gson.fromJson(response.body().string(), APIApplicationKey.class);
+            }
+        } catch (IOException e) {
+            msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(e);
+        }
+    }
+
+    @Override
+    public void createAndRetrieveApplicationCredentialsAndGenerateToken()
+            throws APIServicesException {
+
+        log.error("=====createAndRetrieveApplicationCredentials=====1");
+
+        String serverUser = null;
+        String serverPassword = null;
+        try {
+            log.error("=====createAndRetrieveApplicationCredentials=====2");
+            UserRealm userRealm = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm();
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            UserStoreManager userStoreManager = userRealm.getUserStoreManager();
+
+            createUserIfNotExists(Constants.RESERVED_USER_NAME, Constants.RESERVED_USER_PASSWORD, userStoreManager);
+
+            if(tenantDomain.equals("carbon.super")) {
+                log.error("=====createAndRetrieveApplicationCredentials=====3");
+                serverUser = config.getFirstProperty(Constants.SERVER_USER);
+                serverPassword = config.getFirstProperty(Constants.SERVER_PASSWORD);
+            } else {
+                log.error("=====createAndRetrieveApplicationCredentials=====4");
+                serverUser = Constants.RESERVED_USER_NAME + "@" + tenantDomain;
+                serverPassword = Constants.RESERVED_USER_PASSWORD;
+            }
+        } catch (UserStoreException e) {
+            throw new RuntimeException(e);
+        }
+
+        String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);
+
+        log.error("=====createAndRetrieveApplicationCredentials=====5");
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
+        jsonObject.put("clientName", Constants.CLIENT_NAME);
+        jsonObject.put("grantType", Constants.GRANT_TYPE);
+        jsonObject.put("owner", serverUser);
+        jsonObject.put("saasApp", true);
+
+        log.error("=====createAndRetrieveApplicationCredentials=====6");
+
+        RequestBody requestBody = RequestBody.Companion.create(jsonObject.toString(), JSON);
+        Request request = new Request.Builder()
+                .url(applicationEndpoint)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Credentials.basic(serverUser, serverPassword))
+                .post(requestBody)
+                .build();
+
+        log.error("=====createAndRetrieveApplicationCredentials=====7");
+
+        try {
+            log.error("=====createAndRetrieveApplicationCredentials=====8");
+            try (Response response = client.newCall(request).execute()) {
+                log.error("=====createAndRetrieveApplicationCredentials=====9");
+                APIApplicationKey apiApplicationKey = gson.fromJson(response.body().string(), APIApplicationKey.class);
+                AccessTokenInfo accessTokenInfo = generateAccessTokenFromRegisteredApplication(
+                    apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+
+                PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
+
+                Scope[] scopes = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
+
+            } catch (BadRequestException e) {
+                throw new RuntimeException(e);
+            } catch (UnexpectedResponseException e) {
+                throw new RuntimeException(e);
             }
         } catch (IOException e) {
             msg = "Error occurred while processing the response";
