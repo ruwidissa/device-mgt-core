@@ -456,17 +456,19 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
             Scope scope = new Scope();
             for (DefaultPermission defaultPermission: defaultPermissions.getDefaultPermissions()) {
-                //todo check whether scope is available or not
-                ScopeMapping scopeMapping = defaultPermission.getScopeMapping();
+                if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
+                        defaultPermission.getScopeMapping().getKey())) {
+                    ScopeMapping scopeMapping = defaultPermission.getScopeMapping();
 
-                List<String> bindings = new ArrayList<>(
-                        Arrays.asList(scopeMapping.getDefaultRoles().split(",")));
-                bindings.add(ADMIN_ROLE_KEY);
-                scope.setName(scopeMapping.getKey());
-                scope.setDescription(scopeMapping.getName());
-                scope.setDisplayName(scopeMapping.getName());
-                scope.setBindings(bindings);
-                publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                    List<String> bindings = new ArrayList<>(
+                            Arrays.asList(scopeMapping.getDefaultRoles().split(",")));
+                    bindings.add(ADMIN_ROLE_KEY);
+                    scope.setName(scopeMapping.getKey());
+                    scope.setDescription(scopeMapping.getName());
+                    scope.setDisplayName(scopeMapping.getName());
+                    scope.setBindings(bindings);
+                    publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                }
             }
         } catch (BadRequestException | UnexpectedResponseException | APIServicesException e) {
             log.error("Error occurred while adding default scopes");
