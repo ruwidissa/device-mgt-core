@@ -1228,15 +1228,18 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     private String getTemplateName(String deviceType, String prefix, String separator) throws NoSuchFileException {
-        String templateName = deviceType + separator + prefix;
-        File template = new File(CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator
-                + "resources" + File.separator + "email-templates" + File.separator + templateName + ".vm");
+        String templateName = deviceType + separator + prefix + ".vm";
+        List<String> templatePathSegments =
+                Arrays.asList(CarbonUtils.getCarbonHome(), "repository", "resources", "email-templates", templateName);
+        File template = new File(String.join(File.separator, templatePathSegments));
         if (template.exists()) {
             return templateName;
         }
-        String defaultTemplateName = "default" + separator + prefix;
-        File defaultTemplate = new File(CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator
-                + "resources" + File.separator + "email-templates" + File.separator + defaultTemplateName + ".vm");
+
+        String defaultTemplateName = "default" + separator + prefix + ".vm";
+        List<String> defaultTemplatePathSegments =
+                Arrays.asList(CarbonUtils.getCarbonHome(), "repository", "resources", "email-templates", defaultTemplateName);
+        File defaultTemplate = new File(String.join(File.separator, defaultTemplatePathSegments));
 
         if (defaultTemplate.exists()) {
             if (log.isDebugEnabled()) {
@@ -1245,8 +1248,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             return defaultTemplateName;
         }
 
-        String msg = "Didn't found template file for " + templateName;
-        throw new NoSuchFileException(msg);
+        throw new NoSuchFileException("Didn't found template file for " + templateName);
     }
 
     /**

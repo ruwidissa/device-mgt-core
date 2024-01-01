@@ -124,15 +124,15 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
             Document JITConfigurationDoc = documentBuilder.parse(JITConfigurationFile);
             JITConfigurationDoc.getDocumentElement().normalize();
             Element enrollmentScopes;
-            if (Objects.equals(JITEnrollmentInfo.getOs(), "android")) {
+            if (Objects.equals(JITEnrollmentInfo.getOs(), HandlerConstants.OS_ANDROID)) {
                 enrollmentScopes = (Element) JITConfigurationDoc.
-                        getElementsByTagName("AndroidEnrollmentScopes").item(0);
-            } else if (Objects.equals(JITEnrollmentInfo.getOs(), "ios")) {
+                        getElementsByTagName(HandlerConstants.TAG_ANDROID_ENROLLMENT_SCOPES).item(0);
+            } else if (Objects.equals(JITEnrollmentInfo.getOs(), HandlerConstants.OS_IOS)) {
                 enrollmentScopes = (Element) JITConfigurationDoc.
-                        getElementsByTagName("IOSEnrollmentScopes").item(0);
-            } else if (Objects.equals(JITEnrollmentInfo.getOs(), "windows"))  {
+                        getElementsByTagName(HandlerConstants.TAG_IOS_ENROLLMENT_SCOPES).item(0);
+            } else if (Objects.equals(JITEnrollmentInfo.getOs(), HandlerConstants.OS_WINDOWS))  {
                 enrollmentScopes = (Element) JITConfigurationDoc.
-                        getElementsByTagName("IOSEnrollmentScopes").item(0);
+                        getElementsByTagName(HandlerConstants.TAG_WINDOWS_ENROLLMENT_SCOPES).item(0);
             } else {
                 String msg = "OS type not supported";
                 if (log.isDebugEnabled()) {

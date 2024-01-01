@@ -115,4 +115,10 @@ public class HandlerConstants {
     public static final String JIT_PROVISION_HANDLER = "/jit-provision";
     public static final String JIT_ENROLLMENT_AUTH_APP_KEY = "JIT_ENROLLMENT_AUTH_APP";
     public static final String CLIENT_CREDENTIAL_GRANT_TYPE = "client_credentials";
+    public static final String OS_ANDROID = "android";
+    public static final String OS_WINDOWS = "windows";
+    public static final String OS_IOS = "ios";
+    public static final String TAG_ANDROID_ENROLLMENT_SCOPES = "AndroidEnrollmentScopes";
+    public static final String TAG_WINDOWS_ENROLLMENT_SCOPES = "WindowsEnrollmentScopes";
+    public static final String TAG_IOS_ENROLLMENT_SCOPES = "IOSEnrollmentScopes";
 }

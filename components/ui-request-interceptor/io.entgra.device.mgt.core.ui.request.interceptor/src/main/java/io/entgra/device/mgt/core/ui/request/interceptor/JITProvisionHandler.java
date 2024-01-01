@@ -52,6 +52,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -71,6 +73,7 @@ public class JITProvisionHandler extends HttpServlet {
     private String JITConfigurationPath;
     private String redirectUrl;
     private String state;
+    private static final Map<String, Element> tenantConfigs = new HashMap<>();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
@@ -165,13 +168,17 @@ public class JITProvisionHandler extends HttpServlet {
      */
     private boolean initializeJITConfigurations() throws JITProvisionException {
         try {
-            File JITConfigurationFile = new File(JITConfigurationPath);
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            Document JITConfigurationDoc = documentBuilder.parse(JITConfigurationFile);
-            JITConfigurationDoc.getDocumentElement().normalize();
-            Element serviceProvider = findServiceProvider(tenantDomain, JITConfigurationDoc);
-            if (serviceProvider == null) return false;
+            Element serviceProvider = tenantConfigs.get(tenantDomain);
+            if (serviceProvider == null) {
+                File JITConfigurationFile = new File(JITConfigurationPath);
+                DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+                Document JITConfigurationDoc = documentBuilder.parse(JITConfigurationFile);
+                JITConfigurationDoc.getDocumentElement().normalize();
+                serviceProvider = findServiceProvider(tenantDomain, JITConfigurationDoc);
+                if (serviceProvider == null) return false;
+                tenantConfigs.put(tenantDomain, serviceProvider);
+            }
             clientId = serviceProvider.getElementsByTagName("ClientId").item(0).getTextContent();
             String clientSecret = serviceProvider.getElementsByTagName("ClientSecret").item(0).getTextContent();
             String headerValue = clientId + ":" + clientSecret;
