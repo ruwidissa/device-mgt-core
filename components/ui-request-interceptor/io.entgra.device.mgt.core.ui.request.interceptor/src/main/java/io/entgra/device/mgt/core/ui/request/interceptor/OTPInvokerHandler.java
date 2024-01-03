@@ -25,8 +25,9 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.*;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -51,7 +52,9 @@ public class OTPInvokerHandler extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (validateRequest(req, resp)) {
-                HttpPost postRequest = new HttpPost(HandlerUtil.generateBackendRequestURL(req, apiEndpoint));
+//                HttpPost postRequest = new HttpPost(HandlerUtil.generateBackendRequestURL(req, apiEndpoint));
+                ClassicHttpRequest postRequest = ClassicRequestBuilder.post(HandlerUtil.generateBackendRequestURL(req
+                        , apiEndpoint)).build();
                 HandlerUtil.generateRequestEntity(req, postRequest);
                 ProxyResponse proxyResponse = HandlerUtil.execute(postRequest);
 
@@ -73,7 +76,8 @@ public class OTPInvokerHandler extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (validateRequest(req, resp)) {
-                HttpGet getRequest = new HttpGet(HandlerUtil.generateBackendRequestURL(req, apiEndpoint));
+                ClassicHttpRequest getRequest = ClassicRequestBuilder.post(HandlerUtil.generateBackendRequestURL(req
+                        , apiEndpoint)).build();
                 HandlerUtil.copyRequestHeaders(req, getRequest, false);
                 ProxyResponse proxyResponse = HandlerUtil.execute(getRequest);
 
@@ -93,7 +97,8 @@ public class OTPInvokerHandler extends HttpServlet {
     protected void doHead(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (validateRequest(req, resp)) {
-                HttpHead headRequest = new HttpHead(HandlerUtil.generateBackendRequestURL(req, apiEndpoint));
+                ClassicHttpRequest headRequest = ClassicRequestBuilder.post(HandlerUtil.generateBackendRequestURL(req
+                        , apiEndpoint)).build();
                 HandlerUtil.copyRequestHeaders(req, headRequest, false);
                 ProxyResponse proxyResponse = HandlerUtil.execute(headRequest);
 
@@ -113,7 +118,8 @@ public class OTPInvokerHandler extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (validateRequest(req, resp)) {
-                HttpPut putRequest = new HttpPut(HandlerUtil.generateBackendRequestURL(req, apiEndpoint));
+                ClassicHttpRequest putRequest = ClassicRequestBuilder.post(HandlerUtil.generateBackendRequestURL(req
+                        , apiEndpoint)).build();
                 HandlerUtil.generateRequestEntity(req, putRequest);
                 ProxyResponse proxyResponse = HandlerUtil.execute(putRequest);
 
@@ -135,7 +141,8 @@ public class OTPInvokerHandler extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (validateRequest(req, resp)) {
-                HttpDelete deleteRequest = new HttpDelete(HandlerUtil.generateBackendRequestURL(req, apiEndpoint));
+                ClassicHttpRequest deleteRequest = ClassicRequestBuilder.post(HandlerUtil.generateBackendRequestURL(req
+                        , apiEndpoint)).build();
                 HandlerUtil.copyRequestHeaders(req, deleteRequest, false);
                 ProxyResponse proxyResponse = HandlerUtil.execute(deleteRequest);
 
