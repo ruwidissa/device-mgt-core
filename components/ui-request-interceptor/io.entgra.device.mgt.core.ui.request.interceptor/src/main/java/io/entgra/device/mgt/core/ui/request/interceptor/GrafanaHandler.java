@@ -30,6 +30,8 @@ import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -68,7 +70,7 @@ public class GrafanaHandler extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (validateRequest(req, resp)) {
-                HttpGet grafanaRequest = new HttpGet();
+                ClassicHttpRequest grafanaRequest = ClassicRequestBuilder.get().build();
                 HandlerUtil.copyRequestHeaders(req, grafanaRequest, true);
                 if (!GrafanaUtil.isGrafanaAPI(req.getRequestURI())) {
                     proxyPassGrafanaRequest(grafanaRequest, resp, req);
@@ -112,7 +114,7 @@ public class GrafanaHandler extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (validateRequest(req, resp)) {
-                HttpPost grafanaRequest = new HttpPost();
+                ClassicHttpRequest grafanaRequest = ClassicRequestBuilder.post().build();
                 HandlerUtil.generateRequestEntity(req, grafanaRequest);
                 HandlerUtil.copyRequestHeaders(req, grafanaRequest, true);
                 if (!GrafanaUtil.isGrafanaAPI(req.getRequestURI())) {
