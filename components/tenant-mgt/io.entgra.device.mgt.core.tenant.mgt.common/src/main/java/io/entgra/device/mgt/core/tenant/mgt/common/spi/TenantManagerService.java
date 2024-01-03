@@ -24,4 +24,6 @@ public interface TenantManagerService {
     void addDefaultRoles(TenantInfoBean tenantInfoBean) throws TenantMgtException;
 
     void addDefaultAppCategories(TenantInfoBean tenantInfoBean) throws TenantMgtException;
+
+    void addDefaultDeviceStatusFilters(TenantInfoBean tenantInfoBean) throws TenantMgtException;
 }

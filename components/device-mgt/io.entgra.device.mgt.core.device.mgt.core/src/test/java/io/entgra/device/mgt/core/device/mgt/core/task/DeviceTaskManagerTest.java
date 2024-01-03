@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.task;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,7 +69,7 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
     private OperationManager operationManager;
 
     @BeforeClass
-    public void init() throws DeviceManagementException, RegistryException {
+    public void init() throws DeviceManagementException, RegistryException, MetadataManagementException {
         log.info("Initializing Device Task Manager Test Suite");
         this.deviceIds = new ArrayList<>();
         for (int i = 0; i < 5; i++) {

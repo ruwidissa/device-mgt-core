@@ -1030,10 +1030,9 @@ public interface DeviceManagementProviderService {
      * @param iconPath Icon path of the application
      * @param packageName Package name of the application
      * @param version Version of the application
-     * @param tenantId Tenant ID of the application created user
      * @throws DeviceManagementException if any service level or DAO level error occurs
      */
-    void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId)
+    void saveApplicationIcon(String iconPath, String packageName, String version)
             throws DeviceManagementException;
 
     /**
@@ -1062,4 +1061,12 @@ public interface DeviceManagementProviderService {
      */
     List<Application> getInstalledApplicationsOnDevice(Device device, int offset, int limit)
             throws DeviceManagementException;
+
+    /**
+     * This method is for getting the installed application list of a device
+     * @param device {@link Device}
+     * @return list of applications {@link Application}
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     */
+    List<Application> getInstalledApplicationsOnDevice(Device device) throws DeviceManagementException;
 }

@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceStatusTaskPluginConfig;
@@ -92,6 +93,8 @@ public class DeviceManagementDataHolder {
     private MetadataManagementService metadataManagementService;
     private WhiteLabelManagementService whiteLabelManagementService;
     private TraccarManagementService traccarManagementService;
+
+    private DeviceStatusManagementService deviceStatusManagementService;
 
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
@@ -382,6 +385,14 @@ public class DeviceManagementDataHolder {
 
     public void setWhiteLabelManagementService(WhiteLabelManagementService whiteLabelManagementService) {
         this.whiteLabelManagementService = whiteLabelManagementService;
+    }
+
+    public DeviceStatusManagementService getDeviceStatusManagementService() {
+        return deviceStatusManagementService;
+    }
+
+    public void setDeviceStatusManagementService(DeviceStatusManagementService deviceStatusManagementService) {
+        this.deviceStatusManagementService = deviceStatusManagementService;
     }
 
     public TraccarManagementService getTraccarManagementService() {

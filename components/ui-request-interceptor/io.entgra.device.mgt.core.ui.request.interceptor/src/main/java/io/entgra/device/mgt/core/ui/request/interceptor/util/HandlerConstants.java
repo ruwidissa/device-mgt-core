@@ -107,4 +107,18 @@ public class HandlerConstants {
     public static final String USER_SCOPES = "userScopes";
     public static final String HUBSPOT_CHAT_URL = "api.hubapi.com";
     public static final String USERNAME_WITH_DOMAIN = "usernameWithDomain";
+    public static final String JIT_PROVISION_CALLBACK_URL = "/jit-provision-callback";
+    public static final String JIT_ENROLLMENT_HANDLER_CALLBACK_URL = "/jit-enrollment-callback";
+    public static final String DCR_URL = "/client-registration/v0.17/register";
+    public static final String SESSION_JIT_DATA_KEY = "JITInfo";
+    public static final String SESSION_JIT_ENROLLMENT_DATA_KEY = "JITEnrollmentInfo";
+    public static final String JIT_PROVISION_HANDLER = "/jit-provision";
+    public static final String JIT_ENROLLMENT_AUTH_APP_KEY = "JIT_ENROLLMENT_AUTH_APP";
+    public static final String CLIENT_CREDENTIAL_GRANT_TYPE = "client_credentials";
+    public static final String OS_ANDROID = "android";
+    public static final String OS_WINDOWS = "windows";
+    public static final String OS_IOS = "ios";
+    public static final String TAG_ANDROID_ENROLLMENT_SCOPES = "AndroidEnrollmentScopes";
+    public static final String TAG_WINDOWS_ENROLLMENT_SCOPES = "WindowsEnrollmentScopes";
+    public static final String TAG_IOS_ENROLLMENT_SCOPES = "IOSEnrollmentScopes";
 }
