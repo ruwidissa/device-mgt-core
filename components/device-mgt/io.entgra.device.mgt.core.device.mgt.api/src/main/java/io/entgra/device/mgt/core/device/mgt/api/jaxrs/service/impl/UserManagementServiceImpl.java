@@ -419,7 +419,8 @@ public class UserManagementServiceImpl implements UserManagementService {
             userList = new ArrayList<>(users.size());
             BasicUserInfo user;
             for (String username : users) {
-                if (Constants.APIM_RESERVED_USER.equals(username) || Constants.RESERVED_USER.equals(username)) {
+                if (Constants.APIM_RESERVED_USER.equals(username) || Constants.RESERVED_USER.equals(username) ||
+                        Constants.SCOPE_PUBLISH_RESERVED_USER.equals(username)) {
                     continue;
                 }
                 user = getBasicUserInfo(username);
@@ -485,6 +486,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             if (commonUsers != null) {
                 commonUsers.remove(Constants.APIM_RESERVED_USER);
                 commonUsers.remove(Constants.RESERVED_USER);
+                commonUsers.remove(Constants.SCOPE_PUBLISH_RESERVED_USER);
             }
 
             if (!skipSearch(commonUsers) && StringUtils.isNotEmpty(firstName)) {
@@ -660,7 +662,8 @@ public class UserManagementServiceImpl implements UserManagementService {
             userList = new ArrayList<>();
             UserInfo user;
             for (String username : users) {
-                if (Constants.APIM_RESERVED_USER.equals(username) || Constants.RESERVED_USER.equals(username)) {
+                if (Constants.APIM_RESERVED_USER.equals(username) || Constants.RESERVED_USER.equals(username) ||
+                        Constants.SCOPE_PUBLISH_RESERVED_USER.equals(username)) {
                     continue;
                 }
                 user = new UserInfo();
