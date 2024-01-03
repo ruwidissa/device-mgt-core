@@ -426,16 +426,10 @@ public class DAOUtil {
                 vppUserDTO.setDmUsername(rs.getString("DM_USERNAME"));
             }
             if (rs.getLong("CREATED_TIME") != 0) {
-                Date date = new Date(rs.getLong("CREATED_TIME"));
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                String dateString = dateFormat.format(date);
-                vppUserDTO.setCreatedTime(dateString);
+                vppUserDTO.setCreatedTime(new Timestamp(rs.getLong("CREATED_TIME") * 1000L).toString());
             }
             if (rs.getLong("LAST_UPDATED_TIME") != 0) {
-                Date date = new Date(rs.getLong("LAST_UPDATED_TIME"));
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                String dateString = dateFormat.format(date);
-                vppUserDTO.setLastUpdatedTime(dateString);
+                vppUserDTO.setLastUpdatedTime(new Timestamp(rs.getLong("LAST_UPDATED_TIME") * 1000L).toString());
             }
             vppUserDTOS.add(vppUserDTO);
         }

@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
+import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -56,7 +57,7 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                long currentTime = System.currentTimeMillis();
+                long currentTime = DeviceManagementDAOUtil.getCurrentUTCTime();
                 stmt.setString(1, userDTO.getClientUserId());
                 stmt.setString(2, userDTO.getDmUsername());
                 stmt.setInt(3, tenantId);
@@ -117,7 +118,7 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
 
         try {
             Connection conn = this.getDBConnection();
-            long updatedTime = System.currentTimeMillis();
+            long updatedTime = DeviceManagementDAOUtil.getCurrentUTCTime();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int x = 0;
 
