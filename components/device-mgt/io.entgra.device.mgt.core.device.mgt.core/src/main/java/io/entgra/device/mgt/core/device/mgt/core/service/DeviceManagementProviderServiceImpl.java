@@ -4995,9 +4995,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId) throws DeviceManagementException{
+    public void saveApplicationIcon(String iconPath, String packageName, String version) throws DeviceManagementException{
+        int tenantId = 0;
         try{
             DeviceManagementDAOFactory.beginTransaction();
+            tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             if(applicationDAO.getApplicationPackageCount(packageName) == 0){
                 applicationDAO.saveApplicationIcon(iconPath, packageName, version, tenantId);
             }
@@ -5093,6 +5095,40 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             applications = applicationDAO.getInstalledApplicationListOnDevice(device.getId(),
                     device.getEnrolmentInfo().getId(), offset, limit, tenantId);
+            if (applications == null) {
+                String msg = "Couldn't found applications for device identifier '" + device.getId() + "'";
+                log.error(msg);
+                throw new DeviceManagementException(msg);
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving the application list of android device, " +
+                    "which carries the id '" + device.getId() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        List<Application> newApplicationList;
+        newApplicationList = this.getInstalledAppIconInfo(applications);
+        if (newApplicationList == null) {
+            String msg = "Error occurred while getting app icon info for device identifier '" + device.getId() + "'";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        return newApplicationList;
+    }
+
+    public List<Application> getInstalledApplicationsOnDevice(Device device) throws DeviceManagementException {
+        List<Application> applications;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            applications = applicationDAO.getInstalledApplicationListOnDevice(device.getId(),
+                    device.getEnrolmentInfo().getId(), tenantId);
             if (applications == null) {
                 String msg = "Couldn't found applications for device identifier '" + device.getId() + "'";
                 log.error(msg);

@@ -1333,7 +1333,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
             String iconPath = APIUtil.createAppIconPath(applicationReleaseDTO, tenantId);
             DataHolder.getInstance().getDeviceManagementService().saveApplicationIcon(iconPath,
-                    String.valueOf(applicationReleaseDTO.getPackageName()), applicationReleaseDTO.getVersion(), tenantId);
+                    String.valueOf(applicationReleaseDTO.getPackageName()), applicationReleaseDTO.getVersion());
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating iconPath. Application package name : " + applicationReleaseDTO.getPackageName();
             log.error(msg, e);
