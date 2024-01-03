@@ -114,4 +114,14 @@ public interface ApplicationDAO {
      * @throws DeviceManagementDAOException
      */
     String getIconPath(String applicationIdentifier) throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to get the installed application list of a specific device
+     * @param deviceId ID of the device
+     * @param enrolmentId Enrolment ID of the device
+     * @param tenantId tenant ID
+     * @throws DeviceManagementDAOException If any database error occurred
+     */
+    List<Application> getInstalledApplicationListOnDevice(int deviceId, int enrolmentId, int tenantId)
+            throws DeviceManagementDAOException;
 }

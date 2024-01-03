@@ -1,0 +1,61 @@
+#*
+  Copyright (C) 2018 - 2023 Entgra (Pvt) Ltd, Inc - All Rights Reserved.
+
+  Unauthorised copying/redistribution of this file, via any medium is strictly prohibited.
+
+  Licensed under the Entgra Commercial License, Version 1.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+        https://entgra.io/licenses/entgra-commercial/1.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+*#
+<EmailConfig>
+    <Subject>You have been invited to enroll your $device-type device in Entgra IoT</Subject>
+    <Body>
+    <![CDATA[
+    <html>
+    <head>
+        <title>Entgra IoT Server</title>
+    </head>
+    <body style="color: #666666; background-color:#cdcdcd; padding: 0px; margin: 0px;">
+    <div style="background-color:#cdcdcd; font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; padding: 20px 0px; margin: 0px;">
+        <div style="width: 86%; max-width: 650px; padding: 2%; background-color: #ffffff; margin: auto; border-radius: 14px;">
+            <div style="line-height: 0px; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 10px;">
+                <div style="display: inline-block; line-height: 0px;">
+                    <img alt="entgra" src="https://storage.googleapis.com/cdn-entgra/logo.png" height="50px" width="143px" />
+                </div>
+            </div>
+            <div style="background-color: #ffffff; line-height: 170%; color: #666666; padding: 20px 25px;">
+                <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px 20px;">
+                    Hi $username,
+                </p>
+                <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
+                    You have been invited by $invite-by to enrol your $device-type device in Entgra IoT Server.
+                    Click <a href="$base-url-https/enroll-web-agent/$device-type/provision?username=$username&amp;sp=$sp&amp;tenantDomain=$tenant-domain&amp;ownershipType=$ownership-type&amp;os=$device-type">here</a> to begin device
+                    enrolment.</p>
+
+                <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
+                    Should you need assistance, please contact your administrator.
+                </p>
+
+                <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 20px 0px 5px;">
+                    Regards,
+                </p>
+                <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
+                    Entgra IoT Administrator
+                </p>
+            </div>
+        </div>
+    </div>
+    </body>
+    </html>
+    ]]>
+    </Body>
+</EmailConfig>

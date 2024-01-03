@@ -18,33 +18,34 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
 import com.google.gson.JsonArray;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Info;
-import io.swagger.annotations.ExtensionProperty;
-import io.swagger.annotations.Extension;
-import io.swagger.annotations.Tag;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.ResponseHeader;
-import org.apache.axis2.transport.http.HTTPConstants;
-import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
-import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
+import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ActivityList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.BasicUserInfo;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.BasicUserInfoList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.Credential;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.EnrollmentInvitation;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.JITEnrollmentInvitation;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OldPasswordResetWrapper;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PermissionList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.RoleList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.UserInfo;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.UserStoreList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
+import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Extension;
+import io.swagger.annotations.ExtensionProperty;
+import io.swagger.annotations.Info;
+import io.swagger.annotations.ResponseHeader;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
+import org.apache.axis2.transport.http.HTTPConstants;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -54,7 +55,6 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -939,6 +939,49 @@ public interface UserManagementService {
                     value = "List of email address of recipients",
                     required = true)
             @Valid EnrollmentInvitation enrollmentInvitation);
+
+    @POST
+    @Path("/jit-enrollment-invite")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HTTPConstants.HEADER_POST,
+            value = "Sending Enrollment Invitations to email address",
+            notes = "Send the a mail inviting recipients to enroll devices.",
+            tags = "User Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:send-invitation")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK. \n Successfully sent the invitation mail."),
+            @ApiResponse(
+                    code = 400,
+                    message = "Bad Request. \n Invalid request or validation error.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n The specified resource does not exist.\n",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 415,
+                    message = "Unsupported media type. \n The format of the requested entity was not supported.\n",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n " +
+                            "Server error occurred while updating the user credentials.",
+                    response = ErrorResponse.class)
+    })
+    Response inviteExternalUsers(
+            @ApiParam(
+                    name = "jitEnrollmentInvitation",
+                    value = "List of email address of recipients",
+                    required = true)
+            @Valid JITEnrollmentInvitation jitEnrollmentInvitation);
 
     @POST
     @Path("/validate")

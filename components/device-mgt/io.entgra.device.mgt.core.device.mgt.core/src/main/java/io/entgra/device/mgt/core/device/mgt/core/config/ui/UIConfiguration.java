@@ -38,7 +38,9 @@ public class UIConfiguration {
 
     private DeviceInfoConfigurations deviceInfoConfigurations;
 
-    @XmlElement(name = "AppRegistration", required=true)
+    private DeviceStatusConfigurations deviceStatusConfigurations;
+
+    @XmlElement(name = "AppRegistration", required = true)
     public AppRegistration getAppRegistration() {
         return appRegistration;
     }
@@ -74,7 +76,8 @@ public class UIConfiguration {
     public void setHubspotChat(HubspotChat hubspotChat) {
         this.hubspotChat = hubspotChat;
     }
-    @XmlElement(name = "Billing", required=true)
+
+    @XmlElement(name = "Billing", required = true)
     public Billing getBilling() {
         return billing;
     }
@@ -108,5 +111,14 @@ public class UIConfiguration {
 
     public void setDeviceInfoConfigurations(DeviceInfoConfigurations deviceInfoConfigurations) {
         this.deviceInfoConfigurations = deviceInfoConfigurations;
+    }
+
+    @XmlElement(name = "DeviceStatusConfigurations", required = true)
+    public DeviceStatusConfigurations getDeviceStatusConfigurations() {
+        return deviceStatusConfigurations;
+    }
+
+    public void setDeviceStatusConfigurations(DeviceStatusConfigurations deviceStatusConfigurations) {
+        this.deviceStatusConfigurations = deviceStatusConfigurations;
     }
 }

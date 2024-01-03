@@ -17,6 +17,8 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -371,6 +373,17 @@ public class DeviceManagementServiceComponent {
 
         }
         bundleContext.registerService(WhiteLabelManagementService.class.getName(), whiteLabelManagementService, null);
+
+        /* Registering DeviceState Filter Service */
+        DeviceStatusManagementService deviceStatusManagemntService = new DeviceStatusManagementServiceImpl();
+        DeviceManagementDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagemntService);
+        try {
+            deviceStatusManagemntService.addDefaultDeviceStatusFilterIfNotExist(tenantId);
+        } catch (Throwable e) {
+            log.error("Error occurred while adding default tenant device status", e);
+
+        }
+        bundleContext.registerService(DeviceStatusManagementService.class.getName(), deviceStatusManagemntService, null);
 
         /* Registering Event Configuration Service */
         EventConfigurationProviderService eventConfigurationService = new EventConfigurationProviderServiceImpl();
