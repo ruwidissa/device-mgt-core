@@ -18,15 +18,17 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
-import org.json.JSONObject;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -34,12 +36,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Map;
 
 @MultipartConfig
 @WebServlet("/login-user/scopes")
 public class PermissionScopeHandler extends HttpServlet {
+    private static final long serialVersionUID = 976006906915355611L;
+
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession httpSession = req.getSession(false);
         if (httpSession == null) {
             HandlerUtil.sendUnAuthorizeResponse(resp);
@@ -54,11 +59,15 @@ public class PermissionScopeHandler extends HttpServlet {
 
         if (!StringUtils.isEmpty(authData.getScope())) {
             ProxyResponse proxyResponse = new ProxyResponse();
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put(HandlerConstants.USER_SCOPES, authData.getScope());
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = JsonNodeFactory.instance.objectNode();
+            Map<String, Object> nodeMap = mapper.convertValue(node, new TypeReference<>() {
+            });
+            nodeMap.put(HandlerConstants.USER_SCOPES, authData.getScope());
             proxyResponse.setCode(HttpStatus.SC_OK);
             proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
-            proxyResponse.setData(jsonObject.toString());
+            proxyResponse.setData(mapper.convertValue(nodeMap, JsonNode.class));
             HandlerUtil.handleSuccess(resp, proxyResponse);
             return;
         }

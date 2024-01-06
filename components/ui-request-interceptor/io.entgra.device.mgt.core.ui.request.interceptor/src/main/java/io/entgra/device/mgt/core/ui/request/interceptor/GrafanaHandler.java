@@ -30,12 +30,12 @@ import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.*;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -68,7 +68,7 @@ public class GrafanaHandler extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (validateRequest(req, resp)) {
-                HttpGet grafanaRequest = new HttpGet();
+                ClassicHttpRequest grafanaRequest = ClassicRequestBuilder.get().build();
                 HandlerUtil.copyRequestHeaders(req, grafanaRequest, true);
                 if (!GrafanaUtil.isGrafanaAPI(req.getRequestURI())) {
                     proxyPassGrafanaRequest(grafanaRequest, resp, req);
@@ -112,7 +112,7 @@ public class GrafanaHandler extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (validateRequest(req, resp)) {
-                HttpPost grafanaRequest = new HttpPost();
+                ClassicHttpRequest grafanaRequest = ClassicRequestBuilder.post().build();
                 HandlerUtil.generateRequestEntity(req, grafanaRequest);
                 HandlerUtil.copyRequestHeaders(req, grafanaRequest, true);
                 if (!GrafanaUtil.isGrafanaAPI(req.getRequestURI())) {
@@ -206,10 +206,10 @@ public class GrafanaHandler extends HttpServlet {
         return true;
     }
 
-    private ProxyResponse executeGrafanaAPIRequest(HttpRequestBase requestBase, HttpServletRequest request)
+    private ProxyResponse executeGrafanaAPIRequest(ClassicHttpRequest requestBase, HttpServletRequest request)
             throws IOException {
         URI grafanaUri = HttpUtil.createURI(generateGrafanaAPIUrl(request));
-        requestBase.setURI(grafanaUri);
+        requestBase.setUri(grafanaUri);
         return HandlerUtil.execute(requestBase);
     }
 
@@ -230,14 +230,14 @@ public class GrafanaHandler extends HttpServlet {
         }
         return uri;
     }
-    private void proxyPassGrafanaRequest(HttpRequestBase requestBase, HttpServletResponse response,
+    private void proxyPassGrafanaRequest(ClassicHttpRequest requestBase, HttpServletResponse response,
                                          HttpServletRequest request) throws IOException {
         try (CloseableHttpClient client = HandlerUtil.getHttpClient()) {
             String grafanaUriStr = GrafanaHandlerUtil.generateGrafanaUrl(HttpUtil.createURI(getURIWithQuery(request)),
                     GrafanaUtil.getGrafanaHTTPBase(request.getScheme()));
             URI grafanaURI = HttpUtil.createURI(grafanaUriStr);
-            requestBase.setURI(grafanaURI);
-            HttpResponse grafanaResponse = invokeGrafanaAPI(client, requestBase);
+            requestBase.setUri(grafanaURI);
+            CloseableHttpResponse grafanaResponse = invokeGrafanaAPI(client, requestBase);
             forwardGrafanaResponse(grafanaResponse, response);
         } catch (GrafanaEnvVariablesNotDefined e) {
             handleError(response, HttpStatus.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -248,17 +248,19 @@ public class GrafanaHandler extends HttpServlet {
         }
     }
 
-    private HttpResponse invokeGrafanaAPI(HttpClient client, HttpRequestBase request) throws IOException, GrafanaManagementException {
+    private CloseableHttpResponse invokeGrafanaAPI(CloseableHttpClient client, ClassicHttpRequest request) throws IOException,
+            GrafanaManagementException {
         setBasicAuthHeader(request);
+        //todo this is deprecated call
         return client.execute(request);
     }
 
-    private void setBasicAuthHeader(HttpRequestBase request) throws GrafanaManagementException {
+    private void setBasicAuthHeader(ClassicHttpRequest request) throws GrafanaManagementException {
         String basicAuth = GrafanaUtil.getBasicAuthBase64Header();
         request.setHeader(HttpHeaders.AUTHORIZATION, basicAuth);
     }
 
-    private void forwardGrafanaResponse(HttpResponse grafanaResponse, HttpServletResponse response) throws IOException {
+    private void forwardGrafanaResponse(CloseableHttpResponse grafanaResponse, HttpServletResponse response) throws IOException {
         InputStream responseContent = grafanaResponse.getEntity().getContent();
         String grafanaContentType = HandlerUtil.getMemeType(grafanaResponse);
         response.setHeader(HttpHeaders.CONTENT_TYPE, grafanaContentType);

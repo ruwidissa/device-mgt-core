@@ -1,0 +1,2 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper_${feature.version}/conf/user-store-role-mapping-config.xml,target:${installFolder}/../../../repository/conf/user-store-role-mapping-config.xml,overwrite:true);\

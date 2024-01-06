@@ -24,6 +24,8 @@ import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
 
+import java.util.List;
+
 public interface KeyMgtService {
 
     /***
@@ -35,11 +37,13 @@ public interface KeyMgtService {
      * @param callBackUrl callback url of the application
      * @param tags api tags for api subscription of the application
      * @param isSaasApp if the application is a saas app
+     * @param password Password of the owner
      * @return @{@link DCRResponse} DCR Response object with client credentials
      * @throws KeyMgtException if any error occurs during DCR process
      */
     DCRResponse dynamicClientRegistration(String clientName, String owner, String grantTypes, String callBackUrl,
-                                          String[] tags, boolean isSaasApp, int validityPeriod) throws KeyMgtException;
+                                          String[] tags, boolean isSaasApp, int validityPeriod, String password,
+                                          List<String> supportedGrantTypes, String callbackUrl) throws KeyMgtException;
 
     /***
      * This method will handle the access token requests

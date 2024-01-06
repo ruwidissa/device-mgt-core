@@ -55,16 +55,18 @@ public class OAuthUtils {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(PrivilegedCarbonContext.
-                    getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName());
+            String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                    .getRealmConfiguration().getAdminUserName();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
             PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
             APIManagementProviderService apiManagementProviderService = (APIManagementProviderService) ctx.
                     getOSGiService(APIManagementProviderService.class, null);
             apiApplicationKeyInfo = apiManagementProviderService.
                     generateAndRetrieveApplicationKeys(registrationProfile.getApplicationName(),
                             registrationProfile.getTags(), Constants.ApplicationInstall.DEFAULT_TOKEN_TYPE,
-                            null, registrationProfile.isAllowedToAllDomains(),
-                            Constants.ApplicationInstall.DEFAULT_VALIDITY_PERIOD);
+                            username, registrationProfile.isAllowedToAllDomains(),
+                            Constants.ApplicationInstall.DEFAULT_VALIDITY_PERIOD, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                                    .getRealmConfiguration().getAdminPassword(), null, null, null, false);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

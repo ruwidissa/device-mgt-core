@@ -18,15 +18,16 @@
 
 package io.entgra.device.mgt.core.apimgt.keymgt.extension.internal;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.*;
+
 @Component(
         name = "io.entgra.device.mgt.core.apimgt.keymgt.extension.internal.KeyMgtServiceComponent",
         immediate = true)
@@ -62,5 +63,65 @@ public class KeyMgtServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Key Management Service Component");
         }
+    }
+
+    /**
+     * Sets APIM Consumer REST API service.
+     *
+     * @param consumerRESTAPIServices An instance of ConsumerRESTAPIServices
+     */
+    @Reference(
+            name = "APIM.consumer.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConsumerRESTAPIServices")
+    protected void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting APIM Consumer REST API Service");
+        }
+        KeyMgtDataHolder.getInstance().setConsumerRESTAPIServices(consumerRESTAPIServices);
+    }
+
+    /**
+     * Unset APIM Consumer REST API service
+     *
+     * @param consumerRESTAPIServices An instance of ConsumerRESTAPIServices
+     */
+    protected void unsetConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting APIM Consumer REST API Service");
+        }
+        KeyMgtDataHolder.getInstance().setConsumerRESTAPIServices(null);
+    }
+
+    /**
+     * Sets DCR REST API service.
+     *
+     * @param apiApplicationServices An instance of APIApplicationServices
+     */
+    @Reference(
+            name = "APIM.application.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIApplicationServices")
+    protected void setAPIApplicationServices(APIApplicationServices apiApplicationServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting DCR REST API Service");
+        }
+        KeyMgtDataHolder.getInstance().setApiApplicationServices(apiApplicationServices);
+    }
+
+    /**
+     * Unset DCR REST API service
+     *
+     * @param apiApplicationServices An instance of APIApplicationServices
+     */
+    protected void unsetAPIApplicationServices(APIApplicationServices apiApplicationServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting DCR REST API Service");
+        }
+        KeyMgtDataHolder.getInstance().setApiApplicationServices(null);
     }
 }

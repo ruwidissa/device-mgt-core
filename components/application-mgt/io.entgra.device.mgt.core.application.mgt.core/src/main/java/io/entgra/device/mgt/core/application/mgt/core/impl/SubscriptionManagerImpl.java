@@ -40,6 +40,7 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.TrustStrategy;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
@@ -120,6 +121,8 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -186,23 +189,26 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         try {
             // Only for iOS devices
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-            if (DeviceTypes.IOS.toString().equalsIgnoreCase(APIUtil.getDeviceTypeData(applicationDTO
-                    .getDeviceTypeId()).getName())) {
-                // TODO: replace getAssetByAppId with the correct one in DAO
-                // Check if the app trying to subscribe is a VPP asset.
-                VppAssetDTO storedAsset = vppApplicationDAO.getAssetByAppId(applicationDTO.getId(), tenantId);
-                if (storedAsset != null) { // This is a VPP asset
-                    List<VppUserDTO> users = new ArrayList<>();
-                    List<Device> devices = applicationSubscriptionInfo.getDevices();// get
-                    // subscribed device list, so that we can extract the users of those devices.
-                    for (Device device : devices) {
-                        VppUserDTO user = vppApplicationDAO.getUserByDMUsername(device.getEnrolmentInfo()
-                                .getOwner(), PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                                .getTenantId(true));
-                        users.add(user);
+            // Ignore checking device type if app is a web clip
+            if(!applicationDTO.getType().equals("WEB_CLIP")){
+                if (DeviceTypes.IOS.toString().equalsIgnoreCase(APIUtil.getDeviceTypeData(applicationDTO
+                        .getDeviceTypeId()).getName())) {
+                    // TODO: replace getAssetByAppId with the correct one in DAO
+                    // Check if the app trying to subscribe is a VPP asset.
+                    VppAssetDTO storedAsset = vppApplicationDAO.getAssetByAppId(applicationDTO.getId(), tenantId);
+                    if (storedAsset != null) { // This is a VPP asset
+                        List<VppUserDTO> users = new ArrayList<>();
+                        List<Device> devices = applicationSubscriptionInfo.getDevices();// get
+                        // subscribed device list, so that we can extract the users of those devices.
+                        for (Device device : devices) {
+                            VppUserDTO user = vppApplicationDAO.getUserByDMUsername(device.getEnrolmentInfo()
+                                    .getOwner(), PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                    .getTenantId(true));
+                            users.add(user);
+                        }
+                        VPPApplicationManager vppManager = APIUtil.getVPPManager();
+                        vppManager.addAssociation(storedAsset, users);
                     }
-                    VPPApplicationManager vppManager = APIUtil.getVPPManager();
-                    vppManager.addAssociation(storedAsset, users);
                 }
             }
         } catch (BadRequestException e) {
@@ -1382,7 +1388,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     private CloseableHttpClient getHttpClient() throws ApplicationManagementException {
         try {
             SSLContextBuilder builder = new SSLContextBuilder();
-            builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
+            builder.loadTrustMaterial(null, new TrustStrategy() {
+                        @Override
+                        public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                            return true;
+                        }
+                    });
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
             return HttpClients.custom().setSSLSocketFactory(sslsf).useSystemProperties().build();
         }  catch (NoSuchAlgorithmException e) {

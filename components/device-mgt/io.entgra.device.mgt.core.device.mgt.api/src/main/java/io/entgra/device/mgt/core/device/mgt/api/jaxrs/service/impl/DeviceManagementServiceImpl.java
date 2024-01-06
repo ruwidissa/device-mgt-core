@@ -20,22 +20,32 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
-import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
-import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
-import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
-import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
+import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
+import io.entgra.device.mgt.core.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.DCRResponse;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenRequest;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.TokenResponse;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtServiceImpl;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
+import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
+import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DisenrollRequest;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
@@ -101,8 +111,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @Path("/devices")
 public class DeviceManagementServiceImpl implements DeviceManagementService {
@@ -474,6 +485,64 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         }
     }
 
+    @PUT
+    @Override
+    @Path("/disenroll")
+    public Response disenrollMultipleDevices(DisenrollRequest deviceTypeWithDeviceIds) {
+
+        if (deviceTypeWithDeviceIds == null) {
+            String errorMsg = "Invalid request. The request body must not be null.";
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorMsg).build();
+        }
+        DeviceManagementProviderService deviceManagementProviderService = DeviceMgtAPIUtils.getDeviceManagementService();
+
+        List<DeviceIdentifier> successfullyDisenrolledDevices = new ArrayList<>();
+        List<DeviceIdentifier> failedToDisenrollDevices = new ArrayList<>();
+
+        Map<String, List<String>> list = deviceTypeWithDeviceIds.getDeviceTypeWithDeviceIds();
+        String deviceType;
+        List<String> deviceIds;
+        DeviceIdentifier deviceIdentifier;
+        Device persistedDevice;
+        boolean response;
+
+        for (Map.Entry<String, List<String>> entry : list.entrySet()) {
+            deviceType = entry.getKey();
+            deviceIds = entry.getValue();
+
+            for (String deviceId : deviceIds) {
+                deviceIdentifier = new DeviceIdentifier(deviceId, deviceType);
+                try {
+                    persistedDevice = deviceManagementProviderService.getDevice(deviceIdentifier, true);
+                    if (persistedDevice != null) {
+                        response = deviceManagementProviderService.disenrollDevice(deviceIdentifier);
+                        if (response) {
+                            successfullyDisenrolledDevices.add(deviceIdentifier);
+                        } else {
+                            failedToDisenrollDevices.add(deviceIdentifier);
+                        }
+                    } else {
+                        failedToDisenrollDevices.add(deviceIdentifier);
+                        if(log.isDebugEnabled()){
+                            String msg = "Error encountered while dis-enrolling device of type: " + deviceType + " with " + deviceId;
+                            log.error(msg);
+                        }
+                    }
+                } catch (DeviceManagementException e) {
+                    String msg = "Error encountered while dis-enrolling device of type: " + deviceType + " with " + deviceId;
+                    log.error(msg, e);
+                    failedToDisenrollDevices.add(deviceIdentifier);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+                }
+            }
+        }
+
+        Map<String, List<DeviceIdentifier>> responseMap = new HashMap<>();
+        responseMap.put("successfullyDisenrollDevices", successfullyDisenrolledDevices);
+        responseMap.put("failedToDisenrollDevices", failedToDisenrollDevices);
+
+        return Response.status(Response.Status.OK).entity(responseMap).build();
+    }
     @POST
     @Override
     @Path("/type/{deviceType}/id/{deviceId}/rename")
@@ -819,10 +888,46 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
         KeyMgtService keyMgtService = new KeyMgtServiceImpl();
         try {
-            DCRResponse dcrResponse = keyMgtService.dynamicClientRegistration(applicationName, username,
-                    "client_credentials", null, new String[] {"device_management"}, false, validityTime);
-            deviceConfig.setClientId(dcrResponse.getClientId());
-            deviceConfig.setClientSecret(dcrResponse.getClientSecret());
+            //todo - lasantha - can't get password from here
+            ApiApplicationKey apiApplicationKey;
+            try {
+                APIApplicationServices apiApplicationServices = DeviceMgtAPIUtils.getApiApplicationServices();
+                APIApplicationKey adminDCRResponse = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                        "ClientForJWTTokenGeneration",
+                        "client_credentials password refresh_token urn:ietf:params:oauth:grant-type:jwt-bearer"
+                );
+
+                PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                JWTClientManagerService jwtClientManagerService = (JWTClientManagerService) ctx.
+                        getOSGiService(JWTClientManagerService.class, null);
+                JWTClient jwtClient = jwtClientManagerService.getJWTClient();
+                AccessTokenInfo accessTokenInfo = jwtClient.getAccessToken(adminDCRResponse.getClientId(),
+                        adminDCRResponse.getClientSecret(),
+                        username, "appm:subscribe apim:admin apim:api_key apim:app_import_export apim:app_manage" +
+                                " apim:store_settings apim:sub_alert_manage apim:sub_manage apim:subscribe openid perm:device:enroll " +
+                                "perm:devices:details perm:devices:features perm:devices:search perm:devices:view perm:groups:groups " +
+                                "perm:users:send-invitation");
+
+                APIManagementProviderService apiManagementProviderService = DeviceMgtAPIUtils.getAPIManagementService();
+                apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(applicationName,
+                        new String[] {"device_management"}, "PRODUCTION", null, false, String.valueOf(validityTime),
+                        null, accessTokenInfo.getAccessToken(), null, null,true);
+
+            } catch (JWTClientException e) {
+                String msg = "Error while generating an application tokens for Tenant Admin.";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            } catch (APIServicesException e) {
+                String msg = "Error while generating api Application";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+
+            //todo call REST APIs
+            deviceConfig.setClientId(apiApplicationKey.getConsumerKey());
+            deviceConfig.setClientSecret(apiApplicationKey.getConsumerSecret());
 
             StringBuilder scopes = new StringBuilder("device:" + type.replace(" ", "") + ":" + id);
             for (String topic : mqttEventTopicStructure) {
@@ -840,7 +945,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             // add scopes for update operation /tenantDomain/deviceType/deviceId/update/operation
             scopes.append(" perm:topic:pub:" + tenantDomain + ":" + type + ":" + id + ":update:operation");
 
-            TokenRequest tokenRequest = new TokenRequest(dcrResponse.getClientId(), dcrResponse.getClientSecret(),
+            TokenRequest tokenRequest = new TokenRequest(apiApplicationKey.getConsumerKey(),
+            apiApplicationKey.getConsumerSecret(),
                     null, scopes.toString(), "client_credentials", null,
                     null, null, null,  validityTime);
             TokenResponse tokenResponse = keyMgtService.generateAccessToken(tokenRequest);
@@ -870,6 +976,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (APIManagerException e) {
+            String msg = "Error while calling rest Call for application key generation";
+            log.error(msg, e);
         }
         return Response.status(Response.Status.OK).entity(deviceConfig).build();
 

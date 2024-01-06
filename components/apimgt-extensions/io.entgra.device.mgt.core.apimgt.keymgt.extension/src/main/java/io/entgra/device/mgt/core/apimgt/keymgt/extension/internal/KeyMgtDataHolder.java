@@ -18,12 +18,16 @@
 
 package io.entgra.device.mgt.core.apimgt.keymgt.extension.internal;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.service.KeyMgtService;
 
 public class KeyMgtDataHolder {
 
     private static final KeyMgtDataHolder thisInstance = new KeyMgtDataHolder();
     private KeyMgtService keyMgtService;
+    private ConsumerRESTAPIServices consumerRESTAPIServices;
+    private APIApplicationServices apiApplicationServices;
 
     public static KeyMgtDataHolder getInstance() {
         return thisInstance;
@@ -37,4 +41,20 @@ public class KeyMgtDataHolder {
         this.keyMgtService = keyMgtService;
     }
 
+
+    public ConsumerRESTAPIServices getConsumerRESTAPIServices() {
+        return consumerRESTAPIServices;
+    }
+
+    public void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
+        this.consumerRESTAPIServices = consumerRESTAPIServices;
+    }
+
+    public APIApplicationServices getApiApplicationServices() {
+        return apiApplicationServices;
+    }
+
+    public void setApiApplicationServices(APIApplicationServices apiApplicationServices) {
+        this.apiApplicationServices = apiApplicationServices;
+    }
 }

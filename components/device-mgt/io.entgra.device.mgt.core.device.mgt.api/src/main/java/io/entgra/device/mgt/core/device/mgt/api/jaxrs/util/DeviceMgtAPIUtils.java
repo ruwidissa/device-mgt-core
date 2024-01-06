@@ -19,6 +19,9 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
+import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceTypeVersionWrapper;
@@ -155,7 +158,9 @@ public class DeviceMgtAPIUtils {
 
     private static volatile SubscriptionManager subscriptionManager;
     private static volatile ApplicationManager applicationManager;
-
+    private static volatile APIApplicationServices apiApplicationServices;
+    private static volatile ConsumerRESTAPIServices consumerRESTAPIServices;
+    private static volatile APIManagementProviderService apiManagementProviderService;
     private static volatile APIPublisherService apiPublisher;
 
     static {
@@ -406,6 +411,63 @@ public class DeviceMgtAPIUtils {
             }
         }
         return otpManagementService;
+    }
+
+    /**
+     * Initializing and accessing method for APIM Consumer REST API.
+     *
+     * @return ConsumerRESTAPIServices instance
+     * @throws IllegalStateException if ConsumerRESTAPIServices cannot be initialized
+     */
+    public static synchronized ConsumerRESTAPIServices getConsumerRESTAPIServices() {
+        if (consumerRESTAPIServices == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            consumerRESTAPIServices = (ConsumerRESTAPIServices) ctx.getOSGiService(ConsumerRESTAPIServices.class, null);
+            if (consumerRESTAPIServices == null) {
+                String msg = "Consumer Rest API service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return consumerRESTAPIServices;
+    }
+
+    /**
+     * Initializing and accessing method for APIM API application REST API.
+     *
+     * @return APIApplicationServices instance
+     * @throws IllegalStateException if APIApplicationServices cannot be initialized
+     */
+    public static synchronized APIApplicationServices getApiApplicationServices() {
+        if (apiApplicationServices == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            apiApplicationServices = (APIApplicationServices) ctx.getOSGiService(APIApplicationServices.class, null);
+            if (apiApplicationServices == null) {
+                String msg = "API application service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return apiApplicationServices;
+    }
+
+    /**
+     * Initializing and accessing method for API management Provider Service.
+     *
+     * @return APIManagementProviderService instance
+     * @throws IllegalStateException if APIManagementProviderService cannot be initialized
+     */
+    public static synchronized APIManagementProviderService getAPIManagementService() {
+        if (apiManagementProviderService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            apiManagementProviderService = (APIManagementProviderService) ctx.getOSGiService(APIManagementProviderService.class, null);
+            if (apiManagementProviderService == null) {
+                String msg = "API Management Provider service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return apiManagementProviderService;
     }
 
     public static RegistryService getRegistryService() {

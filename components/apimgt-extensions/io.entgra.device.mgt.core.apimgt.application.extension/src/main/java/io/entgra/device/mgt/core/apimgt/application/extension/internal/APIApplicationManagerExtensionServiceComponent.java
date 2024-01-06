@@ -17,8 +17,11 @@
  */
 package io.entgra.device.mgt.core.apimgt.application.extension.internal;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderService;
 import io.entgra.device.mgt.core.apimgt.application.extension.APIManagementProviderServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -114,5 +117,96 @@ public class APIApplicationManagerExtensionServiceComponent {
             log.debug("Unsetting Realm Service");
         }
         APIApplicationManagerExtensionDataHolder.getInstance().setRealmService(null);
+    }
+
+    /**
+     * Sets APIM Consumer REST API service.
+     *
+     * @param consumerRESTAPIServices An instance of ConsumerRESTAPIServices
+     */
+    @Reference(
+            name = "APIM.consumer.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConsumerRESTAPIServices")
+    protected void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting APIM Consumer REST API Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setConsumerRESTAPIServices(consumerRESTAPIServices);
+    }
+
+    /**
+     * Unset APIM Consumer REST API service
+     *
+     * @param consumerRESTAPIServices An instance of ConsumerRESTAPIServices
+     */
+    protected void unsetConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting APIM Consumer REST API Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setConsumerRESTAPIServices(null);
+    }
+
+
+    /**
+     * Sets DCR REST API service.
+     *
+     * @param apiApplicationServices An instance of APIApplicationServices
+     */
+    @Reference(
+            name = "APIM.application.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIApplicationServices")
+    protected void setAPIApplicationServices(APIApplicationServices apiApplicationServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting DCR REST API Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setApiApplicationServices(apiApplicationServices);
+    }
+
+    /**
+     * Unset DCR REST API service
+     *
+     * @param apiApplicationServices An instance of APIApplicationServices
+     */
+    protected void unsetAPIApplicationServices(APIApplicationServices apiApplicationServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting DCR REST API Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setApiApplicationServices(null);
+    }
+
+    /**
+     * Sets Meta Data Mgt service.
+     *
+     * @param metadataManagementService An instance of MetadataManagementService
+     */
+    @Reference(
+            name = "meta.data.mgt.service",
+            service = io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAMetaMgtServices")
+    protected void setMetaMgtServices(MetadataManagementService metadataManagementService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting Meta data mgt Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setMetadataManagementService(metadataManagementService);
+    }
+
+    /**
+     * Unset Meta Data Mgt service
+     *
+     * @param metadataManagementService An instance of MetadataManagementService
+     */
+    protected void unsetAMetaMgtServices(MetadataManagementService metadataManagementService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting Meta Data mgt Service");
+        }
+        APIApplicationManagerExtensionDataHolder.getInstance().setMetadataManagementService(null);
     }
 }

@@ -197,6 +197,7 @@
         <Scope>and:enterprise:view</Scope>
         <Scope>dm:sign-csr</Scope>
         <Scope>dm:admin:devices:view</Scope>
+        <Scope>dm:devices:status:change</Scope>
         <Scope>rm:roles:add</Scope>
         <Scope>rm:users:add</Scope>
         <Scope>rm:roles:update</Scope>

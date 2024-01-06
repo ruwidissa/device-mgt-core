@@ -28,5 +28,9 @@ public class KeyMgtException extends Exception {
     public KeyMgtException(String errorMessage) {
         super(errorMessage);
     }
+
+    public KeyMgtException(String errorMessage, Exception e) {
+        super(errorMessage, e);
+    }
 }
 

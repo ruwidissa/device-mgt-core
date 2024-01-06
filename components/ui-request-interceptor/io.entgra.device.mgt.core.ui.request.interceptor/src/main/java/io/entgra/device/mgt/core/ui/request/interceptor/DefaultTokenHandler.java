@@ -18,8 +18,10 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
@@ -43,11 +45,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Map;
 
 @MultipartConfig
 @WebServlet("/default-credentials")
 public class DefaultTokenHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(DefaultTokenHandler.class);
+    private static final long serialVersionUID = 6356346497117534430L;
 
 
     @Override
@@ -110,19 +114,19 @@ public class DefaultTokenHandler extends HttpServlet {
         ub3.setHost(System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR));
         ub3.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_GATEWAY_WEBSOCKET_WS_PORT_ENV_VAR)));
 
-        JsonObject responseJsonObj = new JsonObject();
-        responseJsonObj.addProperty("default-access-token", defaultAccessToken);
-        responseJsonObj.addProperty("remote-session-base-url", ub.toString());
-        responseJsonObj.addProperty("secured-websocket-gateway-url", ub2.toString());
-        responseJsonObj.addProperty("unsecured-websocket-gateway-url", ub3.toString());
-
-        Gson gson = new Gson();
-        String payload = gson.toJson(responseJsonObj);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = JsonNodeFactory.instance.objectNode();
+        Map<String, Object> nodeMap = mapper.convertValue(node, new TypeReference<>() {
+        });
+        nodeMap.put("default-access-token", defaultAccessToken);
+        nodeMap.put("remote-session-base-url", ub.toString());
+        nodeMap.put("secured-websocket-gateway-url", ub2.toString());
+        nodeMap.put("unsecured-websocket-gateway-url", ub3.toString());
 
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(HttpStatus.SC_OK);
         proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
-        proxyResponse.setData(payload);
+        proxyResponse.setData(mapper.convertValue(nodeMap, JsonNode.class));
         return proxyResponse;
     }
 }

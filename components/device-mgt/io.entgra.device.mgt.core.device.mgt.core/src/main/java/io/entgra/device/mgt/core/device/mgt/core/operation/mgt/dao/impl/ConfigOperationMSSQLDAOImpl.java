@@ -24,11 +24,21 @@ import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.ConfigOperati
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.*;
-import java.sql.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,7 +53,7 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
             operation.setCreatedTimeStamp(new Timestamp(new Date().getTime()).toString());
             Connection connection = OperationManagementDAOFactory.getConnection();
             String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
-                    "INITIATED_BY, OPERATION_DETAILS) VALUES (?, ?, ?, ?, ?, ?)";
+                    "INITIATED_BY, OPERATION_DETAILS, TENANT_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"id"})) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -55,6 +65,7 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
                 stmt.setString(4, operation.getCode());
                 stmt.setString(5, operation.getInitiatedBy());
                 stmt.setBytes(6, operationBytes);
+                stmt.setInt(7, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
                 stmt.executeUpdate();
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     int id = -1;

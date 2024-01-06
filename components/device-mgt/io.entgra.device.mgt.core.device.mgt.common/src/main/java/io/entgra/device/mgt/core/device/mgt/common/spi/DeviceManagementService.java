@@ -26,6 +26,7 @@ import io.entgra.device.mgt.core.device.mgt.common.license.mgt.License;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import io.entgra.device.mgt.core.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
+import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 
 /**
@@ -65,4 +66,6 @@ public interface DeviceManagementService {
     DeviceEnrollmentInvitationDetails getDeviceEnrollmentInvitationDetails();
 
     License getLicenseConfig();
+
+    DeviceTypeMetaDefinition getDeviceTypeMetaDefinition();
 }

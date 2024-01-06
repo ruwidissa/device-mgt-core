@@ -378,7 +378,7 @@ public interface ActivityInfoProviderService {
             tags = "Device Activity Info Provider",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:activity:get")
                     })
             },
             nickname = "getDeviceActivitiesWithFilters"

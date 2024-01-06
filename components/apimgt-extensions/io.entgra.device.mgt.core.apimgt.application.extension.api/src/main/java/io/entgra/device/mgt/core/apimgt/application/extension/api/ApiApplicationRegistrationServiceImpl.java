@@ -64,7 +64,8 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
             ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
                     applicationName, APIUtil.getDefaultTags(),
                     ApiApplicationConstants.DEFAULT_TOKEN_TYPE, username, false,
-                    ApiApplicationConstants.DEFAULT_VALIDITY_PERIOD);
+                    ApiApplicationConstants.DEFAULT_VALIDITY_PERIOD, PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                            .getRealmConfiguration().getAdminPassword(), null, null, null, false);
             return Response.status(Response.Status.CREATED).entity(apiApplicationKey.toString()).build();
         } catch (APIManagerException e) {
             String msg = "Error occurred while registering an application '" + applicationName + "'";
@@ -110,7 +111,9 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
                     ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
                             applicationName, registrationProfile.getTags(),
                             ApiApplicationConstants.DEFAULT_TOKEN_TYPE, username,
-                            registrationProfile.isAllowedToAllDomains(), validityPeriod);
+                            registrationProfile.isAllowedToAllDomains(), validityPeriod,
+                            registrationProfile.getPassword(), null, registrationProfile.getSupportedGrantTypes(),
+                            registrationProfile.getCallbackUrl(), false);
                     return Response.status(Response.Status.CREATED).entity(apiApplicationKey.toString()).build();
                 }
             }
@@ -122,7 +125,9 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
                 ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
                         applicationName, registrationProfile.getTags(),
                         ApiApplicationConstants.DEFAULT_TOKEN_TYPE, registrationProfile.getUsername(),
-                        registrationProfile.isAllowedToAllDomains(), validityPeriod);
+                        registrationProfile.isAllowedToAllDomains(), validityPeriod,
+                        registrationProfile.getPassword(), null, registrationProfile.getSupportedGrantTypes(),
+                        registrationProfile.getCallbackUrl(), false);
                 return Response.status(Response.Status.CREATED).entity(apiApplicationKey.toString()).build();
             }
         } catch (APIManagerException e) {

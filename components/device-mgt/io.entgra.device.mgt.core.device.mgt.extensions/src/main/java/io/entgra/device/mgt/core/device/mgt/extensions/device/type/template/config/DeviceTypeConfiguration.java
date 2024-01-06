@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template.config;
 
 import io.entgra.device.mgt.core.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
+import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDetails;
 import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 
 import javax.xml.bind.annotation.*;
@@ -88,6 +89,8 @@ public class DeviceTypeConfiguration {
     protected DeviceTypePlatformDetails deviceTypePlatformDetails;
     @XmlElement(name = "DeviceEnrollmentInvitationDetails", required = true)
     protected DeviceEnrollmentInvitationDetails deviceEnrollmentInvitationDetails;
+    @XmlElement(name = "DeviceTypeMetaDetails")
+    protected DeviceTypeMetaDetails deviceTypeMetaDetails;
 
     public DeviceTypePlatformDetails getDeviceTypePlatformDetails() {
         return deviceTypePlatformDetails;
@@ -411,5 +414,13 @@ public class DeviceTypeConfiguration {
     public void setDeviceEnrollmentInvitationDetails(
             DeviceEnrollmentInvitationDetails deviceEnrollmentInvitationDetails) {
         this.deviceEnrollmentInvitationDetails = deviceEnrollmentInvitationDetails;
+    }
+
+    public DeviceTypeMetaDetails getDeviceTypeMetaDetails() {
+        return deviceTypeMetaDetails;
+    }
+
+    public void setDeviceTypeMetaDetails(DeviceTypeMetaDetails deviceTypeMetaDetails) {
+        this.deviceTypeMetaDetails = deviceTypeMetaDetails;
     }
 }

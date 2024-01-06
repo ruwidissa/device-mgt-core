@@ -21,7 +21,7 @@
     <parent>
         <artifactId>apimgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.0.31-SNAPSHOT</version>
+        <version>5.0.33-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -54,6 +54,11 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.device.mgt.common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
+            <!--            <scope>provided</scope>-->
         </dependency>
     </dependencies>
 
@@ -108,6 +113,7 @@
                             org.wso2.carbon.apimgt.keymgt.model;version="[9.28,10)",
                             org.wso2.carbon.apimgt.keymgt.model.entity;version="[9.28,10)",
                             org.wso2.carbon.apimgt.keymgt.service;version="[9.28,10)",
+                            io.entgra.device.mgt.core.apimgt.extension.rest.api,
                             org.wso2.carbon.context;version="[4.8,5)",
                             org.wso2.carbon.user.api;version="[1.0,2)",
                             org.wso2.carbon.user.core.service;version="[4.8,5)",

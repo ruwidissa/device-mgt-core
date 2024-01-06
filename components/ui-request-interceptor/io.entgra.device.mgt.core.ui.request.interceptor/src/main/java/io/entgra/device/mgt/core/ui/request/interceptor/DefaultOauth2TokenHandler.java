@@ -18,21 +18,20 @@
 
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 
 import javax.servlet.annotation.MultipartConfig;
@@ -42,11 +41,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Map;
 
 @MultipartConfig
 @WebServlet("/default-oauth2-credentials")
 public class DefaultOauth2TokenHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(DefaultTokenHandler.class);
+    private static final long serialVersionUID = 2254408216447549205L;
 
 
     @Override
@@ -80,17 +81,16 @@ public class DefaultOauth2TokenHandler extends HttpServlet {
                     }
                 }
 
-                String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR
-                        + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
-                        + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-                String tokenUrl = iotsCoreUrl + "/api/device-mgt/v1.0/devices/" + clientId
-                        + "/" + clientSecret + "/default-token" + scopeString;
+                ClassicHttpRequest defaultTokenRequest =
+                        ClassicRequestBuilder.get(req.getScheme() + HandlerConstants.SCHEME_SEPARATOR
+                                        + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
+                                        + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme())
+                                        + "/api/device-mgt/v1.0/devices/" + clientId + HandlerConstants.URI_SEPARATOR
+                                        + clientSecret + "/default-token" + scopeString)
+                                .setHeader(org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE, org.apache.hc.core5.http.ContentType.APPLICATION_FORM_URLENCODED.toString())
+                                .setHeader(org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken())
+                                .build();
 
-                HttpGet defaultTokenRequest = new HttpGet(tokenUrl);
-                defaultTokenRequest
-                        .setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-                defaultTokenRequest
-                        .setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
                 ProxyResponse tokenResultResponse = HandlerUtil.execute(defaultTokenRequest);
 
                 if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
@@ -98,29 +98,24 @@ public class DefaultOauth2TokenHandler extends HttpServlet {
                     HandlerUtil.handleError(resp, tokenResultResponse);
                     return;
                 }
-                String tokenResult = tokenResultResponse.getData();
+                JsonNode tokenResult = tokenResultResponse.getData();
                 if (tokenResult == null) {
                     log.error("Invalid default token response is received.");
                     HandlerUtil.handleError(resp, tokenResultResponse);
                     return;
                 }
 
-                JsonParser jsonParser = new JsonParser();
-                JsonElement jTokenResult = jsonParser.parse(tokenResult);
-                if (jTokenResult.isJsonObject()) {
-                    JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
-                    AuthData newDefaultAuthData = new AuthData();
-                    newDefaultAuthData.setClientId(clientId);
-                    newDefaultAuthData.setClientSecret(clientSecret);
+                AuthData newDefaultAuthData = new AuthData();
+                newDefaultAuthData.setClientId(clientId);
+                newDefaultAuthData.setClientSecret(clientSecret);
 
-                    String defaultToken = jTokenResultAsJsonObject.get("accessToken").getAsString();
-                    newDefaultAuthData.setAccessToken(defaultToken);
-                    newDefaultAuthData.setRefreshToken(jTokenResultAsJsonObject.get("refreshToken").getAsString());
-                    newDefaultAuthData.setScope(jTokenResultAsJsonObject.get("scopes").getAsString());
-                    httpSession.setAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY, newDefaultAuthData);
+                String defaultToken = tokenResult.get("accessToken").asText();
+                newDefaultAuthData.setAccessToken(defaultToken);
+                newDefaultAuthData.setRefreshToken(tokenResult.get("refreshToken").asText());
+                newDefaultAuthData.setScope(tokenResult.get("scopes").asText());
+                httpSession.setAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY, newDefaultAuthData);
 
-                    HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(defaultToken));
-                }
+                HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(defaultToken));
             } else {
                 HandlerUtil.sendUnAuthorizeResponse(resp);
             }
@@ -152,19 +147,19 @@ public class DefaultOauth2TokenHandler extends HttpServlet {
         ub3.setHost(System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR));
         ub3.setPort(Integer.parseInt(System.getProperty(HandlerConstants.IOT_GATEWAY_WEBSOCKET_WS_PORT_ENV_VAR)));
 
-        JsonObject responseJsonObj = new JsonObject();
-        responseJsonObj.addProperty("default-access-token", defaultAccessToken);
-        responseJsonObj.addProperty("remote-session-base-url", ub.toString());
-        responseJsonObj.addProperty("secured-websocket-gateway-url", ub2.toString());
-        responseJsonObj.addProperty("unsecured-websocket-gateway-url", ub3.toString());
-
-        Gson gson = new Gson();
-        String payload = gson.toJson(responseJsonObj);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = JsonNodeFactory.instance.objectNode();
+        Map<String, Object> nodeMap = mapper.convertValue(node, new TypeReference<>() {
+        });
+        nodeMap.put("default-access-token", defaultAccessToken);
+        nodeMap.put("remote-session-base-url", ub.toString());
+        nodeMap.put("secured-websocket-gateway-url", ub2.toString());
+        nodeMap.put("unsecured-websocket-gateway-url", ub3.toString());
 
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(HttpStatus.SC_OK);
         proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
-        proxyResponse.setData(payload);
+        proxyResponse.setData(mapper.convertValue(nodeMap, JsonNode.class));
         return proxyResponse;
     }
 }

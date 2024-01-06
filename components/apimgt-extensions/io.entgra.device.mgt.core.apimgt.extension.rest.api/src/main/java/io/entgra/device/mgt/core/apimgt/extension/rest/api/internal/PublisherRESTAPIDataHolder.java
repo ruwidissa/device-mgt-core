@@ -19,12 +19,15 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 public class PublisherRESTAPIDataHolder {
 
     private APIApplicationServices apiApplicationServices;
     private APIManagerConfigurationService apiManagerConfigurationService;
+
+    private ConsumerRESTAPIServices consumerRESTAPIServices;
 
     private static PublisherRESTAPIDataHolder thisInstance = new PublisherRESTAPIDataHolder();
 
@@ -52,6 +55,14 @@ public class PublisherRESTAPIDataHolder {
             throw new IllegalStateException("API Manager Configuration service is not initialized properly");
         }
         return apiManagerConfigurationService;
+    }
+
+    public ConsumerRESTAPIServices getConsumerRESTAPIServices() {
+        return consumerRESTAPIServices;
+    }
+
+    public void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
+        this.consumerRESTAPIServices = consumerRESTAPIServices;
     }
 
 }

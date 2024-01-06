@@ -23,7 +23,7 @@
     <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>io.entgra.device.mgt.core.parent</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.31-SNAPSHOT</version>
+    <version>5.0.33-SNAPSHOT</version>
     <name>WSO2 Carbon - Device Management - Parent</name>
     <url>https://entgra.io</url>
     <description>WSO2 Connected Device Manager Components</description>
@@ -593,7 +593,6 @@
                 </exclusions>
             </dependency>
             <!-- End of Governance dependencies -->
-
 
             <dependency>
                 <groupId>org.testng</groupId>
@@ -1310,8 +1309,8 @@
                 <version>${github.openfeign.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
                 <version>${apache.http.client.version}</version>
             </dependency>
             <!-- Removing neethi configs from webapp-->
@@ -1522,6 +1521,11 @@
             <dependency>
                 <groupId>io.entgra.device.mgt.core</groupId>
                 <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.defaultrole.manager</artifactId>
+                <version>${io.entgra.device.mgt.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.entgra.device.mgt.core</groupId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper</artifactId>
                 <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
@@ -1998,7 +2002,7 @@
         <axiom.wso2.version>1.2.11-wso2v25</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <io.entgra.device.mgt.core.version>5.0.31-SNAPSHOT</io.entgra.device.mgt.core.version>
+        <io.entgra.device.mgt.core.version>5.0.33-SNAPSHOT</io.entgra.device.mgt.core.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.9.2</carbon.commons.version>
@@ -2050,7 +2054,7 @@
         <github.openfeign.version>11.0</github.openfeign.version>
         <jsr311.version>1.1.1</jsr311.version>
         <commons.logging.version>1.2</commons.logging.version>
-        <apache.http.client.version>4.5.13</apache.http.client.version>
+        <apache.http.client.version>5.2.1</apache.http.client.version>
         <!-- apache http components core -->
         <apache.http.core.version>4.4.13</apache.http.core.version>
         <apache.http.mime.version>4.5.10</apache.http.mime.version>

@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyMonitoringMa
 import io.entgra.device.mgt.core.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.spi.DeviceManagementService;
+import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 
 import java.util.ArrayList;
@@ -118,4 +119,9 @@ public class TypeXDeviceManagementService implements DeviceManagementService {
 
     @Override
     public License getLicenseConfig() { return null; }
+
+    @Override
+    public DeviceTypeMetaDefinition getDeviceTypeMetaDefinition() {
+        return null;
+    }
 }

@@ -19,9 +19,14 @@
 package io.entgra.device.mgt.core.apimgt.keymgt.extension.service;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.ApiApplicationInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.*;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.keymgt.extension.exception.KeyMgtException;
+import io.entgra.device.mgt.core.apimgt.keymgt.extension.internal.KeyMgtDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.keymanager.KeyManagerConfigurations;
@@ -29,10 +34,8 @@ import okhttp3.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserRealm;
@@ -62,7 +65,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
     String subTenantUserUsername, subTenantUserPassword, keyManagerName, msg = null;
 
     public DCRResponse dynamicClientRegistration(String clientName, String owner, String grantTypes, String callBackUrl,
-                                                 String[] tags, boolean isSaasApp, int validityPeriod) throws KeyMgtException {
+                                                 String[] tags, boolean isSaasApp, int validityPeriod,
+                                                 String password, List<String> supportedGrantTypes, String callbackUrl) throws KeyMgtException {
 
         if (owner == null) {
             PrivilegedCarbonContext threadLocalCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
@@ -83,20 +87,22 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                     .getTenantManager().getTenantId(tenantDomain);
         } catch (UserStoreException e) {
             msg = "Error while loading tenant configuration";
-            log.error(msg);
-            throw new KeyMgtException(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         }
 
         kmConfig = getKeyManagerConfig();
 
         if (KeyMgtConstants.SUPER_TENANT.equals(tenantDomain)) {
-            OAuthApplication dcrApplication = createOauthApplication(clientName, kmConfig.getAdminUsername(), tags, validityPeriod);
+            OAuthApplication dcrApplication = createOauthApplication(clientName, kmConfig.getAdminUsername(), tags,
+                    validityPeriod, kmConfig.getAdminPassword(), supportedGrantTypes, callbackUrl);
             return new DCRResponse(dcrApplication.getClientId(), dcrApplication.getClientSecret());
         } else {
             // super-tenant admin dcr and token generation
+            //todo lasantha null passed in last two params
             OAuthApplication superTenantOauthApp = createOauthApplication(
                     KeyMgtConstants.RESERVED_OAUTH_APP_NAME_PREFIX + KeyMgtConstants.SUPER_TENANT,
-                    kmConfig.getAdminUsername(), null, validityPeriod);
+                    kmConfig.getAdminUsername(), null, validityPeriod, kmConfig.getAdminPassword(), null, null);
             String superAdminAccessToken = createAccessToken(superTenantOauthApp);
 
             // create new key manager for the tenant, under super-tenant space
@@ -112,18 +118,25 @@ public class KeyMgtServiceImpl implements KeyMgtService {
                         .getRealmProperty("reserved_tenant_user_password");
             } catch (UserStoreException e) {
                 msg = "Error while loading user realm configuration";
-                log.error(msg);
-                throw new KeyMgtException(msg);
+                log.error(msg, e);
+                throw new KeyMgtException(msg, e);
             }
             createUserIfNotExists(subTenantUserUsername, subTenantUserPassword);
 
             // DCR for the requesting user
-            OAuthApplication dcrApplication = createOauthApplication(clientName, owner, tags, validityPeriod);
+            //todo lasantha -> need to pass password of user
+            //todo lasantha null passed in last two params
+
+            OAuthApplication dcrApplication = createOauthApplication(clientName, owner, tags, validityPeriod,
+                    password, null, null);
             String requestingUserAccessToken = createAccessToken(dcrApplication);
 
             // get application id
-            Application application = getApplication(clientName, owner);
-            String applicationUUID = application.getUUID();
+            //todo --> can use requestingUserAccessToken token here to get application data - modify getApplication
+            // method signature
+
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application = getApplication(clientName, owner);
+            String applicationUUID = application.getApplicationId();
 
             // do app key mapping
             mapApplicationKeys(dcrApplication.getClientId(), dcrApplication.getClientSecret(), keyManagerName,
@@ -308,13 +321,18 @@ public class KeyMgtServiceImpl implements KeyMgtService {
      * @return @{@link OAuthApplication} OAuth application object
      * @throws KeyMgtException if any error occurs while creating response object
      */
-    private OAuthApplication createOauthApplication (String clientName, String owner, String[] tags, int validityPeriod) throws KeyMgtException {
-        String oauthAppCreationPayloadStr = createOauthAppCreationPayload(clientName, owner, tags, validityPeriod);
+    private OAuthApplication createOauthApplication (String clientName, String owner, String[] tags,
+                                                     int validityPeriod, String ownerPassword,
+                                                     List<String> supportedGrantTypes, String callbackUrl) throws KeyMgtException {
+        //todo modify this to pass the password as well
+        String oauthAppCreationPayloadStr = createOauthAppCreationPayload(clientName, owner, tags, validityPeriod,
+                ownerPassword, supportedGrantTypes, callbackUrl);
         RequestBody oauthAppCreationPayload = RequestBody.Companion.create(oauthAppCreationPayloadStr, JSON);
         kmConfig = getKeyManagerConfig();
         String dcrEndpoint = kmConfig.getServerUrl() + KeyMgtConstants.DCR_ENDPOINT;
         String username, password;
 
+        //todo why can't we use owner details here?
         if (KeyMgtConstants.SUPER_TENANT.equals(MultitenantUtils.getTenantDomain(owner))) {
             username = kmConfig.getAdminUsername();
             password = kmConfig.getAdminPassword();
@@ -323,6 +341,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             password = subTenantUserPassword;
         }
 
+        //todo why can't we use owner details for authentication
         Request request = new Request.Builder()
                 .url(dcrEndpoint)
                 .addHeader(KeyMgtConstants.AUTHORIZATION_HEADER, Credentials.basic(username, password))
@@ -332,7 +351,7 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             Response response = client.newCall(request).execute();
             return gson.fromJson(response.body().string(), OAuthApplication.class);
         } catch (IOException e) {
-            msg = "Error occurred while processing the response";
+            msg = "Error occurred while processing the response" + e;
             throw new KeyMgtException(msg);
         }
     }
@@ -403,8 +422,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             client.newCall(request).execute();
         } catch (IOException e) {
             msg = "Error occurred while invoking create key manager endpoint";
-            log.error(msg);
-            throw new KeyMgtException(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         }
     }
 
@@ -412,28 +431,52 @@ public class KeyMgtServiceImpl implements KeyMgtService {
      * Retrieves an application by name and owner
      *
      * @param applicationName name of the application
-     * @param owner owner of the application
+     * @param accessToken Access Token
      * @return @{@link Application} Application object
      * @throws KeyMgtException if any error occurs while retrieving the application
      */
-    private Application getApplication(String applicationName, String owner) throws KeyMgtException {
+    private io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application getApplication(String applicationName, String accessToken) throws KeyMgtException {
+
+        ApiApplicationInfo apiApplicationInfo = new ApiApplicationInfo();
+        apiApplicationInfo.setAccess_token(accessToken);
         try {
-            APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
-            APIConsumer apiConsumer = apiManagerFactory.getAPIConsumer(owner);
-            return null; // todo:apim - apiConsumer.getApplicationsByName(owner, applicationName, "");
-        } catch (APIManagementException e) {
+            ConsumerRESTAPIServices consumerRESTAPIServices =
+                    KeyMgtDataHolder.getInstance().getConsumerRESTAPIServices();
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application[] applications =
+                    consumerRESTAPIServices.getAllApplications(apiApplicationInfo, applicationName);
+            if (applications.length == 1) {
+                return applications[0];
+            } else {
+                String msg =
+                        "Found invalid number of applications. No of applications found from the APIM: " + applications.length;
+                log.error(msg);
+                throw new KeyMgtException(msg);
+            }
+        } catch (io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException e) {
             msg = "Error while trying to retrieve the application";
-            log.error(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg);
+        } catch (UnexpectedResponseException e) {
+            msg = "Received invalid response for the API applications retrieving REST API call.";
+            log.error(msg, e);
+            throw new KeyMgtException(msg);
+        } catch (APIServicesException e) {
+            msg = "Error occurred while processing the API Response.";
+            log.error(msg, e);
             throw new KeyMgtException(msg);
         }
     }
 
-    private String createOauthAppCreationPayload(String clientName, String owner, String[] tags, int validityPeriod) {
+    private String createOauthAppCreationPayload(String clientName, String owner, String[] tags, int validityPeriod,
+                                                 String password, List<String> supportedGrantTypes, String callbackUrl) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("applicationName", clientName);
         jsonObject.put("username", owner);
         jsonObject.put("tags", tags);
         jsonObject.put("validityPeriod", validityPeriod);
+        jsonObject.put("password", password);
+        jsonObject.put("supportedGrantTypes", supportedGrantTypes);
+        jsonObject.put("callbackUrl", callbackUrl);
         return jsonObject.toString();
     }
 

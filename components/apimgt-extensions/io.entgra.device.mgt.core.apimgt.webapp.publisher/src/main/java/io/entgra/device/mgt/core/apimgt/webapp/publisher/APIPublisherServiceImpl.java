@@ -104,7 +104,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         APIApplicationKey apiApplicationKey;
         AccessTokenInfo accessTokenInfo;
         try {
-            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                    "ClientForPublisherRestCalls",
+                    "client_credentials password refresh_token"
+            );
             accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
         } catch (APIServicesException e) {
@@ -168,19 +171,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                         String apiUuid = apiIdentifier.getUUID();
                         if (!apiFound) {
                             // add new scopes as shared scopes
-                            for (ApiScope apiScope : apiConfig.getScopes()) {
-                                if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
-                                        apiScope.getKey())) {
-                                    Scope scope = new Scope();
-                                    scope.setDisplayName(apiScope.getName());
-                                    scope.setDescription(apiScope.getDescription());
-                                    scope.setName(apiScope.getKey());
-                                    List<String> bindings = new ArrayList<>(apiScope.getRoles());
-                                    bindings.add(ADMIN_ROLE_KEY);
-                                    scope.setBindings(bindings);
-                                    publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
-                                }
-                            }
+                            addNewSharedScope(apiConfig.getScopes(), publisherRESTAPIServices, apiApplicationKey,
+                                    accessTokenInfo);
                             APIInfo api = getAPI(apiConfig, true);
                             APIInfo createdAPI = publisherRESTAPIServices.addAPI(apiApplicationKey, accessTokenInfo, api);
                             apiUuid = createdAPI.getId();
@@ -220,7 +212,6 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             }
                         } else {
                             if (WebappPublisherConfig.getInstance().isEnabledUpdateApi()) {
-
                                 // With 4.x to 5.x upgrade
                                 // - there cannot be same local scope assigned in 2 different APIs
                                 // - local scopes will be deprecated in the future, so need to move all scopes as shared scopes
@@ -235,54 +226,18 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 // 1. add new scopes as shared scopes
                                 // 2. update the API adding scopes for the URI Templates
 
-                                Set<ApiScope> scopesToMoveAsSharedScopes = new HashSet<>();
-                                for (ApiScope apiScope : apiConfig.getScopes()) {
-                                    // if the scope is not available as shared scope, and it is assigned to an API as a local scope
-                                    // need remove the local scope and add as a shared scope
-                                    if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
-                                            apiScope.getKey())) {
-                                        //todo:apim
-                                        // if (apiProvider.isScopeKeyAssignedLocally(apiIdentifier, apiScope.getKey(), tenantId)) {
-                                        if (true) {
-                                            // collect scope to move as shared scopes
-                                            scopesToMoveAsSharedScopes.add(apiScope);
-                                        } else {
-                                            // if new scope add as shared scope
-                                            Scope scope = new Scope();
-                                            scope.setName(apiScope.getKey());
-                                            scope.setDescription(apiScope.getDescription());
-                                            scope.setDisplayName(apiScope.getName());
-                                            List<String> bindings = new ArrayList<>(apiScope.getRoles());
-                                            bindings.add(ADMIN_ROLE_KEY);
-                                            scope.setBindings(bindings);
-                                            publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                                // It is guaranteed that there is no local scope if we update from 5.0.0 to the most
+                                // recent version. Therefore, if the scope is not already available as a shared scope,
+                                // new scopes must be added as shared scopes. Additionally, it is necessary to
+                                // upgrade to 5.0.0 first before updating from 5.0.0 to the most recent version if we
+                                // are updating from a version that is older than 5.0.0.
 
-                                        }
-                                    }
-                                }
+                                addNewSharedScope(apiConfig.getScopes(), publisherRESTAPIServices, apiApplicationKey,
+                                        accessTokenInfo);
 
                                 // Get existing API
                                 APIInfo existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo,
                                         apiUuid);
-                                if (scopesToMoveAsSharedScopes.size() > 0) {
-                                    // update API to remove local scopes
-                                    APIInfo api = getAPI(apiConfig, false);
-                                    api.setLifeCycleStatus(existingAPI.getLifeCycleStatus());
-                                    publisherRESTAPIServices.updateApi(apiApplicationKey, accessTokenInfo, api);
-
-                                    for (ApiScope apiScope : scopesToMoveAsSharedScopes) {
-                                        Scope scope = new Scope();
-                                        scope.setName(apiScope.getKey());
-                                        scope.setDescription(apiScope.getDescription());
-                                        scope.setDisplayName(apiScope.getName());
-                                        List<String> bindings = new ArrayList<>(apiScope.getRoles());
-                                        bindings.add(ADMIN_ROLE_KEY);
-                                        scope.setBindings(bindings);
-                                        publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
-                                    }
-                                }
-
-                                existingAPI = publisherRESTAPIServices.getApi(apiApplicationKey, accessTokenInfo, apiUuid);
                                 APIInfo api = getAPI(apiConfig, true);
                                 api.setLifeCycleStatus(existingAPI.getLifeCycleStatus());
                                 api.setId(apiUuid);
@@ -434,13 +389,43 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         }
     }
 
+    /**
+     * Add new Shared Scopes
+     *
+     * @param apiScopes set of API scopes
+     * @param publisherRESTAPIServices {@link PublisherRESTAPIServices}
+     * @param apiApplicationKey API application Key
+     * @param accessTokenInfo Details of access token
+     * @throws BadRequestException if invalid payload receives to add new shared scopes.
+     * @throws UnexpectedResponseException if the response is not either 200 or 400.
+     * @throws APIServicesException if error occurred while processing the response.
+     */
+    private void addNewSharedScope(Set<ApiScope> apiScopes, PublisherRESTAPIServices publisherRESTAPIServices,
+                                   APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo) throws BadRequestException, UnexpectedResponseException, APIServicesException {
+        for (ApiScope apiScope : apiScopes) {
+            if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
+                    apiScope.getKey())) {
+                Scope scope = new Scope();
+                scope.setName(apiScope.getKey());
+                scope.setDescription(apiScope.getDescription());
+                scope.setDisplayName(apiScope.getName());
+                List<String> bindings = new ArrayList<>(apiScope.getRoles());
+                bindings.add(ADMIN_ROLE_KEY);
+                scope.setBindings(bindings);
+                publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
+            }
+        }
+    }
+
     public void addDefaultScopesIfNotExist() {
         DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
         DefaultPermissions defaultPermissions = deviceManagementConfig.getDefaultPermissions();
         APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
         try {
-            APIApplicationKey apiApplicationKey =
-                    apiApplicationServices.createAndRetrieveApplicationCredentials();
+            APIApplicationKey apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                    "ClientForPublisherRestCalls",
+                    "client_credentials password refresh_token"
+            );
             AccessTokenInfo accessTokenInfo =
                     apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                             apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
@@ -479,7 +464,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         APIApplicationKey apiApplicationKey;
         AccessTokenInfo accessTokenInfo;
         try {
-            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                    "ClientForPublisherRestCalls",
+                    "client_credentials password refresh_token"
+            );
             accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
         } catch (APIServicesException e) {
@@ -613,7 +601,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         APIApplicationKey apiApplicationKey;
         AccessTokenInfo accessTokenInfo;
         try {
-            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials();
+            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                    "ClientForPublisherRestCalls",
+                    "client_credentials password refresh_token"
+            );
             accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
                     apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
         } catch (APIServicesException e) {
@@ -725,16 +716,16 @@ public class APIPublisherServiceImpl implements APIPublisherService {
     }
 
     private void updatePermissions(String role, List<String> permissions) throws UserStoreException {
+        if (role == null || permissions == null) return;
         AuthorizationManager authorizationManager = APIPublisherDataHolder.getInstance().getUserRealm()
                 .getAuthorizationManager();
         if (log.isDebugEnabled()) {
             log.debug("Updating the role '" + role + "'");
         }
-        if (permissions != null && !permissions.isEmpty()) {
-            authorizationManager.clearRoleAuthorization(role);
-            for (String permission : permissions) {
-                authorizationManager.authorizeRole(role, permission, CarbonConstants.UI_PERMISSION_ACTION);
-            }
+        authorizationManager.clearRoleAuthorization(role);
+        for (String permission : permissions) {
+            authorizationManager.authorizeRole(role, permission, CarbonConstants.UI_PERMISSION_ACTION);
+            authorizationManager.refreshAllowedRolesForResource(permission);
         }
     }
 
@@ -797,7 +788,9 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     scope.setName(apiUriTemplate.getScope().getKey());
                     scope.setDisplayName(apiUriTemplate.getScope().getName());
                     scope.setDescription(apiUriTemplate.getScope().getDescription());
-                    scope.setBindings(apiUriTemplate.getScope().getRoles());
+                    List<String> bindings = new ArrayList<>(apiUriTemplate.getScope().getRoles());
+                    bindings.add(ADMIN_ROLE_KEY);
+                    scope.setBindings(bindings);
 
                     JSONObject scopeObject = new JSONObject();
                     scopeObject.put("scope", new JSONObject(gson.toJson(scope)));
