@@ -17,6 +17,15 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.task;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.powermock.api.mockito.PowerMockito;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
@@ -38,14 +47,6 @@ import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProvide
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.task.impl.DeviceDetailsRetrieverTask;
 import io.entgra.device.mgt.core.device.mgt.core.task.impl.DeviceTaskManagerImpl;
-import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.powermock.api.mockito.PowerMockito;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -64,7 +65,7 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
     private OperationManager operationManager;
 
     @BeforeClass
-    public void init() throws DeviceManagementException, RegistryException {
+    public void init() throws DeviceManagementException, RegistryException, MetadataManagementException {
         log.info("Initializing Device Task Manager Test Suite");
         this.deviceIds = new ArrayList<>();
         for (int i = 0; i < 5; i++) {

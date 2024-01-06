@@ -30,6 +30,25 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationStatusBean;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventAttributeList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.java.security.SSLProtocolSocketFactory;
+import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
+import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
+import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.util.Utils;
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
@@ -67,23 +86,6 @@ import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClient
 import io.entgra.device.mgt.core.policy.mgt.common.PolicyMonitoringTaskException;
 import io.entgra.device.mgt.core.policy.mgt.core.PolicyManagerService;
 import io.entgra.device.mgt.core.policy.mgt.core.task.TaskScheduleService;
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Options;
-import org.apache.axis2.java.security.SSLProtocolSocketFactory;
-import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
-import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
-import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.util.Utils;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.publisher.core.EventPublisherService;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceStub;
@@ -154,6 +156,8 @@ public class DeviceMgtAPIUtils {
     //    private static IntegrationClientService integrationClientService;
     private static MetadataManagementService metadataManagementService;
     private static WhiteLabelManagementService whiteLabelManagementService;
+
+    private static DeviceStatusManagementService deviceStatusManagementService;
     private static OTPManagementService otpManagementService;
 
     private static volatile SubscriptionManager subscriptionManager;
@@ -590,6 +594,28 @@ public class DeviceMgtAPIUtils {
             }
         }
         return whiteLabelManagementService;
+    }
+
+    /**
+     * Initializing and accessing method for DeviceStatusManagementService.
+     *
+     * @return WhiteLabelManagementService instance
+     * @throws IllegalStateException if DeviceStatusManagementService cannot be initialized
+     */
+    public static DeviceStatusManagementService getDeviceStatusManagmentService() {
+        if (deviceStatusManagementService == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (deviceStatusManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    deviceStatusManagementService = (DeviceStatusManagementService) ctx.getOSGiService(
+                            DeviceStatusManagementService.class, null);
+                    if (deviceStatusManagementService == null) {
+                        throw new IllegalStateException("DeviceStatusManagementService Management service not initialized.");
+                    }
+                }
+            }
+        }
+        return deviceStatusManagementService;
     }
 
     /**

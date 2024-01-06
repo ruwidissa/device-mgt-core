@@ -20,6 +20,22 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.DeviceEnrolmentLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceEnrolmentLoggerImpl;
+import org.apache.commons.collections.map.SingletonMap;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HTTP;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceEnrollmentInfoNotification;
@@ -125,18 +141,6 @@ import io.entgra.device.mgt.core.notification.logger.DeviceEnrolmentLogContext;
 import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceEnrolmentLoggerImpl;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.*;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
-import org.apache.commons.collections.map.SingletonMap;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HTTP;
-import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -486,6 +490,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             Device currentDevice = this.getDevice(deviceIdentifier, false);
             DeviceManagementDAOFactory.beginTransaction();
             device.setId(currentDevice.getId());
+            DeviceStatusManagementService deviceStatusManagementService = DeviceManagementDataHolder
+                    .getInstance().getDeviceStatusManagementService();
             if (device.getEnrolmentInfo().getId() == 0) {
                 device.getEnrolmentInfo().setId(currentDevice.getEnrolmentInfo().getId());
             }
@@ -496,7 +502,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 device.setName(currentDevice.getName());
             }
             deviceDAO.updateDevice(device, tenantId);
-            enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
+            int updatedRows = enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
+            boolean isEnableDeviceStatusCheck = deviceStatusManagementService.getDeviceStatusCheck(tenantId);
+            boolean isValidState = deviceStatusManagementService.isDeviceStatusValid(device.getType(),device.getEnrolmentInfo().getStatus().name(),tenantId);
+            if (updatedRows == 1 && !deviceStatusManagementService.getDeviceStatusCheck(tenantId)){
+                enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
+            } else if (updatedRows ==1 && isEnableDeviceStatusCheck && isValidState ) {
+                enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
+            }
 
             DeviceManagementDAOFactory.commitTransaction();
             log.info("Device enrolled successfully", deviceEnrolmentLogContextBuilder.setDeviceId(String.valueOf(currentDevice.getId())).setDeviceType(String.valueOf(currentDevice.getType())).setOwner(currentDevice.getEnrolmentInfo().getOwner()).setOwnership(String.valueOf(currentDevice.getEnrolmentInfo().getOwnership())).setTenantID(String.valueOf(tenantId)).setTenantDomain(tenantDomain).setUserName(userName).build());
@@ -604,7 +617,16 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             device.getEnrolmentInfo().setDateOfLastUpdate(new Date().getTime());
             device.getEnrolmentInfo().setStatus(EnrolmentInfo.Status.REMOVED);
             DeviceManagementDAOFactory.beginTransaction();
-            enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
+            DeviceStatusManagementService deviceStatusManagementService = DeviceManagementDataHolder
+                    .getInstance().getDeviceStatusManagementService();
+            int updatedRows = enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
+            boolean isEnableDeviceStatusCheck = deviceStatusManagementService.getDeviceStatusCheck(tenantId);
+            boolean isValidState = deviceStatusManagementService.isDeviceStatusValid(device.getType(),device.getEnrolmentInfo().getStatus().name(),tenantId);
+            if (updatedRows == 1 && !deviceStatusManagementService.getDeviceStatusCheck(tenantId)){
+                enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
+            } else if (updatedRows ==1 && isEnableDeviceStatusCheck && isValidState ) {
+                enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
+            }
             deviceDAO.updateDevice(device, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
             this.removeDeviceFromCache(deviceId);
@@ -1094,10 +1116,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     public double generateCost(List<Device> allDevices, Timestamp startDate, Timestamp endDate,  Cost tenantCost, List<Device> deviceStatusNotAvailable, double totalCost) throws DeviceManagementException {
+        List<DeviceStatus> deviceStatus;
         for (Device device : allDevices) {
             long dateDiff = 0;
-            device.setDeviceStatusInfo(getDeviceStatusHistory(device, null, endDate, true));
-            List<DeviceStatus> deviceStatus = device.getDeviceStatusInfo();
+            deviceStatus = getDeviceStatusHistory(device, null, endDate, true);
             if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
                 if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
                         || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
@@ -3340,7 +3362,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             isDeviceUpdated = disenrollDevice(deviceIdentifier);
         } else {
             enrolmentInfo.setStatus(newStatus);
-            isDeviceUpdated = updateEnrollment(deviceId, enrolmentInfo, tenantId);
+            isDeviceUpdated = updateEnrollment(deviceId, enrolmentInfo, tenantId, deviceIdentifier);
         }
         this.removeDeviceFromCache(deviceIdentifier);
         return isDeviceUpdated;
@@ -3371,7 +3393,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
     }
 
-    private boolean updateEnrollment(int deviceId, EnrolmentInfo enrolmentInfo, int tenantId)
+    private boolean updateEnrollment(int deviceId, EnrolmentInfo enrolmentInfo, int tenantId, DeviceIdentifier deviceIdentifier)
             throws DeviceManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Update enrollment of device: " + deviceId);
@@ -3380,10 +3402,21 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         try {
             DeviceManagementDAOFactory.beginTransaction();
             int updatedRows = enrollmentDAO.updateEnrollment(enrolmentInfo, tenantId);
+            String type = deviceIdentifier.getType();
+            DeviceStatusManagementService deviceStatusManagementService = DeviceManagementDataHolder
+                    .getInstance().getDeviceStatusManagementService();
             DeviceManagementDAOFactory.commitTransaction();
             if (updatedRows > 0) {
                 isUpdatedEnrollment = true;
             }
+            boolean isEnableDeviceStatusCheck = deviceStatusManagementService.getDeviceStatusCheck(tenantId);
+            boolean isValidState = deviceStatusManagementService.isDeviceStatusValid(type, enrolmentInfo.getStatus().name(), tenantId);
+            if (updatedRows == 1 && !deviceStatusManagementService.getDeviceStatusCheck(tenantId)) {
+                enrollmentDAO.addDeviceStatus(enrolmentInfo.getId(), enrolmentInfo.getStatus());
+            } else if (updatedRows == 1 && isEnableDeviceStatusCheck && isValidState) {
+                enrollmentDAO.addDeviceStatus(enrolmentInfo.getId(), enrolmentInfo.getStatus());
+            }
+
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while updating the enrollment information device for" +
@@ -4412,13 +4445,25 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     device.getEnrolmentInfo().setStatus(EnrolmentInfo.Status.REMOVED);
                     // different try blocks are used to isolate transactions
                     try {
-                        enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
+                        String type = device.getType();
+                        DeviceStatusManagementService deviceStatusManagementService = DeviceManagementDataHolder
+                                .getInstance().getDeviceStatusManagementService();
+                        int updatedRows = enrollmentDAO.updateEnrollment(device.getEnrolmentInfo(), tenantId);
+                        boolean isEnableDeviceStatusCheck = deviceStatusManagementService.getDeviceStatusCheck(tenantId);
+                        boolean isValidState = deviceStatusManagementService.isDeviceStatusValid(type, String.valueOf(EnrolmentInfo.Status.REMOVED),tenantId);
+                        if (updatedRows == 1 && !deviceStatusManagementService.getDeviceStatusCheck(tenantId)){
+                            enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
+                        } else if (updatedRows ==1 && isEnableDeviceStatusCheck && isValidState ) {
+                            enrollmentDAO.addDeviceStatus(device.getEnrolmentInfo().getId(), device.getEnrolmentInfo().getStatus());
+                        }
                     } catch (DeviceManagementDAOException e) {
                         DeviceManagementDAOFactory.rollbackTransaction();
                         String msg = "Error occurred while dis-enrolling device: " +
                                 device.getName();
                         log.error(msg, e);
                         throw new DeviceManagementException(msg, e);
+                    } catch (MetadataManagementException e) {
+                        throw new RuntimeException(e);
                     }
                     try {
                         deviceDAO.updateDevice(device, tenantId);
@@ -4954,9 +4999,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public void saveApplicationIcon(String iconPath, String packageName, String version, int tenantId) throws DeviceManagementException{
+    public void saveApplicationIcon(String iconPath, String packageName, String version) throws DeviceManagementException{
+        int tenantId = 0;
         try{
             DeviceManagementDAOFactory.beginTransaction();
+            tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             if(applicationDAO.getApplicationPackageCount(packageName) == 0){
                 applicationDAO.saveApplicationIcon(iconPath, packageName, version, tenantId);
             }
@@ -5052,6 +5099,40 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             applications = applicationDAO.getInstalledApplicationListOnDevice(device.getId(),
                     device.getEnrolmentInfo().getId(), offset, limit, tenantId);
+            if (applications == null) {
+                String msg = "Couldn't found applications for device identifier '" + device.getId() + "'";
+                log.error(msg);
+                throw new DeviceManagementException(msg);
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving the application list of android device, " +
+                    "which carries the id '" + device.getId() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        List<Application> newApplicationList;
+        newApplicationList = this.getInstalledAppIconInfo(applications);
+        if (newApplicationList == null) {
+            String msg = "Error occurred while getting app icon info for device identifier '" + device.getId() + "'";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        return newApplicationList;
+    }
+
+    public List<Application> getInstalledApplicationsOnDevice(Device device) throws DeviceManagementException {
+        List<Application> applications;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            applications = applicationDAO.getInstalledApplicationListOnDevice(device.getId(),
+                    device.getEnrolmentInfo().getId(), tenantId);
             if (applications == null) {
                 String msg = "Couldn't found applications for device identifier '" + device.getId() + "'";
                 log.error(msg);

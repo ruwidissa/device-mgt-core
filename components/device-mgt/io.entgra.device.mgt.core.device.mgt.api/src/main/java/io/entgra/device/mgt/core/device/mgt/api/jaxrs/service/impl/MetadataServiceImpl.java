@@ -80,6 +80,9 @@ public class MetadataServiceImpl implements MetadataService {
             @PathParam("metaKey") String metaKey) {
         Metadata metadata;
         try {
+            if (metaKey.contains("-")) {
+                metaKey = metaKey.replace('-', '_');
+            }
             metadata = DeviceMgtAPIUtils.getMetadataManagementService().retrieveMetadata(metaKey);
             return Response.status(Response.Status.OK).entity(metadata).build();
         } catch (MetadataManagementException e) {
@@ -129,6 +132,9 @@ public class MetadataServiceImpl implements MetadataService {
     public Response deleteMetadataEntry(
             @PathParam("metaKey") String metaKey) {
         try {
+            if (metaKey.contains("-")) {
+                metaKey = metaKey.replace('-', '_');
+            }
             DeviceMgtAPIUtils.getMetadataManagementService().deleteMetadata(metaKey);
             return Response.status(Response.Status.OK).entity("Metadata entry is deleted successfully.").build();
         } catch (MetadataKeyNotFoundException e) {
