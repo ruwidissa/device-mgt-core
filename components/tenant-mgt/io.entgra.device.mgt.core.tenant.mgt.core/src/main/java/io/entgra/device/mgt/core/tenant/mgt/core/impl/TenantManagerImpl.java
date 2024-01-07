@@ -98,6 +98,21 @@ public class TenantManagerImpl implements TenantManager {
         }
     }
 
+    @Override
+    public void addDefaultDeviceStatusFilters(TenantInfoBean tenantInfoBean) throws TenantMgtException {
+        initTenantFlow(tenantInfoBean);
+        try {
+            TenantMgtDataHolder.getInstance().getDeviceStatusManagementService().
+                    addDefaultDeviceStatusFilterIfNotExist(tenantInfoBean.getTenantId());
+        } catch (MetadataManagementException e) {
+            String msg = "Error occurred while adding default device status filter";
+            log.error(msg, e);
+            throw new TenantMgtException(msg, e);
+        } finally {
+            endTenantFlow();
+        }
+    }
+
     private void initTenantFlow(TenantInfoBean tenantInfoBean) {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();

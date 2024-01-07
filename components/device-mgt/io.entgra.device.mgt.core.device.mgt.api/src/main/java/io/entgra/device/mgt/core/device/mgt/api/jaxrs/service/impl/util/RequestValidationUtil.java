@@ -793,6 +793,9 @@ public class RequestValidationUtil {
                     new ErrorResponse.ErrorResponseBuilder()
                             .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
+        if (metadata.getMetaKey().contains("-")) {
+            metadata.setMetaKey(metadata.getMetaKey().replace('-', '_'));
+        }
         String regex = "^[a-zA-Z0-9_.]*$";
         if (!metadata.getMetaKey().matches(regex)) {
             String msg = "Request parameter metaKey should only contain period, " +

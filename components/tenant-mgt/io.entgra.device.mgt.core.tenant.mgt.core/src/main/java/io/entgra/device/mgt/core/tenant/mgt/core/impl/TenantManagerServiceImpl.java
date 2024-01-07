@@ -33,4 +33,9 @@ public class TenantManagerServiceImpl implements TenantManagerService {
     public void addDefaultAppCategories(TenantInfoBean tenantInfoBean) throws TenantMgtException {
         TenantMgtDataHolder.getInstance().getTenantManager().addDefaultAppCategories(tenantInfoBean);
     }
+
+    @Override
+    public void addDefaultDeviceStatusFilters(TenantInfoBean tenantInfoBean) throws TenantMgtException {
+        TenantMgtDataHolder.getInstance().getTenantManager().addDefaultDeviceStatusFilters(tenantInfoBean);
+    }
 }

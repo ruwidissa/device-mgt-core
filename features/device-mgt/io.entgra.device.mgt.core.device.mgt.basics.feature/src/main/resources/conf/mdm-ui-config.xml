@@ -162,6 +162,54 @@
             <Type>deviceInfo</Type>
         </DeviceInfoItem>
     </DeviceInfoConfigurations>
+    <DeviceStatusConfigurations>
+        <EnableDeviceStatusCheck>false</EnableDeviceStatusCheck>
+        <DeviceStatusItem>
+            <Type>android</Type>
+            <AllowedStatus>
+                <Status>ACTIVE</Status>
+                <Status>CREATED</Status>
+                <Status>INACTIVE</Status>
+                <Status>UNREACHABLE</Status>
+                <Status>UNCLAIMED</Status>
+                <Status>SUSPENDED</Status>
+                <Status>BLOCKED</Status>
+                <Status>REMOVED</Status>
+                <Status>SUSPENDED</Status>
+                <Status>DISENROLLMENT_REQUESTED</Status>
+            </AllowedStatus>
+        </DeviceStatusItem>
+        <DeviceStatusItem>
+            <Type>ios</Type>
+            <AllowedStatus>
+                <Status>ACTIVE</Status>
+                <Status>CREATED</Status>
+                <Status>INACTIVE</Status>
+                <Status>UNREACHABLE</Status>
+                <Status>UNCLAIMED</Status>
+                <Status>SUSPENDED</Status>
+                <Status>BLOCKED</Status>
+                <Status>REMOVED</Status>
+                <Status>SUSPENDED</Status>
+                <Status>DISENROLLMENT_REQUESTED</Status>
+            </AllowedStatus>
+        </DeviceStatusItem>
+        <DeviceStatusItem>
+            <Type>windows</Type>
+            <AllowedStatus>
+                <Status>ACTIVE</Status>
+                <Status>CREATED</Status>
+                <Status>INACTIVE</Status>
+                <Status>UNREACHABLE</Status>
+                <Status>UNCLAIMED</Status>
+                <Status>SUSPENDED</Status>
+                <Status>BLOCKED</Status>
+                <Status>REMOVED</Status>
+                <Status>SUSPENDED</Status>
+                <Status>DISENROLLMENT_REQUESTED</Status>
+            </AllowedStatus>
+        </DeviceStatusItem>
+    </DeviceStatusConfigurations>
     <AppRegistration>
         <Tags>
             <Tag>analytics_management</Tag>
@@ -315,6 +363,8 @@
         <Scope>dm:geo:geo-fence:manage</Scope>
         <Scope>dm:whitelable:view</Scope>
         <Scope>dm:whitelable:update</Scope>
+        <Scope>dm:devicestatusfilter:view</Scope>
+        <Scope>dm:devicestatusfilter:update</Scope>
         <Scope>dm:metadata:view</Scope>
         <Scope>dm:metadata:create</Scope>
         <Scope>dm:metadata:update</Scope>

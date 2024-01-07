@@ -17,6 +17,15 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
+import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.ServerStartupObserver;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
@@ -79,15 +88,8 @@ import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.DeviceAPICl
 import io.entgra.device.mgt.core.device.mgt.core.traccar.api.service.impl.DeviceAPIClientServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagementSchemaInitializer;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
-import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -326,6 +328,17 @@ public class DeviceManagementServiceComponent {
 
         }
         bundleContext.registerService(WhiteLabelManagementService.class.getName(), whiteLabelManagementService, null);
+
+        /* Registering DeviceState Filter Service */
+        DeviceStatusManagementService deviceStatusManagemntService = new DeviceStatusManagementServiceImpl();
+        DeviceManagementDataHolder.getInstance().setDeviceStatusManagementService(deviceStatusManagemntService);
+        try {
+            deviceStatusManagemntService.addDefaultDeviceStatusFilterIfNotExist(tenantId);
+        } catch (Throwable e) {
+            log.error("Error occurred while adding default tenant device status", e);
+
+        }
+        bundleContext.registerService(DeviceStatusManagementService.class.getName(), deviceStatusManagemntService, null);
 
         /* Registering Event Configuration Service */
         EventConfigurationProviderService eventConfigurationService = new EventConfigurationProviderServiceImpl();
