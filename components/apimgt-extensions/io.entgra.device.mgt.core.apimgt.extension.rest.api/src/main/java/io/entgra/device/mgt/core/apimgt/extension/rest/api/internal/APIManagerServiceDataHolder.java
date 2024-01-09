@@ -19,19 +19,21 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
-public class PublisherRESTAPIDataHolder {
+public class APIManagerServiceDataHolder {
 
     private APIApplicationServices apiApplicationServices;
     private APIManagerConfigurationService apiManagerConfigurationService;
+    private PublisherRESTAPIServices publisherRESTAPIServices;
 
-    private static PublisherRESTAPIDataHolder thisInstance = new PublisherRESTAPIDataHolder();
+    private static APIManagerServiceDataHolder thisInstance = new APIManagerServiceDataHolder();
 
-    private PublisherRESTAPIDataHolder() {
+    private APIManagerServiceDataHolder() {
     }
 
-    static PublisherRESTAPIDataHolder getInstance() {
+    static APIManagerServiceDataHolder getInstance() {
         return thisInstance;
     }
 
@@ -54,4 +56,11 @@ public class PublisherRESTAPIDataHolder {
         return apiManagerConfigurationService;
     }
 
+    public PublisherRESTAPIServices getPublisherRESTAPIServices() {
+        return publisherRESTAPIServices;
+    }
+
+    public void setPublisherRESTAPIServices(PublisherRESTAPIServices publisherRESTAPIServices) {
+        this.publisherRESTAPIServices = publisherRESTAPIServices;
+    }
 }
