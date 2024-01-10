@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @MultipartConfig
@@ -57,14 +58,13 @@ public class PermissionScopeHandler extends HttpServlet {
             return;
         }
 
-        if (!StringUtils.isEmpty(authData.getScope())) {
+        if (!StringUtils.isEmpty(authData.getScope().toString())) {
             ProxyResponse proxyResponse = new ProxyResponse();
+            JsonNode authDataScope = authData.getScope();
 
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = JsonNodeFactory.instance.objectNode();
-            Map<String, Object> nodeMap = mapper.convertValue(node, new TypeReference<>() {
-            });
-            nodeMap.put(HandlerConstants.USER_SCOPES, authData.getScope());
+            Map<String, Object> nodeMap = new HashMap<>();
+            nodeMap.put(HandlerConstants.USER_SCOPES, authDataScope);
             proxyResponse.setCode(HttpStatus.SC_OK);
             proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
             proxyResponse.setData(mapper.convertValue(nodeMap, JsonNode.class));

@@ -183,7 +183,7 @@ public class LoginHandler extends HttpServlet {
             authData.setEncodedClientApp(encodedClientApp);
             authData.setAccessToken(tokenResult.get("access_token").textValue());
             authData.setRefreshToken(tokenResult.get("refresh_token").textValue());
-            authData.setScope(tokenResult.get("scope").textValue());
+            authData.setScope(tokenResult.get("scope"));
             session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
             return true;
         } catch (IOException e) {

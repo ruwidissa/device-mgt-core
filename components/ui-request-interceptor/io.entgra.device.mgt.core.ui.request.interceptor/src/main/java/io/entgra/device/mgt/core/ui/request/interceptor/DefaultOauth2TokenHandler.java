@@ -112,7 +112,7 @@ public class DefaultOauth2TokenHandler extends HttpServlet {
                 String defaultToken = tokenResult.get("accessToken").asText();
                 newDefaultAuthData.setAccessToken(defaultToken);
                 newDefaultAuthData.setRefreshToken(tokenResult.get("refreshToken").asText());
-                newDefaultAuthData.setScope(tokenResult.get("scopes").asText());
+                newDefaultAuthData.setScope(tokenResult.get("scopes"));
                 httpSession.setAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY, newDefaultAuthData);
 
                 HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(defaultToken));

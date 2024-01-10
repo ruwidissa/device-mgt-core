@@ -129,8 +129,8 @@ public class UserHandler extends HttpServlet {
 
             HandlerUtil.handleSuccess(resp, proxyResponse);
             httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, nodeMap.get("username").toString());
-            log.info("Customer login",
-                    userLogContextBuilder.setUserName(nodeMap.get("username").toString()).setUserRegistered(true).build());
+//            log.info("Customer login",
+//                    userLogContextBuilder.setUserName(nodeMap.get("username").toString()).setUserRegistered(true).build());
         } catch (IOException e) {
             log.error("Error occurred while sending the response into the socket. ", e);
         } catch (JsonSyntaxException e) {
