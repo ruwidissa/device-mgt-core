@@ -65,6 +65,10 @@ public final class Constants {
     public static final String SCOPE_API_ENDPOINT = "/api/am/publisher/v2/scopes/";
     public static final String API_ENDPOINT = "/api/am/publisher/v2/apis/";
     public static final String GET_ALL_APIS = "/api/am/publisher/v2/apis?limit=1000";
+    public static final String SCOPE_PUBLISH_RESERVED_USER_NAME = "scope_publish_reserved_user";
+    public static final String SCOPE_PUBLISH_RESERVED_USER_PASSWORD = "&gKfyE8E4rUY4Q";
+    public static final String ADMIN_ROLE_KEY = "admin";
+    public static final String PERM_SCOPE_MAPPING_META_KEY  = "perm-scope-mapping";
 }
 
 

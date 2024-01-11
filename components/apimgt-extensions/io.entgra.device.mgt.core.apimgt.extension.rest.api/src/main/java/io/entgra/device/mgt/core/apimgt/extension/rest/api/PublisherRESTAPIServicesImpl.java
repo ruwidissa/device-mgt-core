@@ -79,6 +79,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -123,6 +124,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 return false;
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -177,6 +179,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.message();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -231,6 +234,61 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
+                throw new UnexpectedResponseException(msg);
+            }
+        } catch (IOException e) {
+            String msg = "Error occurred while processing the response";
+            log.error(msg, e);
+            throw new APIServicesException(msg, e);
+        }
+    }
+
+    @Override
+    public boolean deleteSharedScope(APIApplicationKey apiApplicationKey, AccessTokenInfo accessTokenInfo, Scope scope)
+            throws APIServicesException, BadRequestException, UnexpectedResponseException {
+        String updateScopeUrl = endPointPrefix + Constants.SCOPE_API_ENDPOINT + scope.getId();
+
+        JSONArray bindings = new JSONArray();
+        if (scope.getBindings() != null) {
+            for (String str : scope.getBindings()) {
+                bindings.put(str);
+            }
+        }
+
+        JSONObject payload = new JSONObject();
+        payload.put("name", (scope.getName() != null ? scope.getName() : ""));
+        payload.put("displayName", (scope.getDisplayName() != null ? scope.getDisplayName() : ""));
+        payload.put("description", (scope.getDescription() != null ? scope.getDescription() : ""));
+        payload.put("bindings", (bindings != null ? bindings : ""));
+        payload.put("usageCount", (scope.getUsageCount() != 0 ? scope.getUsageCount() : 0));
+
+        RequestBody requestBody = RequestBody.create(JSON, payload.toString());
+        Request request = new Request.Builder()
+                .url(updateScopeUrl)
+                .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Constants.AUTHORIZATION_HEADER_PREFIX_BEARER
+                        + accessTokenInfo.getAccess_token())
+                .delete(requestBody)
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            if (HttpStatus.SC_OK == response.code()) {
+                return true;
+            } else if (HttpStatus.SC_UNAUTHORIZED == response.code()) {
+                APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+                AccessTokenInfo refreshedAccessToken = apiApplicationServices.
+                        generateAccessTokenFromRefreshToken(accessTokenInfo.getRefresh_token(),
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                //TODO: max attempt count
+                return deleteSharedScope(apiApplicationKey, refreshedAccessToken, scope);
+            } else if (HttpStatus.SC_BAD_REQUEST == response.code()) {
+                String msg = "Bad Request, Invalid scope object";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            } else {
+                String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -269,6 +327,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -308,6 +367,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -447,6 +507,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response status : " + response.code() + " Response message : " + response.message();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -586,6 +647,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -632,6 +694,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -673,6 +736,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -720,6 +784,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -761,6 +826,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -804,6 +870,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -846,6 +913,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -889,6 +957,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -939,6 +1008,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -990,6 +1060,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -1031,6 +1102,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -1071,6 +1143,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -1111,6 +1184,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -1162,6 +1236,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
@@ -1208,6 +1283,7 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else {
                 String msg = "Response : " + response.code() + response.body();
+                log.error(msg);
                 throw new UnexpectedResponseException(msg);
             }
         } catch (IOException e) {
