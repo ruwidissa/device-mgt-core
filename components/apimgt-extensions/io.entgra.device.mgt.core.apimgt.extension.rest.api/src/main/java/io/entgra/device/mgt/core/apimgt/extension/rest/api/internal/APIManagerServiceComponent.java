@@ -20,6 +20,8 @@ package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServicesImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -36,9 +38,9 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
  * bind="setAPIManagerConfigurationService"
  * unbind="unsetAPIManagerConfigurationService"
  */
-public class PublisherRESTAPIServiceComponent {
+public class APIManagerServiceComponent {
 
-    private static Log log = LogFactory.getLog(PublisherRESTAPIServiceComponent.class);
+    private static Log log = LogFactory.getLog(APIManagerServiceComponent.class);
 
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
@@ -49,7 +51,11 @@ public class PublisherRESTAPIServiceComponent {
 
             APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
             bundleContext.registerService(APIApplicationServices.class.getName(), apiApplicationServices, null);
-            PublisherRESTAPIDataHolder.getInstance().setApiApplicationServices(apiApplicationServices);
+            APIManagerServiceDataHolder.getInstance().setApiApplicationServices(apiApplicationServices);
+
+            PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
+            bundleContext.registerService(PublisherRESTAPIServices.class.getName(), publisherRESTAPIServices, null);
+            APIManagerServiceDataHolder.getInstance().setPublisherRESTAPIServices(publisherRESTAPIServices);
 
             if (log.isDebugEnabled()) {
                 log.debug("API Application bundle has been successfully initialized");
@@ -67,13 +73,13 @@ public class PublisherRESTAPIServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("Setting API Manager Configuration Service");
         }
-        PublisherRESTAPIDataHolder.getInstance().setAPIManagerConfiguration(apiManagerConfigurationService);
+        APIManagerServiceDataHolder.getInstance().setAPIManagerConfiguration(apiManagerConfigurationService);
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService apiManagerConfigurationService) {
         if (log.isDebugEnabled()) {
             log.debug("Unsetting API Manager Configuration Service");
         }
-        PublisherRESTAPIDataHolder.getInstance().setAPIManagerConfiguration(null);
+        APIManagerServiceDataHolder.getInstance().setAPIManagerConfiguration(null);
     }
 }
