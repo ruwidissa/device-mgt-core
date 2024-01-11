@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt;
 
+import io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.documentation.DocConfiguration;
 import io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.whitelabel.WhiteLabelConfiguration;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -26,6 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "MetaDataConfiguration")
 public class MetaDataConfiguration {
     private WhiteLabelConfiguration whiteLabelConfiguration;
+    private DocConfiguration docConfiguration;
 
     @XmlElement(name = "WhiteLabelConfiguration", required = true)
     public WhiteLabelConfiguration getWhiteLabelConfiguration() {
@@ -34,5 +36,14 @@ public class MetaDataConfiguration {
 
     public void setWhiteLabelConfiguration(WhiteLabelConfiguration whiteLabelConfiguration) {
         this.whiteLabelConfiguration = whiteLabelConfiguration;
+    }
+
+    @XmlElement(name = "DocConfiguration", required = true)
+    public DocConfiguration getDocConfiguration() {
+        return docConfiguration;
+    }
+
+    public void setDocConfiguration(DocConfiguration docConfiguration) {
+        this.docConfiguration = docConfiguration;
     }
 }
