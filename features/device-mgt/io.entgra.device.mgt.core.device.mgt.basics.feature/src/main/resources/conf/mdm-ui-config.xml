@@ -368,6 +368,7 @@
         <Scope>dm:metadata:view</Scope>
         <Scope>dm:metadata:create</Scope>
         <Scope>dm:metadata:update</Scope>
+        <Scope>dm:metadata:remove</Scope>
         <Scope>and:ops:add-google-acc</Scope>
         <Scope>and:ops:authenticate-acc</Scope>
         <Scope>and:ops:update-default-sim</Scope>
