@@ -1564,6 +1564,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 new TypedValue<>(String.class, DeviceManagerUtil.getServerBaseHttpsUrl()));
         params.put(io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants.EmailAttributes.SERVER_BASE_URL_HTTP,
                 new TypedValue<>(String.class, DeviceManagerUtil.getServerBaseHttpUrl()));
+        params.put(DeviceManagementConstants.EmailAttributes.DOC_URL,
+                new TypedValue<>(String.class, DeviceManagerUtil.getDocUrl()));
         try {
             EmailContext ctx =
                     new EmailContext.EmailContextBuilder(new ContentProviderInfo(templateName, params),

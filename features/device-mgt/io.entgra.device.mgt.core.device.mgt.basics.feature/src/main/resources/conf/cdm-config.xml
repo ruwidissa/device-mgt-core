@@ -201,6 +201,9 @@
                 <DefaultImagesLocation>default</DefaultImagesLocation>
             </WhiteLabelImages>
         </WhiteLabelConfiguration>
+        <DocConfiguration>
+            <DocUrl>https://docs.entgra.io/uem/6.0.0</DocUrl>
+        </DocConfiguration>
     </MetaDataConfiguration>
 
     <OperationTimeoutConfigurations>
