@@ -1231,17 +1231,17 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     private String getTemplateName(String deviceType, String prefix, String separator) throws NoSuchFileException {
-        String templateName = deviceType + separator + prefix + ".vm";
+        String templateName = deviceType + separator + prefix;
         List<String> templatePathSegments =
-                Arrays.asList(CarbonUtils.getCarbonHome(), "repository", "resources", "email-templates", templateName);
+                Arrays.asList(CarbonUtils.getCarbonHome(), "repository", "resources", "email-templates", templateName + ".vm");
         File template = new File(String.join(File.separator, templatePathSegments));
         if (template.exists()) {
             return templateName;
         }
 
-        String defaultTemplateName = "default" + separator + prefix + ".vm";
+        String defaultTemplateName = "default" + separator + prefix;
         List<String> defaultTemplatePathSegments =
-                Arrays.asList(CarbonUtils.getCarbonHome(), "repository", "resources", "email-templates", defaultTemplateName);
+                Arrays.asList(CarbonUtils.getCarbonHome(), "repository", "resources", "email-templates", defaultTemplateName + ".vm");
         File defaultTemplate = new File(String.join(File.separator, defaultTemplatePathSegments));
 
         if (defaultTemplate.exists()) {
