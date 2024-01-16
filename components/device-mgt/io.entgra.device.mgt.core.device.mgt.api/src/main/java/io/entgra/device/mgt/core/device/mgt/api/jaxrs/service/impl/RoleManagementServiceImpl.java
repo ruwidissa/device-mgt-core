@@ -17,16 +17,18 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import com.google.gson.Gson;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
-import org.apache.commons.logging.Log;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.RoleMgtLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraRoleMgtLoggerImpl;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -67,7 +69,8 @@ import static io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants.PRIM
 public class RoleManagementServiceImpl implements RoleManagementService {
 
     private static final String API_BASE_PATH = "/roles";
-    private static final Log log = LogFactory.getLog(RoleManagementServiceImpl.class);
+    RoleMgtLogContext.Builder roleMgtContextBuilder = new RoleMgtLogContext.Builder();
+    private static final EntgraLogger log = new EntgraRoleMgtLoggerImpl(RoleManagementServiceImpl.class);
 
     @GET
     @Override
@@ -404,6 +407,9 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         RequestValidationUtil.validateRoleDetails(roleInfo);
         RequestValidationUtil.validateRoleName(roleInfo.getRoleName());
         try {
+            String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+            String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
             if (log.isDebugEnabled()) {
                 log.debug("Persisting the role in the underlying user store");
@@ -429,7 +435,19 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 log.error(msg, e);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
-
+            String stringUsers = new Gson().toJson(roleInfo.getUsers());
+            log.info(
+                    "Role " + roleInfo.getRoleName().split("/")[1] + " created",
+                    roleMgtContextBuilder
+                            .setActionTag("ADD_ROLE")
+                            .setUserStoreDomain(roleInfo.getRoleName().split("/")[0])
+                            .setRoleName(roleInfo.getRoleName().split("/")[1])
+                            .setUsers(stringUsers)
+                            .setTenantID(tenantId)
+                            .setTenantDomain(tenantDomain)
+                            .setUserName(userName)
+                            .build()
+            );
             //TODO fix what's returned in the entity
             return Response.created(new URI(API_BASE_PATH + "/" + URLEncoder.encode(roleInfo.getRoleName(), "UTF-8"))).
                     entity("Role '" + roleInfo.getRoleName() + "' has " + "successfully been"
@@ -535,6 +553,9 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         RequestValidationUtil.validateRoleName(roleName);
         RequestValidationUtil.validateRoleDetails(roleInfo);
         try {
+            String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+            String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             final UserStoreManager userStoreManager = userRealm.getUserStoreManager();
             if (!userStoreManager.isExistingRole(roleName)) {
@@ -566,6 +587,19 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 String[] roleDetails = roleName.split("/");
                 updatePermissions(roleDetails[roleDetails.length - 1], roleInfo, userRealm);
             }
+            String stringUsers = new Gson().toJson(roleInfo.getUsers());
+            log.info(
+                    "Role " + roleInfo.getRoleName().split("/")[1] + " updated",
+                    roleMgtContextBuilder
+                            .setActionTag("UPDATE_ROLE")
+                            .setUserStoreDomain(roleInfo.getRoleName().split("/")[0])
+                            .setRoleName(roleInfo.getRoleName().split("/")[1])
+                            .setUsers(stringUsers)
+                            .setTenantID(tenantId)
+                            .setTenantDomain(tenantDomain)
+                            .setUserName(userName)
+                            .build()
+            );
             //TODO: Need to send the updated role information in the entity back to the client
             return Response.status(Response.Status.OK).entity("Role '" + roleInfo.getRoleName() + "' has " +
                     "successfully been updated").build();
@@ -601,6 +635,8 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         }
         RequestValidationUtil.validateRoleName(roleName);
         try {
+            String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             final UserStoreManager userStoreManager = userRealm.getUserStoreManager();
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -614,6 +650,17 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 log.debug("Deleting the role in user store");
             }
             DeviceMgtAPIUtils.getGroupManagementProviderService().deleteRoleAndRoleGroupMapping(roleName, roleToDelete, tenantId, userStoreManager, authorizationManager);
+            log.info(
+                    "Role " + roleName.split("/")[1] + " deleted",
+                    roleMgtContextBuilder
+                            .setActionTag("DELETE_ROLE")
+                            .setUserStoreDomain(userStoreName)
+                            .setRoleName(roleName.split("/")[1])
+                            .setTenantID(String.valueOf(tenantId))
+                            .setTenantDomain(tenantDomain)
+                            .setUserName(userName)
+                            .build()
+            );
             return Response.status(Response.Status.OK).build();
         } catch (UserStoreException e) {
             String msg = "Error occurred while deleting the role '" + roleName + "'";

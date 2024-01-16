@@ -17,11 +17,13 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.UserMgtLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraUserMgtLoggerImpl;
 import org.apache.http.HttpStatus;
 import org.eclipse.wst.common.uriresolver.internal.util.URIEncoder;
 import org.wso2.carbon.context.CarbonContext;
@@ -113,7 +115,8 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     private static final String ROLE_EVERYONE = "Internal/everyone";
     private static final String API_BASE_PATH = "/users";
-    private static final Log log = LogFactory.getLog(UserManagementServiceImpl.class);
+    UserMgtLogContext.Builder userMgtContextBuilder = new UserMgtLogContext.Builder();
+    private static final EntgraLogger log = new EntgraUserMgtLoggerImpl(UserManagementServiceImpl.class);
 
     // Permissions that are given for a normal device user.
     private static final Permission[] PERMISSIONS_FOR_DEVICE_USER = {
@@ -158,7 +161,10 @@ public class UserManagementServiceImpl implements UserManagementService {
             if (log.isDebugEnabled()) {
                 log.debug("User '" + userInfo.getUsername() + "' has successfully been added.");
             }
-
+            String tenantId = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantId());
+            String tenantDomain = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String loggeduserName = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getUsername());
+            String stringRoles = new Gson().toJson(userInfo.getRoles());
             BasicUserInfo createdUserInfo = this.getBasicUserInfo(userInfo.getUsername());
             // Outputting debug message upon successful retrieval of user
             if (log.isDebugEnabled()) {
@@ -173,6 +179,20 @@ public class UserManagementServiceImpl implements UserManagementService {
             props.setProperty("last-name", userInfo.getLastname());
             props.setProperty("username", username);
             props.setProperty("password", initialUserPassword);
+            log.info(
+                    "User " + username + " created",
+                    userMgtContextBuilder
+                            .setActionTag("ADD_USER")
+                            .setUserStoreDomain(userInfo.getUsername().split("/")[0])
+                            .setFirstName(userInfo.getFirstname())
+                            .setLastName(userInfo.getLastname())
+                            .setEmail(userInfo.getEmailAddress())
+                            .setUserRoles(stringRoles)
+                            .setTenantID(tenantId)
+                            .setTenantDomain(tenantDomain)
+                            .setUserName(loggeduserName)
+                            .build()
+            );
 
             EmailMetaInfo metaInfo = new EmailMetaInfo(recipient, props);
             BasicUserInfoWrapper userInfoWrapper = new BasicUserInfoWrapper();
@@ -247,6 +267,9 @@ public class UserManagementServiceImpl implements UserManagementService {
             username = domain + '/' + username;
         }
         try {
+            String tenantId = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantId());
+            String tenantDomain = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String loggeduserName = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getUsername());
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
             if (!userStoreManager.isExistingUser(username)) {
                 if (log.isDebugEnabled()) {
@@ -293,6 +316,21 @@ public class UserManagementServiceImpl implements UserManagementService {
             if (log.isDebugEnabled()) {
                 log.debug("User by username: " + username + " was successfully updated.");
             }
+            String stringRoles = new Gson().toJson(newRoles);
+            log.info(
+                    "User " + username + " updated",
+                    userMgtContextBuilder
+                            .setActionTag("UPDATE_USER")
+                            .setUserStoreDomain(username.split("/")[0])
+                            .setFirstName(userInfo.getFirstname())
+                            .setLastName(userInfo.getLastname())
+                            .setEmail(userInfo.getEmailAddress())
+                            .setUserRoles(stringRoles)
+                            .setTenantID(tenantId)
+                            .setTenantDomain(tenantDomain)
+                            .setUserName(loggeduserName)
+                            .build()
+            );
 
             BasicUserInfo updatedUserInfo = this.getBasicUserInfo(username);
             return Response.ok().entity(updatedUserInfo).build();
@@ -326,6 +364,8 @@ public class UserManagementServiceImpl implements UserManagementService {
             username = domain + '/' + username;
             nameWithDomain = true;
         }
+        String tenantId = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
         try {
             int deviceCount;
             UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
@@ -347,6 +387,16 @@ public class UserManagementServiceImpl implements UserManagementService {
                 if (log.isDebugEnabled()) {
                     log.debug("User '" + username + "' was successfully removed.");
                 }
+                log.info(
+                        "User " + username + " removed",
+                        userMgtContextBuilder
+                                .setActionTag("REMOVE_USER")
+                                .setUserStoreDomain(domain)
+                                .setTenantID(tenantId)
+                                .setTenantDomain(tenantDomain)
+                                .setUserName(username)
+                                .build()
+                );
                 return Response.status(Response.Status.OK).build();
             } else {
                 String msg = "Before deleting this user, ensure there are no devices assigned to the user. You can either remove the devices or change their owner through an update enrollment operation.";

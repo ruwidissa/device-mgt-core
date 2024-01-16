@@ -27,8 +27,8 @@ import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
-import io.entgra.device.mgt.core.notification.logger.UserLogContext;
-import io.entgra.device.mgt.core.notification.logger.impl.EntgraUserLoggerImpl;
+import io.entgra.device.mgt.core.notification.logger.UserLoginLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraUserLoginLoggerImpl;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
@@ -49,8 +49,8 @@ import java.util.Base64;
 @MultipartConfig
 @WebServlet("/user")
 public class UserHandler extends HttpServlet {
-    private static final EntgraLogger log = new EntgraUserLoggerImpl(UserHandler.class);
-    UserLogContext.Builder userLogContextBuilder = new UserLogContext.Builder();
+    private static final EntgraLogger log = new EntgraUserLoginLoggerImpl(UserHandler.class);
+    UserLoginLogContext.Builder userLoginLogContextBuilder = new UserLoginLogContext.Builder();
     private static final long serialVersionUID = 9050048549140517002L;
 
     @Override
@@ -121,7 +121,13 @@ public class UserHandler extends HttpServlet {
                         jTokenResultAsJsonObject.get("username").getAsString().replaceAll("@carbon.super", ""));
                 HandlerUtil.handleSuccess(resp, proxyResponse);
                 httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, jTokenResultAsJsonObject.get("username").getAsString());
-                log.info("Customer login", userLogContextBuilder.setUserName(proxyResponse.getData()).setUserRegistered(true).build());
+                log.info(
+                        "User " + proxyResponse.getData() + " logged in",
+                        userLoginLogContextBuilder
+                                .setUserName(proxyResponse.getData())
+                                .setUserRegistered(true)
+                                .build()
+                );
             }
         } catch (IOException e) {
             log.error("Error occurred while sending the response into the socket. ", e);
