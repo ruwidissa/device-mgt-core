@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
         <artifactId>device-mgt</artifactId>
-        <version>5.0.35-SNAPSHOT</version>
+        <version>5.0.38-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -523,6 +523,10 @@
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.apimgt.extension.rest.api</artifactId>
         </dependency>
     </dependencies>
 </project>

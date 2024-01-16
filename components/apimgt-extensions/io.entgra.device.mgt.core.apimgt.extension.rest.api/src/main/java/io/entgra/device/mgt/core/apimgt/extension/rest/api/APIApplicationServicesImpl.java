@@ -28,8 +28,10 @@ import okhttp3.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
 
@@ -44,12 +46,12 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
     @Override
-    public APIApplicationKey createAndRetrieveApplicationCredentials(String clientName, String grantType)
-            throws APIServicesException {
+    public APIApplicationKey createAndRetrieveApplicationCredentials(String clientName, String grantType) throws APIServicesException {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String serverUser = getScopePublishUserName(tenantDomain);
+        String serverPassword = getScopePublishUserPassword(tenantDomain);
 
         String applicationEndpoint = config.getFirstProperty(Constants.DCR_END_POINT);
-        String serverUser = config.getFirstProperty(Constants.SERVER_USER);
-        String serverPassword = config.getFirstProperty(Constants.SERVER_PASSWORD);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("callbackUrl", Constants.EMPTY_STRING);
@@ -64,9 +66,11 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
                 .addHeader(Constants.AUTHORIZATION_HEADER_NAME, Credentials.basic(serverUser, serverPassword))
                 .post(requestBody)
                 .build();
+
         try {
-            Response response = client.newCall(request).execute();
-            return gson.fromJson(response.body().string(), APIApplicationKey.class);
+            try (Response response = client.newCall(request).execute()) {
+                return gson.fromJson(response.body().string(), APIApplicationKey.class);
+            }
         } catch (IOException e) {
             msg = "Error occurred while processing the response";
             log.error(msg, e);
@@ -107,8 +111,9 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
     public AccessTokenInfo generateAccessTokenFromRegisteredApplication(String consumerKey, String consumerSecret)
             throws APIServicesException {
 
-        String userName = config.getFirstProperty(Constants.SERVER_USER);
-        String userPassword = config.getFirstProperty(Constants.SERVER_PASSWORD);
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userName = getScopePublishUserName(tenantDomain);
+        String userPassword = getScopePublishUserPassword(tenantDomain);
 
         JSONObject params = new JSONObject();
         params.put(Constants.GRANT_TYPE_PARAM_NAME, Constants.PASSWORD_GRANT_TYPE);
@@ -119,9 +124,8 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
     }
 
     @Override
-    public AccessTokenInfo generateAccessTokenFromRefreshToken(String refreshToken, String consumerKey, String consumerSecret)
-            throws APIServicesException {
-
+    public AccessTokenInfo generateAccessTokenFromRefreshToken(String refreshToken, String consumerKey,
+                                                               String consumerSecret) throws APIServicesException {
         JSONObject params = new JSONObject();
         params.put(Constants.GRANT_TYPE_PARAM_NAME, Constants.REFRESH_TOKEN_GRANT_TYPE);
         params.put(Constants.REFRESH_TOKEN_GRANT_TYPE_PARAM_NAME, refreshToken);
@@ -148,6 +152,22 @@ public class APIApplicationServicesImpl implements APIApplicationServices {
             msg = "Error occurred while processing the response";
             log.error(msg, e);
             throw new APIServicesException(e);
+        }
+    }
+
+    private String getScopePublishUserName(String tenantDomain) {
+        if(APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
+           return config.getFirstProperty(Constants.SERVER_USER);
+        } else {
+            return Constants.SCOPE_PUBLISH_RESERVED_USER_NAME + "@" + tenantDomain;
+        }
+    }
+
+    private String getScopePublishUserPassword(String tenantDomain) {
+        if(APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
+            return config.getFirstProperty(Constants.SERVER_PASSWORD);
+        } else {
+            return Constants.SCOPE_PUBLISH_RESERVED_USER_PASSWORD;
         }
     }
 }

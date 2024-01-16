@@ -344,6 +344,11 @@
                 <DefaultImagesLocation>default</DefaultImagesLocation>
             </WhiteLabelImages>
         </WhiteLabelConfiguration>
+        <DocConfiguration>
+            {% if product_conf is defined %}
+            <DocUrl>https://docs.entgra.io/uem/{{product_conf.server_version}}</DocUrl>
+            {% endif %}
+        </DocConfiguration>
     </MetaDataConfiguration>
     <OperationTimeoutConfigurations>
             <OperationTimeouts>

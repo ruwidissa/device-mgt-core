@@ -25,8 +25,8 @@ import com.google.gson.JsonSyntaxException;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
-import io.entgra.device.mgt.core.notification.logger.UserLogContext;
-import io.entgra.device.mgt.core.notification.logger.impl.EntgraUserLoggerImpl;
+import io.entgra.device.mgt.core.notification.logger.UserLoginLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraUserLoginLoggerImpl;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
@@ -55,8 +55,8 @@ import java.util.Map;
 @MultipartConfig
 @WebServlet("/user")
 public class UserHandler extends HttpServlet {
-    private static final EntgraLogger log = new EntgraUserLoggerImpl(UserHandler.class);
-    UserLogContext.Builder userLogContextBuilder = new UserLogContext.Builder();
+    private static final EntgraLogger log = new EntgraUserLoginLoggerImpl(UserHandler.class);
+    UserLoginLogContext.Builder userLoginLogContextBuilder = new UserLoginLogContext.Builder();
     private static final long serialVersionUID = 9050048549140517002L;
 
     @Override
@@ -129,8 +129,13 @@ public class UserHandler extends HttpServlet {
 
             HandlerUtil.handleSuccess(resp, proxyResponse);
             httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, nodeMap.get("username").toString());
-            log.info("Customer login",
-                    userLogContextBuilder.setUserName(nodeMap.get("username").toString()).setUserRegistered(true).build());
+            log.info(
+                    "User " + proxyResponse.getData() + " logged in",
+                    userLoginLogContextBuilder
+                            .setUserName(proxyResponse.getData().toString())
+                            .setUserRegistered(true)
+                            .build()
+            );
         } catch (IOException e) {
             log.error("Error occurred while sending the response into the socket. ", e);
         } catch (JsonSyntaxException e) {

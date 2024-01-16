@@ -952,7 +952,7 @@ public interface UserManagementService {
             tags = "User Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:send-invitation")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:users:invite")
                     })
             }
     )

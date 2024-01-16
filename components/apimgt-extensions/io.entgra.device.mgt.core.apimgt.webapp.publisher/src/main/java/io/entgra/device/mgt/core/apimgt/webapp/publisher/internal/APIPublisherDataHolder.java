@@ -17,6 +17,8 @@
  */
 package io.entgra.device.mgt.core.apimgt.webapp.publisher.internal;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIConfig;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
@@ -44,7 +46,8 @@ public class APIPublisherDataHolder {
     private boolean isServerStarted;
     private Stack<APIConfig> unpublishedApis = new Stack<>();
     private Map<String, String> permScopeMapping;
-
+    private APIApplicationServices apiApplicationServices;
+    private PublisherRESTAPIServices publisherRESTAPIServices;
     private MetadataManagementService metadataManagementService;
 
     private static APIPublisherDataHolder thisInstance = new APIPublisherDataHolder();
@@ -145,9 +148,29 @@ public class APIPublisherDataHolder {
         this.unpublishedApis = unpublishedApis;
     }
 
-    public Map<String, String> getPermScopeMapping() {return permScopeMapping;}
+    public Map<String, String> getPermScopeMapping() {
+        return permScopeMapping;
+    }
 
-    public void setPermScopeMapping(Map<String, String> permScopeMapping) {this.permScopeMapping = permScopeMapping;}
+    public void setPermScopeMapping(Map<String, String> permScopeMapping) {
+        this.permScopeMapping = permScopeMapping;
+    }
+
+    public APIApplicationServices getApiApplicationServices() {
+        return apiApplicationServices;
+    }
+
+    public void setApiApplicationServices(APIApplicationServices apiApplicationServices) {
+        this.apiApplicationServices = apiApplicationServices;
+    }
+
+    public PublisherRESTAPIServices getPublisherRESTAPIServices() {
+        return publisherRESTAPIServices;
+    }
+
+    public void setPublisherRESTAPIServices(PublisherRESTAPIServices publisherRESTAPIServices) {
+        this.publisherRESTAPIServices = publisherRESTAPIServices;
+    }
 
     public MetadataManagementService getMetadataManagementService() {
         return metadataManagementService;

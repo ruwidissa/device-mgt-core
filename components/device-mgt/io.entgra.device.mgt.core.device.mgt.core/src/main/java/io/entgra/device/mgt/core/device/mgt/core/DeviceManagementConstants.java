@@ -124,6 +124,7 @@ public final class DeviceManagementConstants {
         public static final String DEVICE_ENROLLMENT_MAIL_KEY = "enrollment";
         public static final String TEMPLATE_NAME_PART_JOINER = "-";
         public static final String ENROLLMENT_TYPE_SPLITTER = "_";
+        public static final String DOC_URL = "doc-url";
     }
 
     public static final class OperationAttributes {

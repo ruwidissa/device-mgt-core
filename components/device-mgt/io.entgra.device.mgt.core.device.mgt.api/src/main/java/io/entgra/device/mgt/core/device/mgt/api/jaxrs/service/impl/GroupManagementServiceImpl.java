@@ -18,6 +18,21 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceTypesOfGroups;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
+import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.GroupMgtLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraGroupMgtLoggerImpl;
+import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceGroupList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceToGroupsAssignment;
@@ -57,7 +72,8 @@ import java.util.List;
 
 public class GroupManagementServiceImpl implements GroupManagementService {
 
-    private static final Log log = LogFactory.getLog(GroupManagementServiceImpl.class);
+    GroupMgtLogContext.Builder groupMgtContextBuilder = new GroupMgtLogContext.Builder();
+    private static final EntgraLogger log = new EntgraGroupMgtLoggerImpl(GroupManagementServiceImpl.class);
 
     private static final String DEFAULT_ADMIN_ROLE = "admin";
     private static final String[] DEFAULT_ADMIN_PERMISSIONS = {"/permission/device-mgt/admin/groups",
@@ -161,6 +177,8 @@ public class GroupManagementServiceImpl implements GroupManagementService {
 
     @Override
     public Response createGroup(DeviceGroup group) {
+        String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
         String owner = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (group == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -169,6 +187,22 @@ public class GroupManagementServiceImpl implements GroupManagementService {
         group.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
         try {
             DeviceMgtAPIUtils.getGroupManagementProviderService().createGroup(group, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS);
+            int deviceCount = DeviceMgtAPIUtils.getGroupManagementProviderService().getDeviceCount(group.getGroupId());
+            String stringDevices = new Gson().toJson(DeviceMgtAPIUtils.getGroupManagementProviderService().getAllDevicesOfGroup(group.getName(), false));
+            log.info(
+                    "Group " + group.getName() + " created",
+                    groupMgtContextBuilder
+                            .setActionTag("ADD_GROUP")
+                            .setGroupId(String.valueOf(group.getGroupId()))
+                            .setName(group.getName())
+                            .setOwner(group.getOwner())
+                            .setDeviceCount(String.valueOf(deviceCount))
+                            .setDevices(stringDevices)
+                            .setTenantID(tenantId)
+                            .setTenantDomain(tenantDomain)
+                            .setUserName(owner)
+                            .build()
+            );
             return Response.status(Response.Status.CREATED).build();
         } catch (GroupManagementException e) {
             String msg = "Error occurred while adding new group.";
@@ -218,11 +252,30 @@ public class GroupManagementServiceImpl implements GroupManagementService {
 
     @Override
     public Response updateGroup(int groupId, DeviceGroup deviceGroup) {
+        String tenantId = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         if (deviceGroup == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         try {
             DeviceMgtAPIUtils.getGroupManagementProviderService().updateGroup(deviceGroup, groupId);
+            int deviceCount = DeviceMgtAPIUtils.getGroupManagementProviderService().getDeviceCount(groupId);
+            String stringDevices = new Gson().toJson(DeviceMgtAPIUtils.getGroupManagementProviderService().getAllDevicesOfGroup(deviceGroup.getName(), false));
+            log.info(
+                    "Group " + deviceGroup.getName() + " updated",
+                    groupMgtContextBuilder
+                            .setActionTag("UPDATE_GROUP")
+                            .setGroupId(String.valueOf(deviceGroup.getGroupId()))
+                            .setName(deviceGroup.getName())
+                            .setOwner(deviceGroup.getOwner())
+                            .setDeviceCount(String.valueOf(deviceCount))
+                            .setDevices(stringDevices)
+                            .setTenantID(tenantId)
+                            .setTenantDomain(tenantDomain)
+                            .setUserName(username)
+                            .build()
+            );
             return Response.status(Response.Status.OK).build();
         } catch (GroupManagementException e) {
             String msg = "Error occurred while adding new group.";
@@ -242,7 +295,20 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     @Override
     public Response deleteGroup(int groupId, boolean isDeleteChildren) {
         try {
+            String tenantId = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantId());
+            String tenantDomain = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
             if (DeviceMgtAPIUtils.getGroupManagementProviderService().deleteGroup(groupId, isDeleteChildren)) {
+                log.info(
+                        "Group with group id " + groupId + " deleted",
+                        groupMgtContextBuilder
+                                .setActionTag("DELETE_GROUP")
+                                .setGroupId(String.valueOf(groupId))
+                                .setTenantID(tenantId)
+                                .setTenantDomain(tenantDomain)
+                                .setUserName(username)
+                                .build()
+                );
                 return Response.status(Response.Status.OK).build();
             } else {
                 return Response.status(Response.Status.NOT_FOUND).entity("Group not found.").build();
@@ -328,17 +394,36 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     @Override
     public Response addDevicesToGroup(int groupId, List<DeviceIdentifier> deviceIdentifiers) {
         try {
+            String tenantId = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantId());
+            String tenantDomain = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
             DeviceMgtAPIUtils.getGroupManagementProviderService().addDevices(groupId, deviceIdentifiers);
             PolicyAdministratorPoint pap = DeviceMgtAPIUtils.getPolicyManagementService().getPAP();
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            List<Device> devices = new ArrayList<>();
             for(DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
                 Device device = dms.getDevice(deviceIdentifier, false);
+                devices.add(device);
                 if(!device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
                     pap.removePolicyUsed(deviceIdentifier);
                     DeviceMgtAPIUtils.getPolicyManagementService().getEffectivePolicy(deviceIdentifier);
                 }
             }
             pap.publishChanges();
+            int deviceCount = DeviceMgtAPIUtils.getGroupManagementProviderService().getDeviceCount(groupId);
+            String stringDevices = new Gson().toJson(devices);
+            log.info(
+                    "Devices added for group id " + groupId,
+                    groupMgtContextBuilder
+                            .setActionTag("ADD_DEVICES")
+                            .setGroupId(String.valueOf(groupId))
+                            .setDeviceCount(String.valueOf(deviceCount))
+                            .setDevices(stringDevices)
+                            .setTenantID(tenantId)
+                            .setTenantDomain(tenantDomain)
+                            .setUserName(username)
+                            .build()
+            );
             return Response.status(Response.Status.OK).build();
         } catch (GroupManagementException e) {
             String msg = "Error occurred while adding devices to group.";
@@ -460,6 +545,9 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     @Path("/roles/share")
     @Override
     public Response createGroupWithRoles(DeviceGroupRoleWrapper groups) {
+        String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+        String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (groups == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -471,6 +559,22 @@ public class GroupManagementServiceImpl implements GroupManagementService {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername().isEmpty());
             if (group != null) {
                 DeviceMgtAPIUtils.getGroupManagementProviderService().manageGroupSharing(group.getGroupId(), groups.getUserRoles());
+                int deviceCount = DeviceMgtAPIUtils.getGroupManagementProviderService().getDeviceCount(group.getGroupId());
+                String stringDevices = new Gson().toJson(DeviceMgtAPIUtils.getGroupManagementProviderService().getAllDevicesOfGroup(group.getName(), false));
+                log.info(
+                        "Group " + group.getName() + " created",
+                        groupMgtContextBuilder
+                                .setActionTag("ADD_GROUP")
+                                .setGroupId(String.valueOf(group.getGroupId()))
+                                .setName(group.getName())
+                                .setOwner(group.getOwner())
+                                .setDeviceCount(String.valueOf(deviceCount))
+                                .setDevices(stringDevices)
+                                .setTenantID(tenantId)
+                                .setTenantDomain(tenantDomain)
+                                .setUserName(username)
+                                .build()
+                );
                 return Response.status(Response.Status.CREATED).entity(group.getGroupId()).build();
             } else {
                 String msg = "Error occurred while retrieving newly created group.";

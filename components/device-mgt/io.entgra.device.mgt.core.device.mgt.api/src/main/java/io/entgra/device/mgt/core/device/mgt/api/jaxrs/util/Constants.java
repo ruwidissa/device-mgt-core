@@ -31,6 +31,7 @@ public class Constants {
 	public static final String USER_CLAIM_DEVICES = "http://wso2.org/claims/devices";
 	public static final String PRIMARY_USER_STORE = "PRIMARY";
 	public static final String APIM_RESERVED_USER = "apim_reserved_user";
+	public static final String SCOPE_PUBLISH_RESERVED_USER = "scope_publish_reserved_user";
 	public static final String RESERVED_USER = "reserved_user";
 	public static final String DEFAULT_STREAM_VERSION = "1.0.0";
 	public static final String SCOPE = "scope";

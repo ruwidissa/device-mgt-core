@@ -115,6 +115,12 @@ public class UserManagementServiceImplTest {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
         Mockito.doReturn(true).when(userStoreManager).isExistingUser("admin");
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getUsername()).thenReturn("admin");
+        Mockito.when(carbonContext.getTenantDomain()).thenReturn("carbon.super");
         Mockito.doAnswer(new Answer() {
             private int count = 0;
 
@@ -170,6 +176,12 @@ public class UserManagementServiceImplTest {
     public void testUpdateUser() throws UserStoreException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getUserStoreManager"))
                 .toReturn(this.userStoreManager);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getUsername()).thenReturn("admin");
+        Mockito.when(carbonContext.getTenantDomain()).thenReturn("carbon.super");
         Response response = userManagementService.updateUser(TEST2_USERNAME, null, null);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
                 "Non-existing user was successfully updated");
@@ -273,6 +285,11 @@ public class UserManagementServiceImplTest {
                 .toReturn(this.userStoreManager);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getTenantDomain()).thenReturn("carbon.super");
         Mockito.doReturn(0).when(deviceManagementProviderService).getDeviceCount(TEST_USERNAME);
         Mockito.doNothing().when(userStoreManager).deleteUser(Mockito.anyString());
         Response response = userManagementService.removeUser(TEST_USERNAME, null);
@@ -325,6 +342,12 @@ public class UserManagementServiceImplTest {
     public void testNegativeScenarios2() throws UserStoreException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getUserStoreManager"))
                 .toReturn(this.userStoreManager);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getUsername()).thenReturn("admin");
+        Mockito.when(carbonContext.getTenantDomain()).thenReturn("carbon.super");
         Mockito.doThrow(new UserStoreException()).when(userStoreManager).isExistingUser(TEST3_USERNAME);
         Response response = userManagementService.getUser(TEST3_USERNAME, null, null);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
