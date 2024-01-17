@@ -556,6 +556,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             String userName = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
+            String[] stringUserList;
             final UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
             final UserStoreManager userStoreManager = userRealm.getUserStoreManager();
             if (!userStoreManager.isExistingRole(roleName)) {
@@ -571,7 +572,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             if (newRoleName != null && !roleName.equals(newRoleName)) {
                 userStoreManager.updateRoleName(roleName, newRoleName);
             }
-
+            
             if (roleInfo.getUsers() != null) {
                 SetReferenceTransformer<String> transformer = new SetReferenceTransformer<>();
                 transformer.transform(Arrays.asList(userStoreManager.getUserListOfRole(newRoleName)),
@@ -581,13 +582,16 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 final String[] usersToDelete = transformer.getObjectsToRemove().toArray(new String[transformer
                         .getObjectsToRemove().size()]);
                 userStoreManager.updateUserListOfRole(newRoleName, usersToDelete, usersToAdd);
+                stringUserList = roleInfo.getUsers();
+            } else {
+                stringUserList = userStoreManager.getUserListOfRole(roleName);
             }
 
             if (roleInfo.getPermissions() != null) {
                 String[] roleDetails = roleName.split("/");
                 updatePermissions(roleDetails[roleDetails.length - 1], roleInfo, userRealm);
             }
-            String stringUsers = new Gson().toJson(roleInfo.getUsers());
+            String stringUsers = new Gson().toJson(stringUserList);
             log.info(
                     "Role " + roleInfo.getRoleName().split("/")[1] + " updated",
                     roleMgtContextBuilder
