@@ -181,8 +181,6 @@ public class GroupManagementServiceImpl implements GroupManagementService {
         group.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
         try {
             DeviceMgtAPIUtils.getGroupManagementProviderService().createGroup(group, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS);
-            int deviceCount = DeviceMgtAPIUtils.getGroupManagementProviderService().getDeviceCount(group.getGroupId());
-            String stringDevices = new Gson().toJson(DeviceMgtAPIUtils.getGroupManagementProviderService().getAllDevicesOfGroup(group.getName(), false));
             log.info(
                     "Group " + group.getName() + " created",
                     groupMgtContextBuilder
@@ -190,8 +188,6 @@ public class GroupManagementServiceImpl implements GroupManagementService {
                             .setGroupId(String.valueOf(group.getGroupId()))
                             .setName(group.getName())
                             .setOwner(group.getOwner())
-                            .setDeviceCount(String.valueOf(deviceCount))
-                            .setDevices(stringDevices)
                             .setTenantID(tenantId)
                             .setTenantDomain(tenantDomain)
                             .setUserName(owner)
@@ -255,7 +251,12 @@ public class GroupManagementServiceImpl implements GroupManagementService {
         try {
             DeviceMgtAPIUtils.getGroupManagementProviderService().updateGroup(deviceGroup, groupId);
             int deviceCount = DeviceMgtAPIUtils.getGroupManagementProviderService().getDeviceCount(groupId);
-            String stringDevices = new Gson().toJson(DeviceMgtAPIUtils.getGroupManagementProviderService().getAllDevicesOfGroup(deviceGroup.getName(), false));
+            List<Device> devices = DeviceMgtAPIUtils.getGroupManagementProviderService().getAllDevicesOfGroup(deviceGroup.getName(), false);
+            List<String> deviceIdentifiers = new ArrayList<>();
+            for(Device device : devices) {
+                deviceIdentifiers.add(device.getDeviceIdentifier());
+            }
+            String stringDeviceIdentifiers = new Gson().toJson(deviceIdentifiers);
             log.info(
                     "Group " + deviceGroup.getName() + " updated",
                     groupMgtContextBuilder
@@ -264,7 +265,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
                             .setName(deviceGroup.getName())
                             .setOwner(deviceGroup.getOwner())
                             .setDeviceCount(String.valueOf(deviceCount))
-                            .setDevices(stringDevices)
+                            .setDeviceIdentifiers(stringDeviceIdentifiers)
                             .setTenantID(tenantId)
                             .setTenantDomain(tenantDomain)
                             .setUserName(username)
@@ -293,11 +294,13 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             String tenantDomain = String.valueOf(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
             if (DeviceMgtAPIUtils.getGroupManagementProviderService().deleteGroup(groupId, isDeleteChildren)) {
+                int deviceCount = DeviceMgtAPIUtils.getGroupManagementProviderService().getDeviceCount(groupId);
                 log.info(
                         "Group with group id " + groupId + " deleted",
                         groupMgtContextBuilder
                                 .setActionTag("DELETE_GROUP")
                                 .setGroupId(String.valueOf(groupId))
+                                .setDeviceCount(String.valueOf(deviceCount))
                                 .setTenantID(tenantId)
                                 .setTenantDomain(tenantDomain)
                                 .setUserName(username)
@@ -394,10 +397,8 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             DeviceMgtAPIUtils.getGroupManagementProviderService().addDevices(groupId, deviceIdentifiers);
             PolicyAdministratorPoint pap = DeviceMgtAPIUtils.getPolicyManagementService().getPAP();
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
-            List<Device> devices = new ArrayList<>();
             for(DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
                 Device device = dms.getDevice(deviceIdentifier, false);
-                devices.add(device);
                 if(!device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
                     pap.removePolicyUsed(deviceIdentifier);
                     DeviceMgtAPIUtils.getPolicyManagementService().getEffectivePolicy(deviceIdentifier);
@@ -405,14 +406,18 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             }
             pap.publishChanges();
             int deviceCount = DeviceMgtAPIUtils.getGroupManagementProviderService().getDeviceCount(groupId);
-            String stringDevices = new Gson().toJson(devices);
+            List<String> deviceIdentifiersList = new ArrayList<>();
+            for(DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
+                deviceIdentifiersList.add(deviceIdentifier.getId());
+            }
+            String stringDeviceIdentifiers = new Gson().toJson(deviceIdentifiersList);
             log.info(
                     "Devices added for group id " + groupId,
                     groupMgtContextBuilder
                             .setActionTag("ADD_DEVICES")
                             .setGroupId(String.valueOf(groupId))
                             .setDeviceCount(String.valueOf(deviceCount))
-                            .setDevices(stringDevices)
+                            .setDeviceIdentifiers(stringDeviceIdentifiers)
                             .setTenantID(tenantId)
                             .setTenantDomain(tenantDomain)
                             .setUserName(username)
@@ -553,8 +558,6 @@ public class GroupManagementServiceImpl implements GroupManagementService {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername().isEmpty());
             if (group != null) {
                 DeviceMgtAPIUtils.getGroupManagementProviderService().manageGroupSharing(group.getGroupId(), groups.getUserRoles());
-                int deviceCount = DeviceMgtAPIUtils.getGroupManagementProviderService().getDeviceCount(group.getGroupId());
-                String stringDevices = new Gson().toJson(DeviceMgtAPIUtils.getGroupManagementProviderService().getAllDevicesOfGroup(group.getName(), false));
                 log.info(
                         "Group " + group.getName() + " created",
                         groupMgtContextBuilder
@@ -562,8 +565,6 @@ public class GroupManagementServiceImpl implements GroupManagementService {
                                 .setGroupId(String.valueOf(group.getGroupId()))
                                 .setName(group.getName())
                                 .setOwner(group.getOwner())
-                                .setDeviceCount(String.valueOf(deviceCount))
-                                .setDevices(stringDevices)
                                 .setTenantID(tenantId)
                                 .setTenantDomain(tenantDomain)
                                 .setUserName(username)

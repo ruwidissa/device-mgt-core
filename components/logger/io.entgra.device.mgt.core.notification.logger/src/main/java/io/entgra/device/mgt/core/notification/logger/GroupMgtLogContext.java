@@ -26,7 +26,7 @@ public class GroupMgtLogContext extends LogContext {
     private final String owner;
     private final String actionTag;
     private final String deviceCount;
-    private final String devices;
+    private final String deviceIdentifiers;
     private final String userName;
     private final String tenantID;
     private final String tenantDomain;
@@ -37,7 +37,7 @@ public class GroupMgtLogContext extends LogContext {
         this.owner = builder.owner;
         this.actionTag = builder.actionTag;
         this.deviceCount = builder.deviceCount;
-        this.devices = builder.devices;
+        this.deviceIdentifiers = builder.deviceIdentifiers;
         this.userName = builder.userName;
         this.tenantID = builder.tenantID;
         this.tenantDomain = builder.tenantDomain;
@@ -63,8 +63,8 @@ public class GroupMgtLogContext extends LogContext {
         return deviceCount;
     }
 
-    public String getDevices() {
-        return devices;
+    public String getDeviceIdentifiers() {
+        return deviceIdentifiers;
     }
 
     public String getUserName() {
@@ -85,7 +85,7 @@ public class GroupMgtLogContext extends LogContext {
         private String owner;
         private String actionTag;
         private String deviceCount;
-        private String devices;
+        private String deviceIdentifiers;
         private String userName;
         private String tenantID;
         private String tenantDomain;
@@ -138,12 +138,12 @@ public class GroupMgtLogContext extends LogContext {
             return this;
         }
 
-        public String getDevices() {
-            return devices;
+        public String getDeviceIdentifiers() {
+            return deviceIdentifiers;
         }
 
-        public Builder setDevices(String devices) {
-            this.devices = devices;
+        public Builder setDeviceIdentifiers(String deviceIdentifiers) {
+            this.deviceIdentifiers = deviceIdentifiers;
             return this;
         }
 
