@@ -18,18 +18,24 @@
 package io.entgra.device.mgt.core.apimgt.webapp.publisher;
 
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServicesImpl;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIApplicationKey;
-import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.*;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIInfo;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevision;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.APIRevisionDeployment;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.CORSConfiguration;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Documentation;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Mediation;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.MediationPolicy;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Operations;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.APIInfo.Scope;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.dto.AccessTokenInfo;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.APIServicesException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.UnexpectedResponseException;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.util.APIPublisherUtils;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiUriTemplate;
@@ -43,7 +49,6 @@ import io.entgra.device.mgt.core.device.mgt.core.config.permission.ScopeMapping;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -62,6 +67,7 @@ import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -100,21 +106,10 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         RealmService realmService = (RealmService) PrivilegedCarbonContext.getThreadLocalCarbonContext()
                 .getOSGiService(RealmService.class, null);
 
-        APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+        APIApplicationServices apiApplicationServices = APIPublisherDataHolder.getInstance().getApiApplicationServices();
+        PublisherRESTAPIServices publisherRESTAPIServices = APIPublisherDataHolder.getInstance().getPublisherRESTAPIServices();
         APIApplicationKey apiApplicationKey;
         AccessTokenInfo accessTokenInfo;
-        try {
-            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
-                    "ClientForPublisherRestCalls",
-                    "client_credentials password refresh_token"
-            );
-            accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
-                    apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
-        } catch (APIServicesException e) {
-            String errorMsg = "Error occurred while generating the API application";
-            log.error(errorMsg, e);
-            throw new APIManagerPublisherException(e);
-        }
 
         try {
             boolean tenantFound = false;
@@ -150,13 +145,25 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                     int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
                     try {
+                        APIPublisherUtils.createScopePublishUserIfNotExists(tenantDomain);
+                        apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
+                                "ClientForPublisherRestCalls",
+                                "client_credentials password refresh_token");
+                        accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                    } catch (APIServicesException e) {
+                        String errorMsg = "Error occurred while generating the API application";
+                        log.error(errorMsg, e);
+                        throw new APIManagerPublisherException(e);
+                    }
+
+                    try {
                         apiConfig.setOwner(APIUtil.getTenantAdminUserName(tenantDomain));
                         apiConfig.setTenantDomain(tenantDomain);
                         APIProvider apiProvider = API_MANAGER_FACTORY.getAPIProvider(apiConfig.getOwner());
                         APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(apiConfig.getOwner()),
                                 apiConfig.getName(), apiConfig.getVersion());
 
-                        PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
                         APIInfo[] apiList = publisherRESTAPIServices.getApis(apiApplicationKey, accessTokenInfo);
                         boolean apiFound = false;
                         for (int i = 0; i < apiList.length; i++) {
@@ -378,6 +385,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                         log.error(msg, e);
                         throw new APIManagerPublisherException(e);
                     } finally {
+                        APIPublisherUtils.removeScopePublishUserIfExists(tenantDomain);
                         PrivilegedCarbonContext.endTenantFlow();
                     }
                 }
@@ -417,39 +425,55 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         }
     }
 
-    public void addDefaultScopesIfNotExist() {
+    @Override
+    public void addDefaultScopesIfNotExist() throws APIManagerPublisherException {
+        WebappPublisherConfig config = WebappPublisherConfig.getInstance();
+        List<String> tenants = new ArrayList<>(Collections.singletonList(APIConstants.SUPER_TENANT_DOMAIN));
+        tenants.addAll(config.getTenants().getTenant());
+
         DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
         DefaultPermissions defaultPermissions = deviceManagementConfig.getDefaultPermissions();
-        APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
-        try {
-            APIApplicationKey apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
-                    "ClientForPublisherRestCalls",
-                    "client_credentials password refresh_token"
-            );
-            AccessTokenInfo accessTokenInfo =
-                    apiApplicationServices.generateAccessTokenFromRegisteredApplication(
-                            apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+        APIApplicationServices apiApplicationServices = APIPublisherDataHolder.getInstance().getApiApplicationServices();
+        PublisherRESTAPIServices publisherRESTAPIServices = APIPublisherDataHolder.getInstance().getPublisherRESTAPIServices();
 
-            PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
+        for (String tenantDomain : tenants) {
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
-            Scope scope = new Scope();
-            for (DefaultPermission defaultPermission: defaultPermissions.getDefaultPermissions()) {
-                if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
-                        defaultPermission.getScopeMapping().getKey())) {
-                    ScopeMapping scopeMapping = defaultPermission.getScopeMapping();
+                APIPublisherUtils.createScopePublishUserIfNotExists(tenantDomain);
+                APIApplicationKey apiApplicationKey =
+                        apiApplicationServices.createAndRetrieveApplicationCredentials(
+                                "ClientForPublisherRestCalls", "client_credentials password refresh_token"
+                        );
+                AccessTokenInfo accessTokenInfo =
+                        apiApplicationServices.generateAccessTokenFromRegisteredApplication(
+                                apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
 
-                    List<String> bindings = new ArrayList<>(
-                            Arrays.asList(scopeMapping.getDefaultRoles().split(",")));
-                    bindings.add(ADMIN_ROLE_KEY);
-                    scope.setName(scopeMapping.getKey());
-                    scope.setDescription(scopeMapping.getName());
-                    scope.setDisplayName(scopeMapping.getName());
-                    scope.setBindings(bindings);
-                    publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                Scope scope = new Scope();
+                for (DefaultPermission defaultPermission : defaultPermissions.getDefaultPermissions()) {
+                    if (!publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo,
+                            defaultPermission.getScopeMapping().getKey())) {
+                        ScopeMapping scopeMapping = defaultPermission.getScopeMapping();
+
+                        List<String> bindings = new ArrayList<>(
+                                Arrays.asList(scopeMapping.getDefaultRoles().split(",")));
+                        bindings.add(ADMIN_ROLE_KEY);
+                        scope.setName(scopeMapping.getKey());
+                        scope.setDescription(scopeMapping.getName());
+                        scope.setDisplayName(scopeMapping.getName());
+                        scope.setBindings(bindings);
+                        publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                    }
                 }
+            } catch (BadRequestException | UnexpectedResponseException | APIServicesException e) {
+                String errorMsg = "Error occurred while adding default scopes";
+                log.error(errorMsg, e);
+                throw new APIManagerPublisherException(e);
+            } finally {
+                APIPublisherUtils.removeScopePublishUserIfExists(tenantDomain);
+                PrivilegedCarbonContext.endTenantFlow();
             }
-        } catch (BadRequestException | UnexpectedResponseException | APIServicesException e) {
-            log.error("Error occurred while adding default scopes");
         }
     }
 
@@ -462,31 +486,32 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         List<String> tenants = new ArrayList<>(Collections.singletonList(APIConstants.SUPER_TENANT_DOMAIN));
         tenants.addAll(config.getTenants().getTenant());
 
-        APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+        APIApplicationServices apiApplicationServices = APIPublisherDataHolder.getInstance().getApiApplicationServices();
+        PublisherRESTAPIServices publisherRESTAPIServices = APIPublisherDataHolder.getInstance().getPublisherRESTAPIServices();
+
         APIApplicationKey apiApplicationKey;
         AccessTokenInfo accessTokenInfo;
-        try {
-            apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
-                    "ClientForPublisherRestCalls",
-                    "client_credentials password refresh_token"
-            );
-            accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
-                    apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
-        } catch (APIServicesException e) {
-            String errorMsg = "Error occurred while generating the API application";
-            log.error(errorMsg, e);
-            throw new APIManagerPublisherException(e);
-        }
         UserStoreManager userStoreManager;
+        String fileName = null;
 
-        try {
-            for (String tenantDomain : tenants) {
+        for (String tenantDomain : tenants) {
+            try {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
+                try {
+                    APIPublisherUtils.createScopePublishUserIfNotExists(tenantDomain);
+                    apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials("ClientForPublisherRestCalls",
+                            "client_credentials password refresh_token");
+                    accessTokenInfo = apiApplicationServices.generateAccessTokenFromRegisteredApplication(
+                            apiApplicationKey.getClientId(), apiApplicationKey.getClientSecret());
+                } catch (APIServicesException e) {
+                    String errorMsg = "Error occurred while generating the API application";
+                    log.error(errorMsg, e);
+                    throw new APIManagerPublisherException(e);
+                }
 
                 try {
-                    String fileName =
+                    fileName =
                             CarbonUtils.getCarbonConfigDirPath() + File.separator + "etc"
                                     + File.separator + tenantDomain + ".csv";
                     try {
@@ -576,33 +601,39 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                             }
                         }
                     }
-                } catch (IOException | DirectoryIteratorException ex) {
-                    log.error("failed to read scopes from file.", ex);
+                } catch (IOException | DirectoryIteratorException e) {
+                    String errorMsg = "Failed to read scopes from file: '" + fileName + "'.";
+                    log.error(errorMsg, e);
+                    throw new APIManagerPublisherException(e);
                 }
+            } catch (APIServicesException e) {
+                String errorMsg = "Error while processing Publisher REST API response";
+                log.error(errorMsg, e);
+                throw new APIManagerPublisherException(e);
+            } catch (BadRequestException e) {
+                String errorMsg = "Error while calling Publisher REST APIs";
+                log.error(errorMsg, e);
+                throw new APIManagerPublisherException(e);
+            } catch (UnexpectedResponseException e) {
+                String errorMsg = "Unexpected response from the server";
+                log.error(errorMsg, e);
+                throw new APIManagerPublisherException(e);
+            } finally {
+                APIPublisherUtils.removeScopePublishUserIfExists(tenantDomain);
+                PrivilegedCarbonContext.endTenantFlow();
             }
-        } catch (APIServicesException e) {
-            String errorMsg = "Error while processing Publisher REST API response";
-            log.error(errorMsg, e);
-            throw new APIManagerPublisherException(e);
-        } catch (BadRequestException e) {
-            String errorMsg = "Error while calling Publisher REST APIs";
-            log.error(errorMsg, e);
-            throw new APIManagerPublisherException(e);
-        } catch (UnexpectedResponseException e) {
-            String errorMsg = "Unexpected response from the server";
-            log.error(errorMsg, e);
-            throw new APIManagerPublisherException(e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
     @Override
     public void updateScopeRoleMapping(String roleName, String[] permissions, String[] removedPermissions) throws APIManagerPublisherException {
-        APIApplicationServices apiApplicationServices = new APIApplicationServicesImpl();
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        APIApplicationServices apiApplicationServices = APIPublisherDataHolder.getInstance().getApiApplicationServices();
+        PublisherRESTAPIServices publisherRESTAPIServices = APIPublisherDataHolder.getInstance().getPublisherRESTAPIServices();
         APIApplicationKey apiApplicationKey;
         AccessTokenInfo accessTokenInfo;
         try {
+            APIPublisherUtils.createScopePublishUserIfNotExists(tenantDomain);
             apiApplicationKey = apiApplicationServices.createAndRetrieveApplicationCredentials(
                     "ClientForPublisherRestCalls",
                     "client_credentials password refresh_token"
@@ -616,7 +647,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
         }
 
         try {
-            PublisherRESTAPIServices publisherRESTAPIServices = new PublisherRESTAPIServicesImpl();
+
             Scope[] scopeList = publisherRESTAPIServices.getScopes(apiApplicationKey, accessTokenInfo);
 
             Map<String, String> permScopeMap = APIPublisherDataHolder.getInstance().getPermScopeMapping();
@@ -646,6 +677,8 @@ public class APIPublisherServiceImpl implements APIPublisherService {
             String errorMsg = "Unexpected response from the server";
             log.error(errorMsg, e);
             throw new APIManagerPublisherException(errorMsg, e);
+        } finally {
+            APIPublisherUtils.removeScopePublishUserIfExists(tenantDomain);
         }
     }
 

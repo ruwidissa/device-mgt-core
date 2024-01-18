@@ -189,7 +189,7 @@
                 &lt;a href='https://entgra.io' target='_blank'&gt;
                 Entgra
                 &lt;/a&gt;
-                UEM Server 5.3.0 | &#169; 2023
+                UEM Server 6.0.0 | &#169; 2024
                 , All Rights Reserved.
             </FooterText>
             <AppTitle>Entgra</AppTitle>
@@ -201,6 +201,9 @@
                 <DefaultImagesLocation>default</DefaultImagesLocation>
             </WhiteLabelImages>
         </WhiteLabelConfiguration>
+        <DocConfiguration>
+            <DocUrl>https://docs.entgra.io/uem/6.0.0</DocUrl>
+        </DocConfiguration>
     </MetaDataConfiguration>
 
     <OperationTimeoutConfigurations>

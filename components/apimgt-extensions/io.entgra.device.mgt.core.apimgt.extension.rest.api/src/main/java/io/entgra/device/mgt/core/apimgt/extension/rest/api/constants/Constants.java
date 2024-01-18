@@ -72,6 +72,8 @@ public final class Constants {
     public static final String SUBSCRIPTION_API = "/api/am/devportal/v3/subscriptions";
     public static final String DEV_PORTAL_API = "/api/am/devportal/v3/apis?limit=1000";
     public static final String KEY_MANAGERS_API = "/api/am/devportal/v3/key-managers";
+    public static final String SCOPE_PUBLISH_RESERVED_USER_NAME = "scope_publish_reserved_user";
+    public static final String SCOPE_PUBLISH_RESERVED_USER_PASSWORD = "&gKfyE8E4rUY4Q";
+    public static final String ADMIN_ROLE_KEY = "admin";
+    public static final String PERM_SCOPE_MAPPING_META_KEY  = "perm-scope-mapping";
 }
-
-

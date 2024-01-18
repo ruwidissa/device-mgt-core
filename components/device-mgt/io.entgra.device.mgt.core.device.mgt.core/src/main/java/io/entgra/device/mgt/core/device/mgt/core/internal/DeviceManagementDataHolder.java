@@ -18,6 +18,8 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -93,8 +95,9 @@ public class DeviceManagementDataHolder {
     private MetadataManagementService metadataManagementService;
     private WhiteLabelManagementService whiteLabelManagementService;
     private TraccarManagementService traccarManagementService;
-
     private DeviceStatusManagementService deviceStatusManagementService;
+    private APIApplicationServices apiApplicationServices;
+    private PublisherRESTAPIServices publisherRESTAPIServices;
 
     private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
             new HashMap<>());
@@ -409,5 +412,39 @@ public class DeviceManagementDataHolder {
 
     public void setTraccarManagementService(TraccarManagementService traccarManagementService) {
         this.traccarManagementService = traccarManagementService;
+    }
+
+    /**
+     * Retrieves the Dynamic Client Registration REST API Service instance from OSGI service context.
+     * @return {@link APIApplicationServices} Dynamic Client Registration REST API Service
+     */
+    public APIApplicationServices getApiApplicationServices() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        apiApplicationServices = (APIApplicationServices) ctx.getOSGiService(APIApplicationServices.class, null);
+        if (apiApplicationServices == null) {
+            throw new IllegalStateException("Dynamic Client Registration REST API Service was not initialized.");
+        }
+        return apiApplicationServices;
+    }
+
+    public void setApiApplicationServices(APIApplicationServices apiApplicationServices) {
+        this.apiApplicationServices = apiApplicationServices;
+    }
+
+    /**
+     * Retrieves the API Manager Publisher REST API Service instance from OSGI service context.
+     * @return {@link PublisherRESTAPIServices} API Manager Publisher REST API Service
+     */
+    public PublisherRESTAPIServices getPublisherRESTAPIServices() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        publisherRESTAPIServices = (PublisherRESTAPIServices) ctx.getOSGiService(PublisherRESTAPIServices.class, null);
+        if (publisherRESTAPIServices == null) {
+            throw new IllegalStateException("API Manager Publisher REST API Service was not initialized.");
+        }
+        return publisherRESTAPIServices;
+    }
+
+    public void setPublisherRESTAPIServices(PublisherRESTAPIServices publisherRESTAPIServices) {
+        this.publisherRESTAPIServices = publisherRESTAPIServices;
     }
 }

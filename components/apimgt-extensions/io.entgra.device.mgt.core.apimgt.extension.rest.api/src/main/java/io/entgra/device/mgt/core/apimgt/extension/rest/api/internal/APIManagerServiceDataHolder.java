@@ -19,22 +19,28 @@
 package io.entgra.device.mgt.core.apimgt.extension.rest.api.internal;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantManager;
 
-public class PublisherRESTAPIDataHolder {
+public class APIManagerServiceDataHolder {
 
     private APIApplicationServices apiApplicationServices;
     private APIManagerConfigurationService apiManagerConfigurationService;
+    private PublisherRESTAPIServices publisherRESTAPIServices;
+    private RealmService realmService;
+    private TenantManager tenantManager;
+
+    private static APIManagerServiceDataHolder thisInstance = new APIManagerServiceDataHolder();
 
     private ConsumerRESTAPIServices consumerRESTAPIServices;
 
-    private static PublisherRESTAPIDataHolder thisInstance = new PublisherRESTAPIDataHolder();
-
-    private PublisherRESTAPIDataHolder() {
+    private APIManagerServiceDataHolder() {
     }
 
-    static PublisherRESTAPIDataHolder getInstance() {
+    static APIManagerServiceDataHolder getInstance() {
         return thisInstance;
     }
 
@@ -57,6 +63,38 @@ public class PublisherRESTAPIDataHolder {
         return apiManagerConfigurationService;
     }
 
+
+    public PublisherRESTAPIServices getPublisherRESTAPIServices() {
+        return publisherRESTAPIServices;
+    }
+
+    public void setPublisherRESTAPIServices(PublisherRESTAPIServices publisherRESTAPIServices) {
+        this.publisherRESTAPIServices = publisherRESTAPIServices;
+    }
+
+    public RealmService getRealmService() {
+        if (realmService == null) {
+            throw new IllegalStateException("Realm service is not initialized properly");
+        }
+        return realmService;
+    }
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
+        this.setTenantManager(realmService);
+    }
+
+    public TenantManager getTenantManager() {
+        return tenantManager;
+    }
+
+    private void setTenantManager(RealmService realmService) {
+        if (realmService == null) {
+            throw new IllegalStateException("Realm service is not initialized properly");
+        }
+        this.tenantManager = realmService.getTenantManager();
+    }
+
     public ConsumerRESTAPIServices getConsumerRESTAPIServices() {
         return consumerRESTAPIServices;
     }
@@ -64,5 +102,4 @@ public class PublisherRESTAPIDataHolder {
     public void setConsumerRESTAPIServices(ConsumerRESTAPIServices consumerRESTAPIServices) {
         this.consumerRESTAPIServices = consumerRESTAPIServices;
     }
-
 }

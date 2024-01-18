@@ -39,7 +39,7 @@ public interface APIPublisherService {
     /**
      * Add default scopes defined in the cdm-config.xml
      */
-    void addDefaultScopesIfNotExist();
+    void addDefaultScopesIfNotExist() throws APIManagerPublisherException;
 
     /**
      * If the permissions are in the permission list, identify the relevant scopes of the supplied permission list

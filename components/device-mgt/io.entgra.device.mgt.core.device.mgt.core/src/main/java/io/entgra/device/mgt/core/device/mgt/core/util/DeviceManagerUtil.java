@@ -19,8 +19,36 @@ package io.entgra.device.mgt.core.device.mgt.core.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.device.mgt.common.*;
-import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.*;
+import io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.MetaDataConfiguration;
+import io.entgra.device.mgt.core.device.mgt.core.config.metadata.mgt.documentation.DocConfiguration;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HTTP;
+import org.w3c.dom.Document;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.caching.impl.CacheImpl;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import io.entgra.device.mgt.core.device.mgt.common.AppRegistrationCredentials;
+import io.entgra.device.mgt.core.device.mgt.common.ApplicationRegistration;
+import io.entgra.device.mgt.core.device.mgt.common.ApplicationRegistrationException;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfigurationProviderService;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
@@ -1253,5 +1281,15 @@ public final class DeviceManagerUtil {
             return deviceGroup.getParentPath() + DeviceGroupConstants.HierarchicalGroup.SEPERATOR
                     + deviceGroup.getGroupId();
         }
+    }
+
+    /**
+     * Retrieve the documentation url
+     * @return documentation url
+     */
+    public static String getDocUrl() {
+        DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        DocConfiguration docConfiguration = deviceManagementConfig.getMetaDataConfiguration().getDocConfiguration();
+        return docConfiguration.getDocUrl();
     }
 }

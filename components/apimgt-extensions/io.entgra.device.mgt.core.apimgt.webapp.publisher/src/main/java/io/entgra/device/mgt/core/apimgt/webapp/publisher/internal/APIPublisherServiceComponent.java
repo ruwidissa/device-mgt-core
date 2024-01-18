@@ -17,6 +17,8 @@
  */
 package io.entgra.device.mgt.core.apimgt.webapp.publisher.internal;
 
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -118,6 +120,46 @@ public class APIPublisherServiceComponent {
 
     protected void unsetRegistryService(RegistryService registryService) {
         APIPublisherDataHolder.getInstance().setRegistryService(null);
+    }
+
+    @Reference(
+            name = "APIM.application.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIApplicationServices")
+    protected void setAPIApplicationServices(APIApplicationServices apiApplicationServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting DCR REST API Service");
+        }
+        APIPublisherDataHolder.getInstance().setApiApplicationServices(apiApplicationServices);
+    }
+
+    protected void unsetAPIApplicationServices(APIApplicationServices apiApplicationServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting DCR REST API Service");
+        }
+        APIPublisherDataHolder.getInstance().setApiApplicationServices(null);
+    }
+
+    @Reference(
+            name = "APIM.publisher.service",
+            service = io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPublisherRESTAPIServices")
+    protected void setPublisherRESTAPIServices(PublisherRESTAPIServices publisherRESTAPIServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting APIM Publisher REST API Service");
+        }
+        APIPublisherDataHolder.getInstance().setPublisherRESTAPIServices(publisherRESTAPIServices);
+    }
+
+    protected void unsetPublisherRESTAPIServices(PublisherRESTAPIServices publisherRESTAPIServices) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting APIM Publisher REST API Service");
+        }
+        APIPublisherDataHolder.getInstance().setPublisherRESTAPIServices(null);
     }
 
     @Reference(

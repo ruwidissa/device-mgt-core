@@ -53,7 +53,7 @@ import java.util.List;
  */
 @PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "javax.xml.parsers", "org.mockito.*"})
 @SuppressStaticInitializationFor({"io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils",
-        "org.wso2.carbon.context.PrivilegedCarbonContext"})
+        "org.wso2.carbon.context.CarbonContext", "org.wso2.carbon.context.PrivilegedCarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, CarbonContext.class})
 public class GroupManagementServiceImplTest {
     private GroupManagementService groupManagementService;
@@ -187,6 +187,12 @@ public class GroupManagementServiceImplTest {
     public void testUpdateGroup() throws GroupManagementException, GroupNotExistException, GroupAlreadyExistException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getUsername()).thenReturn("admin");
+        Mockito.when(carbonContext.getTenantDomain()).thenReturn("carbon.super");
         DeviceGroup deviceGroup = new DeviceGroup();
         deviceGroup.setGroupId(1);
         Mockito.doNothing().when(groupManagementProviderService).updateGroup(deviceGroup, 1);
@@ -211,6 +217,12 @@ public class GroupManagementServiceImplTest {
     public void testDeleteGroup() throws GroupManagementException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getUsername()).thenReturn("admin");
+        Mockito.when(carbonContext.getTenantDomain()).thenReturn("carbon.super");
         Mockito.doReturn(true).when(groupManagementProviderService).deleteGroup(1, false);
         Mockito.doReturn(false).when(groupManagementProviderService).deleteGroup(2, false);
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).deleteGroup(3, false);
@@ -304,6 +316,12 @@ public class GroupManagementServiceImplTest {
                 .toReturn(policyManagerService);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(deviceManagementProviderService);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getUsername()).thenReturn("admin");
+        Mockito.when(carbonContext.getTenantDomain()).thenReturn("carbon.super");
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
         Mockito.doNothing().when(groupManagementProviderService).addDevices(1, deviceIdentifiers);
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).addDevices(2,

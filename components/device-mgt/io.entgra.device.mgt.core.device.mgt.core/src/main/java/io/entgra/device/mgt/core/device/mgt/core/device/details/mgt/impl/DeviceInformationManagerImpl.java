@@ -442,8 +442,8 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             if (deviceLocation != null) {
                 deviceDetailsDAO.deleteDeviceLocation(device.getId(), device.getEnrolmentInfo().getId());
             } else {
-                log.error("Device location not found for device: " + device.getId());
-                throw new DeviceDetailsMgtException("Device location not found for device: " + device.getId());
+                log.warn("Unable to find location for device with ID " + device.getId() + ". Location deletion request cannot be processed.");
+                return;
             }
             DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {

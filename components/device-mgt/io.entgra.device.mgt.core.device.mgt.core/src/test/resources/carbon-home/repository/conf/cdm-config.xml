@@ -159,5 +159,10 @@
         <MaximumMessageBufferSize>640</MaximumMessageBufferSize>
     </RemoteSessionConfiguration>
     <DefaultGroupsConfiguration>BYOD,COPE</DefaultGroupsConfiguration>
+    <MetaDataConfiguration>
+        <DocConfiguration>
+            <DocUrl>https://docs.entgra.io/uem/6.0.0</DocUrl>
+        </DocConfiguration>
+    </MetaDataConfiguration>
 </DeviceMgtConfiguration>
 
