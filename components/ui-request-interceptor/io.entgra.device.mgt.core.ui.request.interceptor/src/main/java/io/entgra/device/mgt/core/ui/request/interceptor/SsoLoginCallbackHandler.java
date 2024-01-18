@@ -96,7 +96,7 @@ public class SsoLoginCallbackHandler extends HttpServlet {
             authData.setEncodedClientApp(session.getAttribute("encodedClientApp").toString());
             authData.setAccessToken(jsonNode.get("access_token").textValue());
             authData.setRefreshToken(jsonNode.get("refresh_token").textValue());
-            authData.setScope(jsonNode.get("scope").textValue());
+            authData.setScope(jsonNode.get("scope"));
             session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
             resp.sendRedirect(session.getAttribute("redirectUrl").toString());
         } else {

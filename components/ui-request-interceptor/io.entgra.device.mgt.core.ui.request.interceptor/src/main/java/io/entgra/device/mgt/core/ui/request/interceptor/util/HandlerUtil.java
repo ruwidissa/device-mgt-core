@@ -19,6 +19,7 @@
 package io.entgra.device.mgt.core.ui.request.interceptor.util;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -264,9 +265,17 @@ public class HandlerUtil {
         resp.setStatus(proxyResponse.getCode());
         resp.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         resp.setCharacterEncoding(Consts.UTF_8.name());
+        JsonNode responseData = proxyResponse.getData();
+
+        if (!(responseData == null)) {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> newNodeMap = new HashMap<>();
+            newNodeMap.put("data", responseData);
+            responseData = mapper.convertValue(newNodeMap, JsonNode.class);
+        }
 
         try (PrintWriter writer = resp.getWriter()) {
-            writer.write(proxyResponse.getData().toString());
+            writer.write(responseData != null ? responseData.toString() : "{}");
         }
     }
 
@@ -665,7 +674,7 @@ public class HandlerUtil {
         AuthData newAuthData = new AuthData();
         newAuthData.setAccessToken(tokenResult.get("access_token").textValue());
         newAuthData.setRefreshToken(tokenResult.get("refresh_token").textValue());
-        newAuthData.setScope(tokenResult.get("scope").textValue());
+        newAuthData.setScope(tokenResult.get("scope"));
         newAuthData.setClientId(authData.getClientId());
         newAuthData.setClientSecret(authData.getClientSecret());
         newAuthData.setEncodedClientApp(authData.getEncodedClientApp());
