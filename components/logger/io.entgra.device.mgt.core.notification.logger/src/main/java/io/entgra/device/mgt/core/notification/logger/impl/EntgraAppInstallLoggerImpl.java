@@ -52,13 +52,6 @@ public class EntgraAppInstallLoggerImpl implements EntgraLogger {
     }
 
     @Override
-    public void info(String message, LogContext logContext) {
-        AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
-        MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
-        log.info(message);
-    }
-
-    @Override
     public void info(Object object, LogContext logContext) {
         AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
         MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
@@ -88,13 +81,6 @@ public class EntgraAppInstallLoggerImpl implements EntgraLogger {
     @Override
     public void debug(Object o, Throwable throwable) {
         log.debug(o, throwable);
-    }
-
-    @Override
-    public void debug(String message, LogContext logContext) {
-        AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
-        MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
-        log.debug(message);
     }
 
     @Override
@@ -130,20 +116,6 @@ public class EntgraAppInstallLoggerImpl implements EntgraLogger {
     }
 
     @Override
-    public void error(String message, LogContext logContext) {
-        AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
-        MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
-        log.error(message);
-    }
-
-    @Override
-    public void error(String message, Throwable t, LogContext logContext) {
-        AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
-        MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
-        log.error(message, t);
-    }
-
-    @Override
     public void error(Object object, LogContext logContext) {
         AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
         MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
@@ -173,20 +145,6 @@ public class EntgraAppInstallLoggerImpl implements EntgraLogger {
     @Override
     public void warn(Object o, Throwable throwable) {
         log.warn(o, throwable);
-    }
-
-    @Override
-    public void warn(String message, LogContext logContext) {
-        AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
-        MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
-        log.warn(message);
-    }
-
-    @Override
-    public void warn(String message, Throwable t, LogContext logContext) {
-        AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
-        MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
-        log.warn(message, t);
     }
 
     @Override
@@ -222,13 +180,6 @@ public class EntgraAppInstallLoggerImpl implements EntgraLogger {
     }
 
     @Override
-    public void trace(String message, LogContext logContext) {
-        AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
-        MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
-        log.trace(message);
-    }
-
-    @Override
     public void trace(Object object, LogContext logContext) {
         AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
         MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
@@ -258,13 +209,6 @@ public class EntgraAppInstallLoggerImpl implements EntgraLogger {
     @Override
     public void fatal(Object o, Throwable throwable) {
         log.fatal(0, throwable);
-    }
-
-    @Override
-    public void fatal(String message, LogContext logContext) {
-        AppInstallLogContext appInstallLogContext = (AppInstallLogContext) logContext;
-        MDCContextUtil.populateAppInstallMDCContext(appInstallLogContext);
-        log.fatal(message);
     }
 
     @Override
