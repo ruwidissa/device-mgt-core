@@ -21,6 +21,9 @@ package io.entgra.device.mgt.core.operation.template.spi;
 import io.entgra.device.mgt.core.operation.template.dto.OperationTemplate;
 import io.entgra.device.mgt.core.operation.template.exception.OperationTemplateMgtPluginException;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * Operation Template service interface.
  */
@@ -30,8 +33,11 @@ public interface OperationTemplateService {
 
     OperationTemplate updateOperationTemplate(OperationTemplate operationTemplate) throws OperationTemplateMgtPluginException;
 
-    OperationTemplate getOperationTemplate(String subTypeId, String deviceType, String operationCode) throws OperationTemplateMgtPluginException;
+    OperationTemplate getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode) throws OperationTemplateMgtPluginException;
 
-    void deleteOperationTemplate(String subTypeId, String deviceType, String operationCode) throws OperationTemplateMgtPluginException;
+    List<OperationTemplate> getAllOperationTemplatesByDeviceType(String deviceType) throws OperationTemplateMgtPluginException;
 
+    void deleteOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode) throws OperationTemplateMgtPluginException;
+
+    Set<String> getOperationTemplateCodesByDeviceTypeAndSubTypeId(String deviceType, String subTypeId) throws OperationTemplateMgtPluginException;
 }

@@ -48,8 +48,8 @@ public class DAOTest extends BaseOperationTemplatePluginTest {
             throws DBConnectionException, OperationTemplateManagementDAOException {
 
         ConnectionManagerUtils.openDBConnection();
-        OperationTemplate operationTemplateActual = operationTemplateDAO.getOperationTemplate(
-                "4", TestUtils.deviceType, TestUtils.operationCode);
+        OperationTemplate operationTemplateActual = operationTemplateDAO.getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(
+                 TestUtils.deviceType, "4", TestUtils.operationCode);
         ConnectionManagerUtils.closeDBConnection();
         Assert.assertNotNull(operationTemplateActual, "Cannot be null");
         Assert.assertEquals(operationTemplateActual.getSubTypeId(), "4");
@@ -72,8 +72,8 @@ public class DAOTest extends BaseOperationTemplatePluginTest {
         operationTemplateDAO.addOperationTemplate(operationTemplate);
         ConnectionManagerUtils.commitDBTransaction();
 
-        OperationTemplate operationTemplateActual = operationTemplateDAO.getOperationTemplate(
-                "4", TestUtils.deviceType, TestUtils.operationCode);
+        OperationTemplate operationTemplateActual = operationTemplateDAO.getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(
+                TestUtils.deviceType, "4", TestUtils.operationCode);
         ConnectionManagerUtils.closeDBConnection();
         Assert.assertNotNull(operationTemplateActual, "Cannot be null");
         Assert.assertEquals(operationTemplateActual.getSubTypeId(), "4");
@@ -86,8 +86,8 @@ public class DAOTest extends BaseOperationTemplatePluginTest {
             throws DBConnectionException, OperationTemplateManagementDAOException {
 
         ConnectionManagerUtils.beginDBTransaction();
-        OperationTemplate operationTemplate = operationTemplateDAO.getOperationTemplate(
-                "4", TestUtils.deviceType, TestUtils.operationCode);
+        OperationTemplate operationTemplate = operationTemplateDAO.getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(
+                TestUtils.deviceType, "4", TestUtils.operationCode);
         OperationTemplate operationTemplateActual = operationTemplateDAO.updateOperationTemplate(
                 operationTemplate);
         ConnectionManagerUtils.commitDBTransaction();

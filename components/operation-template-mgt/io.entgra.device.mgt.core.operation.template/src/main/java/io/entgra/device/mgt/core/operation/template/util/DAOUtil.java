@@ -44,7 +44,6 @@ public class DAOUtil {
     public static OperationTemplate loadOperationTemplate(ResultSet rs)
         throws SQLException, JsonSyntaxException {
         OperationTemplate operationTemplate = new OperationTemplate();
-        Gson g = new Gson();
         operationTemplate.setSubTypeId(rs.getString("SUB_TYPE_ID"));
         operationTemplate.setCode(rs.getString("OPERATION_CODE"));
         operationTemplate.setDeviceType(rs.getString("DEVICE_TYPE"));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ * Copyright (c) 2018 - 2024, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -22,7 +22,6 @@ import com.google.common.cache.CacheLoader;
 import io.entgra.device.mgt.core.operation.template.dao.OperationTemplateDAO;
 import io.entgra.device.mgt.core.operation.template.dao.OperationTemplateDAOFactory;
 import io.entgra.device.mgt.core.operation.template.dao.impl.util.OperationTemplateManagementUtil;
-import io.entgra.device.mgt.core.operation.template.dto.OperationTemplate;
 import io.entgra.device.mgt.core.operation.template.dto.OperationTemplateCacheKey;
 import io.entgra.device.mgt.core.operation.template.exception.DBConnectionException;
 import io.entgra.device.mgt.core.operation.template.exception.OperationTemplateManagementDAOException;
@@ -31,16 +30,19 @@ import io.entgra.device.mgt.core.operation.template.util.ConnectionManagerUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * Class for the Operation Template cache.
  */
-public class OperationTemplateCacheLoader extends CacheLoader<String, OperationTemplate> {
+public class OperationTemplateCodesCacheLoader extends CacheLoader<String, Set<String>> {
 
-    private static final Log log = LogFactory.getLog(OperationTemplateCacheLoader.class);
+    private static final Log log = LogFactory.getLog(OperationTemplateCodesCacheLoader.class);
 
     private final OperationTemplateDAO operationTemplateDAO;
 
-    public OperationTemplateCacheLoader() {
+    public OperationTemplateCodesCacheLoader() {
         this.operationTemplateDAO = OperationTemplateDAOFactory.getOperationTemplateDAO();
     }
 
@@ -51,38 +53,36 @@ public class OperationTemplateCacheLoader extends CacheLoader<String, OperationT
      * @throws OperationTemplateMgtPluginException
      */
     @Override
-    public OperationTemplate load(String key) throws OperationTemplateMgtPluginException {
-        OperationTemplateCacheKey operationTemplateCacheKey = OperationTemplateManagementUtil.getOperationTemplateCacheKey(
+    public Set<String> load(String key) throws OperationTemplateMgtPluginException {
+        OperationTemplateCacheKey operationTemplateCacheKey = OperationTemplateManagementUtil.getOperationTemplateCodeCacheKey(
                 key);
         String subTypeId = operationTemplateCacheKey.getSubTypeId();
-        String operationCode = operationTemplateCacheKey.getOperationCode();
         String deviceType = operationTemplateCacheKey.getDeviceType();
 
         if (log.isTraceEnabled()) {
             log.trace(
-                    "Loading operation template for subtype Id : " + subTypeId + " & deviceType : " + deviceType + " operation code : "
-                            + operationCode);
+                    "Loading operation template for subtype Id : " + subTypeId + " & deviceType : " + deviceType);
         }
         try {
             ConnectionManagerUtils.openDBConnection();
-            return operationTemplateDAO.getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(deviceType, subTypeId, operationCode);
+            return operationTemplateDAO.getOperationTemplateCodesByDeviceTypeAndSubTypeId(deviceType, subTypeId);
         } catch (DBConnectionException e) {
             String msg =
-                    "Error occurred while obtaining the database connection to retrieve operation template for "
+                    "Error occurred while obtaining the database connection to retrieve operation template codes for "
                             +
-                            "subtype Id : " + subTypeId + " & operation code : " + operationCode;
+                            "subtype Id : " + subTypeId + " & device type : " + deviceType;
             log.error(msg);
             throw new OperationTemplateMgtPluginException(msg, e);
         } catch (InvalidCacheLoadException e) {
             String msg =
-                    "CacheLoader returned null for operation template for subtype Id : " + subTypeId
-                            + " & operation code : " + operationCode;
+                    "CacheLoader returned null for operation template codes for subtype Id : " + subTypeId
+                            + " & device type : " + deviceType;
             log.error(msg, e);
             return null;
         } catch (OperationTemplateManagementDAOException e) {
             String msg =
-                    "Error occurred in the database level while retrieving operation template for subtype Id : "
-                            + subTypeId + " & operation code : " + operationCode;
+                    "Error occurred in the database level while retrieving operation template codes for subtype Id : "
+                            + subTypeId + " & device type : " + deviceType;
             log.error(msg);
             throw new OperationTemplateMgtPluginException(msg, e);
         } finally {

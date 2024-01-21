@@ -21,6 +21,9 @@ package io.entgra.device.mgt.core.operation.template.dao;
 import io.entgra.device.mgt.core.operation.template.dto.OperationTemplate;
 import io.entgra.device.mgt.core.operation.template.exception.OperationTemplateManagementDAOException;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * This class represents the key operations associated with persisting mobile-device related
  * information.
@@ -31,8 +34,11 @@ public interface OperationTemplateDAO {
     OperationTemplate updateOperationTemplate(OperationTemplate operationTemplate)
             throws OperationTemplateManagementDAOException;
 
-    OperationTemplate getOperationTemplate(String subTypeId, String deviceType, String operationCode) throws OperationTemplateManagementDAOException;
+    OperationTemplate getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode) throws OperationTemplateManagementDAOException;
 
-    void deleteOperationTemplate(String subTypeId, String deviceCode, String operationCode) throws OperationTemplateManagementDAOException;
+    List<OperationTemplate> getAllOperationTemplatesByDeviceType(String deviceType) throws OperationTemplateManagementDAOException;
 
+    int deleteOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode) throws OperationTemplateManagementDAOException;
+
+     Set<String> getOperationTemplateCodesByDeviceTypeAndSubTypeId(String deviceType, String subTypeId) throws OperationTemplateManagementDAOException;
 }

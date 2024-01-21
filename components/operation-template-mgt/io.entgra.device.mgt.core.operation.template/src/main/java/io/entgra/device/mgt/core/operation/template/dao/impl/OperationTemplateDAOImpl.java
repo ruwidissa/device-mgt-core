@@ -31,6 +31,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -102,7 +106,7 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
                 stmt.setString(5, operationTemplate.getCode());
                 stmt.executeUpdate();
 
-                return getOperationTemplate(operationTemplate.getSubTypeId(), operationTemplate.getDeviceType(), operationTemplate.getCode());
+                return getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(operationTemplate.getDeviceType(), operationTemplate.getSubTypeId(), operationTemplate.getCode());
             } catch (SQLException e) {
                 String msg = "Error occurred while processing update operation template.";
                 log.error(msg);
@@ -122,14 +126,14 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
      * @throws OperationTemplateManagementDAOException
      */
     @Override
-    public OperationTemplate getOperationTemplate(String subTypeId, String deviceType, String operationCode)
+    public OperationTemplate getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode)
             throws OperationTemplateManagementDAOException {
         try {
-            String sql = "SELECT * FROM SUB_OPERATION_TEMPLATE WHERE SUB_TYPE_ID = ? AND DEVICE_TYPE = ? AND OPERATION_CODE = ?";
+            String sql = "SELECT * FROM SUB_OPERATION_TEMPLATE WHERE DEVICE_TYPE = ? AND SUB_TYPE_ID = ? AND OPERATION_CODE = ?";
             Connection conn = ConnectionManagerUtils.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, subTypeId);
-                stmt.setString(2, deviceType);
+                stmt.setString(1, deviceType);
+                stmt.setString(2, subTypeId);
                 stmt.setString(3, operationCode);
 
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -151,22 +155,94 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
     }
 
     /**
+     * @param deviceType
+     * @param subTypeId
+     * @return
+     * @throws OperationTemplateManagementDAOException
+     */
+    @Override
+    public Set<String> getOperationTemplateCodesByDeviceTypeAndSubTypeId(String deviceType, String subTypeId)
+            throws OperationTemplateManagementDAOException {
+
+        try {
+            String sql = "SELECT OPERATION_CODE FROM SUB_OPERATION_TEMPLATE WHERE SUB_TYPE_ID = ? AND DEVICE_TYPE = ?";
+            Connection conn = ConnectionManagerUtils.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, subTypeId);
+                stmt.setString(2, deviceType);
+
+                Set<String> deviceTypes = new HashSet<>();
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        deviceTypes.add(rs.getString("OPERATION_CODE"));
+                    }
+                    return deviceTypes;
+                }
+            } catch (SQLException e) {
+                String msg = "Error occurred while getting operation template codes for sub type id : " + subTypeId
+                        + " and device type : " + deviceType;
+                log.error(msg, e);
+                throw new OperationTemplateManagementDAOException(msg, e);
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining DB connection to getting operation template codes.";
+            log.error(msg);
+            throw new OperationTemplateManagementDAOException(msg, e);
+        }
+    }
+
+
+    /**
+     * @param deviceType
+     * @return
+     * @throws OperationTemplateManagementDAOException
+     */
+    @Override
+    public List<OperationTemplate> getAllOperationTemplatesByDeviceType(String deviceType)
+            throws OperationTemplateManagementDAOException {
+
+        try {
+            String sql = "SELECT * FROM SUB_OPERATION_TEMPLATE WHERE DEVICE_TYPE = ?";
+            List<OperationTemplate> operationTemplates = new ArrayList<>();
+
+            Connection conn = ConnectionManagerUtils.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, deviceType);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        operationTemplates.add(DAOUtil.loadOperationTemplate(rs));
+                    }
+                    return operationTemplates;
+                }
+            } catch (SQLException e) {
+                String msg = "Error occurred while loading operation template list.";
+                log.error(e.getMessage());
+                throw new OperationTemplateManagementDAOException(msg, e);
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining DB connection to loading operation template list.";
+            log.error(msg);
+            throw new OperationTemplateManagementDAOException(msg, e);
+        }
+    }
+
+    /**
      * @param subTypeId
      * @param deviceType
      * @param operationCode
      * @throws OperationTemplateManagementDAOException
      */
     @Override
-    public void deleteOperationTemplate(String subTypeId, String deviceType, String operationCode)
+    public int deleteOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode)
             throws OperationTemplateManagementDAOException {
-        String sql = "DELETE FROM SUB_OPERATION_TEMPLATE WHERE SUB_TYPE_ID = ? AND DEVICE_TYPE = ? AND OPERATION_CODE = ?";
+        String sql = "DELETE FROM SUB_OPERATION_TEMPLATE WHERE DEVICE_TYPE = ? AND SUB_TYPE_ID = ? AND OPERATION_CODE = ?";
         try {
             Connection conn = ConnectionManagerUtils.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, subTypeId);
-                stmt.setString(2, deviceType);
+                stmt.setString(1, deviceType);
+                stmt.setString(2, subTypeId);
                 stmt.setString(3, operationCode);
-                stmt.executeUpdate();
+                return stmt.executeUpdate();
             } catch (SQLException e) {
                 String msg = "Error occurred while deleting operation template for sub type id : " + subTypeId
                         + " and operation code : " + operationCode;
