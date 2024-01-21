@@ -228,6 +228,9 @@ public final class MDCContextUtil {
         if (mdcContext.getActionTag() != null) {
             MDC.put("ActionTag", mdcContext.getActionTag());
         }
+        if (mdcContext.getRoles() != null) {
+            MDC.put("Roles", mdcContext.getRoles());
+        }
         if (mdcContext.getDeviceCount() != null) {
             MDC.put("DeviceCount", mdcContext.getDeviceCount());
         }
