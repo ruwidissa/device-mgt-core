@@ -558,12 +558,17 @@ public class GroupManagementServiceImpl implements GroupManagementService {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername().isEmpty());
             if (group != null) {
                 DeviceMgtAPIUtils.getGroupManagementProviderService().manageGroupSharing(group.getGroupId(), groups.getUserRoles());
+                String stringRoles = "";
+                if(groups.getUserRoles() != null){
+                    stringRoles = new Gson().toJson(groups.getUserRoles());
+                }
                 log.info(
                         "Group " + group.getName() + " created",
                         groupMgtContextBuilder
                                 .setActionTag("ADD_GROUP")
                                 .setGroupId(String.valueOf(group.getGroupId()))
                                 .setName(group.getName())
+                                .setRoles(stringRoles)
                                 .setOwner(group.getOwner())
                                 .setTenantID(tenantId)
                                 .setTenantDomain(tenantDomain)

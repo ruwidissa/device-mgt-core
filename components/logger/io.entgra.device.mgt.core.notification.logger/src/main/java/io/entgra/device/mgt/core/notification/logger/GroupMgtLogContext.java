@@ -25,6 +25,7 @@ public class GroupMgtLogContext extends LogContext {
     private final String name;
     private final String owner;
     private final String actionTag;
+    private final String roles;
     private final String deviceCount;
     private final String deviceIdentifiers;
     private final String userName;
@@ -36,6 +37,7 @@ public class GroupMgtLogContext extends LogContext {
         this.name = builder.name;
         this.owner = builder.owner;
         this.actionTag = builder.actionTag;
+        this.roles = builder.roles;
         this.deviceCount = builder.deviceCount;
         this.deviceIdentifiers = builder.deviceIdentifiers;
         this.userName = builder.userName;
@@ -57,6 +59,10 @@ public class GroupMgtLogContext extends LogContext {
 
     public String getActionTag() {
         return actionTag;
+    }
+
+    public String getRoles() {
+        return roles;
     }
 
     public String getDeviceCount() {
@@ -84,6 +90,7 @@ public class GroupMgtLogContext extends LogContext {
         private String name;
         private String owner;
         private String actionTag;
+        private String roles;
         private String deviceCount;
         private String deviceIdentifiers;
         private String userName;
@@ -126,6 +133,15 @@ public class GroupMgtLogContext extends LogContext {
 
         public Builder setActionTag(String actionTag) {
             this.actionTag = actionTag;
+            return this;
+        }
+
+        public String getRoles() {
+            return roles;
+        }
+
+        public Builder setRoles(String roles) {
+            this.roles = roles;
             return this;
         }
 
