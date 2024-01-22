@@ -36,17 +36,14 @@
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.cea.mgt.common</artifactId>
-            <version>5.0.33-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.cea.mgt.core</artifactId>
-            <version>5.0.33-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.entgra.device.mgt.core</groupId>
             <artifactId>io.entgra.device.mgt.core.cea.mgt.enforce</artifactId>
-            <version>5.0.33-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
