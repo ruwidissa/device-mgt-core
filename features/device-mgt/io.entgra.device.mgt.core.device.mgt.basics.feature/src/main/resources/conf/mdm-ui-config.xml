@@ -406,6 +406,11 @@
         <Scope>am:store:vpp:assets:view</Scope>
         <Scope>and:devices:enroll</Scope>
         <Scope>ios:devices:enroll</Scope>
+        <Scope>dm:admin:cea:view</Scope>
+        <Scope>dm:admin:cea:add</Scope>
+        <Scope>dm:admin:cea:update</Scope>
+        <Scope>dm:admin:cea:delete</Scope>
+        <Scope>dm:admin:cea:sync</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

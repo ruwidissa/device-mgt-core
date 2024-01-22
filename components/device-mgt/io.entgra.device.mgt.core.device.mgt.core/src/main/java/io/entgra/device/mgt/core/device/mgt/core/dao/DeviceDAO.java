@@ -838,4 +838,6 @@ public interface DeviceDAO {
      * @throws DeviceManagementDAOException
      */
     List<String> getAgentVersions(int tenantId) throws DeviceManagementDAOException;
+    List<Device> getDevicesEnrolledSince(Date since) throws DeviceManagementDAOException;
+    List<Device> getDevicesEnrolledPriorTo(Date priorTo) throws DeviceManagementDAOException;
 }
