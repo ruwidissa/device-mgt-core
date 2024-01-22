@@ -30,7 +30,6 @@ import io.entgra.device.mgt.core.operation.template.util.ConnectionManagerUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -65,7 +64,7 @@ public class OperationTemplateCodesCacheLoader extends CacheLoader<String, Set<S
         }
         try {
             ConnectionManagerUtils.openDBConnection();
-            return operationTemplateDAO.getOperationTemplateCodesByDeviceTypeAndSubTypeId(deviceType, subTypeId);
+            return operationTemplateDAO.getOperationTemplateCodes(deviceType, subTypeId);
         } catch (DBConnectionException e) {
             String msg =
                     "Error occurred while obtaining the database connection to retrieve operation template codes for "

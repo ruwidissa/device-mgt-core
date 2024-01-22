@@ -48,7 +48,7 @@ public class DAOTest extends BaseOperationTemplatePluginTest {
             throws DBConnectionException, OperationTemplateManagementDAOException {
 
         ConnectionManagerUtils.openDBConnection();
-        OperationTemplate operationTemplateActual = operationTemplateDAO.getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(
+        OperationTemplate operationTemplateActual = operationTemplateDAO.getOperationTemplate(
                  TestUtils.deviceType, "4", TestUtils.operationCode);
         ConnectionManagerUtils.closeDBConnection();
         Assert.assertNotNull(operationTemplateActual, "Cannot be null");
@@ -72,7 +72,7 @@ public class DAOTest extends BaseOperationTemplatePluginTest {
         operationTemplateDAO.addOperationTemplate(operationTemplate);
         ConnectionManagerUtils.commitDBTransaction();
 
-        OperationTemplate operationTemplateActual = operationTemplateDAO.getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(
+        OperationTemplate operationTemplateActual = operationTemplateDAO.getOperationTemplate(
                 TestUtils.deviceType, "4", TestUtils.operationCode);
         ConnectionManagerUtils.closeDBConnection();
         Assert.assertNotNull(operationTemplateActual, "Cannot be null");
@@ -86,7 +86,7 @@ public class DAOTest extends BaseOperationTemplatePluginTest {
             throws DBConnectionException, OperationTemplateManagementDAOException {
 
         ConnectionManagerUtils.beginDBTransaction();
-        OperationTemplate operationTemplate = operationTemplateDAO.getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(
+        OperationTemplate operationTemplate = operationTemplateDAO.getOperationTemplate(
                 TestUtils.deviceType, "4", TestUtils.operationCode);
         OperationTemplate operationTemplateActual = operationTemplateDAO.updateOperationTemplate(
                 operationTemplate);

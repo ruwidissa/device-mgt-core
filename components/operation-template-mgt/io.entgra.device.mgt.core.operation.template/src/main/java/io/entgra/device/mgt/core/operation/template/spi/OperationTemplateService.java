@@ -33,11 +33,11 @@ public interface OperationTemplateService {
 
     OperationTemplate updateOperationTemplate(OperationTemplate operationTemplate) throws OperationTemplateMgtPluginException;
 
-    OperationTemplate getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode) throws OperationTemplateMgtPluginException;
+    OperationTemplate getOperationTemplate(String deviceType, String subTypeId, String operationCode) throws OperationTemplateMgtPluginException;
 
-    List<OperationTemplate> getAllOperationTemplatesByDeviceType(String deviceType) throws OperationTemplateMgtPluginException;
+    List<OperationTemplate> getAllOperationTemplates(String deviceType) throws OperationTemplateMgtPluginException;
 
-    void deleteOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode) throws OperationTemplateMgtPluginException;
+    void deleteOperationTemplate(String deviceType, String subTypeId, String operationCode) throws OperationTemplateMgtPluginException;
 
-    Set<String> getOperationTemplateCodesByDeviceTypeAndSubTypeId(String deviceType, String subTypeId) throws OperationTemplateMgtPluginException;
+    Set<String> getOperationTemplateCodes(String deviceType, String subTypeId) throws OperationTemplateMgtPluginException;
 }

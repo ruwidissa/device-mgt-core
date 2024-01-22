@@ -36,7 +36,6 @@ import io.entgra.device.mgt.core.operation.template.util.AssertUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -110,7 +109,7 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
         }
     }
 
-    public void deleteOperationTemplateDetailsForCacheLoader(String deviceType, String subTypeId, String code) {
+    public void deleteOperationTemplateDetailsFromCacheLoader(String deviceType, String subTypeId, String code) {
         try {
             String operationTemplateKey = OperationTemplateManagementUtil.setOperationTemplateCacheKey(
                     deviceType, subTypeId, code);
@@ -124,7 +123,7 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
         }
     }
 
-    public void refreshOperationTemplateDetailsForCacheLoader(OperationTemplate operationTemplate) {
+    public void refreshOperationTemplateDetailsFromCacheLoader(OperationTemplate operationTemplate) {
         try {
             if (operationTemplate != null) {
                 String operationTemplateKey = OperationTemplateManagementUtil.setOperationTemplateCacheKey(operationTemplate.getDeviceType(),
@@ -174,7 +173,9 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
             throw new OperationTemplateMgtPluginException(e.getMessage(), e);
         } finally {
             ConnectionManagerUtils.closeDBConnection();
-            refreshOperationTemplateDetailsForCacheLoader(updatedOperationTemplate);
+            if (updatedOperationTemplate != null) {
+                refreshOperationTemplateDetailsFromCacheLoader(updatedOperationTemplate);
+            }
         }
     }
 
@@ -186,7 +187,7 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
      * @throws OperationTemplateMgtPluginException
      */
     @Override
-    public OperationTemplate getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode)
+    public OperationTemplate getOperationTemplate(String deviceType, String subTypeId, String operationCode)
             throws OperationTemplateMgtPluginException {
         try {
 
@@ -211,12 +212,12 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
      * @throws OperationTemplateMgtPluginException
      */
     @Override
-    public List<OperationTemplate> getAllOperationTemplatesByDeviceType(String deviceType)
+    public List<OperationTemplate> getAllOperationTemplates(String deviceType)
             throws OperationTemplateMgtPluginException {
         AssertUtils.hasText(deviceType, "Invalid device type.");
         try {
              ConnectionManagerUtils.openDBConnection();
-             return operationTemplateDAO.getAllOperationTemplatesByDeviceType(deviceType);
+             return operationTemplateDAO.getAllOperationTemplates(deviceType);
         } catch (DBConnectionException | OperationTemplateManagementDAOException e) {
             log.error(e.getMessage());
             throw new OperationTemplateMgtPluginException(e.getMessage(), e);
@@ -233,18 +234,18 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
      * @throws OperationTemplateMgtPluginException
      */
     @Override
-    public void deleteOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode)
+    public void deleteOperationTemplate(String deviceType, String subTypeId, String operationCode)
             throws OperationTemplateMgtPluginException {
 
         String msg = "Operation Template does not exist for subtype id : " + subTypeId
                 + " and device type : " + deviceType + " and operation code : "
                 + operationCode;
-        AssertUtils.isNull(getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(deviceType, subTypeId, operationCode), msg);
+        AssertUtils.isNull(getOperationTemplate(deviceType, subTypeId, operationCode), msg);
 
-        int deleted = 0;
+        boolean isDelete = false;
         try {
             ConnectionManagerUtils.beginDBTransaction();
-            deleted = operationTemplateDAO.deleteOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(deviceType, subTypeId, operationCode);
+            isDelete = operationTemplateDAO.deleteOperationTemplate(deviceType, subTypeId, operationCode);
             ConnectionManagerUtils.commitDBTransaction();
             if (log.isDebugEnabled()) {
                 String debugMsg = "Operation Template deleted successfully,for subtype id "
@@ -257,8 +258,8 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
             throw new OperationTemplateMgtPluginException(e.getMessage(), e);
         } finally {
             ConnectionManagerUtils.closeDBConnection();
-            if (deleted == 1) {
-                deleteOperationTemplateDetailsForCacheLoader(deviceType, subTypeId, operationCode);
+            if (isDelete) {
+                deleteOperationTemplateDetailsFromCacheLoader(deviceType, subTypeId, operationCode);
             }
 
         }
@@ -271,7 +272,7 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
      * @throws OperationTemplateMgtPluginException
      */
     @Override
-    public Set<String> getOperationTemplateCodesByDeviceTypeAndSubTypeId(String deviceType, String subTypeId)
+    public Set<String> getOperationTemplateCodes(String deviceType, String subTypeId)
             throws OperationTemplateMgtPluginException  {
 
         try {
@@ -321,7 +322,7 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
         String msg = "Operation Template already exist for subtype id : " + operationTemplate.getSubTypeId()
                 + " and device type : " + operationTemplate.getDeviceType() + " and operation code : "
                 + operationTemplate.getCode();
-        AssertUtils.notNull(getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(operationTemplate.getDeviceType(), operationTemplate.getSubTypeId(),
+        AssertUtils.notNull(getOperationTemplate(operationTemplate.getDeviceType(), operationTemplate.getSubTypeId(),
                 operationTemplate.getCode()), msg);
     }
 
@@ -337,7 +338,7 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
         String msg = "Operation Template does not exist for subtype id : " + operationTemplate.getSubTypeId()
                 + " and device type : " + operationTemplate.getDeviceType() + " and operation code : "
                 + operationTemplate.getCode();
-        AssertUtils.isNull(getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(operationTemplate.getDeviceType(), operationTemplate.getSubTypeId(),
+        AssertUtils.isNull(getOperationTemplate(operationTemplate.getDeviceType(), operationTemplate.getSubTypeId(),
                 operationTemplate.getCode()), msg);
     }
 

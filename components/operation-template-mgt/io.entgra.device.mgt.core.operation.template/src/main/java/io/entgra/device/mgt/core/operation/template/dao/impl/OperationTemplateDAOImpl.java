@@ -106,7 +106,7 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
                 stmt.setString(5, operationTemplate.getCode());
                 stmt.executeUpdate();
 
-                return getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(operationTemplate.getDeviceType(), operationTemplate.getSubTypeId(), operationTemplate.getCode());
+                return getOperationTemplate(operationTemplate.getDeviceType(), operationTemplate.getSubTypeId(), operationTemplate.getCode());
             } catch (SQLException e) {
                 String msg = "Error occurred while processing update operation template.";
                 log.error(msg);
@@ -126,7 +126,7 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
      * @throws OperationTemplateManagementDAOException
      */
     @Override
-    public OperationTemplate getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode)
+    public OperationTemplate getOperationTemplate(String deviceType, String subTypeId, String operationCode)
             throws OperationTemplateManagementDAOException {
         try {
             String sql = "SELECT * FROM SUB_OPERATION_TEMPLATE WHERE DEVICE_TYPE = ? AND SUB_TYPE_ID = ? AND OPERATION_CODE = ?";
@@ -161,7 +161,7 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
      * @throws OperationTemplateManagementDAOException
      */
     @Override
-    public Set<String> getOperationTemplateCodesByDeviceTypeAndSubTypeId(String deviceType, String subTypeId)
+    public Set<String> getOperationTemplateCodes(String deviceType, String subTypeId)
             throws OperationTemplateManagementDAOException {
 
         try {
@@ -198,7 +198,7 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
      * @throws OperationTemplateManagementDAOException
      */
     @Override
-    public List<OperationTemplate> getAllOperationTemplatesByDeviceType(String deviceType)
+    public List<OperationTemplate> getAllOperationTemplates(String deviceType)
             throws OperationTemplateManagementDAOException {
 
         try {
@@ -233,7 +233,7 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
      * @throws OperationTemplateManagementDAOException
      */
     @Override
-    public int deleteOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode)
+    public boolean deleteOperationTemplate(String deviceType, String subTypeId, String operationCode)
             throws OperationTemplateManagementDAOException {
         String sql = "DELETE FROM SUB_OPERATION_TEMPLATE WHERE DEVICE_TYPE = ? AND SUB_TYPE_ID = ? AND OPERATION_CODE = ?";
         try {
@@ -242,7 +242,7 @@ public class OperationTemplateDAOImpl implements OperationTemplateDAO {
                 stmt.setString(1, deviceType);
                 stmt.setString(2, subTypeId);
                 stmt.setString(3, operationCode);
-                return stmt.executeUpdate();
+                return stmt.executeUpdate() == 1;
             } catch (SQLException e) {
                 String msg = "Error occurred while deleting operation template for sub type id : " + subTypeId
                         + " and operation code : " + operationCode;

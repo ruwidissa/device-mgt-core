@@ -34,11 +34,11 @@ public interface OperationTemplateDAO {
     OperationTemplate updateOperationTemplate(OperationTemplate operationTemplate)
             throws OperationTemplateManagementDAOException;
 
-    OperationTemplate getOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode) throws OperationTemplateManagementDAOException;
+    OperationTemplate getOperationTemplate(String deviceType, String subTypeId, String operationCode) throws OperationTemplateManagementDAOException;
 
-    List<OperationTemplate> getAllOperationTemplatesByDeviceType(String deviceType) throws OperationTemplateManagementDAOException;
+    List<OperationTemplate> getAllOperationTemplates(String deviceType) throws OperationTemplateManagementDAOException;
 
-    int deleteOperationTemplateByDeviceTypeAndSubTypeIdAndOperationCode(String deviceType, String subTypeId, String operationCode) throws OperationTemplateManagementDAOException;
+    boolean deleteOperationTemplate(String deviceType, String subTypeId, String operationCode) throws OperationTemplateManagementDAOException;
 
-     Set<String> getOperationTemplateCodesByDeviceTypeAndSubTypeId(String deviceType, String subTypeId) throws OperationTemplateManagementDAOException;
+     Set<String> getOperationTemplateCodes(String deviceType, String subTypeId) throws OperationTemplateManagementDAOException;
 }
