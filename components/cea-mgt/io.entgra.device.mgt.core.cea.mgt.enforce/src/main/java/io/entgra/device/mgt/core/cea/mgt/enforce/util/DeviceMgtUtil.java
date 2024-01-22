@@ -41,39 +41,29 @@ import java.util.stream.Collectors;
 public class DeviceMgtUtil {
     private static final Log log = LogFactory.getLog(DeviceMgtUtil.class);
 
-    public static List<ActiveSyncDevice> getEnrolledActiveSyncDevicesSince(Date since)
+    /**
+     * Retrieve enrolled devices before or after a certain timestamp
+     * @param date Timestamp to retrieve devices
+     * @param isPriorTo Whether to retrieve prior devices based on the provided timestamp
+     * @return List of {@link ActiveSyncDevice}
+     * @throws DeviceManagementException Throws when error occurred while retrieving devices
+     * @throws UserStoreException Throws when failed to obtain user details belongs to a device
+     */
+    public static List<ActiveSyncDevice> getEnrolledActiveSyncDevices(Date date, boolean isPriorTo)
             throws DeviceManagementException, UserStoreException {
-        DeviceManagementProviderService deviceManagementProviderService = getDeviceManagementProviderService();
+        DeviceManagementProviderService deviceManagementProviderService =
+                EnforcementServiceComponentDataHolder.getInstance().getDeviceManagementProviderService();
         if (deviceManagementProviderService == null) {
             String msg = "Device management provider service has not initialized";
             log.error(msg);
             throw new IllegalStateException(msg);
         }
-        List<Device> devices = deviceManagementProviderService.getEnrolledDevicesSince(since);
+        List<Device> devices = isPriorTo ? deviceManagementProviderService.getEnrolledDevicesPriorTo(date) :
+                deviceManagementProviderService.getEnrolledDevicesSince(date);
         if (devices == null) {
             return new ArrayList<>();
         }
         return DeviceMgtUtil.constructActiveSyncDeviceList(devices);
-
-    }
-
-    public static List<ActiveSyncDevice> getEnrolledActiveSyncDevicesPriorTo(Date priorTo)
-            throws DeviceManagementException, UserStoreException {
-        DeviceManagementProviderService deviceManagementProviderService = getDeviceManagementProviderService();
-        if (deviceManagementProviderService == null) {
-            String msg = "Device management provider service has not initialized";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        List<Device> devices = deviceManagementProviderService.getEnrolledDevicesPriorTo(priorTo);
-        if (devices == null) {
-            return new ArrayList<>();
-        }
-        return DeviceMgtUtil.constructActiveSyncDeviceList(devices);
-    }
-
-    private static DeviceManagementProviderService getDeviceManagementProviderService() {
-        return EnforcementServiceComponentDataHolder.getInstance().getDeviceManagementProviderService();
     }
 
     private static UserStoreManager getUserStoreManager(int tenantId) throws UserStoreException {
@@ -87,11 +77,12 @@ public class DeviceMgtUtil {
         return realmService.getTenantUserRealm(tenantId).getUserStoreManager();
     }
 
-    private static String getIdentity(String owner, UserStoreManager userStoreManager)
-            throws UserStoreException {
-        return userStoreManager.getUserClaimValue(owner, Constants.EMAIL_CLAIM_URI, null);
-    }
-
+    /**
+     * Generate active sync device list from retrieved device list from device management service
+     * @param devices List of devices retrieved from device management service
+     * @return List of {@link ActiveSyncDevice}
+     * @throws UserStoreException Throws when failed to load user details form user store
+     */
     private static List<ActiveSyncDevice> constructActiveSyncDeviceList(List<Device> devices)
             throws UserStoreException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -114,11 +105,19 @@ public class DeviceMgtUtil {
         return activeSyncDevices;
     }
 
+    /**
+     * Map devices which are retrieved from device management service to active sync devices
+     * @param device Device list retrieved from device management service
+     * @param userStoreManager {@link UserStoreManager}
+     * @return {@link ActiveSyncDevice}
+     * @throws UserStoreException Throws when failed to load user details form user store
+     */
     public static ActiveSyncDevice mapToActiveSyncDevice(Device device, UserStoreManager userStoreManager)
             throws UserStoreException {
         EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
         ActiveSyncDevice activeSyncDevice = new ActiveSyncDevice();
-        activeSyncDevice.setUserPrincipalName(DeviceMgtUtil.getIdentity(enrolmentInfo.getOwner(), userStoreManager));
+        activeSyncDevice.setUserPrincipalName(userStoreManager.
+                getUserClaimValue(enrolmentInfo.getOwner(), Constants.EMAIL_CLAIM_URI, null));
         if (!Objects.equals(device.getType(), Constants.DEVICE_TYPE_ANDROID)) {
             for (Device.Property property : device.getProperties()) {
                 if (property != null && Objects.equals(property.getName(), Constants.DEVICE_PROPERTY_EAS_ID)) {

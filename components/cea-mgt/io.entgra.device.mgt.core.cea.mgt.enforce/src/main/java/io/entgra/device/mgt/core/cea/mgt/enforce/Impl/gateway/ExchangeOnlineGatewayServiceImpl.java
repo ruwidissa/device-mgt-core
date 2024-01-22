@@ -83,6 +83,14 @@ public class ExchangeOnlineGatewayServiceImpl implements GatewayService {
         }
     }
 
+    /**
+     * Retrieve confidential client application if exists, otherwise create and retrieve
+     * @param clientId Client ID of the Azure AD application
+     * @param secret Client Secret of the Azure AD application
+     * @param authority Authority URL of the tenant which Azure AD application belongs
+     * @return {@link IConfidentialClientApplication}
+     * @throws MalformedURLException Throws when trying to set malformed authority URL
+     */
     private IConfidentialClientApplication getOrCreateConfidentialClientApplication(String clientId, String secret, String authority)
             throws MalformedURLException {
         IConfidentialClientApplication confidentialClientApplication = confidentialClientApplications.get(clientId);

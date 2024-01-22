@@ -264,8 +264,8 @@ public class ExchangeOnlineCEAEnforcementServiceImpl implements CEAEnforcementSe
             * time to avoid unnecessary device bulks.
             * */
             List<ActiveSyncDevice> validActiveSyncDevices = isSynced ? DeviceMgtUtil.
-                    getEnrolledActiveSyncDevicesSince(lastSynced) :
-                    DeviceMgtUtil.getEnrolledActiveSyncDevicesPriorTo(new Date());
+                    getEnrolledActiveSyncDevices(lastSynced, false) :
+                    DeviceMgtUtil.getEnrolledActiveSyncDevices(new Date(), true);
             List<ActiveSyncDevice> notValidActiveSyncDevices = new ArrayList<>();
 
             List<ActiveSyncDevice> connectedActiveSyncDevices = isSynced ?
@@ -286,33 +286,15 @@ public class ExchangeOnlineCEAEnforcementServiceImpl implements CEAEnforcementSe
                 calendar.add(Calendar.DAY_OF_MONTH, -Constants.MAX_GRACE_PERIOD_IN_DAYS);
                 List<ActiveSyncDevice> graceExceededNewlyConnectedActiveSyncDevices =
                         getConnectedActiveSyncDevicesAfter(calendar.getTime(), activeSyncServer);
-                List<ActiveSyncDevice> managedDevices = DeviceMgtUtil.getEnrolledActiveSyncDevicesSince(calendar.getTime());
-                for (ActiveSyncDevice activeSyncDevice : graceExceededNewlyConnectedActiveSyncDevices) {
-                    if (!EASMgtUtil.isManageByUEM(activeSyncDevice.getDeviceId())
-                            && !managedDevices.contains(activeSyncDevice)) {
-                        validActiveSyncDevices.remove(activeSyncDevice);
-                        notValidActiveSyncDevices.add(activeSyncDevice);
-                    } else {
-                        // These devices are managed by UEM, so add to the valid category
-                        notValidActiveSyncDevices.remove(activeSyncDevice);
-                        validActiveSyncDevices.add(activeSyncDevice);
-                    }
-                }
+                List<ActiveSyncDevice> managedDevices = DeviceMgtUtil.getEnrolledActiveSyncDevices(calendar.getTime(), false);
+                categorizeDevices(validActiveSyncDevices, notValidActiveSyncDevices,
+                        graceExceededNewlyConnectedActiveSyncDevices, managedDevices, gracePeriod, false);
 
                 // Block grace offered existing devices if exists
                 List<ActiveSyncDevice> connectedActiveSyncDevicesBeforeTheCreationOfCEAPolicy =
                         getConnectedActiveSyncDevicesBefore(created, activeSyncServer);
-                for (ActiveSyncDevice activeSyncDevice: connectedActiveSyncDevicesBeforeTheCreationOfCEAPolicy) {
-                    if (!EASMgtUtil.isManageByUEM(activeSyncDevice.getDeviceId())
-                            && !validActiveSyncDevices.contains(activeSyncDevice)) {
-                        validActiveSyncDevices.remove(activeSyncDevice);
-                        notValidActiveSyncDevices.add(activeSyncDevice);
-                    } else {
-                        // These devices are managed by UEM, so add to the valid category
-                        notValidActiveSyncDevices.remove(activeSyncDevice);
-                        validActiveSyncDevices.add(activeSyncDevice);
-                    }
-                }
+                categorizeDevices(validActiveSyncDevices, notValidActiveSyncDevices,
+                        connectedActiveSyncDevicesBeforeTheCreationOfCEAPolicy, validActiveSyncDevices, gracePeriod, false);
             }
 
             if (gracePeriod.getGraceAllowedPolicy().equalsName(GraceAllowedPolicy.NEW_AND_EXISTING.name()) ||
@@ -320,77 +302,27 @@ public class ExchangeOnlineCEAEnforcementServiceImpl implements CEAEnforcementSe
 
                 List<ActiveSyncDevice> newlyConnectedActiveSyncDevices =
                         getConnectedActiveSyncDevicesAfter(isSynced ? lastSynced : created, activeSyncServer);
-                for (ActiveSyncDevice activeSyncDevice : newlyConnectedActiveSyncDevices) {
-                    if (!EASMgtUtil.isManageByUEM(activeSyncDevice.getDeviceId())
-                            && !validActiveSyncDevices.contains(activeSyncDevice)) {
-                        long timeDiff = Math.abs(new Date().getTime() - activeSyncDevice.getFirstSyncTime().getTime());
-                        // Enforce the grace period if the device not exceeds the grace limit
-                        if (TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS) < gracePeriod.getGracePeriod()) {
-                            notValidActiveSyncDevices.remove(activeSyncDevice);
-                            validActiveSyncDevices.add(activeSyncDevice);
-                        } else {
-                            validActiveSyncDevices.remove(activeSyncDevice);
-                            notValidActiveSyncDevices.add(activeSyncDevice);
-                        }
-                    } else {
-                        // These devices are managed by UEM, so add to the valid category
-                        notValidActiveSyncDevices.remove(activeSyncDevice);
-                        validActiveSyncDevices.add(activeSyncDevice);
-                    }
-                }
+                categorizeDevices(validActiveSyncDevices, notValidActiveSyncDevices,
+                        newlyConnectedActiveSyncDevices, validActiveSyncDevices, gracePeriod, true);
 
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.DAY_OF_MONTH, -Constants.MAX_GRACE_PERIOD_IN_DAYS);
                 List<ActiveSyncDevice> graceExceededNewlyConnectedActiveSyncDevices =
                         getConnectedActiveSyncDevicesAfter(calendar.getTime(), activeSyncServer);
-                List<ActiveSyncDevice> managedDevices = DeviceMgtUtil.getEnrolledActiveSyncDevicesSince(calendar.getTime());
-                for (ActiveSyncDevice activeSyncDevice : graceExceededNewlyConnectedActiveSyncDevices) {
-                    if (!EASMgtUtil.isManageByUEM(activeSyncDevice.getDeviceId())
-                            && !managedDevices.contains(activeSyncDevice)) {
-                        long timeDiff = Math.abs(new Date().getTime() - activeSyncDevice.getFirstSyncTime().getTime());
-                        // Enforce the grace period if the device isn't exceeds the current grace limit
-                        if (TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS) < gracePeriod.getGracePeriod()) {
-                            notValidActiveSyncDevices.remove(activeSyncDevice);
-                            validActiveSyncDevices.add(activeSyncDevice);
-                        } else {
-                            validActiveSyncDevices.remove(activeSyncDevice);
-                            notValidActiveSyncDevices.add(activeSyncDevice);
-                        }
-                    } else {
-                        notValidActiveSyncDevices.remove(activeSyncDevice);
-                        validActiveSyncDevices.add(activeSyncDevice);
-                    }
-                }
+                List<ActiveSyncDevice> managedDevices = DeviceMgtUtil.getEnrolledActiveSyncDevices(calendar.getTime(), false);
+                categorizeDevices(validActiveSyncDevices, notValidActiveSyncDevices,
+                        graceExceededNewlyConnectedActiveSyncDevices, managedDevices, gracePeriod, true);
             }
 
             if (gracePeriod.getGraceAllowedPolicy().equalsName(GraceAllowedPolicy.NEW_AND_EXISTING.name()) ||
                     gracePeriod.getGraceAllowedPolicy().equalsName(GraceAllowedPolicy.EXISTING_ONLY.name())) {
-
-                long timeDiffBetweenCEAPolicyCreatedAndNow = Math.abs(new Date().getTime() - ceaPolicy.getCreated().getTime());
-
                 List<ActiveSyncDevice> connectedActiveSyncDevicesBeforeTheCreationOfCEAPolicy =
                         getConnectedActiveSyncDevicesBefore(created, activeSyncServer);
-                for (ActiveSyncDevice activeSyncDevice: connectedActiveSyncDevicesBeforeTheCreationOfCEAPolicy) {
-                    if (!EASMgtUtil.isManageByUEM(activeSyncDevice.getDeviceId())
-                            && !validActiveSyncDevices.contains(activeSyncDevice)) {
-                        // Enforce the grace period if the device not exceeds the grace limit
-                        if(TimeUnit.DAYS.convert(timeDiffBetweenCEAPolicyCreatedAndNow, TimeUnit.MILLISECONDS)
-                                < gracePeriod.getGracePeriod()) {
-                            notValidActiveSyncDevices.remove(activeSyncDevice);
-                            validActiveSyncDevices.add(activeSyncDevice);
-                        } else {
-                            validActiveSyncDevices.remove(activeSyncDevice);
-                            notValidActiveSyncDevices.add(activeSyncDevice);
-                        }
-                    } else {
-                        // These devices are managed by UEM, so add to the valid category
-                        notValidActiveSyncDevices.remove(activeSyncDevice);
-                        validActiveSyncDevices.add(activeSyncDevice);
-                    }
-                }
+                categorizeDevices(validActiveSyncDevices, notValidActiveSyncDevices,
+                        connectedActiveSyncDevicesBeforeTheCreationOfCEAPolicy, validActiveSyncDevices, gracePeriod, true);
             }
 
-            List<MailboxProfile> mailboxProfiles = generateMailboxPolicies(validActiveSyncDevices,
+            List<MailboxProfile> mailboxProfiles = generateMailboxProfiles(validActiveSyncDevices,
                     notValidActiveSyncDevices);
             for (MailboxProfile mailboxProfile : mailboxProfiles) {
                 PowershellCommand powershellCommand = getCommand(Parser.COMMAND_SetCASMailbox.COMMAND, activeSyncServer);
@@ -416,6 +348,61 @@ public class ExchangeOnlineCEAEnforcementServiceImpl implements CEAEnforcementSe
         }
     }
 
+    /**
+     * Categorize active sync devices into valid and not valid
+     * @param validActiveSyncDevices Valid active sync devices
+     * @param notValidActiveSyncDevices Not valid active sync devices
+     * @param deviceList Device list to filter
+     * @param managedList Already managing devices from UEM
+     * @param gracePeriod Grace period to consider
+     * @param allowGrace Whether to allow grace or not
+     */
+    private void categorizeDevices(List<ActiveSyncDevice> validActiveSyncDevices, List<ActiveSyncDevice> notValidActiveSyncDevices,
+            List<ActiveSyncDevice> deviceList, List<ActiveSyncDevice> managedList, GracePeriod gracePeriod, boolean allowGrace) {
+        for (ActiveSyncDevice activeSyncDevice : deviceList) {
+            if (!EASMgtUtil.isManageByUEM(activeSyncDevice.getDeviceId())
+                    && !managedList.contains(activeSyncDevice)) {
+                if (allowGrace) {
+                    filterDeviceBasedOnGrace(activeSyncDevice, validActiveSyncDevices, notValidActiveSyncDevices, gracePeriod);
+                } else {
+                    validActiveSyncDevices.remove(activeSyncDevice);
+                    notValidActiveSyncDevices.add(activeSyncDevice);
+                }
+            } else {
+                // These devices are managed by UEM, so add to the valid category
+                notValidActiveSyncDevices.remove(activeSyncDevice);
+                validActiveSyncDevices.add(activeSyncDevice);
+            }
+        }
+    }
+
+    /**
+     * Filter active sync device based on grace period
+     * @param activeSyncDevice Active sync device
+     * @param validActiveSyncDevices Valid active sync device list
+     * @param notValidActiveSyncDevices Not valid active sync device list
+     * @param gracePeriod Grace period to consider
+     */
+    private void filterDeviceBasedOnGrace(ActiveSyncDevice activeSyncDevice, List<ActiveSyncDevice> validActiveSyncDevices,
+            List<ActiveSyncDevice> notValidActiveSyncDevices, GracePeriod gracePeriod) {
+        long timeDiff = Math.abs(new Date().getTime() - activeSyncDevice.getFirstSyncTime().getTime());
+        // Enforce the grace period if the device not exceeds the grace limit
+        if (TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS) < gracePeriod.getGracePeriod()) {
+            notValidActiveSyncDevices.remove(activeSyncDevice);
+            validActiveSyncDevices.add(activeSyncDevice);
+        } else {
+            validActiveSyncDevices.remove(activeSyncDevice);
+            notValidActiveSyncDevices.add(activeSyncDevice);
+        }
+    }
+
+    /**
+     * Generate powershell command {@link PowershellCommand} from command string
+     * @param command Powershell command string
+     * @param activeSyncServer {@link ActiveSyncServer}
+     * @return {@link PowershellCommand}
+     * @throws GatewayServiceException Throws when error occurred while retrieving access token
+     */
     private PowershellCommand getCommand(String command, ActiveSyncServer activeSyncServer)
             throws GatewayServiceException {
         String[] urlParts = activeSyncServer.getGatewayUrl().split("/");
@@ -426,6 +413,13 @@ public class ExchangeOnlineCEAEnforcementServiceImpl implements CEAEnforcementSe
         return commandBuilder.build();
     }
 
+    /**
+     * Wrap powershell command to effect all mailboxes in active sync server
+     * @param command {@link PowershellCommand} command to wrap
+     * @param activeSyncServer {@link ActiveSyncServer}
+     * @return {@link PowershellCommand}
+     * @throws GatewayServiceException Throws when error occurred while retrieving access token
+     */
     private PowershellCommand toAllMailboxesCommand(PowershellCommand command,
                                                     ActiveSyncServer activeSyncServer) throws GatewayServiceException {
         PowershellCommand getEXOMailbox = getCommand(Parser.COMMAND_GetEXOMailbox.COMMAND, activeSyncServer);
@@ -438,13 +432,24 @@ public class ExchangeOnlineCEAEnforcementServiceImpl implements CEAEnforcementSe
         return getEXOMailbox;
     }
 
+    /**
+     * Create new powershell request to execute via powershell binaries
+     * @param command {@link PowershellCommand}
+     * @return {@link PowershellRequest}
+     */
     private PowershellRequest getPowershellRequest(PowershellCommand command) {
         PowershellRequest powershellRequest = new PowershellRequest();
         powershellRequest.setCommand(command);
         return powershellRequest;
     }
 
-    private List<MailboxProfile> generateMailboxPolicies(List<ActiveSyncDevice> activeSyncAllowedDevices,
+    /**
+     * Generate mailbox profiles from active sync block and allowed devices
+     * @param activeSyncAllowedDevices Active sync allowed device list
+     * @param activeSyncBlockedDevices Active sync blocked device list
+     * @return List of {@link MailboxProfile}
+     */
+    private List<MailboxProfile> generateMailboxProfiles(List<ActiveSyncDevice> activeSyncAllowedDevices,
                                                          List<ActiveSyncDevice> activeSyncBlockedDevices) {
         List<MailboxProfile> mailboxProfiles = new ArrayList<>();
         MailboxProfile mailboxProfile;
@@ -474,6 +479,12 @@ public class ExchangeOnlineCEAEnforcementServiceImpl implements CEAEnforcementSe
         return mailboxProfiles;
     }
 
+    /**
+     * Construct active sync device list from powershell response
+     * @param powershellResponse Shell response return from powershell binary
+     * @return List of {@link ActiveSyncDevice}
+     * @throws CEAEnforcementException Throws when error occurred while generating the device list
+     */
     private List<ActiveSyncDevice> constructActiveSyncDeviceList(PowershellResponse powershellResponse)
             throws CEAEnforcementException {
         if (powershellResponse == null) {
@@ -514,6 +525,15 @@ public class ExchangeOnlineCEAEnforcementServiceImpl implements CEAEnforcementSe
         return activeSyncDevices;
     }
 
+    /**
+     * Get active sync devices, which are connected with active sync server after a certain timestamp
+     * @param after Timestamp to retrieve connected devices
+     * @param activeSyncServer {@link ActiveSyncServer}
+     * @return List of {@link ActiveSyncDevice}
+     * @throws GatewayServiceException Throws when error occurred while retrieving access token
+     * @throws PowershellExecutionException Throws when error occurred while executing the powershell command
+     * @throws CEAEnforcementException Throws when error occurred while constructing device list
+     */
     private List<ActiveSyncDevice> getConnectedActiveSyncDevicesAfter(Date after, ActiveSyncServer activeSyncServer)
             throws GatewayServiceException, PowershellExecutionException, CEAEnforcementException {
         SimpleDateFormat powershellDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -541,6 +561,15 @@ public class ExchangeOnlineCEAEnforcementServiceImpl implements CEAEnforcementSe
         return constructActiveSyncDeviceList(powershellResponse);
     }
 
+    /**
+     * Get active sync devices, which are connected with active sync server before a certain timestamp
+     * @param before Timestamp to retrieve connected devices
+     * @param activeSyncServer {@link ActiveSyncServer}
+     * @return List of {@link ActiveSyncDevice}
+     * @throws GatewayServiceException Throws when error occurred while retrieving access token
+     * @throws PowershellExecutionException Throws when error occurred while executing the powershell command
+     * @throws CEAEnforcementException Throws when error occurred while constructing device list
+     */
     private List<ActiveSyncDevice> getConnectedActiveSyncDevicesBefore(Date before, ActiveSyncServer activeSyncServer)
             throws GatewayServiceException, PowershellExecutionException, CEAEnforcementException {
         SimpleDateFormat powershellDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -568,6 +597,14 @@ public class ExchangeOnlineCEAEnforcementServiceImpl implements CEAEnforcementSe
         return constructActiveSyncDeviceList(powershellResponse);
     }
 
+    /**
+     * Get all connected active sync devices from active sync server
+     * @param activeSyncServer {@link ActiveSyncServer}
+     * @return List of {@link ActiveSyncDevice}
+     * @throws GatewayServiceException Throws when error occurred while retrieving access token
+     * @throws PowershellExecutionException Throws when error occurred while executing the powershell command
+     * @throws CEAEnforcementException Throws when error occurred while constructing device list
+     */
     private List<ActiveSyncDevice> getAllConnectedActiveSyncDevices(ActiveSyncServer activeSyncServer)
             throws GatewayServiceException, PowershellExecutionException, CEAEnforcementException {
         PowershellCommand getEXOMobileDeviceStatistics = getCommand(Parser.COMMAND_GetEXOMobileDeviceStatistics.COMMAND,

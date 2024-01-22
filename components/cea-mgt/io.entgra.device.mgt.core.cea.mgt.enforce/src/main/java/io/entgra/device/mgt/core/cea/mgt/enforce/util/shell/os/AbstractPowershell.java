@@ -25,6 +25,8 @@ import io.entgra.device.mgt.core.cea.mgt.enforce.bean.PowershellRequest;
 import io.entgra.device.mgt.core.cea.mgt.enforce.bean.PowershellResponse;
 import io.entgra.device.mgt.core.cea.mgt.enforce.exception.PowershellExecutionException;
 import io.entgra.device.mgt.core.cea.mgt.enforce.util.shell.Powershell;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,6 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AbstractPowershell implements Powershell {
+    private static final Log log = LogFactory.getLog(AbstractPowershell.class);
     protected static final String SYMBOL_SPLITTER = "&";
     private static final String PARAMETER_COMMAND = "-Command";
     private static final String COMMAND_REDIRECT_WARNINGS = "$WarningPreference = 'SilentlyContinue';";
@@ -75,10 +78,12 @@ public class AbstractPowershell implements Powershell {
         } catch (IOException e) {
             String msg = "IOException occurred while executing powershell command : "
                     + powershellRequest.getCommand();
+            log.error(msg, e);
             throw new PowershellExecutionException(msg, e);
         } catch (InterruptedException e) {
             String msg = "Thread got interrupted while executing powershell command : "
                     + powershellRequest.getCommand();
+            log.error(msg, e);
             throw new PowershellExecutionException(msg, e);
         }
     }

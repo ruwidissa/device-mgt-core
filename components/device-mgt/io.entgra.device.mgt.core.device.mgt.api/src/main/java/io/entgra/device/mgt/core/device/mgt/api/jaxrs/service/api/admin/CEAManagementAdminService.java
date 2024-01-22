@@ -297,7 +297,7 @@ public interface CEAManagementAdminService {
     ) CEAPolicyWrapper ceaPolicyWrapper);
 
     @GET
-    @Path("/syncNow")
+    @Path("/sync-now")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = HttpMethod.GET,

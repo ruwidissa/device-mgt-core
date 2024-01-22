@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *  Copyright (c) 2018 - 2024, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -14,6 +14,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
@@ -153,7 +154,7 @@ public class CEAManagementAdminServiceImpl implements CEAManagementAdminService 
     }
 
     @GET
-    @Path("/syncNow")
+    @Path("/sync-now")
     @Override
     public Response sync() {
         CEAManagementService ceaManagementService = DeviceMgtAPIUtils.getCEAManagementService();
@@ -167,6 +168,11 @@ public class CEAManagementAdminServiceImpl implements CEAManagementAdminService 
         }
     }
 
+    /**
+     * Construct {@link CEAPolicy} from {@link CEAPolicyWrapper}
+     * @param ceaPolicyWrapper {@link CEAPolicyWrapper}
+     * @return {@link CEAPolicy}
+     */
     private CEAPolicy constructCEAPolicy(CEAPolicyWrapper ceaPolicyWrapper) {
         AccessPolicyWrapper accessPolicyWrapper = ceaPolicyWrapper.getConditionalAccessPolicyEntries();
         AccessPolicy accessPolicy = new AccessPolicy();
@@ -192,21 +198,5 @@ public class CEAManagementAdminServiceImpl implements CEAManagementAdminService 
         ceaPolicy.setGracePeriod(gracePeriod);
         ceaPolicy.setActiveSyncServer(activeSyncServer);
         return ceaPolicy;
-    }
-
-    private List<ActiveSyncServerUIConfiguration> constructActiveSyncServerConfigurations
-            (List<ServerUIConfiguration> serverUIConfigurations) {
-        List<ActiveSyncServerUIConfiguration> activeSyncServerUIConfigurations = new ArrayList<>();
-        if (serverUIConfigurations == null) {
-            return activeSyncServerUIConfigurations;
-        }
-        for (ServerUIConfiguration serverUIConfiguration : serverUIConfigurations) {
-            ActiveSyncServerUIConfiguration activeSyncServerUIConfiguration = new ActiveSyncServerUIConfiguration();
-            activeSyncServerUIConfiguration.setName(serverUIConfiguration.getName());
-            activeSyncServerUIConfiguration.setKey(serverUIConfiguration.getKey());
-            activeSyncServerUIConfiguration.setDescription(serverUIConfiguration.getDescription());
-            activeSyncServerUIConfigurations.add(activeSyncServerUIConfiguration);
-        }
-        return activeSyncServerUIConfigurations;
     }
 }

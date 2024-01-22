@@ -923,6 +923,10 @@ public class RequestValidationUtil {
         }
     }
 
+    /**
+     * Validate conditional access policy
+     * @param ceaPolicyWrapper {@link CEAPolicyWrapper}
+     */
     public static void validateCEAPolicy(CEAPolicyWrapper ceaPolicyWrapper) {
         if (ceaPolicyWrapper == null) {
             String msg = "CEA policy should not be null";
@@ -934,6 +938,10 @@ public class RequestValidationUtil {
         validateCEAGracePeriod(ceaPolicyWrapper.getGracePeriodEntries());
     }
 
+    /**
+     * Validate active sync server configurations
+     * @param activeSyncServer {@link ActiveSyncServer}
+     */
     public static void validateActiveSyncServer(ActiveSyncServer activeSyncServer) {
         if (activeSyncServer == null) {
             String msg = "Active sync server should not be null";
@@ -962,6 +970,10 @@ public class RequestValidationUtil {
         }
     }
 
+    /**
+     * Validate conditional access policy configurations
+     * @param accessPolicyWrapper {@link AccessPolicyWrapper}
+     */
     public static void validateCEAAccessPolicy(AccessPolicyWrapper accessPolicyWrapper) {
         if (accessPolicyWrapper == null) {
             String msg = "Access policy should not be null";
@@ -982,6 +994,10 @@ public class RequestValidationUtil {
         }
     }
 
+    /**
+     * Validate grace period configurations
+     * @param gracePeriodWrapper {@link GracePeriodWrapper}
+     */
     public static void validateCEAGracePeriod(GracePeriodWrapper gracePeriodWrapper) {
         if (gracePeriodWrapper == null) {
             String msg = "Grace period should not be null";
