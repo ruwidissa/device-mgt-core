@@ -1700,6 +1700,16 @@
                 <version>${io.entgra.device.mgt.core.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.entgra.device.mgt.core</groupId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.device.organization</artifactId>
+                <version>${io.entgra.device.mgt.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.entgra.device.mgt.core</groupId>
+                <artifactId>io.entgra.device.mgt.core.device.mgt.extensions.device.organization.api</artifactId>
+                <version>${io.entgra.device.mgt.core.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson-annotations.version}</version>

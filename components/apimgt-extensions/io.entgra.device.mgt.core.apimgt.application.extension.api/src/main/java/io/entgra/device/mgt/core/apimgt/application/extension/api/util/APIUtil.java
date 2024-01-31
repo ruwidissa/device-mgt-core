@@ -51,6 +51,8 @@ public class APIUtil {
     private static final String DEFAULT_ENTERPRISE_TAG= "androidforwork";
     private static final String DEFAULT_ANALYTICS_MGT_TAG= "analytics_management";
 
+    private static final String DEFAULT_DEVICE_ORGANIZATION_MGT_TAG= "device_organization_management";
+
     public static final String PERMISSION_PROPERTY_NAME = "name";
 
     public static String getAuthenticatedUser() {
@@ -121,6 +123,7 @@ public class APIUtil {
         allowedApisTags.add(DEFAULT_ANALYTICS_ARTIFACT_TAG);
         allowedApisTags.add(DEFAULT_TRANSPORT_MGT_TAG);
         allowedApisTags.add(DEFAULT_ANALYTICS_MGT_TAG);
+        allowedApisTags.add(DEFAULT_DEVICE_ORGANIZATION_MGT_TAG);
         // In an environment only super tenant should be capable of calling this API tag
         if (PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId() ==
                 MultitenantConstants.SUPER_TENANT_ID) {

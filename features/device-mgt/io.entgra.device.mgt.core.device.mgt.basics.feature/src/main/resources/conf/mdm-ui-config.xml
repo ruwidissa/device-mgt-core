@@ -370,7 +370,6 @@
         <Scope>dm:metadata:update</Scope>
         <Scope>dm:metadata:remove</Scope>
         <Scope>and:ops:add-google-acc</Scope>
-        <Scope>and:ops:authenticate-acc</Scope>
         <Scope>and:ops:update-default-sim</Scope>
         <Scope>and:ops:add-google-acc</Scope>
         <Scope>and:ops:device-info</Scope>
@@ -407,6 +406,10 @@
         <Scope>am:store:vpp:assets:view</Scope>
         <Scope>and:devices:enroll</Scope>
         <Scope>ios:devices:enroll</Scope>
+        <Scope>dm:device-org:view</Scope>
+        <Scope>dm:device-org:add</Scope>
+        <Scope>dm:device-org:modify</Scope>
+        <Scope>dm:device-org:delete</Scope>
         <Scope>dm:admin:cea:view</Scope>
         <Scope>dm:admin:cea:add</Scope>
         <Scope>dm:admin:cea:update</Scope>
