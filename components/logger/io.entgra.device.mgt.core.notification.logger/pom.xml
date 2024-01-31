@@ -79,8 +79,8 @@
                             io.entgra.device.mgt.core.device.mgt.extensions.logger.spi;version="[5.0,6)",
                             io.entgra.device.mgt.core.notification.logger,
                             io.entgra.device.mgt.core.notification.logger.util,
-                            org.apache.commons.logging;version="[1.2,2)"
-<!--                            org.apache.log4j;version="[2,3)"-->
+                            org.apache.commons.logging;version="[1.2,2)",
+                            pax-logging-api
                         </Import-Package>
                         <Export-Package>
                             io.entgra.device.mgt.core.notification.logger.*
