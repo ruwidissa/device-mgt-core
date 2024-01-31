@@ -18,12 +18,12 @@
 
 package io.entgra.device.mgt.core.subtype.mgt.dao.impl;
 
-import io.entgra.device.mgt.core.subtype.mgt.exception.DBConnectionException;
-import io.entgra.device.mgt.core.subtype.mgt.exception.SubTypeMgtDAOException;
 import io.entgra.device.mgt.core.subtype.mgt.dao.DeviceSubTypeDAO;
 import io.entgra.device.mgt.core.subtype.mgt.dao.util.ConnectionManagerUtil;
-import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
 import io.entgra.device.mgt.core.subtype.mgt.dao.util.DAOUtil;
+import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
+import io.entgra.device.mgt.core.subtype.mgt.exception.DBConnectionException;
+import io.entgra.device.mgt.core.subtype.mgt.exception.SubTypeMgtDAOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -101,7 +101,9 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     public DeviceSubType getDeviceSubType(String subTypeId, int tenantId, String deviceType)
             throws SubTypeMgtDAOException {
         try {
-            String sql = "SELECT * FROM DM_DEVICE_SUB_TYPE WHERE SUB_TYPE_ID = ? AND TENANT_ID = ? AND DEVICE_TYPE = ?";
+            String sql = "SELECT s.*, o.OPERATION_CODE  FROM DM_DEVICE_SUB_TYPE s " +
+                    "LEFT JOIN SUB_OPERATION_TEMPLATE o on s.SUB_TYPE_ID = o.SUB_TYPE_ID " +
+                    "WHERE s.SUB_TYPE_ID = ? AND s.TENANT_ID = ? AND s.DEVICE_TYPE = ?";
 
             Connection conn = ConnectionManagerUtil.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -109,10 +111,8 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
                 stmt.setInt(2, tenantId);
                 stmt.setString(3, deviceType);
                 try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return DAOUtil.loadDeviceSubType(rs);
-                    }
-                    return null;
+                    List<DeviceSubType> deviceSubTypes = DAOUtil.loadDeviceSubTypes(rs);
+                    return (deviceSubTypes != null && !deviceSubTypes.isEmpty()) ? deviceSubTypes.get(0) : null;
                 }
             }
 
@@ -133,18 +133,20 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     public List<DeviceSubType> getAllDeviceSubTypes(int tenantId, String deviceType)
             throws SubTypeMgtDAOException {
         try {
-            String sql = "SELECT * FROM DM_DEVICE_SUB_TYPE WHERE TENANT_ID = ? AND DEVICE_TYPE = ? ORDER BY " +
-                    "SUB_TYPE_ID";
+            String sql = "SELECT s.*, o.OPERATION_CODE FROM DM_DEVICE_SUB_TYPE s " +
+                    "LEFT JOIN SUB_OPERATION_TEMPLATE o on s.SUB_TYPE_ID = o.SUB_TYPE_ID AND s.DEVICE_TYPE  = o.DEVICE_TYPE " +
+                    "WHERE s.TENANT_ID = ? AND s.DEVICE_TYPE = ? ORDER BY " +
+                    "s.SUB_TYPE_ID";
 
             Connection conn = ConnectionManagerUtil.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.setString(2, deviceType);
                 try (ResultSet rs = stmt.executeQuery()) {
-                    return DAOUtil.loadDeviceSubTypes(rs);
+                    List<DeviceSubType> deviceSubTypes = DAOUtil.loadDeviceSubTypes(rs);
+                    return deviceSubTypes;
                 }
             }
-
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining DB connection to retrieve all device sub types for " +
                     deviceType + " subtypes";

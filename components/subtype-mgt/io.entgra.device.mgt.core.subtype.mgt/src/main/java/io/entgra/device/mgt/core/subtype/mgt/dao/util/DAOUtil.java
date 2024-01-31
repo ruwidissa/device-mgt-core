@@ -20,11 +20,12 @@ package io.entgra.device.mgt.core.subtype.mgt.dao.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DAOUtil {
 
@@ -49,10 +50,35 @@ public class DAOUtil {
     }
 
     public static List<DeviceSubType> loadDeviceSubTypes(ResultSet rs) throws SQLException {
-        List<DeviceSubType> deviceSubTypes = new ArrayList<>();
-        while (rs.next()) {
-            deviceSubTypes.add(loadDeviceSubType(rs));
+        try {
+            Map<String, DeviceSubType> deviceSubTypes = new LinkedHashMap<>();
+            DeviceSubType deviceSubType = new DeviceSubType() {
+                @Override
+                public <T> DeviceSubType convertToDeviceSubType() {
+                    return null;
+                }
+
+                @Override
+                public String parseSubTypeToJson() throws JsonProcessingException {
+                    return null;
+                }
+            };
+            while (rs.next()) {
+                String currentSubTypeId = rs.getString("SUB_TYPE_ID");
+                String deviceType = rs.getString("DEVICE_TYPE");
+                String operationCode = rs.getString("OPERATION_CODE");
+                String key = deviceType + "|" + currentSubTypeId;
+                if (!deviceSubTypes.containsKey(key)) {
+                    deviceSubType = loadDeviceSubType(rs);
+                }
+                if (operationCode != null) {
+                    deviceSubType.addOperationCode(operationCode);
+                }
+                deviceSubTypes.put(key, deviceSubType);
+            }
+            return new ArrayList<>(deviceSubTypes.values());
+        } catch (Exception e) {
+            return null;
         }
-        return deviceSubTypes;
     }
 }

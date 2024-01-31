@@ -59,8 +59,18 @@ public class OperationTemplateManagementUtil {
      * @param operationCode
      * @return
      */
-    public static String setOperationTemplateCacheKey(String subTypeId, String deviceType, String operationCode) {
-        return subTypeId + "|" + deviceType + "|" + operationCode;
+    public static String setOperationTemplateCacheKey(String deviceType, String subTypeId, String operationCode) {
+        return deviceType + "|" + subTypeId + "|" + operationCode;
+    }
+
+    /**
+     *
+     * @param subTypeId
+     * @param deviceType
+     * @return
+     */
+    public static String setOperationTemplateCacheKey(String deviceType, String subTypeId) {
+        return deviceType + "|" + subTypeId;
     }
 
     /**
@@ -70,14 +80,32 @@ public class OperationTemplateManagementUtil {
      */
     public static OperationTemplateCacheKey getOperationTemplateCacheKey(String key) {
         String[] keys = key.split("\\|");
-        String subTypeId = keys[0];;
-        String deviceType = keys[1];
+        String deviceType = keys[0];;
+        String subTypeId = keys[1];
         String operationCode = keys[2];
 
         OperationTemplateCacheKey operationTemplateCacheKey = new OperationTemplateCacheKey();
         operationTemplateCacheKey.setSubTypeId(subTypeId);
         operationTemplateCacheKey.setDeviceType(deviceType);
         operationTemplateCacheKey.setOperationCode(operationCode);
+
+        return operationTemplateCacheKey;
+    }
+
+    /**
+     *
+     * @param key
+     * @return
+     */
+    public static OperationTemplateCacheKey getOperationTemplateCodeCacheKey(String key) {
+
+        String[] keys = key.split("\\|");
+        String deviceType = keys[0];;
+        String subTypeId = keys[1];
+
+        OperationTemplateCacheKey operationTemplateCacheKey = new OperationTemplateCacheKey();
+        operationTemplateCacheKey.setSubTypeId(subTypeId);
+        operationTemplateCacheKey.setDeviceType(deviceType);
 
         return operationTemplateCacheKey;
     }
