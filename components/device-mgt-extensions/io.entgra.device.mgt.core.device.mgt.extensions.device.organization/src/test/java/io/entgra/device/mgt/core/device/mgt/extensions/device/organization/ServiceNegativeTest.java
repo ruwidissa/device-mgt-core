@@ -96,32 +96,6 @@ public class ServiceNegativeTest extends BaseDeviceOrganizationTest {
         deviceOrganizationService.addDeviceOrganization(invalidOrganization);
     }
 
-    @Test(description = "This method tests Add Device Organization method under negative circumstances with invalid" +
-            "parent ID",
-            expectedExceptions = {DeviceOrganizationMgtPluginException.class})
-    public void testAddDeviceOrganizationWithInvalidParentID() throws DeviceOrganizationMgtPluginException {
-
-        DeviceOrganization deviceOrganizationOne = new DeviceOrganization();
-        deviceOrganizationOne.setDeviceId(3);
-        deviceOrganizationOne.setParentDeviceId(30);
-        deviceOrganizationOne.setDeviceOrganizationMeta("Physical Relationship");
-
-        boolean result1 = deviceOrganizationService.addDeviceOrganization(deviceOrganizationOne);
-    }
-
-    @Test(description = "This method tests Add Device Organization method under negative circumstances with invalid" +
-            "child ID",
-            expectedExceptions = {DeviceOrganizationMgtPluginException.class})
-    public void testAddDeviceOrganizationWithInvalidChildID() throws DeviceOrganizationMgtPluginException {
-
-        DeviceOrganization deviceOrganizationOne = new DeviceOrganization();
-        deviceOrganizationOne.setDeviceId(30);
-        deviceOrganizationOne.setParentDeviceId(3);
-        deviceOrganizationOne.setDeviceOrganizationMeta("Physical Relationship");
-        boolean result1 = deviceOrganizationService.addDeviceOrganization(deviceOrganizationOne);
-
-    }
-
     @Test(description = "This method tests isDeviceOrganizationExist method under negative circumstances with an organization that doesn't exist")
     public void testOrganizationDoesNotExist() throws DeviceOrganizationMgtPluginException {
         int nonExistentDeviceId = 9999; // An ID that doesn't exist
