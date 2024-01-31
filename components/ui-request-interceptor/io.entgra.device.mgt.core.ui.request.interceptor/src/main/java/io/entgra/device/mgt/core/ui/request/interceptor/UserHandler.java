@@ -50,7 +50,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 
 @MultipartConfig
 @WebServlet("/user")
@@ -122,13 +121,11 @@ public class UserHandler extends HttpServlet {
             proxyResponse.setCode(HttpStatus.SC_OK);
 
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> nodeMap = mapper.convertValue(tokenData, new TypeReference<>() {
-            });
-            nodeMap.put("username", tokenData.get("username").textValue().replaceAll("@carbon.super", ""));
-            proxyResponse.setData(mapper.convertValue(nodeMap, JsonNode.class));
+            String data = tokenData.get("username").textValue().replaceAll("@carbon.super", "");
+            proxyResponse.setData(mapper.convertValue(data, JsonNode.class));
 
             HandlerUtil.handleSuccess(resp, proxyResponse);
-            httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, nodeMap.get("username").toString());
+            httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, tokenData.get("username").toString());
             log.info(
                     "User " + proxyResponse.getData() + " logged in",
                     userLoginLogContextBuilder
