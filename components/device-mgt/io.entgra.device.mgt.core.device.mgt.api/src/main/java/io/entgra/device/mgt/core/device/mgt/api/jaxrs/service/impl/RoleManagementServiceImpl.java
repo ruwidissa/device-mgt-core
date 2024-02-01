@@ -427,6 +427,16 @@ public class RoleManagementServiceImpl implements RoleManagementService {
     public Response addRole(RoleInfo roleInfo) {
         RequestValidationUtil.validateRoleDetails(roleInfo);
         RequestValidationUtil.validateRoleName(roleInfo.getRoleName());
+
+        String role;
+        String[] roles = roleInfo.getRoleName().split("/");
+
+        if (roles.length > 1) {
+            role = roleInfo.getRoleName().split("/")[1];
+        } else {
+            role = roleInfo.getRoleName().split("/")[0];
+        }
+
         try {
             String tenantId = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             String tenantDomain = String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
@@ -435,6 +445,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             if (log.isDebugEnabled()) {
                 log.debug("Persisting the role in the underlying user store");
             }
+
 
             Permission[] permissions = null;
             if (roleInfo.getPermissions() != null && roleInfo.getPermissions().length > 0) {
@@ -458,11 +469,11 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             }
             String stringUsers = new Gson().toJson(roleInfo.getUsers());
             log.info(
-                    "Role " + roleInfo.getRoleName().split("/")[1] + " created",
+                    "Role " + role + " created",
                     roleMgtContextBuilder
                             .setActionTag("ADD_ROLE")
                             .setUserStoreDomain(roleInfo.getRoleName().split("/")[0])
-                            .setRoleName(roleInfo.getRoleName().split("/")[1])
+                            .setRoleName(role)
                             .setUsers(stringUsers)
                             .setTenantID(tenantId)
                             .setTenantDomain(tenantDomain)
@@ -481,8 +492,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 errorCode = e.getMessage().split("-")[0].trim();
             }
             if (ErrorMessages.ERROR_CODE_ROLE_ALREADY_EXISTS.getCode().equals(errorCode)) {
-                String roleName = roleInfo.getRoleName().split("/")[1];
-                String msg = "Role already exists with name : " + roleName + ". Try with another role name.";
+                String msg = "Role already exists with name : " + role + ". Try with another role name.";
                 log.warn(msg);
                 return Response.status(Response.Status.CONFLICT).entity(msg).build();
             } else {
@@ -609,12 +619,22 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 updatePermissions(roleDetails[roleDetails.length - 1], roleInfo, userRealm);
             }
             String stringUsers = new Gson().toJson(roleInfo.getUsers());
+
+            String role;
+            String[] roles = roleInfo.getRoleName().split("/");
+
+            if (roles.length > 1) {
+                role = roleInfo.getRoleName().split("/")[1];
+            } else {
+                role = roleInfo.getRoleName().split("/")[0];
+            }
+
             log.info(
-                    "Role " + roleInfo.getRoleName().split("/")[1] + " updated",
+                    "Role " + role + " updated",
                     roleMgtContextBuilder
                             .setActionTag("UPDATE_ROLE")
                             .setUserStoreDomain(roleInfo.getRoleName().split("/")[0])
-                            .setRoleName(roleInfo.getRoleName().split("/")[1])
+                            .setRoleName(role)
                             .setUsers(stringUsers)
                             .setTenantID(tenantId)
                             .setTenantDomain(tenantDomain)
@@ -671,12 +691,21 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                 log.debug("Deleting the role in user store");
             }
             DeviceMgtAPIUtils.getGroupManagementProviderService().deleteRoleAndRoleGroupMapping(roleName, roleToDelete, tenantId, userStoreManager, authorizationManager);
+            String role;
+            String[] roles = roleName.split("/");
+
+            if (roles.length > 1) {
+                role = roleName.split("/")[1];
+            } else {
+                role = roleName.split("/")[0];
+            }
+
             log.info(
-                    "Role " + roleName.split("/")[1] + " deleted",
+                    "Role " + role + " deleted",
                     roleMgtContextBuilder
                             .setActionTag("DELETE_ROLE")
                             .setUserStoreDomain(userStoreName)
-                            .setRoleName(roleName.split("/")[1])
+                            .setRoleName(role)
                             .setTenantID(String.valueOf(tenantId))
                             .setTenantDomain(tenantDomain)
                             .setUserName(userName)
