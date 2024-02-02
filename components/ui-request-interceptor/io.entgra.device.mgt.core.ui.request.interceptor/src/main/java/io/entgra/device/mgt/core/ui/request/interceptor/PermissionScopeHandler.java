@@ -63,8 +63,8 @@ public class PermissionScopeHandler extends HttpServlet {
             JsonNode authDataScope = authData.getScope();
 
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> nodeMap = new HashMap<>();
-            nodeMap.put(HandlerConstants.USER_SCOPES, authDataScope);
+            Map<String, String> nodeMap = new HashMap<>();
+            nodeMap.put(HandlerConstants.USER_SCOPES, authDataScope.asText().replace("\"", ""));
             proxyResponse.setCode(HttpStatus.SC_OK);
             proxyResponse.setStatus(ProxyResponse.Status.SUCCESS);
             proxyResponse.setData(mapper.convertValue(nodeMap, JsonNode.class));
