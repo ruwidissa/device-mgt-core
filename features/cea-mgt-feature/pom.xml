@@ -33,5 +33,6 @@
 
     <modules>
         <module>io.entgra.device.mgt.core.cea.mgt.server.feature</module>
+        <module>io.entgra.device.mgt.core.cea.mgt.admin.api.feature</module>
     </modules>
 </project>

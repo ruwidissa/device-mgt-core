@@ -17,11 +17,16 @@
  *
  */
 
-package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
+package io.entgra.device.mgt.core.cea.mgt.admin.api.impl;
 
+import io.entgra.device.mgt.core.cea.mgt.admin.api.bean.AccessPolicyWrapper;
+import io.entgra.device.mgt.core.cea.mgt.admin.api.bean.CEAPolicyWrapper;
+import io.entgra.device.mgt.core.cea.mgt.admin.api.bean.GracePeriodWrapper;
+import io.entgra.device.mgt.core.cea.mgt.admin.api.service.CEAManagementAdminService;
+import io.entgra.device.mgt.core.cea.mgt.admin.api.util.CEAManagementApiUtil;
+import io.entgra.device.mgt.core.cea.mgt.admin.api.util.RequestValidationUtil;
 import io.entgra.device.mgt.core.cea.mgt.common.bean.AccessPolicy;
 import io.entgra.device.mgt.core.cea.mgt.common.bean.ActiveSyncServer;
-import io.entgra.device.mgt.core.cea.mgt.common.bean.ActiveSyncServerUIConfiguration;
 import io.entgra.device.mgt.core.cea.mgt.common.bean.CEAPolicy;
 import io.entgra.device.mgt.core.cea.mgt.common.bean.GracePeriod;
 import io.entgra.device.mgt.core.cea.mgt.common.bean.enums.DefaultAccessPolicy;
@@ -29,21 +34,14 @@ import io.entgra.device.mgt.core.cea.mgt.common.bean.enums.EmailOutlookAccessPol
 import io.entgra.device.mgt.core.cea.mgt.common.bean.enums.GraceAllowedPolicy;
 import io.entgra.device.mgt.core.cea.mgt.common.bean.enums.POPIMAPAccessPolicy;
 import io.entgra.device.mgt.core.cea.mgt.common.bean.enums.WebOutlookAccessPolicy;
-import io.entgra.device.mgt.core.cea.mgt.common.bean.ui.CEAPolicyUIConfiguration;
-import io.entgra.device.mgt.core.cea.mgt.common.bean.ui.ServerUIConfiguration;
 import io.entgra.device.mgt.core.cea.mgt.common.exception.CEAManagementException;
 import io.entgra.device.mgt.core.cea.mgt.common.exception.CEAPolicyAlreadyExistsException;
 import io.entgra.device.mgt.core.cea.mgt.common.exception.CEAPolicyNotFoundException;
 import io.entgra.device.mgt.core.cea.mgt.common.service.CEAManagementService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.AccessPolicyWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.CEAPolicyWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.GracePeriodWrapper;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.CEAManagementAdminService;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import io.entgra.device.mgt.core.cea.mgt.common.bean.ui.CEAPolicyUIConfiguration;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -52,9 +50,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Path("/admin/cea-policies")
@@ -67,7 +63,7 @@ public class CEAManagementAdminServiceImpl implements CEAManagementAdminService 
     @Path("/ui")
     @Override
     public Response getCEAPolicyUI() {
-        CEAManagementService ceaManagementService = DeviceMgtAPIUtils.getCEAManagementService();
+        CEAManagementService ceaManagementService = CEAManagementApiUtil.getCEAManagementService();
         try {
             CEAPolicyUIConfiguration ceaPolicyUIConfiguration = ceaManagementService.getCEAPolicyUIConfiguration();
             if (ceaPolicyUIConfiguration == null) {
@@ -86,7 +82,7 @@ public class CEAManagementAdminServiceImpl implements CEAManagementAdminService 
     public Response createCEAPolicy(CEAPolicyWrapper ceaPolicyWrapper) {
         try {
             RequestValidationUtil.validateCEAPolicy(ceaPolicyWrapper);
-            CEAManagementService ceaManagementService = DeviceMgtAPIUtils.getCEAManagementService();
+            CEAManagementService ceaManagementService = CEAManagementApiUtil.getCEAManagementService();
             CEAPolicy ceaPolicy = constructCEAPolicy(ceaPolicyWrapper);
             ceaPolicy = ceaManagementService.createCEAPolicy(ceaPolicy);
             return Response.status(HttpStatus.SC_CREATED).entity(ceaPolicy).build();
@@ -104,7 +100,7 @@ public class CEAManagementAdminServiceImpl implements CEAManagementAdminService 
     @Override
     public Response retrieveCEAPolicy() {
         try {
-            CEAManagementService ceaManagementService = DeviceMgtAPIUtils.getCEAManagementService();
+            CEAManagementService ceaManagementService = CEAManagementApiUtil.getCEAManagementService();
             CEAPolicy ceaPolicy = ceaManagementService.retrieveCEAPolicy();
             if (ceaPolicy == null) {
                 return Response.status(HttpStatus.SC_NOT_FOUND).entity("CEA policy isn't exists in the tenant").build();
@@ -120,7 +116,7 @@ public class CEAManagementAdminServiceImpl implements CEAManagementAdminService 
     @Override
     public Response deleteCEAPolicy() {
         try {
-            CEAManagementService ceaManagementService = DeviceMgtAPIUtils.getCEAManagementService();
+            CEAManagementService ceaManagementService = CEAManagementApiUtil.getCEAManagementService();
             ceaManagementService.deleteCEAPolicy();
             return Response.status(HttpStatus.SC_OK).build();
         } catch (CEAPolicyNotFoundException e) {
@@ -138,7 +134,7 @@ public class CEAManagementAdminServiceImpl implements CEAManagementAdminService 
     public Response updateCEAPolicy(CEAPolicyWrapper ceaPolicyWrapper) {
         try {
             RequestValidationUtil.validateCEAPolicy(ceaPolicyWrapper);
-            CEAManagementService ceaManagementService = DeviceMgtAPIUtils.getCEAManagementService();
+            CEAManagementService ceaManagementService = CEAManagementApiUtil.getCEAManagementService();
             CEAPolicy ceaPolicy = constructCEAPolicy(ceaPolicyWrapper);
             ceaPolicy = ceaManagementService.updateCEAPolicy(ceaPolicy);
             return Response.status(HttpStatus.SC_CREATED).entity(ceaPolicy).build();
@@ -157,7 +153,7 @@ public class CEAManagementAdminServiceImpl implements CEAManagementAdminService 
     @Path("/sync-now")
     @Override
     public Response sync() {
-        CEAManagementService ceaManagementService = DeviceMgtAPIUtils.getCEAManagementService();
+        CEAManagementService ceaManagementService = CEAManagementApiUtil.getCEAManagementService();
         try {
             ceaManagementService.syncNow();
             return Response.status(HttpStatus.SC_OK).build();
