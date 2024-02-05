@@ -18,39 +18,54 @@
   ~
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <artifactId>cea-mgt-feature</artifactId>
+        <artifactId>io.entgra.device.mgt.core.parent</artifactId>
         <version>5.0.40-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>io.entgra.device.mgt.core.cea.mgt.server.feature</artifactId>
-    <name>Entgra IoT - CEA Management Server Feature</name>
-    <description>Entgra IoT - Conditional Email Access Management Server Feature</description>
-
-    <dependencies>
-        <dependency>
-            <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.core.cea.mgt.common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.core.cea.mgt.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.entgra.device.mgt.core</groupId>
-            <artifactId>io.entgra.device.mgt.core.cea.mgt.enforce</artifactId>
-        </dependency>
-    </dependencies>
+    <artifactId>io.entgra.device.mgt.core.cea.mgt.admin.api.feature</artifactId>
+    <name>Entgra IoT - CEA Management Admin API Feature</name>
+    <description>Entgra IoT - Conditional Email Access Management Admin API Feature</description>
 
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>io.entgra.device.mgt.core</groupId>
+                                    <artifactId>io.entgra.device.mgt.core.cea.mgt.admin.api</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>
+                                        ${project.build.directory}/maven-shared-archive-resources/webapps
+                                    </outputDirectory>
+                                    <destFileName>api#cea-mgt#v1.0.war</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -76,7 +91,6 @@
             <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
-                <version>${carbon.p2.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>p2-feature-generation</id>
@@ -85,33 +99,21 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>io.entgra.device.mgt.core.cea.mgt.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <id>io.entgra.device.mgt.core.cea.mgt.admin.api</id>
+                            <propertiesFile>../../../features/etc/feature.properties
+                            </propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server
                                     </propertyDef>
-                                    <propertyDef>org.eclipse.equinox.p2.type.group:true
+                                    <propertyDef>org.eclipse.equinox.p2.type.group:false
                                     </propertyDef>
                                 </properties>
                             </adviceFile>
-                            <bundles>
-                                <!--<bundleDef>{groupId}:{artifactId}:{version}</bundleDef>-->
-                                <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.cea.mgt.common:${io.entgra.device.mgt.core.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.cea.mgt.core:${io.entgra.device.mgt.core.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    io.entgra.device.mgt.core:io.entgra.device.mgt.core.cea.mgt.enforce:${io.entgra.device.mgt.core.version}
-                                </bundleDef>
-                            </bundles>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-
 </project>
