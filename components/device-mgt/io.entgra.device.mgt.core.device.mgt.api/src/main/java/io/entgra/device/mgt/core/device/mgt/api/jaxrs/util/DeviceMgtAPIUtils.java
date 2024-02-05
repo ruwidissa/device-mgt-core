@@ -159,7 +159,6 @@ public class DeviceMgtAPIUtils {
 
     private static DeviceStatusManagementService deviceStatusManagementService;
     private static OTPManagementService otpManagementService;
-
     private static volatile SubscriptionManager subscriptionManager;
     private static volatile ApplicationManager applicationManager;
     private static volatile APIApplicationServices apiApplicationServices;
@@ -1290,5 +1289,4 @@ public class DeviceMgtAPIUtils {
         }
         return isPermitted;
     }
-
 }

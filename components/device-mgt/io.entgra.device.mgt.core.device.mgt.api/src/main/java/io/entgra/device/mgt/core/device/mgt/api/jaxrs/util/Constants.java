@@ -88,4 +88,8 @@ public class Constants {
 		public static final String TENANT = "/permission/admin/tenants";
 	}
 
+	public static final class CEAPolicyConstants {
+		CEAPolicyConstants() {};
+		public static final String CEAPolicyMetaKey = "_CEA_POLICY";
+	}
 }

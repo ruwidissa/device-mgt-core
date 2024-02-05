@@ -27,8 +27,6 @@ import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.DevicePrope
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceMonitoringData;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCoordinate;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
@@ -38,14 +36,24 @@ import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.LogFactory;
+import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
+import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCoordinate;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.Random;
-import java.util.*;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
@@ -3275,5 +3283,64 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
         return agentVersions;
+    }
+
+    public List<Device> getDevicesEnrolledSince(Date since) throws DeviceManagementDAOException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        List<Device> devices = new ArrayList<>();
+        String query = "SELECT e.ID AS ENROLMENT_ID, e.DEVICE_ID, e.OWNER, e.OWNERSHIP, e.DATE_OF_ENROLMENT, " +
+                "e.DATE_OF_LAST_UPDATE, e.IS_TRANSFERRED, e.STATUS,d.DEVICE_NAME, d.DESCRIPTION, d.DEVICE_TYPE, d.DEVICE_IDENTIFICATION " +
+                "FROM DM_ENROLMENT e,(SELECT d1.ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_IDENTIFICATION, " +
+                "t1.NAME AS DEVICE_TYPE FROM DM_DEVICE d1, DM_DEVICE_TYPE t1 WHERE d1.DEVICE_TYPE_ID = t1.ID " +
+                "AND d1.TENANT_ID = ?) d WHERE e.STATUS NOT IN ('DELETED', 'REMOVED') AND e.DATE_OF_ENROLMENT > ? AND e.TENANT_ID = ?";
+        try {
+            Connection connection = DeviceManagementDAOFactory.getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setInt(1, tenantId);
+                preparedStatement.setTimestamp(2, new Timestamp(since.getTime()));
+                preparedStatement.setInt(3, tenantId);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(resultSet);
+                        device.setProperties(getDeviceProps(device.getDeviceIdentifier(), tenantId).getProperties());
+                        devices.add(device);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving devices";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+        return devices;
+    }
+    public List<Device> getDevicesEnrolledPriorTo(Date priorTo) throws DeviceManagementDAOException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        List<Device> devices = new ArrayList<>();
+        String query = "SELECT e.ID AS ENROLMENT_ID, e.DEVICE_ID, e.OWNER, e.OWNERSHIP, e.DATE_OF_ENROLMENT, " +
+                "e.DATE_OF_LAST_UPDATE, e.IS_TRANSFERRED, e.STATUS, d.DEVICE_NAME, d.DESCRIPTION, d.DEVICE_TYPE, d.DEVICE_IDENTIFICATION " +
+                "FROM DM_ENROLMENT e,(SELECT d1.ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_IDENTIFICATION, " +
+                "t1.NAME AS DEVICE_TYPE FROM DM_DEVICE d1, DM_DEVICE_TYPE t1 WHERE d1.DEVICE_TYPE_ID = t1.ID " +
+                "AND d1.TENANT_ID = ?) d WHERE e.STATUS NOT IN ('DELETED', 'REMOVED') AND e.DATE_OF_ENROLMENT < ? AND e.TENANT_ID = ?";
+        try {
+            Connection connection = DeviceManagementDAOFactory.getConnection();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setInt(1, tenantId);
+                preparedStatement.setTimestamp(2, new Timestamp(priorTo.getTime()));
+                preparedStatement.setInt(3, tenantId);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(resultSet);
+                        device.setProperties(getDeviceProps(device.getDeviceIdentifier(), tenantId).getProperties());
+                        devices.add(device);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving devices";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+        return devices;
     }
 }
