@@ -25,36 +25,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.internal.UserStoreRoleMappingServiceComponent"
- * immediate="true"
- * @scr.reference name="user.realmservice.default"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setRealmService"
- * unbind="unsetRealmService"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- * @scr.reference name="entgra.heart.beat.service"
- * interface="io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService"
- * cardinality="0..1"
- * policy="dynamic"
- * bind="setHeartBeatService"
- * unbind="unsetHeartBeatService"
- */
+@Component(
+        name = "io.entgra.device.mgt.core.device.mgt.extensions.userstore.role.mapper.internal.UserStoreRoleMappingServiceComponent",
+        immediate = true)
 public class UserStoreRoleMappingServiceComponent {
 
     private static final Log log = LogFactory.getLog(UserStoreRoleMappingServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("Activating Role Management Service Component");
@@ -72,12 +55,19 @@ public class UserStoreRoleMappingServiceComponent {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("De-activating Role Manager Service Component");
         }
     }
 
+    @Reference(
+            name = "user.realmservice.default",
+            service = org.wso2.carbon.user.core.service.RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
     protected void setConfigurationContextService(ConfigurationContextService configurationContextService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting ConfigurationContextService");
@@ -86,6 +76,12 @@ public class UserStoreRoleMappingServiceComponent {
         UserStoreRoleMappingDataHolder.getInstance().setConfigurationContextService(configurationContextService);
     }
 
+    @Reference(
+            name = "config.context.service",
+            service = org.wso2.carbon.utils.ConfigurationContextService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetConfigurationContextService")
     protected void unsetConfigurationContextService(ConfigurationContextService configurationContextService) {
         if (log.isDebugEnabled()) {
             log.debug("Un-setting ConfigurationContextService");
@@ -118,6 +114,12 @@ public class UserStoreRoleMappingServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Reference(
+            name = "entgra.heart.beat.service",
+            service = io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetHeartBeatService")
     protected void setHeartBeatService(HeartBeatManagementService heartBeatService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting heart beat service");

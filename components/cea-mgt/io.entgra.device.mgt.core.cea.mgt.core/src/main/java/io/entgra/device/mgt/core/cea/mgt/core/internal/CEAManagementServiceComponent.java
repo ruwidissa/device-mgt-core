@@ -29,34 +29,17 @@ import io.entgra.device.mgt.core.cea.mgt.core.task.CEAPolicyMonitoringTaskManage
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 
-/**
- * @scr.component name="io.entgra.device.mgt.core.cea.mgt.core.CEAManagementServiceComponent" immediate="true"
- * @scr.reference name="org.wso2.carbon.ndatasource"
- * interface="org.wso2.carbon.ndatasource.core.DataSourceService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setDataSourceService"
- * unbind="unsetDataSourceService"
- * @scr.reference name="io.entgra.device.mgt.core.cea.mgt.enforcementServiceManager"
- * interface="io.entgra.device.mgt.core.cea.mgt.common.service.EnforcementServiceManager"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setEnforcementServiceManager"
- * unbind="unsetEnforcementServiceManager"
- * @scr.reference name="ntask.component"
- * interface="org.wso2.carbon.ntask.core.service.TaskService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setTaskService"
- * unbind="unsetTaskService"
- */
-
+@Component(
+        name = "io.entgra.device.mgt.core.cea.mgt.core.CEAManagementServiceComponent",
+        immediate = true)
 public class CEAManagementServiceComponent {
     private static final Log log = LogFactory.getLog(CEAManagementServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             CEAConfigManager ceaConfigManager = CEAConfigManager.getInstance();
@@ -72,6 +55,13 @@ public class CEAManagementServiceComponent {
         }
     }
 
+    @Reference(
+            name = "org.wso2.carbon.ndatasource",
+            service = org.wso2.carbon.ndatasource.core.DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "setDataSourceService",
+            unbind = "unsetDataSourceService")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         // This is to avoid cea management component getting initialized before the underlying datasource registered
     }
@@ -80,6 +70,13 @@ public class CEAManagementServiceComponent {
         // Do nothing
     }
 
+    @Reference(
+            name = "io.entgra.device.mgt.core.cea.mgt.enforcementServiceManager",
+            service = io.entgra.device.mgt.core.cea.mgt.common.service.EnforcementServiceManager.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "setEnforcementServiceManager",
+            unbind = "unsetEnforcementServiceManager")
     protected void setEnforcementServiceManager(EnforcementServiceManager enforcementServiceManager) {
         CEAManagementDataHolder.getInstance().setEnforcementServiceManager(enforcementServiceManager);
         if (log.isDebugEnabled()) {
@@ -94,6 +91,13 @@ public class CEAManagementServiceComponent {
         }
     }
 
+    @Reference(
+            name = "ntask.component",
+            service = org.wso2.carbon.ntask.core.service.TaskService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "setTaskService",
+            unbind = "unsetTaskService")
     protected void setTaskService(TaskService taskService) {
         CEAManagementDataHolder.getInstance().setTaskService(taskService);
         if (log.isDebugEnabled()) {

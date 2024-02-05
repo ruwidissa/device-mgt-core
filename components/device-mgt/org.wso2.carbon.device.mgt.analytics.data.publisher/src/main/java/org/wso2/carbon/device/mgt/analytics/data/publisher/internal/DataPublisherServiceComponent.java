@@ -27,10 +27,9 @@ import org.wso2.carbon.device.mgt.analytics.data.publisher.config.AnalyticsConfi
 import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherServiceImpl;
 
-/**
- * @scr.component name="org.wso2.carbon.device.mgt.analytics.data.publisher.internal.DataPublisherServiceComponent"
- * immediate="true"
- */
+@Component(
+        name = "org.wso2.carbon.device.mgt.analytics.data.publisher.internal.DataPublisherServiceComponent",
+        immediate = true)
 public class DataPublisherServiceComponent {
 
     private ServiceRegistration analyticsServiceRef;
