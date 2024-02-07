@@ -23,7 +23,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <artifactId>io.entgra.device.mgt.core.parent</artifactId>
+        <artifactId>cea-mgt-feature</artifactId>
         <version>5.0.40-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
