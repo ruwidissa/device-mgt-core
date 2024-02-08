@@ -21,6 +21,9 @@ package io.entgra.device.mgt.core.subtype.mgt.dto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 public abstract class DeviceSubType {
 
@@ -29,16 +32,22 @@ public abstract class DeviceSubType {
     private String deviceType;
     private String subTypeName;
     private String typeDefinition;
-
+    private Set<String> operationCodes = new HashSet<>();
     public DeviceSubType() {
     }
 
-    public DeviceSubType(String subTypeId, int tenantId, String deviceType, String subTypeName, String typeDefinition) {
+    public DeviceSubType(String subTypeId, int tenantId, String deviceType, String subTypeName, String typeDefinition,
+                         Set<String> operationCodes) {
         this.subTypeId = subTypeId;
         this.tenantId = tenantId;
         this.deviceType = deviceType;
         this.subTypeName = subTypeName;
         this.typeDefinition = typeDefinition;
+        if (operationCodes != null || !operationCodes.isEmpty()) {
+            this.operationCodes.addAll(operationCodes);
+        }
+
+
     }
 
     public String getSubTypeId() {
@@ -85,4 +94,10 @@ public abstract class DeviceSubType {
 
     public abstract String parseSubTypeToJson() throws JsonProcessingException;
 
+    public void addOperationCode(String code) {
+        operationCodes.add(code);
+    }
+    public Set<String> getOperationCodes() {
+        return operationCodes;
+    }
 }

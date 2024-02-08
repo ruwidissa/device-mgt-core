@@ -1053,7 +1053,6 @@ public interface DeviceManagementProviderService {
      */
     List<Application> getInstalledApplicationsOnDevice(Device device, int offset, int limit)
             throws DeviceManagementException;
-
     /**
      * This method is for getting the installed application list of a device
      * @param device {@link Device}
@@ -1061,4 +1060,6 @@ public interface DeviceManagementProviderService {
      * @throws DeviceManagementException if any service level or DAO level error occurs
      */
     List<Application> getInstalledApplicationsOnDevice(Device device) throws DeviceManagementException;
+    List<Device> getEnrolledDevicesSince(Date since) throws DeviceManagementException;
+    List<Device> getEnrolledDevicesPriorTo(Date before) throws DeviceManagementException;
 }

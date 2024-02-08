@@ -53,13 +53,6 @@ public class EntgraRoleMgtLoggerImpl implements EntgraLogger {
     }
 
     @Override
-    public void info(String message, LogContext logContext) {
-        RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
-        MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
-        log.info(message);
-    }
-
-    @Override
     public void info(Object object, LogContext logContext) {
         RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
         MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
@@ -89,13 +82,6 @@ public class EntgraRoleMgtLoggerImpl implements EntgraLogger {
     @Override
     public void debug(Object o, Throwable throwable) {
         log.debug(o, throwable);
-    }
-
-    @Override
-    public void debug(String message, LogContext logContext) {
-        RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
-        MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
-        log.debug(message);
     }
 
     @Override
@@ -131,20 +117,6 @@ public class EntgraRoleMgtLoggerImpl implements EntgraLogger {
     }
 
     @Override
-    public void error(String message, LogContext logContext) {
-        RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
-        MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
-        log.error(message);
-    }
-
-    @Override
-    public void error(String message, Throwable t, LogContext logContext) {
-        RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
-        MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
-        log.error(message, t);
-    }
-
-    @Override
     public void error(Object object, LogContext logContext) {
         RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
         MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
@@ -174,20 +146,6 @@ public class EntgraRoleMgtLoggerImpl implements EntgraLogger {
     @Override
     public void warn(Object o, Throwable throwable) {
         log.warn(o, throwable);
-    }
-
-    @Override
-    public void warn(String message, LogContext logContext) {
-        RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
-        MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
-        log.warn(message);
-    }
-
-    @Override
-    public void warn(String message, Throwable t, LogContext logContext) {
-        RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
-        MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
-        log.warn(message, t);
     }
 
     @Override
@@ -223,13 +181,6 @@ public class EntgraRoleMgtLoggerImpl implements EntgraLogger {
     }
 
     @Override
-    public void trace(String message, LogContext logContext) {
-        RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
-        MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
-        log.trace(message);
-    }
-
-    @Override
     public void trace(Object object, LogContext logContext) {
         RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
         MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
@@ -259,13 +210,6 @@ public class EntgraRoleMgtLoggerImpl implements EntgraLogger {
     @Override
     public void fatal(Object o, Throwable throwable) {
         log.fatal(0, throwable);
-    }
-
-    @Override
-    public void fatal(String message, LogContext logContext) {
-        RoleMgtLogContext roleMgtLogContext = (RoleMgtLogContext) logContext;
-        MDCContextUtil.populateRoleMgtMDCContext(roleMgtLogContext);
-        log.fatal(message);
     }
 
     @Override

@@ -49,7 +49,7 @@ public class DAOTest extends BaseOperationTemplatePluginTest {
 
         ConnectionManagerUtils.openDBConnection();
         OperationTemplate operationTemplateActual = operationTemplateDAO.getOperationTemplate(
-                "4", TestUtils.deviceType, TestUtils.operationCode);
+                 TestUtils.deviceType, "4", TestUtils.operationCode);
         ConnectionManagerUtils.closeDBConnection();
         Assert.assertNotNull(operationTemplateActual, "Cannot be null");
         Assert.assertEquals(operationTemplateActual.getSubTypeId(), "4");
@@ -73,7 +73,7 @@ public class DAOTest extends BaseOperationTemplatePluginTest {
         ConnectionManagerUtils.commitDBTransaction();
 
         OperationTemplate operationTemplateActual = operationTemplateDAO.getOperationTemplate(
-                "4", TestUtils.deviceType, TestUtils.operationCode);
+                TestUtils.deviceType, "4", TestUtils.operationCode);
         ConnectionManagerUtils.closeDBConnection();
         Assert.assertNotNull(operationTemplateActual, "Cannot be null");
         Assert.assertEquals(operationTemplateActual.getSubTypeId(), "4");
@@ -87,7 +87,7 @@ public class DAOTest extends BaseOperationTemplatePluginTest {
 
         ConnectionManagerUtils.beginDBTransaction();
         OperationTemplate operationTemplate = operationTemplateDAO.getOperationTemplate(
-                "4", TestUtils.deviceType, TestUtils.operationCode);
+                TestUtils.deviceType, "4", TestUtils.operationCode);
         OperationTemplate operationTemplateActual = operationTemplateDAO.updateOperationTemplate(
                 operationTemplate);
         ConnectionManagerUtils.commitDBTransaction();

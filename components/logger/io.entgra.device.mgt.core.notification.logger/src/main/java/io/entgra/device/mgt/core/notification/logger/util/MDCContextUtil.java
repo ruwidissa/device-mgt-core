@@ -228,11 +228,14 @@ public final class MDCContextUtil {
         if (mdcContext.getActionTag() != null) {
             MDC.put("ActionTag", mdcContext.getActionTag());
         }
+        if (mdcContext.getRoles() != null) {
+            MDC.put("Roles", mdcContext.getRoles());
+        }
         if (mdcContext.getDeviceCount() != null) {
             MDC.put("DeviceCount", mdcContext.getDeviceCount());
         }
-        if (mdcContext.getDevices() != null) {
-            MDC.put("Devices", mdcContext.getDevices());
+        if (mdcContext.getDeviceIdentifiers() != null) {
+            MDC.put("DeviceIdentifiers", mdcContext.getDeviceIdentifiers());
         }
         if (mdcContext.getUserName() != null) {
             MDC.put("UserName", mdcContext.getUserName());

@@ -52,13 +52,6 @@ public class EntgraUserLoginLoggerImpl implements EntgraLogger {
     }
 
     @Override
-    public void info(String message, LogContext logContext) {
-        UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
-        MDCContextUtil.populateUserMDCContext(userLoginLogContext);
-        log.info(message);
-    }
-
-    @Override
     public void info(Object object, LogContext logContext) {
         UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
         MDCContextUtil.populateUserMDCContext(userLoginLogContext);
@@ -89,13 +82,6 @@ public class EntgraUserLoginLoggerImpl implements EntgraLogger {
     @Override
     public void debug(Object o, Throwable throwable) {
         log.debug(o, throwable);
-    }
-
-    @Override
-    public void debug(String message, LogContext logContext) {
-        UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
-        MDCContextUtil.populateUserMDCContext(userLoginLogContext);
-        log.debug(message);
     }
 
     @Override
@@ -132,20 +118,6 @@ public class EntgraUserLoginLoggerImpl implements EntgraLogger {
     }
 
     @Override
-    public void error(String message, LogContext logContext) {
-        UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
-        MDCContextUtil.populateUserMDCContext(userLoginLogContext);
-        log.error(message);
-    }
-
-    @Override
-    public void error(String message, Throwable t, LogContext logContext) {
-        UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
-        MDCContextUtil.populateUserMDCContext(userLoginLogContext);
-        log.error(message, t);
-    }
-
-    @Override
     public void error(Object object, LogContext logContext) {
         UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
         MDCContextUtil.populateUserMDCContext(userLoginLogContext);
@@ -176,20 +148,6 @@ public class EntgraUserLoginLoggerImpl implements EntgraLogger {
     @Override
     public void warn(Object o, Throwable throwable) {
         log.warn(o, throwable);
-    }
-
-    @Override
-    public void warn(String message, LogContext logContext) {
-        UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
-        MDCContextUtil.populateUserMDCContext(userLoginLogContext);
-        log.warn(message);
-    }
-
-    @Override
-    public void warn(String message, Throwable t, LogContext logContext) {
-        UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
-        MDCContextUtil.populateUserMDCContext(userLoginLogContext);
-        log.warn(message, t);
     }
 
     @Override
@@ -225,13 +183,6 @@ public class EntgraUserLoginLoggerImpl implements EntgraLogger {
     }
 
     @Override
-    public void trace(String message, LogContext logContext) {
-        UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
-        MDCContextUtil.populateUserMDCContext(userLoginLogContext);
-        log.trace(message);
-    }
-
-    @Override
     public void trace(Object object, LogContext logContext) {
         UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
         MDCContextUtil.populateUserMDCContext(userLoginLogContext);
@@ -245,7 +196,6 @@ public class EntgraUserLoginLoggerImpl implements EntgraLogger {
         log.trace(object, t);
 
     }
-
 
     public void fatal(String message) {
         log.fatal(message);
@@ -263,13 +213,6 @@ public class EntgraUserLoginLoggerImpl implements EntgraLogger {
     @Override
     public void fatal(Object o, Throwable throwable) {
         log.fatal(0, throwable);
-    }
-
-    @Override
-    public void fatal(String message, LogContext logContext) {
-        UserLoginLogContext userLoginLogContext = (UserLoginLogContext) logContext;
-        MDCContextUtil.populateUserMDCContext(userLoginLogContext);
-        log.fatal(message);
     }
 
     @Override

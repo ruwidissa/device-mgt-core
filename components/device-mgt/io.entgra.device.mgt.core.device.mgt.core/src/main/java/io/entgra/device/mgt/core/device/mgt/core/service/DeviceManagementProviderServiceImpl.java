@@ -37,6 +37,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.Billing;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceEnrollmentInfoNotification;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
@@ -56,6 +57,7 @@ import io.entgra.device.mgt.core.device.mgt.common.StartupOperationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.BillingResponse;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.MobileAppTypes;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.ConfigurationManagementException;
@@ -81,7 +83,6 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagem
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.UserNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoQuery;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
@@ -126,6 +127,7 @@ import io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.DeviceInform
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeVersion;
+import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementServiceComponent;
 import io.entgra.device.mgt.core.device.mgt.core.internal.PluginInitializationListener;
@@ -136,10 +138,11 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.CommandOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.HttpReportingUtil;
-import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
-import io.entgra.device.mgt.core.notification.logger.DeviceEnrolmentLogContext;
-import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceEnrolmentLoggerImpl;
-import io.entgra.device.mgt.core.transport.mgt.email.sender.core.*;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.ContentProviderInfo;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailContext;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailSendingFailedException;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.EmailTransportNotConfiguredException;
+import io.entgra.device.mgt.core.transport.mgt.email.sender.core.TypedValue;
 import io.entgra.device.mgt.core.transport.mgt.email.sender.core.service.EmailSenderService;
 import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
@@ -156,17 +159,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
@@ -5160,5 +5154,45 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throw new DeviceManagementException(msg);
         }
         return newApplicationList;
+    }
+
+    @Override
+    public List<Device> getEnrolledDevicesSince(Date since) throws DeviceManagementException {
+        List<Device> devices;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            devices = deviceDAO.getDevicesEnrolledSince(since);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while getting devices enrolled device since " + since.getTime();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return devices;
+    }
+
+    @Override
+    public List<Device> getEnrolledDevicesPriorTo(Date priorTo) throws DeviceManagementException {
+        List<Device> devices;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            devices = deviceDAO.getDevicesEnrolledPriorTo(priorTo);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while getting devices enrolled device prior to " + priorTo.getTime();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return devices;
     }
 }

@@ -29,6 +29,9 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.util.List;
+import java.util.Set;
+
 public class ServiceTest extends BaseOperationTemplatePluginTest {
 
     private static final Log log = LogFactory.getLog(ServiceTest.class);
@@ -43,7 +46,8 @@ public class ServiceTest extends BaseOperationTemplatePluginTest {
     @Test(dependsOnMethods = "testAddOperationTemplate")
     public void testGetOperationTemplate() throws OperationTemplateMgtPluginException {
 
-        OperationTemplate operationTemplateActual = operationTemplateService.getOperationTemplate(TestUtils.subtypeId, TestUtils.deviceType, TestUtils.operationCode);
+        OperationTemplate operationTemplateActual = operationTemplateService.getOperationTemplate(
+                TestUtils.deviceType, TestUtils.subtypeId, TestUtils.operationCode);
         Assert.assertEquals(operationTemplateActual.getSubTypeId(), operationTemplateActual.getSubTypeId());
         Assert.assertEquals(operationTemplateActual.getCode(), TestUtils.operationCode);
         Assert.assertEquals(operationTemplateActual.getDeviceType(), TestUtils.deviceType);
@@ -59,7 +63,7 @@ public class ServiceTest extends BaseOperationTemplatePluginTest {
         operationTemplate.setOperationDefinition(TestUtils.getOperationDefinition(TestUtils.subtypeId, TestUtils.operationCode));
         operationTemplateService.addOperationTemplate(operationTemplate);
 
-        OperationTemplate operationTemplateActual = operationTemplateService.getOperationTemplate(TestUtils.subtypeId, TestUtils.deviceType, TestUtils.operationCode);
+        OperationTemplate operationTemplateActual = operationTemplateService.getOperationTemplate(TestUtils.deviceType, TestUtils.subtypeId, TestUtils.operationCode);
         Assert.assertNotNull(operationTemplateActual, "Cannot be null");
         Assert.assertEquals(operationTemplateActual.getOperationDefinition(), TestUtils.getOperationDefinition(TestUtils.subtypeId, TestUtils.operationCode));
         Assert.assertEquals(operationTemplateActual.getSubTypeId(), operationTemplateActual.getSubTypeId());
@@ -70,7 +74,7 @@ public class ServiceTest extends BaseOperationTemplatePluginTest {
     @Test(dependsOnMethods = "testAddOperationTemplate")
     public void testUpdateOperationTemplate() throws OperationTemplateMgtPluginException {
 
-        OperationTemplate operationTemplate = operationTemplateService.getOperationTemplate(TestUtils.subtypeId, TestUtils.deviceType, TestUtils.operationCode);
+        OperationTemplate operationTemplate = operationTemplateService.getOperationTemplate(TestUtils.deviceType, TestUtils.subtypeId, TestUtils.operationCode);
         operationTemplate.setOperationDefinition("{}");
         OperationTemplate operationTemplateActual = operationTemplateService.updateOperationTemplate(operationTemplate);
 
@@ -81,13 +85,30 @@ public class ServiceTest extends BaseOperationTemplatePluginTest {
         Assert.assertEquals(operationTemplateActual.getDeviceType(), TestUtils.deviceType);
     }
 
-    @Test(dependsOnMethods = {"testAddOperationTemplate", "testGetOperationTemplate", "testUpdateOperationTemplate"})
-    public void testDeleteOperationTemplate() throws OperationTemplateMgtPluginException {
-        operationTemplateService.deleteOperationTemplate(TestUtils.subtypeId, TestUtils.deviceType, TestUtils.operationCode);
-        Assert.assertNull(getOperationTemplateBySubtypeIdAndDeviceTypeAndOperationCode(TestUtils.subtypeId, TestUtils.deviceType, TestUtils.operationCode));
+
+    public OperationTemplate getOperationTemplateBySubtypeIdAndDeviceTypeAndOperationCode(String deviceType, String subtypeId, String operationCode) throws OperationTemplateMgtPluginException {
+        return operationTemplateService.getOperationTemplate(deviceType, subtypeId, operationCode);
     }
 
-    public OperationTemplate getOperationTemplateBySubtypeIdAndDeviceTypeAndOperationCode(String subtypeId, String deviceType, String operationCode) throws OperationTemplateMgtPluginException {
-        return operationTemplateService.getOperationTemplate(subtypeId, deviceType, operationCode);
+    @Test(dependsOnMethods = "testAddOperationTemplate")
+    public void testGetOperationTemplateCodesByDeviceTypeAndSubTypeId() throws OperationTemplateMgtPluginException {
+
+        Set<String> operationCodes = operationTemplateService.getOperationTemplateCodes(TestUtils.deviceType, TestUtils.subtypeId);
+        Assert.assertNotNull(operationCodes, "Cannot be null");
+    }
+
+    @Test(dependsOnMethods = "testAddOperationTemplate")
+    public void testGetAllOperationTemplatesByDeviceType() throws OperationTemplateMgtPluginException {
+
+        List<OperationTemplate> operationTemplates = operationTemplateService.getAllOperationTemplates(TestUtils.deviceType);
+        Assert.assertNotNull(operationTemplates, "Cannot be null");
+        Assert.assertFalse(operationTemplates.isEmpty(), "operationTemplates is empty");
+    }
+
+    @Test(dependsOnMethods = {"testAddOperationTemplate", "testGetOperationTemplate", "testUpdateOperationTemplate",
+            "testGetOperationTemplateCodesByDeviceTypeAndSubTypeId", "testGetAllOperationTemplatesByDeviceType"})
+    public void testDeleteOperationTemplate() throws OperationTemplateMgtPluginException {
+        operationTemplateService.deleteOperationTemplate(TestUtils.deviceType, TestUtils.subtypeId, TestUtils.operationCode);
+        Assert.assertNull(getOperationTemplateBySubtypeIdAndDeviceTypeAndOperationCode(TestUtils.deviceType, TestUtils.subtypeId, TestUtils.operationCode));
     }
 }

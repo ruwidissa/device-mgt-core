@@ -65,7 +65,7 @@ public class OperationTemplateCacheLoader extends CacheLoader<String, OperationT
         }
         try {
             ConnectionManagerUtils.openDBConnection();
-            return operationTemplateDAO.getOperationTemplate(subTypeId, deviceType, operationCode);
+            return operationTemplateDAO.getOperationTemplate(deviceType, subTypeId, operationCode);
         } catch (DBConnectionException e) {
             String msg =
                     "Error occurred while obtaining the database connection to retrieve operation template for "

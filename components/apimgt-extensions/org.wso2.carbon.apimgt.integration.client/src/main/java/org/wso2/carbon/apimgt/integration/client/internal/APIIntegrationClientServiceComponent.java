@@ -27,19 +27,14 @@ import org.wso2.carbon.apimgt.integration.client.configs.APIMConfigReader;
 import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 
-/**
- * @scr.component name="org.wso2.carbon.api.integration.client" immediate="true"
- * @scr.reference name="api.integration.client.service"
- * interface="io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setJWTClientManagerService"
- * unbind="unsetJWTClientManagerService"
- */
+@Component(
+        name = "org.wso2.carbon.api.integration.client",
+        immediate = true)
 public class APIIntegrationClientServiceComponent {
 
     private static Log log = LogFactory.getLog(APIIntegrationClientServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         try {
             if (log.isDebugEnabled()) {
@@ -59,10 +54,18 @@ public class APIIntegrationClientServiceComponent {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
 
+    @Reference(
+            name = "api.integration.client.service",
+            service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "setJWTClientManagerService",
+            unbind = "unsetJWTClientManagerService")
     protected void setJWTClientManagerService(JWTClientManagerService jwtClientManagerService) {
         if (jwtClientManagerService != null) {
             log.debug("jwtClientManagerService service is initialized");

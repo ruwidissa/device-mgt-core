@@ -125,4 +125,19 @@ public class ServiceTest extends BaseDeviceSubTypePluginTest {
         int subTypeCount = deviceSubTypeService.getDeviceSubTypeCount(deviceType);
         log.info(deviceType + " Device subtypes count: " + subTypeCount);
     }
+
+    @Test
+    public void testGetMeterDeviceType() throws SubTypeMgtPluginException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        DeviceSubType subTypeActual = deviceSubTypeService.getDeviceSubType("7", tenantId,
+                "METER");
+        Assert.assertNotNull(subTypeActual);
+    }
+
+    @Test
+    public void testGetAllMeterDeviceTypes() throws SubTypeMgtPluginException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        List<DeviceSubType> subTypeActual = deviceSubTypeService.getAllDeviceSubTypes(tenantId, "METER");
+        Assert.assertNotNull(subTypeActual);
+    }
 }

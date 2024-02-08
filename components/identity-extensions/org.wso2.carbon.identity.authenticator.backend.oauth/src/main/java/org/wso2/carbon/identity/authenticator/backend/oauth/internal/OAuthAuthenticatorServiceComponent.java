@@ -26,20 +26,15 @@ import org.wso2.carbon.core.services.authentication.CarbonServerAuthenticator;
 import org.wso2.carbon.identity.authenticator.backend.oauth.OauthAuthenticator;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 
-/**
- * @scr.component name="org.wso2.carbon.identity.backend.oauth.authenticator" immediate="true"
- * @scr.reference name="identity.oauth2.validation.service"
- * interface="org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService"
- * cardinality="1..1"
- * policy="dynamic"
- * bind="setOAuth2ValidationService"
- * unbind="unsetOAuth2ValidationService"
- */
+@Component(
+        name = "org.wso2.carbon.identity.backend.oauth.authenticator",
+        immediate = true)
 public class OAuthAuthenticatorServiceComponent {
 
     private static final Log log = LogFactory.getLog(OAuthAuthenticatorServiceComponent.class);
 
     @SuppressWarnings("unused")
+    @Activate
     protected void activate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Starting Backend OAuthAuthenticator Framework Bundle");
@@ -47,6 +42,7 @@ public class OAuthAuthenticatorServiceComponent {
     }
 
     @SuppressWarnings("unused")
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
@@ -57,6 +53,13 @@ public class OAuthAuthenticatorServiceComponent {
      * @param tokenValidationService An instance of OAuth2TokenValidationService.
      */
     @SuppressWarnings("unused")
+    @Reference(
+            name = "identity.oauth2.validation.service",
+            service = org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "setOAuth2ValidationService",
+            unbind = "unsetOAuth2ValidationService")
     protected void setOAuth2ValidationService(OAuth2TokenValidationService tokenValidationService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting OAuth2TokenValidationService Service");
