@@ -18,11 +18,14 @@
 
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
+import io.entgra.device.mgt.core.application.mgt.common.exception.FileDownloaderServiceException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.FileTransferServiceException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.core.dao.SPApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -103,6 +106,8 @@ import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -145,6 +150,55 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public <T> Application createApplication(T app, boolean isPublished) throws ApplicationManagementException {
+        return createApplicationBasedOnRemoteStatus(app, isPublished);
+    }
+
+    /**
+     * Create the application based on the release wrapper's remote status. If the remote status is true, then
+     * the application creation will take place asynchronously.
+     * @param app Application release wrapper
+     * @param isPublished Publish status
+     * @return {@link Application}
+     * @throws ApplicationManagementException Throws when error occurred while application creation
+     */
+    @SuppressWarnings("unchecked")
+    private <T> Application createApplicationBasedOnRemoteStatus(T app, boolean isPublished) throws ApplicationManagementException {
+        if (ApplicationManagementUtil.getRemoteStatus(app)) {
+            List<?> releaseWrappers = ApplicationManagementUtil.deriveApplicationWithoutRelease(app);
+            Application createdApplication = triggerApplicationCreation(app, isPublished);
+            if (createdApplication == null) {
+                throw new ApplicationManagementException("Null retrieved for created application.");
+            }
+            try {
+                if (releaseWrappers != null && !releaseWrappers.isEmpty()) {
+                    if (app instanceof ApplicationWrapper) {
+                        ((ApplicationWrapper) app).setEntAppReleaseWrappers((List<EntAppReleaseWrapper>) releaseWrappers);
+                        createApplicationReleaseBasedOnRemoteStatus(createdApplication.getId(),
+                                ((ApplicationWrapper) app).getEntAppReleaseWrappers().get(0), isPublished);
+                    } else if (app instanceof CustomAppWrapper) {
+                        ((CustomAppWrapper) app).setCustomAppReleaseWrappers((List<CustomAppReleaseWrapper>) releaseWrappers);
+                        createApplicationReleaseBasedOnRemoteStatus(createdApplication.getId(),
+                                ((CustomAppWrapper) app).getCustomAppReleaseWrappers().get(0), isPublished);
+                    } else {
+                        throw new ApplicationManagementException("Unsupported release wrapper received");
+                    }
+                }
+                return createdApplication;
+            } catch (ResourceManagementException e) {
+                throw new ApplicationManagementException("Error encountered while creating deploying artifact", e);
+            }
+        }
+        return triggerApplicationCreation(app, isPublished);
+    }
+
+    /**
+     * Trigger the application creation process
+     * @param app Application release wrapper
+     * @param isPublished Publish status
+     * @return {@link Application}
+     * @throws ApplicationManagementException Throws when error occurred while creating the application
+     */
+    private <T> Application triggerApplicationCreation(T app, boolean isPublished) throws ApplicationManagementException {
         ApplicationDTO applicationDTO = uploadReleaseArtifactIfExist(app);
         try {
             ConnectionManagerUtil.beginDBTransaction();
@@ -172,22 +226,110 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
+    /**
+     * Create application release based on remote status. If the remote status is true, then the
+     * application release creation will take place asynchronously.
+     * @param appId Application id
+     * @param releaseWrapper Release wrapper
+     * @param isPublished Publish status
+     * @return {@link Application}
+     * @throws ApplicationManagementException Throws when error occurred while deploying the release
+     * @throws ResourceManagementException Throws when error occurred while deploying the release
+     */
+    private <T> ApplicationRelease createApplicationReleaseBasedOnRemoteStatus(int appId, T releaseWrapper, boolean isPublished)
+            throws ApplicationManagementException, ResourceManagementException {
+        if (ApplicationManagementUtil.getRemoteStatusFromWrapper(releaseWrapper)) {
+            triggerReleaseAsynchronously(appId, releaseWrapper, isPublished);
+        } else {
+            if (releaseWrapper instanceof EntAppReleaseWrapper) {
+                return triggerEntAppRelease(appId, (EntAppReleaseWrapper) releaseWrapper, isPublished);
+            }
+
+            if (releaseWrapper instanceof CustomAppReleaseWrapper) {
+                return triggerCustomAppRelease(appId, (CustomAppReleaseWrapper) releaseWrapper, isPublished);
+            }
+
+            throw new ApplicationManagementException("Unsupported release wrapper received");
+        }
+        return new ApplicationRelease();
+    }
+
+    /**
+     * Trigger release creation asynchronously
+     * @param appId Application id
+     * @param releaseWrapper Release wrapper
+     * @param isPublished Publish status
+     */
+    private <T> void triggerReleaseAsynchronously(int appId, T releaseWrapper, boolean isPublished) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        new Thread(() -> {
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
+                if (releaseWrapper instanceof EntAppReleaseWrapper &&
+                        ((EntAppReleaseWrapper) releaseWrapper).isRemoteStatus()) {
+                    triggerEntAppRelease(appId, (EntAppReleaseWrapper) releaseWrapper, isPublished);
+                }else if (releaseWrapper instanceof CustomAppReleaseWrapper &&
+                        ((CustomAppReleaseWrapper) releaseWrapper).isRemoteStatus()) {
+                    triggerCustomAppRelease(appId, (CustomAppReleaseWrapper) releaseWrapper, isPublished);
+                } else {
+                    throw new ApplicationManagementException("Unsupported release wrapper received");
+                }
+            } catch (ApplicationManagementException | ResourceManagementException e) {
+                log.error("Error encountered while deploying remote application release", e);
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }).start();
+    }
+
+    /**
+     * Trigger enterprise application creation
+     * @param appId Application id
+     * @param releaseWrapper Release wrapper
+     * @param isPublished Publish status
+     * @return {@link ApplicationRelease}
+     * @throws ApplicationManagementException Throws when error encountered while creating enterprise application
+     */
+    private ApplicationRelease triggerEntAppRelease(int appId, EntAppReleaseWrapper releaseWrapper, boolean isPublished)
+            throws ApplicationManagementException{
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            ApplicationArtifact artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIconLink(), releaseWrapper.getScreenshotLinks(),
+                    releaseWrapper.getArtifactLink(), releaseWrapper.getBannerLink());
+            ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
+            DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
+            ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
+            releaseDTO = uploadEntAppReleaseArtifacts(releaseDTO, artifact, deviceType.getName(), true);
+            try {
+                return createRelease(applicationDTO, releaseDTO, ApplicationType.ENTERPRISE, isPublished);
+            } catch (ApplicationManagementException e) {
+                String msg = "Error occurred while creating ent app release for application with the name: " + applicationDTO.getName();
+                log.error(msg, e);
+                deleteApplicationArtifacts(Collections.singletonList(releaseDTO.getAppHashValue()));
+                throw new ApplicationManagementException(msg, e);
+            }
+        } catch (MalformedURLException e) {
+            String msg = "Malformed URL link received as a downloadable link";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (FileDownloaderServiceException e) {
+            String msg = "Error encountered while downloading application release artifacts for app id " + appId;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
     @Override
     public ApplicationRelease createEntAppRelease(int appId, EntAppReleaseWrapper releaseWrapper, boolean isPublished)
             throws ApplicationManagementException {
-        ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationArtifact artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(), releaseWrapper.getScreenshots(),
-                releaseWrapper.getBinaryFile(), releaseWrapper.getBanner());
-        ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
-        DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
-        ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
-        releaseDTO = uploadEntAppReleaseArtifacts(releaseDTO, artifact, deviceType.getName(), true);
         try {
-            return createRelease(applicationDTO, releaseDTO, ApplicationType.ENTERPRISE, isPublished);
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while creating ent app release for application with the name: " + applicationDTO.getName();
+            return createApplicationReleaseBasedOnRemoteStatus(appId, releaseWrapper, isPublished);
+        } catch (ResourceManagementException e) {
+            String msg = "Error occurred while creating enterprise app release for the app id " + appId;
             log.error(msg, e);
-            deleteApplicationArtifacts(Collections.singletonList(releaseDTO.getAppHashValue()));
             throw new ApplicationManagementException(msg, e);
         }
     }
@@ -196,17 +338,27 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public ApplicationRelease createWebAppRelease(int appId, WebAppReleaseWrapper releaseWrapper, boolean isPublished)
             throws ApplicationManagementException, ResourceManagementException {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
-        ApplicationArtifact artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                releaseWrapper.getScreenshots(), null, releaseWrapper.getBanner());
-        ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
-        releaseDTO = uploadWebAppReleaseArtifacts(releaseDTO, artifact);
         try {
-            return createRelease(applicationDTO, releaseDTO, ApplicationType.WEB_CLIP, isPublished);
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while creating web app release for application with the name: " + applicationDTO.getName();
+            ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
+            ApplicationArtifact artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIconLink(), releaseWrapper.getScreenshotLinks(),
+                    null, releaseWrapper.getBannerLink());
+            ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
+            releaseDTO = uploadWebAppReleaseArtifacts(releaseDTO, artifact);
+            try {
+                return createRelease(applicationDTO, releaseDTO, ApplicationType.WEB_CLIP, isPublished);
+            } catch (ApplicationManagementException e) {
+                String msg = "Error occurred while creating web app release for application with the name: " + applicationDTO.getName();
+                log.error(msg, e);
+                deleteApplicationArtifacts(Collections.singletonList(releaseDTO.getAppHashValue()));
+                throw new ApplicationManagementException(msg, e);
+            }
+        } catch (MalformedURLException e) {
+            String msg = "Malformed URL link received as a downloadable link";
             log.error(msg, e);
-            deleteApplicationArtifacts(Collections.singletonList(releaseDTO.getAppHashValue()));
+            throw new ApplicationManagementException(msg, e);
+        } catch (FileDownloaderServiceException e) {
+            String msg = "Error encountered while downloading application release artifacts";
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
     }
@@ -215,38 +367,69 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public ApplicationRelease createPubAppRelease(int appId, PublicAppReleaseWrapper releaseWrapper, boolean isPublished) throws
             ResourceManagementException, ApplicationManagementException {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
-        DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
-        ApplicationArtifact artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                releaseWrapper.getScreenshots(), null, releaseWrapper.getBanner());
-        ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
-        releaseDTO = uploadPubAppReleaseArtifacts(releaseDTO, artifact, deviceType.getName());
         try {
-            return createRelease(applicationDTO, releaseDTO, ApplicationType.PUBLIC, isPublished);
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while creating ent public release for application with the name: " + applicationDTO.getName();
+            ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
+            DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
+            ApplicationArtifact artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIconLink(), releaseWrapper.getScreenshotLinks(),
+                    null, releaseWrapper.getBannerLink());
+            ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
+            releaseDTO = uploadPubAppReleaseArtifacts(releaseDTO, artifact, deviceType.getName());
+            try {
+                return createRelease(applicationDTO, releaseDTO, ApplicationType.PUBLIC, isPublished);
+            } catch (ApplicationManagementException e) {
+                String msg = "Error occurred while creating ent public release for application with the name: " + applicationDTO.getName();
+                log.error(msg, e);
+                deleteApplicationArtifacts(Collections.singletonList(releaseDTO.getAppHashValue()));
+                throw new ApplicationManagementException(msg, e);
+            }
+        } catch (MalformedURLException e) {
+            String msg = "Malformed URL link received as a downloadable link";
             log.error(msg, e);
-            deleteApplicationArtifacts(Collections.singletonList(releaseDTO.getAppHashValue()));
+            throw new ApplicationManagementException(msg, e);
+        } catch (FileDownloaderServiceException e) {
+            String msg = "Error encountered while downloading application release artifacts";
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
     }
 
     @Override
     public ApplicationRelease createCustomAppRelease(int appId, CustomAppReleaseWrapper releaseWrapper, boolean isPublished)
+            throws ApplicationManagementException {
+        try {
+            return createApplicationReleaseBasedOnRemoteStatus(appId, releaseWrapper, isPublished);
+        } catch (ResourceManagementException e) {
+            String msg = "Error occurred while creating enterprise app release";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    private ApplicationRelease triggerCustomAppRelease(int appId, CustomAppReleaseWrapper releaseWrapper, boolean isPublished)
             throws ResourceManagementException, ApplicationManagementException {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
-        DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
-        ApplicationArtifact artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                releaseWrapper.getScreenshots(), releaseWrapper.getBinaryFile(), releaseWrapper.getBanner());
-        ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
-        releaseDTO = uploadCustomAppReleaseArtifacts(releaseDTO, artifact, deviceType.getName());
         try {
-            return createRelease(applicationDTO, releaseDTO, ApplicationType.CUSTOM, isPublished);
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while creating custom app release for application with the name: " + applicationDTO.getName();
+            ApplicationDTO applicationDTO = applicationManager.getApplication(appId);
+            DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
+            ApplicationArtifact artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIconLink(), releaseWrapper.getScreenshotLinks(),
+                    releaseWrapper.getArtifactLink(), releaseWrapper.getBannerLink());
+            ApplicationReleaseDTO releaseDTO = APIUtil.releaseWrapperToReleaseDTO(releaseWrapper);
+            releaseDTO = uploadCustomAppReleaseArtifacts(releaseDTO, artifact, deviceType.getName());
+            try {
+                return createRelease(applicationDTO, releaseDTO, ApplicationType.CUSTOM, isPublished);
+            } catch (ApplicationManagementException e) {
+                String msg = "Error occurred while creating custom app release for application with the name: " + applicationDTO.getName();
+                log.error(msg, e);
+                deleteApplicationArtifacts(Collections.singletonList(releaseDTO.getAppHashValue()));
+                throw new ApplicationManagementException(msg, e);
+            }
+        } catch (MalformedURLException e) {
+            String msg = "Malformed URL link received as a downloadable link";
             log.error(msg, e);
-            deleteApplicationArtifacts(Collections.singletonList(releaseDTO.getAppHashValue()));
+            throw new ApplicationManagementException(msg, e);
+        } catch (FileDownloaderServiceException e) {
+            String msg = "Error encountered while downloading application release artifacts";
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
     }
@@ -279,27 +462,27 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (app instanceof ApplicationWrapper) {
                 ApplicationWrapper wrapper = (ApplicationWrapper) app;
                 EntAppReleaseWrapper releaseWrapper = wrapper.getEntAppReleaseWrappers().get(0);
-                artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                        releaseWrapper.getScreenshots(), releaseWrapper.getBinaryFile(), releaseWrapper.getBanner());
+                artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIconLink(), releaseWrapper.getScreenshotLinks(),
+                        releaseWrapper.getArtifactLink(), releaseWrapper.getBannerLink());
                 releaseDTO = uploadEntAppReleaseArtifacts(releaseDTO,
                         artifact, wrapper.getDeviceType(), false);
             } else if (app instanceof PublicAppWrapper) {
                 PublicAppWrapper wrapper = (PublicAppWrapper) app;
                 PublicAppReleaseWrapper releaseWrapper = wrapper.getPublicAppReleaseWrappers().get(0);
-                artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                        releaseWrapper.getScreenshots(), null, releaseWrapper.getBanner());
+                artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIconLink(), releaseWrapper.getScreenshotLinks(),
+                        null, releaseWrapper.getBannerLink());
                 releaseDTO = uploadPubAppReleaseArtifacts(releaseDTO, artifact, wrapper.getDeviceType());
             } else if (app instanceof WebAppWrapper) {
                 WebAppWrapper wrapper = (WebAppWrapper) app;
                 WebAppReleaseWrapper releaseWrapper = wrapper.getWebAppReleaseWrappers().get(0);
-                artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                        releaseWrapper.getScreenshots(), null, releaseWrapper.getBanner());
+                artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIconLink(), releaseWrapper.getScreenshotLinks(),
+                        null, releaseWrapper.getBannerLink());
                 releaseDTO = uploadWebAppReleaseArtifacts(releaseDTO, artifact);
             } else if (app instanceof CustomAppWrapper) {
                 CustomAppWrapper wrapper = (CustomAppWrapper) app;
                 CustomAppReleaseWrapper releaseWrapper = wrapper.getCustomAppReleaseWrappers().get(0);
-                artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIcon(),
-                        releaseWrapper.getScreenshots(), releaseWrapper.getBinaryFile(), releaseWrapper.getBanner());
+                artifact = ApplicationManagementUtil.constructApplicationArtifact(releaseWrapper.getIconLink(), releaseWrapper.getScreenshotLinks(),
+                        releaseWrapper.getArtifactLink(), releaseWrapper.getBannerLink());
                 try {
                     releaseDTO = uploadCustomAppReleaseArtifacts(releaseDTO, artifact, wrapper.getDeviceType());
                 } catch (ResourceManagementException e) {
@@ -315,6 +498,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (ResourceManagementException e) {
             String msg = "Error Occurred when uploading artifacts of the web clip: " + applicationDTO.getName();
             log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (MalformedURLException e) {
+            String msg = "Malformed URL link received as a downloadable link";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (FileDownloaderServiceException e) {
+            String msg = "Error encountered while downloading application release artifacts";
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
         applicationDTO.getApplicationReleaseDTOs().clear();
@@ -3210,11 +3401,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
-                                                  ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
+    public ApplicationRelease updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
+            ApplicationArtifact applicationArtifact = ApplicationManagementUtil.constructApplicationArtifact(publicAppReleaseWrapper.getIconLink(), publicAppReleaseWrapper.getScreenshotLinks(), null, null);
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
             validateAppReleaseUpdating(publicAppReleaseWrapper, applicationDTO, applicationArtifact,
@@ -3273,6 +3464,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + "release UUID:" + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
+        } catch (MalformedURLException e) {
+            throw new ApplicationManagementException("Malformed downloadable URL received for the Public app " +
+                    "release UUID: " + releaseUuid);
+        } catch (FileDownloaderServiceException e) {
+            throw new ApplicationManagementException("Error encountered while downloading artifact for the Public app " +
+                    "release UUID: " + releaseUuid);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -3903,30 +4100,24 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void validateEntAppReleaseCreatingRequest(EntAppReleaseWrapper releaseWrapper, String deviceType)
             throws RequestValidatingException, ApplicationManagementException {
         validateReleaseCreatingRequest(releaseWrapper, deviceType);
-        validateBinaryArtifact(releaseWrapper.getBinaryFile());
-        validateImageArtifacts(releaseWrapper.getIcon(), releaseWrapper.getScreenshots());
     }
 
     @Override
     public void validateCustomAppReleaseCreatingRequest(CustomAppReleaseWrapper releaseWrapper, String deviceType)
             throws RequestValidatingException, ApplicationManagementException {
         validateReleaseCreatingRequest(releaseWrapper, deviceType);
-        validateBinaryArtifact(releaseWrapper.getBinaryFile());
-        validateImageArtifacts(releaseWrapper.getIcon(), releaseWrapper.getScreenshots());
     }
 
     @Override
     public void validateWebAppReleaseCreatingRequest(WebAppReleaseWrapper releaseWrapper)
             throws RequestValidatingException, ApplicationManagementException {
         validateReleaseCreatingRequest(releaseWrapper, Constants.ANY);
-        validateImageArtifacts(releaseWrapper.getIcon(), releaseWrapper.getScreenshots());
     }
 
     @Override
     public void validatePublicAppReleaseCreatingRequest(PublicAppReleaseWrapper releaseWrapper, String deviceType)
             throws RequestValidatingException, ApplicationManagementException {
         validateReleaseCreatingRequest(releaseWrapper, deviceType);
-        validateImageArtifacts(releaseWrapper.getIcon(), releaseWrapper.getScreenshots());
         validatePublicAppReleasePackageName(releaseWrapper.getPackageName());
     }
 

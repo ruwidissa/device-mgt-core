@@ -83,7 +83,10 @@
                             io.entgra.device.mgt.core.apimgt.application.extension.*,
                             org.apache.commons.httpclient,
                             org.apache.commons.httpclient.methods,
-                            org.apache.commons.validator.routines
+                            org.apache.commons.validator.routines,
+                            okhttp3.OkHttpClient,
+                            okhttp3.Request,
+                            okhttp3.Response
                         </Import-Package>
                         <Embed-Dependency>apk-parser;scope=compile|runtime;inline=false</Embed-Dependency>
                         <Export-Package>
@@ -105,6 +108,9 @@
                     <systemPropertyVariables>
                         <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-unit.exec</jacoco-agent.destfile>
                         <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>
+                        <iot.gateway.http.port>8280</iot.gateway.http.port>
+                        <iot.gateway.https.port>8280</iot.gateway.https.port>
+                        <iot.gateway.host>test</iot.gateway.host>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -112,7 +118,6 @@
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -366,6 +371,11 @@
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.ntask.core</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

@@ -74,6 +74,7 @@ public class APIUtil {
     private static volatile AppmDataHandler appmDataHandler;
     private static volatile VPPApplicationManager vppApplicationManager;
     private static volatile MetadataManagementService metadataManagementService;
+    private static volatile FileTransferService fileTransferService;
 
     public static SPApplicationManager getSPApplicationManager() {
         if (SPApplicationManager == null) {
@@ -590,5 +591,17 @@ public class APIUtil {
             }
         }
         return metadataManagementService;
+    }
+
+    public static FileTransferService getFileTransferService() {
+        if (fileTransferService == null) {
+            synchronized (APIUtil.class) {
+                if (fileTransferService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    fileTransferService = (FileTransferService) ctx.getOSGiService(FileTransferService.class, null);
+                }
+            }
+        }
+        return fileTransferService;
     }
 }

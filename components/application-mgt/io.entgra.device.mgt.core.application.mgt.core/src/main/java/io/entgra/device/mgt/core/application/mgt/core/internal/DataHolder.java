@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.application.mgt.core.internal;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.AppmDataHandler;
+import io.entgra.device.mgt.core.application.mgt.common.services.FileTransferService;
 import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
@@ -55,6 +56,7 @@ public class DataHolder {
     private AppmDataHandler configManager;
 
     private TaskService taskService;
+    private FileTransferService fileTransferService;
 
     private static final DataHolder applicationMgtDataHolder = new DataHolder();
 
@@ -152,5 +154,13 @@ public class DataHolder {
 
     public void setVppApplicationManager(VPPApplicationManager vppApplicationManager) {
         this.vppApplicationManager = vppApplicationManager;
+    }
+
+    public FileTransferService getFileTransferService() {
+        return fileTransferService;
+    }
+
+    public void setFileTransferService(FileTransferService fileTransferService) {
+        this.fileTransferService = fileTransferService;
     }
 }

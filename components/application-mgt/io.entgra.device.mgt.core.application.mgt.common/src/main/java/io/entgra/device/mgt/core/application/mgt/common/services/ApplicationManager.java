@@ -383,11 +383,9 @@ public interface ApplicationManager {
      *
      * @param releaseUuid UUID of the application release.
      * @param publicAppReleaseWrapper {@link ApplicationReleaseDTO}
-     * @param applicationArtifact {@link ApplicationArtifact}
      * @return If the application release is updated correctly True returns, otherwise retuen False
      */
-    ApplicationRelease updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
-                                           ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
+    ApplicationRelease updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper) throws ApplicationManagementException;
 
     /**
      * Use to update existing web app release
