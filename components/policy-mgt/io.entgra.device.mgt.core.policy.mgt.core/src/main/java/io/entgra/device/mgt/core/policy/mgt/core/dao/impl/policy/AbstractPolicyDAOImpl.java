@@ -26,6 +26,7 @@ import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.CorrectiveAction;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.DeviceGroupWrapper;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyCriterion;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 import io.entgra.device.mgt.core.policy.mgt.common.Criterion;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyDAO;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
@@ -1844,4 +1845,66 @@ public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
         }
         return policies;
     }
+
+    /**
+     * Extracts a list of Policy objects with associated Profile objects from the given ResultSet
+     *
+     * @param resultSet The ResultSet containing the policy and profile data
+     * @param tenantId The tenant ID
+     * @return A list of Policy objects populated with data from the ResultSet
+     * @throws SQLException If an SQL error occurs while processing the ResultSet
+     */
+    protected List<Policy> extractPolicyListWithProfileFromDbResult(ResultSet resultSet, int tenantId) throws SQLException {
+        List<Policy> policies = new ArrayList<>();
+        while (resultSet.next()) {
+            Policy policy = createPolicyFromResultSet(resultSet, tenantId);
+            Profile profile = createProfileFromResultSet(resultSet, tenantId);
+            policy.setProfile(profile);
+            policies.add(policy);
+        }
+        return policies;
+    }
+
+    /**
+     * Creates a Policy object from the current row in the given ResultSet
+     *
+     * @param resultSet The ResultSet containing the policy data
+     * @param tenantId The tenant ID
+     * @return A Policy object populated with data from the ResultSet
+     * @throws SQLException If an SQL error occurs while processing the ResultSet
+     */
+    private Policy createPolicyFromResultSet(ResultSet resultSet, int tenantId) throws SQLException {
+        Policy policy = new Policy();
+        policy.setId(resultSet.getInt("ID"));
+        policy.setProfileId(resultSet.getInt("PROFILE_ID"));
+        policy.setPolicyName(resultSet.getString("NAME"));
+        policy.setTenantId(tenantId);
+        policy.setPriorityId(resultSet.getInt("PRIORITY"));
+        policy.setCompliance(resultSet.getString("COMPLIANCE"));
+        policy.setOwnershipType(resultSet.getString("OWNERSHIP_TYPE"));
+        policy.setUpdated(PolicyManagerUtil.convertIntToBoolean(resultSet.getInt("UPDATED")));
+        policy.setActive(PolicyManagerUtil.convertIntToBoolean(resultSet.getInt("ACTIVE")));
+        policy.setDescription(resultSet.getString("DESCRIPTION"));
+        policy.setPolicyType(resultSet.getString("POLICY_TYPE"));
+        policy.setPolicyPayloadVersion(resultSet.getString("PAYLOAD_VERSION"));
+        return policy;
+    }
+
+    /**
+     * Creates a Profile object from the current row in the given ResultSet
+     *
+     * @param resultSet The ResultSet containing the profile data
+     * @param tenantId The tenant ID
+     * @return A Profile object populated with data from the ResultSet
+     * @throws SQLException If an SQL error occurs while processing the ResultSet
+     */
+    private Profile createProfileFromResultSet(ResultSet resultSet, int tenantId) throws SQLException {
+        Profile profile = new Profile();
+        profile.setProfileId(resultSet.getInt("PROFILE_ID"));
+        profile.setProfileName(resultSet.getString("PROFILE_NAME"));
+        profile.setTenantId(tenantId);
+        profile.setDeviceType(resultSet.getString("DEVICE_TYPE"));
+        return profile;
+    }
+
 }
