@@ -135,7 +135,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             //todo --> can use requestingUserAccessToken token here to get application data - modify getApplication
             // method signature
 
-            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application = getApplication(clientName, owner);
+            io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application =
+                    getApplication(clientName, requestingUserAccessToken);
             String applicationUUID = application.getApplicationId();
 
             // do app key mapping

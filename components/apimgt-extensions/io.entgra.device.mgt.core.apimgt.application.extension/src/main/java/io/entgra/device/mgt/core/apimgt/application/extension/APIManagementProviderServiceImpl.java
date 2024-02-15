@@ -112,12 +112,14 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
             }
 
             Map<String, APIInfo> uniqueApiSet = new HashMap<>();
-            for (String tag : tags) {
-                Map<String, String> queryParams = new HashMap<>();
-                queryParams.put("tag", tag);
+            if (tags != null) {
+                for (String tag : tags) {
+                    Map<String, String> queryParams = new HashMap<>();
+                    queryParams.put("tag", tag);
 
-                APIInfo[] apiInfos = consumerRESTAPIServices.getAllApis(apiApplicationInfo, queryParams, headerParams);
-                Arrays.stream(apiInfos).forEach(apiInfo -> uniqueApiSet.putIfAbsent(apiInfo.getName(), apiInfo));
+                    APIInfo[] apiInfos = consumerRESTAPIServices.getAllApis(apiApplicationInfo, queryParams, headerParams);
+                    Arrays.stream(apiInfos).forEach(apiInfo -> uniqueApiSet.putIfAbsent(apiInfo.getName(), apiInfo));
+                }
             }
 
             List<APIInfo> uniqueApiList = new ArrayList<>(uniqueApiSet.values());
