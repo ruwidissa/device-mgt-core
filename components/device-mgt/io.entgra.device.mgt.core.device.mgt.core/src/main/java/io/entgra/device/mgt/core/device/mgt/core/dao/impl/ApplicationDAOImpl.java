@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 
+import io.entgra.device.mgt.core.device.mgt.core.common.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
@@ -298,9 +299,13 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             String filter = request.getFilter();
             if (filter != null) {
                 sql = sql + "AND NAME LIKE ? ";
+                filter = Constants.QUERY_WILDCARD.concat(filter).concat(Constants.QUERY_WILDCARD);
             }
+
+            boolean isLimitPresent = false;
             if (request != null && request.getRowCount() != -1) {
                 sql = sql + "LIMIT ? OFFSET ?";
+                isLimitPresent = true;
             }
             Connection conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -312,7 +317,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 if (filter != null){
                     stmt.setString(paramIdx++, filter);
                 }
-                if (request != null && request.getRowCount() != -1) {
+                if (isLimitPresent) {
                     stmt.setInt(paramIdx++, request.getRowCount());
                     stmt.setInt(paramIdx, request.getStartIndex());
                 }
