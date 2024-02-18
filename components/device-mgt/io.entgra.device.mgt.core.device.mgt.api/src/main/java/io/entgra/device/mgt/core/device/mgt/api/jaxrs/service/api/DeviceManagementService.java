@@ -2660,7 +2660,7 @@ public interface DeviceManagementService {
                     String appName,
             @ApiParam(
                     name = "packageName",
-                    value = "App package name searched")
+                    value = "App package name to be searched")
             @QueryParam("packageName")
                     String packageName);
 
