@@ -1823,6 +1823,11 @@
                 <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
                 <version>${apache.felix.scr.ds.annotations.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-ext</artifactId>
+                <version>${slf4j.ext.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2173,6 +2178,7 @@
         <power.mock.version>2.0.2</power.mock.version>
         <commons.dbcp.version>1.4.0.wso2v1</commons.dbcp.version>
         <slf4j.nop.version>1.7.25</slf4j.nop.version>
+        <slf4j.ext.version>1.7.29</slf4j.ext.version>
 
         <!-- app management related versions -->
         <googlecode.plist.version>1.21</googlecode.plist.version>
