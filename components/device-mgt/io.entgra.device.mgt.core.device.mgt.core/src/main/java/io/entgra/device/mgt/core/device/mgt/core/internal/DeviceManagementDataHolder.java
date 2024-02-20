@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.device.mgt.core.internal;
 
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
+import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -78,6 +79,7 @@ public class DeviceManagementDataHolder {
     private ConfigurationContextService configurationContextService;
     private final HashMap<String, Boolean> requireDeviceAuthorization = new HashMap<>();
     private DeviceAccessAuthorizationService deviceAccessAuthorizationService;
+    private GroupAccessAuthorizationService groupAccessAuthorizationService;
     private GroupManagementProviderService groupManagementProviderService;
     private TaskService taskService;
     private EmailSenderService emailSenderService;
@@ -446,5 +448,13 @@ public class DeviceManagementDataHolder {
 
     public void setPublisherRESTAPIServices(PublisherRESTAPIServices publisherRESTAPIServices) {
         this.publisherRESTAPIServices = publisherRESTAPIServices;
+    }
+
+    public GroupAccessAuthorizationService getGroupAccessAuthorizationService() {
+        return groupAccessAuthorizationService;
+    }
+
+    public void setGroupAccessAuthorizationService(GroupAccessAuthorizationService groupAccessAuthorizationService) {
+        this.groupAccessAuthorizationService = groupAccessAuthorizationService;
     }
 }

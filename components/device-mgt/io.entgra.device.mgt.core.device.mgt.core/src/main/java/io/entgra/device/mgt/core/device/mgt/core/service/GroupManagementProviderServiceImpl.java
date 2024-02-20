@@ -32,6 +32,7 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.GroupDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -593,10 +594,24 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             } else {
                 List<Integer> allDeviceGroupIdsOfUser = getGroupIds(username);
                 rootGroups = this.getGroups(allDeviceGroupIdsOfUser, tenantId);
-                if (requireGroupProps) {
+                try {
+                    GroupManagementDAOFactory.openConnection();
                     for (DeviceGroup rootGroup : rootGroups) {
-                        populateGroupProperties(rootGroup, tenantId);
+                        parentPath = DeviceManagerUtil.createParentPath(rootGroup);
+                        childrenGroups = groupDAO.getChildrenGroups(parentPath, tenantId);
+                        createGroupWithChildren(
+                                rootGroup, childrenGroups, requireGroupProps, tenantId, request.getDepth(), 0);
+                        if (requireGroupProps) {
+                            populateGroupProperties(rootGroup, tenantId);
+                        }
                     }
+                } catch (SQLException e) {
+                    String msg = "Error occurred while opening a connection to the data source to retrieve all groups "
+                            + "with hierarchy when username is provided";
+                    log.error(msg, e);
+                    throw new GroupManagementException(msg, e);
+                } finally {
+                    GroupManagementDAOFactory.closeConnection();
                 }
             }
         } catch (GroupManagementDAOException e) {

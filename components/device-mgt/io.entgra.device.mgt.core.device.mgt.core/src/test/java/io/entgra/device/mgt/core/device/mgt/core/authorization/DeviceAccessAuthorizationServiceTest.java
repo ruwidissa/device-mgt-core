@@ -193,7 +193,7 @@ public class DeviceAccessAuthorizationServiceTest {
     public void userAuthDevIdUserName() throws Exception {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(ADMIN_USER);
         for (DeviceIdentifier deviceId : deviceIds) {
-            Assert.assertTrue(deviceAccessAuthorizationService.isUserAuthorized(deviceId, ADMIN_USER),
+            Assert.assertTrue(deviceAccessAuthorizationService.isUserAuthorized(deviceId, ADMIN_USER, new String[]{NON_ADMIN_PERMISSION}),
                     "Device access authorization for admin user failed");
         }
     }
@@ -202,7 +202,7 @@ public class DeviceAccessAuthorizationServiceTest {
     public void userAuthDevIdUserNameResult() throws DeviceAccessAuthorizationException {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(ADMIN_USER);
         DeviceAuthorizationResult deviceAuthorizationResult = deviceAccessAuthorizationService.
-                isUserAuthorized(deviceIds, ADMIN_USER);
+                isUserAuthorized(deviceIds, ADMIN_USER, new String[]{NON_ADMIN_PERMISSION});
         Assert.assertEquals(deviceAuthorizationResult.getAuthorizedDevices().size(), 5,
                 "Expected 5 authorized devices for admin user");
         Assert.assertEquals(deviceAuthorizationResult.getUnauthorizedDevices().size(), 0,
@@ -213,7 +213,7 @@ public class DeviceAccessAuthorizationServiceTest {
     public void userAuthDevId() throws Exception {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(ADMIN_USER);
         for (DeviceIdentifier deviceId : deviceIds) {
-            Assert.assertTrue(deviceAccessAuthorizationService.isUserAuthorized(deviceId),
+            Assert.assertTrue(deviceAccessAuthorizationService.isUserAuthorized(deviceId, new String[]{NON_ADMIN_PERMISSION}),
                     "Authorize user from device identifier failed");
         }
     }
@@ -222,7 +222,7 @@ public class DeviceAccessAuthorizationServiceTest {
     public void userAuthDevIdResult() throws Exception {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(ADMIN_USER);
         DeviceAuthorizationResult deviceAuthorizationResult = deviceAccessAuthorizationService.
-                isUserAuthorized(deviceIds);
+                isUserAuthorized(deviceIds, new String[]{NON_ADMIN_PERMISSION});
         Assert.assertEquals(deviceAuthorizationResult.getAuthorizedDevices().size(), 5,
                 "Expected 5 authorized devices for admin user");
         Assert.assertEquals(deviceAuthorizationResult.getUnauthorizedDevices().size(), 0,
