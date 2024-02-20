@@ -533,7 +533,7 @@ public class HandlerUtil {
         if (scopes != null && scopes.isArray() && !scopes.isEmpty()) {
             StringBuilder builder = new StringBuilder();
             for (JsonNode objNode : scopes) {
-                builder.append(objNode).append(" ");
+                builder.append(objNode.asText()).append(" ");
             }
             return builder.toString();
         } else {
