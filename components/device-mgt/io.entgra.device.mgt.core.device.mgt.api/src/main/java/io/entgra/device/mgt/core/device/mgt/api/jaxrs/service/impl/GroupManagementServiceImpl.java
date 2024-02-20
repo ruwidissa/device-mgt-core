@@ -27,7 +27,6 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistEx
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
-import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.notification.logger.GroupMgtLogContext;
 import io.entgra.device.mgt.core.notification.logger.impl.EntgraGroupMgtLoggerImpl;
