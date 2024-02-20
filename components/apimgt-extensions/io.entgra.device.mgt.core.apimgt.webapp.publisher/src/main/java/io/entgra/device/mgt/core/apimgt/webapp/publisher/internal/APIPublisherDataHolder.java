@@ -22,6 +22,7 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServi
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIConfig;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.PostApiPublishingObsever;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -32,9 +33,11 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.List;
+import java.util.ArrayList;
+
 
 public class APIPublisherDataHolder {
 
@@ -52,6 +55,7 @@ public class APIPublisherDataHolder {
 
     private static APIPublisherDataHolder thisInstance = new APIPublisherDataHolder();
 
+    private List<PostApiPublishingObsever> postApiPublishingObseverList = new ArrayList<>();
     private APIPublisherDataHolder() {
     }
 
@@ -178,5 +182,17 @@ public class APIPublisherDataHolder {
 
     public void setMetadataManagementService(MetadataManagementService metadataManagementService) {
         this.metadataManagementService = metadataManagementService;
+    }
+
+    public List<PostApiPublishingObsever> getPostApiPublishingObseverList() {
+        return postApiPublishingObseverList;
+    }
+
+    public void addPostApiPublishingObseverList(PostApiPublishingObsever postApiPublishingObseverList) {
+        this.postApiPublishingObseverList.add(postApiPublishingObseverList);
+    }
+
+    public void removePostApiPublishingObseverList(PostApiPublishingObsever postApiPublishingObsever) {
+        this.postApiPublishingObseverList.remove(postApiPublishingObsever);
     }
 }
