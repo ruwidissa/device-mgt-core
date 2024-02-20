@@ -2652,7 +2652,12 @@ public interface DeviceManagementService {
                     name = "appName",
                     value = "App name to be searched")
             @QueryParam("appName")
-                    String appName);
+                    String appName,
+            @ApiParam(
+                    name = "packageName",
+                    value = "App package name to be searched")
+            @QueryParam("packageName")
+                    String packageName);
 
     @GET
     @Path("/application/{packageName}/versions")

@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.apimgt.webapp.publisher.internal;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationServices;
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.PublisherRESTAPIServices;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.PostApiPublishingObsever;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -177,6 +178,26 @@ public class APIPublisherServiceComponent {
 
     protected void unsetMetaDataMgtService(MetadataManagementService metadataManagementService) {
         APIPublisherDataHolder.getInstance().setMetadataManagementService(null);
+    }
+
+    @Reference(
+            name = "postApiPublishingObsever",
+            service = io.entgra.device.mgt.core.apimgt.webapp.publisher.PostApiPublishingObsever.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPostApiPublishingObsever")
+    protected void setPostApiPublishingObsever(PostApiPublishingObsever postApiPublishingObsever) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting PostApiPublishingObsever");
+        }
+        APIPublisherDataHolder.getInstance().addPostApiPublishingObseverList(postApiPublishingObsever);
+    }
+
+    protected void unsetPostApiPublishingObsever(PostApiPublishingObsever postApiPublishingObsever) {
+        if (log.isDebugEnabled()) {
+            log.debug("Unsetting PostApiPublishingObsever");
+        }
+        APIPublisherDataHolder.getInstance().removePostApiPublishingObseverList(postApiPublishingObsever);
     }
 
 }
