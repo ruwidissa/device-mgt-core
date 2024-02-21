@@ -17,10 +17,6 @@
  */
 package io.entgra.device.mgt.core.task.mgt.core.service;
 
-import io.entgra.device.mgt.core.task.mgt.core.dao.DynamicTaskPropDAO;
-import io.entgra.device.mgt.core.task.mgt.core.dao.common.TaskManagementDAOFactory;
-import io.entgra.device.mgt.core.task.mgt.core.internal.TaskManagerDataHolder;
-import io.entgra.device.mgt.core.task.mgt.core.util.TaskManagementUtil;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
 import io.entgra.device.mgt.core.task.mgt.common.bean.DynamicTask;
 import io.entgra.device.mgt.core.task.mgt.common.constant.TaskMgtConstants;
@@ -30,14 +26,21 @@ import io.entgra.device.mgt.core.task.mgt.common.exception.TaskNotFoundException
 import io.entgra.device.mgt.core.task.mgt.common.exception.TransactionManagementException;
 import io.entgra.device.mgt.core.task.mgt.common.spi.TaskManagementService;
 import io.entgra.device.mgt.core.task.mgt.core.dao.DynamicTaskDAO;
+import io.entgra.device.mgt.core.task.mgt.core.dao.DynamicTaskPropDAO;
+import io.entgra.device.mgt.core.task.mgt.core.dao.common.TaskManagementDAOFactory;
+import io.entgra.device.mgt.core.task.mgt.core.internal.TaskManagerDataHolder;
+import io.entgra.device.mgt.core.task.mgt.core.util.TaskManagementUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ntask.common.TaskException;
 import org.wso2.carbon.ntask.core.TaskInfo;
 import org.wso2.carbon.ntask.core.TaskManager;
 import org.wso2.carbon.ntask.core.service.TaskService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -78,42 +81,43 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
     @Override
     public void createTask(DynamicTask dynamicTask) throws TaskManagementException {
-        String taskId;
+        String nTaskName;
+        int dynamicTaskId;
+        int serverHashIdx;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             // add into the dynamic task tables
             TaskManagementDAOFactory.beginTransaction();
-            int dynamicTaskId = dynamicTaskDAO.addTask(dynamicTask);
-
-            Map<String, String> taskProperties = dynamicTask.getProperties();
-            dynamicTaskPropDAO.addTaskProperties(dynamicTaskId, taskProperties);
-
-            // add into the ntask core
-            taskId = TaskManagementUtil.generateTaskId(dynamicTaskId);
+            dynamicTaskId = dynamicTaskDAO.addTask(dynamicTask, tenantId);
+            dynamicTaskPropDAO.addTaskProperties(dynamicTaskId, dynamicTask.getProperties(), tenantId);
 
             try {
-                int serverHashIdx = TaskManagerDataHolder.getInstance().getHeartBeatService()
+                serverHashIdx = TaskManagerDataHolder.getInstance().getHeartBeatService()
                         .getServerCtxInfo().getLocalServerHashIdx();
-                taskProperties.put(TaskMgtConstants.Task.LOCAL_HASH_INDEX, String.valueOf(serverHashIdx));
-                taskProperties.put(TaskMgtConstants.Task.LOCAL_TASK_NAME, taskId);
+                nTaskName = TaskManagementUtil.generateNTaskName(dynamicTaskId, serverHashIdx);
             } catch (HeartBeatManagementException e) {
                 String msg = "Unexpected exception when getting server hash index.";
                 log.error(msg, e);
                 throw new TaskManagementException(msg, e);
             }
 
-            if (!isTaskExists(taskId)) {
-                TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
-                triggerInfo.setCronExpression(dynamicTask.getCronExpression());
-                TaskInfo taskInfo = new TaskInfo(taskId, dynamicTask.getTaskClassName(), taskProperties, triggerInfo);
-                taskManager.registerTask(taskInfo);
-                taskManager.scheduleTask(taskId);
-                if (!dynamicTask.isEnabled()) {
-                    taskManager.pauseTask(taskId);
-                }
-            } else {
-                String msg = "Task '" + taskId + "' is already exists in the ntask core "
-                        + "Hence not creating another task for the same name.";
-                log.error(msg);
+            if (isTaskExists(nTaskName)) {
+                String msg = "Task '" + nTaskName + "' is already exists in the ntask core. "
+                        + "Hence removing existing task from nTask before adding new one.";
+                log.warn(msg);
+                taskManager.deleteTask(nTaskName);
+            }
+
+            // add into the ntask core
+            Map<String, String> taskProperties = TaskManagementUtil
+                    .populateNTaskProperties(dynamicTask, nTaskName, serverHashIdx);
+            TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
+            triggerInfo.setCronExpression(dynamicTask.getCronExpression());
+            TaskInfo taskInfo = new TaskInfo(nTaskName, dynamicTask.getTaskClassName(), taskProperties, triggerInfo);
+            taskManager.registerTask(taskInfo);
+            taskManager.scheduleTask(nTaskName);
+            if (!dynamicTask.isEnabled()) {
+                taskManager.pauseTask(nTaskName);
             }
 
             TaskManagementDAOFactory.commitTransaction();
@@ -137,19 +141,20 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     }
 
     @Override
-    public void updateTask(int dynamicTaskId, DynamicTask dynamicTask) throws TaskManagementException
-            , TaskNotFoundException {
+    public void updateTask(int dynamicTaskId, DynamicTask dynamicTask)
+            throws TaskManagementException, TaskNotFoundException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             //Update dynamic task table
             TaskManagementDAOFactory.beginTransaction();
-            DynamicTask existingTask = dynamicTaskDAO.getDynamicTaskById(dynamicTaskId);
+            DynamicTask existingTask = dynamicTaskDAO.getDynamicTask(dynamicTaskId, tenantId);
 
             if (existingTask != null) {
                 existingTask.setEnabled(dynamicTask.isEnabled());
                 existingTask.setCronExpression(dynamicTask.getCronExpression());
-                dynamicTaskDAO.updateDynamicTask(existingTask);
+                dynamicTaskDAO.updateDynamicTask(existingTask, tenantId);
                 if (!dynamicTask.getProperties().isEmpty()) {
-                    dynamicTaskPropDAO.updateDynamicTaskProps(dynamicTaskId, dynamicTask.getProperties());
+                    dynamicTaskPropDAO.updateDynamicTaskProps(dynamicTaskId, dynamicTask.getProperties(), tenantId);
                 }
             } else {
                 String msg = "Task '" + dynamicTaskId + "' is not exists in the dynamic task table.";
@@ -158,12 +163,14 @@ public class TaskManagementServiceImpl implements TaskManagementService {
             }
 
             // Update task in the ntask core
-            String taskId = TaskManagementUtil.generateTaskId(existingTask.getDynamicTaskId());
-            if (isTaskExists(taskId)) {
-                TaskInfo taskInfo = taskManager.getTask(taskId);
-                if (!dynamicTask.getProperties().isEmpty()) {
-                    taskInfo.setProperties(dynamicTask.getProperties());
-                }
+            String nTaskName = TaskManagementUtil.generateNTaskName(existingTask.getDynamicTaskId());
+            if (isTaskExists(nTaskName)) {
+                TaskInfo taskInfo = taskManager.getTask(nTaskName);
+
+                Map<String, String> taskProperties = TaskManagementUtil
+                        .populateNTaskProperties(dynamicTask, nTaskName);
+                taskInfo.setProperties(taskProperties);
+
                 TaskInfo.TriggerInfo triggerInfo;
                 if (taskInfo.getTriggerInfo() == null) {
                     triggerInfo = new TaskInfo.TriggerInfo();
@@ -173,9 +180,9 @@ public class TaskManagementServiceImpl implements TaskManagementService {
                 triggerInfo.setCronExpression(dynamicTask.getCronExpression());
                 taskInfo.setTriggerInfo(triggerInfo);
                 taskManager.registerTask(taskInfo);
-                taskManager.rescheduleTask(taskId);
+                taskManager.rescheduleTask(nTaskName);
             } else {
-                String msg = "Task '" + taskId + "' is not exists in the n task core "
+                String msg = "Task '" + nTaskName + "' is not exists in the n task core "
                         + "Hence cannot update the task.";
                 log.error(msg);
             }
@@ -200,16 +207,17 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     }
 
     @Override
-    public void toggleTask(int dynamicTaskId, boolean isEnabled) throws TaskManagementException
-            , TaskNotFoundException {
+    public void toggleTask(int dynamicTaskId, boolean isEnabled)
+            throws TaskManagementException, TaskNotFoundException {
 
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             //update dynamic task table
             TaskManagementDAOFactory.beginTransaction();
-            DynamicTask existingTask = dynamicTaskDAO.getDynamicTaskById(dynamicTaskId);
+            DynamicTask existingTask = dynamicTaskDAO.getDynamicTask(dynamicTaskId, tenantId);
             if (existingTask != null) {
                 existingTask.setEnabled(isEnabled);
-                dynamicTaskDAO.updateDynamicTask(existingTask);
+                dynamicTaskDAO.updateDynamicTask(existingTask, tenantId);
             } else {
                 String msg = "Task '" + dynamicTaskId + "' is not exists.";
                 log.error(msg);
@@ -217,15 +225,15 @@ public class TaskManagementServiceImpl implements TaskManagementService {
             }
 
             // Update task in the ntask core
-            String taskId = TaskManagementUtil.generateTaskId(existingTask.getDynamicTaskId());
-            if (isTaskExists(taskId)) {
+            String taskName = TaskManagementUtil.generateNTaskName(existingTask.getDynamicTaskId());
+            if (isTaskExists(taskName)) {
                 if (isEnabled) {
-                    taskManager.resumeTask(taskId);
+                    taskManager.resumeTask(taskName);
                 } else {
-                    taskManager.pauseTask(taskId);
+                    taskManager.pauseTask(taskName);
                 }
             } else {
-                String msg = "Task '" + taskId + "' is not exists in the ntask core "
+                String msg = "Task '" + taskName + "' is not exists in the ntask core "
                         + "Hence cannot toggle the task in the ntask.";
                 log.error(msg);
             }
@@ -251,22 +259,23 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     @Override
     public void deleteTask(int dynamicTaskId) throws TaskManagementException, TaskNotFoundException {
         // delete task from dynamic task table
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             TaskManagementDAOFactory.beginTransaction();
-            DynamicTask existingTask = dynamicTaskDAO.getDynamicTaskById(dynamicTaskId);
+            DynamicTask existingTask = dynamicTaskDAO.getDynamicTask(dynamicTaskId, tenantId);
             if (existingTask != null) {
-                dynamicTaskDAO.deleteDynamicTask(dynamicTaskId);
+                dynamicTaskDAO.deleteDynamicTask(dynamicTaskId, tenantId);
             } else {
                 String msg = "Task '" + dynamicTaskId + "' is not exists.";
                 log.error(msg);
                 throw new TaskNotFoundException(msg);
             }
 
-            String taskId = TaskManagementUtil.generateTaskId(existingTask.getDynamicTaskId());
-            if (isTaskExists(taskId)) {
-                taskManager.deleteTask(taskId);
+            String taskName = TaskManagementUtil.generateNTaskName(existingTask.getDynamicTaskId());
+            if (isTaskExists(taskName)) {
+                taskManager.deleteTask(taskName);
             } else {
-                String msg = "Task '" + taskId + "' is not exists in the ntask core "
+                String msg = "Task '" + taskName + "' is not exists in the ntask core "
                         + "Hence cannot delete from the ntask core.";
                 log.error(msg);
             }
@@ -292,22 +301,21 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
     @Override
     public List<DynamicTask> getAllDynamicTasks() throws TaskManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         List<DynamicTask> dynamicTasks;
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Fetching the details of all dynamic tasks");
+            if (log.isTraceEnabled()) {
+                log.trace("Fetching the details of all dynamic tasks");
             }
-            TaskManagementDAOFactory.beginTransaction();
-            dynamicTasks = dynamicTaskDAO.getAllDynamicTasks();
+            TaskManagementDAOFactory.openConnection();
+            dynamicTasks = dynamicTaskDAO.getAllDynamicTasks(tenantId);
             if (dynamicTasks != null) {
                 for (DynamicTask dynamicTask : dynamicTasks) {
                     dynamicTask.setProperties(dynamicTaskPropDAO
-                            .getDynamicTaskProps(dynamicTask.getDynamicTaskId()));
+                            .getDynamicTaskProps(dynamicTask.getDynamicTaskId(), tenantId));
                 }
             }
-            TaskManagementDAOFactory.commitTransaction();
         } catch (TaskManagementDAOException e) {
-            TaskManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while fetching all dynamic tasks";
             log.error(msg, e);
             throw new TaskManagementException(msg, e);
@@ -322,20 +330,63 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     }
 
     @Override
-    public DynamicTask getDynamicTaskById(int dynamicTaskId) throws TaskManagementException {
+    public Map<Integer, List<DynamicTask>> getDynamicTasksForAllTenants() throws TaskManagementException {
+        List<DynamicTask> dynamicTasks;
+        try {
+            if (log.isTraceEnabled()) {
+                log.trace("Fetching the details of dynamic tasks for all tenants");
+            }
+            TaskManagementDAOFactory.openConnection();
+            dynamicTasks = dynamicTaskDAO.getAllDynamicTasks();
+            if (dynamicTasks != null) {
+                for (DynamicTask dynamicTask : dynamicTasks) {
+                    dynamicTask.setProperties(dynamicTaskPropDAO
+                            .getDynamicTaskProps(dynamicTask.getDynamicTaskId(), dynamicTask.getTenantId()));
+                }
+            }
+        } catch (TaskManagementDAOException e) {
+            String msg = "Error occurred while fetching all dynamic tasks";
+            log.error(msg, e);
+            throw new TaskManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Failed to start/open transaction to get all dynamic tasks";
+            log.error(msg, e);
+            throw new TaskManagementException(msg, e);
+        } finally {
+            TaskManagementDAOFactory.closeConnection();
+        }
+        Map<Integer, List<DynamicTask>> tenantedDynamicTasks = new HashMap<>();
+        List<DynamicTask> dts;
+        if (dynamicTasks != null) {
+            for (DynamicTask dt : dynamicTasks) {
+                if (tenantedDynamicTasks.containsKey(dt.getTenantId())) {
+                    dts = tenantedDynamicTasks.get(dt.getTenantId());
+                } else {
+                    dts = new ArrayList<>();
+                }
+                dts.add(dt);
+                tenantedDynamicTasks.put(dt.getTenantId(), dts);
+            }
+        }
+        return tenantedDynamicTasks;
+    }
+
+    @Override
+    public DynamicTask getDynamicTask(int dynamicTaskId) throws TaskManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DynamicTask dynamicTask;
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Fetching the details of dynamic task '" + dynamicTaskId + "'");
             }
-            TaskManagementDAOFactory.beginTransaction();
-            dynamicTask = dynamicTaskDAO.getDynamicTaskById(dynamicTaskId);
+            TaskManagementDAOFactory.openConnection();
+            dynamicTask = dynamicTaskDAO.getDynamicTask(dynamicTaskId, tenantId);
             if (dynamicTask != null) {
-                dynamicTask.setProperties(dynamicTaskPropDAO.getDynamicTaskProps(dynamicTask.getDynamicTaskId()));
+                dynamicTask.setProperties(dynamicTaskPropDAO.getDynamicTaskProps(dynamicTask.getDynamicTaskId(),
+                        tenantId));
             }
             TaskManagementDAOFactory.commitTransaction();
         } catch (TaskManagementDAOException e) {
-            TaskManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while fetching dynamic task '" + dynamicTaskId + "'";
             log.error(msg, e);
             throw new TaskManagementException(msg, e);
@@ -351,21 +402,21 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 
     @Override
     public List<DynamicTask> getActiveDynamicTasks() throws TaskManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         List<DynamicTask> dynamicTasks;
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Fetching the details of all active dynamic tasks");
             }
-            TaskManagementDAOFactory.beginTransaction();
-            dynamicTasks = dynamicTaskDAO.getActiveDynamicTasks();
+            TaskManagementDAOFactory.openConnection();
+            dynamicTasks = dynamicTaskDAO.getActiveDynamicTasks(tenantId);
             if (dynamicTasks != null) {
                 for (DynamicTask dynamicTask : dynamicTasks) {
-                    dynamicTask.setProperties(dynamicTaskPropDAO.getDynamicTaskProps(dynamicTask.getDynamicTaskId()));
+                    dynamicTask.setProperties(dynamicTaskPropDAO.getDynamicTaskProps(dynamicTask.getDynamicTaskId(),
+                            tenantId));
                 }
             }
-            TaskManagementDAOFactory.commitTransaction();
         } catch (TaskManagementDAOException e) {
-            TaskManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while fetching all active dynamic tasks";
             log.error(msg, e);
             throw new TaskManagementException(msg, e);
@@ -380,18 +431,19 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     }
 
     // check whether task exist in the ntask core
-    private boolean isTaskExists(String taskId) throws TaskManagementException, TaskException {
-        if (StringUtils.isEmpty(taskId)) {
-            String msg = "Task ID must not be null or empty.";
+    private boolean isTaskExists(String taskName) throws TaskManagementException, TaskException {
+        if (StringUtils.isEmpty(taskName)) {
+            String msg = "Task Name must not be null or empty.";
             log.error(msg);
             throw new TaskManagementException(msg);
         }
         List<TaskInfo> tasks = taskManager.getAllTasks();
         for (TaskInfo t : tasks) {
-            if (taskId.equals(t.getName())) {
+            if (taskName.equals(t.getName())) {
                 return true;
             }
         }
         return false;
     }
+
 }

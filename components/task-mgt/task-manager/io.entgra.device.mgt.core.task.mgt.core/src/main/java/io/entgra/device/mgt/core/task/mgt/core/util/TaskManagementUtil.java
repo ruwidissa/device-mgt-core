@@ -17,20 +17,21 @@
  */
 package io.entgra.device.mgt.core.task.mgt.core.util;
 
-import com.google.gson.Gson;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
+import io.entgra.device.mgt.core.task.mgt.common.bean.DynamicTask;
 import io.entgra.device.mgt.core.task.mgt.common.constant.TaskMgtConstants;
 import io.entgra.device.mgt.core.task.mgt.common.exception.TaskManagementException;
 import io.entgra.device.mgt.core.task.mgt.core.internal.TaskManagerDataHolder;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -55,11 +56,11 @@ public class TaskManagementUtil {
         }
     }
 
-    public static String generateTaskId(int dynamicTaskId) throws TaskManagementException {
+    public static String generateNTaskName(int dynamicTaskId) throws TaskManagementException {
         try {
             int serverHashIdx = TaskManagerDataHolder.getInstance().getHeartBeatService()
                     .getServerCtxInfo().getLocalServerHashIdx();
-            return generateTaskId(dynamicTaskId, serverHashIdx);
+            return generateNTaskName(dynamicTaskId, serverHashIdx);
         } catch (HeartBeatManagementException e) {
             String msg = "Failed to generate task id for a dynamic task " + dynamicTaskId;
             log.error(msg, e);
@@ -67,18 +68,33 @@ public class TaskManagementUtil {
         }
     }
 
-    public static String generateTaskId(int dynamicTaskId, int serverHashIdx) {
+    public static String generateNTaskName(int dynamicTaskId, int serverHashIdx) {
         return TaskMgtConstants.Task.DYNAMIC_TASK_TYPE + TaskMgtConstants.Task.NAME_SEPARATOR + dynamicTaskId
                 + TaskMgtConstants.Task.NAME_SEPARATOR + serverHashIdx;
     }
 
-    public static String generateTaskPropsMD5(Map<String, String> taskProperties) {
-        taskProperties.remove(TaskMgtConstants.Task.TENANT_ID_PROP);
-        taskProperties.remove(TaskMgtConstants.Task.LOCAL_HASH_INDEX);
-        taskProperties.remove(TaskMgtConstants.Task.LOCAL_TASK_NAME);
-        Gson gson = new Gson();
-        String json = gson.toJson(taskProperties);
-        return DigestUtils.md5Hex(json);
+    public static Map<String, String> populateNTaskProperties(DynamicTask dynamicTask,
+                                                              String nTaskName) throws TaskManagementException {
+        try {
+            int serverHashIdx = TaskManagerDataHolder.getInstance().getHeartBeatService()
+                    .getServerCtxInfo().getLocalServerHashIdx();
+            return populateNTaskProperties(dynamicTask, nTaskName, serverHashIdx);
+        } catch (HeartBeatManagementException e) {
+            String msg = "Failed to populate nTask properties a dynamic task " + dynamicTask.getDynamicTaskId();
+            log.error(msg, e);
+            throw new TaskManagementException(msg, e);
+        }
+    }
+
+    public static Map<String, String> populateNTaskProperties(DynamicTask dynamicTask,
+                                                              String nTaskName, int serverHashIdx) {
+        Map<String, String> taskProperties = new HashMap<>();
+        taskProperties.put(TaskMgtConstants.Task.DYNAMIC_TASK_ID, String.valueOf(dynamicTask.getDynamicTaskId()));
+        taskProperties.put(TaskMgtConstants.Task.LOCAL_TASK_NAME, nTaskName);
+        taskProperties.put(TaskMgtConstants.Task.LOCAL_HASH_INDEX, String.valueOf(serverHashIdx));
+        taskProperties.put(TaskMgtConstants.Task.TENANT_ID_PROP,
+                String.valueOf(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId()));
+        return taskProperties;
     }
 
 }
