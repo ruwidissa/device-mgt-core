@@ -28,8 +28,6 @@ import org.wso2.carbon.ntask.core.Task;
 public abstract class RandomlyAssignedScheduleTask implements Task {
 
     private static final Log log = LogFactory.getLog(RandomlyAssignedScheduleTask.class);
-
-    private static String taskName = "UNSPECIFIED";
     private static boolean qualifiedToExecuteTask = false;
     private static boolean dynamicTaskEnabled = false;
 
@@ -40,8 +38,6 @@ public abstract class RandomlyAssignedScheduleTask implements Task {
         } catch (HeartBeatManagementException e) {
             log.error("Error Instantiating Variables necessary for Randomly Assigned Task Scheduling.", e);
         }
-        //This is done so that sub class extending this abstract class is forced to specify a task name.
-        taskName = getTaskName();
         setup();
     }
 
@@ -57,15 +53,15 @@ public abstract class RandomlyAssignedScheduleTask implements Task {
         if (dynamicTaskEnabled) {
             try {
                 qualifiedToExecuteTask = DeviceManagementDataHolder.getInstance().getHeartBeatService().isQualifiedToExecuteTask();
-                log.info("## NODE Qualified to execute Randomly Assigned Task : " + taskName);
-                DeviceManagementDataHolder.getInstance().getHeartBeatService().updateTaskExecutionAcknowledgement(taskName);
             } catch (HeartBeatManagementException e) {
-                log.error("Error refreshing Variables necessary for Randomly Assigned Scheduled Task. " +
-                        "Dynamic Tasks will not function.", e);
+                log.error("Error refreshing variables necessary for " +
+                        "Randomly Assigned Scheduled Task: " + getTaskName(), e);
             }
         } else {
             qualifiedToExecuteTask = true;
         }
+        log.info("Node is " + (qualifiedToExecuteTask ? "" : "not")
+                + " qualified to execute Randomly Assigned Task : " + getTaskName());
     }
 
     protected abstract void setup();

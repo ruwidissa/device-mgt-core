@@ -385,7 +385,6 @@ public class TaskManagementServiceImpl implements TaskManagementService {
                 dynamicTask.setProperties(dynamicTaskPropDAO.getDynamicTaskProps(dynamicTask.getDynamicTaskId(),
                         tenantId));
             }
-            TaskManagementDAOFactory.commitTransaction();
         } catch (TaskManagementDAOException e) {
             String msg = "Error occurred while fetching dynamic task '" + dynamicTaskId + "'";
             log.error(msg, e);

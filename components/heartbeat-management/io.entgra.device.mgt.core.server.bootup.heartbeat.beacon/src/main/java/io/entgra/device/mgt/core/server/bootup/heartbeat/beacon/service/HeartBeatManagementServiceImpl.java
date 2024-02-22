@@ -151,7 +151,7 @@ public class HeartBeatManagementServiceImpl implements HeartBeatManagementServic
                 if (candidate != null && candidate.getServerUUID().equalsIgnoreCase(localServerUUID)) {
                     isQualified = true;
                     if (log.isDebugEnabled()) {
-                        log.debug("Node : " + localServerUUID + " Qualified to execute randomly assigned task.");
+                        log.debug("Node : " + localServerUUID + " is qualified to execute randomly assigned task.");
                     }
                 }
             } catch (HeartBeatDAOException e) {
