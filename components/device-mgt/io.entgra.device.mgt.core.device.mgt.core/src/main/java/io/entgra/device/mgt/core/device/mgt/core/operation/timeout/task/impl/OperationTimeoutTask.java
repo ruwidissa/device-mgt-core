@@ -64,7 +64,7 @@ public class OperationTimeoutTask extends RandomlyAssignedScheduleTask {
 
     @Override
     protected void executeRandomlyAssignedTask() {
-// this task will run only in one node when the deployment has multiple nodes
+        // this task will run only in one node when the deployment has multiple nodes
         String operationTimeoutTaskConfigStr = getProperty(
                 OperationTimeoutTaskManagerServiceImpl.OPERATION_TIMEOUT_TASK_CONFIG);
         Gson gson = new Gson();
@@ -89,22 +89,22 @@ public class OperationTimeoutTask extends RandomlyAssignedScheduleTask {
             List<Activity> activities = DeviceManagementDataHolder.getInstance().getOperationManager()
                     .getActivities(deviceTypes, operationTimeoutConfig.getCode(), timeMillis,
                             operationTimeoutConfig.getInitialStatus());
+            String operationId;
+            Operation operation;
             for (Activity activity : activities) {
+                operationId = activity.getActivityId().replace("ACTIVITY_", "");
                 for (ActivityStatus activityStatus : activity.getActivityStatus()) {
-                    String operationId = activity.getActivityId().replace("ACTIVITY_", "");
-                    Operation operation = DeviceManagementDataHolder.getInstance().getOperationManager()
+                    operation = DeviceManagementDataHolder.getInstance().getOperationManager()
                             .getOperation(Integer.parseInt(operationId));
                     operation.setStatus(Operation.Status.valueOf(operationTimeoutConfig.getNextStatus()));
                     DeviceManagementDataHolder.getInstance().getOperationManager()
                             .updateOperation(activityStatus.getDeviceIdentifier(), operation);
                 }
             }
-
         } catch (OperationManagementException e) {
             String msg = "Error occurred while retrieving operations.";
             log.error(msg, e);
         }
-
     }
 
 }
