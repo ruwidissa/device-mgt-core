@@ -17,16 +17,19 @@
  */
 package io.entgra.device.mgt.core.task.mgt.core.dao.impl;
 
-import io.entgra.device.mgt.core.task.mgt.core.dao.common.TaskManagementDAOFactory;
-import io.entgra.device.mgt.core.task.mgt.core.dao.util.TaskManagementDAOUtil;
 import io.entgra.device.mgt.core.task.mgt.common.bean.DynamicTask;
 import io.entgra.device.mgt.core.task.mgt.common.exception.TaskManagementDAOException;
 import io.entgra.device.mgt.core.task.mgt.core.dao.DynamicTaskDAO;
+import io.entgra.device.mgt.core.task.mgt.core.dao.common.TaskManagementDAOFactory;
+import io.entgra.device.mgt.core.task.mgt.core.dao.util.TaskManagementDAOUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 
@@ -34,9 +37,9 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
     private static final Log log = LogFactory.getLog(DynamicTaskDAOImpl.class);
 
     @Override
-    public int addTask(DynamicTask dynamicTask) throws TaskManagementDAOException {
+    public int addTask(DynamicTask dynamicTask, int tenantId) throws TaskManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
+        ResultSet rs;
         int taskId = -1;
         try {
             Connection conn = TaskManagementDAOFactory.getConnection();
@@ -48,13 +51,14 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
             stmt.setString(2, dynamicTask.getName());
             stmt.setBoolean(3, dynamicTask.isEnabled());
             stmt.setString(4, dynamicTask.getTaskClassName());
-            stmt.setInt(5, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+            stmt.setInt(5, tenantId);
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 taskId = rs.getInt(1);
             }
+            dynamicTask.setDynamicTaskId(taskId);
             return taskId;
         } catch (SQLException e) {
             String msg = "Error occurred while inserting task '" + dynamicTask.getName() + "'";
@@ -66,16 +70,17 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
     }
 
     @Override
-    public boolean updateDynamicTask(DynamicTask dynamicTask) throws TaskManagementDAOException {
+    public boolean updateDynamicTask(DynamicTask dynamicTask, int tenantId) throws TaskManagementDAOException {
         PreparedStatement stmt = null;
         int rows;
         try {
             Connection conn = TaskManagementDAOFactory.getConnection();
-            String sql = "UPDATE DYNAMIC_TASK SET CRON = ?,IS_ENABLED = ? WHERE DYNAMIC_TASK_ID = ?";
+            String sql = "UPDATE DYNAMIC_TASK SET CRON = ?,IS_ENABLED = ? WHERE DYNAMIC_TASK_ID = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, dynamicTask.getCronExpression());
             stmt.setBoolean(2, dynamicTask.isEnabled());
             stmt.setInt(3, dynamicTask.getDynamicTaskId());
+            stmt.setInt(4, tenantId);
             rows = stmt.executeUpdate();
             return (rows > 0);
         } catch (SQLException e) {
@@ -87,9 +92,8 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
         }
     }
 
-
     @Override
-    public void deleteDynamicTask(int dynamicTaskId) throws TaskManagementDAOException {
+    public void deleteDynamicTask(int dynamicTaskId, int tenantId) throws TaskManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to delete dynamic task with the id: " + dynamicTaskId);
         }
@@ -98,7 +102,7 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
             Connection conn = TaskManagementDAOFactory.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setInt(1, dynamicTaskId);
-                stmt.setInt(2, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+                stmt.setInt(2, tenantId);
                 stmt.executeUpdate();
             }
         } catch (SQLException e) {
@@ -110,7 +114,7 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
     }
 
     @Override
-    public DynamicTask getDynamicTaskById(int dynamicTaskId) throws TaskManagementDAOException {
+    public DynamicTask getDynamicTask(int dynamicTaskId, int tenantId) throws TaskManagementDAOException {
         DynamicTask dynamicTask = null;
         try {
             Connection conn = TaskManagementDAOFactory.getConnection();
@@ -118,7 +122,7 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, dynamicTaskId);
-                stmt.setInt(2, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+                stmt.setInt(2, tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         dynamicTask = TaskManagementDAOUtil.loadDynamicTask(rs);
@@ -155,13 +159,14 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
     }
 
     @Override
-    public List<DynamicTask> getActiveDynamicTasks() throws TaskManagementDAOException {
-        List<DynamicTask> dynamicTasks = null;
+    public List<DynamicTask> getAllDynamicTasks(int tenantId) throws TaskManagementDAOException {
+        List<DynamicTask> dynamicTasks;
         try {
             Connection conn = TaskManagementDAOFactory.getConnection();
-            String sql = "SELECT * FROM DYNAMIC_TASK WHERE IS_ENABLED = 'true' ";
+            String sql = "SELECT * FROM DYNAMIC_TASK WHERE TENANT_ID = ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     dynamicTasks = TaskManagementDAOUtil.loadDynamicTasks(rs);
                 }
@@ -173,4 +178,26 @@ public class DynamicTaskDAOImpl implements DynamicTaskDAO {
         }
         return dynamicTasks;
     }
+
+    @Override
+    public List<DynamicTask> getActiveDynamicTasks(int tenantId) throws TaskManagementDAOException {
+        List<DynamicTask> dynamicTasks;
+        try {
+            Connection conn = TaskManagementDAOFactory.getConnection();
+            String sql = "SELECT * FROM DYNAMIC_TASK WHERE IS_ENABLED = 'true' AND TENANT_ID = ?";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    dynamicTasks = TaskManagementDAOUtil.loadDynamicTasks(rs);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting all dynamic task data ";
+            log.error(msg, e);
+            throw new TaskManagementDAOException(msg, e);
+        }
+        return dynamicTasks;
+    }
+
 }

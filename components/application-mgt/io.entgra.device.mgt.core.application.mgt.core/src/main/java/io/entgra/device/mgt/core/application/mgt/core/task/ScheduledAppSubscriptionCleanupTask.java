@@ -59,4 +59,5 @@ public class ScheduledAppSubscriptionCleanupTask extends RandomlyAssignedSchedul
     public String getTaskName() {
         return TASK_NAME;
     }
+
 }
