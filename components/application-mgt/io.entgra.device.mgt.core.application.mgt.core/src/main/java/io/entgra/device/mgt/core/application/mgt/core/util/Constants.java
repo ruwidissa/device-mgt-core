@@ -214,4 +214,10 @@ public class Constants {
         public static final String ASSOCIATION_DEVICE = "ASSOCIATION_DEVICE";
         public static final String ASSOCIATION_USER = "ASSOCIATION_USER";
     }
+
+    /**
+     * App name sanitization related constants
+     */
+    public static final int MAX_APP_NAME_CHARACTERS = 350;
+    public static final String APP_NAME_REGEX = "[^a-zA-Z0-9.\\s-]";
 }

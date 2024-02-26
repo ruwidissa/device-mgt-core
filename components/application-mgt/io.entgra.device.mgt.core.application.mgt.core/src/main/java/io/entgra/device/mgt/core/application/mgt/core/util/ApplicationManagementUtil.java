@@ -535,4 +535,29 @@ public class ApplicationManagementUtil {
         packageNamesOfApps.add(adamId);
         return applicationManager.getApplications(packageNamesOfApps);
     }
+
+    /**
+     * Sanitize app names and shorten icon/screenshot file names
+     *
+     * @param originalName Original name of the file which is being uploaded
+     * @param type Type - Name/Artifact(Icon, Screenshot, etc.)
+     * @return Sanitized and shortened file name
+     */
+    public static String sanitizeName(String originalName, String type) {
+        String sanitizedName = originalName.replaceAll(Constants.APP_NAME_REGEX, "");
+        if (Constants.ApplicationProperties.NAME.equals(type) && sanitizedName.length() > Constants.MAX_APP_NAME_CHARACTERS) {
+            sanitizedName = sanitizedName.substring(0, Constants.MAX_APP_NAME_CHARACTERS);
+            return sanitizedName;
+        } else if (Constants.ICON_NAME.equals(type) || Constants.SCREENSHOT_NAME.equals(type)) {
+            // Shortening icon/screenshot names
+            String fileExtension = "";
+            int dotIndex = originalName.lastIndexOf('.');
+            if (dotIndex >= 0) {
+                fileExtension = originalName.substring(dotIndex);
+            }
+            return type + fileExtension;
+        } else {
+            return sanitizedName;
+        }
+    }
 }
