@@ -25,6 +25,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.core.services.authentication.CarbonServerAuthenticator;
 import org.wso2.carbon.identity.authenticator.backend.oauth.OauthAuthenticator;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
+import org.osgi.service.component.annotations.*;
 
 @Component(
         name = "org.wso2.carbon.identity.backend.oauth.authenticator",

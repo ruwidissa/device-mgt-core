@@ -25,6 +25,7 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.integration.client.IntegrationClientServiceImpl;
 import org.wso2.carbon.apimgt.integration.client.configs.APIMConfigReader;
 import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
+import org.osgi.service.component.annotations.*;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.service.JWTClientManagerService;
 
 @Component(
