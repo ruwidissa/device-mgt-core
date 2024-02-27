@@ -36,10 +36,6 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-scr-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<extensions>true</extensions>
 				<configuration>
@@ -54,8 +50,8 @@
 							!org.wso2.carbon.apimgt.integration.client.internal
 						</Export-Package>
 						<Import-Package>
-							org.osgi.framework,
-							org.osgi.service.component,
+							org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+							org.osgi.service.*;version="${imp.package.version.osgi.service}",
 							feign,
 							feign.codec,
 							feign.auth,
@@ -126,6 +122,11 @@
 	</build>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>

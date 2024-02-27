@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.*;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 @Component(
-        name = "io.entgra.device.mgt.core.apimgt.extension.rest.api.internal.PublisherRESTAPIServiceComponent",
+        name = "io.entgra.device.mgt.core.apimgt.extension.rest.api.internal.APIManagerServiceComponent",
         immediate = true)
 public class APIManagerServiceComponent {
 
