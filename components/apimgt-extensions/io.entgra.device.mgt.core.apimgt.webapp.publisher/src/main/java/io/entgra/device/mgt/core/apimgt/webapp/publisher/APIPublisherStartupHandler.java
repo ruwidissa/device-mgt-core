@@ -90,6 +90,15 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
                 } catch (APIManagerPublisherException e) {
                     log.error("failed to update scope role mapping.", e);
                 }
+
+                // execute after api publishing
+                for (PostApiPublishingObsever observer : APIPublisherDataHolder.getInstance().getPostApiPublishingObseverList()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Executing " + observer.getClass().getName());
+                    }
+                    observer.execute();
+                }
+                log.info("Finish executing PostApiPublishingObsevers");
             }
         });
         t.start();

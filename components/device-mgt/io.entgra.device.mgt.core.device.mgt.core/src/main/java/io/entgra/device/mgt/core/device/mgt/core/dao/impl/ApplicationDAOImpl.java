@@ -17,6 +17,9 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 
+import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationFilter;
+import io.entgra.device.mgt.core.device.mgt.core.common.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
@@ -295,12 +298,27 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                     "PLATFORM = ? AND TENANT_ID = ?) ";
 
         try {
-            String filter = request.getFilter();
-            if (filter != null) {
+            ApplicationFilter applicationFilter = new Gson().fromJson(request.getFilter(), ApplicationFilter.class);
+            boolean isAppNameFilterProvided = false;
+            if (null != applicationFilter.getAppName()) {
                 sql = sql + "AND NAME LIKE ? ";
+                applicationFilter.setAppName(Constants.QUERY_WILDCARD.concat(applicationFilter.getAppName())
+                        .concat(Constants.QUERY_WILDCARD));
+                isAppNameFilterProvided = true;
             }
+
+            boolean isPackageFilterProvided = false;
+            if (null != applicationFilter.getPackageName()) {
+                sql = sql + "AND APP_IDENTIFIER LIKE ? ";
+                applicationFilter.setPackageName(Constants.QUERY_WILDCARD.concat(applicationFilter.getPackageName())
+                        .concat(Constants.QUERY_WILDCARD));
+                isPackageFilterProvided = true;
+            }
+
+            boolean isLimitPresent = false;
             if (request != null && request.getRowCount() != -1) {
                 sql = sql + "LIMIT ? OFFSET ?";
+                isLimitPresent = true;
             }
             Connection conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -309,10 +327,13 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 stmt.setInt(paramIdx++, tenantId);
                 stmt.setString(paramIdx++, request.getDeviceType());
                 stmt.setInt(paramIdx++, tenantId);
-                if (filter != null){
-                    stmt.setString(paramIdx++, filter);
+                if (isAppNameFilterProvided){
+                    stmt.setString(paramIdx++, applicationFilter.getAppName());
                 }
-                if (request != null && request.getRowCount() != -1) {
+                if (isPackageFilterProvided){
+                    stmt.setString(paramIdx++, applicationFilter.getPackageName());
+                }
+                if (isLimitPresent) {
                     stmt.setInt(paramIdx++, request.getRowCount());
                     stmt.setInt(paramIdx, request.getStartIndex());
                 }

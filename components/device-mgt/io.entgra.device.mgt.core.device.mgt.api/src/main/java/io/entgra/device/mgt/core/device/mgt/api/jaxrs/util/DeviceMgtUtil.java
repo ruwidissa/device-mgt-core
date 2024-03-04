@@ -24,7 +24,9 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ProfileFeature;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationFilter;
 
+import com.google.gson.Gson;
 import javax.validation.ConstraintViolation;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,5 +142,13 @@ public class DeviceMgtUtil {
         }
         errorResponse.setErrorItems(errorListItems);
         return errorResponse;
+    }
+
+    public static String buildAppSearchFilter(String appName, String packageName) {
+        //Create search filter as a Json string to attach into the filter in PaginationRequest
+        ApplicationFilter applicationFilter = new ApplicationFilter();
+        applicationFilter.setAppName(appName);
+        applicationFilter.setPackageName(packageName);
+        return new Gson().toJson(applicationFilter);
     }
 }

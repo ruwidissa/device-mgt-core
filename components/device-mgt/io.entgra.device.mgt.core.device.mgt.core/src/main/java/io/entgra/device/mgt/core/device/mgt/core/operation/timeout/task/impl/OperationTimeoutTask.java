@@ -18,9 +18,6 @@
 package io.entgra.device.mgt.core.device.mgt.core.operation.timeout.task.impl;
 
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.HeartBeatManagementException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityStatus;
@@ -29,75 +26,85 @@ import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationManage
 import io.entgra.device.mgt.core.device.mgt.core.config.operation.timeout.OperationTimeout;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
-import io.entgra.device.mgt.core.device.mgt.core.task.impl.DynamicPartitionedScheduleTask;
+import io.entgra.device.mgt.core.device.mgt.core.task.impl.RandomlyAssignedScheduleTask;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class OperationTimeoutTask extends DynamicPartitionedScheduleTask {
+public class OperationTimeoutTask extends RandomlyAssignedScheduleTask {
 
     private static final Log log = LogFactory.getLog(OperationTimeoutTask.class);
+    public static final String OPERATION_TIMEOUT_TASK = "OPERATION_TIMEOUT_TASK";
+    private Map<String, String> properties;
+
+    @Override
+    public final void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
+    public final String getProperty(String name) {
+        if (properties == null) {
+            return null;
+        }
+        return properties.get(name);
+    }
+
     @Override
     protected void setup() {
 
     }
 
     @Override
-    protected void executeDynamicTask() {
-        if (isQualifiedToExecuteTask()) { // this task will run only in one node when the deployment has multiple nodes
-            String operationTimeoutTaskConfigStr = getProperty(
-                    OperationTimeoutTaskManagerServiceImpl.OPERATION_TIMEOUT_TASK_CONFIG);
-            Gson gson = new Gson();
-            OperationTimeout operationTimeoutConfig = gson.fromJson(operationTimeoutTaskConfigStr, OperationTimeout.class);
-            try {
-                long timeMillis = System.currentTimeMillis() - (long) operationTimeoutConfig.getTimeout();
-                List<String> deviceTypes = new ArrayList<>();
-                if (operationTimeoutConfig.getDeviceTypes().size() == 1 &&
-                        "ALL".equals(operationTimeoutConfig.getDeviceTypes().get(0))) {
-                    try {
-                        List<DeviceType> deviceTypeList = DeviceManagementDataHolder.getInstance()
-                                .getDeviceManagementProvider().getDeviceTypes();
-                        for (DeviceType deviceType : deviceTypeList) {
-                            deviceTypes.add(deviceType.getName());
-                        }
-                    } catch (DeviceManagementException e) {
-                        log.error("Error occurred while reading device types", e);
-                    }
-                } else {
-                    deviceTypes = operationTimeoutConfig.getDeviceTypes();
-                }
-                List<Activity> activities = DeviceManagementDataHolder.getInstance().getOperationManager()
-                        .getActivities(deviceTypes, operationTimeoutConfig.getCode(), timeMillis,
-                                operationTimeoutConfig.getInitialStatus());
-                for (Activity activity : activities) {
-                    for (ActivityStatus activityStatus : activity.getActivityStatus()) {
-                        String operationId = activity.getActivityId().replace("ACTIVITY_", "");
-                        Operation operation = DeviceManagementDataHolder.getInstance().getOperationManager()
-                                .getOperation(Integer.parseInt(operationId));
-                        operation.setStatus(Operation.Status.valueOf(operationTimeoutConfig.getNextStatus()));
-                        DeviceManagementDataHolder.getInstance().getOperationManager()
-                                .updateOperation(activityStatus.getDeviceIdentifier(), operation);
-                    }
-                }
-
-            } catch (OperationManagementException e) {
-                String msg = "Error occurred while retrieving operations.";
-                log.error(msg, e);
-            }
-        }
-
+    public String getTaskName() {
+        return OPERATION_TIMEOUT_TASK;
     }
 
-    private boolean isQualifiedToExecuteTask() {
-        if (isDynamicTaskEligible()) {
-            try {
-                return DeviceManagementDataHolder.getInstance().getHeartBeatService().isQualifiedToExecuteTask();
-            } catch (HeartBeatManagementException e) {
-                log.error("Error while checking is qualified to execute task", e);
+    @Override
+    protected void executeRandomlyAssignedTask() {
+        // this task will run only in one node when the deployment has multiple nodes
+        String operationTimeoutTaskConfigStr = getProperty(
+                OperationTimeoutTaskManagerServiceImpl.OPERATION_TIMEOUT_TASK_CONFIG);
+        Gson gson = new Gson();
+        OperationTimeout operationTimeoutConfig = gson.fromJson(operationTimeoutTaskConfigStr, OperationTimeout.class);
+        try {
+            long timeMillis = System.currentTimeMillis() - (long) operationTimeoutConfig.getTimeout();
+            List<String> deviceTypes = new ArrayList<>();
+            if (operationTimeoutConfig.getDeviceTypes().size() == 1 &&
+                    "ALL".equals(operationTimeoutConfig.getDeviceTypes().get(0))) {
+                try {
+                    List<DeviceType> deviceTypeList = DeviceManagementDataHolder.getInstance()
+                            .getDeviceManagementProvider().getDeviceTypes();
+                    for (DeviceType deviceType : deviceTypeList) {
+                        deviceTypes.add(deviceType.getName());
+                    }
+                } catch (DeviceManagementException e) {
+                    log.error("Error occurred while reading device types", e);
+                }
+            } else {
+                deviceTypes = operationTimeoutConfig.getDeviceTypes();
             }
-        } else {
-            return true;
+            List<Activity> activities = DeviceManagementDataHolder.getInstance().getOperationManager()
+                    .getActivities(deviceTypes, operationTimeoutConfig.getCode(), timeMillis,
+                            operationTimeoutConfig.getInitialStatus());
+            String operationId;
+            Operation operation;
+            for (Activity activity : activities) {
+                operationId = activity.getActivityId().replace("ACTIVITY_", "");
+                for (ActivityStatus activityStatus : activity.getActivityStatus()) {
+                    operation = DeviceManagementDataHolder.getInstance().getOperationManager()
+                            .getOperation(Integer.parseInt(operationId));
+                    operation.setStatus(Operation.Status.valueOf(operationTimeoutConfig.getNextStatus()));
+                    DeviceManagementDataHolder.getInstance().getOperationManager()
+                            .updateOperation(activityStatus.getDeviceIdentifier(), operation);
+                }
+            }
+        } catch (OperationManagementException e) {
+            String msg = "Error occurred while retrieving operations.";
+            log.error(msg, e);
         }
-        return false;
     }
+
 }

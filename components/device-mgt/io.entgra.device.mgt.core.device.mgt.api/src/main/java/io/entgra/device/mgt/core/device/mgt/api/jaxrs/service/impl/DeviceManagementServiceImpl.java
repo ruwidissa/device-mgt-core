@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationMana
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DisenrollRequest;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtUtil;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -1564,11 +1565,13 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("offset") int offset,
             @DefaultValue("10")
             @QueryParam("limit") int limit,
-            @QueryParam("appName") String appName) {
+            @QueryParam("appName") String appName,
+            @QueryParam("packageName") String packageName) {
         PaginationRequest request = new PaginationRequest(offset, limit);
         ApplicationList applicationList = new ApplicationList();
         request.setDeviceType(deviceType);
-        request.setFilter(appName);
+        request.setFilter(DeviceMgtUtil.buildAppSearchFilter(appName, packageName));
+
         try {
             PaginationResult paginationResult = DeviceMgtAPIUtils
                     .getDeviceManagementService()

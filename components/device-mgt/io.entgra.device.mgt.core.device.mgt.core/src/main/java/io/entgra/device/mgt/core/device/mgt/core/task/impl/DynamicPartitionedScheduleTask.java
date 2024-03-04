@@ -53,7 +53,7 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
     public final void init() {
         try {
             boolean dynamicTaskEnabled = DeviceManagementDataHolder.getInstance().getHeartBeatService().isTaskPartitioningEnabled();
-            if(dynamicTaskEnabled){
+            if (dynamicTaskEnabled) {
                 taskContext = new DynamicTaskContext();
                 taskContext.setPartitioningEnabled(true);
             } else {
@@ -75,9 +75,9 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
             String localHashIndex = getProperty(TaskMgtConstants.Task.LOCAL_HASH_INDEX);
             // These tasks are not dynamically scheduled. They are added via a config so scheduled in each node
             // during the server startup
-            if (localHashIndex == null ) {
+            if (localHashIndex == null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Executing startup scheduled task (" + getTaskName() +  ") with class: " +
+                    log.debug("Executing startup scheduled task (" + getTaskName() + ") with class: " +
                             this.getClass().getName());
                 }
                 executeDynamicTask();
@@ -116,7 +116,7 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
 
     private void updateContext() throws HeartBeatManagementException {
         ServerCtxInfo ctxInfo = DeviceManagementDataHolder.getInstance().getHeartBeatService().getServerCtxInfo();
-        if(ctxInfo != null) {
+        if (ctxInfo != null) {
             populateContext(ctxInfo);
         } else {
             log.info("Dynamic Task Context not present. Tasks will run on regular worker/manager mode.");
@@ -127,10 +127,10 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
         taskContext.setActiveServerCount(ctxInfo.getActiveServerCount());
         taskContext.setServerHashIndex(ctxInfo.getLocalServerHashIdx());
 
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Initiating execution of dynamic task for server : " + taskContext.getServerHashIndex() +
-                      " where active server count is : " + taskContext.getActiveServerCount() +
-                      " partitioning task enabled : " + taskContext.isPartitioningEnabled());
+                    " where active server count is : " + taskContext.getActiveServerCount() +
+                    " partitioning task enabled : " + taskContext.isPartitioningEnabled());
         }
     }
 
@@ -142,7 +142,8 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
         return taskContext;
     }
 
-    public static boolean isDynamicTaskEligible(){
+    @Deprecated
+    public static boolean isDynamicTaskEligible() {
         return taskContext != null && taskContext.isPartitioningEnabled();
     }
 
