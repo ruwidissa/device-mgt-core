@@ -22,6 +22,7 @@ import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dao.D
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.DeviceNodeResult;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.DeviceOrganization;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.RootChildrenRequest;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.exception.DeviceOrganizationMgtPluginException;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.impl.DeviceOrganizationServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.mock.BaseDeviceOrganizationTest;
@@ -283,6 +284,21 @@ public class ServiceTest extends BaseDeviceOrganizationTest {
         }
         Assert.assertNotNull(organizations, "List of organizations cannot be null");
         Assert.assertFalse(organizations.isEmpty(), "List of organizations should not be empty");
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceOrganizationWithNullParent")
+    public void testGetAllOrganizationsForRoots() throws DeviceOrganizationMgtPluginException {
+
+        int offSet = 0;
+        int limit = 100;
+        boolean includeDevice = true;
+        int maxDepth =100;
+        RootChildrenRequest request = new RootChildrenRequest(offSet, limit);
+        request.setMaxDepth(maxDepth);
+        request.setIncludeDevice(includeDevice);
+        List<DeviceNodeResult> nodeResultList = deviceOrganizationService.getAllDeviceOrganizationsForRoots(request);
+        Assert.assertNotNull(nodeResultList, "Cannot be null");
+        Assert.assertFalse(nodeResultList.isEmpty(), "List of node result should not be empty");
     }
 
     @Test(dependsOnMethods = "testAddDeviceOrganizationWithNullParent")

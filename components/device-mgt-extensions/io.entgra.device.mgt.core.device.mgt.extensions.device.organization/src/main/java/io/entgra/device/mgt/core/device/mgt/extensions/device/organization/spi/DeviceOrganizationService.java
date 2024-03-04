@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.device.mgt.extensions.device.organization.spi;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.DeviceNodeResult;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.DeviceOrganization;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.RootChildrenRequest;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.exception.DeviceOrganizationMgtPluginException;
 
 import java.util.List;
@@ -70,6 +71,15 @@ public interface DeviceOrganizationService {
      * @throws DeviceOrganizationMgtPluginException If an error occurs during the operation.
      */
     List<DeviceOrganization> getAllDeviceOrganizations() throws DeviceOrganizationMgtPluginException;
+
+    /**
+     * Retrieves a list of all device organizations for roots.
+     * @param request
+     * @return
+     * @throws DeviceOrganizationMgtPluginException
+     */
+    List<DeviceNodeResult> getAllDeviceOrganizationsForRoots(RootChildrenRequest request)
+            throws DeviceOrganizationMgtPluginException;
 
     /**
      * Retrieves device Organization Leafs
