@@ -158,7 +158,7 @@ public class DeviceOrganizationMgtServiceImpl implements DeviceOrganizationMgtSe
     }
 
     @GET
-    @Path("roots-children")
+    @Path("roots/children")
     @Override
     public Response getDeviceOrganizationChildrenForRoots(
             @DefaultValue("0") @QueryParam("offset") int offset,

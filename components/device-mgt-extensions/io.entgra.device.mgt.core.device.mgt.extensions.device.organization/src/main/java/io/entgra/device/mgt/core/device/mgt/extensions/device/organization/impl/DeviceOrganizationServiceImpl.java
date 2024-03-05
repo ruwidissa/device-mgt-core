@@ -177,22 +177,15 @@ public class DeviceOrganizationServiceImpl implements DeviceOrganizationService 
             PaginationRequest paginationRequest = new PaginationRequest(request.getOffSet(), request.getLimit());
             List<DeviceOrganization> roots = getDeviceOrganizationRoots(paginationRequest);
 
-            if (roots == null || roots.isEmpty()) {
-                log.warn("No root device organizations found.");
-                return allDeviceOrganizations; // Return an empty list
-            }
-
             // Iterate over each root and fetch its children
             for (DeviceOrganization root : roots) {
                 DeviceNodeResult childrenResult = getChildrenOfDeviceNode(root.getDeviceId(), request.getMaxDepth(), request.isIncludeDevice());
                 if (childrenResult != null) {
                     allDeviceOrganizations.add(childrenResult);
-                } else {
-                    log.warn("no children found for roots.");
                 }
             }
             return allDeviceOrganizations;
-        } catch (NullPointerException | DeviceOrganizationMgtPluginException e) {
+        } catch (DeviceOrganizationMgtPluginException e) {
             String msg = "Error occurred while retrieving all device organizations for roots.";
             log.error(msg, e);
             throw new DeviceOrganizationMgtPluginException(msg, e);

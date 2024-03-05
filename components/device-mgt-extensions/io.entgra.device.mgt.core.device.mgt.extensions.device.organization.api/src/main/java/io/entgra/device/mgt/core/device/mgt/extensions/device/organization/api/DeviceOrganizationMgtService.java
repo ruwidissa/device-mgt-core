@@ -433,7 +433,7 @@ public interface DeviceOrganizationMgtService {
      * @return A response containing a list of root device organizations.
      */
     @GET
-    @Path("roots-children")
+    @Path("roots/children")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
