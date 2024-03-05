@@ -125,6 +125,7 @@ public class DeviceOrganizationMgtServiceImpl implements DeviceOrganizationMgtSe
             @DefaultValue("20") @QueryParam("limit") int limit) {
         RequestValidationUtil.validatePaginationParameters(offset, limit);
         try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
             DeviceOrganizationService deviceOrganizationService = DeviceOrgAPIUtils.getDeviceOrganizationService();
             PaginationRequest request = new PaginationRequest(offset, limit);
             List<DeviceOrganization> organizations = deviceOrganizationService.getDeviceOrganizationLeafs(request);
@@ -144,6 +145,7 @@ public class DeviceOrganizationMgtServiceImpl implements DeviceOrganizationMgtSe
             @DefaultValue("20") @QueryParam("limit") int limit) {
         RequestValidationUtil.validatePaginationParameters(offset, limit);
         try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
             DeviceOrganizationService deviceOrganizationService = DeviceOrgAPIUtils.getDeviceOrganizationService();
             PaginationRequest request = new PaginationRequest(offset, limit);
             List<DeviceOrganization> organizations = deviceOrganizationService.getDeviceOrganizationRoots(request);
@@ -165,6 +167,7 @@ public class DeviceOrganizationMgtServiceImpl implements DeviceOrganizationMgtSe
             @QueryParam("includeDevice") boolean includeDevice) {
         RequestValidationUtil.validatePaginationParameters(offset, limit);
         try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
             DeviceOrganizationService deviceOrganizationService = DeviceOrgAPIUtils.getDeviceOrganizationService();
             RootChildrenRequest request = new RootChildrenRequest(offset, limit);
             request.setMaxDepth(maxDepth);
