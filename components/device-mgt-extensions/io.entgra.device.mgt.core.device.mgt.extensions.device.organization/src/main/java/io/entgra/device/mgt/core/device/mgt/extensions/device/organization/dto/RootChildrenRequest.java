@@ -16,25 +16,33 @@
  * under the License.
  */
 
-package io.entgra.device.mgt.core.device.mgt.extensions.device.organization.exception;
+package io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto;
 
-/**
- * This runtime exception will be thrown if the server has configured with unsupported DB engine.
- */
-public class UnsupportedDatabaseEngineException extends RuntimeException {
+public class RootChildrenRequest extends PaginationRequest{
 
-    private static final long serialVersionUID = -3151279311929070297L;
+    int maxDepth;
+    boolean includeDevice;
 
-    public UnsupportedDatabaseEngineException(String msg, Exception nestedEx) {
-        super(msg, nestedEx);
+    public RootChildrenRequest(int start, int limit) {
+        super(start, limit);
     }
 
-    public UnsupportedDatabaseEngineException(String message, Throwable cause) {
-        super(message, cause);
+    public int getMaxDepth() {
+        return maxDepth;
     }
 
-    public UnsupportedDatabaseEngineException(String msg) {
-        super(msg);
+    public void setMaxDepth(int maxDepth) {
+        if (maxDepth < 0) {
+            throw new IllegalArgumentException("maxDepth cannot be negative");
+        }
+        this.maxDepth = maxDepth;
     }
 
+    public boolean isIncludeDevice() {
+        return includeDevice;
+    }
+
+    public void setIncludeDevice(boolean includeDevice) {
+        this.includeDevice = includeDevice;
+    }
 }

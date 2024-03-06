@@ -24,6 +24,7 @@ import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.api.u
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.DeviceNodeResult;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.DeviceOrganization;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.RootChildrenRequest;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.exception.DeviceOrganizationMgtPluginException;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.spi.DeviceOrganizationService;
 import org.apache.commons.logging.Log;
@@ -124,6 +125,7 @@ public class DeviceOrganizationMgtServiceImpl implements DeviceOrganizationMgtSe
             @DefaultValue("20") @QueryParam("limit") int limit) {
         RequestValidationUtil.validatePaginationParameters(offset, limit);
         try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
             DeviceOrganizationService deviceOrganizationService = DeviceOrgAPIUtils.getDeviceOrganizationService();
             PaginationRequest request = new PaginationRequest(offset, limit);
             List<DeviceOrganization> organizations = deviceOrganizationService.getDeviceOrganizationLeafs(request);
@@ -143,12 +145,37 @@ public class DeviceOrganizationMgtServiceImpl implements DeviceOrganizationMgtSe
             @DefaultValue("20") @QueryParam("limit") int limit) {
         RequestValidationUtil.validatePaginationParameters(offset, limit);
         try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
             DeviceOrganizationService deviceOrganizationService = DeviceOrgAPIUtils.getDeviceOrganizationService();
             PaginationRequest request = new PaginationRequest(offset, limit);
             List<DeviceOrganization> organizations = deviceOrganizationService.getDeviceOrganizationRoots(request);
             return Response.status(Response.Status.OK).entity(organizations).build();
         } catch (DeviceOrganizationMgtPluginException e) {
             String errorMessage = "get root organizations failed";
+            log.error(errorMessage);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMessage).build();
+        }
+    }
+
+    @GET
+    @Path("roots/children")
+    @Override
+    public Response getDeviceOrganizationChildrenForRoots(
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("20") @QueryParam("limit") int limit,
+            @QueryParam("maxDepth") int maxDepth,
+            @QueryParam("includeDevice") boolean includeDevice) {
+        RequestValidationUtil.validatePaginationParameters(offset, limit);
+        try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
+            DeviceOrganizationService deviceOrganizationService = DeviceOrgAPIUtils.getDeviceOrganizationService();
+            RootChildrenRequest request = new RootChildrenRequest(offset, limit);
+            request.setMaxDepth(maxDepth);
+            request.setIncludeDevice(includeDevice);
+            List<DeviceNodeResult> nodeResultList  = deviceOrganizationService.getAllDeviceOrganizationsForRoots(request);
+            return Response.status(Response.Status.OK).entity(nodeResultList).build();
+        } catch (DeviceOrganizationMgtPluginException e) {
+            String errorMessage = "get children for root organizations failed";
             log.error(errorMessage);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMessage).build();
         }
