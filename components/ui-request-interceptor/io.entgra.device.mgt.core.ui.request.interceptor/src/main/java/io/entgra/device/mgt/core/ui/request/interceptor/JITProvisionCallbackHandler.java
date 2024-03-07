@@ -19,12 +19,11 @@
 package io.entgra.device.mgt.core.ui.request.interceptor;
 
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.JITData;
-import io.entgra.device.mgt.core.ui.request.interceptor.beans.JITEnrollmentData;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hc.core5.http.HttpStatus;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;

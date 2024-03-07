@@ -30,8 +30,8 @@ import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
-import org.apache.http.HttpStatus;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 

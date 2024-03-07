@@ -962,37 +962,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>org.wso2.tomcat</groupId>-->
-<!--                <artifactId>tomcat</artifactId>-->
-<!--                <version>${orbit.version.tomcat}</version>-->
-<!--                <exclusions>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>org.apache.tomcat</groupId>-->
-<!--                        <artifactId>tomcat-dbcp</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>org.apache.tomcat</groupId>-->
-<!--                        <artifactId>tomcat-jasper</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>org.apache.tomcat</groupId>-->
-<!--                        <artifactId>tomcat-websocket-api</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>org.apache.tomcat.embed</groupId>-->
-<!--                        <artifactId>tomcat-embed-core</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>org.apache.tomcat.embed</groupId>-->
-<!--                        <artifactId>tomcat-embed-jasper</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>org.apache.tomcat.embed</groupId>-->
-<!--                        <artifactId>tomcat-embed-websocket</artifactId>-->
-<!--                    </exclusion>-->
-<!--                </exclusions>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.tomcat.ext</artifactId>
@@ -1025,21 +994,15 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.apache.tomcat.wso2</groupId>
+                <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
                 <artifactId>jdbc-pool</artifactId>
-                <version>${tomcat.jdbc.pooling.version}</version>
+                <version>${orbit.version.tomcat}</version>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/org.wso2.orbit.org.apache.tomcat/tomcat-servlet-api -->
             <dependency>
                 <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
                 <artifactId>tomcat-servlet-api</artifactId>
-                <version>9.0.71.wso2v1</version>
+                <version>${orbit.version.tomcat}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>org.wso2.tomcat</groupId>-->
-<!--                <artifactId>tomcat-servlet-api</artifactId>-->
-<!--                <version>${orbit.version.tomcat.servlet.api}</version>-->
-<!--            </dependency>-->
             <!-- End of Tomcat dependencies -->
 
             <!-- Carbon Identity dependencies -->
@@ -2053,8 +2016,6 @@
 
         <!-- Tomcat -->
         <orbit.version.tomcat>9.0.71.wso2v1</orbit.version.tomcat>
-        <orbit.version.tomcat.servlet.api>7.0.93.wso2v1</orbit.version.tomcat.servlet.api>
-        <tomcat.jdbc.pooling.version>7.0.34.wso2v2</tomcat.jdbc.pooling.version>
 
         <!-- Carbon Identity -->
         <carbon.identity.framework.version>5.24.8</carbon.identity.framework.version>
