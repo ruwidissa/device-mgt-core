@@ -20,6 +20,8 @@
 package io.entgra.device.mgt.core.ui.request.interceptor.exceptions;
 
 public class JITProvisionException extends Exception {
+    private static final long serialVersionUID = 1413607461296734217L;
+
     public JITProvisionException(String msg, Throwable t) {
         super(msg, t);
     }

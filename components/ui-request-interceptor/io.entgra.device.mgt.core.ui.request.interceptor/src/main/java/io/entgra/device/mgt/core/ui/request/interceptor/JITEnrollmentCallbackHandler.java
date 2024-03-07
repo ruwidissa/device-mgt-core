@@ -23,9 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.JITData;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.JITEnrollmentData;
@@ -36,13 +34,8 @@ import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.core5.http.ClassicHttpRequest;
-import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
-import org.apache.hc.core5.http.message.BasicNameValuePair;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.w3c.dom.Document;
@@ -190,7 +183,7 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
 
     /***
      * Build application registration request
-     * @return {@link HttpPost} Application registration request
+     * @return {@link ClassicHttpRequest} Application registration request
      */
     private ClassicHttpRequest buildApplicationRegistrationRequest() {
 
@@ -265,7 +258,7 @@ public class JITEnrollmentCallbackHandler extends HttpServlet {
 
     /***
      * Build token acquire request
-     * @return {@link HttpPost} Token acquire request
+     * @return {@link ClassicHttpRequest} Token acquire request
      */
     private ClassicHttpRequest buildTokenAcquireRequest() {
 

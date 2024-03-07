@@ -952,8 +952,9 @@
             <!-- End of API Management dependencies -->
 
             <!-- Tomcat dependencies -->
+            <!-- https://mvnrepository.com/artifact/org.wso2.orbit.org.apache.tomcat/tomcat -->
             <dependency>
-                <groupId>org.wso2.tomcat</groupId>
+                <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
                 <artifactId>tomcat</artifactId>
                 <version>${orbit.version.tomcat}</version>
                 <exclusions>
@@ -1015,14 +1016,14 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.apache.tomcat.wso2</groupId>
+                <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
                 <artifactId>jdbc-pool</artifactId>
-                <version>${tomcat.jdbc.pooling.version}</version>
+                <version>${orbit.version.tomcat}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.tomcat</groupId>
+                <groupId>org.wso2.orbit.org.apache.tomcat</groupId>
                 <artifactId>tomcat-servlet-api</artifactId>
-                <version>${orbit.version.tomcat.servlet.api}</version>
+                <version>${orbit.version.tomcat}</version>
             </dependency>
             <!-- End of Tomcat dependencies -->
 
@@ -2052,9 +2053,7 @@
         <eclipse.osgi.version>3.8.1.v20120830-144521</eclipse.osgi.version>
 
         <!-- Tomcat -->
-        <orbit.version.tomcat>7.0.93.wso2v1</orbit.version.tomcat>
-        <orbit.version.tomcat.servlet.api>7.0.93.wso2v1</orbit.version.tomcat.servlet.api>
-        <tomcat.jdbc.pooling.version>7.0.34.wso2v2</tomcat.jdbc.pooling.version>
+        <orbit.version.tomcat>9.0.71.wso2v1</orbit.version.tomcat>
 
         <!-- Carbon Identity -->
         <carbon.identity.framework.version>5.24.8</carbon.identity.framework.version>

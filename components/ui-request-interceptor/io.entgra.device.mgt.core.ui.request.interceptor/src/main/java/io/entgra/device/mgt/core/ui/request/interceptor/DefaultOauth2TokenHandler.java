@@ -29,10 +29,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.utils.URIBuilder;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
+import org.apache.hc.core5.net.URIBuilder;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
