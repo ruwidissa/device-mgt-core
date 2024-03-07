@@ -35,6 +35,8 @@ public class BasicUserInfo {
     private String createdDate;
     @ApiModelProperty(name = "modifiedDate", value = "User modifiedDate date." )
     private String modifiedDate;
+    @ApiModelProperty(name = "isRemovable", value = "User's removable status." )
+    private boolean isRemovable;
 
     public String getUsername() {
         return username;
@@ -84,4 +86,11 @@ public class BasicUserInfo {
         this.modifiedDate = modifiedDate;
     }
 
+    public boolean isRemovable() {
+        return isRemovable;
+    }
+
+    public void setRemovable(boolean removable) {
+        isRemovable = removable;
+    }
 }
