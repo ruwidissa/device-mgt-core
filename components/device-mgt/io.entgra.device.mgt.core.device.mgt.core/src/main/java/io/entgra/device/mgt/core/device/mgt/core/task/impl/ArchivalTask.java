@@ -18,21 +18,21 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.task.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.core.archival.ArchivalException;
 import io.entgra.device.mgt.core.device.mgt.core.archival.ArchivalService;
 import io.entgra.device.mgt.core.device.mgt.core.archival.ArchivalServiceImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.ntask.core.Task;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class ArchivalTask implements Task {
+public class ArchivalTask extends RandomlyAssignedScheduleTask {
 
     private static final Log log = LogFactory.getLog(ArchivalTask.class);
+    private static final String TASK_NAME = "DATA_ARCHIVAL_TASK";
 
     private ArchivalService archivalService;
 
@@ -42,12 +42,12 @@ public class ArchivalTask implements Task {
     }
 
     @Override
-    public void init() {
+    protected void setup() {
         this.archivalService = new ArchivalServiceImpl();
     }
 
     @Override
-    public void execute() {
+    protected void executeRandomlyAssignedTask() {
         log.info("Executing ArchivalTask at " + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()));
         long startTime = System.currentTimeMillis();
         try {
@@ -58,6 +58,11 @@ public class ArchivalTask implements Task {
         long endTime = System.currentTimeMillis();
         long difference = endTime - startTime;
         log.info("ArchivalTask completed. Total execution time: " + getDurationBreakdown(difference));
+    }
+
+    @Override
+    public String getTaskName() {
+        return TASK_NAME;
     }
 
     private String getDurationBreakdown(long millis) {
@@ -74,4 +79,5 @@ public class ArchivalTask implements Task {
 
         return (days + " Days " + hours + " Hours " + minutes + " Minutes " + seconds + " Seconds");
     }
+
 }

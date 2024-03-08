@@ -103,18 +103,22 @@ public class TaskManagementDAOFactory {
             conn.setAutoCommit(false);
             currentConnection.set(conn);
         } catch (SQLException e) {
-            throw new TransactionManagementException("Error occurred while retrieving config.datasource connection", e);
+            throw new TransactionManagementException("Error occurred while retrieving datasource connection", e);
         }
     }
 
-    public static void openConnection() throws SQLException {
+    public static void openConnection() throws TransactionManagementException {
         Connection conn = currentConnection.get();
         if (conn != null) {
             throw new IllegalTransactionStateException("A transaction is already active within the context of " +
                     "this particular thread. Therefore, calling 'beginTransaction/openConnection' while another " +
                     "transaction is already active is a sign of improper transaction handling");
         }
-        conn = dataSource.getConnection();
+        try {
+            conn = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new TransactionManagementException("Error occurred while retrieving datasource connection", e);
+        }
         currentConnection.set(conn);
     }
 

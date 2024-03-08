@@ -142,7 +142,7 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
             }
         } catch (SQLException e) {
             String msg = "Error occurred while updating task list of elected server : '" +
-                         uuid + "'  and task list " + taskList;
+                         uuid + "' and task list " + taskList;
             log.error(msg, e);
             throw new HeartBeatDAOException(msg, e);
         }

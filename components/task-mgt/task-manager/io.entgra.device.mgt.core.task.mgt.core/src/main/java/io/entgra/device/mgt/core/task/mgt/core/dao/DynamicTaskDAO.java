@@ -27,16 +27,18 @@ import java.util.List;
  */
 public interface DynamicTaskDAO {
 
-    int addTask(DynamicTask dynamicTask) throws TaskManagementDAOException;
+    int addTask(DynamicTask dynamicTask, int tenantId) throws TaskManagementDAOException;
 
-    boolean updateDynamicTask(DynamicTask dynamicTask) throws TaskManagementDAOException;
+    boolean updateDynamicTask(DynamicTask dynamicTask, int tenantId) throws TaskManagementDAOException;
 
-    void deleteDynamicTask(int dynamicTaskId) throws TaskManagementDAOException;
+    void deleteDynamicTask(int dynamicTaskId, int tenantId) throws TaskManagementDAOException;
 
-    DynamicTask getDynamicTaskById(int dynamicTaskId) throws TaskManagementDAOException;
+    DynamicTask getDynamicTask(int dynamicTaskId, int tenantId) throws TaskManagementDAOException;
 
     List<DynamicTask> getAllDynamicTasks() throws TaskManagementDAOException;
 
-    List<DynamicTask> getActiveDynamicTasks() throws TaskManagementDAOException;
+    List<DynamicTask> getAllDynamicTasks(int tenantId) throws TaskManagementDAOException;
+
+    List<DynamicTask> getActiveDynamicTasks(int tenantId) throws TaskManagementDAOException;
 
 }

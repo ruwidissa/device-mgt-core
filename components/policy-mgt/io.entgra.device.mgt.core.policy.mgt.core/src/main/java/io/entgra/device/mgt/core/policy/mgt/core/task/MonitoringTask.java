@@ -105,7 +105,7 @@ public class MonitoringTask extends DynamicPartitionedScheduleTask {
                             PolicyManagementDataHolder.getInstance().getDeviceManagementService()
                                     .getPolicyMonitoringManager(deviceType);
                     List<Device> devices;
-                    if(isDynamicTaskEligible()){
+                    if (getTaskContext() != null && getTaskContext().isPartitioningEnabled()) {
                         devices = deviceManagementProviderService
                                 .getAllocatedDevices(deviceType, getTaskContext().getActiveServerCount(),
                                         getTaskContext().getServerHashIndex());

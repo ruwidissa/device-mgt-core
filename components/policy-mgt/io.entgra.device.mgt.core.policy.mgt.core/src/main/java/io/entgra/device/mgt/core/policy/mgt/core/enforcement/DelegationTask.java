@@ -64,7 +64,7 @@ public class DelegationTask extends DynamicPartitionedScheduleTask {
                     try {
                         devices = new ArrayList<>();
                         toBeNotified = new ArrayList<>();
-                        if (isDynamicTaskEligible()) {
+                        if(getTaskContext() != null && getTaskContext().isPartitioningEnabled()){
                             devices.addAll(service.getAllocatedDevices(deviceType,
                                                                        getTaskContext().getActiveServerCount(),
                                                                        getTaskContext().getServerHashIndex()));
