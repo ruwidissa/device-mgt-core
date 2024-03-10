@@ -145,4 +145,5 @@ public class ScheduledAppSubscriptionTask extends RandomlyAssignedScheduleTask {
     public String getTaskName() {
         return TASK_NAME;
     }
+
 }

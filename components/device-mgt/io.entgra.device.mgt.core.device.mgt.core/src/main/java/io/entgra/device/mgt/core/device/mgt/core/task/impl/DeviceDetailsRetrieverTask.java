@@ -109,4 +109,5 @@ public class DeviceDetailsRetrieverTask extends DynamicPartitionedScheduleTask {
     protected void setup() {
 
     }
+
 }

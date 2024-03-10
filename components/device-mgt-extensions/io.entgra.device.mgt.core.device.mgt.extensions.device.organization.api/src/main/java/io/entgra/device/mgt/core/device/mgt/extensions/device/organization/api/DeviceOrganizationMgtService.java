@@ -346,14 +346,14 @@ public interface DeviceOrganizationMgtService {
     Response getDeviceOrganizationLeafs(
             @ApiParam(
                     name = "offset",
-                    value = "The starting pagination index for the complete list of qualified items",
+                    value = "leaf node offset",
                     required = false,
                     defaultValue = "0")
             @DefaultValue("0") @QueryParam("offset")
             int offset,
             @ApiParam(
                     name = "limit",
-                    value = "Provide how many policy details you require from the starting pagination index/offset.",
+                    value = "leaf node limit",
                     required = false,
                     defaultValue = "5")
             @DefaultValue("20") @QueryParam("limit")
@@ -369,8 +369,8 @@ public interface DeviceOrganizationMgtService {
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "Retrieve leaf Device Organizations",
-            notes = "Get a list of leaf device organizations.",
+            value = "Retrieve root Device Organizations",
+            notes = "Get a list of root device organizations.",
             tags = "Device Organization Management",
             extensions = {
                     @Extension(properties = {
@@ -414,18 +414,96 @@ public interface DeviceOrganizationMgtService {
     Response getDeviceOrganizationRoots(
             @ApiParam(
                     name = "offset",
-                    value = "The starting pagination index for the complete list of qualified items",
+                    value = "root node offset",
                     required = false,
                     defaultValue = "0")
             @DefaultValue("0") @QueryParam("offset")
             int offset,
             @ApiParam(
                     name = "limit",
-                    value = "Provide how many policy details you require from the starting pagination index/offset.",
+                    value = "root node limit",
                     required = false,
-                    defaultValue = "5")
+                    defaultValue = "20")
             @DefaultValue("20") @QueryParam("limit")
             int limit);
+
+    /**
+     * Retrieves a list of root device organizations.
+     *
+     * @return A response containing a list of root device organizations.
+     */
+    @GET
+    @Path("roots/children")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Retrieve children for root Device Organizations",
+            notes = "Get a list of children for root device organizations.",
+            tags = "Device Organization Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "dm:device-org:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the all devices.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description =
+                                                    "Date and time the resource was last modified.\n" +
+                                                            "Used by caches, or in conditional requests."),
+                            }
+                    ),
+                    @ApiResponse(
+                            code = 400,
+                            message =
+                                    "Bad Request. \n"),
+                    @ApiResponse(
+                            code = 406,
+                            message = "Not Acceptable.\n The requested media type is not supported"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Server error occurred while fetching the " +
+                                    "list of supported device types.",
+                            response = ErrorResponse.class)
+            })
+    Response getDeviceOrganizationChildrenForRoots(
+            @ApiParam(
+                    name = "offset",
+                    value = "root offset",
+                    required = false,
+                    defaultValue = "0")
+            @DefaultValue("0") @QueryParam("offset")
+            int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "root limit.",
+                    required = false,
+                    defaultValue = "20")
+            @DefaultValue("20") @QueryParam("limit")
+            int limit,
+            @ApiParam(
+                    name= "maxDepth",
+                    value = "The maximum depth of child nodes to retrieve for each root.",
+                    required = true) @QueryParam("maxDepth")
+            int maxDepth,
+            @ApiParam(
+                    name= "includeDevice",
+                    value = "Indicates whether to include device information in the retrieved child nodes.",
+                    required = true) @QueryParam("includeDevice")
+            boolean includeDevice);
 
     /**
      * Retrieves a specific device organization by its organization ID.

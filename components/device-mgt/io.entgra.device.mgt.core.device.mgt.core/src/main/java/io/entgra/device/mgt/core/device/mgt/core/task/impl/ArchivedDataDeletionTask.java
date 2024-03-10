@@ -29,9 +29,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
-public class ArchivedDataDeletionTask implements Task {
+public class ArchivedDataDeletionTask extends RandomlyAssignedScheduleTask {
 
-    private static Log log = LogFactory.getLog(ArchivedDataDeletionTask.class);
+    private static final Log log = LogFactory.getLog(ArchivedDataDeletionTask.class);
+    private static final String TASK_NAME = "ARCHIVED_DATA_CLEANUP_TASK";
 
     private ArchivalService archivalService;
 
@@ -41,12 +42,12 @@ public class ArchivedDataDeletionTask implements Task {
     }
 
     @Override
-    public void init() {
+    public void setup() {
         this.archivalService = new ArchivalServiceImpl();
     }
 
     @Override
-    public void execute() {
+    protected void executeRandomlyAssignedTask() {
         log.info("Executing DataDeletionTask at " + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()));
         long startTime = System.nanoTime();
         try {
@@ -58,4 +59,10 @@ public class ArchivedDataDeletionTask implements Task {
         long difference = (endTime - startTime) / (1000000 * 1000);
         log.info("DataDeletionTask completed. Total execution time: " + difference + " seconds");
     }
+
+    @Override
+    public String getTaskName() {
+        return TASK_NAME;
+    }
+
 }

@@ -23,7 +23,7 @@
     <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>io.entgra.device.mgt.core.parent</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.40-SNAPSHOT</version>
+    <version>5.0.41-SNAPSHOT</version>
     <name>WSO2 Carbon - Device Management - Parent</name>
     <url>https://entgra.io</url>
     <description>WSO2 Connected Device Manager Components</description>
@@ -875,6 +875,13 @@
                 <artifactId>jaxb-impl</artifactId>
                 <version>2.3.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.1.wso2v1</version>
+                <scope>compile</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.axis2.transport</groupId>
                 <artifactId>axis2-transport-mail</artifactId>
@@ -2077,7 +2084,7 @@
         <axiom.wso2.version>1.2.11-wso2v25</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <io.entgra.device.mgt.core.version>5.0.40-SNAPSHOT</io.entgra.device.mgt.core.version>
+        <io.entgra.device.mgt.core.version>5.0.41-SNAPSHOT</io.entgra.device.mgt.core.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.9.2</carbon.commons.version>

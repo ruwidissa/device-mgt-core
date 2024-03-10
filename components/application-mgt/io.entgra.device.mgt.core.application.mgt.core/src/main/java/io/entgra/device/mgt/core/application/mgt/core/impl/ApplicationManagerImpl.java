@@ -856,7 +856,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                                     ApplicationArtifact applicationArtifact, int tenantId) throws ResourceManagementException {
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
 
-        applicationReleaseDTO.setIconName(applicationArtifact.getIconName());
+        applicationReleaseDTO.setIconName(ApplicationManagementUtil.sanitizeName
+                (applicationArtifact.getIconName(), Constants.ICON_NAME));
         applicationReleaseDTO.setBannerName(applicationArtifact.getBannerName());
 
         Map<String, InputStream> screenshots = applicationArtifact.getScreenshots();
@@ -865,11 +866,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int counter = 1;
         for (String scName : screenshotNames) {
             if (counter == 1) {
-                applicationReleaseDTO.setScreenshotName1(scName);
+                applicationReleaseDTO.setScreenshotName1(ApplicationManagementUtil.sanitizeName
+                        (scName, Constants.SCREENSHOT_NAME + counter));
             } else if (counter == 2) {
-                applicationReleaseDTO.setScreenshotName2(scName);
+                applicationReleaseDTO.setScreenshotName2(ApplicationManagementUtil.sanitizeName
+                        (scName, Constants.SCREENSHOT_NAME + counter));
             } else if (counter == 3) {
-                applicationReleaseDTO.setScreenshotName3(scName);
+                applicationReleaseDTO.setScreenshotName3(ApplicationManagementUtil.sanitizeName
+                        (scName, Constants.SCREENSHOT_NAME + counter));
             }
             counter++;
         }
@@ -897,7 +901,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationStorageManager
                     .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), Constants.ICON_ARTIFACT,
                             applicationReleaseDTO.getIconName(), tenantId);
-            applicationReleaseDTO.setIconName(applicationArtifact.getIconName());
+            applicationReleaseDTO.setIconName(ApplicationManagementUtil.sanitizeName
+                    (applicationArtifact.getIconName(), Constants.ICON_NAME));
         }
         if (!StringUtils.isEmpty(applicationArtifact.getBannerName())){
             applicationStorageManager
@@ -920,17 +925,20 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     applicationStorageManager
                             .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), folderPath,
                                     applicationReleaseDTO.getScreenshotName1(), tenantId);
-                    applicationReleaseDTO.setScreenshotName1(scName);
+                    applicationReleaseDTO.setScreenshotName1(ApplicationManagementUtil.sanitizeName
+                            (scName, Constants.SCREENSHOT_NAME + counter));
                 } else if (counter == 2) {
                     applicationStorageManager
                             .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), folderPath,
                                     applicationReleaseDTO.getScreenshotName2(), tenantId);
-                    applicationReleaseDTO.setScreenshotName2(scName);
+                    applicationReleaseDTO.setScreenshotName2(ApplicationManagementUtil.sanitizeName
+                            (scName, Constants.SCREENSHOT_NAME + counter));
                 } else if (counter == 3) {
                     applicationStorageManager
                             .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), folderPath,
                                     applicationReleaseDTO.getScreenshotName3(), tenantId);
-                    applicationReleaseDTO.setScreenshotName3(scName);
+                    applicationReleaseDTO.setScreenshotName3(ApplicationManagementUtil.sanitizeName
+                            (scName, Constants.SCREENSHOT_NAME + counter));
                 }
                 counter++;
             }
@@ -2426,7 +2434,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     log.error(msg);
                     throw new BadRequestException(msg);
                 }
-                applicationDTO.setName(applicationUpdateWrapper.getName());
+                applicationDTO.setName(ApplicationManagementUtil.sanitizeName(applicationUpdateWrapper.getName(),
+                        Constants.ApplicationProperties.NAME));
             }
             if (!StringUtils.isEmpty(applicationUpdateWrapper.getSubMethod()) && !applicationDTO.getSubType()
                     .equals(applicationUpdateWrapper.getSubMethod())) {
