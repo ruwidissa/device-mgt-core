@@ -622,7 +622,7 @@ public class HandlerUtil {
                 log.error("Unauthorized, You are not logged in. Please log in to the portal");
                 return constructProxyResponseByErrorCode(HttpStatus.SC_UNAUTHORIZED);
             }
-            if(!isDefaultAuthToken){
+            if (!isDefaultAuthToken) {
                 httpRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = HandlerUtil.execute(httpRequest);
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
@@ -660,7 +660,7 @@ public class HandlerUtil {
 //            handleError(resp, HttpStatus.SC_UNAUTHORIZED);
             return tokenResultResponse;
         }
-        if(isDefaultAuthToken){
+        if (isDefaultAuthToken) {
             authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY);
         } else {
             authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
@@ -676,7 +676,7 @@ public class HandlerUtil {
         JsonElement jTokenResult = jsonParser.parse(tokenResultResponse.getData());
 
         if (jTokenResult.isJsonObject()) {
-            if(isDefaultAuthToken){
+            if (isDefaultAuthToken) {
                 setNewDefaultAuthData(constructAuthDataFromTokenResult(jTokenResult, authData), session);
             } else {
                 setNewAuthData(constructAuthDataFromTokenResult(jTokenResult, authData), session);
@@ -702,7 +702,7 @@ public class HandlerUtil {
 
         tokenEndpoint.setEntity(tokenEndpointPayload);
         String encodedClientApp = authData.getEncodedClientApp();
-        if(encodedClientApp == null){
+        if (encodedClientApp == null) {
             String clientId = authData.getClientId();
             String clientSecret = authData.getClientSecret();
             String toEncode = clientId + ":" + clientSecret;
