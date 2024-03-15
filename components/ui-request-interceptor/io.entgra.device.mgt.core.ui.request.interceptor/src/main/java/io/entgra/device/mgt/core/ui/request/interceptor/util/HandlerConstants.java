@@ -52,6 +52,7 @@ public class HandlerConstants {
     public static final String API_COMMON_CONTEXT = "/api";
     public static final String EXECUTOR_EXCEPTION_PREFIX = "ExecutorException-";
     public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
+    public static final String DEFAULT_TOKEN_IS_EXPIRED = "{\"active\":false}";
     public static final String REPORTS = "Reports";
     public static final String APP_NAME = "App-Name";
     public static final String[] SSO_LOGOUT_COOKIE_PATHS = new String[]{"/", "/entgra-ui-request-handler",
