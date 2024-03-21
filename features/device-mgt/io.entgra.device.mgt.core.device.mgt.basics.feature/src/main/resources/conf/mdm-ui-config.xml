@@ -382,6 +382,10 @@
         <Scope>win:ops:reboot</Scope>
         <Scope>win:ops:location</Scope>
         <Scope>win:ops:scan</Scope>
+        <Scope>win:ops:apps</Scope>
+        <Scope>win:ops:device-info</Scope>
+        <Scope>win:ops:security-info</Scope>
+        <Scope>win:ops:firewall-info</Scope>
         <Scope>admin:tenant:view</Scope>
         <Scope>dm:admin:devices:usage:view</Scope>
         <Scope>and:ops:clear-app</Scope>
