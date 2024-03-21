@@ -546,4 +546,12 @@ public interface ApplicationManager {
      */
     void updateAppIconInfo(ApplicationRelease applicationRelease, String oldPackageName)
             throws ApplicationManagementException;
+
+    /**
+     * Delete all application related data of a tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementException thrown if an error occurs when deleting data
+     */
+    void deleteApplicationDataOfTenant(int tenantId) throws ApplicationManagementException;
 }

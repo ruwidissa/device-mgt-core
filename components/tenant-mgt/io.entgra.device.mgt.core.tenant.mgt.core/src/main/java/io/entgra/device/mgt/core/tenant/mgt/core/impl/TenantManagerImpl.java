@@ -20,6 +20,9 @@ package io.entgra.device.mgt.core.tenant.mgt.core.impl;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.dao.TenantDAO;
 import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
 import io.entgra.device.mgt.core.tenant.mgt.common.exception.TenantMgtException;
 import io.entgra.device.mgt.core.tenant.mgt.core.internal.TenantMgtDataHolder;
@@ -38,6 +41,7 @@ import io.entgra.device.mgt.core.device.mgt.common.roles.config.Role;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +50,11 @@ import java.util.Map;
 public class TenantManagerImpl implements TenantManager {
     private static final Log log = LogFactory.getLog(TenantManagerImpl.class);
     private static final String PERMISSION_ACTION = "ui.execute";
+    TenantDAO tenantDao;
+
+    public TenantManagerImpl() {
+        this.tenantDao = DeviceManagementDAOFactory.getTenantDAO();
+    }
 
     @Override
     public void addDefaultRoles(TenantInfoBean tenantInfoBean) throws TenantMgtException {
@@ -111,6 +120,99 @@ public class TenantManagerImpl implements TenantManager {
         } finally {
             endTenantFlow();
         }
+    }
+
+    @Override
+    public void deleteTenantApplicationData(int tenantId) throws TenantMgtException {
+        try {
+            TenantMgtDataHolder.getInstance().getApplicationManager().
+                    deleteApplicationDataOfTenant(tenantId);
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while deleting Application related data of Tenant of " +
+                    "tenant Id" + tenantId;
+            log.error(msg, e);
+            throw new TenantMgtException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteTenantDeviceData(int tenantId) throws TenantMgtException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request is received to delete Device related data of tenant with ID: " + tenantId);
+        }
+        try {
+            DeviceManagementDAOFactory.openConnection();
+
+            tenantDao.deleteExternalPermissionMapping(tenantId);
+            tenantDao.deleteExternalDeviceMappingByTenantId(tenantId);
+            tenantDao.deleteExternalGroupMappingByTenantId(tenantId);
+            tenantDao.deleteDeviceOrganizationByTenantId(tenantId);
+            tenantDao.deleteDeviceHistoryLastSevenDaysByTenantId(tenantId);
+            tenantDao.deleteDeviceDetailByTenantId(tenantId);
+            tenantDao.deleteDeviceLocationByTenantId(tenantId);
+            tenantDao.deleteDeviceInfoByTenantId(tenantId);
+            tenantDao.deleteNotificationByTenantId(tenantId);
+            tenantDao.deleteAppIconsByTenantId(tenantId);
+            tenantDao.deleteTraccarUnsyncedDevicesByTenantId(tenantId);
+            tenantDao.deleteDeviceEventGroupMappingByTenantId(tenantId);
+            tenantDao.deleteDeviceEventByTenantId(tenantId);
+            tenantDao.deleteGeofenceEventMappingByTenantId(tenantId);
+            tenantDao.deleteGeofenceGroupMappingByTenantId(tenantId);
+            tenantDao.deleteGeofenceByTenantId(tenantId);
+            tenantDao.deleteDeviceGroupPolicyByTenantId(tenantId);
+            tenantDao.deleteDynamicTaskPropertiesByTenantId(tenantId);
+            tenantDao.deleteDynamicTaskByTenantId(tenantId);
+            tenantDao.deleteMetadataByTenantId(tenantId);
+            tenantDao.deleteOTPDataByTenantId(tenantId);
+            tenantDao.deleteSubOperationTemplate(tenantId);
+            tenantDao.deleteDeviceSubTypeByTenantId(tenantId);
+            tenantDao.deleteCEAPoliciesByTenantId(tenantId);
+
+            tenantDao.deleteApplicationByTenantId(tenantId);
+            tenantDao.deletePolicyCriteriaPropertiesByTenantId(tenantId);
+            tenantDao.deletePolicyCriteriaByTenantId(tenantId);
+            tenantDao.deleteCriteriaByTenantId(tenantId);
+            tenantDao.deletePolicyChangeManagementByTenantId(tenantId);
+            tenantDao.deletePolicyComplianceFeaturesByTenantId(tenantId);
+            tenantDao.deletePolicyComplianceStatusByTenantId(tenantId);
+            tenantDao.deleteRolePolicyByTenantId(tenantId);
+            tenantDao.deleteUserPolicyByTenantId(tenantId);
+            tenantDao.deleteDeviceTypePolicyByTenantId(tenantId);
+            tenantDao.deleteDevicePolicyAppliedByTenantId(tenantId);
+            tenantDao.deleteDevicePolicyByTenantId(tenantId);
+            tenantDao.deletePolicyCorrectiveActionByTenantId(tenantId);
+            tenantDao.deletePolicyByTenantId(tenantId);
+            tenantDao.deleteProfileFeaturesByTenantId(tenantId);
+            tenantDao.deleteProfileByTenantId(tenantId);
+
+            tenantDao.deleteDeviceOperationResponseLargeByTenantId(tenantId);
+            tenantDao.deleteDeviceOperationResponseByTenantId(tenantId);
+            tenantDao.deleteEnrolmentOpMappingByTenantId(tenantId);
+            tenantDao.deleteDeviceStatusByTenantId(tenantId);
+            tenantDao.deleteEnrolmentByTenantId(tenantId);
+            tenantDao.deleteOperationByTenantId(tenantId);
+            tenantDao.deleteDeviceGroupMapByTenantId(tenantId);
+            tenantDao.deleteGroupPropertiesByTenantId(tenantId);
+            tenantDao.deleteDevicePropertiesByTenantId(tenantId);
+            tenantDao.deleteDeviceByTenantId(tenantId);
+            tenantDao.deleteRoleGroupMapByTenantId(tenantId);
+            tenantDao.deleteGroupByTenantId(tenantId);
+            tenantDao.deleteDeviceCertificateByTenantId(tenantId);
+
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (SQLException e){
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error accessing the database when trying to delete tenant info of '" + tenantId + "'";
+            log.error(msg);
+            throw new TenantMgtException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error deleting data of tenant of ID: '" + tenantId + "'";
+            log.error(msg);
+            throw new TenantMgtException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+
     }
 
     private void initTenantFlow(TenantInfoBean tenantInfoBean) {

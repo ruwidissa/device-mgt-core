@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.application.mgt.core.dao;
 import io.entgra.device.mgt.core.application.mgt.common.response.Review;
 import io.entgra.device.mgt.core.application.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ReviewDTO;
+import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ReviewManagementDAOException;
 
 import java.util.List;
@@ -119,4 +120,11 @@ import java.util.List;
 
     void deleteAllChildCommentsOfReview(int rootParentId, int tenantId) throws ReviewManagementDAOException;
 
+ /**
+  * Delete reviews of a tenant
+  *
+  * @param tenantId Tenant ID
+  * @throws ReviewManagementDAOException thrown if an error occurs while deleting data
+  */
+ void deleteReviewsByTenant(int tenantId) throws ReviewManagementDAOException;
 }
