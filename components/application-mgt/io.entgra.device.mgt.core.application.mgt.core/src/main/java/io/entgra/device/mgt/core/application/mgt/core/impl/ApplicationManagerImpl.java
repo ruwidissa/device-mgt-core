@@ -3324,11 +3324,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease updateEntAppRelease(String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
-                                                  ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
+    public ApplicationRelease updateEntAppRelease(String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
+            ApplicationArtifact applicationArtifact = ApplicationManagementUtil.
+                    constructApplicationArtifact(entAppReleaseWrapper.getIconLink(), entAppReleaseWrapper.getScreenshotLinks(),
+                            entAppReleaseWrapper.getArtifactLink(), entAppReleaseWrapper.getBannerLink());
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
             DeviceType deviceTypeObj = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
@@ -3395,6 +3397,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + "UUID:" + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
+        } catch (MalformedURLException e) {
+            throw new ApplicationManagementException("Malformed downloadable URL received for the Public app " +
+                    "release UUID: " + releaseUuid);
+        } catch (FileDownloaderServiceException e) {
+            throw new ApplicationManagementException("Error encountered while downloading artifact for the Public app " +
+                    "release UUID: " + releaseUuid);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -3405,7 +3413,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
-            ApplicationArtifact applicationArtifact = ApplicationManagementUtil.constructApplicationArtifact(publicAppReleaseWrapper.getIconLink(), publicAppReleaseWrapper.getScreenshotLinks(), null, null);
+            ApplicationArtifact applicationArtifact = ApplicationManagementUtil.
+                    constructApplicationArtifact(publicAppReleaseWrapper.getIconLink(), publicAppReleaseWrapper.getScreenshotLinks(),
+                            null, publicAppReleaseWrapper.getBannerLink());
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
             validateAppReleaseUpdating(publicAppReleaseWrapper, applicationDTO, applicationArtifact,
@@ -3476,11 +3486,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
-                                                  ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
+    public ApplicationRelease updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
+            ApplicationArtifact applicationArtifact = ApplicationManagementUtil.
+                    constructApplicationArtifact(webAppReleaseWrapper.getIconLink(), webAppReleaseWrapper.getScreenshotLinks(),
+                            null, webAppReleaseWrapper.getBannerLink());
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
             validateAppReleaseUpdating(webAppReleaseWrapper, applicationDTO, applicationArtifact,
@@ -3535,18 +3547,27 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + "release UUID:" + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
+        } catch (MalformedURLException e) {
+            throw new ApplicationManagementException("Malformed downloadable URL received for the Public app " +
+                    "release UUID: " + releaseUuid);
+        } catch (FileDownloaderServiceException e) {
+            throw new ApplicationManagementException("Error encountered while downloading artifact for the Public app " +
+                    "release UUID: " + releaseUuid);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
 
     @Override
-    public ApplicationRelease updateCustomAppRelease(String releaseUuid,
-                                                     CustomAppReleaseWrapper customAppReleaseWrapper, ApplicationArtifact applicationArtifact)
+    public ApplicationRelease updateCustomAppRelease(String releaseUuid, CustomAppReleaseWrapper customAppReleaseWrapper)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
+            ApplicationArtifact applicationArtifact = ApplicationManagementUtil.
+                    constructApplicationArtifact(customAppReleaseWrapper.getIconLink(),
+                            customAppReleaseWrapper.getScreenshotLinks(), customAppReleaseWrapper.getArtifactLink(),
+                            customAppReleaseWrapper.getBannerLink());
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
             AtomicReference<ApplicationReleaseDTO> applicationReleaseDTO = new AtomicReference<>(
@@ -3665,6 +3686,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + "UUID:" + releaseUuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
+        } catch (MalformedURLException e) {
+            throw new ApplicationManagementException("Malformed downloadable URL received for the Public app " +
+                    "release UUID: " + releaseUuid);
+        } catch (FileDownloaderServiceException e) {
+            throw new ApplicationManagementException("Error encountered while downloading artifact for the Public app " +
+                    "release UUID: " + releaseUuid);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
