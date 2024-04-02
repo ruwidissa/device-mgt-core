@@ -21,6 +21,7 @@ import io.entgra.device.mgt.core.application.mgt.common.config.LifecycleState;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.AppmDataHandler;
+import io.entgra.device.mgt.core.application.mgt.common.services.FileTransferService;
 import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
@@ -28,6 +29,7 @@ import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationM
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import io.entgra.device.mgt.core.application.mgt.core.impl.AppmDataHandlerImpl;
+import io.entgra.device.mgt.core.application.mgt.core.impl.FileTransferServiceImpl;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
@@ -122,6 +124,10 @@ public class ApplicationManagementServiceComponent {
                     .getVPPManagerInstance();
             DataHolder.getInstance().setVppApplicationManager(vppApplicationManager);
             bundleContext.registerService(VPPApplicationManager.class.getName(), vppApplicationManager, null);
+
+            FileTransferService fileTransferService = FileTransferServiceImpl.getInstance();
+            DataHolder.getInstance().setFileTransferService(fileTransferService);
+            bundleContext.registerService(FileTransferService.class.getName(), fileTransferService, null);
 
             ScheduledAppSubscriptionTaskManager taskManager = new ScheduledAppSubscriptionTaskManager();
             taskManager.scheduleCleanupTask();
