@@ -22,7 +22,6 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.HeartBeatBeaconC
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.HeartBeatBeaconUtils;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.datasource.DataSourceConfig;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.exception.InvalidConfigurationStateException;
-import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.ClusterFormationChangedNotifier;
 import org.w3c.dom.Document;
 import org.wso2.carbon.utils.CarbonUtils;
 

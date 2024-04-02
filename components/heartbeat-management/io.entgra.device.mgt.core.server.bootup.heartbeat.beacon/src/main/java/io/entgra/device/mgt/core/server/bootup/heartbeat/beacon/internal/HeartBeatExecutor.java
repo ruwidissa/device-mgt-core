@@ -65,7 +65,7 @@ public class HeartBeatExecutor implements ServerStartupObserver {
                 Executors.newSingleThreadScheduledExecutor();
 
         if (CONFIG == null) {
-            String msg = "Error while initiating schedule taks for recording heartbeats.";
+            String msg = "Error while initiating schedule tasks for recording heartbeats.";
             log.error(msg);
             throw new HeartBeatBeaconConfigurationException(msg);
         }
@@ -78,15 +78,15 @@ public class HeartBeatExecutor implements ServerStartupObserver {
             }
             int timeOutIntervalInSeconds = CONFIG.getServerTimeOutIntervalInSeconds();
             int timeSkew = CONFIG.getTimeSkew();
-            int cumilativeTimeOut = timeOutIntervalInSeconds + timeSkew;
+            int cumulativeTimeOut = timeOutIntervalInSeconds + timeSkew;
             final String designatedUUID = uuid;
             HeartBeatBeaconDataHolder.getInstance().setLocalServerUUID(designatedUUID);
             Runnable periodicTask = new Runnable() {
                 public void run() {
                     try {
                         recordHeartBeat(designatedUUID);
-                        electDynamicTaskExecutionCandidate(cumilativeTimeOut);
-                        notifyClusterFormationChanged(cumilativeTimeOut);
+                        electDynamicTaskExecutionCandidate(cumulativeTimeOut);
+                        notifyClusterFormationChanged(cumulativeTimeOut);
                     } catch (Exception e) {
                         log.error("Error while executing record heart beat task. This will result in schedule operation malfunction.", e);
                     }
@@ -97,7 +97,7 @@ public class HeartBeatExecutor implements ServerStartupObserver {
                                          CONFIG.getNotifierFrequency() != 0 ? CONFIG.getNotifierFrequency() : DEFAULT__NOTIFIER_INTERVAL,
                                          TimeUnit.SECONDS);
         } catch (HeartBeatManagementException e) {
-            String msg = "Error occured while updating initial server context.";
+            String msg = "Error occurred while updating initial server context.";
             log.error(msg);
             throw new HeartBeatBeaconConfigurationException(msg, e);
         } catch (IOException e) {
@@ -111,13 +111,14 @@ public class HeartBeatExecutor implements ServerStartupObserver {
         HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().recordHeartBeat(new HeartBeatEvent(uuid));
     }
 
-    static void electDynamicTaskExecutionCandidate(int cumilativeTimeOut)
+    static void electDynamicTaskExecutionCandidate(int cumulativeTimeOut)
             throws HeartBeatManagementException {
-        HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().electCandidate(cumilativeTimeOut);
+        HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().electCandidate(cumulativeTimeOut);
     }
 
-    static void notifyClusterFormationChanged(int cumilativeTimeOut) throws HeartBeatManagementException {
-        HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService().notifyClusterFormationChanged(cumilativeTimeOut);
+    static void notifyClusterFormationChanged(int cumulativeTimeOut) throws HeartBeatManagementException {
+        HeartBeatBeaconDataHolder.getInstance().getHeartBeatManagementService()
+                .notifyClusterFormationChanged(cumulativeTimeOut);
     }
 
 }

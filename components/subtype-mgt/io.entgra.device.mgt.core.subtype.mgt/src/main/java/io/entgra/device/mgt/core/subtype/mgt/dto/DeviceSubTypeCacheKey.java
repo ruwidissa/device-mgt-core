@@ -19,9 +19,10 @@
 package io.entgra.device.mgt.core.subtype.mgt.dto;
 
 public class DeviceSubTypeCacheKey {
-    int tenantId;
-    String subTypeId;
-    String deviceType;
+
+    private int tenantId;
+    private String subTypeId;
+    private String deviceType;
 
     public int getTenantId() {
         return tenantId;
@@ -46,4 +47,15 @@ public class DeviceSubTypeCacheKey {
     public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
     }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return tenantId + "|" + subTypeId + "|" + deviceType;
+    }
+
 }
