@@ -166,9 +166,10 @@ public class FileTransferServiceHelperUtil {
             throw new FileTransferServiceHelperUtilException("Received null for download url");
         }
 
-        if (!Objects.equals(System.getProperty("iot.gateway.host"), downloadUrl.getHost())) {
+        if (!Objects.equals(System.getProperty("iot.gateway.host"), downloadUrl.getHost()) &&
+                !Objects.equals(System.getProperty("iot.core.host"), downloadUrl.getHost())) {
             if (log.isDebugEnabled()) {
-                log.debug("Host not match with " + System.getProperty("iot.gateway.host"));
+                log.debug("Download URL " + downloadUrl + " contains not matching host");
             }
             return null;
         }
