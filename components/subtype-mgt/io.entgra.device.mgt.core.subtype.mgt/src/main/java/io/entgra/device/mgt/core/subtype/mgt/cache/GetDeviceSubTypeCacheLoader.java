@@ -19,20 +19,19 @@
 package io.entgra.device.mgt.core.subtype.mgt.cache;
 
 import com.google.common.cache.CacheLoader;
-import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubTypeCacheKey;
 import io.entgra.device.mgt.core.subtype.mgt.dao.DeviceSubTypeDAO;
 import io.entgra.device.mgt.core.subtype.mgt.dao.DeviceSubTypeDAOFactory;
 import io.entgra.device.mgt.core.subtype.mgt.dao.util.ConnectionManagerUtil;
 import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
+import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubTypeCacheKey;
 import io.entgra.device.mgt.core.subtype.mgt.exception.DBConnectionException;
 import io.entgra.device.mgt.core.subtype.mgt.exception.SubTypeMgtDAOException;
 import io.entgra.device.mgt.core.subtype.mgt.exception.SubTypeMgtPluginException;
-import io.entgra.device.mgt.core.subtype.mgt.util.DeviceSubTypeMgtUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-public class GetDeviceSubTypeCacheLoader extends CacheLoader<String, DeviceSubType> {
+public class GetDeviceSubTypeCacheLoader extends CacheLoader<DeviceSubTypeCacheKey, DeviceSubType> {
 
     private static final Log log = LogFactory.getLog(GetDeviceSubTypeCacheLoader.class);
 
@@ -43,14 +42,13 @@ public class GetDeviceSubTypeCacheLoader extends CacheLoader<String, DeviceSubTy
     }
 
     @Override
-    public DeviceSubType load(String key) throws SubTypeMgtPluginException {
-        DeviceSubTypeCacheKey deviceSubTypeCacheKey = DeviceSubTypeMgtUtil.getDeviceSubTypeCacheKey(key);
+    public DeviceSubType load(DeviceSubTypeCacheKey deviceSubTypeCacheKey) throws SubTypeMgtPluginException {
         int tenantId = deviceSubTypeCacheKey.getTenantId();
         String subTypeId = deviceSubTypeCacheKey.getSubTypeId();
         String deviceType = deviceSubTypeCacheKey.getDeviceType();
 
-        if (log.isTraceEnabled()) {
-            log.trace("Loading Device subtype for " + deviceType + " subtype & subtype Id : " + subTypeId);
+        if (log.isDebugEnabled()) {
+            log.debug("Loading Device subtype for " + deviceType + " subtype & subtype Id : " + subTypeId);
         }
         try {
             ConnectionManagerUtil.openDBConnection();
