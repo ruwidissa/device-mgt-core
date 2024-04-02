@@ -19,23 +19,15 @@
 package io.entgra.device.mgt.core.subtype.mgt.util;
 
 import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubTypeCacheKey;
-import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubType;
 
 public class DeviceSubTypeMgtUtil {
-    public static String setDeviceSubTypeCacheKey(int tenantId, String subTypeId, String deviceType) {
-        return tenantId + "|" + subTypeId + "|" + deviceType.toString();
-    }
 
-    public static DeviceSubTypeCacheKey getDeviceSubTypeCacheKey(String key) {
-        String[] keys = key.split("\\|");
-        int tenantId = Integer.parseInt(keys[0]);
-        String subTypeId = keys[1];
-        String deviceType = keys[2];
-
+    public static DeviceSubTypeCacheKey getDeviceSubTypeCacheKey(int tenantId, String subTypeId, String deviceType) {
         DeviceSubTypeCacheKey deviceSubTypesCacheKey = new DeviceSubTypeCacheKey();
         deviceSubTypesCacheKey.setTenantId(tenantId);
         deviceSubTypesCacheKey.setSubTypeId(subTypeId);
         deviceSubTypesCacheKey.setDeviceType(deviceType);
         return deviceSubTypesCacheKey;
     }
+
 }
