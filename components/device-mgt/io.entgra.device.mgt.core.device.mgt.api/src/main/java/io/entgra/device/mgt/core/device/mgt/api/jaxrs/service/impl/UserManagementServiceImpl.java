@@ -574,7 +574,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                     basicUserInfo.setEmailAddress(getClaimValue(user, Constants.USER_CLAIM_EMAIL_ADDRESS));
                     basicUserInfo.setFirstname(getClaimValue(user, Constants.USER_CLAIM_FIRST_NAME));
                     basicUserInfo.setLastname(getClaimValue(user, Constants.USER_CLAIM_LAST_NAME));
-                    basicUserInfo.setRemovable(isUserRemovable(username));
+                    basicUserInfo.setRemovable(isUserRemovable(user));
                     filteredUserList.add(basicUserInfo);
                 }
             }
