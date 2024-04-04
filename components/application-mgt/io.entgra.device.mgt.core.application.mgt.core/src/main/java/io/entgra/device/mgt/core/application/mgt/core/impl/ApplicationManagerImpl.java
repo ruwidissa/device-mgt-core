@@ -2614,21 +2614,22 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationDTO applicationDTO = getApplication(applicationId);
+        String sanitizedName = ApplicationManagementUtil.sanitizeName(applicationUpdateWrapper.getName(),
+                Constants.ApplicationProperties.NAME );
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            if (!StringUtils.isEmpty(applicationUpdateWrapper.getName()) && !applicationDTO.getName()
-                    .equals(applicationUpdateWrapper.getName())) {
+            if (!StringUtils.isEmpty(sanitizedName) && !applicationDTO.getName()
+                    .equals(sanitizedName)) {
                 if (applicationDAO
-                        .isExistingAppName(applicationUpdateWrapper.getName().trim(), applicationDTO.getDeviceTypeId(),
+                        .isExistingAppName(sanitizedName.trim(), applicationDTO.getDeviceTypeId(),
                                 tenantId)) {
-                    String msg = "Already an application registered with same name " + applicationUpdateWrapper.getName()
+                    String msg = "Already an application registered with same name " + sanitizedName
                             + ". Hence you can't update the application name from " + applicationDTO.getName() + " to "
-                            + applicationUpdateWrapper.getName();
+                            + sanitizedName;
                     log.error(msg);
                     throw new BadRequestException(msg);
                 }
-                applicationDTO.setName(ApplicationManagementUtil.sanitizeName(applicationUpdateWrapper.getName(),
-                        Constants.ApplicationProperties.NAME));
+                applicationDTO.setName(sanitizedName);
             }
             if (!StringUtils.isEmpty(applicationUpdateWrapper.getSubMethod()) && !applicationDTO.getSubType()
                     .equals(applicationUpdateWrapper.getSubMethod())) {
