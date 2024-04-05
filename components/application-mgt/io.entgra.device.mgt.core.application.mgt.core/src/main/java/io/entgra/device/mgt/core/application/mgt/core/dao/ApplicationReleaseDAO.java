@@ -127,4 +127,12 @@ public interface ApplicationReleaseDAO {
      */
     List<ApplicationReleaseDTO> getReleaseByPackages(List<String> packages, int tenantId)
             throws ApplicationManagementDAOException;
+
+    /**
+     * Delete Application releases of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteReleasesByTenant(int tenantId) throws ApplicationManagementDAOException;
 }

@@ -264,4 +264,52 @@ public interface SubscriptionDAO {
      * @throws ApplicationManagementDAOException if error occurred while retrieving the app details
      */
     Activity getOperationAppDetails(int operationId, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete Operation mapping details of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteOperationMappingByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete device subscriptions of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteDeviceSubscriptionByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete group subscriptions of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteGroupSubscriptionByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete role subscriptions of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteRoleSubscriptionByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete user subscriptions of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteUserSubscriptionByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete scheduled subscription details of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteScheduledSubscriptionByTenant(int tenantId) throws ApplicationManagementDAOException;
 }

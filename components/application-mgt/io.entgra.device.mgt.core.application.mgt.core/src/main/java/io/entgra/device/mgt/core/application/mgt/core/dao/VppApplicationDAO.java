@@ -43,4 +43,28 @@ public interface VppApplicationDAO {
     int addAssociation(VppAssociationDTO vppAssociationDTO, int tenantId) throws ApplicationManagementDAOException;
 
     VppAssociationDTO updateAssociation(VppAssociationDTO vppAssociationDTO, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete associations of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteAssociationByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete Vpp users of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteVppUserByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete assets of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteAssetsByTenant(int tenantId) throws ApplicationManagementDAOException;
 }

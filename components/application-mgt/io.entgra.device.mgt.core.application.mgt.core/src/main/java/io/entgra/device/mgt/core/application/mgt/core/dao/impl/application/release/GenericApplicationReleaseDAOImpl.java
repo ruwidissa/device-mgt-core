@@ -624,4 +624,29 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
-}
+
+        @Override
+        public void deleteReleasesByTenant(int tenantId) throws ApplicationManagementDAOException {
+            if (log.isDebugEnabled()) {
+                log.debug("Request received in DAO Layer to delete application releases of tenant  of id " + tenantId);
+            }
+            String sql = "DELETE FROM AP_APP_RELEASE "
+                    + "WHERE TENANT_ID = ?";
+            try (Connection conn = this.getDBConnection()) {
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setInt(1, tenantId);
+                    stmt.executeUpdate();
+                }
+            } catch (DBConnectionException e) {
+                String msg = "Error occurred while obtaining the DB connection when removing application release of tenant"
+                        +tenantId;
+                log.error(msg, e);
+                throw new ApplicationManagementDAOException(msg, e);
+            } catch (SQLException e) {
+                String msg = "SQL Error occurred while removing application release of tenant of id " + tenantId +
+                        "Executed Query: " + sql;
+                log.error(msg, e);
+                throw new ApplicationManagementDAOException(msg, e);
+            }
+        }
+    }

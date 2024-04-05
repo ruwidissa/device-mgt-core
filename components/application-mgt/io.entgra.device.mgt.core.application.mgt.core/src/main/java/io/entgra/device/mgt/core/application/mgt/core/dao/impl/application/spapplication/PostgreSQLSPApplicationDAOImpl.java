@@ -485,4 +485,57 @@ public class PostgreSQLSPApplicationDAOImpl extends AbstractDAOImpl implements S
         }
     }
 
+    @Override
+    public void deleteIdentityServerByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete identity server of the tenant of id: " + tenantId);
+        }
+        String sql = "DELETE FROM AP_IDENTITY_SERVER " +
+                "WHERE TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to delete an identity server of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to delete an identity server of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteSPApplicationMappingByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete applications of tenant  of id " + tenantId
+                    + " from service providers");
+        }
+        String sql = "DELETE FROM AP_IS_SP_APP_MAPPING "
+                + "WHERE TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection when removing applications of tenant"
+                    +tenantId+ "from service providers";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while removing applications of tenant of id " + tenantId +
+                    "from service providers. Executed Query: " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
 }

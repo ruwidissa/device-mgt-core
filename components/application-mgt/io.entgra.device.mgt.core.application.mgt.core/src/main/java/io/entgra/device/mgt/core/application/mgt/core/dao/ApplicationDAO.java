@@ -238,4 +238,52 @@ public interface ApplicationDAO {
     int getApplicationCount(Filter filter, int deviceTypeId, int tenantId) throws ApplicationManagementDAOException;
 
     void deleteApplication(int appId, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete favourite applications of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteAppFavouritesByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete Application category mapping of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteApplicationCategoryMappingByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete Application categories of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteApplicationCategoriesByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete Application tags mapping of Tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteApplicationTagsMappingByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete Application tags of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteApplicationTagsByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete Applications of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteApplicationsByTenant(int tenantId) throws ApplicationManagementDAOException;
 }

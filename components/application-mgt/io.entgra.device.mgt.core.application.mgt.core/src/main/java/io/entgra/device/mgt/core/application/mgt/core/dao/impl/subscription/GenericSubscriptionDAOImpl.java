@@ -1476,4 +1476,157 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
+
+    @Override
+    public void deleteOperationMappingByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete operation mapping of the tenant of id: " + tenantId);
+        }
+        String sql = "DELETE FROM AP_APP_SUB_OP_MAPPING " +
+                "WHERE TENANT_ID = ?";
+        try (Connection conn = this.getDBConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to delete operation mapping of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to delete operation mapping of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteRoleSubscriptionByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete role subscription of the tenant of id: " + tenantId);
+        }
+        String sql = "DELETE FROM AP_ROLE_SUBSCRIPTION " +
+                "WHERE TENANT_ID = ?";
+        try (Connection conn = this.getDBConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to delete role subscription of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to delete role subscription of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+
+    }
+
+    @Override
+    public void deleteUserSubscriptionByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete user subscription of the tenant of id: " + tenantId);
+        }
+        String sql = "DELETE FROM AP_USER_SUBSCRIPTION " +
+                "WHERE TENANT_ID = ?";
+        try (Connection conn = this.getDBConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to delete user subscription of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to delete user subscription of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+
+    }
+
+    @Override
+    public void deleteGroupSubscriptionByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete user subscription of the tenant of id: " + tenantId);
+        }
+        String sql = "DELETE FROM AP_GROUP_SUBSCRIPTION " +
+                "WHERE TENANT_ID = ?";
+        try (Connection conn = this.getDBConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to delete group subscription of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to delete group subscription of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteScheduledSubscriptionByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete scheduled subscription of the tenant of id: " + tenantId);
+        }
+        String sql = "DELETE FROM AP_SCHEDULED_SUBSCRIPTION " +
+                "WHERE APPLICATION_UUID IN " +
+                "(SELECT UUID FROM AP_APP_RELEASE WHERE TENANT_ID = ?)";
+        try (Connection conn = this.getDBConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeBatch();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to delete scheduled subscription of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to delete scheduled subscription of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteDeviceSubscriptionByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete device subscription of the tenant of id: " + tenantId);
+        }
+        String sql = "DELETE FROM AP_DEVICE_SUBSCRIPTION " +
+                "WHERE TENANT_ID = ?";
+        try (Connection conn = this.getDBConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to delete device subscription of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to delete device subscription of tenant of id "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
 }

@@ -26,4 +26,6 @@ public interface TenantManagerService {
     void addDefaultAppCategories(TenantInfoBean tenantInfoBean) throws TenantMgtException;
 
     void addDefaultDeviceStatusFilters(TenantInfoBean tenantInfoBean) throws TenantMgtException;
+    void deleteTenantApplicationData(int tenantId) throws TenantMgtException;
+    void deleteTenantDeviceData(int tenantId) throws TenantMgtException;
 }
