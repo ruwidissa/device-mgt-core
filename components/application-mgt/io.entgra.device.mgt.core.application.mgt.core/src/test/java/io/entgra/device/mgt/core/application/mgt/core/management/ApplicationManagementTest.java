@@ -107,7 +107,7 @@ public class ApplicationManagementTest extends BaseTestCase {
         EntAppReleaseWrapper releaseWrapper = new EntAppReleaseWrapper();
         releaseWrapper.setDescription("First release");
         releaseWrapper.setIsSharedWithAllTenants(false);
-        releaseWrapper.setMetaData("Just meta data");
+        releaseWrapper.setMetaData("[{\"key\": \"Just a metadata\"}]");
         releaseWrapper.setReleaseType("free");
         releaseWrapper.setPrice(5.7);
         releaseWrapper.setSupportedOsVersions("4.0-7.0");
@@ -173,6 +173,7 @@ public class ApplicationManagementTest extends BaseTestCase {
         fileTransferService.writeChunk(chunkDescriptor);
         releaseWrapper.setArtifactLink(apkTransferLink.getDirectTransferLink() + "/sample.apk");
         releaseWrapper.setRemoteStatus(false);
+
 
         entAppReleaseWrappers.add(releaseWrapper);
         applicationWrapper.setEntAppReleaseWrappers(entAppReleaseWrappers);

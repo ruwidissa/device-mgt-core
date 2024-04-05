@@ -17,11 +17,16 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
 import io.entgra.device.mgt.core.application.mgt.common.FileDataHolder;
 import io.entgra.device.mgt.core.application.mgt.common.FileDescriptor;
 import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ItuneAppDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.FileDownloaderServiceException;
@@ -60,6 +65,7 @@ import io.entgra.device.mgt.core.device.mgt.core.common.util.FileUtil;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -80,6 +86,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -649,4 +656,55 @@ public class ApplicationManagementUtil {
         }
         return releaseWrappers;
     }
+
+    /**
+     * Add installer path metadata value to windows applications
+     * @param applicationReleaseDTO {@link ApplicationReleaseDTO}
+     * @throws ApplicationManagementException Throws when error encountered while updating the app metadata
+     */
+    public static void addInstallerPathToMetadata(ApplicationReleaseDTO applicationReleaseDTO)
+            throws ApplicationManagementException {
+        if (applicationReleaseDTO.getMetaData() == null) return;
+        Gson gson = new Gson();
+        String installerPath = APIUtil.constructInstallerPath(applicationReleaseDTO.getInstallerName(), applicationReleaseDTO.getAppHashValue());
+        String[] fileNameSegments = extractNameSegments(applicationReleaseDTO, installerPath);
+        String extension = fileNameSegments[fileNameSegments.length - 1];
+        if (!Objects.equals(extension, "appx") && !Objects.equals(extension, "msi")) {
+            return;
+        }
+
+        String installerPaths = "[ {" +
+                "\"key\": \"Content_Uri\", " +
+                "\"value\" : \"" + installerPath + "\"" +
+                "}]";
+
+        if (Objects.equals(extension, "appx")) {
+            installerPaths = "[ {" +
+                    "\"key\": \"Package_Uri\", " +
+                    "\"value\" : \"" + installerPath + "\"" +
+                    "}]";
+        }
+
+        JsonArray parsedMetadataList = gson.fromJson(applicationReleaseDTO.getMetaData(), JsonArray.class);
+        JsonArray installerPathsArray = gson.fromJson(installerPaths, JsonArray.class);
+        parsedMetadataList.addAll(installerPathsArray);
+        applicationReleaseDTO.setMetaData(gson.toJson(parsedMetadataList));
+    }
+
+    private static String[] extractNameSegments(ApplicationReleaseDTO applicationReleaseDTO, String installerPath)
+            throws ApplicationManagementException {
+        String []installerPathSegments = installerPath.split("/");
+        if (installerPathSegments.length == 0) {
+            throw new ApplicationManagementException("Received malformed url for installer path of the app : "
+                    + applicationReleaseDTO.getInstallerName());
+        }
+        String fullQualifiedName = installerPathSegments[installerPathSegments.length - 1];
+        String []fileNameSegments = fullQualifiedName.split("\\.(?=[^.]+$)");
+        if (fileNameSegments.length != 2) {
+            throw new ApplicationManagementException("Received malformed url for installer path of the app : "
+                    + applicationReleaseDTO.getInstallerName());
+        }
+        return fileNameSegments;
+    }
+
 }
