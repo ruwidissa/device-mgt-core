@@ -27,7 +27,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONObject;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.EventPublishingException;
@@ -48,6 +47,24 @@ public class HttpReportingUtil {
 
     public static String getReportingHost() {
         return System.getProperty(DeviceManagementConstants.Report.REPORTING_EVENT_HOST);
+    }
+
+    public static int invokeApi(String payload, String endpoint) throws EventPublishingException {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpPost apiEndpoint = new HttpPost(endpoint);
+            apiEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+            StringEntity requestEntity = new StringEntity(
+                    payload, ContentType.APPLICATION_JSON);
+            apiEndpoint.setEntity(requestEntity);
+            HttpResponse response = client.execute(apiEndpoint);
+            return response.getStatusLine().getStatusCode();
+        } catch (ConnectException e) {
+            log.error("Connection refused to API endpoint: " + endpoint, e);
+            return HttpStatus.SC_SERVICE_UNAVAILABLE;
+        } catch (IOException e) {
+            throw new EventPublishingException("Error occurred when " +
+                    "invoking API. API endpoint: " + endpoint, e);
+        }
     }
 
 

@@ -19,7 +19,6 @@
 package io.entgra.device.mgt.core.device.mgt.core.app.mgt;
 
 import com.google.gson.Gson;
-import io.entgra.device.mgt.core.device.mgt.core.report.mgt.ReportingPublisherManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -287,11 +286,8 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
                 deviceDetailsWrapper.setTenantId(tenantId);
                 deviceDetailsWrapper.setDevice(device);
                 deviceDetailsWrapper.setApplications(newApplications);
-                ReportingPublisherManager reportingManager = new ReportingPublisherManager();
-                reportingManager.publishData(deviceDetailsWrapper, DeviceManagementConstants
-                        .Report.APP_USAGE_ENDPOINT);
-                /*HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(),
-                                            reportingHost + DeviceManagementConstants.Report.APP_USAGE_ENDPOINT);*/
+                HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(),
+                                            reportingHost + DeviceManagementConstants.Report.APP_USAGE_ENDPOINT);
             }
 
         } catch (DeviceManagementDAOException e) {

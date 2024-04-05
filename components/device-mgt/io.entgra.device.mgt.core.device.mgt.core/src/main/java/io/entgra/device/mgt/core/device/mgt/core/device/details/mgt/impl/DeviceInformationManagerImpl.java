@@ -18,7 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.impl;
 
-import io.entgra.device.mgt.core.device.mgt.core.report.mgt.ReportingPublisherManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +29,7 @@ import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceDetailsW
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocation;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.EventPublishingException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
@@ -203,8 +203,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                     getDeviceManagementProvider().getDevice(deviceIdentifier, false);
             DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
             deviceDetailsWrapper.setEvents(payload);
-            publishEvents(device, deviceDetailsWrapper, eventType);
-            return 201;
+            return publishEvents(device, deviceDetailsWrapper, eventType);
         } catch (DeviceManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Event publishing error. Could not get device " + deviceId;
@@ -218,7 +217,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
      * @param device Device that is sending event
      * @param deviceDetailsWrapper Payload to send(example, deviceinfo, applist, raw events)
      */
-    private void publishEvents(Device device, DeviceDetailsWrapper deviceDetailsWrapper, String
+    private int publishEvents(Device device, DeviceDetailsWrapper deviceDetailsWrapper, String
             eventType)  {
         String reportingHost = HttpReportingUtil.getReportingHost();
         if (!StringUtils.isBlank(reportingHost)
@@ -253,9 +252,9 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
                 String eventUrl = reportingHost + DeviceManagementConstants.Report
                         .REPORTING_CONTEXT + DeviceManagementConstants.URL_SEPERATOR + eventType;
-                ReportingPublisherManager reportingManager = new ReportingPublisherManager();
-                reportingManager.publishData(deviceDetailsWrapper, eventUrl);
-                //return HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(), eventUrl);
+                return HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(), eventUrl);
+            } catch (EventPublishingException e) {
+                log.error("Error occurred while sending events", e);
             } catch (GroupManagementException e) {
                 log.error("Error occurred while getting group list", e);
             } catch (UserStoreException e) {
@@ -271,6 +270,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                         + DeviceManagerUtil.getTenantId());
             }
         }
+        return 0;
     }
 
     @Override
