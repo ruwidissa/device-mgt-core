@@ -128,4 +128,20 @@ public interface SPApplicationDAO {
      * @throws ApplicationManagementDAOException if any db error occurred
      */
     void deleteIdentityServer(int id, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete Identity servers of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteIdentityServerByTenant(int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * Delete Service provide mapping details of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteSPApplicationMappingByTenant(int tenantId) throws ApplicationManagementDAOException;
 }

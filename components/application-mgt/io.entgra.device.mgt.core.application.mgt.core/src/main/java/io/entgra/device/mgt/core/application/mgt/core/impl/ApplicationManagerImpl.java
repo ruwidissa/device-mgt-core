@@ -21,6 +21,8 @@ package io.entgra.device.mgt.core.application.mgt.core.impl;
 import io.entgra.device.mgt.core.application.mgt.common.exception.FileDownloaderServiceException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.FileTransferServiceException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.application.mgt.core.dao.*;
+import io.entgra.device.mgt.core.application.mgt.core.exception.*;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.application.mgt.core.dao.SPApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
@@ -78,11 +80,6 @@ import io.entgra.device.mgt.core.application.mgt.common.wrapper.PublicAppWrapper
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppReleaseWrapper;
 import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppWrapper;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
-import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationReleaseDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.LifecycleStateDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
-import io.entgra.device.mgt.core.application.mgt.core.dao.VisibilityDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import io.entgra.device.mgt.core.application.mgt.core.util.APIUtil;
 import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
@@ -133,6 +130,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private SubscriptionDAO subscriptionDAO;
     private LifecycleStateManager lifecycleStateManager;
     private SPApplicationDAO spApplicationDAO;
+    private VppApplicationDAO vppApplicationDAO;
+    private ReviewDAO reviewDAO;
 
     public ApplicationManagerImpl() {
         initDataAccessObjects();
@@ -146,6 +145,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         this.applicationReleaseDAO = ApplicationManagementDAOFactory.getApplicationReleaseDAO();
         this.subscriptionDAO = ApplicationManagementDAOFactory.getSubscriptionDAO();
         this.spApplicationDAO = ApplicationManagementDAOFactory.getSPApplicationDAO();
+        this.vppApplicationDAO = ApplicationManagementDAOFactory.getVppApplicationDAO();
+        this.reviewDAO = ApplicationManagementDAOFactory.getCommentDAO();
     }
 
     @Override
@@ -4384,6 +4385,68 @@ public class ApplicationManagerImpl implements ApplicationManager {
             String msg = "Error occurred while deleting application icon info. Application package name: " + applicationDTO.getPackageName();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteApplicationDataOfTenant(int tenantId) throws ApplicationManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request is received to delete application related data of tenant with ID: " + tenantId);
+        }
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+
+            vppApplicationDAO.deleteAssociationByTenant(tenantId);
+            vppApplicationDAO.deleteVppUserByTenant(tenantId);
+            vppApplicationDAO.deleteAssetsByTenant(tenantId);
+            reviewDAO.deleteReviewsByTenant(tenantId);
+            subscriptionDAO.deleteOperationMappingByTenant(tenantId);
+            subscriptionDAO.deleteDeviceSubscriptionByTenant(tenantId);
+            subscriptionDAO.deleteGroupSubscriptionByTenant(tenantId);
+            subscriptionDAO.deleteRoleSubscriptionByTenant(tenantId);
+            subscriptionDAO.deleteUserSubscriptionByTenant(tenantId);
+            applicationDAO.deleteAppFavouritesByTenant(tenantId);
+            applicationDAO.deleteApplicationTagsMappingByTenant(tenantId);
+            applicationDAO.deleteApplicationTagsByTenant(tenantId);
+            applicationDAO.deleteApplicationCategoryMappingByTenant(tenantId);
+            applicationDAO.deleteApplicationCategoriesByTenant(tenantId);
+            subscriptionDAO.deleteScheduledSubscriptionByTenant(tenantId);
+            lifecycleStateDAO.deleteAppLifecycleStatesByTenant(tenantId);
+            applicationReleaseDAO.deleteReleasesByTenant(tenantId);
+            visibilityDAO.deleteAppUnrestrictedRolesByTenant(tenantId);
+            spApplicationDAO.deleteSPApplicationMappingByTenant(tenantId);
+            spApplicationDAO.deleteIdentityServerByTenant(tenantId);
+            applicationDAO.deleteApplicationsByTenant(tenantId);
+            APIUtil.getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
+
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while observing the database connection to delete applications for tenant with ID: "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Database access error is occurred when getting applications for tenant with ID: " + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (LifeCycleManagementDAOException e) {
+            String msg = "Error occurred while deleting life-cycle state data of application releases of the tenant"
+                    + " of ID: " + tenantId ;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ReviewManagementDAOException e) {
+            String msg = "Error occurred while deleting reviews of application releases of the applications"
+                    + " of tenant ID: " + tenantId ;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationStorageManagementException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while deleting App folder of tenant"
+                    + " of tenant ID: " + tenantId ;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 }

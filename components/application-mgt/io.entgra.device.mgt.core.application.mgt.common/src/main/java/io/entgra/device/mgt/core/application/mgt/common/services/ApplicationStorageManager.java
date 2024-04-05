@@ -132,4 +132,12 @@ public interface ApplicationStorageManager {
      * @throws StorageManagementException if errors while generating md5 string
      */
     String getMD5(InputStream inputStream) throws StorageManagementException;
+
+    /**
+     * Delete the folder containing all the app releases of a tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws ApplicationStorageManagementException thrown if
+     */
+    void deleteAppFolderOfTenant(int tenantId) throws ApplicationStorageManagementException;
 }
