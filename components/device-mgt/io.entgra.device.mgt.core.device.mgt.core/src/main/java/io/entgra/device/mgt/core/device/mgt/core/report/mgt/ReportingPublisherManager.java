@@ -33,8 +33,10 @@ import org.apache.http.protocol.HTTP;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class ReportingPublisherManager {
 
@@ -51,15 +53,15 @@ public class ReportingPublisherManager {
         poolingManager.setDefaultMaxPerRoute(10);
     }
 
-    public void publishData(DeviceDetailsWrapper deviceDetailsWrapper, String eventUrl) {
+    public Future<Integer> publishData(DeviceDetailsWrapper deviceDetailsWrapper, String eventUrl) {
         this.payload = deviceDetailsWrapper;
         this.endpoint = eventUrl;
-        executorService.submit(new ReportingPublisher());
+        return executorService.submit(new ReportingPublisher());
     }
 
-    private class ReportingPublisher implements Runnable {
+    private class ReportingPublisher implements Callable<Integer> {
         @Override
-        public void run() {
+        public Integer call() throws EventPublishingException {
             try (CloseableHttpClient client = HttpClients.custom().setConnectionManager(poolingManager).build()) {
                 HttpPost apiEndpoint = new HttpPost(endpoint);
                 apiEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
@@ -70,12 +72,15 @@ public class ReportingPublisherManager {
                 if (log.isDebugEnabled()) {
                     log.debug("Published data to the reporting backend: " + endpoint + ", Response code: " + statusCode);
                 }
+                return statusCode;
             } catch (ConnectException e) {
                 String message = "Connection refused while publishing reporting data to the API: " + endpoint;
                 log.error(message, e);
+                throw new EventPublishingException(message, e);
             } catch (IOException e) {
                 String message = "Error occurred when publishing reporting data to the API: " + endpoint;
                 log.error(message, e);
+                throw new EventPublishingException(message, e);
             }
         }
     }

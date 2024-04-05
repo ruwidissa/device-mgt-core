@@ -290,8 +290,6 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
                 ReportingPublisherManager reportingManager = new ReportingPublisherManager();
                 reportingManager.publishData(deviceDetailsWrapper, DeviceManagementConstants
                         .Report.APP_USAGE_ENDPOINT);
-                /*HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(),
-                                            reportingHost + DeviceManagementConstants.Report.APP_USAGE_ENDPOINT);*/
             }
 
         } catch (DeviceManagementDAOException e) {

@@ -54,6 +54,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
@@ -86,6 +88,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
             DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
             deviceDetailsWrapper.setDeviceInfo(deviceInfo);
+            //Asynchronous call to publish the device information to the reporting service. Hence, response is ignored.
             publishEvents(device, deviceDetailsWrapper, DeviceManagementConstants.Report.DEVICE_INFO_PARAM);
 
             DeviceManagementDAOFactory.beginTransaction();
@@ -203,13 +206,32 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                     getDeviceManagementProvider().getDevice(deviceIdentifier, false);
             DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
             deviceDetailsWrapper.setEvents(payload);
-            publishEvents(device, deviceDetailsWrapper, eventType);
-            return 201;
+            Future<Integer> apiCallback = publishEvents(device, deviceDetailsWrapper, eventType);
+            if (null != apiCallback) {
+                while(!apiCallback.isDone()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Waiting for the response from the API for the reporting data " +
+                                "publishing for the device " + deviceId + ". Event payload: " + payload);
+                    }
+                }
+                return apiCallback.get();
+            }
+            return 0; // If the event publishing is disabled.
         } catch (DeviceManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Event publishing error. Could not get device " + deviceId;
             log.error(msg, e);
             throw new DeviceDetailsMgtException(msg, e);
+        } catch (ExecutionException e) {
+            String message = "Failed while publishing device information data to the reporting service for the device "
+                    + deviceId;
+            log.error(message, e);
+            throw new DeviceDetailsMgtException(message, e);
+        } catch (InterruptedException e) {
+            String message = "Failed while publishing device information data to the reporting service. Thread " +
+                    "interrupted while waiting for the response from the API for the Device " + deviceId;
+            log.error(message, e);
+            throw new DeviceDetailsMgtException(message, e);
         }
     }
 
@@ -218,7 +240,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
      * @param device Device that is sending event
      * @param deviceDetailsWrapper Payload to send(example, deviceinfo, applist, raw events)
      */
-    private void publishEvents(Device device, DeviceDetailsWrapper deviceDetailsWrapper, String
+    private Future<Integer> publishEvents(Device device, DeviceDetailsWrapper deviceDetailsWrapper, String
             eventType)  {
         String reportingHost = HttpReportingUtil.getReportingHost();
         if (!StringUtils.isBlank(reportingHost)
@@ -254,8 +276,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 String eventUrl = reportingHost + DeviceManagementConstants.Report
                         .REPORTING_CONTEXT + DeviceManagementConstants.URL_SEPERATOR + eventType;
                 ReportingPublisherManager reportingManager = new ReportingPublisherManager();
-                reportingManager.publishData(deviceDetailsWrapper, eventUrl);
-                //return HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(), eventUrl);
+                return reportingManager.publishData(deviceDetailsWrapper, eventUrl);
             } catch (GroupManagementException e) {
                 log.error("Error occurred while getting group list", e);
             } catch (UserStoreException e) {
@@ -271,6 +292,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                         + DeviceManagerUtil.getTenantId());
             }
         }
+        return null;
     }
 
     @Override
