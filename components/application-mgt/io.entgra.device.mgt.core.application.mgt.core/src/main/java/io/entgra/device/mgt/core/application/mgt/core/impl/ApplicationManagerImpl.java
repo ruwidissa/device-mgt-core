@@ -509,6 +509,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
+        ApplicationManagementUtil.addInstallerPathToMetadata(releaseDTO);
         applicationDTO.getApplicationReleaseDTOs().clear();
         applicationDTO.getApplicationReleaseDTOs().add(releaseDTO);
         return applicationDTO;
