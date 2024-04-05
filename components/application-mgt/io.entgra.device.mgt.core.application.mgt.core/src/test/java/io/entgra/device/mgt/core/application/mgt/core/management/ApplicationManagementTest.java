@@ -174,7 +174,6 @@ public class ApplicationManagementTest extends BaseTestCase {
         releaseWrapper.setArtifactLink(apkTransferLink.getDirectTransferLink() + "/sample.apk");
         releaseWrapper.setRemoteStatus(false);
 
-
         entAppReleaseWrappers.add(releaseWrapper);
         applicationWrapper.setEntAppReleaseWrappers(entAppReleaseWrappers);
 

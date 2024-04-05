@@ -691,6 +691,13 @@ public class ApplicationManagementUtil {
         applicationReleaseDTO.setMetaData(gson.toJson(parsedMetadataList));
     }
 
+    /**
+     * Extract name segments from installer path
+     * @param applicationReleaseDTO {@link ApplicationReleaseDTO}
+     * @param installerPath Installer path
+     * @return Extracted file name segments
+     * @throws ApplicationManagementException Throws when error encountered while extracting name segments from installer path
+     */
     private static String[] extractNameSegments(ApplicationReleaseDTO applicationReleaseDTO, String installerPath)
             throws ApplicationManagementException {
         String []installerPathSegments = installerPath.split("/");
