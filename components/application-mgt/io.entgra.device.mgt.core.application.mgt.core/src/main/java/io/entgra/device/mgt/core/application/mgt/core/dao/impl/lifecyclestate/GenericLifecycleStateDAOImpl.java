@@ -121,7 +121,8 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         }
         String sql = "DELETE FROM AP_APP_LIFECYCLE_STATE "
                 + "WHERE TENANT_ID = ?";
-        try ( Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();

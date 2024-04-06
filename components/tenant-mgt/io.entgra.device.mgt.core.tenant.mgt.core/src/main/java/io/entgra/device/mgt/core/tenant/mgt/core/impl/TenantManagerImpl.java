@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.tenant.mgt.core.impl;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.TenantDAO;
@@ -200,13 +201,13 @@ public class TenantManagerImpl implements TenantManager {
             tenantDao.deleteDeviceCertificateByTenantId(tenantId);
 
             DeviceManagementDAOFactory.commitTransaction();
-        } catch (SQLException e){
+        } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
-            String msg = "Error accessing the database when trying to delete tenant info of '" + tenantId + "'";
+            String msg = "Error deleting data of tenant of ID: '" + tenantId + "'";
             log.error(msg);
             throw new TenantMgtException(msg, e);
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error deleting data of tenant of ID: '" + tenantId + "'";
+        } catch (SQLException e) {
+            String msg = "Error accessing the database when trying to delete tenant info of '" + tenantId + "'";
             log.error(msg);
             throw new TenantMgtException(msg, e);
         } finally {

@@ -491,7 +491,8 @@ public class GenericSPApplicationDAOImpl extends AbstractDAOImpl implements SPAp
         }
         String sql = "DELETE FROM AP_IDENTITY_SERVER " +
                 "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();

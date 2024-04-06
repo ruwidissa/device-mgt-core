@@ -632,7 +632,8 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             }
             String sql = "DELETE FROM AP_APP_RELEASE "
                     + "WHERE TENANT_ID = ?";
-            try (Connection conn = this.getDBConnection()) {
+            try {
+                Connection conn = this.getDBConnection();
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setInt(1, tenantId);
                     stmt.executeUpdate();

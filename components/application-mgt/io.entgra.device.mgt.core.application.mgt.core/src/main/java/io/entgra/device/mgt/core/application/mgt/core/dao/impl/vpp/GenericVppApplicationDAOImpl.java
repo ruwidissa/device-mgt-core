@@ -514,7 +514,8 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
         }
         String sql = "DELETE FROM AP_ASSETS "
                 + "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -539,7 +540,8 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
         }
         String sql = "DELETE FROM AP_VPP_USER "
                 + "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -565,7 +567,8 @@ public class GenericVppApplicationDAOImpl  extends AbstractDAOImpl implements Vp
         }
         String sql = "DELETE FROM AP_VPP_ASSOCIATION  "
                 + "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();

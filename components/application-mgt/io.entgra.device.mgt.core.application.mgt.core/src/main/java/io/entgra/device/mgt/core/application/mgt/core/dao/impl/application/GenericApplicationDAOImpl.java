@@ -1891,7 +1891,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
         String sql = "DELETE FROM AP_APP_FAVOURITES "
                 + "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -1917,7 +1918,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
         String sql = "DELETE FROM AP_APP_CATEGORY_MAPPING "
                 + "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -1943,7 +1945,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
         String sql = "DELETE FROM AP_APP_CATEGORY "
                 + "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -1969,7 +1972,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
         String sql = "DELETE FROM AP_APP_TAG_MAPPING "
                 + "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -1995,7 +1999,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
         String sql = "DELETE FROM AP_APP_TAG "
                 + "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -2021,7 +2026,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
         String sql = "DELETE FROM AP_APP "
                 + "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();

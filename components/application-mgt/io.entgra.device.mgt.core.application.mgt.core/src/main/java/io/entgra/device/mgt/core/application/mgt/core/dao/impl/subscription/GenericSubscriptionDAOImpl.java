@@ -1484,7 +1484,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
         String sql = "DELETE FROM AP_APP_SUB_OP_MAPPING " +
                 "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -1509,7 +1510,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
         String sql = "DELETE FROM AP_ROLE_SUBSCRIPTION " +
                 "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -1535,7 +1537,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
         String sql = "DELETE FROM AP_USER_SUBSCRIPTION " +
                 "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -1561,7 +1564,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
         String sql = "DELETE FROM AP_GROUP_SUBSCRIPTION " +
                 "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
@@ -1587,7 +1591,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         String sql = "DELETE FROM AP_SCHEDULED_SUBSCRIPTION " +
                 "WHERE APPLICATION_UUID IN " +
                 "(SELECT UUID FROM AP_APP_RELEASE WHERE TENANT_ID = ?)";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeBatch();
@@ -1612,7 +1617,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
         String sql = "DELETE FROM AP_DEVICE_SUBSCRIPTION " +
                 "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
