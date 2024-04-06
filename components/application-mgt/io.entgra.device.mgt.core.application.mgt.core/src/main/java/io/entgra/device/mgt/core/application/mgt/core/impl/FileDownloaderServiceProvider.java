@@ -111,7 +111,8 @@ public class FileDownloaderServiceProvider {
                     throw new FileDownloaderServiceException("Unexpected response code received for the remote url " + downloadUrl);
                 }
                 String contentDisposition = response.header("Content-Disposition");
-                String[] fileNameSegments = getFileNameSegments(contentDisposition);
+                String contentType = response.header("Content-Type");
+                String[] fileNameSegments = getFileNameSegments(contentDisposition, contentType);
                 FileMetaEntry fileMetaEntry = new FileMetaEntry();
                 fileMetaEntry.setSize(Long.parseLong(Objects.requireNonNull(response.header("Content-Length"))));
                 fileMetaEntry.setFileName(fileNameSegments[0] + "-" + UUID.randomUUID());
@@ -123,15 +124,25 @@ public class FileDownloaderServiceProvider {
         }
 
         /**
-         * Extract file name segments(filename & extensions) from content disposition header
+         * Extract file name segments(filename & extensions) from content disposition header and content type header
          * @param contentDisposition Content disposition header value
+         * @param contentType Content type header value
          * @return Array of name segments
          * @throws FileDownloaderServiceException Throws when error occurred while extracting name segments
          */
-        private static String[] getFileNameSegments(String contentDisposition) throws FileDownloaderServiceException {
-            if (contentDisposition == null) {
+        private static String[] getFileNameSegments(String contentDisposition, String contentType) throws FileDownloaderServiceException {
+            if (contentDisposition == null && contentType == null) {
                 throw new FileDownloaderServiceException("Cannot determine the file name for the remote file");
             }
+
+            if (contentDisposition == null) {
+                String []contentTypeSegments = contentType.split("/");
+                if (contentTypeSegments.length != 2) {
+                    throw new FileDownloaderServiceException("Encountered wrong content type header value");
+                }
+                return new String[]{ UUID.randomUUID().toString(), contentTypeSegments[contentTypeSegments.length - 1]};
+            }
+
             String []contentDispositionSegments = contentDisposition.split("=");
             if (contentDispositionSegments.length != 2) {
                 throw new FileDownloaderServiceException("Error encountered when constructing file name");
