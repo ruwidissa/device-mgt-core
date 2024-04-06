@@ -66,6 +66,7 @@
                             io.entgra.device.mgt.core.device.mgt.common.roles.config,
                             io.entgra.device.mgt.core.device.mgt.core.metadata.mgt,
                             io.entgra.device.mgt.core.device.mgt.core.config,
+                            io.entgra.device.mgt.core.device.mgt.core.dao.*,
                             org.wso2.carbon.user.core.service,
                             org.wso2.carbon.context
                         </Import-Package>

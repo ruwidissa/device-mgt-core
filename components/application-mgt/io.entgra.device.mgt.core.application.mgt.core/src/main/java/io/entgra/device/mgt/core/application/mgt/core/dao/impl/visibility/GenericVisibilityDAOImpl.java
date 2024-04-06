@@ -186,7 +186,8 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         String sql = "DELETE "
                 + "FROM AP_UNRESTRICTED_ROLE "
                 + "WHERE TENANT_ID = ?";
-        try (Connection conn = this.getDBConnection()) {
+        try {
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
