@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.application.mgt.common.exception.FileTransferSe
 import io.entgra.device.mgt.core.application.mgt.common.services.FileDownloaderService;
 import io.entgra.device.mgt.core.application.mgt.common.services.FileTransferService;
 import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
+import io.entgra.device.mgt.core.application.mgt.core.util.Constants;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -112,15 +113,54 @@ public class FileDownloaderServiceProvider {
                 }
                 String contentDisposition = response.header("Content-Disposition");
                 String contentType = response.header("Content-Type");
-                String[] fileNameSegments = getFileNameSegments(contentDisposition, contentType);
+                String[] fileNameSegments = extractFileNameSegmentsFromUrl(downloadUrl);
+
+                // if the url parsing failed to resolve the file name segments
+                // falling to remote file name segment resolving
+                if (fileNameSegments == null) {
+                    fileNameSegments = getFileNameSegments(contentDisposition, contentType);
+                }
+
                 FileMetaEntry fileMetaEntry = new FileMetaEntry();
                 fileMetaEntry.setSize(Long.parseLong(Objects.requireNonNull(response.header("Content-Length"))));
-                fileMetaEntry.setFileName(fileNameSegments[0] + "-" + UUID.randomUUID());
+                fileMetaEntry.setFileName(fileNameSegments[0]);
                 fileMetaEntry.setExtension(fileNameSegments[1]);
                 return fileMetaEntry;
             } catch (IOException e) {
                 throw new FileDownloaderServiceException("IO error occurred while constructing file name for the remote url " + downloadUrl);
             }
+        }
+
+        /**
+         * Extracting file name segments by parsing the URL
+         * @param url Remote URL to extract file name segments
+         * @return Array containing file name segments or null when failed to extract
+         */
+        public static String[] extractFileNameSegmentsFromUrl(URL url) {
+            if (url == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Null received as the remote URL");
+                }
+                return null;
+            }
+
+            String []urlSegments = url.toString().split("/");
+            if (urlSegments.length < 1) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Cannot determine the file name for the remote file");
+                }
+                return null;
+            }
+
+            String fullQualifiedName = urlSegments[urlSegments.length - 1];
+            String []fileNameSegments = fullQualifiedName.split("\\.(?=[^.]+$)");
+            if (fileNameSegments.length != 2) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error encountered when constructing file name");
+                }
+                return null;
+            }
+            return fileNameSegments;
         }
 
         /**
@@ -136,11 +176,24 @@ public class FileDownloaderServiceProvider {
             }
 
             if (contentDisposition == null) {
-                String []contentTypeSegments = contentType.split("/");
-                if (contentTypeSegments.length != 2) {
-                    throw new FileDownloaderServiceException("Encountered wrong content type header value");
+                String extension;
+                if (contentType.equals(Constants.MIME_TYPE_VND_ANDROID_PACKAGE_ARCHIVE)) {
+                    extension = Constants.EXTENSION_APK;
+                } else if (contentType.equals(Constants.MIME_TYPE_OCTET_STREAM)) {
+                    extension = Constants.EXTENSION_IPA;
+                } else if (contentType.equals(Constants.MIME_TYPE_VND_APPX)) {
+                    extension = Constants.EXTENSION_APPX;
+                } else if (contentType.equals(Constants.MIME_TYPE_X_MS_INSTALLER)
+                        || contentType.equals(Constants.MIME_TYPE_VND_MS_WINDOWS_MSI)) {
+                    extension = Constants.EXTENSION_MSI;
+                } else {
+                    String []contentTypeSegments = contentType.split("/");
+                    if (contentTypeSegments.length != 2) {
+                        throw new FileDownloaderServiceException("Encountered wrong content type header value");
+                    }
+                    extension = contentTypeSegments[contentTypeSegments.length - 1];
                 }
-                return new String[]{ UUID.randomUUID().toString(), contentTypeSegments[contentTypeSegments.length - 1]};
+                return new String[]{ UUID.randomUUID().toString(), extension};
             }
 
             String []contentDispositionSegments = contentDisposition.split("=");

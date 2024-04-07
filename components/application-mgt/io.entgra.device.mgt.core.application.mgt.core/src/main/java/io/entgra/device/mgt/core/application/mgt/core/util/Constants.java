@@ -220,4 +220,14 @@ public class Constants {
      */
     public static final int MAX_APP_NAME_CHARACTERS = 350;
     public static final String APP_NAME_REGEX = "[^a-zA-Z0-9.\\s-]";
+
+    public static final String EXTENSION_APK = ".apk";
+    public static final String EXTENSION_IPA = ".ipa";
+    public static final String EXTENSION_MSI = ".msi";
+    public static final String EXTENSION_APPX = ".appx";
+    public static final String MIME_TYPE_OCTET_STREAM = "application/octet-stream";
+    public static final String MIME_TYPE_VND_ANDROID_PACKAGE_ARCHIVE = "application/vnd.android.package-archive";
+    public static final String MIME_TYPE_VND_MS_WINDOWS_MSI = "application/vnd.ms-windows.msi";
+    public static final String MIME_TYPE_X_MS_INSTALLER = "application/x-ms-installer";
+    public static final String MIME_TYPE_VND_APPX = "application/vnd.appx";
 }
