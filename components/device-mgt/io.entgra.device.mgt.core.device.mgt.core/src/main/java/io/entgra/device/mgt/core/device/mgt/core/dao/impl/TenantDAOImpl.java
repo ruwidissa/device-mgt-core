@@ -207,7 +207,7 @@ public class TenantDAOImpl implements TenantDAO {
     public void deleteDeviceOperationResponseByTenantId(int tenantId) throws DeviceManagementDAOException {
         try {
             Connection conn = DeviceManagementDAOFactory.getConnection();
-            String sql = "DELETE FROM DM_DEVICE_OPERATION_RESPONSE WHERE ID IN " +
+            String sql = "DELETE FROM DM_DEVICE_OPERATION_RESPONSE WHERE EN_OP_MAP_ID IN " +
                     "(SELECT ID FROM DM_ENROLMENT_OP_MAPPING WHERE TENANT_ID = ?)";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
@@ -786,7 +786,7 @@ public class TenantDAOImpl implements TenantDAO {
     public void deleteExternalDeviceMappingByTenantId(int tenantId) throws DeviceManagementDAOException {
         try {
             Connection conn = DeviceManagementDAOFactory.getConnection();
-            String sql = "DELETE FROM DM_OTP_DATA WHERE TENANT_ID = ?";
+            String sql = "DELETE FROM DM_EXT_DEVICE_MAPPING WHERE TENANT_ID = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, tenantId);
                 stmt.executeUpdate();
