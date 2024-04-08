@@ -680,7 +680,7 @@ public class ApplicationManagementUtil {
 
         if (Objects.equals(extension, "appx")) {
             installerPaths = "[ {" +
-                    "\"key\": \"Package_Uri\", " +
+                    "\"key\": \"Package_Url\", " +
                     "\"value\" : \"" + installerPath + "\"" +
                     "}]";
         }
