@@ -157,8 +157,8 @@ public class TenantManagerImpl implements TenantManager {
             tenantDao.deleteAppIconsByTenantId(tenantId);
             tenantDao.deleteTraccarUnsyncedDevicesByTenantId(tenantId);
             tenantDao.deleteDeviceEventGroupMappingByTenantId(tenantId);
-            tenantDao.deleteDeviceEventByTenantId(tenantId);
             tenantDao.deleteGeofenceEventMappingByTenantId(tenantId);
+            tenantDao.deleteDeviceEventByTenantId(tenantId);
             tenantDao.deleteGeofenceGroupMappingByTenantId(tenantId);
             tenantDao.deleteGeofenceByTenantId(tenantId);
             tenantDao.deleteDeviceGroupPolicyByTenantId(tenantId);
