@@ -509,7 +509,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
-        ApplicationManagementUtil.addInstallerPathToMetadata(releaseDTO);
+        // TODO: artifact URLs are not working for Windows AppX installations https://roadmap.entgra.net/issues/11010
+        //ApplicationManagementUtil.addInstallerPathToMetadata(releaseDTO);
         applicationDTO.getApplicationReleaseDTOs().clear();
         applicationDTO.getApplicationReleaseDTOs().add(releaseDTO);
         return applicationDTO;
