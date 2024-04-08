@@ -546,4 +546,5 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException thrown if an error occurs when deleting data
      */
     void deleteApplicationDataOfTenant(int tenantId) throws ApplicationManagementException;
+    void deleteApplicationDataByTenantDomain(String tenantDomain) throws ApplicationManagementException;
 }

@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
+import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -93,11 +94,13 @@ public class UserManagementAdminServiceImpl implements UserManagementAdminServic
     public Response deleteTenantByDomain(@PathParam("tenantDomain") String tenantDomain) {
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            if(tenantId != MultitenantConstants.SUPER_TENANT_ID){
+            if (tenantId != MultitenantConstants.SUPER_TENANT_ID){
                 String msg = "Only super tenants are allowed to delete tenants";
                 log.error(msg);
                 return Response.status(Response.Status.UNAUTHORIZED).entity(msg).build();
-            }else{
+            } else {
+                DeviceMgtAPIUtils.getApplicationManager().deleteApplicationDataByTenantDomain(tenantDomain);
+                DeviceMgtAPIUtils.getDeviceManagementService().deleteDeviceDataByTenantDomain(tenantDomain);
                 TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();
                 tenantMgtAdminService.deleteTenant(tenantDomain);
                 String msg = "Tenant Deletion process has been initiated for tenant:" + tenantDomain;
@@ -106,6 +109,14 @@ public class UserManagementAdminServiceImpl implements UserManagementAdminServic
 
         } catch (StratosException | UserStoreException e) {
             String msg = "Error deleting tenant: " + tenantDomain;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error deleting application data of tenant: " + tenantDomain;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error deleting device data of tenant: " + tenantDomain;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

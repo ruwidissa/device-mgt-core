@@ -142,12 +142,13 @@ public class TenantManagerImpl implements TenantManager {
             log.debug("Request is received to delete Device related data of tenant with ID: " + tenantId);
         }
         try {
-            DeviceManagementDAOFactory.openConnection();
+            DeviceManagementDAOFactory.beginTransaction();
 
             tenantDao.deleteExternalPermissionMapping(tenantId);
             tenantDao.deleteExternalDeviceMappingByTenantId(tenantId);
             tenantDao.deleteExternalGroupMappingByTenantId(tenantId);
-            tenantDao.deleteDeviceOrganizationByTenantId(tenantId);
+            // TODO: Check whether deleting DM_DEVICE_ORGANIZATION table data is necessary
+//            tenantDao.deleteDeviceOrganizationByTenantId(tenantId);
             tenantDao.deleteDeviceHistoryLastSevenDaysByTenantId(tenantId);
             tenantDao.deleteDeviceDetailByTenantId(tenantId);
             tenantDao.deleteDeviceLocationByTenantId(tenantId);
@@ -206,8 +207,8 @@ public class TenantManagerImpl implements TenantManager {
             String msg = "Error deleting data of tenant of ID: '" + tenantId + "'";
             log.error(msg);
             throw new TenantMgtException(msg, e);
-        } catch (SQLException e) {
-            String msg = "Error accessing the database when trying to delete tenant info of '" + tenantId + "'";
+        } catch (TransactionManagementException e) {
+            String msg = "Error initializing transaction when trying to delete tenant info of '" + tenantId + "'";
             log.error(msg);
             throw new TenantMgtException(msg, e);
         } finally {
