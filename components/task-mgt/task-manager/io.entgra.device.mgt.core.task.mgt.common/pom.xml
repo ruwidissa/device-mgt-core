@@ -20,7 +20,7 @@
     <parent>
         <artifactId>task-manager</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.0.41</version>
+        <version>5.0.42-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
