@@ -491,7 +491,7 @@ public interface ActivityInfoProviderService {
                     name = "status",
                     value = "Operation response status to filter"
             )
-            @QueryParam("status") String status,
+            @QueryParam("status") List<String> statuses,
             @ApiParam(
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time\n." +
@@ -615,7 +615,7 @@ public interface ActivityInfoProviderService {
                     name = "status",
                     value = "Operation response status to filter"
             )
-            @QueryParam("status") String status,
+            @QueryParam("status") List<String> statuses,
             @ApiParam(
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time\n." +

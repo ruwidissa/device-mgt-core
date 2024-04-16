@@ -2272,7 +2272,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getDeviceType() != null ||
                     (activityPaginationRequest.getDeviceIds() != null && !activityPaginationRequest.getDeviceIds().isEmpty()) ||
                     activityPaginationRequest.getSince() != 0 ||
-                    activityPaginationRequest.getStatus() != null) {
+                    activityPaginationRequest.getStatuses() != null) {
 
                 sql.append("(SELECT DISTINCT OPERATION_ID FROM DM_ENROLMENT_OP_MAPPING eom WHERE TENANT_ID = ? ");
 
@@ -2305,8 +2305,12 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (activityPaginationRequest.getType() != null) {
                     sql.append("AND TYPE = ? ");
                 }
-                if (activityPaginationRequest.getStatus() != null) {
-                    sql.append("AND STATUS = ? ");
+                if (activityPaginationRequest.getStatuses() != null && !activityPaginationRequest.getStatuses().isEmpty()) {
+                    sql.append("AND STATUS IN (");
+                    for (int i = 0; i < activityPaginationRequest.getStatuses().size() - 1; i++) {
+                        sql.append("?, ");
+                    }
+                    sql.append("?) ");
                 }
 
                 sql.append("ORDER BY OPERATION_ID ASC limit ? , ? ) eom_ordered " +
@@ -2360,8 +2364,12 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getType() != null) {
                 sql.append("AND eom.TYPE = ? ");
             }
-            if (activityPaginationRequest.getStatus() != null) {
-                sql.append("AND eom.STATUS = ? ");
+            if (activityPaginationRequest.getStatuses() != null && !activityPaginationRequest.getStatuses().isEmpty()) {
+                sql.append("AND eom.STATUS IN (");
+                for (int i = 0; i < activityPaginationRequest.getStatuses().size() - 1; i++) {
+                    sql.append("?, ");
+                }
+                sql.append("?) ");
             }
 
             sql.append("ORDER BY eom.OPERATION_ID, eom.UPDATED_TIMESTAMP");
@@ -2372,7 +2380,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (activityPaginationRequest.getDeviceType() != null ||
                         (activityPaginationRequest.getDeviceIds() != null && !activityPaginationRequest.getDeviceIds().isEmpty()) ||
                         activityPaginationRequest.getSince() != 0 ||
-                        activityPaginationRequest.getStatus() != null) {
+                        activityPaginationRequest.getStatuses() != null) {
 
                     if (activityPaginationRequest.getDeviceType() != null) {
                         stmt.setString(index++, activityPaginationRequest.getDeviceType());
@@ -2401,8 +2409,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
                     if (activityPaginationRequest.getType() != null) {
                         stmt.setString(index++, activityPaginationRequest.getType().name());
                     }
-                    if (activityPaginationRequest.getStatus() != null) {
-                        stmt.setString(index++, activityPaginationRequest.getStatus().name());
+                    if (activityPaginationRequest.getStatuses() != null && !activityPaginationRequest.getStatuses().isEmpty()) {
+                        for (io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation.Status status : activityPaginationRequest.getStatuses()) {
+                            stmt.setString(index++, status.name());
+                        }
                     }
 
                     stmt.setInt(index++, activityPaginationRequest.getOffset());
@@ -2463,8 +2473,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (activityPaginationRequest.getType() != null) {
                     stmt.setString(index++, activityPaginationRequest.getType().name());
                 }
-                if (activityPaginationRequest.getStatus() != null) {
-                    stmt.setString(index, activityPaginationRequest.getStatus().name());
+                if (activityPaginationRequest.getStatuses() != null && !activityPaginationRequest.getStatuses().isEmpty()) {
+                    for (io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation.Status status : activityPaginationRequest.getStatuses()) {
+                        stmt.setString(index++, status.name());
+                    }
                 }
 
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -2496,7 +2508,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getDeviceType() != null ||
                     (activityPaginationRequest.getDeviceIds() != null && !activityPaginationRequest.getDeviceIds().isEmpty()) ||
                     activityPaginationRequest.getSince() != 0 ||
-                    activityPaginationRequest.getStatus() != null) {
+                    activityPaginationRequest.getStatuses() != null) {
 
                 sql.append("SELECT count(DISTINCT OPERATION_ID) AS ACTIVITY_COUNT " +
                         "FROM DM_ENROLMENT_OP_MAPPING WHERE TENANT_ID = ? ");
@@ -2526,8 +2538,12 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (activityPaginationRequest.getType() != null) {
                     sql.append("AND TYPE = ? ");
                 }
-                if (activityPaginationRequest.getStatus() != null) {
-                    sql.append("AND STATUS = ? ");
+                if (activityPaginationRequest.getStatuses() != null && !activityPaginationRequest.getStatuses().isEmpty()) {
+                    sql.append("AND STATUS IN (");
+                    for (int i = 0; i < activityPaginationRequest.getStatuses().size() - 1; i++) {
+                        sql.append("?, ");
+                    }
+                    sql.append("?) ");
                 }
 
             } else {
@@ -2555,7 +2571,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (activityPaginationRequest.getDeviceType() != null ||
                         (activityPaginationRequest.getDeviceIds() != null && !activityPaginationRequest.getDeviceIds().isEmpty()) ||
                         activityPaginationRequest.getSince() != 0 ||
-                        activityPaginationRequest.getStatus() != null) {
+                        activityPaginationRequest.getStatuses() != null) {
                     if (activityPaginationRequest.getDeviceType() != null) {
                         stmt.setString(index++, activityPaginationRequest.getDeviceType());
                     }
@@ -2579,8 +2595,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
                     if (activityPaginationRequest.getType() != null) {
                         stmt.setString(index++, activityPaginationRequest.getType().name());
                     }
-                    if (activityPaginationRequest.getStatus() != null) {
-                        stmt.setString(index++, activityPaginationRequest.getStatus().name());
+                    if (activityPaginationRequest.getStatuses() != null && !activityPaginationRequest.getStatuses().isEmpty()) {
+                        for (io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation.Status status : activityPaginationRequest.getStatuses()) {
+                            stmt.setString(index++, status.name());
+                        }
                     }
                 } else {
                     if (activityPaginationRequest.getOperationCode() != null) {
@@ -2662,8 +2680,12 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getType() != null) {
                 sql.append("AND TYPE = ? ");
             }
-            if (activityPaginationRequest.getStatus() != null) {
-                sql.append("AND STATUS = ? ");
+            if (activityPaginationRequest.getStatuses() != null && !activityPaginationRequest.getStatuses().isEmpty()) {
+                sql.append("AND STATUS IN (");
+                for (int i = 0; i < activityPaginationRequest.getStatuses().size() - 1; i++) {
+                    sql.append("?, ");
+                }
+                sql.append("?) ");
             }
 
             sql.append("ORDER BY ID ASC limit ? , ? ) eom " +
@@ -2700,8 +2722,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (activityPaginationRequest.getType() != null) {
                     stmt.setString(index++, activityPaginationRequest.getType().name());
                 }
-                if (activityPaginationRequest.getStatus() != null) {
-                    stmt.setString(index++, activityPaginationRequest.getStatus().name());
+                if (activityPaginationRequest.getStatuses() != null && !activityPaginationRequest.getStatuses().isEmpty()) {
+                    for (io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation.Status status : activityPaginationRequest.getStatuses()) {
+                        stmt.setString(index++, status.name());
+                    }
                 }
 
                 stmt.setInt(index++, activityPaginationRequest.getOffset());
@@ -2744,7 +2768,6 @@ public class GenericOperationDAOImpl implements OperationDAO {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             StringBuilder sql = new StringBuilder();
 
-
             sql.append("SELECT count(DISTINCT ID) AS ACTIVITY_COUNT " +
                     "FROM DM_ENROLMENT_OP_MAPPING WHERE TENANT_ID = ? ");
 
@@ -2773,8 +2796,12 @@ public class GenericOperationDAOImpl implements OperationDAO {
             if (activityPaginationRequest.getType() != null) {
                 sql.append("AND TYPE = ? ");
             }
-            if (activityPaginationRequest.getStatus() != null) {
-                sql.append("AND STATUS = ? ");
+            if (activityPaginationRequest.getStatuses() != null && !activityPaginationRequest.getStatuses().isEmpty()) {
+                sql.append("AND STATUS IN (");
+                for (int i = 0; i < activityPaginationRequest.getStatuses().size() - 1; i++) {
+                    sql.append("?, ");
+                }
+                sql.append("?) ");
             }
 
             if (activityPaginationRequest.getStartTimestamp() > 0 && activityPaginationRequest.getEndTimestamp() > 0) {
@@ -2808,8 +2835,10 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (activityPaginationRequest.getType() != null) {
                     stmt.setString(index++, activityPaginationRequest.getType().name());
                 }
-                if (activityPaginationRequest.getStatus() != null) {
-                    stmt.setString(index++, activityPaginationRequest.getStatus().name());
+                if (activityPaginationRequest.getStatuses() != null && !activityPaginationRequest.getStatuses().isEmpty()) {
+                    for (io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation.Status status : activityPaginationRequest.getStatuses()) {
+                        stmt.setString(index++, status.name());
+                    }
                 }
 
                 if (isTimeDurationFilteringProvided) {

@@ -50,6 +50,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -259,7 +260,7 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                                         @QueryParam("deviceType") String deviceType,
                                         @QueryParam("deviceId") List<String> deviceIds,
                                         @QueryParam("type") String type,
-                                        @QueryParam("status") String status,
+                                        @QueryParam("status") List<String> statuses,
                                         @HeaderParam("If-Modified-Since") String ifModifiedSince,
                                         @QueryParam("startTimestamp") long startTimestamp,
                                         @QueryParam("endTimestamp") long endTimestamp) {
@@ -336,8 +337,12 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
             if (type != null && !type.isEmpty()) {
                 activityPaginationRequest.setType(Operation.Type.valueOf(type.toUpperCase()));
             }
-            if (status != null && !status.isEmpty()) {
-                activityPaginationRequest.setStatus(Operation.Status.valueOf(status.toUpperCase()));
+            if (statuses != null && !statuses.isEmpty()) {
+                List<Operation.Status> statusEnums = new ArrayList<>();
+                for (String status : statuses) {
+                    statusEnums.add(Operation.Status.valueOf(status.toUpperCase()));
+                }
+                activityPaginationRequest.setStatuses(statusEnums);
             }
             if (timestamp > 0) {
                 activityPaginationRequest.setSince(timestamp);
@@ -382,7 +387,7 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
                                   @QueryParam("deviceType") String deviceType,
                                   @QueryParam("deviceId") List<String> deviceIds,
                                   @QueryParam("type") String type,
-                                  @QueryParam("status") String status,
+                                  @QueryParam("status") List<String> statuses,
                                   @HeaderParam("If-Modified-Since") String ifModifiedSince,
                                   @QueryParam("startTimestamp") long startTimestamp,
                                   @QueryParam("endTimestamp") long endTimestamp) {
@@ -457,8 +462,12 @@ public class ActivityProviderServiceImpl implements ActivityInfoProviderService 
             if (type != null && !type.isEmpty()) {
                 activityPaginationRequest.setType(Operation.Type.valueOf(type.toUpperCase()));
             }
-            if (status != null && !status.isEmpty()) {
-                activityPaginationRequest.setStatus(Operation.Status.valueOf(status.toUpperCase()));
+            if (statuses != null && !statuses.isEmpty()) {
+                List<Operation.Status> statusEnums = new ArrayList<>();
+                for (String status : statuses) {
+                    statusEnums.add(Operation.Status.valueOf(status.toUpperCase()));
+                }
+                activityPaginationRequest.setStatuses(statusEnums);
             }
             if (timestamp > 0) {
                 activityPaginationRequest.setSince(timestamp);
