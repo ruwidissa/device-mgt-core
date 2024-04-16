@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -167,7 +168,9 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                     DeviceMgtAPIUtils.getDeviceAccessAuthorizationService();
             boolean status;
             try {
-                status = deviceAccessAuthorizationService.isUserAuthorized(new DeviceIdentifier(id, type));
+                String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+                String[] requiredPermissions = new String[] {requiredPermission};
+                status = deviceAccessAuthorizationService.isUserAuthorized(new DeviceIdentifier(id, type), requiredPermissions);
             } catch (DeviceAccessAuthorizationException e) {
                 String msg = "Error occurred while modifying enrollment of the Android device that carries the id '" +
                         id + "'";
@@ -229,8 +232,10 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                 String msg = "invalid payload structure";
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             } else {
+                String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+                String[] requiredPermissions = new String[] {requiredPermission};
                 boolean authorized = DeviceMgtAPIUtils.getDeviceAccessAuthorizationService().isUserAuthorized
-                        (new DeviceIdentifier(type, deviceId));
+                        (new DeviceIdentifier(type, deviceId), requiredPermissions);
                 if (!authorized) {
                     String msg = "Does not have permission to access the device.";
                     return Response.status(Response.Status.UNAUTHORIZED).entity(msg).build();
@@ -329,8 +334,10 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                 String msg = "Invalid payload structure";
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             } else {
+                String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+                String[] requiredPermissions = new String[] {requiredPermission};
                 boolean authorized = DeviceMgtAPIUtils.getDeviceAccessAuthorizationService().isUserAuthorized
-                        (new DeviceIdentifier(type, deviceId));
+                        (new DeviceIdentifier(type, deviceId), requiredPermissions);
                 if (!authorized) {
                     String msg = "Does not have permission to access the device.";
                     return Response.status(Response.Status.UNAUTHORIZED).entity(msg).build();

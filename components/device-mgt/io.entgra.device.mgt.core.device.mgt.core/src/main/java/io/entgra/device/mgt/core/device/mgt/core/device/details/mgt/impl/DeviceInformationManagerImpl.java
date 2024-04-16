@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.device.details.mgt.impl;
 
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.report.mgt.ReportingPublisherManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -260,10 +261,12 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
                 String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
                 if (StringUtils.isEmpty(username)) {
+                    String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+                    String[] requiredPermissions = new String[] {requiredPermission};
                     boolean isUserAuthorized = DeviceManagementDataHolder.getInstance().
                             getDeviceAccessAuthorizationService().isUserAuthorized(
                                     new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()),
-                                    device.getEnrolmentInfo().getOwner()
+                                    device.getEnrolmentInfo().getOwner(), requiredPermissions
                             );
                     if (isUserAuthorized) {
                         username = device.getEnrolmentInfo().getOwner();

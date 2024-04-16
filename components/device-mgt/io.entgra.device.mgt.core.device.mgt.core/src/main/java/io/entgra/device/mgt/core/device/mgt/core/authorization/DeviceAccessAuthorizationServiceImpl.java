@@ -63,41 +63,55 @@ public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthori
             return !DeviceManagementDataHolder.getInstance().requireDeviceAuthorization(deviceIdentifier.getType());
         }
         //check for admin and ownership permissions
-        if (isAdmin(username, tenantId) || isDeviceOwner(deviceIdentifier, username)) {
+        if (isDeviceAdminUser(username, tenantId) || isDeviceOwner(deviceIdentifier, username)) {
             return true;
         }
         //check for group permissions
-        try {
-            return isSharedViaGroup(deviceIdentifier, username);
-        } catch (GroupManagementException | UserStoreException e) {
-            throw new DeviceAccessAuthorizationException("Unable to authorize the access to device : " +
-                    deviceIdentifier.getId() + " for the user : " +
-                    username, e);
-        }
-    }
-
-    private boolean isSharedViaGroup(DeviceIdentifier deviceIdentifier, String username)
-            throws GroupManagementException, UserStoreException {
-        List<DeviceGroup> groupsWithDevice = DeviceManagementDataHolder.getInstance()
-                .getGroupManagementProviderService().getGroups(deviceIdentifier, false);
-        String[] userRoles = DeviceManagementDataHolder.getInstance().getRealmService()
-                .getTenantUserRealm(getTenantId()).getUserStoreManager().getRoleListOfUser(username);
-        for (DeviceGroup deviceGroup : groupsWithDevice) {
-            List<String> sharingRoles = DeviceManagementDataHolder.getInstance()
-                    .getGroupManagementProviderService().getRoles(deviceGroup.getGroupId());
-            for (String role : userRoles) {
-                if (sharingRoles.contains(role)) {
-                    return true;
+        if (groupPermissions == null || groupPermissions.length == 0) {
+            return false;
+        } else {
+            // if group permissions specified, check whether that permission is available in shared role
+            try {
+                boolean isAuthorized = true;
+                for (String groupPermission : groupPermissions) {
+                    if (!isAuthorizedViaSharedGroup(deviceIdentifier, username, groupPermission)) {
+                        //if at least one failed, authorizations fails and break the loop
+                        isAuthorized = false;
+                        break;
+                    }
                 }
+               return isAuthorized;
+            } catch (DeviceAccessAuthorizationException e) {
+                throw new DeviceAccessAuthorizationException("Unable to authorize the access to device : " +
+                        deviceIdentifier.getId() + " for the user : " +
+                        username, e);
             }
         }
-        return false;
     }
 
-    @Override
-    public boolean isUserAuthorized(DeviceIdentifier deviceIdentifier, String username)
+
+    private boolean isAuthorizedViaSharedGroup(DeviceIdentifier deviceIdentifier, String username, String groupPermission)
             throws DeviceAccessAuthorizationException {
-        return isUserAuthorized(deviceIdentifier, username, null);
+        try {
+            List<DeviceGroup> groupsWithDevice = DeviceManagementDataHolder.getInstance()
+                    .getGroupManagementProviderService().getGroups(deviceIdentifier, false);
+            UserRealm userRealm = DeviceManagementDataHolder.getInstance().getRealmService()
+                    .getTenantUserRealm(getTenantId());
+            String[] userRoles = userRealm.getUserStoreManager().getRoleListOfUser(username);
+            for (DeviceGroup deviceGroup : groupsWithDevice) {
+                List<String> sharingRoles = DeviceManagementDataHolder.getInstance()
+                        .getGroupManagementProviderService().getRoles(deviceGroup.getGroupId());
+                for (String role : userRoles) {
+                    if (sharingRoles.contains(role) && userRealm.getAuthorizationManager().
+                            isRoleAuthorized(role, groupPermission, CarbonConstants.UI_PERMISSION_ACTION)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } catch (GroupManagementException | UserStoreException e) {
+            throw new DeviceAccessAuthorizationException("unable to authorized via shared role, " + groupPermission);
+        }
     }
 
     @Override
@@ -107,17 +121,12 @@ public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthori
     }
 
     @Override
-    public boolean isUserAuthorized(DeviceIdentifier deviceIdentifier) throws DeviceAccessAuthorizationException {
-        return isUserAuthorized(deviceIdentifier, this.getUserName(), null);
-    }
-
-    @Override
     public boolean isDeviceAdminUser() throws DeviceAccessAuthorizationException {
         String username = this.getUserName();
         int tenantId = this.getTenantId();
         try {
-            return isAdminUser(username, tenantId);
-        } catch (UserStoreException e) {
+            return isDeviceAdminUser(username, tenantId);
+        } catch (DeviceAccessAuthorizationException e) {
             throw new DeviceAccessAuthorizationException("Unable to check the admin permissions of user : " +
                                                          username + " in tenant : " + tenantId, e);
         }
@@ -132,7 +141,7 @@ public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthori
             return null;
         }
         DeviceAuthorizationResult deviceAuthorizationResult = new DeviceAuthorizationResult();
-        if (isAdmin(username, tenantId)) {
+        if (isDeviceAdminUser(username, tenantId)) {
             deviceAuthorizationResult.setAuthorizedDevices(deviceIdentifiers);
             return deviceAuthorizationResult;
         }
@@ -149,7 +158,7 @@ public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthori
                     //check for group permissions
                     boolean isAuthorized = true;
                     for (String groupPermission : groupPermissions) {
-                        if (!isAuthorizedViaGroup(username, deviceIdentifier, groupPermission)) {
+                        if (!isAuthorizedViaSharedGroup(deviceIdentifier, username, groupPermission)) {
                             //if at least one failed, authorizations fails and break the loop
                             isAuthorized = false;
                             break;
@@ -160,7 +169,7 @@ public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthori
                     } else {
                         deviceAuthorizationResult.addUnauthorizedDevice(deviceIdentifier);
                     }
-                } catch (GroupManagementException e) {
+                } catch (DeviceAccessAuthorizationException e) {
                     throw new DeviceAccessAuthorizationException("Unable to authorize the access to device : " +
                                                                  deviceIdentifier.getId() + " for the user : " +
                                                                  username, e);
@@ -171,52 +180,9 @@ public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthori
     }
 
     @Override
-    public DeviceAuthorizationResult isUserAuthorized(List<DeviceIdentifier> deviceIdentifiers, String username)
-            throws DeviceAccessAuthorizationException {
-        return isUserAuthorized(deviceIdentifiers, username, null);
-    }
-
-    @Override
-    public DeviceAuthorizationResult isUserAuthorized(List<DeviceIdentifier> deviceIdentifiers)
-            throws DeviceAccessAuthorizationException {
-        return isUserAuthorized(deviceIdentifiers, this.getUserName(), null);
-    }
-
-    @Override
     public DeviceAuthorizationResult isUserAuthorized(List<DeviceIdentifier> deviceIdentifiers, String[] groupPermissions)
             throws DeviceAccessAuthorizationException {
         return isUserAuthorized(deviceIdentifiers, this.getUserName(), groupPermissions);
-    }
-
-    private boolean isAdmin(String username, int tenantId)
-            throws DeviceAccessAuthorizationException {
-        try {
-            //Check for admin users. If the user is an admin user we authorize the access to that device.
-            return (isAdminUser(username, tenantId));
-        } catch (UserStoreException e) {
-            throw new DeviceAccessAuthorizationException("Unable to authorize the access for the user : " +
-                                                                 username, e);
-        }
-    }
-
-    private boolean isAuthorizedViaGroup(String username, DeviceIdentifier deviceIdentifier, String groupPermission)
-            throws GroupManagementException {
-        List<DeviceGroup> authorizedGroups =
-                DeviceManagementDataHolder.getInstance().getGroupManagementProviderService()
-                        .getGroups(username, groupPermission, false);
-        List<DeviceGroup> groupsWithDevice =
-                DeviceManagementDataHolder.getInstance().getGroupManagementProviderService()
-                        .getGroups(deviceIdentifier, false);
-        for (DeviceGroup group : authorizedGroups) {
-            Iterator<DeviceGroup> groupsWithDeviceIterator = groupsWithDevice.iterator();
-            while (groupsWithDeviceIterator.hasNext()) {
-                DeviceGroup deviceGroup = groupsWithDeviceIterator.next();
-                if (deviceGroup.getGroupId() == group.getGroupId()) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private boolean isDeviceOwner(DeviceIdentifier deviceIdentifier, String username)
@@ -232,15 +198,20 @@ public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthori
         }
     }
 
-    private boolean isAdminUser(String username, int tenantId) throws UserStoreException {
-        UserRealm userRealm = DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
-        if (userRealm != null && userRealm.getAuthorizationManager() != null) {
-            return userRealm.getAuthorizationManager()
-                    .isUserAuthorized(removeTenantDomain(username),
-                                      PermissionUtils.getAbsolutePermissionPath(CDM_ADMIN_PERMISSION),
-                            CarbonConstants.UI_PERMISSION_ACTION);
+    private boolean isDeviceAdminUser(String username, int tenantId) throws DeviceAccessAuthorizationException {
+        try {
+            UserRealm userRealm = DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
+            if (userRealm != null && userRealm.getAuthorizationManager() != null) {
+                return userRealm.getAuthorizationManager()
+                        .isUserAuthorized(removeTenantDomain(username),
+                                PermissionUtils.getAbsolutePermissionPath(CDM_ADMIN_PERMISSION),
+                                CarbonConstants.UI_PERMISSION_ACTION);
+            }
+            return false;
+        } catch (UserStoreException e) {
+            throw new DeviceAccessAuthorizationException("Unable to authorize the access for the user : " +
+                username, e);
         }
-        return false;
     }
 
     private String getUserName() {

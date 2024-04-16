@@ -19,6 +19,7 @@
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.notification.logger.DeviceConnectivityLogContext;
 import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceConnectivityLoggerImpl;
@@ -561,9 +562,11 @@ public class OperationManagerImpl implements OperationManager {
             } else {
                 boolean isAuthorized;
                 authorizedDeviceList = new ArrayList<>();
+                String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+                String[] requiredPermissions = new String[] {requiredPermission};
                 for (DeviceIdentifier devId : deviceIds) {
                     isAuthorized = DeviceManagementDataHolder.getInstance().getDeviceAccessAuthorizationService().
-                            isUserAuthorized(devId);
+                            isUserAuthorized(devId, requiredPermissions);
                     if (isAuthorized) {
                         authorizedDeviceList.add(devId);
                     } else {
@@ -1470,9 +1473,11 @@ public class OperationManagerImpl implements OperationManager {
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         String user = this.getUser();
         boolean isUserAuthorized;
+        String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+        String[] requiredPermissions = new String[] {requiredPermission};
         try {
             isUserAuthorized = DeviceManagementDataHolder.getInstance()
-                    .getDeviceAccessAuthorizationService().isUserAuthorized(deviceId, user);
+                    .getDeviceAccessAuthorizationService().isUserAuthorized(deviceId, user, requiredPermissions);
         } catch (DeviceAccessAuthorizationException e) {
             throw new OperationManagementException("Error occurred while checking the device access permissions for '" +
                     deviceId.getType() + "' device carrying the identifier '" +

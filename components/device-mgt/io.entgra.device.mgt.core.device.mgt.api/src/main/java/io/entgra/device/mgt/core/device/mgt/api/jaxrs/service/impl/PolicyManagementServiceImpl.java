@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import io.entgra.device.mgt.core.device.mgt.common.PolicyPaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -85,7 +86,9 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
                 PrivilegedCarbonContext threadLocalCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 String username = threadLocalCarbonContext.getUsername();
                 try {
-                    if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, username)) {
+                    String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+                    String[] requiredPermissions = new String[] {requiredPermission};
+                    if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, username, requiredPermissions)) {
                         return Response.status(Response.Status.UNAUTHORIZED).entity(
                                 new ErrorResponse.ErrorResponseBuilder().setMessage
                                         ("Current logged in user is not authorized to add policies").build()).build();

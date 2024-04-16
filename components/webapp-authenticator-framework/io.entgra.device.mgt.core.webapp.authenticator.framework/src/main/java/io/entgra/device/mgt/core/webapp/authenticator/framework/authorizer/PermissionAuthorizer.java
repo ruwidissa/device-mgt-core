@@ -134,6 +134,7 @@ public class PermissionAuthorizer {
         }
 
         if (isUserAuthorized) {
+            PermissionManagerServiceImpl.getInstance().setRequiredPermission(requiredPermission);
             return WebappAuthenticator.Status.SUCCESS;
         } else {
             return WebappAuthenticator.Status.FAILURE;
