@@ -22,6 +22,7 @@ import io.entgra.device.mgt.core.task.mgt.common.exception.TaskNotFoundException
 import io.entgra.device.mgt.core.task.mgt.common.exception.TaskManagementException;
 
 import java.util.List;
+import java.util.Map;
 
 public interface TaskManagementService {
 
@@ -37,7 +38,9 @@ public interface TaskManagementService {
 
     List<DynamicTask> getAllDynamicTasks() throws TaskManagementException;
 
-    DynamicTask getDynamicTaskById(int dynamicTaskId) throws TaskManagementException;
+    Map<Integer, List<DynamicTask>> getDynamicTasksForAllTenants() throws TaskManagementException;
+
+    DynamicTask getDynamicTask(int dynamicTaskId) throws TaskManagementException;
 
     List<DynamicTask> getActiveDynamicTasks() throws TaskManagementException;
 }

@@ -1070,4 +1070,5 @@ public interface DeviceManagementProviderService {
     List<Application> getInstalledApplicationsOnDevice(Device device) throws DeviceManagementException;
     List<Device> getEnrolledDevicesSince(Date since) throws DeviceManagementException;
     List<Device> getEnrolledDevicesPriorTo(Date before) throws DeviceManagementException;
+    void deleteDeviceDataByTenantDomain(String tenantDomain) throws DeviceManagementException;
 }

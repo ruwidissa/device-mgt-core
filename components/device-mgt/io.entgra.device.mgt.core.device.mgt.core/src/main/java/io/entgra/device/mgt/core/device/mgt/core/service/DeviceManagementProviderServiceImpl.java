@@ -21,6 +21,7 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.dao.TenantDAO;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.notification.logger.DeviceEnrolmentLogContext;
 import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceEnrolmentLoggerImpl;
@@ -160,7 +161,6 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
@@ -178,6 +178,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private final ApplicationDAO applicationDAO;
     private MetadataDAO metadataDAO;
     private final DeviceStatusDAO deviceStatusDAO;
+    private final TenantDAO tenantDao;
     int count = 0;
 
     public DeviceManagementProviderServiceImpl() {
@@ -188,6 +189,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         this.enrollmentDAO = DeviceManagementDAOFactory.getEnrollmentDAO();
         this.metadataDAO = MetadataManagementDAOFactory.getMetadataDAO();
         this.deviceStatusDAO = DeviceManagementDAOFactory.getDeviceStatusDAO();
+        this.tenantDao = DeviceManagementDAOFactory.getTenantDAO();
 
         /* Registering a listener to retrieve events when some device management service plugin is installed after
          * the component is done getting initialized */
@@ -5186,5 +5188,95 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.closeConnection();
         }
         return devices;
+    }
+
+    @Override
+    public void deleteDeviceDataByTenantDomain(String tenantDomain) throws DeviceManagementException {
+        int tenantId;
+        try{
+            TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();
+            TenantInfoBean tenantInfoBean = tenantMgtAdminService.getTenant(tenantDomain);
+            tenantId = tenantInfoBean.getTenantId();
+
+        } catch (Exception e) {
+            String msg = "Error getting tenant ID from domain: "
+                    + tenantDomain;
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        }
+
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+
+            tenantDao.deleteExternalPermissionMapping(tenantId);
+            tenantDao.deleteExternalDeviceMappingByTenantId(tenantId);
+            tenantDao.deleteExternalGroupMappingByTenantId(tenantId);
+            // TODO: Check whether deleting DM_DEVICE_ORGANIZATION table data is necessary
+//            tenantDao.deleteDeviceOrganizationByTenantId(tenantId);
+            tenantDao.deleteDeviceHistoryLastSevenDaysByTenantId(tenantId);
+            tenantDao.deleteDeviceDetailByTenantId(tenantId);
+            tenantDao.deleteDeviceLocationByTenantId(tenantId);
+            tenantDao.deleteDeviceInfoByTenantId(tenantId);
+            tenantDao.deleteNotificationByTenantId(tenantId);
+            tenantDao.deleteAppIconsByTenantId(tenantId);
+            tenantDao.deleteTraccarUnsyncedDevicesByTenantId(tenantId);
+            tenantDao.deleteDeviceEventGroupMappingByTenantId(tenantId);
+            tenantDao.deleteGeofenceEventMappingByTenantId(tenantId);
+            tenantDao.deleteDeviceEventByTenantId(tenantId);
+            tenantDao.deleteGeofenceGroupMappingByTenantId(tenantId);
+            tenantDao.deleteGeofenceByTenantId(tenantId);
+            tenantDao.deleteDeviceGroupPolicyByTenantId(tenantId);
+            tenantDao.deleteDynamicTaskPropertiesByTenantId(tenantId);
+            tenantDao.deleteDynamicTaskByTenantId(tenantId);
+            tenantDao.deleteMetadataByTenantId(tenantId);
+            tenantDao.deleteOTPDataByTenantId(tenantId);
+            tenantDao.deleteSubOperationTemplate(tenantId);
+            tenantDao.deleteDeviceSubTypeByTenantId(tenantId);
+            tenantDao.deleteCEAPoliciesByTenantId(tenantId);
+
+            tenantDao.deleteApplicationByTenantId(tenantId);
+            tenantDao.deletePolicyCriteriaPropertiesByTenantId(tenantId);
+            tenantDao.deletePolicyCriteriaByTenantId(tenantId);
+            tenantDao.deleteCriteriaByTenantId(tenantId);
+            tenantDao.deletePolicyChangeManagementByTenantId(tenantId);
+            tenantDao.deletePolicyComplianceFeaturesByTenantId(tenantId);
+            tenantDao.deletePolicyComplianceStatusByTenantId(tenantId);
+            tenantDao.deleteRolePolicyByTenantId(tenantId);
+            tenantDao.deleteUserPolicyByTenantId(tenantId);
+            tenantDao.deleteDeviceTypePolicyByTenantId(tenantId);
+            tenantDao.deleteDevicePolicyAppliedByTenantId(tenantId);
+            tenantDao.deleteDevicePolicyByTenantId(tenantId);
+            tenantDao.deletePolicyCorrectiveActionByTenantId(tenantId);
+            tenantDao.deletePolicyByTenantId(tenantId);
+            tenantDao.deleteProfileFeaturesByTenantId(tenantId);
+            tenantDao.deleteProfileByTenantId(tenantId);
+
+            tenantDao.deleteDeviceOperationResponseLargeByTenantId(tenantId);
+            tenantDao.deleteDeviceOperationResponseByTenantId(tenantId);
+            tenantDao.deleteEnrolmentOpMappingByTenantId(tenantId);
+            tenantDao.deleteDeviceStatusByTenantId(tenantId);
+            tenantDao.deleteEnrolmentByTenantId(tenantId);
+            tenantDao.deleteOperationByTenantId(tenantId);
+            tenantDao.deleteDeviceGroupMapByTenantId(tenantId);
+            tenantDao.deleteGroupPropertiesByTenantId(tenantId);
+            tenantDao.deleteDevicePropertiesByTenantId(tenantId);
+            tenantDao.deleteDeviceByTenantId(tenantId);
+            tenantDao.deleteRoleGroupMapByTenantId(tenantId);
+            tenantDao.deleteGroupByTenantId(tenantId);
+            tenantDao.deleteDeviceCertificateByTenantId(tenantId);
+
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error deleting data of tenant of ID: '" + tenantId + "'";
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error while initiating transaction when trying to delete tenant info of '" + tenantId + "'";
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
     }
 }

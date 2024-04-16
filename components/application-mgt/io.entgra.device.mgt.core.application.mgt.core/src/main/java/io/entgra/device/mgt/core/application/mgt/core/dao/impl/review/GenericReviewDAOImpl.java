@@ -602,4 +602,30 @@ public class GenericReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             throw new ReviewManagementDAOException(msg, e);
         }
     }
+
+    @Override
+    public void deleteReviewsByTenant(int tenantId) throws ReviewManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete app reviews of tenant  of id " + tenantId);
+        }
+        String sql = "DELETE FROM AP_APP_REVIEW "
+                + "WHERE TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection when removing app reviews of tenant "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ReviewManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while removing app reviews of tenant of id " + tenantId +
+                    "Executed Query: " + sql;
+            log.error(msg, e);
+            throw new ReviewManagementDAOException(msg, e);
+        }
+    }
 }

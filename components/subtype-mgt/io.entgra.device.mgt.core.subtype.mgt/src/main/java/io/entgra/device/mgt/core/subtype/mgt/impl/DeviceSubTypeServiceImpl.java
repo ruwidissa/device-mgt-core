@@ -22,6 +22,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.entgra.device.mgt.core.subtype.mgt.cache.GetDeviceSubTypeCacheLoader;
+import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubTypeCacheKey;
 import io.entgra.device.mgt.core.subtype.mgt.exception.BadRequestException;
 import io.entgra.device.mgt.core.subtype.mgt.exception.DBConnectionException;
 import io.entgra.device.mgt.core.subtype.mgt.exception.SubTypeMgtDAOException;
@@ -42,8 +43,10 @@ import java.util.concurrent.TimeUnit;
 
 public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
     private static final Log log = LogFactory.getLog(DeviceSubTypeServiceImpl.class);
-    private static final LoadingCache<String, DeviceSubType> deviceSubTypeCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(15, TimeUnit.MINUTES).build(new GetDeviceSubTypeCacheLoader());
+    private static final LoadingCache<DeviceSubTypeCacheKey, DeviceSubType> deviceSubTypeCache
+            = CacheBuilder.newBuilder()
+            .expireAfterWrite(15, TimeUnit.MINUTES)
+            .build(new GetDeviceSubTypeCacheLoader());
     private final DeviceSubTypeDAO deviceSubTypeDAO;
 
     public DeviceSubTypeServiceImpl() {
@@ -52,7 +55,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
 
     @Override
     public boolean addDeviceSubType(DeviceSubType deviceSubType) throws SubTypeMgtPluginException {
-        String msg = "";
+        String msg;
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         deviceSubType.setTenantId(tenantId);
 
@@ -72,9 +75,6 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
                 throw new SubTypeMgtPluginException(msg);
             }
             ConnectionManagerUtil.commitDBTransaction();
-            String key = DeviceSubTypeMgtUtil.setDeviceSubTypeCacheKey(tenantId, deviceSubType.getSubTypeId(),
-                    deviceSubType.getDeviceType());
-            deviceSubTypeCache.put(key, deviceSubType);
             return true;
         } catch (DBConnectionException e) {
             msg = "Error occurred while obtaining the database connection to add device subtype for " +
@@ -89,6 +89,10 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
             throw new SubTypeMgtPluginException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
+            DeviceSubTypeCacheKey key = DeviceSubTypeMgtUtil.getDeviceSubTypeCacheKey(tenantId,
+                    deviceSubType.getSubTypeId(),
+                    deviceSubType.getDeviceType());
+            deviceSubTypeCache.refresh(key);
         }
     }
 
@@ -96,7 +100,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
     public boolean updateDeviceSubType(String subTypeId, int tenantId, String deviceType,
                                        String subTypeName, String typeDefinition)
             throws SubTypeMgtPluginException {
-        String msg = "";
+        String msg;
         DeviceSubType deviceSubTypeOld = getDeviceSubType(subTypeId, tenantId, deviceType);
 
         if (deviceSubTypeOld == null) {
@@ -133,7 +137,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
             throw new SubTypeMgtPluginException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
-            String key = DeviceSubTypeMgtUtil.setDeviceSubTypeCacheKey(tenantId, subTypeId, deviceType);
+            DeviceSubTypeCacheKey key = DeviceSubTypeMgtUtil.getDeviceSubTypeCacheKey(tenantId, subTypeId, deviceType);
             deviceSubTypeCache.refresh(key);
         }
     }
@@ -142,7 +146,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
     public DeviceSubType getDeviceSubType(String subTypeId, int tenantId, String deviceType)
             throws SubTypeMgtPluginException {
         try {
-            String key = DeviceSubTypeMgtUtil.setDeviceSubTypeCacheKey(tenantId, subTypeId, deviceType);
+            DeviceSubTypeCacheKey key = DeviceSubTypeMgtUtil.getDeviceSubTypeCacheKey(tenantId, subTypeId, deviceType);
             return deviceSubTypeCache.get(key);
         } catch (CacheLoader.InvalidCacheLoadException e) {
             String msg = "Not having any" + deviceType + " subtype for subtype id: " + subTypeId;
@@ -179,12 +183,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
     @Override
     public int getDeviceSubTypeCount(String deviceType) throws SubTypeMgtPluginException {
         try {
-            int result = deviceSubTypeDAO.getDeviceSubTypeCount(deviceType);
-            if (result <= 0) {
-                String msg = "There are no any subtypes for device type: " + deviceType;
-                log.error(msg);
-            }
-            return result;
+            return deviceSubTypeDAO.getDeviceSubTypeCount(deviceType);
         } catch (SubTypeMgtDAOException e) {
             String msg = "Error occurred in the database level while retrieving device subtypes count for " + deviceType
                     + " subtypes";

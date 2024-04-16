@@ -49,5 +49,6 @@ public class TaskMgtConstants {
         public static final String TENANT_ID_PROP = "__TENANT_ID_PROP__";
         public static final String LOCAL_HASH_INDEX = "__LOCAL_HASH_INDEX__";
         public static final String LOCAL_TASK_NAME = "__LOCAL_TASK_NAME__";
+        public static final String DYNAMIC_TASK_ID = "__DYNAMIC_TASK_ID__";
     }
 }

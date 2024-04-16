@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ * Copyright (c) 2018 - 2024, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -20,10 +20,11 @@ package io.entgra.device.mgt.core.device.mgt.extensions.device.organization.impl
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dao.DeviceOrganizationDAO;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dao.DeviceOrganizationDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dao.util.ConnectionManagerUtil;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.AdditionResult;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.DeviceNodeResult;
-import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.DeviceOrganization;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.DeviceOrganization;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.RootChildrenRequest;
+import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.dto.AdditionResult;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.exception.BadRequestException;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.exception.DBConnectionException;
 import io.entgra.device.mgt.core.device.mgt.extensions.device.organization.exception.DeviceOrganizationMgtDAOException;
@@ -33,7 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DeviceOrganizationServiceImpl implements DeviceOrganizationService {
@@ -163,6 +164,34 @@ public class DeviceOrganizationServiceImpl implements DeviceOrganizationService 
             ConnectionManagerUtil.closeDBConnection();
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<DeviceNodeResult> getAllDeviceOrganizationsForRoots(RootChildrenRequest request) throws DeviceOrganizationMgtPluginException {
+        List<DeviceNodeResult> allDeviceOrganizations = new ArrayList<>();
+
+        try {
+            // Get all root device organizations
+            PaginationRequest paginationRequest = new PaginationRequest(request.getOffSet(), request.getLimit());
+            List<DeviceOrganization> roots = getDeviceOrganizationRoots(paginationRequest);
+
+            // Iterate over each root and fetch its children
+            for (DeviceOrganization root : roots) {
+                DeviceNodeResult childrenResult = getChildrenOfDeviceNode(root.getDeviceId(), request.getMaxDepth(), request.isIncludeDevice());
+                if (childrenResult != null) {
+                    allDeviceOrganizations.add(childrenResult);
+                }
+            }
+            return allDeviceOrganizations;
+        } catch (DeviceOrganizationMgtPluginException e) {
+            String msg = "Error occurred while retrieving all device organizations for roots.";
+            log.error(msg, e);
+            throw new DeviceOrganizationMgtPluginException(msg, e);
+        }
+    }
+
 
     /**
      * {@inheritDoc}

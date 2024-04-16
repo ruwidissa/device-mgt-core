@@ -21,7 +21,7 @@
     <parent>
         <artifactId>device-mgt</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.0.40-SNAPSHOT</version>
+        <version>5.0.42-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 

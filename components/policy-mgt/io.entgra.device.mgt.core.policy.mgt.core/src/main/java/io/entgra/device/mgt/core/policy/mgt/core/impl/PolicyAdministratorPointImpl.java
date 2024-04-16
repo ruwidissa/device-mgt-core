@@ -154,6 +154,10 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
             //Check whether the TaskType is already registered. If not we'll register it here.
             if (!registeredTaskTypes.contains(PolicyManagementConstants.DELEGATION_TASK_TYPE)) {
                 taskService.registerTaskType(PolicyManagementConstants.DELEGATION_TASK_TYPE);
+                // Delete init task if exists
+                if (taskManager.isTaskScheduled(taskName)) {
+                    taskManager.deleteTask(taskName);
+                }
             }
 
             TaskInfo registeredTaskInfo = null;

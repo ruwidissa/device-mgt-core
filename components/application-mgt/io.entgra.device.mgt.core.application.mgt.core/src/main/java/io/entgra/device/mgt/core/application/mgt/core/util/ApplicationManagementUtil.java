@@ -17,18 +17,27 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
 import io.entgra.device.mgt.core.application.mgt.common.FileDataHolder;
+import io.entgra.device.mgt.core.application.mgt.common.FileDescriptor;
 import io.entgra.device.mgt.core.application.mgt.common.LifecycleChanger;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ItuneAppDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.FileDownloaderServiceException;
+import io.entgra.device.mgt.core.application.mgt.common.exception.FileTransferServiceException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.InvalidConfigurationException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.RequestValidatingException;
 import io.entgra.device.mgt.core.application.mgt.common.response.Application;
 import io.entgra.device.mgt.core.application.mgt.common.response.Category;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationStorageManager;
+import io.entgra.device.mgt.core.application.mgt.common.services.FileTransferService;
 import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
@@ -45,15 +54,18 @@ import io.entgra.device.mgt.core.application.mgt.common.wrapper.WebAppWrapper;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.config.Extension;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.application.mgt.core.impl.FileDownloaderServiceProvider;
 import io.entgra.device.mgt.core.application.mgt.core.impl.VppApplicationManagerImpl;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.common.util.FileUtil;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -74,6 +86,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -153,6 +166,49 @@ public class ApplicationManagementUtil {
                 screenshotNameCount.put(screenshotName, screenshotNameCount.getOrDefault(screenshotName, 0) + 1);
                 screenshotName = FileUtil.generateDuplicateFileName(screenshotName, screenshotNameCount.get(screenshotName));
                 screenshotData.put(screenshotName, screenshotFile.getFile());
+            }
+            applicationArtifact.setScreenshots(screenshotData);
+        }
+        return applicationArtifact;
+    }
+
+    public static ApplicationArtifact constructApplicationArtifact(String iconLink, List<String> screenshotLinks, String artifactLink, String bannerLink)
+            throws MalformedURLException, FileDownloaderServiceException {
+        ApplicationArtifact applicationArtifact = new ApplicationArtifact();
+        FileDescriptor fileDescriptor;
+        if (artifactLink != null) {
+            URL artifactLinkUrl = new URL(artifactLink);
+            fileDescriptor = FileDownloaderServiceProvider.getFileDownloaderService(artifactLinkUrl).download(artifactLinkUrl);
+            applicationArtifact.setInstallerName(fileDescriptor.getFullQualifiedName());
+            applicationArtifact.setInstallerStream(fileDescriptor.getFile());
+        }
+
+        if (iconLink != null) {
+            URL iconLinkUrl = new URL(iconLink);
+            fileDescriptor = FileDownloaderServiceProvider.getFileDownloaderService(iconLinkUrl).download(iconLinkUrl);
+            applicationArtifact.setIconName(fileDescriptor.getFullQualifiedName());
+            applicationArtifact.setIconStream(fileDescriptor.getFile());
+        }
+
+        if (bannerLink != null) {
+            URL bannerLinkUrl = new URL(bannerLink);
+            fileDescriptor = FileDownloaderServiceProvider.getFileDownloaderService(bannerLinkUrl).download(bannerLinkUrl);
+            applicationArtifact.setBannerName(fileDescriptor.getFullQualifiedName());
+            applicationArtifact.setBannerStream(fileDescriptor.getFile());
+        }
+
+        if (screenshotLinks != null) {
+            Map<String, InputStream> screenshotData = new TreeMap<>();
+            // This is to handle cases in which multiple screenshots have the same name
+            Map<String, Integer> screenshotNameCount = new HashMap<>();
+            URL screenshotLinkUrl;
+            for (String screenshotLink : screenshotLinks) {
+                screenshotLinkUrl = new URL(screenshotLink);
+                fileDescriptor = FileDownloaderServiceProvider.getFileDownloaderService(screenshotLinkUrl).download(screenshotLinkUrl);
+                String screenshotName = fileDescriptor.getFullQualifiedName();
+                screenshotNameCount.put(screenshotName, screenshotNameCount.getOrDefault(screenshotName, 0) + 1);
+                screenshotName = FileUtil.generateDuplicateFileName(screenshotName, screenshotNameCount.get(screenshotName));
+                screenshotData.put(screenshotName, fileDescriptor.getFile());
             }
             applicationArtifact.setScreenshots(screenshotData);
         }
@@ -251,6 +307,41 @@ public class ApplicationManagementUtil {
         throw new IllegalArgumentException("Provided bean does not belong to an Application Wrapper");
     }
 
+    public static <T> boolean getRemoteStatus(T appWrapper) {
+        if (!isReleaseAvailable(appWrapper)) {
+            return false;
+        }
+        if (appWrapper instanceof ApplicationWrapper) {
+            return getRemoteStatusFromWrapper(((ApplicationWrapper) appWrapper).getEntAppReleaseWrappers().get(0));
+        }
+        if (appWrapper instanceof PublicAppWrapper) {
+            return getRemoteStatusFromWrapper(((PublicAppWrapper) appWrapper).getPublicAppReleaseWrappers().get(0));
+        }
+        if (appWrapper instanceof WebAppWrapper) {
+            return getRemoteStatusFromWrapper(((WebAppWrapper) appWrapper).getWebAppReleaseWrappers().get(0));
+        }
+        if (appWrapper instanceof CustomAppWrapper) {
+            return getRemoteStatusFromWrapper(((CustomAppWrapper) appWrapper).getCustomAppReleaseWrappers().get(0));
+        }
+        throw new IllegalArgumentException("Provided bean does not belong to an Application Wrapper");
+    }
+
+    public static <T> boolean getRemoteStatusFromWrapper(T releaseWrapper) {
+        if (releaseWrapper instanceof EntAppReleaseWrapper) {
+            return ((EntAppReleaseWrapper) releaseWrapper).isRemoteStatus();
+        }
+        if (releaseWrapper instanceof PublicAppReleaseWrapper) {
+            return ((PublicAppReleaseWrapper) releaseWrapper).isRemoteStatus();
+        }
+        if (releaseWrapper instanceof WebAppReleaseWrapper) {
+            return ((WebAppReleaseWrapper) releaseWrapper).isRemoteStatus();
+        }
+        if (releaseWrapper instanceof CustomAppReleaseWrapper) {
+            return ((CustomAppReleaseWrapper) releaseWrapper).isRemoteStatus();
+        }
+        throw new IllegalArgumentException("Provided bean does not belong to an Release Wrapper");
+    }
+
     public static <T> T getInstance(Extension extension, Class<T> cls) throws InvalidConfigurationException {
         try {
             Class theClass = Class.forName(extension.getClassName());
@@ -279,13 +370,12 @@ public class ApplicationManagementUtil {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Category> categories = applicationManager.getRegisteredCategories();
         if (product != null && product.getVersion() != null) {
-            // Generate artifacts
-            ApplicationArtifact applicationArtifact = generateArtifacts(product);
 
             List<String> packageNamesOfApps = new ArrayList<>();
             packageNamesOfApps.add(product.getPackageName());
 
             List<Application> existingApps = applicationManager.getApplications(packageNamesOfApps);
+            PublicAppReleaseWrapper publicAppReleaseWrapper = generatePublicAppReleaseWrapper(product);
 
             if (existingApps != null && existingApps.size() > 0) {
                 Application app = existingApps.get(0);
@@ -293,7 +383,6 @@ public class ApplicationManagementUtil {
                     ApplicationUpdateWrapper applicationUpdateWrapper = generatePubAppUpdateWrapper(product, categories);
                     applicationManager.updateApplication(app.getId(), applicationUpdateWrapper);
 
-                    PublicAppReleaseWrapper publicAppReleaseWrapper = new PublicAppReleaseWrapper();
                     if (app.getSubMethod()
                             .equalsIgnoreCase(Constants.ApplicationProperties.FREE_SUB_METHOD)) {
                         publicAppReleaseWrapper.setPrice(0.0);
@@ -306,54 +395,46 @@ public class ApplicationManagementUtil {
                     publicAppReleaseWrapper.setVersion(product.getVersion());
                     publicAppReleaseWrapper.setSupportedOsVersions("4.0-12.3");
                     applicationManager.updatePubAppRelease(app.getApplicationReleases().get(0).getUuid(),
-                            publicAppReleaseWrapper, applicationArtifact);
+                            publicAppReleaseWrapper);
                     return;
                 }
             } else {
 
                 // Generate App wrapper
                 PublicAppWrapper publicAppWrapper = generatePubAppWrapper(product, categories);
-                PublicAppReleaseWrapper appReleaseWrapper = new PublicAppReleaseWrapper();
-
-                if (publicAppWrapper.getSubMethod()
-                        .equalsIgnoreCase(Constants.ApplicationProperties.FREE_SUB_METHOD)) {
-                    appReleaseWrapper.setPrice(0.0);
-                } else {
-                    appReleaseWrapper.setPrice(1.0);
-                }
-
-                appReleaseWrapper.setDescription(product.getDescription());
-                appReleaseWrapper.setReleaseType("ga");
-                appReleaseWrapper.setVersion(product.getVersion());
-                appReleaseWrapper.setPackageName(product.getPackageName());
-                appReleaseWrapper.setSupportedOsVersions("4.0-12.3");
 
                 publicAppWrapper.setPublicAppReleaseWrappers(
-                        Arrays.asList(new PublicAppReleaseWrapper[]{appReleaseWrapper}));
+                        Arrays.asList(new PublicAppReleaseWrapper[]{publicAppReleaseWrapper}));
 
-                try {
-                    updateImages(appReleaseWrapper, applicationArtifact.getIconName(),
-                            applicationArtifact.getIconStream(), applicationArtifact.getScreenshots());
-
-                    Application application = applicationManager.createApplication(publicAppWrapper, false);
-                    if (application != null && (application.getApplicationReleases().get(0).getCurrentStatus() == null
-                            || application.getApplicationReleases().get(0).getCurrentStatus().equals("CREATED"))) {
-                        String uuid = application.getApplicationReleases().get(0).getUuid();
-                        LifecycleChanger lifecycleChanger = new LifecycleChanger();
-                        lifecycleChanger.setAction("IN-REVIEW");
-                        applicationManager.changeLifecycleState(uuid, lifecycleChanger);
-                        lifecycleChanger.setAction("APPROVED");
-                        applicationManager.changeLifecycleState(uuid, lifecycleChanger);
-                        lifecycleChanger.setAction("PUBLISHED");
-                        applicationManager.changeLifecycleState(uuid, lifecycleChanger);
-                    }
-                } catch (IOException e) {
-                    String msg = "Error while downloading images of release.";
-                    log.error(msg);
-                    throw new ApplicationManagementException(msg, e);
+                Application application = applicationManager.createApplication(publicAppWrapper, false);
+                if (application != null && (application.getApplicationReleases().get(0).getCurrentStatus() == null
+                        || application.getApplicationReleases().get(0).getCurrentStatus().equals("CREATED"))) {
+                    String uuid = application.getApplicationReleases().get(0).getUuid();
+                    LifecycleChanger lifecycleChanger = new LifecycleChanger();
+                    lifecycleChanger.setAction("IN-REVIEW");
+                    applicationManager.changeLifecycleState(uuid, lifecycleChanger);
+                    lifecycleChanger.setAction("APPROVED");
+                    applicationManager.changeLifecycleState(uuid, lifecycleChanger);
+                    lifecycleChanger.setAction("PUBLISHED");
+                    applicationManager.changeLifecycleState(uuid, lifecycleChanger);
                 }
             }
         }
+    }
+
+    private static PublicAppReleaseWrapper generatePublicAppReleaseWrapper(ItuneAppDTO product) {
+        PublicAppReleaseWrapper publicAppReleaseWrapper = new PublicAppReleaseWrapper();
+        publicAppReleaseWrapper.setDescription(product.getDescription());
+        publicAppReleaseWrapper.setReleaseType("ga");
+        publicAppReleaseWrapper.setVersion(product.getVersion());
+        publicAppReleaseWrapper.setPackageName(product.getPackageName());
+        publicAppReleaseWrapper.setSupportedOsVersions("4.0-12.3");
+        publicAppReleaseWrapper.setIconLink(product.getIconURL());
+        publicAppReleaseWrapper.setRemoteStatus(false);
+        List<String> screenshotUrls = new ArrayList<>(Collections.nCopies(3, product.getIconURL()));
+        publicAppReleaseWrapper.setScreenshotLinks(screenshotUrls);
+        publicAppReleaseWrapper.setPrice(1.0);
+        return publicAppReleaseWrapper;
     }
 
     private static PublicAppWrapper generatePubAppWrapper(ItuneAppDTO product, List<Category> categories) {
@@ -535,4 +616,102 @@ public class ApplicationManagementUtil {
         packageNamesOfApps.add(adamId);
         return applicationManager.getApplications(packageNamesOfApps);
     }
+
+    /**
+     * Sanitize app names and shorten icon/screenshot file names
+     *
+     * @param originalName Original name of the file which is being uploaded
+     * @param type Type - Name/Artifact(Icon, Screenshot, etc.)
+     * @return Sanitized and shortened file name
+     */
+    public static String sanitizeName(String originalName, String type) {
+        String sanitizedName = originalName.replaceAll(Constants.APP_NAME_REGEX, "");
+        if (Constants.ApplicationProperties.NAME.equals(type) && sanitizedName.length() > Constants.MAX_APP_NAME_CHARACTERS) {
+            sanitizedName = sanitizedName.substring(0, Constants.MAX_APP_NAME_CHARACTERS);
+            return sanitizedName;
+        } else if (Constants.ICON_NAME.equals(type) || Constants.SCREENSHOT_NAME.equals(type)) {
+            // Shortening icon/screenshot names
+            String fileExtension = "";
+            int dotIndex = originalName.lastIndexOf('.');
+            if (dotIndex >= 0) {
+                fileExtension = originalName.substring(dotIndex);
+            }
+            return type + fileExtension;
+        } else {
+            return sanitizedName;
+        }
+    }
+
+    public static <T> List<?> deriveApplicationWithoutRelease(T app) {
+        List<?> releaseWrappers = null;
+        if (app instanceof ApplicationWrapper) {
+            ApplicationWrapper applicationWrapper = (ApplicationWrapper) app;
+            releaseWrappers = applicationWrapper.getEntAppReleaseWrappers();
+            applicationWrapper.setEntAppReleaseWrappers(Collections.emptyList());
+        }
+        if (app instanceof CustomAppWrapper) {
+            CustomAppWrapper applicationWrapper = (CustomAppWrapper) app;
+            releaseWrappers = applicationWrapper.getCustomAppReleaseWrappers();
+            applicationWrapper.setCustomAppReleaseWrappers(Collections.emptyList());
+        }
+        return releaseWrappers;
+    }
+
+    /**
+     * Add installer path metadata value to windows applications
+     * @param applicationReleaseDTO {@link ApplicationReleaseDTO}
+     * @throws ApplicationManagementException Throws when error encountered while updating the app metadata
+     */
+    public static void addInstallerPathToMetadata(ApplicationReleaseDTO applicationReleaseDTO)
+            throws ApplicationManagementException {
+        if (applicationReleaseDTO.getMetaData() == null) return;
+        Gson gson = new Gson();
+        String installerPath = APIUtil.constructInstallerPath(applicationReleaseDTO.getInstallerName(), applicationReleaseDTO.getAppHashValue());
+        String[] fileNameSegments = extractNameSegments(applicationReleaseDTO, installerPath);
+        String extension = fileNameSegments[fileNameSegments.length - 1];
+        if (!Objects.equals(extension, "appx") && !Objects.equals(extension, "msi")) {
+            return;
+        }
+
+        String installerPaths = "[ {" +
+                "\"key\": \"Content_Uri\", " +
+                "\"value\" : \"" + installerPath + "\"" +
+                "}]";
+
+        if (Objects.equals(extension, "appx")) {
+            installerPaths = "[ {" +
+                    "\"key\": \"Package_Url\", " +
+                    "\"value\" : \"" + installerPath + "\"" +
+                    "}]";
+        }
+
+        JsonArray parsedMetadataList = gson.fromJson(applicationReleaseDTO.getMetaData(), JsonArray.class);
+        JsonArray installerPathsArray = gson.fromJson(installerPaths, JsonArray.class);
+        parsedMetadataList.addAll(installerPathsArray);
+        applicationReleaseDTO.setMetaData(gson.toJson(parsedMetadataList));
+    }
+
+    /**
+     * Extract name segments from installer path
+     * @param applicationReleaseDTO {@link ApplicationReleaseDTO}
+     * @param installerPath Installer path
+     * @return Extracted file name segments
+     * @throws ApplicationManagementException Throws when error encountered while extracting name segments from installer path
+     */
+    private static String[] extractNameSegments(ApplicationReleaseDTO applicationReleaseDTO, String installerPath)
+            throws ApplicationManagementException {
+        String []installerPathSegments = installerPath.split("/");
+        if (installerPathSegments.length == 0) {
+            throw new ApplicationManagementException("Received malformed url for installer path of the app : "
+                    + applicationReleaseDTO.getInstallerName());
+        }
+        String fullQualifiedName = installerPathSegments[installerPathSegments.length - 1];
+        String []fileNameSegments = fullQualifiedName.split("\\.(?=[^.]+$)");
+        if (fileNameSegments.length != 2) {
+            throw new ApplicationManagementException("Received malformed url for installer path of the app : "
+                    + applicationReleaseDTO.getInstallerName());
+        }
+        return fileNameSegments;
+    }
+
 }

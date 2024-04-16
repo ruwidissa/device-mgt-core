@@ -26,10 +26,11 @@ import java.util.Map;
  */
 public interface DynamicTaskPropDAO {
 
-    void addTaskProperties(int dynamicTaskId, Map<String, String> properties) throws TaskManagementDAOException;
+    void addTaskProperties(int dynamicTaskId, Map<String, String> properties, int tenantId)
+            throws TaskManagementDAOException;
 
-    Map<String, String> getDynamicTaskProps(int dynamicTaskId) throws TaskManagementDAOException;
+    Map<String, String> getDynamicTaskProps(int dynamicTaskId, int tenantId) throws TaskManagementDAOException;
 
-    void updateDynamicTaskProps(int dynamicTaskId, Map<String, String> properties)
+    void updateDynamicTaskProps(int dynamicTaskId, Map<String, String> properties, int tenantId)
             throws TaskManagementDAOException;
 }

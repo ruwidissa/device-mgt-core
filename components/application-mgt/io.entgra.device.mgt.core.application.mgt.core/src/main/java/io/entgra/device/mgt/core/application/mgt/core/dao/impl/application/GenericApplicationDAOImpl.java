@@ -1884,4 +1884,165 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
     }
 
+    @Override
+    public void deleteAppFavouritesByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete app of tenant  of id " + tenantId + " from favourites");
+        }
+        String sql = "DELETE FROM AP_APP_FAVOURITES "
+                + "WHERE TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection when removing app from favourites of tenant "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while removing app of tenant of id " + tenantId + " from favourites. " +
+                    "Executed Query: " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+
+    }
+
+    @Override
+    public void deleteApplicationCategoryMappingByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete application category mapping  of tenant  of id " + tenantId);
+        }
+        String sql = "DELETE FROM AP_APP_CATEGORY_MAPPING "
+                + "WHERE TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection when removing application category mapping of tenant"
+                    +tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while removing application category mapping of tenant of id " + tenantId +
+                    "Executed Query: " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+
+    }
+
+    @Override
+    public void deleteApplicationCategoriesByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete application category of tenant  of id " + tenantId);
+        }
+        String sql = "DELETE FROM AP_APP_CATEGORY "
+                + "WHERE TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection when removing application category of tenant "
+                    + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while removing application category of tenant of id " + tenantId +
+                    "Executed Query: " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+
+    }
+
+    @Override
+    public void deleteApplicationTagsMappingByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete application tags mapping of tenant  of id " + tenantId);
+        }
+        String sql = "DELETE FROM AP_APP_TAG_MAPPING "
+                + "WHERE TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection when removing application tags mapping of tenant"
+                    +tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while removing application tags mapping of tenant of id " + tenantId +
+                    "Executed Query: " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+
+    }
+
+    @Override
+    public void deleteApplicationTagsByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete application tags of tenant  of id " + tenantId);
+        }
+        String sql = "DELETE FROM AP_APP_TAG "
+                + "WHERE TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection when removing application tags of tenant"
+                    +tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while removing application tags of tenant of id " + tenantId +
+                    "Executed Query: " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+
+    }
+
+    @Override
+    public void deleteApplicationsByTenant(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete applications of tenant  of id " + tenantId);
+        }
+        String sql = "DELETE FROM AP_APP "
+                + "WHERE TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection when removing applications of tenant"
+                    +tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while removing applications of tenant of id " + tenantId +
+                    "Executed Query: " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
 }

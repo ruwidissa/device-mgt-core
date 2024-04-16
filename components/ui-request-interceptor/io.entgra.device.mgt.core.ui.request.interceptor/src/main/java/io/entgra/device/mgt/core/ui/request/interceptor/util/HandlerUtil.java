@@ -73,6 +73,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -613,24 +614,30 @@ public class HandlerUtil {
      * @throws IOException If an error occurs when try to retry the request.
      */
     public static ProxyResponse retryRequestWithRefreshedToken(HttpServletRequest req, HttpRequestBase httpRequest,
-                                                               String apiEndpoint) throws IOException {
-        ProxyResponse retryResponse = refreshToken(req, apiEndpoint);
+                                                               String apiEndpoint, boolean isDefaultAuthToken) throws IOException {
+        ProxyResponse retryResponse = refreshToken(req, apiEndpoint, isDefaultAuthToken);
         if (isResponseSuccessful(retryResponse)) {
             HttpSession session = req.getSession(false);
             if (session == null) {
                 log.error("Unauthorized, You are not logged in. Please log in to the portal");
                 return constructProxyResponseByErrorCode(HttpStatus.SC_UNAUTHORIZED);
             }
-            httpRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-            ProxyResponse proxyResponse = HandlerUtil.execute(httpRequest);
-            if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                log.error("Error occurred while invoking the API after refreshing the token.");
+            if (!isDefaultAuthToken) {
+                httpRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
+                ProxyResponse proxyResponse = HandlerUtil.execute(httpRequest);
+                if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+                    log.error("Error occurred while invoking the API after refreshing the token.");
+                    return proxyResponse;
+                }
                 return proxyResponse;
             }
-            return proxyResponse;
-
         }
         return retryResponse;
+    }
+
+    public static ProxyResponse retryRequestWithRefreshedToken(HttpServletRequest req, HttpRequestBase httpRequest,
+                                                               String apiEndpoint) throws IOException {
+        return retryRequestWithRefreshedToken(req, httpRequest, apiEndpoint, false);
     }
 
     /***
@@ -640,7 +647,7 @@ public class HandlerUtil {
      * @return If successfully renew tokens, returns TRUE otherwise return FALSE
      * @throws IOException If an error occurs while witting error response to client side or invoke token renewal API
      */
-    private static ProxyResponse refreshToken(HttpServletRequest req, String keymanagerUrl)
+    private static ProxyResponse refreshToken(HttpServletRequest req, String keymanagerUrl, boolean isDefaultAuthToken)
             throws IOException {
         if (log.isDebugEnabled()) {
             log.debug("refreshing the token");
@@ -653,8 +660,11 @@ public class HandlerUtil {
 //            handleError(resp, HttpStatus.SC_UNAUTHORIZED);
             return tokenResultResponse;
         }
-
-        authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
+        if (isDefaultAuthToken) {
+            authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY);
+        } else {
+            authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
+        }
         tokenResultResponse = getTokenResult(authData, keymanagerUrl);
         if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
             log.error("Error occurred while refreshing access token.");
@@ -666,7 +676,11 @@ public class HandlerUtil {
         JsonElement jTokenResult = jsonParser.parse(tokenResultResponse.getData());
 
         if (jTokenResult.isJsonObject()) {
-            setNewAuthData(constructAuthDataFromTokenResult(jTokenResult, authData), session);
+            if (isDefaultAuthToken) {
+                setNewDefaultAuthData(constructAuthDataFromTokenResult(jTokenResult, authData), session);
+            } else {
+                setNewAuthData(constructAuthDataFromTokenResult(jTokenResult, authData), session);
+            }
             return tokenResultResponse;
         }
 
@@ -675,6 +689,11 @@ public class HandlerUtil {
 //        handleError(resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         return tokenResultResponse;
     }
+
+    private static ProxyResponse refreshToken(HttpServletRequest req, String keymanagerUrl) throws IOException {
+        return refreshToken(req, keymanagerUrl, false);
+    }
+
     public static ProxyResponse getTokenResult(AuthData authData, String keymanagerUrl) throws IOException {
         HttpPost tokenEndpoint = new HttpPost(keymanagerUrl + HandlerConstants.OAUTH2_TOKEN_ENDPOINT);
         StringEntity tokenEndpointPayload = new StringEntity(
@@ -683,6 +702,12 @@ public class HandlerUtil {
 
         tokenEndpoint.setEntity(tokenEndpointPayload);
         String encodedClientApp = authData.getEncodedClientApp();
+        if (encodedClientApp == null) {
+            String clientId = authData.getClientId();
+            String clientSecret = authData.getClientSecret();
+            String toEncode = clientId + ":" + clientSecret;
+            encodedClientApp = Base64.getEncoder().encodeToString(toEncode.getBytes());
+        }
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +
                 encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
@@ -692,6 +717,11 @@ public class HandlerUtil {
     public static void setNewAuthData(AuthData newAuthData, HttpSession session) {
         authData = newAuthData;
         session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, newAuthData);
+    }
+
+    public static void setNewDefaultAuthData(AuthData newAuthData, HttpSession session) {
+        authData = newAuthData;
+        session.setAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY, newAuthData);
     }
 
     public static AuthData constructAuthDataFromTokenResult(JsonElement tokenResult, AuthData authData) {

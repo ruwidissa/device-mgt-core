@@ -38,9 +38,9 @@ public class DynamicTaskPropDAOImpl implements DynamicTaskPropDAO {
     private static final Log log = LogFactory.getLog(DynamicTaskPropDAOImpl.class);
 
     @Override
-    public void addTaskProperties(int taskId, Map<String, String> properties)
+    public void addTaskProperties(int taskId, Map<String, String> properties, int tenantId)
             throws TaskManagementDAOException {
-        Connection conn = null;
+        Connection conn;
         PreparedStatement stmt = null;
         try {
             conn = TaskManagementDAOFactory.getConnection();
@@ -51,7 +51,7 @@ public class DynamicTaskPropDAOImpl implements DynamicTaskPropDAO {
                 stmt.setInt(1, taskId);
                 stmt.setString(2, propertyKey);
                 stmt.setString(3, properties.get(propertyKey));
-                stmt.setInt(4, PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
+                stmt.setInt(4, tenantId);
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -64,17 +64,17 @@ public class DynamicTaskPropDAOImpl implements DynamicTaskPropDAO {
         }
     }
 
-
-    public Map<String, String> getDynamicTaskProps(int dynamicTaskId) throws TaskManagementDAOException {
-        Connection conn = null;
+    public Map<String, String> getDynamicTaskProps(int dynamicTaskId, int tenantId) throws TaskManagementDAOException {
+        Connection conn;
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         Map<String, String> properties;
         try {
             conn = TaskManagementDAOFactory.getConnection();
             stmt = conn.prepareStatement(
-                    "SELECT * FROM DYNAMIC_TASK_PROPERTIES WHERE DYNAMIC_TASK_ID = ?");
+                    "SELECT * FROM DYNAMIC_TASK_PROPERTIES WHERE DYNAMIC_TASK_ID = ? AND TENANT_ID = ?");
             stmt.setInt(1, dynamicTaskId);
+            stmt.setInt(2, tenantId);
             resultSet = stmt.executeQuery();
             properties = new HashMap<>();
             while (resultSet.next()) {
@@ -92,7 +92,7 @@ public class DynamicTaskPropDAOImpl implements DynamicTaskPropDAO {
     }
 
     @Override
-    public void updateDynamicTaskProps(int dynamicTaskId, Map<String, String> properties)
+    public void updateDynamicTaskProps(int dynamicTaskId, Map<String, String> properties, int tenantId)
             throws TaskManagementDAOException {
         if (properties.isEmpty()) {
             if (log.isDebugEnabled()) {
@@ -105,12 +105,13 @@ public class DynamicTaskPropDAOImpl implements DynamicTaskPropDAO {
         try {
             conn = TaskManagementDAOFactory.getConnection();
             stmt = conn.prepareStatement("UPDATE DYNAMIC_TASK_PROPERTIES SET PROPERTY_VALUE = ? " +
-                    "WHERE DYNAMIC_TASK_ID = ? AND PROPERTY_NAME = ?");
+                    "WHERE DYNAMIC_TASK_ID = ? AND PROPERTY_NAME = ? AND TENANT_ID = ?");
 
             for (Map.Entry<String, String> entry : properties.entrySet()) {
                 stmt.setString(1, entry.getValue());
                 stmt.setInt(2, dynamicTaskId);
                 stmt.setString(3, entry.getKey());
+                stmt.setInt(4, tenantId);
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -121,4 +122,5 @@ public class DynamicTaskPropDAOImpl implements DynamicTaskPropDAO {
             TaskManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
+
 }

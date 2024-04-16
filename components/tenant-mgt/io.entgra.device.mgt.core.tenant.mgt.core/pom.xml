@@ -20,7 +20,7 @@
     <parent>
         <artifactId>tenant-mgt</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.0.40-SNAPSHOT</version>
+        <version>5.0.42-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -66,6 +66,7 @@
                             io.entgra.device.mgt.core.device.mgt.common.roles.config,
                             io.entgra.device.mgt.core.device.mgt.core.metadata.mgt,
                             io.entgra.device.mgt.core.device.mgt.core.config,
+                            io.entgra.device.mgt.core.device.mgt.core.dao.*,
                             org.wso2.carbon.user.core.service,
                             org.wso2.carbon.context
                         </Import-Package>

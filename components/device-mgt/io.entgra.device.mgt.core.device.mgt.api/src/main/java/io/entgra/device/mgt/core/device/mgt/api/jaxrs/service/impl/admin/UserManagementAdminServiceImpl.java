@@ -17,6 +17,8 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 
+import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
@@ -25,6 +27,11 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.PasswordResetWrapper
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.admin.UserManagementAdminService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.CredentialManagementResponseBuilder;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.stratos.common.exception.StratosException;
+import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.validation.constraints.Size;
 import javax.ws.rs.*;
@@ -76,6 +83,40 @@ public class UserManagementAdminServiceImpl implements UserManagementAdminServic
             return Response.status(Response.Status.OK).build();
         } catch (PrivacyComplianceException e) {
             String msg = "Error occurred while deleting the devices information.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @DELETE
+    @Path("/domain/{tenantDomain}")
+    @Override
+    public Response deleteTenantByDomain(@PathParam("tenantDomain") String tenantDomain) {
+        try {
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            if (tenantId != MultitenantConstants.SUPER_TENANT_ID){
+                String msg = "Only super tenants are allowed to delete tenants";
+                log.error(msg);
+                return Response.status(Response.Status.UNAUTHORIZED).entity(msg).build();
+            } else {
+                DeviceMgtAPIUtils.getApplicationManager().deleteApplicationDataByTenantDomain(tenantDomain);
+                DeviceMgtAPIUtils.getDeviceManagementService().deleteDeviceDataByTenantDomain(tenantDomain);
+                TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();
+                tenantMgtAdminService.deleteTenant(tenantDomain);
+                String msg = "Tenant Deletion process has been initiated for tenant:" + tenantDomain;
+                return Response.status(Response.Status.OK).entity(msg).build();
+            }
+
+        } catch (StratosException | UserStoreException e) {
+            String msg = "Error deleting tenant: " + tenantDomain;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error deleting application data of tenant: " + tenantDomain;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error deleting device data of tenant: " + tenantDomain;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

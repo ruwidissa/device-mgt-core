@@ -22,6 +22,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
+import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.AuthData;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.device.mgt.core.ui.request.interceptor.util.HandlerUtil;
@@ -31,9 +33,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import io.entgra.device.mgt.core.ui.request.interceptor.beans.ProxyResponse;
+import org.apache.http.entity.StringEntity;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -42,90 +46,114 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Base64;
 
 @MultipartConfig
 @WebServlet("/default-oauth2-credentials")
 public class DefaultOauth2TokenHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(DefaultTokenHandler.class);
 
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             HttpSession httpSession = req.getSession(false);
-
             if (httpSession != null) {
                 AuthData authData = (AuthData) httpSession.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
                 if (authData == null) {
                     HandlerUtil.sendUnAuthorizeResponse(resp);
                     return;
                 }
-
                 AuthData defaultAuthData = (AuthData) httpSession
                         .getAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY);
                 if (defaultAuthData != null) {
-                    HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(defaultAuthData.getAccessToken()));
-                    return;
-                }
+                    String accessToken = defaultAuthData.getAccessToken();
+                    String accessTokenWithoutPrefix = accessToken.substring(accessToken.indexOf("_") + 1);
 
-                String clientId = authData.getClientId();
-                String clientSecret = authData.getClientSecret();
+                    HttpPost tokenEndpoint = new HttpPost(HandlerUtil.getKeyManagerUrl(req.getScheme()) + HandlerConstants.INTROSPECT_ENDPOINT);
+                    tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
+                    DeviceManagementConfig dmc = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+                    String adminUsername = dmc.getKeyManagerConfigurations().getAdminUsername();
+                    String adminPassword = dmc.getKeyManagerConfigurations().getAdminPassword();
+                    tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
+                            .encodeToString((adminUsername + HandlerConstants.COLON + adminPassword).getBytes()));
+                    StringEntity tokenEPPayload = new StringEntity("token=" + accessTokenWithoutPrefix,
+                            ContentType.APPLICATION_FORM_URLENCODED);
+                    tokenEndpoint.setEntity(tokenEPPayload);
+                    ProxyResponse tokenStatus = HandlerUtil.execute(tokenEndpoint);
 
-                String queryString = req.getQueryString();
-                String scopeString = "";
-                if (StringUtils.isNotEmpty(queryString)) {
-                    scopeString = req.getParameter("scopes");
-                    if (scopeString != null) {
-                        scopeString = "?scopes=" + scopeString;
+                    if (HandlerConstants.DEFAULT_TOKEN_IS_EXPIRED.equals(tokenStatus.getData())) {
+                        tokenStatus = HandlerUtil.retryRequestWithRefreshedToken(req, tokenEndpoint, HandlerUtil.getKeyManagerUrl(req.getScheme()), true);
+                        if (!HandlerUtil.isResponseSuccessful(tokenStatus)) {
+                            HandlerUtil.handleError(resp, tokenStatus);
+                            return;
+                        }
+                    } else {
+                        HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(defaultAuthData.getAccessToken()));
+                        return;
                     }
                 }
-
-                String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR
-                        + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
-                        + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-                String tokenUrl = iotsCoreUrl + "/api/device-mgt/v1.0/devices/" + clientId
-                        + "/" + clientSecret + "/default-token" + scopeString;
-
-                HttpGet defaultTokenRequest = new HttpGet(tokenUrl);
-                defaultTokenRequest
-                        .setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-                defaultTokenRequest
-                        .setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
-                ProxyResponse tokenResultResponse = HandlerUtil.execute(defaultTokenRequest);
-
-                if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                    log.error("Error occurred while invoking the API to get default token data.");
-                    HandlerUtil.handleError(resp, tokenResultResponse);
-                    return;
-                }
-                String tokenResult = tokenResultResponse.getData();
-                if (tokenResult == null) {
-                    log.error("Invalid default token response is received.");
-                    HandlerUtil.handleError(resp, tokenResultResponse);
-                    return;
-                }
-
-                JsonParser jsonParser = new JsonParser();
-                JsonElement jTokenResult = jsonParser.parse(tokenResult);
-                if (jTokenResult.isJsonObject()) {
-                    JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
-                    AuthData newDefaultAuthData = new AuthData();
-                    newDefaultAuthData.setClientId(clientId);
-                    newDefaultAuthData.setClientSecret(clientSecret);
-
-                    String defaultToken = jTokenResultAsJsonObject.get("accessToken").getAsString();
-                    newDefaultAuthData.setAccessToken(defaultToken);
-                    newDefaultAuthData.setRefreshToken(jTokenResultAsJsonObject.get("refreshToken").getAsString());
-                    newDefaultAuthData.setScope(jTokenResultAsJsonObject.get("scopes").getAsString());
-                    httpSession.setAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY, newDefaultAuthData);
-
-                    HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(defaultToken));
-                }
+                processDefaultTokenRequest(httpSession, authData, req, resp);
             } else {
                 HandlerUtil.sendUnAuthorizeResponse(resp);
             }
         } catch (IOException e) {
             log.error("Error occurred when processing GET request to get default token.", e);
+        }
+    }
+
+    private void processDefaultTokenRequest(HttpSession httpSession, AuthData authData, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String clientId = authData.getClientId();
+        String clientSecret = authData.getClientSecret();
+
+        String queryString = req.getQueryString();
+        String scopeString = "";
+        if (StringUtils.isNotEmpty(queryString)) {
+            scopeString = req.getParameter("scopes");
+            if (scopeString != null) {
+                scopeString = "?scopes=" + scopeString;
+            }
+        }
+
+        String iotsCoreUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR
+                + System.getProperty(HandlerConstants.IOT_GW_HOST_ENV_VAR)
+                + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
+        String tokenUrl = iotsCoreUrl + "/api/device-mgt/v1.0/devices/" + clientId
+                + "/" + clientSecret + "/default-token" + scopeString;
+
+        HttpGet defaultTokenRequest = new HttpGet(tokenUrl);
+        defaultTokenRequest
+                .setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
+        defaultTokenRequest
+                .setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
+        ProxyResponse tokenResultResponse = HandlerUtil.execute(defaultTokenRequest);
+
+        if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+            log.error("Error occurred while invoking the API to get default token data.");
+            HandlerUtil.handleError(resp, tokenResultResponse);
+            return;
+        }
+        String tokenResult = tokenResultResponse.getData();
+        if (tokenResult == null) {
+            log.error("Invalid default token response is received.");
+            HandlerUtil.handleError(resp, tokenResultResponse);
+            return;
+        }
+
+        JsonParser jsonParser = new JsonParser();
+        JsonElement jTokenResult = jsonParser.parse(tokenResult);
+        if (jTokenResult.isJsonObject()) {
+            JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
+            AuthData newDefaultAuthData = new AuthData();
+            newDefaultAuthData.setClientId(clientId);
+            newDefaultAuthData.setClientSecret(clientSecret);
+
+            String defaultToken = jTokenResultAsJsonObject.get("accessToken").getAsString();
+            newDefaultAuthData.setAccessToken(defaultToken);
+            newDefaultAuthData.setRefreshToken(jTokenResultAsJsonObject.get("refreshToken").getAsString());
+            newDefaultAuthData.setScope(jTokenResultAsJsonObject.get("scopes").getAsString());
+            httpSession.setAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY, newDefaultAuthData);
+
+            HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(defaultToken));
         }
     }
 
