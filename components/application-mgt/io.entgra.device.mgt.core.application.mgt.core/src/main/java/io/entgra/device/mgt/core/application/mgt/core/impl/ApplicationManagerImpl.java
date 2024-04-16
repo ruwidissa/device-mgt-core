@@ -2619,8 +2619,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationDTO applicationDTO = getApplication(applicationId);
-        String sanitizedName = ApplicationManagementUtil.sanitizeName(applicationUpdateWrapper.getName(),
-                Constants.ApplicationProperties.NAME );
+        String sanitizedName = "";
+        if (!StringUtils.isEmpty(applicationUpdateWrapper.getName())) {
+            sanitizedName = ApplicationManagementUtil.sanitizeName(applicationUpdateWrapper.getName(),
+                    Constants.ApplicationProperties.NAME );
+        }
         try {
             ConnectionManagerUtil.beginDBTransaction();
             if (!StringUtils.isEmpty(sanitizedName) && !applicationDTO.getName()
