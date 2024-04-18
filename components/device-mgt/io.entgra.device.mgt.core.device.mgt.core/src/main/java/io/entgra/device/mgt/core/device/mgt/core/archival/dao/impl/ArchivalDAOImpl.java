@@ -547,8 +547,9 @@ public class ArchivalDAOImpl implements ArchivalDAO {
 
             String sql = "INSERT INTO " + DESTINATION_DB + ".DM_OPERATION_ARCH " +
                     "SELECT OPR.ID, OPR.TYPE, OPR.CREATED_TIMESTAMP, OPR.RECEIVED_TIMESTAMP, " +
-                    "OPR.OPERATION_CODE, OPR.INITIATED_BY, OPR.OPERATION_DETAILS, OPR.ENABLED, NOW() " +
-                    "FROM   " + SOURCE_DB + ".DM_OPERATION OPR " +
+                    "OPR.OPERATION_CODE, OPR.INITIATED_BY, OPR.OPERATION_DETAILS, OPR.OPERATION_PROPERTIES, " +
+                    "OPR.ENABLED, NOW() " +
+                    "FROM " + SOURCE_DB + ".DM_OPERATION OPR " +
                     "WHERE OPR.ID NOT IN (SELECT DISTINCT OPERATION_ID FROM " + SOURCE_DB + ".DM_ENROLMENT_OP_MAPPING)";
 
             long startTime = System.currentTimeMillis();
