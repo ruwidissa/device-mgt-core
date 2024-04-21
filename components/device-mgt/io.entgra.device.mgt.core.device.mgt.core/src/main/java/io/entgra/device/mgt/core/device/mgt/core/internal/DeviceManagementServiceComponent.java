@@ -17,7 +17,9 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.internal;
 
+import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.authorization.GroupAccessAuthorizationServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
@@ -307,6 +309,12 @@ public class DeviceManagementServiceComponent {
         DeviceManagementDataHolder.getInstance().setDeviceAccessAuthorizationService(deviceAccessAuthorizationService);
         bundleContext.registerService(DeviceAccessAuthorizationService.class.getName(),
                 deviceAccessAuthorizationService, null);
+
+        /* Registering GroupAccessAuthorization Service */
+        GroupAccessAuthorizationService groupAccessAuthorizationService = new GroupAccessAuthorizationServiceImpl();
+        DeviceManagementDataHolder.getInstance().setGroupAccessAuthorizationService(groupAccessAuthorizationService);
+            bundleContext.registerService(GroupAccessAuthorizationService.class.getName(),
+                    groupAccessAuthorizationService, null);
 
         /* Registering Geo Service */
         GeoLocationProviderService geoService = new GeoLocationProviderServiceImpl();

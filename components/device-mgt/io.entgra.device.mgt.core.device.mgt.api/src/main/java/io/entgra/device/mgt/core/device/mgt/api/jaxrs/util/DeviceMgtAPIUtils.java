@@ -24,13 +24,18 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationService
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+<<<<<<< HEAD
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceTypeVersionWrapper;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationStatusBean;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventAttributeList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
+=======
+import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
+>>>>>>> upstream/master
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.java.security.SSLProtocolSocketFactory;
@@ -346,6 +351,17 @@ public class DeviceMgtAPIUtils {
         return deviceAccessAuthorizationService;
     }
 
+    public static GroupAccessAuthorizationService getGroupAccessAuthorizationService() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        GroupAccessAuthorizationService groupAccessAuthorizationService =
+                (GroupAccessAuthorizationService) ctx.getOSGiService(GroupAccessAuthorizationService.class, null);
+        if (groupAccessAuthorizationService == null) {
+            String msg = "GroupAccessAuthorizationService service has not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return groupAccessAuthorizationService;
+    }
     public static GroupManagementProviderService getGroupManagementProviderService() {
         PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         GroupManagementProviderService groupManagementProviderService =
@@ -1172,7 +1188,9 @@ public class DeviceMgtAPIUtils {
             RequestValidationUtil.validateDeviceIdentifier(deviceType, identifier);
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(identifier, deviceType);
 
-            if (!getDeviceAccessAuthorizationService().isUserAuthorized(deviceIdentifier, authorizedUser)) {
+            String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+            String[] requiredPermissions = new String[] {requiredPermission};
+            if (!getDeviceAccessAuthorizationService().isUserAuthorized(deviceIdentifier, authorizedUser, requiredPermissions)) {
                 String msg = "User '" + authorizedUser + "' is not authorized to retrieve the given device id '" +
                         identifier + "'";
                 log.error(msg);

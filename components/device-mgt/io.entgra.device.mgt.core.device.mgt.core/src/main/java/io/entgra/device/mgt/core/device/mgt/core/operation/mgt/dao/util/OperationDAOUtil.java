@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
 public class OperationDAOUtil {
@@ -328,4 +329,60 @@ public class OperationDAOUtil {
         deviceActivity.setUpdatedTimestamp(new Date(rs.getLong(("UPDATED_TIMESTAMP")) * 1000).toString());
         return deviceActivity;
     }
+
+    public static Operation getOperation(ResultSet rs) throws OperationManagementDAOException, SQLException {
+        Operation operation = new Operation();
+        operation.setId(rs.getInt("ID"));
+        operation.setType(Operation.Type.valueOf(rs.getString("TYPE")));
+        operation.setCreatedTimeStamp(new Timestamp(rs.getLong("CREATED_TIMESTAMP") * 1000L).toString());
+        if (rs.getLong("RECEIVED_TIMESTAMP") == 0) {
+            operation.setReceivedTimeStamp("");
+        } else {
+            operation.setReceivedTimeStamp(
+                    new Timestamp((rs.getLong("RECEIVED_TIMESTAMP") * 1000)).toString());
+        }
+        operation.setCode(rs.getString("OPERATION_CODE"));
+        operation.setInitiatedBy(rs.getString("INITIATED_BY"));
+        byte[] operationDetails = rs.getBytes("OPERATION_DETAILS");
+        if (!rs.wasNull()) {
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(operationDetails);
+                 ObjectInputStream ois = new ObjectInputStream(bais)) {
+                operation.setPayLoad(ois.readObject());
+            } catch (IOException e) {
+                String msg = "IO Error occurred while retrieving operation details";
+                log.error(msg, e);
+                throw new OperationManagementDAOException(msg, e);
+            } catch (ClassNotFoundException e) {
+                String msg = "Class not found error occurred while retrieving operation details";
+                log.error(msg, e);
+                throw new OperationManagementDAOException(msg, e);
+            } catch (Exception e) {
+                String msg = "Error occurred while retrieving operation details";
+                log.error(msg, e);
+                throw new OperationManagementDAOException(msg, e);
+            }
+        }
+        byte[] operationProperties = rs.getBytes("OPERATION_PROPERTIES");
+        if (!rs.wasNull()) {
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(operationProperties);
+                 ObjectInputStream ois = new ObjectInputStream(bais)) {
+                operation.setProperties((Properties) ois.readObject());
+            } catch (IOException e) {
+                String msg = "IO Error occurred while retrieving operation properties";
+                log.error(msg, e);
+                throw new OperationManagementDAOException(msg, e);
+            } catch (ClassNotFoundException e) {
+                String msg = "Class not found error occurred while retrieving operation properties";
+                log.error(msg, e);
+                throw new OperationManagementDAOException(msg, e);
+            } catch (Exception e) {
+                String msg = "Error occurred while retrieving operation properties";
+                log.error(msg, e);
+                throw new OperationManagementDAOException(msg, e);
+            }
+        }
+        OperationDAOUtil.setActivityId(operation, rs.getInt("ID"));
+        return operation;
+    }
+
 }

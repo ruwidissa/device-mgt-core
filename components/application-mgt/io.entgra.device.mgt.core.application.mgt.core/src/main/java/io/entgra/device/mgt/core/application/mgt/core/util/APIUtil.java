@@ -67,6 +67,7 @@ public class APIUtil {
     private static volatile AppmDataHandler appmDataHandler;
     private static volatile VPPApplicationManager vppApplicationManager;
     private static volatile MetadataManagementService metadataManagementService;
+    private static volatile FileTransferService fileTransferService;
 
     public static SPApplicationManager getSPApplicationManager() {
         if (SPApplicationManager == null) {
@@ -488,7 +489,6 @@ public class APIUtil {
 
         List<String> screenshotPaths = new ArrayList<>();
         ApplicationRelease applicationRelease = new ApplicationRelease();
-        UrlValidator urlValidator = new UrlValidator();
 
         applicationRelease.setDescription(applicationReleaseDTO.getDescription());
         applicationRelease.setVersion(applicationReleaseDTO.getVersion());
@@ -511,13 +511,8 @@ public class APIUtil {
                             .getBannerName());
         }
 
-        if (urlValidator.isValid(applicationReleaseDTO.getInstallerName())) {
-            applicationRelease.setInstallerPath(applicationReleaseDTO.getInstallerName());
-        } else {
-            applicationRelease.setInstallerPath(
-                    basePath + Constants.APP_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO
-                            .getInstallerName());
-        }
+        applicationRelease.setInstallerPath(constructInstallerPath(applicationReleaseDTO.getInstallerName(),
+                applicationReleaseDTO.getAppHashValue()));
 
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName1())) {
             screenshotPaths
@@ -536,6 +531,21 @@ public class APIUtil {
         }
         applicationRelease.setScreenshots(screenshotPaths);
         return applicationRelease;
+    }
+
+    /**
+     * Construct installer path
+     * @param installerName Installer name
+     * @param appHash Application hash
+     * @return Constructed installer path value
+     * @throws ApplicationManagementException Throws when error encountered while constructing installer path
+     */
+    public static String constructInstallerPath(String installerName, String appHash) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        UrlValidator urlValidator = new UrlValidator();
+        String basePath = getArtifactDownloadBaseURL() + tenantId + Constants.FORWARD_SLASH + appHash + Constants.FORWARD_SLASH;
+        return urlValidator.isValid(installerName) ? installerName
+                : basePath + Constants.APP_ARTIFACT + Constants.FORWARD_SLASH + installerName;
     }
 
     public static String getArtifactDownloadBaseURL() throws ApplicationManagementException {
@@ -583,5 +593,17 @@ public class APIUtil {
             }
         }
         return metadataManagementService;
+    }
+
+    public static FileTransferService getFileTransferService() {
+        if (fileTransferService == null) {
+            synchronized (APIUtil.class) {
+                if (fileTransferService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    fileTransferService = (FileTransferService) ctx.getOSGiService(FileTransferService.class, null);
+                }
+            }
+        }
+        return fileTransferService;
     }
 }

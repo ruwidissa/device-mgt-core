@@ -45,7 +45,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class IoTSStartupHandler implements ServerStartupObserver {
+
     private static final Log log = LogFactory.getLog(IoTSStartupHandler.class);
+
+    private static int lastHashIndex = -1;
 
     @Override
     public void completingServerStartup() {
@@ -80,6 +83,22 @@ public class IoTSStartupHandler implements ServerStartupObserver {
             Map<Integer, List<DynamicTask>> tenantedDynamicTasks = TaskWatcherDataHolder.getInstance()
                     .getTaskManagementService().getDynamicTasksForAllTenants();
 
+            int serverHashIdx;
+            try {
+                serverHashIdx = TaskWatcherDataHolder.getInstance().getHeartBeatService()
+                        .getServerCtxInfo().getLocalServerHashIdx();
+            } catch (HeartBeatManagementException e) {
+                String msg = "Failed to get server hash index.";
+                log.error(msg, e);
+                throw new TaskManagementException(msg, e);
+            }
+
+            if (serverHashIdx != lastHashIndex) {
+                log.info("Server hash index changed. Old: " + lastHashIndex + ", new: " + serverHashIdx);
+                deleteAllDynamicNTasks(nTaskService, tenantedDynamicTasks, serverHashIdx);
+                lastHashIndex = serverHashIdx;
+            }
+
             scheduleMissingTasks(nTaskService, tenantedDynamicTasks);
             deleteObsoleteTasks(nTaskService, tenantedDynamicTasks);
 
@@ -96,7 +115,45 @@ public class IoTSStartupHandler implements ServerStartupObserver {
 
     }
 
-    private static void scheduleMissingTasks(TaskService nTaskService, Map<Integer,
+    private void deleteAllDynamicNTasks(TaskService nTaskService, Map<Integer,
+            List<DynamicTask>> tenantedDynamicTasks, int serverHashIdx) throws TaskException {
+        List<Tenant> tenants = getAllTenants();
+
+        TaskManager taskManager;
+
+        for (Tenant tenant : tenants) {
+            if (tenantedDynamicTasks.get(tenant.getId()) == null) {
+                if (log.isTraceEnabled()) {
+                    log.trace("Dynamic tasks not running for tenant: [" + tenant.getId() + "] "
+                            + tenant.getDomain());
+                }
+                continue;
+            }
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenant.getId(), true);
+            if (!nTaskService.getRegisteredTaskTypes().contains(TaskMgtConstants.Task.DYNAMIC_TASK_TYPE)) {
+                nTaskService.registerTaskType(TaskMgtConstants.Task.DYNAMIC_TASK_TYPE);
+            }
+            taskManager = nTaskService.getTaskManager(TaskMgtConstants.Task.DYNAMIC_TASK_TYPE);
+            List<TaskInfo> tasks = taskManager.getAllTasks();
+            // Remove all applicable dynamic tasks from the nTask core
+            for (TaskInfo taskInfo : tasks) {
+                for (DynamicTask dt : tenantedDynamicTasks.get(tenant.getId())) {
+                    if (tenant.getId() == dt.getTenantId()
+                            && taskInfo.getName()
+                            .equals(TaskManagementUtil.generateNTaskName(dt.getDynamicTaskId(), serverHashIdx))) {
+                        taskManager.deleteTask(taskInfo.getName());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Task '" + taskInfo.getName() + "' deleted as server hash changed.");
+                        }
+                    }
+                }
+            }
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    private void scheduleMissingTasks(TaskService nTaskService, Map<Integer,
             List<DynamicTask>> tenantedDynamicTasks)
             throws TaskException, TaskManagementException {
 
@@ -187,25 +244,9 @@ public class IoTSStartupHandler implements ServerStartupObserver {
         }
     }
 
-    private static void deleteObsoleteTasks(TaskService nTaskService,
-                                            Map<Integer, List<DynamicTask>> tenantedDynamicTasks)
+    private void deleteObsoleteTasks(TaskService nTaskService,
+                                     Map<Integer, List<DynamicTask>> tenantedDynamicTasks)
             throws TaskManagementException, TaskException {
-
-        List<Tenant> tenants = new ArrayList<>();
-        try {
-            RealmService realmService = TaskWatcherDataHolder.getInstance().getRealmService();
-            Tenant[] tenantArray = realmService.getTenantManager().getAllTenants();
-            if (tenantArray != null && tenantArray.length != 0) {
-                tenants.addAll(Arrays.asList(tenantArray));
-            }
-            Tenant superTenant = new Tenant();
-            superTenant.setId(-1234);
-            tenants.add(superTenant);
-        } catch (UserStoreException e) {
-            String msg = "Unable to load tenants";
-            log.error(msg, e);
-            return;
-        }
 
         TaskManager taskManager;
         Set<Integer> hashIds;
@@ -216,6 +257,8 @@ public class IoTSStartupHandler implements ServerStartupObserver {
             log.error(msg, e);
             throw new TaskManagementException(msg, e);
         }
+
+        List<Tenant> tenants = getAllTenants();
 
         for (Tenant tenant : tenants) {
             if (tenantedDynamicTasks.get(tenant.getId()) == null) {
@@ -255,6 +298,25 @@ public class IoTSStartupHandler implements ServerStartupObserver {
                 }
             }
             PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    private List<Tenant> getAllTenants() {
+        List<Tenant> tenants = new ArrayList<>();
+        try {
+            RealmService realmService = TaskWatcherDataHolder.getInstance().getRealmService();
+            Tenant[] tenantArray = realmService.getTenantManager().getAllTenants();
+            if (tenantArray != null && tenantArray.length != 0) {
+                tenants.addAll(Arrays.asList(tenantArray));
+            }
+            Tenant superTenant = new Tenant();
+            superTenant.setId(-1234);
+            tenants.add(superTenant);
+            return tenants;
+        } catch (UserStoreException e) {
+            String msg = "Unable to load tenants";
+            log.error(msg, e);
+            return new ArrayList<>();
         }
     }
 

@@ -196,7 +196,7 @@
                                                                                      <div style="font-family: 'Montserrat',sans-serif; font-size: 13.5px; line-height: 140%; text-align: left; word-wrap: break-word;">
                                                                                         <p style="line-height: 140%;">Hi $first-name,</p>
                                                                                         <p style="line-height: 140%;"></p>
-                                                                                        <p style="line-height: 140%;">Welcome to your free Entgra UEM trial. Please download the product <a rel="noopener" href="https://docs.entgra.io/uem/5.3.0/server/" target="_blank"> here. </a> </p>
+                                                                                        <p style="line-height: 140%;">Welcome to your free Entgra UEM trial. Please download the product <a rel="noopener" href="$download-url" target="_blank"> here. </a> </p>
                                                                                         <br />
                                                                                         <p style="line-height: 140%;"> To make the best use of your evaluation, here's a quick introduction to the key capabilities of our product. </p>
                                                                                      </div>

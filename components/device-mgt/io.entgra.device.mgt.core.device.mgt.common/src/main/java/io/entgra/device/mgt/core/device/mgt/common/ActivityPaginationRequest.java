@@ -36,7 +36,7 @@ public class ActivityPaginationRequest {
     private String initiatedBy;
     private long since;
     private Operation.Type type;
-    private Operation.Status status;
+    private List<Operation.Status> statuses;
     private long startTimestamp;
     private long endTimestamp;
 
@@ -110,12 +110,12 @@ public class ActivityPaginationRequest {
         this.type = type;
     }
 
-    public Operation.Status getStatus() {
-        return status;
+    public List<Operation.Status> getStatuses() {
+        return statuses;
     }
 
-    public void setStatus(Operation.Status status) {
-        this.status = status;
+    public void setStatuses(List<Operation.Status> statuses) {
+        this.statuses = statuses;
     }
 
     public long getStartTimestamp() {

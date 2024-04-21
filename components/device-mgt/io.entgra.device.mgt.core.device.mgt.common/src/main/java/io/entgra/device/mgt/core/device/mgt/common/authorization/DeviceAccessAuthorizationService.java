@@ -28,15 +28,6 @@ import java.util.List;
  * accessing the device information and performing MDM operations on devices.
  */
 public interface DeviceAccessAuthorizationService {
-    /**
-     * This method will check whether the currently logged-in user has the access to the device identified by the given
-     * DeviceIdentifier.
-     *
-     * @param deviceIdentifier - DeviceIdentifier of the device to be checked.
-     * @return Boolean authorization result.
-     * @throws DeviceAccessAuthorizationException if something goes wrong when checking the authorization.
-     */
-    boolean isUserAuthorized(DeviceIdentifier deviceIdentifier) throws DeviceAccessAuthorizationException;
 
     /**
      * This method will check whether the currently logged-in user has the access to the device identified by the given
@@ -49,18 +40,6 @@ public interface DeviceAccessAuthorizationService {
      */
     boolean isUserAuthorized(DeviceIdentifier deviceIdentifier, String[] groupPermissions)
             throws DeviceAccessAuthorizationException;
-
-    /**
-     * This method will check whether the currently logged-in user has the access to the devices identified by the given
-     * DeviceIdentifier list.
-     *
-     * @param deviceIdentifiers - List of DeviceIdentifiers to be checked for authorization.
-     * @return DeviceAuthorizationResult - Authorization result object including the list of authorized devices and
-     *                                      unauthorized devices.
-     * @throws DeviceAccessAuthorizationException if something goes wrong when checking the authorization.
-     */
-    DeviceAuthorizationResult isUserAuthorized(List<DeviceIdentifier> deviceIdentifiers) throws
-                                                                                         DeviceAccessAuthorizationException;
 
     /**
      * This method will check whether the currently logged-in user has the access to the devices identified by the given
@@ -104,35 +83,10 @@ public interface DeviceAccessAuthorizationService {
                                                                           DeviceAccessAuthorizationException;
 
     /**
-     * This method will check whether the given user has the access to the device identified by the given
-     * DeviceIdentifier.
-     *
-     * @param deviceIdentifier - DeviceIdentifier of the device to be checked.
-     * @param username         - Username of the user to be checked for authorization.
-     * @return Boolean authorization result.
-     * @throws DeviceAccessAuthorizationException if something goes wrong when checking the authorization.
-     */
-    boolean isUserAuthorized(DeviceIdentifier deviceIdentifier, String username) throws
-                                                                                 DeviceAccessAuthorizationException;
-
-    /**
      * This method will check whether the authenticated user has the admin permissions.
      *
      * @return Boolean authorization result.
      * @throws DeviceAccessAuthorizationException if something goes wrong when checking the authorization.
      */
     boolean isDeviceAdminUser() throws DeviceAccessAuthorizationException;
-
-    /**
-     * This method will check whether the given user has the access to the devices identified by the given
-     * DeviceIdentifier list.
-     *
-     * @param deviceIdentifiers - List of DeviceIdentifiers to be checked for authorization.
-     * @param username          - Username of the user to be checked for authorization.
-     * @return DeviceAuthorizationResult - Authorization result object including the list of authorized devices and
-     *                                      unauthorized devices.
-     * @throws DeviceAccessAuthorizationException if something goes wrong when checking the authorization.
-     */
-    DeviceAuthorizationResult isUserAuthorized(List<DeviceIdentifier> deviceIdentifiers, String username) throws
-                                                                                                          DeviceAccessAuthorizationException;
 }

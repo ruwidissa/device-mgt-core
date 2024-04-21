@@ -89,6 +89,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
             // add into the dynamic task tables
             TaskManagementDAOFactory.beginTransaction();
             dynamicTaskId = dynamicTaskDAO.addTask(dynamicTask, tenantId);
+            dynamicTask.setDynamicTaskId(dynamicTaskId);
             dynamicTaskPropDAO.addTaskProperties(dynamicTaskId, dynamicTask.getProperties(), tenantId);
 
             try {

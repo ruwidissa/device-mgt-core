@@ -43,4 +43,18 @@ public interface TenantManager {
      * @throws TenantMgtException Throws when error occurred while adding default application categories
      */
     void addDefaultDeviceStatusFilters(TenantInfoBean tenantInfoBean) throws TenantMgtException;
+
+    /**
+     * Delete Application related details of a tenant
+     * @param tenantId ID of the tenant
+     * @throws TenantMgtException Throws when deleting Tenant related application data
+     */
+    void deleteTenantApplicationData(int tenantId) throws TenantMgtException;
+
+    /**
+     * Delete Device related details of a tenant
+     * @param tenantId ID of the tenant
+     * @throws TenantMgtException Throws when deleting Tenant related device data
+     */
+    void deleteTenantDeviceData(int tenantId) throws TenantMgtException;
 }

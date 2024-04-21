@@ -19,8 +19,18 @@ package io.entgra.device.mgt.core.application.mgt.core.management;
 
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationArtifact;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationList;
+import io.entgra.device.mgt.core.application.mgt.common.ChunkDescriptor;
+import io.entgra.device.mgt.core.application.mgt.common.FileMetaEntry;
 import io.entgra.device.mgt.core.application.mgt.common.Filter;
 import io.entgra.device.mgt.core.application.mgt.common.LifecycleState;
+import io.entgra.device.mgt.core.application.mgt.common.TransferLink;
+import io.entgra.device.mgt.core.application.mgt.common.services.FileTransferService;
+import io.entgra.device.mgt.core.application.mgt.core.impl.FileTransferServiceImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.RequestValidatingException;
@@ -52,6 +62,10 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -98,32 +112,72 @@ public class ApplicationManagementTest extends BaseTestCase {
         EntAppReleaseWrapper releaseWrapper = new EntAppReleaseWrapper();
         releaseWrapper.setDescription("First release");
         releaseWrapper.setIsSharedWithAllTenants(false);
-        releaseWrapper.setMetaData("Just meta data");
+        releaseWrapper.setMetaData("[{\"key\": \"Just a metadata\"}]");
         releaseWrapper.setReleaseType("free");
         releaseWrapper.setPrice(5.7);
         releaseWrapper.setSupportedOsVersions("4.0-7.0");
 
 
-        File banner = new File("src/test/resources/samples/app1/banner1.jpg");
-        File icon =  new File("src/test/resources/samples/app1/icon.png");
-        File ss1 = new File("src/test/resources/samples/app1/shot1.png");
-        File ss2 = new File("src/test/resources/samples/app1/shot2.png");
-        File ss3 = new File("src/test/resources/samples/app1/shot3.png");
+        FileTransferService fileTransferService = FileTransferServiceImpl.getInstance();
+        DataHolder.getInstance().setFileTransferService(fileTransferService);
 
-        Base64File bannerBase64 = new Base64File("banner", FileUtil.fileToBase64String(banner));
-        Base64File iconBase64 = new Base64File("icon", FileUtil.fileToBase64String(icon));
-        Base64File ss1Base64 = new Base64File("ss1", FileUtil.fileToBase64String(ss1));
-        Base64File ss2Base64 = new Base64File("ss2", FileUtil.fileToBase64String(ss2));
-        Base64File ss3Base64 = new Base64File("ss3", FileUtil.fileToBase64String(ss3));
+        FileMetaEntry metaEntry = new FileMetaEntry();
+        TransferLink transferLink;
+        String []segments;
+        ChunkDescriptor chunkDescriptor;
 
-        File apk = new File("src/test/resources/samples/app1/sample.apk");
-        Base64File apkBase64 = new Base64File("apk", FileUtil.fileToBase64String(apk));
+        metaEntry.setFileName("banner1");
+        metaEntry.setExtension("jpg");
+        metaEntry.setSize(179761);
+        transferLink = fileTransferService.generateUploadLink(metaEntry);
+        segments = transferLink.getRelativeTransferLink().split("/");
+        chunkDescriptor = fileTransferService.
+                resolve(segments[segments.length-1], Files.newInputStream(
+                        Paths.get("src/test/resources/samples/app1/banner1.jpg")));
+        fileTransferService.writeChunk(chunkDescriptor);
+        releaseWrapper.setBannerLink(transferLink.getDirectTransferLink() + "/banner1.jpg");
 
+        metaEntry.setFileName("icon");
+        metaEntry.setExtension("png");
+        metaEntry.setSize(41236);
+        transferLink = fileTransferService.generateUploadLink(metaEntry);
+        segments = transferLink.getRelativeTransferLink().split("/");
+        chunkDescriptor = fileTransferService.
+                resolve(segments[segments.length-1], Files.newInputStream(
+                        Paths.get("src/test/resources/samples/app1/icon.png")));
+        fileTransferService.writeChunk(chunkDescriptor);
+        releaseWrapper.setIconLink(transferLink.getDirectTransferLink() + "/icon.png");
 
-        releaseWrapper.setBanner(bannerBase64);
-        releaseWrapper.setIcon(iconBase64);
-        releaseWrapper.setBinaryFile(apkBase64);
-        releaseWrapper.setScreenshots(Arrays.asList(ss1Base64, ss2Base64, ss3Base64));
+        List<String> screenshotPaths = Arrays.asList("src/test/resources/samples/app1/shot1.png",
+                "src/test/resources/samples/app1/shot2.png", "src/test/resources/samples/app1/shot3.png");
+        List<String> screenshotLinks = new ArrayList<>();
+        String []pathSegments;
+        for (String path: screenshotPaths) {
+            pathSegments = path.split("/");
+            String fullQualifiedName = pathSegments[pathSegments.length - 1];
+            String []nameSegments = fullQualifiedName.split("\\.(?=[^.]+$)");
+            metaEntry.setFileName(nameSegments[0]);
+            metaEntry.setExtension(nameSegments[1]);
+            metaEntry.setSize(41236);
+            transferLink = fileTransferService.generateUploadLink(metaEntry);
+            segments = transferLink.getRelativeTransferLink().split("/");
+            chunkDescriptor = fileTransferService.
+                    resolve(segments[segments.length-1], Files.newInputStream(Paths.get(path)));
+            fileTransferService.writeChunk(chunkDescriptor);
+            screenshotLinks.add(transferLink.getDirectTransferLink() + "/" + fullQualifiedName);
+        }
+        releaseWrapper.setScreenshotLinks(screenshotLinks);
+
+        metaEntry.setFileName("sample");
+        metaEntry.setExtension("apk");
+        metaEntry.setSize(6259412);
+        TransferLink apkTransferLink = fileTransferService.generateUploadLink(metaEntry);
+        segments = apkTransferLink.getRelativeTransferLink().split("/");
+        chunkDescriptor = fileTransferService.
+                resolve(segments[segments.length-1], Files.newInputStream(Paths.get("src/test/resources/samples/app1/sample.apk")));
+        fileTransferService.writeChunk(chunkDescriptor);
+        releaseWrapper.setArtifactLink(apkTransferLink.getDirectTransferLink() + "/sample.apk");
+        releaseWrapper.setRemoteStatus(false);
 
         entAppReleaseWrappers.add(releaseWrapper);
         applicationWrapper.setEntAppReleaseWrappers(entAppReleaseWrappers);

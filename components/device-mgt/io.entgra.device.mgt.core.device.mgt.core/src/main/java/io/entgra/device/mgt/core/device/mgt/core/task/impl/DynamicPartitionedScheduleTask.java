@@ -86,13 +86,13 @@ public abstract class DynamicPartitionedScheduleTask implements Task {
             if (localHashIndex.equals(String.valueOf(taskContext.getServerHashIndex()))) {
                 if (log.isDebugEnabled()) {
                     log.debug("Executing dynamically scheduled task (" + getTaskName() +
-                            ") for current server hash index: " + localHashIndex);
+                            ") for current server hash index: " + taskContext.getServerHashIndex());
                 }
                 executeDynamicTask();
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Ignoring execution of task (" + getTaskName() +
-                            ") not belonging to current serer hash index: " + localHashIndex);
+                            ") not belonging to current server hash index: " + taskContext.getServerHashIndex());
                 }
             }
         } else {

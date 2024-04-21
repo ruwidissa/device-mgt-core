@@ -38,4 +38,14 @@ public class TenantManagerServiceImpl implements TenantManagerService {
     public void addDefaultDeviceStatusFilters(TenantInfoBean tenantInfoBean) throws TenantMgtException {
         TenantMgtDataHolder.getInstance().getTenantManager().addDefaultDeviceStatusFilters(tenantInfoBean);
     }
+
+    @Override
+    public void deleteTenantApplicationData(int tenantId) throws TenantMgtException {
+        TenantMgtDataHolder.getInstance().getTenantManager().deleteTenantApplicationData(tenantId);
+    }
+
+    @Override
+    public void deleteTenantDeviceData(int tenantId) throws TenantMgtException {
+        TenantMgtDataHolder.getInstance().getTenantManager().deleteTenantDeviceData(tenantId);
+    }
 }

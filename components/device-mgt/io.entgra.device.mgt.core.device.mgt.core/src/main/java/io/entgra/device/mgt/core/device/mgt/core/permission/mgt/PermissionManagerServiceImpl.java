@@ -32,6 +32,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService {
 
     private static PermissionManagerServiceImpl registryBasedPermissionManager;
     private static APIResourcePermissions apiResourcePermissions;
+    private ThreadLocal<String> requiredPermission = null;
     private PermissionManagerServiceImpl() {
     }
 
@@ -63,5 +64,17 @@ public class PermissionManagerServiceImpl implements PermissionManagerService {
     @Override
     public List<Permission> getPermission(String context) throws PermissionManagementException {
         return apiResourcePermissions.getPermissions(context);
+    }
+
+    public String getRequiredPermission() {
+        if (requiredPermission == null) {
+            requiredPermission = new ThreadLocal<>();
+        }
+        return requiredPermission.get();
+    }
+
+    public void setRequiredPermission(String permission) {
+        requiredPermission = new ThreadLocal<>();
+        requiredPermission.set(permission);
     }
 }
