@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.device.mgt.core.config.datasource.JNDILookupDef
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.ApplicationDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.DeviceStatusDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.DeviceTypeDAOImpl;
+import io.entgra.device.mgt.core.device.mgt.core.dao.impl.TenantDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.device.GenericDeviceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.device.OracleDeviceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.device.PostgreSQLDeviceDAOImpl;

@@ -436,12 +436,12 @@
         <dependency>
             <groupId>com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
+            <version>${okio.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.mgt</artifactId>
             <scope>compile</scope>
->>>>>>> upstream/master
         </dependency>
     </dependencies>
 </project>

@@ -24,16 +24,13 @@ import io.entgra.device.mgt.core.apimgt.extension.rest.api.APIApplicationService
 import io.entgra.device.mgt.core.apimgt.extension.rest.api.ConsumerRESTAPIServices;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
-<<<<<<< HEAD
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.DeviceTypeVersionWrapper;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.OperationStatusBean;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.analytics.EventAttributeList;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.InputValidationException;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
-=======
 import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
->>>>>>> upstream/master
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.apache.axis2.AxisFault;
