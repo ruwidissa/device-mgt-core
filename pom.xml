@@ -23,7 +23,7 @@
     <groupId>io.entgra.device.mgt.core</groupId>
     <artifactId>io.entgra.device.mgt.core.parent</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.41-SNAPSHOT</version>
+    <version>5.0.42-SNAPSHOT</version>
     <name>WSO2 Carbon - Device Management - Parent</name>
     <url>https://entgra.io</url>
     <description>WSO2 Connected Device Manager Components</description>
@@ -2084,7 +2084,7 @@
         <axiom.wso2.version>1.2.11-wso2v25</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <io.entgra.device.mgt.core.version>5.0.41-SNAPSHOT</io.entgra.device.mgt.core.version>
+        <io.entgra.device.mgt.core.version>5.0.42-SNAPSHOT</io.entgra.device.mgt.core.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.9.2</carbon.commons.version>
@@ -2131,8 +2131,8 @@
         <json.smart.version>1.3</json.smart.version>
         <google.gson.version>2.9.1</google.gson.version>
         <google.guava.version>31.0.1-jre</google.guava.version>
-        <squareup.okhttp3.version>4.6.0</squareup.okhttp3.version>
-        <okio.version>1.13.0</okio.version>
+        <squareup.okhttp3.version>4.12.0</squareup.okhttp3.version>
+        <okio.version>3.6.0</okio.version>
         <github.openfeign.version>11.0</github.openfeign.version>
         <jsr311.version>1.1.1</jsr311.version>
         <commons.logging.version>1.2</commons.logging.version>

@@ -62,7 +62,7 @@ public interface OperationDAO {
     void updateEnrollmentOperationsStatus(int enrolmentId, String operationCode, Operation.Status existingStatus,
                                           Operation.Status newStatus) throws OperationManagementDAOException;
 
-    Map<Integer, Integer> getExistingOperationIDs(Integer[] enrolmentIds, String operationCode)
+    Map<Integer, Integer> getExistingNotExecutedOperationIDs(Integer[] enrolmentIds, String operationCode)
             throws OperationManagementDAOException;
 
     OperationResponseMeta addOperationResponse(int enrolmentId, io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation operation, String deviceId)

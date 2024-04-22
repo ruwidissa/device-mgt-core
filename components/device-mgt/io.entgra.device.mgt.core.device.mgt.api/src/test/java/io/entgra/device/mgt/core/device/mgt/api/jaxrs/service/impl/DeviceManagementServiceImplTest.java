@@ -215,7 +215,7 @@ public class DeviceManagementServiceImplTest {
         Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
         Mockito.when(carbonContext.getUsername()).thenReturn(DEFAULT_USERNAME);
         Mockito.when(deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class),
-                                                                       Mockito.anyString())).thenReturn(true);
+                                                                       Mockito.anyString(), Mockito.any(String[].class))).thenReturn(true);
 
         Response response = this.deviceManagementService
                 .getDeviceByID(TEST_DEVICE_IDENTIFIER, ifModifiedSince,true);

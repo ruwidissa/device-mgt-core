@@ -61,6 +61,13 @@ import javax.ws.rs.core.Response;
                         key = "um:admin:users:remove",
                         roles = {"Internal/devicemgt-admin"},
                         permissions = {"/device-mgt/admin/users/delete"}
+                ),
+                @Scope(
+                        name = "Delete Tenant Information",
+                        description = "Delete tenant details",
+                        key = "um:admin:tenants:remove",
+                        roles = {"Internal/devicemgt-admin"},
+                        permissions = {"/device-mgt/admin/tenants/delete"}
                 )
         }
 )
@@ -258,5 +265,41 @@ public interface UserManagementAdminService {
             @Size(max = 45)
             String deviceId);
 
+    @DELETE
+    @Path("/domain/{tenantDomain}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "DELETE",
+            value = "Delete a tenant by tenant domain.",
+            notes = "This API allows the deletion of a tenant by providing the tenant domain.",
+            tags = "Tenant details remove",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "um:admin:tenants:remove")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Tenant has been deleted successfully."),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n The tenant with the provided domain does not exist.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while removing the tenant.",
+                    response = ErrorResponse.class)
+    })
+    Response deleteTenantByDomain(
+            @ApiParam(
+                    name = "tenantDomain",
+                    value = "The domain of the tenant to be deleted.",
+                    required = true)
+
+            @PathParam("tenantDomain")
+            String tenantDomain);
 
 }

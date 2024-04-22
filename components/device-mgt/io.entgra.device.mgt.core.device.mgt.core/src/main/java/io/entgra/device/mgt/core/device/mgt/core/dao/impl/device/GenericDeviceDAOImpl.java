@@ -1260,33 +1260,36 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             boolean isOwnershipProvided = false;
             boolean isSerialProvided = false;
 
-            StringJoiner joiner = new StringJoiner(",",
-                    "SELECT "
-                            + "DM_DEVICE.ID AS DEVICE_ID, "
-                            + "DM_DEVICE.NAME AS DEVICE_NAME, "
-                            + "DM_DEVICE.DESCRIPTION AS DESCRIPTION, "
-                            + "DM_DEVICE.DEVICE_TYPE_ID, "
-                            + "DM_DEVICE.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFICATION, "
-                            + "e.ID AS ENROLMENT_ID, "
-                            + "e.OWNER, "
-                            + "e.OWNERSHIP, "
-                            + "e.DATE_OF_ENROLMENT, "
-                            + "e.DATE_OF_LAST_UPDATE, "
-                            + "e.STATUS, "
-                            + "e.IS_TRANSFERRED, "
-                            + "device_types.NAME AS DEVICE_TYPE "
-                            + "FROM DM_DEVICE "
-                            + "INNER JOIN DM_ENROLMENT e ON "
-                            + "DM_DEVICE.ID = e.DEVICE_ID AND "
-                            + "DM_DEVICE.TENANT_ID = e.TENANT_ID "
-                            + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
-                            + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID "
-                            + "INNER JOIN DM_DEVICE_INFO i ON "
-                            + "DM_DEVICE.ID = i.DEVICE_ID "
-                            + "AND i.KEY_FIELD = 'serial' "
-                            + "WHERE DM_DEVICE.ID IN (",
-                    ") AND DM_DEVICE.TENANT_ID = ? AND e.STATUS != ?");
+            query = "SELECT "
+                    + "DM_DEVICE.ID AS DEVICE_ID, "
+                    + "DM_DEVICE.NAME AS DEVICE_NAME, "
+                    + "DM_DEVICE.DESCRIPTION AS DESCRIPTION, "
+                    + "DM_DEVICE.DEVICE_TYPE_ID, "
+                    + "DM_DEVICE.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFICATION, "
+                    + "e.ID AS ENROLMENT_ID, "
+                    + "e.OWNER, "
+                    + "e.OWNERSHIP, "
+                    + "e.DATE_OF_ENROLMENT, "
+                    + "e.DATE_OF_LAST_UPDATE, "
+                    + "e.STATUS, "
+                    + "e.IS_TRANSFERRED, "
+                    + "device_types.NAME AS DEVICE_TYPE "
+                    + "FROM DM_DEVICE "
+                    + "INNER JOIN DM_ENROLMENT e ON "
+                    + "DM_DEVICE.ID = e.DEVICE_ID AND "
+                    + "DM_DEVICE.TENANT_ID = e.TENANT_ID "
+                    + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
+                    + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID ";
 
+            if (null != serial && !serial.isEmpty()) { // Only if serial is provided, join with device info table
+                query = query.concat("INNER JOIN DM_DEVICE_INFO i ON "
+                        + "DM_DEVICE.ID = i.DEVICE_ID "
+                        + "AND i.KEY_FIELD = 'serial' ");
+                isSerialProvided = true;
+            }
+            query = query.concat("WHERE DM_DEVICE.ID IN (");
+            StringJoiner joiner = new StringJoiner(",", query ,
+                    ") AND DM_DEVICE.TENANT_ID = ? AND e.STATUS != ?");
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             query = joiner.toString();
 
@@ -1298,9 +1301,8 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 query += " AND e.OWNERSHIP = ?";
                 isOwnershipProvided = true;
             }
-            if (serial != null && !serial.isEmpty()) {
+            if (isSerialProvided) {
                 query += " AND i.VALUE_FIELD LIKE ?" ;
-                isSerialProvided = true;
             }
             if (user != null && !user.isEmpty()) {
                 query += " AND e.OWNER = ?";

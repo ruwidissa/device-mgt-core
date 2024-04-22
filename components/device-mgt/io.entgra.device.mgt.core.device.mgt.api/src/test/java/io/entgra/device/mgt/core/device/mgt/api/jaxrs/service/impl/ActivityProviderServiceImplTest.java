@@ -132,7 +132,7 @@ public class ActivityProviderServiceImplTest {
         activityPaginationRequest.setDeviceType(DEVICE_TYPE_2);
         activityPaginationRequest.setOperationId(OPERATION_ID);
         activityPaginationRequest.setInitiatedBy(INITIATED_BY);
-        activityPaginationRequest.setStatus(STATUS);
+        activityPaginationRequest.setStatuses(Collections.singletonList(STATUS));
         activityPaginationRequest.setType(TYPE);
         activityPaginationRequest.setStartTimestamp(0);
         activityPaginationRequest.setEndTimestamp(0);
@@ -226,7 +226,7 @@ public class ActivityProviderServiceImplTest {
         Mockito.when(this.deviceManagementProviderService.getActivities(Mockito.any())).thenReturn(activities);
         Response response = this.activityInfoProviderService.getActivities(
                 OFFSET, LIMIT, SINCE, INITIATED_BY, OPERATION_CODE, OPERATION_ID,
-                DEVICE_TYPE_2, Collections.singletonList(DEVICE_ID), TYPE.toString(), STATUS.toString(), null, 0, 0);
+                DEVICE_TYPE_2, Collections.singletonList(DEVICE_ID), TYPE.toString(), Collections.singletonList(STATUS.toString()), null, 0, 0);
 
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         Assert.assertNotNull(response);
@@ -258,7 +258,7 @@ public class ActivityProviderServiceImplTest {
         Mockito.when(this.deviceManagementProviderService.getDeviceActivities(Mockito.any())).thenReturn(deviceActivities);
         Response response = this.activityInfoProviderService.getDeviceActivities(
                 OFFSET, LIMIT, SINCE, INITIATED_BY, OPERATION_CODE, OPERATION_ID,
-                DEVICE_TYPE_2, Collections.singletonList(DEVICE_ID), TYPE.toString(), STATUS.toString(), null, 0, 0);
+                DEVICE_TYPE_2, Collections.singletonList(DEVICE_ID), TYPE.toString(), Collections.singletonList(STATUS.toString()), null, 0, 0);
 
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         Assert.assertNotNull(response);

@@ -172,6 +172,9 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
         if (group == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
+        if (StringUtils.isEmpty(group.getOwner())) {
+            group.setOwner(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
+        }
         group.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
         try {
             DeviceMgtAPIUtils.getGroupManagementProviderService().createGroup(group, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS);

@@ -43,6 +43,7 @@ import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionMan
 import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DisenrollRequest;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtUtil;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -589,7 +590,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(id, type);
             // check whether the user is authorized
-            if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, authorizedUser)) {
+            String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+            String[] requiredPermissions = new String[] {requiredPermission};
+            if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, authorizedUser, requiredPermissions)) {
                 String msg = "User '" + authorizedUser + "' is not authorized to retrieve the given device id '" + id + "'";
                 log.error(msg);
                 return Response.status(Response.Status.UNAUTHORIZED).entity(
@@ -725,7 +728,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             }
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(id, device.getType());
             // check whether the user is authorized
-            if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, authorizedUser)) {
+            String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+            String[] requiredPermissions = new String[] {requiredPermission};
+            if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, authorizedUser, requiredPermissions)) {
                 String message = "User '" + authorizedUser + "' is not authorized to retrieve the given " +
                         "device id '" + id + "'";
                 log.error(message);

@@ -83,6 +83,44 @@ public class CustomAppReleaseWrapper {
     @ApiModelProperty(name = "icon",
             value = "banner of the application")
     private Base64File banner;
+    private boolean remoteStatus;
+
+    public boolean isRemoteStatus() {
+        return remoteStatus;
+    }
+
+    public void setRemoteStatus(boolean remoteStatus) {
+        this.remoteStatus = remoteStatus;
+    }
+
+    private String artifactLink;
+    private List<String> screenshotLinks;
+    private String iconLink;
+    private String bannerLink;
+
+    public String getArtifactLink() {
+        return artifactLink;
+    }
+
+    public void setArtifactLink(String artifactLink) {
+        this.artifactLink = artifactLink;
+    }
+
+    public List<String> getScreenshotLinks() {
+        return screenshotLinks;
+    }
+
+    public void setScreenshotLinks(List<String> screenshotLinks) {
+        this.screenshotLinks = screenshotLinks;
+    }
+
+    public String getIconLink() {
+        return iconLink;
+    }
+
+    public void setIconLink(String iconLink) {
+        this.iconLink = iconLink;
+    }
 
     public String getReleaseType() {
         return releaseType;
@@ -172,5 +210,13 @@ public class CustomAppReleaseWrapper {
 
     public void setBanner(Base64File banner) {
         this.banner = banner;
+    }
+
+    public String getBannerLink() {
+        return bannerLink;
+    }
+
+    public void setBannerLink(String bannerLink) {
+        this.bannerLink = bannerLink;
     }
 }

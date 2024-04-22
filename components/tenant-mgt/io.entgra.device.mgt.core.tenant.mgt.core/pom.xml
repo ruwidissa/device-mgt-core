@@ -20,7 +20,7 @@
     <parent>
         <artifactId>tenant-mgt</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.0.41-SNAPSHOT</version>
+        <version>5.0.42-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -74,7 +74,19 @@
                             org.wso2.carbon.stratos.common.exception;version="[4.9,5)",
                             org.wso2.carbon.stratos.common.listeners;version="[4.9,5)",
                             org.wso2.carbon.user.api;version="[1.0,2)",
-                            org.wso2.carbon.user.core.service;version="[4.8,5)"
+                            org.wso2.carbon.user.core.service;version="[4.8,5)",
+                            org.apache.commons.logging,
+                            io.entgra.device.mgt.core.application.mgt.common.*,
+                            io.entgra.device.mgt.core.application.mgt.core.config,
+                            io.entgra.device.mgt.core.device.mgt.core,
+                            io.entgra.device.mgt.core.tenant.mgt.common.*,
+                            io.entgra.device.mgt.core.device.mgt.common.metadata.mgt,
+                            io.entgra.device.mgt.core.device.mgt.common.exceptions,
+                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt,
+                            io.entgra.device.mgt.core.device.mgt.common.roles.config,
+                            io.entgra.device.mgt.core.device.mgt.core.metadata.mgt,
+                            io.entgra.device.mgt.core.device.mgt.core.config,
+                            io.entgra.device.mgt.core.device.mgt.core.dao.*
                         </Import-Package>
                         <Export-Package>
                             !io.entgra.device.mgt.core.tenant.mgt.core.internal,

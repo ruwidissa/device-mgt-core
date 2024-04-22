@@ -283,7 +283,7 @@ public class DeviceAgentServiceTest {
         Device testDevice = DeviceMgtAPITestHelper.generateDummyDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
         Mockito.when(this.deviceManagementProviderService
                 .getDevice(Mockito.any(DeviceIdentifier.class), Mockito.any(Boolean.class))).thenReturn(testDevice);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenThrow(new DeviceAccessAuthorizationException());
         Response response = deviceAgentService.updateDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER, testDevice);
         Assert.assertNotNull(response, "Response should not be null");
@@ -303,7 +303,7 @@ public class DeviceAgentServiceTest {
         Device testDevice = DeviceMgtAPITestHelper.generateDummyDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
         Mockito.when(this.deviceManagementProviderService
                 .getDevice(Mockito.any(DeviceIdentifier.class), Mockito.any(Boolean.class))).thenReturn(testDevice);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenReturn(false);
         Response response = deviceAgentService.updateDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER, testDevice);
         Assert.assertNotNull(response, "Response should not be null");
@@ -325,7 +325,7 @@ public class DeviceAgentServiceTest {
         Device testDevice = DeviceMgtAPITestHelper.generateDummyDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
         Mockito.when(this.deviceManagementProviderService
                 .getDevice(Mockito.any(DeviceIdentifier.class), Mockito.any(Boolean.class))).thenReturn(testDevice);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenReturn(true);
         Mockito.when(this.deviceManagementProviderService.modifyEnrollment(Mockito.any())).thenReturn(false);
         Response response = deviceAgentService.updateDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER, testDevice);
@@ -348,7 +348,7 @@ public class DeviceAgentServiceTest {
         Device testDevice = DeviceMgtAPITestHelper.generateDummyDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
         Mockito.when(this.deviceManagementProviderService
                 .getDevice(Mockito.any(DeviceIdentifier.class), Mockito.any(Boolean.class))).thenReturn(testDevice);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenReturn(true);
         Mockito.when(this.deviceManagementProviderService.modifyEnrollment(Mockito.any()))
                 .thenThrow(new DeviceManagementException());
@@ -370,7 +370,7 @@ public class DeviceAgentServiceTest {
                 "getAuthenticatedUser")).toReturn(AUTHENTICATED_USER);
         Device testDevice = DeviceMgtAPITestHelper.generateDummyDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
         Mockito.when(this.deviceManagementProviderService.getDevice(Mockito.any(DeviceIdentifier.class), Mockito.any(Boolean.class))).thenReturn(testDevice);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenReturn(true);
         Mockito.when(this.deviceManagementProviderService.modifyEnrollment(Mockito.any())).thenReturn((true));
         Response response = deviceAgentService.updateDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER, testDevice);
@@ -406,7 +406,7 @@ public class DeviceAgentServiceTest {
                 .toReturn(this.privilegedCarbonContext);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
                 "getDeviceAccessAuthorizationService")).toReturn(this.deviceAccessAuthorizationService);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenReturn(false);
         Mockito.when(this.privilegedCarbonContext.getTenantDomain())
                 .thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
@@ -430,7 +430,7 @@ public class DeviceAgentServiceTest {
                 .toReturn(this.privilegedCarbonContext);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
                 "getDeviceAccessAuthorizationService")).toReturn(this.deviceAccessAuthorizationService);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenThrow(new DeviceAccessAuthorizationException());
         Mockito.when(this.privilegedCarbonContext.getTenantDomain())
                 .thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
@@ -455,7 +455,7 @@ public class DeviceAgentServiceTest {
                 .toReturn(this.privilegedCarbonContext);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
                 "getDeviceAccessAuthorizationService")).toReturn(this.deviceAccessAuthorizationService);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenReturn(true);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventStreamAdminServiceStub"))
                 .toReturn(this.eventStreamAdminServiceStub);
@@ -483,7 +483,7 @@ public class DeviceAgentServiceTest {
                 .toReturn(this.privilegedCarbonContext);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
                 "getDeviceAccessAuthorizationService")).toReturn(this.deviceAccessAuthorizationService);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenReturn(true);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventStreamAdminServiceStub"))
                 .toThrow(new AxisFault(""));
@@ -509,7 +509,7 @@ public class DeviceAgentServiceTest {
                 .toReturn(this.privilegedCarbonContext);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
                 "getDeviceAccessAuthorizationService")).toReturn(this.deviceAccessAuthorizationService);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenReturn(true);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventStreamAdminServiceStub"))
                 .toThrow(new RemoteException());
@@ -537,7 +537,7 @@ public class DeviceAgentServiceTest {
                 .toReturn(this.privilegedCarbonContext);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
                 "getDeviceAccessAuthorizationService")).toReturn(this.deviceAccessAuthorizationService);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenReturn(true);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventStreamAdminServiceStub"))
                 .toThrow(new JWTClientException());
@@ -565,7 +565,7 @@ public class DeviceAgentServiceTest {
                 .toReturn(this.privilegedCarbonContext);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
                 "getDeviceAccessAuthorizationService")).toReturn(this.deviceAccessAuthorizationService);
-        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class)))
+        Mockito.when(this.deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class), Mockito.any(String[].class)))
                 .thenReturn(true);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getEventStreamAdminServiceStub"))
                 .toThrow(new UserStoreException());

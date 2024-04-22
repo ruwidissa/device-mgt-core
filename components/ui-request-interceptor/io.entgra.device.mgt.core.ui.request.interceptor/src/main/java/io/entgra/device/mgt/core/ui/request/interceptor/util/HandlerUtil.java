@@ -69,6 +69,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -616,7 +617,7 @@ public class HandlerUtil {
      * @return If successfully renew tokens, returns TRUE otherwise return FALSE
      * @throws IOException If an error occurs while witting error response to client side or invoke token renewal API
      */
-    private static ProxyResponse refreshToken(HttpServletRequest req, String keymanagerUrl)
+    private static ProxyResponse refreshToken(HttpServletRequest req, String keymanagerUrl, boolean isDefaultAuthToken)
             throws IOException {
         if (log.isDebugEnabled()) {
             log.debug("refreshing the token");
@@ -628,8 +629,11 @@ public class HandlerUtil {
             tokenResultResponse = constructProxyResponseByErrorCode(HttpStatus.SC_UNAUTHORIZED);
             return tokenResultResponse;
         }
-
-        authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
+        if (isDefaultAuthToken) {
+            authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY);
+        } else {
+            authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
+        }
         tokenResultResponse = getTokenResult(authData, keymanagerUrl);
         if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
             log.error("Error occurred while refreshing access token.");
@@ -647,6 +651,10 @@ public class HandlerUtil {
         return tokenResultResponse;
     }
 
+    private static ProxyResponse refreshToken(HttpServletRequest req, String keymanagerUrl) throws IOException {
+        return refreshToken(req, keymanagerUrl, false);
+    }
+
     public static ProxyResponse getTokenResult(AuthData authData, String keymanagerUrl) throws IOException {
         HttpPost tokenEndpoint = new HttpPost(keymanagerUrl + HandlerConstants.OAUTH2_TOKEN_ENDPOINT);
         StringEntity tokenEndpointPayload = new StringEntity(
@@ -655,6 +663,12 @@ public class HandlerUtil {
 
         tokenEndpoint.setEntity(tokenEndpointPayload);
         String encodedClientApp = authData.getEncodedClientApp();
+        if (encodedClientApp == null) {
+            String clientId = authData.getClientId();
+            String clientSecret = authData.getClientSecret();
+            String toEncode = clientId + ":" + clientSecret;
+            encodedClientApp = Base64.getEncoder().encodeToString(toEncode.getBytes());
+        }
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC +
                 encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());

@@ -119,4 +119,11 @@ import java.util.List;
 
     void deleteAllChildCommentsOfReview(int rootParentId, int tenantId) throws ReviewManagementDAOException;
 
+ /**
+  * Delete reviews of a tenant
+  *
+  * @param tenantId Tenant ID
+  * @throws ReviewManagementDAOException thrown if an error occurs while deleting data
+  */
+ void deleteReviewsByTenant(int tenantId) throws ReviewManagementDAOException;
 }

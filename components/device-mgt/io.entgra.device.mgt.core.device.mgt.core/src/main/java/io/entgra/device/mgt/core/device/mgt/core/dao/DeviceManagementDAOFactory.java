@@ -27,6 +27,7 @@ import io.entgra.device.mgt.core.device.mgt.core.config.datasource.JNDILookupDef
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.ApplicationDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.DeviceStatusDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.DeviceTypeDAOImpl;
+import io.entgra.device.mgt.core.device.mgt.core.dao.impl.TenantDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.device.GenericDeviceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.device.OracleDeviceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.impl.device.PostgreSQLDeviceDAOImpl;
@@ -134,6 +135,22 @@ public class DeviceManagementDAOFactory {
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2:
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MYSQL:
                     return new GenericEnrollmentDAOImpl();
+                default:
+                    throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
+            }
+        }
+        throw new IllegalStateException("Database engine has not initialized properly.");
+    }
+
+    public static TenantDAO getTenantDAO() {
+        if (databaseEngine != null) {
+            switch (databaseEngine) {
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_ORACLE:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MSSQL:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MYSQL:
+                    return new TenantDAOImpl();
                 default:
                     throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
             }

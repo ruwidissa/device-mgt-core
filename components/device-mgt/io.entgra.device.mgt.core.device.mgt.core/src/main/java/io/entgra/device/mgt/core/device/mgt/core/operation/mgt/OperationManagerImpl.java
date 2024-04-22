@@ -18,6 +18,15 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt;
 
+import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
+import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
+import io.entgra.device.mgt.core.notification.logger.DeviceConnectivityLogContext;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraDeviceConnectivityLoggerImpl;
+import io.entgra.device.mgt.core.notification.logger.impl.EntgraPolicyLoggerImpl;
+import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
@@ -221,7 +230,7 @@ public class OperationManagerImpl implements OperationManager {
                 if (operationDto.getControl()
                         == io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {
                     Map<Integer, Integer> pendingOperationIDs = operationDAO
-                            .getExistingOperationIDs(enrolments.keySet().toArray(new Integer[0]), operationCode);
+                            .getExistingNotExecutedOperationIDs(enrolments.keySet().toArray(new Integer[0]), operationCode);
                     for (Integer enrolmentId : pendingOperationIDs.keySet()) {
                         operation.setId(pendingOperationIDs.get(enrolmentId));
                         device = enrolments.get(enrolmentId);
@@ -293,7 +302,7 @@ public class OperationManagerImpl implements OperationManager {
             if (operationDto.getControl() ==
                     io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {
                 Map<Integer, Integer> pendingOperationIDs = operationDAO
-                        .getExistingOperationIDs(enrolments.keySet().toArray(new Integer[0]), operationCode);
+                        .getExistingNotExecutedOperationIDs(enrolments.keySet().toArray(new Integer[0]), operationCode);
                 Device device;
                 for (Integer enrolmentId : pendingOperationIDs.keySet()) {
                     operation.setId(pendingOperationIDs.get(enrolmentId));
@@ -367,7 +376,7 @@ public class OperationManagerImpl implements OperationManager {
                 if (operationDto.getControl() ==
                         io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {
                     Map<Integer, Integer> pendingOperationIDs = operationDAO
-                            .getExistingOperationIDs(enrolments.keySet().toArray(new Integer[0]), operationCode);
+                            .getExistingNotExecutedOperationIDs(enrolments.keySet().toArray(new Integer[0]), operationCode);
                     Device device;
                     for (Integer enrolmentId : pendingOperationIDs.keySet()) {
                         operation.setId(pendingOperationIDs.get(enrolmentId));
@@ -561,9 +570,11 @@ public class OperationManagerImpl implements OperationManager {
             } else {
                 boolean isAuthorized;
                 authorizedDeviceList = new ArrayList<>();
+                String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+                String[] requiredPermissions = new String[] {requiredPermission};
                 for (DeviceIdentifier devId : deviceIds) {
                     isAuthorized = DeviceManagementDataHolder.getInstance().getDeviceAccessAuthorizationService().
-                            isUserAuthorized(devId);
+                            isUserAuthorized(devId, requiredPermissions);
                     if (isAuthorized) {
                         authorizedDeviceList.add(devId);
                     } else {
@@ -845,23 +856,23 @@ public class OperationManagerImpl implements OperationManager {
             }
 
             if (dtoOperation != null) {
-                if (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.COMMAND.equals(dtoOperation.getType()
-                )) {
-                    io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation commandOperation;
-                    commandOperation =
-                            (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation) commandOperationDAO.
-                                    getOperation(dtoOperation.getId());
-                    dtoOperation.setEnabled(commandOperation.isEnabled());
-                } else if (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.CONFIG.equals(dtoOperation.
-                        getType())) {
-                    dtoOperation = configOperationDAO.getOperation(dtoOperation.getId());
-                } else if (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.PROFILE.equals(dtoOperation.
-                        getType())) {
-                    dtoOperation = profileOperationDAO.getOperation(dtoOperation.getId());
-                } else if (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.POLICY.equals(dtoOperation.
-                        getType())) {
-                    dtoOperation = policyOperationDAO.getOperation(dtoOperation.getId());
-                }
+//                if (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.COMMAND.equals(dtoOperation.getType()
+//                )) {
+//                    io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation commandOperation;
+//                    commandOperation =
+//                            (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation) commandOperationDAO.
+//                                    getOperation(dtoOperation.getId());
+//                    dtoOperation.setEnabled(commandOperation.isEnabled());
+//                } else if (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.CONFIG.equals(dtoOperation.
+//                        getType())) {
+//                    dtoOperation = configOperationDAO.getOperation(dtoOperation.getId());
+//                } else if (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.PROFILE.equals(dtoOperation.
+//                        getType())) {
+//                    dtoOperation = profileOperationDAO.getOperation(dtoOperation.getId());
+//                } else if (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.POLICY.equals(dtoOperation.
+//                        getType())) {
+//                    dtoOperation = policyOperationDAO.getOperation(dtoOperation.getId());
+//                }
                 operation = OperationDAOUtil.convertOperation(dtoOperation);
             }
         } catch (OperationManagementDAOException e) {
@@ -1054,29 +1065,29 @@ public class OperationManagerImpl implements OperationManager {
             io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation deviceSpecificOperation = operationDAO.
                     getOperationByDeviceAndId(enrolmentInfo.getId(),
                             operationId);
-            io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation dtoOperation = deviceSpecificOperation;
-            if (deviceSpecificOperation.getType().
-                    equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.COMMAND)) {
-                io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation commandOperation;
-                commandOperation =
-                        (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation) commandOperationDAO.
-                                getOperation(deviceSpecificOperation.getId());
-                dtoOperation.setEnabled(commandOperation.isEnabled());
-            } else if (deviceSpecificOperation.getType().
-                    equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.CONFIG)) {
-                dtoOperation = configOperationDAO.getOperation(deviceSpecificOperation.getId());
-            } else if (deviceSpecificOperation.getType().equals(
-                    io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.PROFILE)) {
-                dtoOperation = profileOperationDAO.getOperation(deviceSpecificOperation.getId());
-            } else if (deviceSpecificOperation.getType().equals(
-                    io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.POLICY)) {
-                dtoOperation = policyOperationDAO.getOperation(deviceSpecificOperation.getId());
-            }
-            if (dtoOperation == null) {
-                throw new OperationManagementException("Operation not found for operation Id:" + operationId +
-                        " device id:" + deviceId.getId());
-            }
-            dtoOperation.setStatus(deviceSpecificOperation.getStatus());
+//            io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation dtoOperation = deviceSpecificOperation;
+//            if (deviceSpecificOperation.getType().
+//                    equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.COMMAND)) {
+//                io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation commandOperation;
+//                commandOperation =
+//                        (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation) commandOperationDAO.
+//                                getOperation(deviceSpecificOperation.getId());
+//                dtoOperation.setEnabled(commandOperation.isEnabled());
+//            } else if (deviceSpecificOperation.getType().
+//                    equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.CONFIG)) {
+//                dtoOperation = configOperationDAO.getOperation(deviceSpecificOperation.getId());
+//            } else if (deviceSpecificOperation.getType().equals(
+//                    io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.PROFILE)) {
+//                dtoOperation = profileOperationDAO.getOperation(deviceSpecificOperation.getId());
+//            } else if (deviceSpecificOperation.getType().equals(
+//                    io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.POLICY)) {
+//                dtoOperation = policyOperationDAO.getOperation(deviceSpecificOperation.getId());
+//            }
+//            if (dtoOperation == null) {
+//                throw new OperationManagementException("Operation not found for operation Id:" + operationId +
+//                        " device id:" + deviceId.getId());
+//            }
+//            dtoOperation.setStatus(deviceSpecificOperation.getStatus());
             operation = OperationDAOUtil.convertOperation(deviceSpecificOperation);
         } catch (OperationManagementDAOException e) {
             throw new OperationManagementException("Error occurred while retrieving the list of " +
@@ -1159,23 +1170,23 @@ public class OperationManagerImpl implements OperationManager {
                 throw new OperationManagementException("Operation not found for given Id:" + operationId);
             }
 
-            if (dtoOperation.getType()
-                    .equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.COMMAND)) {
-                io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation commandOperation;
-                commandOperation =
-                        (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation) commandOperationDAO.
-                                getOperation(dtoOperation.getId());
-                dtoOperation.setEnabled(commandOperation.isEnabled());
-            } else if (dtoOperation.getType().
-                    equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.CONFIG)) {
-                dtoOperation = configOperationDAO.getOperation(dtoOperation.getId());
-            } else if (dtoOperation.getType().equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.
-                    PROFILE)) {
-                dtoOperation = profileOperationDAO.getOperation(dtoOperation.getId());
-            } else if (dtoOperation.getType().equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.
-                    POLICY)) {
-                dtoOperation = policyOperationDAO.getOperation(dtoOperation.getId());
-            }
+//            if (dtoOperation.getType()
+//                    .equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.COMMAND)) {
+//                io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation commandOperation;
+//                commandOperation =
+//                        (io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.CommandOperation) commandOperationDAO.
+//                                getOperation(dtoOperation.getId());
+//                dtoOperation.setEnabled(commandOperation.isEnabled());
+//            } else if (dtoOperation.getType().
+//                    equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.CONFIG)) {
+//                dtoOperation = configOperationDAO.getOperation(dtoOperation.getId());
+//            } else if (dtoOperation.getType().equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.
+//                    PROFILE)) {
+//                dtoOperation = profileOperationDAO.getOperation(dtoOperation.getId());
+//            } else if (dtoOperation.getType().equals(io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation.Type.
+//                    POLICY)) {
+//                dtoOperation = policyOperationDAO.getOperation(dtoOperation.getId());
+//            }
             operation = OperationDAOUtil.convertOperation(dtoOperation);
         } catch (OperationManagementDAOException e) {
             throw new OperationManagementException("Error occurred while retrieving the operation with operation Id '" +
@@ -1477,9 +1488,11 @@ public class OperationManagerImpl implements OperationManager {
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         String user = this.getUser();
         boolean isUserAuthorized;
+        String requiredPermission = PermissionManagerServiceImpl.getInstance().getRequiredPermission();
+        String[] requiredPermissions = new String[] {requiredPermission};
         try {
             isUserAuthorized = DeviceManagementDataHolder.getInstance()
-                    .getDeviceAccessAuthorizationService().isUserAuthorized(deviceId, user);
+                    .getDeviceAccessAuthorizationService().isUserAuthorized(deviceId, user, requiredPermissions);
         } catch (DeviceAccessAuthorizationException e) {
             throw new OperationManagementException("Error occurred while checking the device access permissions for '" +
                     deviceId.getType() + "' device carrying the identifier '" +

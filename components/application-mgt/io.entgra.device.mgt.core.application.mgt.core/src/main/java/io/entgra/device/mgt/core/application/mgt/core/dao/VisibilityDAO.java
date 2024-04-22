@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.application.mgt.core.dao;
 
+import io.entgra.device.mgt.core.application.mgt.core.exception.ApplicationManagementDAOException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.VisibilityManagementDAOException;
 
 import java.util.List;
@@ -70,4 +71,11 @@ public interface VisibilityDAO {
      */
     void deleteAppUnrestrictedRoles(int applicationId, int tenantId) throws VisibilityManagementDAOException;
 
+    /**
+     * Delete app unrestricted roles of tenant
+     *
+     * @param tenantId Tenant ID
+     * @throws VisibilityManagementDAOException thrown if an error occurs while deleting data
+     */
+    void deleteAppUnrestrictedRolesByTenant(int tenantId) throws VisibilityManagementDAOException;
 }

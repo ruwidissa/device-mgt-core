@@ -182,7 +182,7 @@ public class GenericHeartBeatDAOImpl implements HeartBeatDAO {
                 }
             }
         } catch (SQLException e) {
-            String msg = "Error occurred checking existense of UUID" + uuid +
+            String msg = "Error occurred checking existence of UUID" + uuid +
                          " amongst heartbeat meta info.";
             log.error(msg, e);
             throw new HeartBeatDAOException(msg, e);

@@ -313,4 +313,18 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             throw new StorageManagementException(msg, e);
         }
     }
+
+    @Override
+    public void deleteAppFolderOfTenant(int tenantId) throws ApplicationStorageManagementException{
+        String folderPath = storagePath + File.separator + tenantId;
+        File folder = new File(folderPath);
+        if (folder.exists()) {
+            try {
+                StorageManagementUtil.delete(folder);
+            } catch (IOException e) {
+                throw new ApplicationStorageManagementException(
+                        "Error occurred while deleting App folder of tenant:" + tenantId, e);
+            }
+        }
+    }
 }

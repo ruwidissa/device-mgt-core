@@ -243,7 +243,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
             BasicUserInfo user = this.getBasicUserInfo(username);
             return Response.status(Response.Status.OK).entity(user).build();
-        } catch (UserStoreException e) {
+        } catch (UserStoreException | DeviceManagementException e) {
             String msg = "Error occurred while retrieving information of the user '" + username + "'";
             log.error(msg, e);
             return Response.serverError().entity(
@@ -325,7 +325,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
             BasicUserInfo updatedUserInfo = this.getBasicUserInfo(username);
             return Response.ok().entity(updatedUserInfo).build();
-        } catch (UserStoreException e) {
+        } catch (UserStoreException | DeviceManagementException e) {
             String msg = "Error occurred while trying to update user '" + username + "'";
             log.error(msg, e);
             return Response.serverError().entity(
@@ -486,7 +486,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             result.setCount(userList.size());
 
             return Response.status(Response.Status.OK).entity(result).build();
-        } catch (UserStoreException e) {
+        } catch (UserStoreException | DeviceManagementException e) {
             String msg = "Error occurred while retrieving the list of users.";
             log.error(msg, e);
             return Response.serverError().entity(
@@ -565,6 +565,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                     basicUserInfo.setEmailAddress(getClaimValue(user, Constants.USER_CLAIM_EMAIL_ADDRESS));
                     basicUserInfo.setFirstname(getClaimValue(user, Constants.USER_CLAIM_FIRST_NAME));
                     basicUserInfo.setLastname(getClaimValue(user, Constants.USER_CLAIM_LAST_NAME));
+                    basicUserInfo.setRemovable(isUserRemovable(user));
                     filteredUserList.add(basicUserInfo);
                 }
             }
@@ -589,7 +590,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             result.setCount(commonUsers != null ? commonUsers.size() : 0);
 
             return Response.status(Response.Status.OK).entity(result).build();
-        } catch (UserStoreException e) {
+        } catch (UserStoreException | DeviceManagementException e) {
             String msg = "Error occurred while retrieving the list of users.";
             log.error(msg, e);
             return Response.serverError().entity(
@@ -1240,7 +1241,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         return initialUserPassword.toString();
     }
 
-    private BasicUserInfo getBasicUserInfo(String username) throws UserStoreException {
+    private BasicUserInfo getBasicUserInfo(String username) throws UserStoreException, DeviceManagementException {
         BasicUserInfo userInfo = new BasicUserInfo();
         userInfo.setUsername(username);
         userInfo.setEmailAddress(getClaimValue(username, Constants.USER_CLAIM_EMAIL_ADDRESS));
@@ -1248,7 +1249,19 @@ public class UserManagementServiceImpl implements UserManagementService {
         userInfo.setLastname(getClaimValue(username, Constants.USER_CLAIM_LAST_NAME));
         userInfo.setCreatedDate(getClaimValue(username, Constants.USER_CLAIM_CREATED));
         userInfo.setModifiedDate(getClaimValue(username, Constants.USER_CLAIM_MODIFIED));
+        userInfo.setRemovable(isUserRemovable(username));
         return userInfo;
+    }
+
+    /**
+     * Check if the user can be removed or not
+     * @param username Username of the user
+     * @return True when user can be removed, otherwise false
+     * @throws DeviceManagementException Throws when error occurred while getting device count
+     */
+    private boolean isUserRemovable(String username) throws DeviceManagementException {
+        DeviceManagementProviderService deviceManagementProviderService = DeviceMgtAPIUtils.getDeviceManagementService();
+        return deviceManagementProviderService.getDeviceCount(username.contains("/") ? username.split("/")[1] : username) == 0;
     }
 
     private String getClaimValue(String username, String claimUri) throws UserStoreException {
