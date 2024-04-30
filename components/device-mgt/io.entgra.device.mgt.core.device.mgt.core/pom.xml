@@ -82,8 +82,8 @@
                         <Private-Package>io.entgra.device.mgt.core.device.mgt.core.internal</Private-Package>
                         <Import-Package>
                             com.fasterxml.jackson.databind;version="[2.14,3)",
-                            com.google.common.collect;version="[31.0,32)",
-                            com.google.common.reflect;version="[31.0,32)",
+                            com.google.common.collect;version="[32.1,33)";resolution:=optional,
+                            com.google.common.reflect;version="[32.1,33)";resolution:=optional,
                             com.google.gson;version="[2.9,3)",
                             com.google.gson.reflect;version="[2.9,3)",
                             io.entgra.device.mgt.core.apimgt.annotations;version="[5.0,6)",
@@ -501,6 +501,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
