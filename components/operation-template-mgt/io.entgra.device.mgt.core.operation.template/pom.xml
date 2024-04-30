@@ -54,7 +54,7 @@
                         <Bundle-Description>IOT Operation Template Bundle</Bundle-Description>
                         <Private-Package>io.entgra.device.mgt.core.operation.template.internal</Private-Package>
                         <Import-Package>
-                            com.google.common.cache;version="[31.0,32)",
+                            com.google.common.cache;version="[32.1,33)";resolution:=optional,
                             com.google.gson;version="[2.9,3)",
                             io.entgra.device.mgt.core.device.mgt.common.exceptions;version="[5.0,6)",
                             io.entgra.device.mgt.core.device.mgt.core.service;version="[5.0,6)",
@@ -298,7 +298,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
+            <version>${google.guava.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
