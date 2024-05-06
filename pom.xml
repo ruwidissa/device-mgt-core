@@ -1874,6 +1874,11 @@
                 <artifactId>slf4j-ext</artifactId>
                 <version>${slf4j.ext.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.commons</groupId>
+                <artifactId>org.wso2.carbon.tenant.common</artifactId>
+                <version>${carbon.commons.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
