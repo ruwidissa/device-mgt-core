@@ -477,6 +477,7 @@ public interface DeviceDAO {
      * @return returns list of device types.
      * @throws DeviceManagementDAOException
      */
+    @Deprecated
     List<DeviceType> getDeviceTypes() throws DeviceManagementDAOException;
 
     /**

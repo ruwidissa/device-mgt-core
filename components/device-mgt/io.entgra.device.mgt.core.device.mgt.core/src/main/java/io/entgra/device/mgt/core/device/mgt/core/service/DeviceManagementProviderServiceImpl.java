@@ -329,7 +329,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                         if ((updateStatus > 0) || EnrolmentInfo.Status.REMOVED.
                                 equals(existingEnrolmentInfo.getStatus())) {
                             enrollment = enrollmentDAO
-                                    .addEnrollment(existingDevice.getId(), newEnrolmentInfo, tenantId);
+                                    .addEnrollment(existingDevice.getId(), deviceIdentifier,
+                                            newEnrolmentInfo, tenantId);
                             if (enrollment == null) {
                                 DeviceManagementDAOFactory.rollbackTransaction();
                                 throw new DeviceManagementException(
@@ -375,7 +376,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 if (type != null) {
                     int deviceId = deviceDAO.addDevice(type.getId(), device, tenantId);
                     device.setId(deviceId);
-                    enrollment = enrollmentDAO.addEnrollment(deviceId, device.getEnrolmentInfo(), tenantId);
+                    enrollment = enrollmentDAO.addEnrollment(deviceId, deviceIdentifier, device.getEnrolmentInfo(), tenantId);
                     if (enrollment == null) {
                         DeviceManagementDAOFactory.rollbackTransaction();
                         throw new DeviceManagementException(

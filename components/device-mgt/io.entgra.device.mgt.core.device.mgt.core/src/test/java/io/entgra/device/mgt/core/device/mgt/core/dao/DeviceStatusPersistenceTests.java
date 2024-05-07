@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.dao;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
@@ -215,7 +216,8 @@ public class DeviceStatusPersistenceTests extends BaseDeviceManagementTest {
         EnrolmentInfo source = new EnrolmentInfo(owner, EnrolmentInfo.OwnerShip.BYOD, initialStatus);
         try {
             DeviceManagementDAOFactory.openConnection();
-            EnrolmentInfo config = enrollmentDAO.addEnrollment(deviceId, source, tenantId);
+            EnrolmentInfo config = enrollmentDAO.addEnrollment(deviceId,
+                    new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()), source, tenantId);
             device.setEnrolmentInfo(config);
             return config.getId();
         } catch (DeviceManagementDAOException | SQLException e) {

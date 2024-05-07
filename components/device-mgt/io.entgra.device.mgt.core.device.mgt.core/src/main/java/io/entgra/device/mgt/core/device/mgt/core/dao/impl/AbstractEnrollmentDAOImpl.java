@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
@@ -39,24 +40,29 @@ import java.util.List;
 public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
 
     @Override
-    public EnrolmentInfo addEnrollment(int deviceId, EnrolmentInfo enrolmentInfo,
+    public EnrolmentInfo addEnrollment(int deviceId, DeviceIdentifier deviceIdentifier, EnrolmentInfo enrolmentInfo,
                                        int tenantId) throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             conn = this.getConnection();
-            String sql = "INSERT INTO DM_ENROLMENT(DEVICE_ID, OWNER, OWNERSHIP, STATUS, " +
-                    "DATE_OF_ENROLMENT, DATE_OF_LAST_UPDATE, TENANT_ID) VALUES(?, ?, ?, ?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql, new String[] {"id"});
+            String sql = "INSERT INTO DM_ENROLMENT(DEVICE_ID, DEVICE_TYPE, DEVICE_IDENTIFICATION, OWNER, OWNERSHIP, " +
+                    "STATUS, IS_TRANSFERRED, DATE_OF_ENROLMENT, DATE_OF_LAST_UPDATE, TENANT_ID) " +
+                    "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             Timestamp enrollmentTime = new Timestamp(new Date().getTime());
+
+            stmt = conn.prepareStatement(sql, new String[]{"id"});
             stmt.setInt(1, deviceId);
-            stmt.setString(2, enrolmentInfo.getOwner());
-            stmt.setString(3, enrolmentInfo.getOwnership().toString());
-            stmt.setString(4, enrolmentInfo.getStatus().toString());
-            stmt.setTimestamp(5, enrollmentTime);
-            stmt.setTimestamp(6, enrollmentTime);
-            stmt.setInt(7, tenantId);
+            stmt.setString(2, deviceIdentifier.getType());
+            stmt.setString(3, deviceIdentifier.getId());
+            stmt.setString(4, enrolmentInfo.getOwner());
+            stmt.setString(5, enrolmentInfo.getOwnership().toString());
+            stmt.setString(6, enrolmentInfo.getStatus().toString());
+            stmt.setBoolean(7, enrolmentInfo.isTransferred());
+            stmt.setTimestamp(8, enrollmentTime);
+            stmt.setTimestamp(9, enrollmentTime);
+            stmt.setInt(10, tenantId);
             stmt.execute();
 
             rs = stmt.getGeneratedKeys();
@@ -70,7 +76,6 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
             }
             return null;
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new DeviceManagementDAOException("Error occurred while adding enrolment configuration", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
@@ -81,7 +86,6 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
     public int updateEnrollment(EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             conn = this.getConnection();
             String sql = "UPDATE DM_ENROLMENT SET OWNERSHIP = ?, STATUS = ?, DATE_OF_LAST_UPDATE = ? " +
@@ -92,12 +96,11 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
             stmt.setTimestamp(3, new Timestamp(new Date().getTime()));
             stmt.setInt(4, enrolmentInfo.getId());
             stmt.setInt(5, tenantId);
-            int updatedCount = stmt.executeUpdate();
-            return updatedCount;
+            return stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while updating enrolment configuration", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -105,7 +108,6 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
     public boolean updateEnrollmentStatus(List<EnrolmentInfo> enrolmentInfos) throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         boolean status = false;
         int updateStatus = -1;
         try {
@@ -132,7 +134,7 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while updating enrolment status of given device-list.", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
         return status;
     }
@@ -147,7 +149,7 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         try {
             conn = this.getConnection();
             String sql = "DELETE FROM DM_ENROLMENT WHERE DEVICE_ID = ? AND OWNER = ? AND TENANT_ID = ?";
-            stmt = conn.prepareStatement(sql, new String[] {"id"});
+            stmt = conn.prepareStatement(sql, new String[]{"id"});
             stmt.setInt(1, deviceId);
             stmt.setString(2, currentOwner);
             stmt.setInt(3, tenantId);
@@ -177,12 +179,12 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
             stmt.setString(1, owner);
             stmt.setInt(2, tenantID);
             rs = stmt.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
                 count = rs.getInt("COUNT");
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while trying to get device " +
-                    "count of Owner : "+owner, e);
+                    "count of Owner : " + owner, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -197,11 +199,11 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
 
     @Override
     public boolean setStatusAllDevices(String currentOwner, EnrolmentInfo.Status status, int tenantId)
-            throws DeviceManagementDAOException{
+            throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         Timestamp updateTime = new Timestamp(new Date().getTime());
-        if(getCountOfDevicesOfOwner(currentOwner, tenantId) > 0){
+        if (getCountOfDevicesOfOwner(currentOwner, tenantId) > 0) {
             try {
                 conn = this.getConnection();
                 String sql = "UPDATE DM_ENROLMENT SET STATUS = ?, DATE_OF_LAST_UPDATE = ? WHERE OWNER = ? AND TENANT_ID = ?";
@@ -236,8 +238,8 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
             stmt.setInt(3, enrolmentID);
             stmt.setInt(4, tenantId);
             int updatedRowCount = stmt.executeUpdate();
-            if (updatedRowCount != 1){
-                throw new DeviceManagementDAOException("Error occurred while setting the status of device enrolment: "+
+            if (updatedRowCount != 1) {
+                throw new DeviceManagementDAOException("Error occurred while setting the status of device enrolment: " +
                         updatedRowCount + " rows were updated instead of one row!!!");
             }
             // save the device status history
@@ -254,10 +256,11 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         return addDeviceStatus(config.getId(), config.getStatus());
     }
 
-    public boolean addDeviceStatus(String currentOwner, EnrolmentInfo.Status status, int tenantId) throws DeviceManagementDAOException {
+    public boolean addDeviceStatus(String currentOwner, EnrolmentInfo.Status status, int tenantId)
+            throws DeviceManagementDAOException {
         Connection conn;
         String changedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        if (changedBy == null){
+        if (changedBy == null) {
             changedBy = DeviceManagementConstants.MaintenanceProperties.MAINTENANCE_USER;
         }
         PreparedStatement stmt = null;
@@ -281,7 +284,7 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
             sql = "INSERT INTO DM_DEVICE_STATUS (ENROLMENT_ID, DEVICE_ID, STATUS, UPDATE_TIME, CHANGED_BY) VALUES(?, ?, ?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 if (conn.getMetaData().supportsBatchUpdates()) {
-                    for(int[] info: enrolmentInfoList){
+                    for (int[] info : enrolmentInfoList) {
                         ps.setInt(1, info[0]);
                         ps.setInt(2, info[1]);
                         ps.setString(3, status.toString());
@@ -296,7 +299,7 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
                         }
                     }
                 } else {
-                    for(int[] info: enrolmentInfoList){
+                    for (int[] info : enrolmentInfoList) {
                         ps.setInt(1, info[0]);
                         ps.setInt(2, info[1]);
                         ps.setString(3, status.toString());
@@ -320,14 +323,15 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
     public boolean addDeviceStatus(int enrolmentId, EnrolmentInfo.Status status) throws DeviceManagementDAOException {
         Connection conn;
         String changedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        if (changedBy == null){
+        if (changedBy == null) {
             changedBy = DeviceManagementConstants.MaintenanceProperties.MAINTENANCE_USER;
         }
         PreparedStatement stmt = null;
         try {
             conn = this.getConnection();
-            // get the device id and last udpated status from the device status table
-            String sql = "SELECT DEVICE_ID, STATUS FROM DM_DEVICE_STATUS WHERE ENROLMENT_ID = ? ORDER BY UPDATE_TIME DESC LIMIT 1";
+            // get the device id and last updated status from the device status table
+            String sql = "SELECT DEVICE_ID, STATUS FROM DM_DEVICE_STATUS " +
+                    "WHERE ENROLMENT_ID = ? ORDER BY UPDATE_TIME DESC LIMIT 1";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, enrolmentId);
             ResultSet rs = stmt.executeQuery();
@@ -353,12 +357,14 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
                     } else {
                         // if there were no records corresponding to the enrolment id this is a problem. i.e. enrolment
                         // id is invalid
-                        throw new DeviceManagementDAOException("Error occurred while setting the status of device enrolment: no record for enrolment id " + enrolmentId);
+                        throw new DeviceManagementDAOException("Error occurred while setting the status of " +
+                                "device enrolment: no record for enrolment id " + enrolmentId);
                     }
                     DeviceManagementDAOUtil.cleanupResources(stmt, null);
                 }
 
-                sql = "INSERT INTO DM_DEVICE_STATUS (ENROLMENT_ID, DEVICE_ID, STATUS, UPDATE_TIME, CHANGED_BY) VALUES(?, ?, ?, ?, ?)";
+                sql = "INSERT INTO DM_DEVICE_STATUS (ENROLMENT_ID, DEVICE_ID, STATUS, UPDATE_TIME, CHANGED_BY) " +
+                        "VALUES(?, ?, ?, ?, ?)";
                 stmt = conn.prepareStatement(sql);
                 Timestamp updateTime = new Timestamp(new Date().getTime());
                 stmt.setInt(1, enrolmentId);
@@ -377,6 +383,7 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         }
         return true;
     }
+
     @Override
     public EnrolmentInfo.Status getStatus(int deviceId, String currentOwner,
                                           int tenantId) throws DeviceManagementDAOException {
@@ -534,11 +541,11 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         }
     }
 
-    private Connection getConnection() throws SQLException {
+    protected Connection getConnection() throws SQLException {
         return DeviceManagementDAOFactory.getConnection();
     }
 
-    private EnrolmentInfo loadEnrolment(ResultSet rs) throws SQLException {
+    protected EnrolmentInfo loadEnrolment(ResultSet rs) throws SQLException {
         EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
         enrolmentInfo.setOwner(rs.getString("OWNER"));
         enrolmentInfo.setOwnership(EnrolmentInfo.OwnerShip.valueOf(rs.getString("OWNERSHIP")));

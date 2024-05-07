@@ -102,7 +102,8 @@ public class PolicyDAOTestCase extends BasePolicyManagementDAOTest {
             DeviceManagementDAOFactory.beginTransaction();
             for (Device device : devices) {
                 int id = deviceDAO.addDevice(type.getId(), device, -1234);
-                enrollmentDAO.addEnrollment(id, device.getEnrolmentInfo(), -1234);
+                enrollmentDAO.addEnrollment(id, new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()),
+                        device.getEnrolmentInfo(), -1234);
             }
         } catch (TransactionManagementException e) {
             log.error("Error occurred while adding device enrolment", e);
