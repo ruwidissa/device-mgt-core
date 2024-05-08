@@ -22,7 +22,7 @@ import java.util.List;
 
 public class ConfigOperation extends Operation {
 
-    private final List<Property> properties;
+    private final transient List<Property> properties;
 
     public ConfigOperation() {
         properties = new ArrayList<>();
