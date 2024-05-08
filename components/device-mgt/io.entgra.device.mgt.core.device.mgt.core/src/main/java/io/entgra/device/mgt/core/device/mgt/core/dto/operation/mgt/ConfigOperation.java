@@ -22,19 +22,8 @@ import java.util.List;
 
 public class ConfigOperation extends Operation {
 
-    private final transient List<Property> properties;
-
     public ConfigOperation() {
-        properties = new ArrayList<>();
         setControl(Control.REPEAT);
-    }
-
-    public List<Property> getConfigProperties() {
-        return properties;
-    }
-
-    public void addConfigProperty(String name, Object value, Class<?> type) {
-        properties.add(new Property(name, value, type));
     }
 
     public Type getType() {
