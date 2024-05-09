@@ -70,7 +70,7 @@ public class MDMAndroidOperationUtil {
 				webApplication.setName(application.getName());
 //				webApplication.setType(application.getType().toString());
 //				Hard-corded "type" to "webapp". Some agent versions accept only "webapp" as the type.
-				webApplication.setType("webapp");
+//				webApplication.setType("webapp");
 				webApplication.setProperties(application.getProperties());
 				operation.setPayLoad(webApplication.toJSON());
 				break;
