@@ -42,7 +42,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
+
     private static final Log log = LogFactory.getLog(DeviceSubTypeServiceImpl.class);
+
     private static final LoadingCache<DeviceSubTypeCacheKey, DeviceSubType> deviceSubTypeCache
             = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.MINUTES)
@@ -143,7 +145,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
     }
 
     @Override
-    public DeviceSubType getDeviceSubType(String subTypeId, int tenantId, String deviceType)
+    public synchronized DeviceSubType getDeviceSubType(String subTypeId, int tenantId, String deviceType)
             throws SubTypeMgtPluginException {
         try {
             DeviceSubTypeCacheKey key = DeviceSubTypeMgtUtil.getDeviceSubTypeCacheKey(tenantId, subTypeId, deviceType);
