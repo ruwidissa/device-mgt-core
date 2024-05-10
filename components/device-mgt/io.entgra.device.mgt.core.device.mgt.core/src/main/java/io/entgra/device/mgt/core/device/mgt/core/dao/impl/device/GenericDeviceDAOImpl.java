@@ -1297,7 +1297,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             }
             query = query.concat("WHERE DM_DEVICE.ID IN (");
             StringJoiner joiner = new StringJoiner(",", query ,
-                    ") AND DM_DEVICE.TENANT_ID = ? AND e.STATUS != ?");
+                    ") AND DM_DEVICE.TENANT_ID = ? AND e.STATUS != ? AND e.STATUS != ?");
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             query = joiner.toString();
 
@@ -1341,6 +1341,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
                 ps.setInt(index++, tenantId);
                 ps.setString(index++, EnrolmentInfo.Status.REMOVED.toString());
+                ps.setString(index++, EnrolmentInfo.Status.DELETED.toString());
                 if (isDeviceNameProvided) {
                     ps.setString(index++, name + "%");
                 }
