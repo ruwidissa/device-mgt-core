@@ -1323,7 +1323,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
                     DeviceManagementConstants.EventServices.GEOFENCE, new GeoFenceEventMeta(geofenceData),
                     tenantId, geofenceData.getGroupIds());
         } catch (EventConfigurationException e) {
-            String msg = "Failed while creating EVENT_REVOKE operation creation task entry while updating geo fence "
+            String msg = "Failed while creating EVENT_CONFIG operation creation task entry while updating geo fence "
                     + geofenceData.getFenceName() + " of the tenant " + tenantId;
             log.error(msg, e);
             throw new GeoLocationBasedServiceException(msg, e);
@@ -1650,11 +1650,11 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             log.debug("Update geofence event completed.");
         }
         try {
-            eventConfigService.createEventOperationTask(OperationMgtConstants.OperationCodes.EVENT_REVOKE,
+            eventConfigService.createEventOperationTask(OperationMgtConstants.OperationCodes.EVENT_UPDATE,
                     DeviceManagementConstants.EventServices.GEOFENCE,
                     new GeoFenceEventMeta(geofenceData), tenantId, geofenceData.getGroupIds());
         } catch (EventConfigurationException e) {
-            String msg = "Failed while creating EVENT_REVOKE operation creation task entry while updating geo fence "
+            String msg = "Failed while creating EVENT_UPDATE operation creation task entry while updating geo fence "
                     + geofenceData.getFenceName() + " of the tenant " + tenantId;
             log.error(msg, e);
             throw new GeoLocationBasedServiceException(msg, e);

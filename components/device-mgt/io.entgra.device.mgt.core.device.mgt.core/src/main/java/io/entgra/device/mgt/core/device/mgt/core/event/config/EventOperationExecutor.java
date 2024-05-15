@@ -85,6 +85,16 @@ public class EventOperationExecutor implements Runnable {
     }
 
     /**
+     * Build operation to create EVENT_UPDATE operation.
+     * @param operation Operation object to build
+     */
+    private void buildEventUpdateOperation(ProfileOperation operation) {
+        if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
+            createGeoFenceUpdateOperation(operation);
+        } //extend with another cases to handle other types of events
+    }
+
+    /**
      * Build operation to create EVENT_CONFIG operation.
      * @param operation Operation object to build
      * @throws EventConfigurationException Failed while build the operation object
@@ -128,6 +138,18 @@ public class EventOperationExecutor implements Runnable {
      * @param operation operation object to set the payload
      */
     private void createGeoFenceRevokeOperation(ProfileOperation operation) {
+        changeGeoFenceOperation(operation);
+    }
+
+    /**
+     * Create EVENT_UPDATE operation object and attach payload to configure geo fence events
+     * @param operation operation object to set the payload
+     */
+    private void createGeoFenceUpdateOperation(ProfileOperation operation) {
+        changeGeoFenceOperation(operation);
+    }
+
+    private void changeGeoFenceOperation(ProfileOperation operation) {
         GeoFenceEventMeta geoFenceMeta = (GeoFenceEventMeta) eventMetaData;
         EventRevokeOperation eventRevokeOperation = new EventRevokeOperation();
         eventRevokeOperation.setEventSource(eventSource);
@@ -188,6 +210,9 @@ public class EventOperationExecutor implements Runnable {
             if (operationCode.equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_CONFIG)) {
                 operation.setCode(OperationMgtConstants.OperationCodes.EVENT_CONFIG);
                 buildEventConfigOperation(operation);
+            } else if (operationCode.equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_UPDATE)){
+                operation.setCode(OperationMgtConstants.OperationCodes.EVENT_UPDATE);
+                buildEventUpdateOperation(operation);
             } else if (operationCode.equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_REVOKE)){
                 operation.setCode(OperationMgtConstants.OperationCodes.EVENT_REVOKE);
                 buildEventRevokeOperation(operation);
