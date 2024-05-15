@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao;
 
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
@@ -33,6 +34,8 @@ import io.entgra.device.mgt.core.device.mgt.core.common.TestDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 
 import java.sql.*;
+import java.util.Collections;
+import java.util.List;
 
 public class DevicePersistTests extends BaseDeviceManagementTest {
 
@@ -224,4 +227,60 @@ public class DevicePersistTests extends BaseDeviceManagementTest {
             DeviceManagementDAOFactory.closeConnection();
         }
     }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDevicesByIdentifiersTest() throws DeviceManagementDAOException, TransactionManagementException {
+        Device device = TestDataHolder.initialTestDevice;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            DeviceIdentifier deviceId = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
+            List<Device> retrieved = deviceDAO.getDevicesByIdentifiers(
+                    Collections.singletonList(deviceId.getId()), TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(1, retrieved.size(), "Device count is not matched to expected.");
+        } catch (DeviceManagementDAOException | SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the current status of the " +
+                    "enrolment", e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void recordDeviceUpdateTest() throws DeviceManagementDAOException, TransactionManagementException {
+        Device device = TestDataHolder.initialTestDevice;
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            device = deviceDAO.getDevice(device.getDeviceIdentifier(), TestDataHolder.SUPER_TENANT_ID);
+            log.info("Device before update: " + device);
+            DeviceIdentifier deviceId = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
+            boolean updated = deviceDAO.recordDeviceUpdate(deviceId, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertTrue(updated, "Device timestamp is not updated.");
+            Device updatedDevice = deviceDAO.getDevice(device.getDeviceIdentifier(), TestDataHolder.SUPER_TENANT_ID);
+            log.info("Device after update: " + updatedDevice);
+            Assert.assertTrue(device.getLastUpdatedTimeStamp() < updatedDevice.getLastUpdatedTimeStamp(),
+                    "Last updated timestamp is way older.");
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the current status of the " +
+                    "enrolment", e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = "testAddDeviceTest")
+    public void getDeviceByStatusTest() throws DeviceManagementDAOException, TransactionManagementException {
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            PaginationRequest pr = new PaginationRequest(0, 10);
+            pr.setStatusList(Collections.singletonList(Status.ACTIVE.name()));
+            List<Device> results = deviceDAO.getDevicesByStatus(pr, TestDataHolder.SUPER_TENANT_ID);
+            Assert.assertEquals(1, results.size(), "No device returned");
+        } catch (DeviceManagementDAOException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the current status of the " +
+                    "enrolment", e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
 }

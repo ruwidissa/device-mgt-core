@@ -122,6 +122,9 @@ public interface DeviceDAO {
      */
     boolean updateDevice(Device device, int tenantId) throws DeviceManagementDAOException;
 
+    boolean recordDeviceUpdate(DeviceIdentifier deviceIdentifier, int tenantId)
+            throws DeviceManagementDAOException;
+
     Device getDevice(DeviceData deviceData, int tenantId) throws DeviceManagementDAOException;
 
 

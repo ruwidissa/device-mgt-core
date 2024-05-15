@@ -230,6 +230,7 @@ public final class DeviceManagementDAOUtil {
         device.setDescription(rs.getString("DESCRIPTION"));
         device.setType(rs.getString("DEVICE_TYPE"));
         device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
+        device.setLastUpdatedTimeStamp(rs.getTimestamp("LAST_UPDATED_TIMESTAMP").getTime());
         device.setEnrolmentInfo(loadEnrolment(rs));
         return device;
     }

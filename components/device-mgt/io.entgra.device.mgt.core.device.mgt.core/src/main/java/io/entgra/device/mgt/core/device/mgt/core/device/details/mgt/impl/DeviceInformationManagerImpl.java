@@ -142,9 +142,12 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 log.info("Device identifier " + device.getDeviceIdentifier() + ", Device name " +
                         "changed by user from " + device.getName() + " to " + name);
                 device.setName(name);
+                deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
+            } else {
+                deviceDAO.recordDeviceUpdate(
+                        new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()),
+                        CarbonContext.getThreadLocalCarbonContext().getTenantId());
             }
-
-            deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
             DeviceManagementDAOFactory.commitTransaction();
 
             //TODO :: This has to be fixed by adding the enrollment ID.
