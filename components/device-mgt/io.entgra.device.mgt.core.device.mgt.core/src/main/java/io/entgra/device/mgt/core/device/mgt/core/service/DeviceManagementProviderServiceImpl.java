@@ -1147,7 +1147,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         List<DeviceStatus> deviceStatus;
         for (Device device : allDevices) {
             long dateDiff = 0;
-            deviceStatus = getDeviceStatusHistory(device, null, endDate, true);
+            deviceStatus = getDeviceStatusHistoryInsideTransaction(device, null, endDate, true);
             if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
                 if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
                         || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
@@ -2202,23 +2202,52 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
     }
 
+    /*
+    This is just to avoid breaking the billing functionality as it required to call getDeviceStatusHistory method
+    without transaction handling.
+     */
+    private List<DeviceStatus> getDeviceStatusHistoryInsideTransaction(
+            Device device, Date fromDate, Date toDate, boolean billingStatus)
+            throws DeviceManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("get status history of device: " + device.getDeviceIdentifier());
+        }
+        try {
+            DeviceManagementDAOFactory.getConnection();
+            int tenantId = this.getTenantId();
+            return deviceStatusDAO.getStatus(device.getId(), tenantId, fromDate, toDate, billingStatus);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred in retrieving status history for device :" + device.getDeviceIdentifier();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.info(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
     @Override
     public List<DeviceStatus> getDeviceStatusHistory(Device device, Date fromDate, Date toDate, boolean billingStatus) throws DeviceManagementException {
         if (log.isDebugEnabled()) {
             log.debug("get status history of device: " + device.getDeviceIdentifier());
         }
         try {
+            DeviceManagementDAOFactory.openConnection();
             int tenantId = this.getTenantId();
             return deviceStatusDAO.getStatus(device.getId(), tenantId, fromDate, toDate, billingStatus);
         } catch (DeviceManagementDAOException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
-            String msg = "Error occurred while retrieving status history";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (Exception e) {
             String msg = "Error occurred in retrieving status history for device :" + device.getDeviceIdentifier();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.info(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
         }
     }
 
