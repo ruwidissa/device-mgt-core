@@ -626,6 +626,9 @@ public class GenericGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
                         geofenceData.setGroupData(groupMap);
                     }
                 }
+                if (geofenceData != null) {
+                    geofenceData.setGroupIds(new ArrayList<>(groupMap.keySet()));
+                }
                 return geofenceData;
             }
         } catch (SQLException e) {
