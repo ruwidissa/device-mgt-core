@@ -198,6 +198,7 @@ public class OperationManagerImpl implements OperationManager {
             String initiatedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
             if (initiatedBy == null && (isScheduledOperation
                     || operation.getCode().equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_CONFIG)
+                    || operation.getCode().equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_UPDATE)
                     || operation.getCode().equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_REVOKE))) {
                 operation.setInitiatedBy(SYSTEM);
             } else if (StringUtils.isEmpty(operation.getInitiatedBy())) {
@@ -1445,6 +1446,7 @@ public class OperationManagerImpl implements OperationManager {
             case DeviceManagementConstants.AuthorizationSkippedOperationCodes.POLICY_OPERATION_CODE:
             case DeviceManagementConstants.AuthorizationSkippedOperationCodes.EVENT_CONFIG_OPERATION_CODE:
             case DeviceManagementConstants.AuthorizationSkippedOperationCodes.EVENT_REVOKE_OPERATION_CODE:
+            case DeviceManagementConstants.AuthorizationSkippedOperationCodes.EVENT_UPDATE_OPERATION_CODE:
             case DeviceManagementConstants.AuthorizationSkippedOperationCodes.POLICY_REVOKE_OPERATION_CODE:
             case DeviceManagementConstants.AuthorizationSkippedOperationCodes.MONITOR_OPERATION_CODE:
                 status = true;

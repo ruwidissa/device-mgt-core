@@ -106,6 +106,8 @@ public class GroupAssignmentEventOperationExecutor implements Runnable {
                 operation.setType(Operation.Type.PROFILE);
                 if (operationCode.equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_CONFIG)) {
                     buildEventConfigOperationObject(operation);
+                } else if (operationCode.equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_UPDATE)) {
+                    buildEventUpdateOperation(operation);
                 } else if (operationCode.equalsIgnoreCase(OperationMgtConstants.OperationCodes.EVENT_REVOKE)) {
                     buildEventRevokeOperation(operation);
                 }
@@ -158,6 +160,19 @@ public class GroupAssignmentEventOperationExecutor implements Runnable {
         for (String eventSource : this.eventSources) {
             if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
                 setGeoFenceRevokeOperationContent(operation);
+            } //add other cases to handle other types of events
+        }
+    }
+
+    /**
+     * Build EVENT_UPDATE operation attaching event payload
+     * @param operation operation object to build
+     * @throws EventConfigurationException if not events found for the specific group
+     */
+    private void buildEventUpdateOperation(ProfileOperation operation) throws EventConfigurationException {
+        for (String eventSource : this.eventSources) {
+            if (eventSource.equalsIgnoreCase(DeviceManagementConstants.EventServices.GEOFENCE)) {
+                setGeoFenceUpdateOperationContent(operation);
             } //add other cases to handle other types of events
         }
     }
@@ -217,6 +232,18 @@ public class GroupAssignmentEventOperationExecutor implements Runnable {
      * @param operation operation object to attach payload
      */
     private void setGeoFenceRevokeOperationContent(ProfileOperation operation){
+        changeGeoFenceOperation(operation);
+    }
+
+    /**
+     * Set operation payload GeoFence for EVENT_UPDATE operation
+     * @param operation operation object to attach payload
+     */
+    private void setGeoFenceUpdateOperationContent(ProfileOperation operation){
+        changeGeoFenceOperation(operation);
+    }
+
+    private void changeGeoFenceOperation(ProfileOperation operation) {
         List<EventRevokeOperation> revokeOperationList = new ArrayList<>();
         for (GeofenceData geofenceData : this.geoFencesOfGroup) {
             EventRevokeOperation eventRevokeOperation = new EventRevokeOperation();
