@@ -25,6 +25,7 @@ import io.entgra.device.mgt.core.device.mgt.common.Count;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceBilling;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -1078,7 +1079,7 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
                             + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
                             + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID "
                             + "WHERE DM_DEVICE.ID IN (",
-                    ") AND DM_DEVICE.TENANT_ID = ?");
+                    ") AND DM_DEVICE.TENANT_ID AND e.STATUS NOT IN (?, ?)");
 
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
@@ -1120,6 +1121,8 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
 
                 ps.setInt(index++, tenantId);
+                ps.setString(index++, EnrolmentInfo.Status.REMOVED.toString());
+                ps.setString(index++, EnrolmentInfo.Status.DELETED.toString());
                 if (isDeviceNameProvided) {
                     ps.setString(index++, name + "%");
                 }
