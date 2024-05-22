@@ -1034,11 +1034,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     "AP_DEVICE_SUBSCRIPTION.AP_APP_RELEASE_ID = AP_APP_RELEASE.AP_APP_ID " +
                     "WHERE PACKAGE_NAME = ? " +
                     "AND DM_DEVICE_ID = ? " +
-                    "AND UNSUBSCRIBED = 'FALSE' " +
+                    "AND UNSUBSCRIBED = ? " +
                     "AND STATUS = 'COMPLETED';";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, packageName);
                 stmt.setInt(2, id);
+                stmt.setBoolean(3, false);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         return rs.getString("UUID");
