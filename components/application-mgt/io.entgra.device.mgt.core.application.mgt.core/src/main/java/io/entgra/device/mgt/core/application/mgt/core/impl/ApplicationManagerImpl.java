@@ -727,19 +727,20 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @throws ResourceManagementException if error occurred while uploading
      */
     private ApplicationReleaseDTO uploadCustomAppReleaseArtifacts(ApplicationReleaseDTO releaseDTO, ApplicationArtifact applicationArtifact,
-                                                                 String deviceType)
+                                                                  String deviceType)
             throws ResourceManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
-            String md5OfApp = applicationStorageManager.getMD5(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())));
+            String md5OfApp = applicationStorageManager.
+                    getMD5(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())));
             validateReleaseBinaryFileHash(md5OfApp);
             releaseDTO.setUuid(UUID.randomUUID().toString());
             releaseDTO.setAppHashValue(md5OfApp);
             releaseDTO.setInstallerName(applicationArtifact.getInstallerName());
 
-                applicationStorageManager.uploadReleaseArtifact(releaseDTO, deviceType,
-                        Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), tenantId);
+            applicationStorageManager.uploadReleaseArtifact(releaseDTO, deviceType,
+                    Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), tenantId);
         } catch (IOException e) {
             String msg = "Error occurred when uploading release artifact into the server";
             log.error(msg);
@@ -748,6 +749,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             String msg = "Error occurred while md5sum value retrieving process: application UUID "
                     + releaseDTO.getUuid();
             log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         }
         return addImageArtifacts(releaseDTO, applicationArtifact, tenantId);
     }
@@ -896,7 +898,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     log.error(msg);
                     throw new ApplicationManagementException(msg);
                 }
-                String md5OfApp = applicationStorageManager.getMD5(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())));
+                String md5OfApp = applicationStorageManager.
+                        getMD5(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())));
                 if (md5OfApp == null) {
                     String msg = "Error occurred while md5sum value retrieving process: application UUID "
                             + applicationReleaseDTO.getUuid();
@@ -910,10 +913,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     throw new BadRequestException(msg);
                 }
                 applicationReleaseDTO.setAppHashValue(md5OfApp);
-
-                    applicationStorageManager
-                            .uploadReleaseArtifact(applicationReleaseDTO, deviceType,
-                                    Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), tenantId);
+                applicationStorageManager
+                        .uploadReleaseArtifact(applicationReleaseDTO, deviceType,
+                                Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), tenantId);
             } catch (StorageManagementException e) {
                 String msg = "Error occurred while md5sum value retrieving process: application UUID "
                         + applicationReleaseDTO.getUuid();
@@ -969,9 +971,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             if (!applicationReleaseDTO.getAppHashValue().equals(md5OfApp)) {
                 applicationReleaseDTO.setInstallerName(applicationArtifact.getInstallerName());
-                    ApplicationInstaller applicationInstaller = applicationStorageManager
-                            .getAppInstallerData(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), deviceType);
-                    String packageName = applicationInstaller.getPackageName();
+                ApplicationInstaller applicationInstaller = applicationStorageManager
+                        .getAppInstallerData(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), deviceType);
+                String packageName = applicationInstaller.getPackageName();
 
                 try {
                     ConnectionManagerUtil.getDBConnection();
@@ -981,13 +983,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         log.error(msg);
                         throw new BadRequestException(msg);
                     }
-                    if (applicationReleaseDTO.getPackageName() == null){
+                    if (applicationReleaseDTO.getPackageName() == null) {
                         String msg = "Found null value for application release package name for application "
                                 + "release which has UUID: " + applicationReleaseDTO.getUuid();
                         log.error(msg);
                         throw new ApplicationManagementException(msg);
                     }
-                    if (!applicationReleaseDTO.getPackageName().equals(packageName)){
+                    if (!applicationReleaseDTO.getPackageName().equals(packageName)) {
                         String msg = "Package name of the new artifact does not match with the package name of "
                                 + "the exiting application release. Package name of the existing app release "
                                 + applicationReleaseDTO.getPackageName() + " and package name of the new "
@@ -1000,11 +1002,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     applicationReleaseDTO.setPackageName(packageName);
                     String deletingAppHashValue = applicationReleaseDTO.getAppHashValue();
                     applicationReleaseDTO.setAppHashValue(md5OfApp);
-                        applicationStorageManager.uploadReleaseArtifact(applicationReleaseDTO, deviceType,
-                                Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())),
-                                        tenantId);
-                        applicationStorageManager.copyImageArtifactsAndDeleteInstaller(deletingAppHashValue,
-                                applicationReleaseDTO, tenantId);
+                    applicationStorageManager.uploadReleaseArtifact(applicationReleaseDTO, deviceType,
+                            Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())),
+                            tenantId);
+                    applicationStorageManager.copyImageArtifactsAndDeleteInstaller(deletingAppHashValue,
+                            applicationReleaseDTO, tenantId);
                 } catch (DBConnectionException e) {
                     String msg = "Error occurred when getting database connection for verifying application "
                             + "release existing for new app hash value.";
@@ -3625,11 +3627,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             applicationReleaseDTO.get().setInstallerName(applicationArtifact.getInstallerName());
                             String deletingAppHashValue = applicationReleaseDTO.get().getAppHashValue();
                             applicationReleaseDTO.get().setAppHashValue(md5OfApp);
-                                applicationStorageManager.
-                                        uploadReleaseArtifact(applicationReleaseDTO.get(), deviceTypeObj.getName(),
-                                                Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), tenantId);
-                                applicationStorageManager.copyImageArtifactsAndDeleteInstaller(deletingAppHashValue,
-                                        applicationReleaseDTO.get(), tenantId);
+                            applicationStorageManager.
+                                    uploadReleaseArtifact(applicationReleaseDTO.get(), deviceTypeObj.getName(),
+                                            Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), tenantId);
+                            applicationStorageManager.copyImageArtifactsAndDeleteInstaller(deletingAppHashValue,
+                                    applicationReleaseDTO.get(), tenantId);
                         } catch (DBConnectionException e) {
                             String msg = "Error occurred when getting database connection for verifying application"
                                     + " release existing for new app hash value.";

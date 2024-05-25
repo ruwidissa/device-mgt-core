@@ -244,9 +244,10 @@ public class FileTransferServiceHelperUtil {
     }
 
     private static FileDescriptor resolve(String []urlSegments) throws FileTransferServiceHelperUtilException {
+        // check the possibility of url is pointing to a file resides in  the default storage path
         if (urlSegments.length < 4) {
             if (log.isDebugEnabled()) {
-                log.debug("URL path segments contain less than 2 segments");
+                log.debug("URL path segments contain less than 4 segments");
             }
             return null;
         }

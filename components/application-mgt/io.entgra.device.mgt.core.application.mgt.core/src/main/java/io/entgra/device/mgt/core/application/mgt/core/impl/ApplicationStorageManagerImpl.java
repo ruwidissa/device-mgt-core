@@ -156,7 +156,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     public void uploadReleaseArtifact(ApplicationReleaseDTO applicationReleaseDTO,
             String deviceType, InputStream binaryFile, int tenantId) throws ResourceManagementException {
         try {
-            //byte [] content = IOUtils.toByteArray(binaryFile);
             String artifactDirectoryPath =
                     storagePath + tenantId + File.separator + applicationReleaseDTO.getAppHashValue() + File.separator
                             + Constants.APP_ARTIFACT;
