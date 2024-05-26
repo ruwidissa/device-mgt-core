@@ -27,11 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.dao.impl.AbstractDeviceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
-import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCoordinate;
 import io.entgra.device.mgt.core.device.mgt.core.report.mgt.Constants;
 
 import java.sql.Connection;
@@ -48,7 +44,7 @@ import java.util.Map;
 /**
  * This class holds the generic implementation of DeviceDAO which can be used to support ANSI db syntax.
  */
-public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
+public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
 
     private static final Log log = LogFactory.getLog(SQLServerDeviceDAOImpl.class);
 
@@ -1115,10 +1111,6 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
-    }
-
-    private Connection getConnection() throws SQLException {
-        return DeviceManagementDAOFactory.getConnection();
     }
 
     @Override
