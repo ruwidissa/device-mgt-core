@@ -669,6 +669,8 @@ public interface DeviceManagementProviderService {
 
     void addLicense(String deviceType, License license) throws DeviceManagementException;
 
+    boolean recordDeviceUpdate(DeviceIdentifier deviceIdentifier) throws DeviceManagementException;
+
     boolean modifyEnrollment(Device device) throws DeviceManagementException;
 
     boolean enrollDevice(Device device) throws DeviceManagementException;

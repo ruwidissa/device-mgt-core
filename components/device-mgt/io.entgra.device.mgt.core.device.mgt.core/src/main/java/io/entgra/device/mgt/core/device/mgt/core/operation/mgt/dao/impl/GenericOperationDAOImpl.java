@@ -17,7 +17,6 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.impl;
 
-import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.ProfileOperation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,8 +43,6 @@ import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.util.Operatio
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,7 +56,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -575,14 +571,12 @@ public class GenericOperationDAOImpl implements OperationDAO {
             Connection conn = OperationManagementDAOFactory.getConnection();
             String sql =
                     "SELECT eom.ENROLMENT_ID, eom.OPERATION_ID, eom.ID AS EOM_MAPPING_ID, "
-                            + "dor.ID AS OP_RES_ID, de.DEVICE_ID, d.DEVICE_IDENTIFICATION, d.DEVICE_TYPE_ID, "
-                            + "dt.NAME AS DEVICE_TYPE_NAME, eom.STATUS, eom.CREATED_TIMESTAMP, "
+                            + "dor.ID AS OP_RES_ID, de.DEVICE_ID, de.DEVICE_IDENTIFICATION, de.DEVICE_TYPE, "
+                            + "eom.STATUS, eom.CREATED_TIMESTAMP, "
                             + "eom.UPDATED_TIMESTAMP, op.OPERATION_CODE, op.TYPE AS OPERATION_TYPE, "
                             + "dor.OPERATION_RESPONSE, op.INITIATED_BY, dor.RECEIVED_TIMESTAMP, dor.IS_LARGE_RESPONSE FROM "
                             + "DM_ENROLMENT_OP_MAPPING eom INNER JOIN DM_OPERATION op "
-                            + "ON op.ID=eom.OPERATION_ID INNER JOIN DM_ENROLMENT de "
-                            + "ON de.ID=eom.ENROLMENT_ID INNER JOIN DM_DEVICE d ON d.ID=de.DEVICE_ID "
-                            + "INNER JOIN DM_DEVICE_TYPE dt ON dt.ID=d.DEVICE_TYPE_ID "
+                            + "ON op.ID=eom.OPERATION_ID INNER JOIN DM_ENROLMENT de ON de.ID=eom.ENROLMENT_ID "
                             + "LEFT JOIN DM_DEVICE_OPERATION_RESPONSE dor ON dor.ENROLMENT_ID=de.id "
                             + "AND dor.OPERATION_ID = eom.OPERATION_ID WHERE eom.OPERATION_ID "
                             + "IN (SELECT * FROM TABLE(x INT = ?)) AND de.TENANT_ID = ?";
@@ -617,7 +611,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
 
                     DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
                     deviceIdentifier.setId(rs.getString("DEVICE_IDENTIFICATION"));
-                    deviceIdentifier.setType(rs.getString("DEVICE_TYPE_NAME"));
+                    deviceIdentifier.setType(rs.getString("DEVICE_TYPE"));
 
                     activityStatus.setDeviceIdentifier(deviceIdentifier);
 
@@ -655,7 +649,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
 
                     DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
                     deviceIdentifier.setId(rs.getString("DEVICE_IDENTIFICATION"));
-                    deviceIdentifier.setType(rs.getString("DEVICE_TYPE_NAME"));
+                    deviceIdentifier.setType(rs.getString("DEVICE_TYPE"));
                     activityStatus.setDeviceIdentifier(deviceIdentifier);
 
                     activityStatus.setStatus(ActivityStatus.Status.valueOf(rs.getString("STATUS")));
@@ -715,8 +709,8 @@ public class GenericOperationDAOImpl implements OperationDAO {
                     + "eom.OPERATION_ID, eom.ID AS EOM_MAPPING_ID, "
                     + "dor.ID AS OP_RES_ID, "
                     + "de.DEVICE_ID, "
-                    + "d.DEVICE_IDENTIFICATION, "
-                    + "d.DEVICE_TYPE_ID, dt.NAME AS DEVICE_TYPE_NAME, "
+                    + "de.DEVICE_IDENTIFICATION, "
+                    + "de.DEVICE_TYPE, "
                     + "eom.STATUS, eom.CREATED_TIMESTAMP, "
                     + "eom.UPDATED_TIMESTAMP, "
                     + "op.OPERATION_CODE, "
@@ -727,11 +721,9 @@ public class GenericOperationDAOImpl implements OperationDAO {
                     + "op.INITIATED_BY FROM DM_ENROLMENT_OP_MAPPING AS eom "
                     + "INNER JOIN DM_OPERATION AS op ON op.ID=eom.OPERATION_ID "
                     + "INNER JOIN DM_ENROLMENT AS de ON de.ID=eom.ENROLMENT_ID "
-                    + "INNER JOIN DM_DEVICE AS d ON d.ID=de.DEVICE_ID "
-                    + "INNER JOIN DM_DEVICE_TYPE AS dt ON dt.ID=d.DEVICE_TYPE_ID "
                     + "LEFT JOIN DM_DEVICE_OPERATION_RESPONSE AS dor ON dor.ENROLMENT_ID=de.id "
                     + "AND dor.OPERATION_ID = eom.OPERATION_ID "
-                    + "WHERE eom.OPERATION_ID = ? AND de.device_id = ? AND de.TENANT_ID = ?";
+                    + "WHERE eom.OPERATION_ID = ? AND de.DEVICE_ID = ? AND de.TENANT_ID = ?";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, operationId);
@@ -756,7 +748,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
                 if (enrolmentId != rs.getInt("ENROLMENT_ID")) {
                     activityStatus = new ActivityStatus();
                     DeviceIdentifier deviceIdentifier = new DeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"),
-                            rs.getString("DEVICE_TYPE_NAME"));
+                            rs.getString("DEVICE_TYPE"));
                     activityStatus.setDeviceIdentifier(deviceIdentifier);
                     activityStatus.setStatus(ActivityStatus.Status.valueOf(rs.getString("STATUS")));
 
@@ -850,15 +842,13 @@ public class GenericOperationDAOImpl implements OperationDAO {
                     "            op.TYPE AS OPERATION_TYPE, " +
                     "            opm.STATUS, " +
                     "            en.DEVICE_ID, " +
-                    "            de.DEVICE_IDENTIFICATION, " +
-                    "            dt.NAME AS DEVICE_TYPE, " +
+                    "            en.DEVICE_IDENTIFICATION, " +
+                    "            en.DEVICE_TYPE, " +
                     "            de.TENANT_ID " +
                     "    FROM" +
                     "        DM_ENROLMENT_OP_MAPPING  opm " +
                     "        INNER JOIN DM_OPERATION  op ON opm.OPERATION_ID = op.ID " +
                     "        INNER JOIN DM_ENROLMENT  en ON opm.ENROLMENT_ID = en.ID " +
-                    "        INNER JOIN DM_DEVICE  de ON en.DEVICE_ID = de.ID " +
-                    "        INNER JOIN DM_DEVICE_TYPE  dt ON dt.ID = de.DEVICE_TYPE_ID " +
                     "    WHERE " +
                     "        op.OPERATION_CODE = ? " +
                     "            AND de.TENANT_ID = ? " +

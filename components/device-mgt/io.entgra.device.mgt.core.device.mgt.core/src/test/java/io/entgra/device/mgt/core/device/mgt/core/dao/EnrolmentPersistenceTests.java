@@ -17,6 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.dao;
 
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
@@ -58,7 +59,8 @@ public class EnrolmentPersistenceTests extends BaseDeviceManagementTest {
             DeviceDAO deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
             deviceId = deviceDAO.addDevice(TestDataHolder.initialTestDeviceType.getId(), device, TestDataHolder.SUPER_TENANT_ID);
             device.setId(deviceId);
-            enrollmentDAO.addEnrollment(deviceId, source, TestDataHolder.SUPER_TENANT_ID);
+            enrollmentDAO.addEnrollment(deviceId, new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()),
+                    source, TestDataHolder.SUPER_TENANT_ID);
         } catch (DeviceManagementDAOException | SQLException e) {
             log.error("Error occurred while adding enrollment", e);
         } finally {

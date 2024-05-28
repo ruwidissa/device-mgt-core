@@ -21,7 +21,6 @@ package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.event.config.EventConfig;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.EventConfigDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.EventManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.EventManagementDAOFactory;
@@ -30,12 +29,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public abstract class AbstractEventConfigDAO implements EventConfigDAO {
     private static final Log log = LogFactory.getLog(AbstractEventConfigDAO.class);

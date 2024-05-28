@@ -59,9 +59,8 @@ public class OperationTemplateCacheLoader extends CacheLoader<String, OperationT
         String deviceType = operationTemplateCacheKey.getDeviceType();
 
         if (log.isTraceEnabled()) {
-            log.trace(
-                    "Loading operation template for subtype Id : " + subTypeId + " & deviceType : " + deviceType + " operation code : "
-                            + operationCode);
+            log.trace("Loading operation template for subtype Id : " + subTypeId
+                    + " & deviceType : " + deviceType + " operation code : " + operationCode);
         }
         try {
             ConnectionManagerUtils.openDBConnection();

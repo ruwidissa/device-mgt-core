@@ -24,10 +24,8 @@ import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.config.datasourc
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.dao.impl.GenericHeartBeatDAOImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.IllegalTransactionStateException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -42,7 +40,7 @@ public class HeartBeatBeaconDAOFactory {
 
     private static final Log log = LogFactory.getLog(HeartBeatBeaconDAOFactory.class);
     private static DataSource dataSource;
-    private static ThreadLocal<Connection> currentConnection = new ThreadLocal<>();
+    private static final ThreadLocal<Connection> currentConnection = new ThreadLocal<>();
 
     /**
      * Get instance of GroupDAO
@@ -64,7 +62,6 @@ public class HeartBeatBeaconDAOFactory {
     /**
      * Begin transaction with datasource for write data
      *
-     * @throws TransactionManagementException
      */
     public static void beginTransaction() throws TransactionManagementException {
         Connection conn = currentConnection.get();
@@ -85,7 +82,6 @@ public class HeartBeatBeaconDAOFactory {
     /**
      * Open connection to the datasource for read data
      *
-     * @throws SQLException
      */
     public static void openConnection() throws SQLException {
         Connection conn = currentConnection.get();
@@ -102,7 +98,6 @@ public class HeartBeatBeaconDAOFactory {
      * Get current connection to datasource
      *
      * @return current connection
-     * @throws SQLException
      */
     public static Connection getConnection() throws SQLException {
         Connection conn = currentConnection.get();
@@ -189,7 +184,7 @@ public class HeartBeatBeaconDAOFactory {
             List<JNDILookupDefinition.JNDIProperty> jndiPropertyList =
                     jndiConfig.getJndiProperties();
             if (jndiPropertyList != null) {
-                Hashtable<Object, Object> jndiProperties = new Hashtable<Object, Object>();
+                Hashtable<Object, Object> jndiProperties = new Hashtable<>();
                 for (JNDILookupDefinition.JNDIProperty prop : jndiPropertyList) {
                     jndiProperties.put(prop.getName(), prop.getValue());
                 }

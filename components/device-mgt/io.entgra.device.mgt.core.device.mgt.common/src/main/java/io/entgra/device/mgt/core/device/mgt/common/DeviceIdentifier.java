@@ -69,9 +69,20 @@ public class DeviceIdentifier implements Serializable{
 
     @Override
     public String toString() {
-        return "deviceId {" +
-                "id='" + id + '\'' +
-                ", type='" + type + '\'' +
-                '}';
+        return type + "|" + id;
     }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DeviceIdentifier) {
+            return (this.hashCode() == obj.hashCode());
+        }
+        return false;
+    }
+
 }

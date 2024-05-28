@@ -18,6 +18,7 @@
 package io.entgra.device.mgt.core.device.mgt.core.dao;
 
 import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo.Status;
 
@@ -26,7 +27,8 @@ import java.util.List;
 
 public interface EnrollmentDAO {
 
-    EnrolmentInfo addEnrollment(int deviceId, EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException;
+    EnrolmentInfo addEnrollment(int deviceId, DeviceIdentifier deviceIdentifier,
+                                EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException;
 
     int updateEnrollment(EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException;
 

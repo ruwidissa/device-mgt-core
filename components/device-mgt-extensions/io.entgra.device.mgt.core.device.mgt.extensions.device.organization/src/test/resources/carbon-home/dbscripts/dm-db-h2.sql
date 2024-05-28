@@ -125,6 +125,8 @@ CREATE TABLE IF NOT EXISTS DM_ENROLMENT
 (
     ID                  INTEGER AUTO_INCREMENT NOT NULL,
     DEVICE_ID           INTEGER                NOT NULL,
+    DEVICE_TYPE         VARCHAR(300)           NOT NULL,
+    DEVICE_IDENTIFICATION VARCHAR(300)         NOT NULL,
     OWNER               VARCHAR(255)           NOT NULL,
     OWNERSHIP           VARCHAR(45)                     DEFAULT NULL,
     STATUS              VARCHAR(50)            NULL,
