@@ -178,7 +178,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             sql += "AND AP_APP_RELEASE.CURRENT_STATE = ? ";
         }
         if (deviceTypeId != -1) {
-            sql += "AND AP_APP.DEVICE_TYPE_ID = ? ";
+            sql += "AND (AP_APP.DEVICE_TYPE_ID = ? ";
+            if (filter.isWithWebApps()) {
+                sql += "OR AP_APP.DEVICE_TYPE_ID = 0 ";
+            }
+            sql += ") ";
         }
         if (filter.isNotRetired()) {
             sql +=  "AND AP_APP.STATUS != 'RETIRED' ";
@@ -309,7 +313,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             sql += " AND AP_APP_RELEASE.CURRENT_STATE = ?";
         }
         if (deviceTypeId != -1) {
-            sql += " AND AP_APP.DEVICE_TYPE_ID = ?";
+            sql += "AND (AP_APP.DEVICE_TYPE_ID = ? ";
+            if (filter.isWithWebApps()) {
+                sql += "OR AP_APP.DEVICE_TYPE_ID = 0 ";
+            }
+            sql += ") ";
         }
         if (filter.isNotRetired()) {
             sql +=  " AND AP_APP.STATUS != 'RETIRED'";
