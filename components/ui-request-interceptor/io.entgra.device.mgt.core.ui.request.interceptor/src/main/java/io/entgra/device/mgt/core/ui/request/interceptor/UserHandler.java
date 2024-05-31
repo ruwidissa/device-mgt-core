@@ -124,7 +124,7 @@ public class UserHandler extends HttpServlet {
             proxyResponse.setData(mapper.convertValue(data, JsonNode.class));
 
             HandlerUtil.handleSuccess(resp, proxyResponse);
-            httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, tokenData.get("username").toString());
+            httpSession.setAttribute(HandlerConstants.USERNAME_WITH_DOMAIN, tokenData.get("username").textValue());
             log.info(
                     "User " + proxyResponse.getData() + " logged in",
                     userLoginLogContextBuilder
