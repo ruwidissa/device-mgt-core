@@ -574,7 +574,11 @@ public class RequestValidationUtil {
         }
 
         if (operationCode != null && !operationCode.isEmpty()) {
-            validateOperationCodeFiltering(operationCode, type);
+            /*
+                Commenting this as dynamic device types doesn't have configuration based feature manager which
+                used to define fixed set of operation codes.
+             */
+//            validateOperationCodeFiltering(operationCode, type);
             operationLogFilters.setOperationCode(operationCode);
         }
         return operationLogFilters;
