@@ -273,7 +273,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             );
             return Response.status(Response.Status.OK).build();
         } catch (GroupManagementException e) {
-            String msg = "Error occurred while adding new group.";
+            String msg = "Error occurred while updating group. ";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (GroupNotExistException e) {
