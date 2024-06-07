@@ -646,8 +646,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
     }
 
     @Override
-    public List<Device> searchDevicesInGroup(PaginationRequest request, int tenantId)
-            throws DeviceManagementDAOException {
+    public List<Device> searchDevicesInGroup(PaginationRequest request, int tenantId) throws DeviceManagementDAOException {
         List<Device> devices = null;
         int groupId = request.getGroupId();
         String deviceType = request.getDeviceType();
@@ -687,6 +686,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "gd.DESCRIPTION, " +
                     "gd.NAME, " +
                     "gd.DEVICE_IDENTIFICATION, " +
+                    "gd.LAST_UPDATED_TIMESTAMP " +
                     "FROM " +
                     "(SELECT d.ID AS DEVICE_ID, " +
                     "d.DESCRIPTION,  " +
@@ -708,10 +708,10 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             sql = sql + " WHERE 1 = 1";
             //Add query for last updated timestamp
             if (since != null) {
-                sql = sql + " AND d.LAST_UPDATED_TIMESTAMP > ?";
+                sql = sql + " AND gd.LAST_UPDATED_TIMESTAMP > ?";
                 isSinceProvided = true;
             }
-            sql = sql + " ) d1 WHERE d1.DEVICE_ID = e.DEVICE_ID AND TENANT_ID = ? ";
+            sql = sql + " ) d1 WHERE d1.DEVICE_ID = e.DEVICE_ID AND e.TENANT_ID = ? ";
             //Add the query for device-type
             if (deviceType != null && !deviceType.isEmpty()) {
                 sql = sql + " AND e.DEVICE_TYPE = ?";
