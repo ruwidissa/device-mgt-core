@@ -176,7 +176,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     + "d.DESCRIPTION, "
                     + "d.NAME, "
                     + "d.LAST_UPDATED_TIMESTAMP "
-                    + "FROM DM_DEVICE d"
+                    + "FROM DM_DEVICE d WHERE "
                     + "d.DEVICE_IDENTIFICATION = ? AND "
                     + "d.TENANT_ID = ?";
 
@@ -197,7 +197,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIndx = 1;
-                stmt.setString(paramIndx++, deviceData.getDeviceIdentifier().getType());
                 stmt.setString(paramIndx++, deviceData.getDeviceIdentifier().getId());
                 stmt.setInt(paramIndx++, tenantId);
                 if (deviceData.getLastModifiedDate() != null) {
@@ -964,12 +963,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     + "d.NAME AS DEVICE_NAME, "
                     + "d.DEVICE_IDENTIFICATION, "
                     + "d.LAST_UPDATED_TIMESTAMP, "
-                    + "e.DEVICE_TYPE "
+                    + "e1.DEVICE_TYPE "
                     + "FROM "
                     + "DM_DEVICE d, "
                     + "(SELECT "
                     + "e.OWNER, "
-                    + "e.DEVICE_TYPE "
+                    + "e.DEVICE_TYPE, "
                     + "e.OWNERSHIP, "
                     + "e.ID AS ENROLMENT_ID, "
                     + "e.DEVICE_ID, "
