@@ -47,4 +47,23 @@ public class OperationTemplateCacheKey {
     public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
     }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return subTypeId + "|" + deviceType + "|" + operationCode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof OperationTemplateCacheKey) {
+            return (this.hashCode() == obj.hashCode());
+        }
+        return false;
+    }
+
 }

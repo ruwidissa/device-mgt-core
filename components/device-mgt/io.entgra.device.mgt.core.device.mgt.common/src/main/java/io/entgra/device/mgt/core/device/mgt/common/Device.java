@@ -57,6 +57,9 @@ public class Device implements Serializable {
             required = true)
     private String deviceIdentifier;
 
+    @ApiModelProperty(name = "updatedTimeStamp", value = "Last updated timestamp of the device.")
+    private long lastUpdatedTimeStamp;
+
     @ApiModelProperty(name = "enrolmentInfo", value = "This defines the device registration related information. " +
             "It is mandatory to define this information.", required = true)
     private EnrolmentInfo enrolmentInfo;
@@ -219,6 +222,14 @@ public class Device implements Serializable {
 
     public void setHistorySnapshot(DeviceLocationHistorySnapshotWrapper historySnapshot) {
         this.historySnapshot = historySnapshot;
+    }
+
+    public long getLastUpdatedTimeStamp() {
+        return lastUpdatedTimeStamp;
+    }
+
+    public void setLastUpdatedTimeStamp(long lastUpdatedTimeStamp) {
+        this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
     }
 
     public static class Property {
