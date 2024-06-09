@@ -176,7 +176,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     + "d.DESCRIPTION, "
                     + "d.NAME, "
                     + "d.LAST_UPDATED_TIMESTAMP "
-                    + "FROM DM_DEVICE d"
+                    + "FROM DM_DEVICE d WHERE "
                     + "d.DEVICE_IDENTIFICATION = ? AND "
                     + "d.TENANT_ID = ?";
 
@@ -197,7 +197,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIndx = 1;
-                stmt.setString(paramIndx++, deviceData.getDeviceIdentifier().getType());
                 stmt.setString(paramIndx++, deviceData.getDeviceIdentifier().getId());
                 stmt.setInt(paramIndx++, tenantId);
                 if (deviceData.getLastModifiedDate() != null) {
@@ -964,12 +963,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     + "d.NAME AS DEVICE_NAME, "
                     + "d.DEVICE_IDENTIFICATION, "
                     + "d.LAST_UPDATED_TIMESTAMP, "
-                    + "e.DEVICE_TYPE "
+                    + "e1.DEVICE_TYPE "
                     + "FROM "
                     + "DM_DEVICE d, "
                     + "(SELECT "
                     + "e.OWNER, "
-                    + "e.DEVICE_TYPE "
+                    + "e.DEVICE_TYPE, "
                     + "e.OWNERSHIP, "
                     + "e.ID AS ENROLMENT_ID, "
                     + "e.DEVICE_ID, "
@@ -1037,12 +1036,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     "(SELECT gd.DEVICE_ID, " +
                     "gd.DESCRIPTION, " +
                     "gd.NAME, " +
-                    "gd.DEVICE_IDENTIFICATION, " +
+                    "gd.DEVICE_IDENTIFICATION " +
                     "FROM " +
                     "(SELECT d.ID AS DEVICE_ID, " +
                     "d.DESCRIPTION,  " +
                     "d.NAME, " +
-                    "d.DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION " +
                     "FROM DM_DEVICE d, " +
                     "(SELECT dgm.DEVICE_ID " +
                     "FROM DM_DEVICE_GROUP_MAP dgm " +
@@ -2366,7 +2365,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                             "e.device_id," +
                             "e.status, " +
                             "e.date_of_last_update, " +
-                            "e.date_of_enrolment " +
+                            "e.date_of_enrolment, " +
                             "e.DEVICE_TYPE " +
                             "FROM dm_enrolment e " +
                             "INNER JOIN " +
@@ -2376,7 +2375,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                             "KEY_FIELD = 'encryptionEnabled' " +
                             "AND VALUE_FIELD = ?) AS di " +
                             "ON di.DEVICE_ID = e.DEVICE_ID " +
-                            "WHERE e.tenant_id = ?) e1, " +
+                            "WHERE e.tenant_id = ?) e1 " +
                             "WHERE d.id = e1.device_id " +
                             "ORDER BY e1.date_of_last_update DESC " +
                             "LIMIT ? OFFSET ?";
@@ -2410,7 +2409,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             Connection conn = getConnection();
             String sql =
-                    "SELECT COUNT(DEVICE_ID) " +
+                    "SELECT COUNT(DEVICE_ID) AS DEVICE_COUNT " +
                             "FROM DM_DEVICE_INFO " +
                             "WHERE KEY_FIELD = 'encryptionEnabled' " +
                             "AND VALUE_FIELD = ?";
@@ -2418,7 +2417,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setBoolean(1, isEncrypted);
-                ps.setInt(2, tenantId);
 
                 try (ResultSet rs = ps.executeQuery()) {
                     return rs.next() ? rs.getInt("DEVICE_COUNT") : 0;
