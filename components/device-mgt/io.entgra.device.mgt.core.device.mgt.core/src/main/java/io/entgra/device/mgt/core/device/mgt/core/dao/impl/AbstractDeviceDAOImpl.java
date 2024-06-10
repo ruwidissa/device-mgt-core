@@ -1716,7 +1716,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             String sql = "SELECT d.ID AS DEVICE_ID, d.DESCRIPTION, d.NAME AS DEVICE_NAME, d.LAST_UPDATED_TIMESTAMP, " +
                     "e.DEVICE_TYPE, e.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.IS_TRANSFERRED, " +
                     "e.DATE_OF_LAST_UPDATE, e.DATE_OF_ENROLMENT, e.ENROLMENT_ID FROM " +
-                    "(SELECT e.ID, e.DEVICE_ID, e.DEVICE_TYPE, e.OWNER, " +
+                    "(SELECT e.ID, e.DEVICE_ID, e.DEVICE_TYPE, e.DEVICE_IDENTIFICATION, e.OWNER, " +
                     "e.OWNERSHIP, e.STATUS, e.IS_TRANSFERRED, e.DATE_OF_ENROLMENT, e.DATE_OF_LAST_UPDATE, e.ID AS " +
                     "ENROLMENT_ID FROM DM_ENROLMENT e WHERE TENANT_ID = ? AND STATUS = ?) e, " +
                     "DM_DEVICE d WHERE d.ID = e.DEVICE_ID AND d.TENANT_ID = ?";
