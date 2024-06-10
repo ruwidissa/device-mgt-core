@@ -24,8 +24,6 @@ import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
-import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
-import io.entgra.device.mgt.core.device.mgt.core.dao.impl.AbstractDeviceDAOImpl;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.report.mgt.Constants;
 import org.apache.commons.lang.StringUtils;
@@ -46,7 +44,7 @@ import java.util.Map;
 /**
  * This class holds the generic implementation of DeviceDAO which can be used to support ANSI db syntax.
  */
-public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
+public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
 
     private static final Log log = LogFactory.getLog(SQLServerDeviceDAOImpl.class);
 
@@ -924,7 +922,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                             + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
                             + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID "
                             + "WHERE DM_DEVICE.ID IN (",
-                    ") AND DM_DEVICE.TENANT_ID = ?");
+                    ") AND DM_DEVICE.TENANT_ID = ? AND e.STATUS != ? AND e.STATUS != ?");
 
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
@@ -966,6 +964,8 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
 
                 ps.setInt(index++, tenantId);
+                ps.setString(index++, EnrolmentInfo.Status.REMOVED.toString());
+                ps.setString(index++, EnrolmentInfo.Status.DELETED.toString());
                 if (isDeviceNameProvided) {
                     ps.setString(index++, name + "%");
                 }
@@ -1111,10 +1111,6 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
-    }
-
-    private Connection getConnection() throws SQLException {
-        return DeviceManagementDAOFactory.getConnection();
     }
 
     @Override

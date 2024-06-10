@@ -157,6 +157,9 @@ public class SQLServerGeofenceDAOImpl extends AbstractGeofenceDAOImpl {
                         geofenceData.setFenceShape(rst.getString("FENCE_SHAPE"));
                         geofenceData.setGroupData(groupMap);
                     }
+                    if (geofenceData != null) {
+                        geofenceData.setGroupIds(new ArrayList<>(groupMap.keySet()));
+                    }
                     return geofenceData;
                 }
             }

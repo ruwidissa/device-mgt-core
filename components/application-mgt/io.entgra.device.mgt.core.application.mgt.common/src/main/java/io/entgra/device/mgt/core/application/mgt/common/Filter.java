@@ -118,6 +118,11 @@ public class Filter {
      */
     private boolean isNotRetired;
 
+    /**
+     * To check whether web applications should be returned
+     */
+    private boolean withWebApps;
+
     public int getLimit() {
         return limit;
     }
@@ -220,5 +225,13 @@ public class Filter {
 
     public void setNotRetired(boolean notRetired) {
         isNotRetired = notRetired;
+    }
+
+    public boolean isWithWebApps() {
+        return withWebApps;
+    }
+
+    public void setWithWebApps(boolean withWebApps) {
+        this.withWebApps = withWebApps;
     }
 }

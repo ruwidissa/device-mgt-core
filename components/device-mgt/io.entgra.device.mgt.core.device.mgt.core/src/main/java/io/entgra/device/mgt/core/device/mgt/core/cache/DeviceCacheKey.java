@@ -28,7 +28,6 @@ public class DeviceCacheKey {
     private String deviceId;
     private String deviceType;
     private int tenantId;
-    private volatile int hashCode;
 
     public String getDeviceId() {
         return deviceId;
@@ -55,27 +54,21 @@ public class DeviceCacheKey {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!DeviceCacheKey.class.isAssignableFrom(obj.getClass())) {
-            return false;
-        }
-        final DeviceCacheKey other = (DeviceCacheKey) obj;
-        String thisId = this.deviceId + "-" + this.deviceType + "_" + this.tenantId;
-        String otherId = other.deviceId + "-" + other.deviceType + "_" + other.tenantId;
-        if (!thisId.equals(otherId)) {
-            return false;
-        }
-        return true;
+    public int hashCode() {
+        return toString().hashCode();
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = Objects.hash(deviceId, deviceType, tenantId);
-        }
-        return hashCode;
+    public String toString() {
+        return tenantId + "|" + deviceType + "|" + deviceId;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DeviceCacheKey) {
+            return (this.hashCode() == obj.hashCode());
+        }
+        return false;
+    }
+
 }

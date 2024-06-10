@@ -122,6 +122,9 @@ public interface DeviceDAO {
      */
     boolean updateDevice(Device device, int tenantId) throws DeviceManagementDAOException;
 
+    boolean recordDeviceUpdate(DeviceIdentifier deviceIdentifier, int tenantId)
+            throws DeviceManagementDAOException;
+
     Device getDevice(DeviceData deviceData, int tenantId) throws DeviceManagementDAOException;
 
 
@@ -477,6 +480,7 @@ public interface DeviceDAO {
      * @return returns list of device types.
      * @throws DeviceManagementDAOException
      */
+    @Deprecated
     List<DeviceType> getDeviceTypes() throws DeviceManagementDAOException;
 
     /**

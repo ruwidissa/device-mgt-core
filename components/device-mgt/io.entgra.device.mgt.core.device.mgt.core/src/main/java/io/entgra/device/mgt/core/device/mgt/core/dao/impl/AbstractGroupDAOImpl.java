@@ -1283,8 +1283,9 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                     + "d1.DEVICE_ID, "
                     + "d1.DESCRIPTION, "
                     + "d1.NAME AS DEVICE_NAME, "
-                    + "d1.DEVICE_TYPE, "
+                    + "e.DEVICE_TYPE, "
                     + "d1.DEVICE_IDENTIFICATION, "
+                    + "d1.LAST_UPDATED_TIMESTAMP, "
                     + "e.OWNER, "
                     + "e.OWNERSHIP, "
                     + "e.STATUS, "
@@ -1294,15 +1295,14 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                     + "e.ID AS ENROLMENT_ID "
                     + "FROM "
                     + "DM_ENROLMENT e, "
-                    + "(SELECT gd.DEVICE_ID, gd.DESCRIPTION, gd.NAME, gd.DEVICE_IDENTIFICATION, t.NAME AS DEVICE_TYPE "
+                    + "(SELECT gd.DEVICE_ID, gd.DESCRIPTION, gd.NAME, gd.DEVICE_IDENTIFICATION, gd.LAST_UPDATED_TIMESTAMP "
                     + "FROM "
-                    + "(SELECT d.ID AS DEVICE_ID, d.DESCRIPTION, d.NAME, d.DEVICE_IDENTIFICATION, d.DEVICE_TYPE_ID "
+                    + "(SELECT d.ID AS DEVICE_ID, d.DESCRIPTION, d.NAME, d.DEVICE_IDENTIFICATION, d.LAST_UPDATED_TIMESTAMP "
                     + "FROM DM_DEVICE d, "
                     + "(SELECT dgm.DEVICE_ID "
                     + "FROM DM_DEVICE_GROUP_MAP dgm "
                     + "WHERE dgm.GROUP_ID = (SELECT ID FROM DM_GROUP WHERE GROUP_NAME = ? AND TENANT_ID = ?)) dgm1 "
-                    + "WHERE d.ID = dgm1.DEVICE_ID AND d.TENANT_ID = ?) gd, DM_DEVICE_TYPE t "
-                    + "WHERE gd.DEVICE_TYPE_ID = t.ID) d1 "
+                    + "WHERE d.ID = dgm1.DEVICE_ID AND d.TENANT_ID = ?) gd) d1 "
                     + "WHERE d1.DEVICE_ID = e.DEVICE_ID AND TENANT_ID = ? AND e.STATUS IN (",
                     ")");
 
@@ -1344,8 +1344,9 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                     + "d1.DEVICE_ID, "
                     + "d1.DESCRIPTION, "
                     + "d1.NAME AS DEVICE_NAME, "
-                    + "d1.DEVICE_TYPE, "
+                    + "e.DEVICE_TYPE, "
                     + "d1.DEVICE_IDENTIFICATION, "
+                    + "d1.LAST_UPDATED_TIMESTAMP, "
                     + "e.OWNER, "
                     + "e.OWNERSHIP, "
                     + "e.STATUS, "
@@ -1355,15 +1356,14 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                     + "e.ID AS ENROLMENT_ID "
                     + "FROM "
                     + "DM_ENROLMENT e, "
-                    + "(SELECT gd.DEVICE_ID, gd.DESCRIPTION, gd.NAME, gd.DEVICE_IDENTIFICATION, t.NAME AS DEVICE_TYPE "
+                    + "(SELECT gd.DEVICE_ID, gd.DESCRIPTION, gd.NAME, gd.DEVICE_IDENTIFICATION, gd.LAST_UPDATED_TIMESTAMP "
                     + "FROM "
-                    + "(SELECT d.ID AS DEVICE_ID, d.DESCRIPTION, d.NAME, d.DEVICE_IDENTIFICATION, d.DEVICE_TYPE_ID "
+                    + "(SELECT d.ID AS DEVICE_ID, d.DESCRIPTION, d.NAME, d.DEVICE_IDENTIFICATION, d.LAST_UPDATED_TIMESTAMP "
                     + "FROM DM_DEVICE d, "
                     + "(SELECT dgm.DEVICE_ID "
                     + "FROM DM_DEVICE_GROUP_MAP dgm "
                     + "WHERE dgm.GROUP_ID = (SELECT ID FROM DM_GROUP WHERE GROUP_NAME = ? AND TENANT_ID = ?)) dgm1 "
-                    + "WHERE d.ID = dgm1.DEVICE_ID AND d.TENANT_ID = ?) gd, DM_DEVICE_TYPE t "
-                    + "WHERE gd.DEVICE_TYPE_ID = t.ID) d1 "
+                    + "WHERE d.ID = dgm1.DEVICE_ID AND d.TENANT_ID = ?) gd) d1 "
                     + "WHERE d1.DEVICE_ID = e.DEVICE_ID AND TENANT_ID = ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -1396,9 +1396,10 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             StringJoiner sql = new StringJoiner(",",
                     "SELECT DEVICE.ID AS DEVICE_ID, " +
                             "DEVICE.NAME AS DEVICE_NAME, " +
-                            "DEVICE_TYPE.NAME AS DEVICE_TYPE, " +
+                            "ENROLMENT.DEVICE_TYPE, " +
                             "DEVICE.DESCRIPTION, " +
                             "DEVICE.DEVICE_IDENTIFICATION, " +
+                            "DEVICE.LAST_UPDATED_TIMESTAMP, " +
                             "ENROLMENT.ID AS ENROLMENT_ID, " +
                             "ENROLMENT.OWNER, " +
                             "ENROLMENT.OWNERSHIP, " +
@@ -1406,9 +1407,9 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                             "ENROLMENT.DATE_OF_LAST_UPDATE, " +
                             "ENROLMENT.STATUS, " +
                             "ENROLMENT.IS_TRANSFERRED " +
-                            "FROM DM_DEVICE AS DEVICE, DM_DEVICE_TYPE AS DEVICE_TYPE, DM_ENROLMENT " +
+                            "FROM DM_DEVICE AS DEVICE, DM_ENROLMENT " +
                             "AS ENROLMENT " +
-                            "WHERE DEVICE_TYPE.NAME = ? AND DEVICE.ID " +
+                            "WHERE ENROLMENT.DEVICE_TYPE = ? AND DEVICE.ID " +
                             "NOT IN " +
                             "(SELECT DEVICE_ID " +
                             "FROM DM_DEVICE_GROUP_MAP " +

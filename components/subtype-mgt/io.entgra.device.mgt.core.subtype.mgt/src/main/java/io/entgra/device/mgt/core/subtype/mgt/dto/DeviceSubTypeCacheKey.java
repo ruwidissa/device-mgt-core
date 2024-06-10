@@ -58,4 +58,12 @@ public class DeviceSubTypeCacheKey {
         return tenantId + "|" + subTypeId + "|" + deviceType;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DeviceSubTypeCacheKey) {
+            return (this.hashCode() == obj.hashCode());
+        }
+        return false;
+    }
+
 }
