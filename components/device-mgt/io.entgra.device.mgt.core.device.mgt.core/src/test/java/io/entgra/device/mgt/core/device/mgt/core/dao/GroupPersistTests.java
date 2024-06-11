@@ -18,6 +18,8 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao;
 
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
@@ -54,19 +56,18 @@ public class GroupPersistTests extends BaseDeviceManagementTest {
             GroupManagementDAOFactory.beginTransaction();
             groupId = groupDAO.addGroup(deviceGroup, TestDataHolder.SUPER_TENANT_ID);
             GroupManagementDAOFactory.commitTransaction();
-            GroupManagementDAOFactory.closeConnection();
             log.debug("Group added to database. ID: " + groupId);
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while adding device type '" + deviceGroup.getName() + "'.";
             log.error(msg, e);
             Assert.fail(msg, e);
         } catch (TransactionManagementException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while initiating transaction.";
             log.error(msg, e);
             Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
         }
         DeviceGroup group = getGroupById(groupId);
         if (!isMock()) {
@@ -83,22 +84,21 @@ public class GroupPersistTests extends BaseDeviceManagementTest {
             request.setGroupName(null);
             request.setOwner(null);
             List<DeviceGroup> groups = groupDAO.getGroups(request, TestDataHolder.SUPER_TENANT_ID);
-            GroupManagementDAOFactory.closeConnection();
             if (!isMock()) {
                 Assert.assertNotEquals(groups.size(), 0, "No groups found");
                 Assert.assertNotNull(groups.get(0), "Group is null");
                 log.debug("No of Groups found: " + groups.size());
             }
         } catch (GroupManagementDAOException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while find group by name.";
             log.error(msg, e);
             Assert.fail(msg, e);
         } catch (SQLException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while opening a connection to the data source.";
             log.error(msg, e);
             Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
         }
     }
 
@@ -114,21 +114,20 @@ public class GroupPersistTests extends BaseDeviceManagementTest {
             }
             GroupManagementDAOFactory.commitTransaction();
             List<String> roles = groupDAO.getRoles(groupId, TestDataHolder.SUPER_TENANT_ID);
-            GroupManagementDAOFactory.closeConnection();
             if (!isMock()) {
                 Assert.assertEquals(roles, addedRoles, "Added roles are not equal to returned roles.");
             }
             log.debug("Group shared with roles.");
         } catch (GroupManagementDAOException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while find group by name.";
             log.error(msg, e);
             Assert.fail(msg, e);
         } catch (TransactionManagementException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while opening a connection to the data source.";
             log.error(msg, e);
             Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
         }
     }
 
@@ -141,22 +140,21 @@ public class GroupPersistTests extends BaseDeviceManagementTest {
                 roles.remove(0);
             }
             List<DeviceGroup> deviceGroups = groupDAO.getGroups(roles.toArray(new String[roles.size()]), TestDataHolder.SUPER_TENANT_ID);
-            GroupManagementDAOFactory.closeConnection();
             if (!isMock()) {
                 Assert.assertEquals(deviceGroups.size(), 1, "Unexpected number of device groups found with role.");
                 Assert.assertEquals(deviceGroups.get(0).getGroupId(), groupId, "Unexpected groupId found with role.");
             }
             log.debug("Group found for given roles.");
         } catch (GroupManagementDAOException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while getting groups shared with roles.";
             log.error(msg, e);
             Assert.fail(msg, e);
         } catch (SQLException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while opening a connection to the data source.";
             log.error(msg, e);
             Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
         }
     }
 
@@ -271,19 +269,18 @@ public class GroupPersistTests extends BaseDeviceManagementTest {
             GroupManagementDAOFactory.beginTransaction();
             groupDAO.updateGroup(group, groupId, TestDataHolder.SUPER_TENANT_ID);
             GroupManagementDAOFactory.commitTransaction();
-            GroupManagementDAOFactory.closeConnection();
             log.debug("Group updated");
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while updating group details.";
             log.error(msg, e);
             Assert.fail(msg, e);
         } catch (TransactionManagementException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while initiating transaction.";
             log.error(msg, e);
             Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
         }
         if (!isMock()) {
             group = getGroupById(groupId);
@@ -301,19 +298,19 @@ public class GroupPersistTests extends BaseDeviceManagementTest {
             GroupManagementDAOFactory.beginTransaction();
             groupDAO.deleteGroup(group.getGroupId(), TestDataHolder.SUPER_TENANT_ID);
             GroupManagementDAOFactory.commitTransaction();
-            GroupManagementDAOFactory.closeConnection();
             log.debug("Group deleted");
         } catch (GroupManagementDAOException e) {
             GroupManagementDAOFactory.rollbackTransaction();
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while updating group details.";
             log.error(msg, e);
             Assert.fail(msg, e);
         } catch (TransactionManagementException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while initiating transaction.";
             log.error(msg, e);
             Assert.fail(msg, e);
+        }
+        finally {
+            GroupManagementDAOFactory.closeConnection();
         }
         group = getGroupById(groupId);
         if (!isMock()) {
@@ -325,23 +322,290 @@ public class GroupPersistTests extends BaseDeviceManagementTest {
         try {
             GroupManagementDAOFactory.openConnection();
             DeviceGroup deviceGroup = groupDAO.getGroup(groupId, TestDataHolder.SUPER_TENANT_ID);
-            GroupManagementDAOFactory.closeConnection();
             if (deviceGroup == null && isMock()) {
                 deviceGroup = new DeviceGroup();
                 deviceGroup.setGroupId(groupId);
             }
             return deviceGroup;
         } catch (GroupManagementDAOException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while retrieving group details.";
             log.error(msg, e);
             Assert.fail(msg, e);
         } catch (SQLException e) {
-            GroupManagementDAOFactory.closeConnection();
             String msg = "Error occurred while opening a connection to the data source.";
             log.error(msg, e);
             Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
         }
         return null;
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getAllDevicesOfGroupWithStatus() {
+        DeviceGroup deviceGroup = getGroupById(groupId);
+        Assert.assertNotNull(deviceGroup, "Group is null");
+        List<String> deviceStatus = new ArrayList<>();
+        deviceStatus.add(EnrolmentInfo.Status.ACTIVE.name());
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getAllDevicesOfGroup(deviceGroup.getName(), deviceStatus, TestDataHolder.SUPER_TENANT_ID);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting devices of group '" + groupId + "'.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getAllDevicesOfGroup() {
+        DeviceGroup deviceGroup = getGroupById(groupId);
+        Assert.assertNotNull(deviceGroup, "Group is null");
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getAllDevicesOfGroup(deviceGroup.getName(), TestDataHolder.SUPER_TENANT_ID);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting devices of group '" + groupId + "'.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getGroupUnassignedDevices() {
+        DeviceGroup deviceGroup = getGroupById(groupId);
+        Device device = TestDataHolder.initialTestDevice;
+        Assert.assertNotNull(deviceGroup, "Group is null");
+        PaginationRequest pr = new PaginationRequest(0,10);
+        pr.setDeviceType(device.getType());
+        List<String> groupNames = new ArrayList<>();
+        groupNames.add(deviceGroup.getName());
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getGroupUnassignedDevices(pr, groupNames);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting devices of group '" + groupId + "'.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getOwnGroupsCount() {
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getOwnGroupsCount(TestDataHolder.OWNER, TestDataHolder.SUPER_TENANT_ID, "/");
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting own group count for '" + TestDataHolder.OWNER + "'.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getOwnGroups() {
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getOwnGroups(TestDataHolder.OWNER, TestDataHolder.SUPER_TENANT_ID);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting own groups for '" + TestDataHolder.OWNER + "'.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getOwnGroupIds() {
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getOwnGroupIds(TestDataHolder.OWNER, TestDataHolder.SUPER_TENANT_ID);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting own group Ids for '" + TestDataHolder.OWNER + "'.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getDeviceCount() {
+        DeviceGroup deviceGroup = getGroupById(groupId);
+        Assert.assertNotNull(deviceGroup, "Group is null");
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getDeviceCount(deviceGroup.getGroupId(), TestDataHolder.SUPER_TENANT_ID);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting device count for '" +groupId+ "'.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void isDeviceMappedToGroup() {
+        DeviceGroup deviceGroup = getGroupById(groupId);
+        Device device = TestDataHolder.initialTestDevice;
+        Assert.assertNotNull(deviceGroup, "Group is null");
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.isDeviceMappedToGroup(deviceGroup.getGroupId(), Integer.parseInt(device.getDeviceIdentifier()), TestDataHolder.SUPER_TENANT_ID);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while checking device map to group for '" +groupId+ "'.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getGroupCount() {
+        DeviceGroup deviceGroup = getGroupById(groupId);
+        GroupPaginationRequest pr = new GroupPaginationRequest(0,10);
+        pr.setGroupName(deviceGroup.getName());
+        Assert.assertNotNull(deviceGroup, "Group is null");
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getGroupCount(pr, TestDataHolder.SUPER_TENANT_ID);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting group count for '" +TestDataHolder.SUPER_TENANT_ID+ "'.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getGroupCountWithStatus() {
+        DeviceGroup deviceGroup = getGroupById(groupId);
+        Assert.assertNotNull(deviceGroup, "Group is null");
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getGroupCount(TestDataHolder.SUPER_TENANT_ID, EnrolmentInfo.Status.ACTIVE.name());
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting group count for" + TestDataHolder.SUPER_TENANT_ID;
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getRootGroups() {
+        DeviceGroup deviceGroup = getGroupById(groupId);
+        Assert.assertNotNull(deviceGroup, "Group is null");
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getRootGroups(TestDataHolder.SUPER_TENANT_ID);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting group count for " + TestDataHolder.SUPER_TENANT_ID;
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Test(dependsOnMethods = {"addDeviceToGroupTest"})
+    public void getAllGroupProperties() {
+        DeviceGroup deviceGroup = getGroupById(groupId);
+        Assert.assertNotNull(deviceGroup, "Group is null");
+        try {
+            GroupManagementDAOFactory.beginTransaction();
+            groupDAO.getAllGroupProperties(groupId, TestDataHolder.SUPER_TENANT_ID);
+            GroupManagementDAOFactory.commitTransaction();
+        } catch (GroupManagementDAOException e) {
+            GroupManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while getting groups for " + TestDataHolder.SUPER_TENANT_ID;
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction.";
+            log.error(msg, e);
+            Assert.fail(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
     }
 }
