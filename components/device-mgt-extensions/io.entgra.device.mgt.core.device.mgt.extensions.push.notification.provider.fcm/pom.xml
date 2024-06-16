@@ -112,8 +112,44 @@
             <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.auth</groupId>
+            <groupId>org.wso2.orbit.com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.google.auth-library-oauth2-http</groupId>
             <artifactId>google-auth-library-oauth2-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.opencensus</groupId>
+            <artifactId>opencensus</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opencensus</groupId>
+            <artifactId>opencensus-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opencensus</groupId>
+            <artifactId>opencensus-contrib-http-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.grpc</groupId>
+            <artifactId>grpc-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>failureaccess</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
         </dependency>
     </dependencies>
 
@@ -141,14 +177,27 @@
                             com.google.gson,
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
+                            org.wso2.carbon.utils.*,
                             io.entgra.device.mgt.core.device.mgt.common.operation.mgt,
                             io.entgra.device.mgt.core.device.mgt.common.push.notification,
                             org.apache.commons.logging,
                             io.entgra.device.mgt.core.device.mgt.common.*,
                             io.entgra.device.mgt.core.device.mgt.core.service,
+                            io.entgra.device.mgt.core.device.mgt.core.config.*,
+                            io.entgra.device.mgt.core.device.mgt.core.config.push.notification.*,
                             io.entgra.device.mgt.core.device.mgt.extensions.logger.spi,
-                            io.entgra.device.mgt.core.notification.logger.*
+                            io.entgra.device.mgt.core.notification.logger.*,
+                            com.google.auth.oauth2.*
                         </Import-Package>
+                        <Embed-Dependency>
+                            google-auth-library-oauth2-http;scope=compile|runtime,
+                            google-http-client;scope=compile|runtime,
+                            grpc-context;scope=compile|runtime,
+                            guava;scope=compile|runtime,
+                            opencensus;scope=compile|runtime,
+                            failureaccess;scope=compile|runtime
+                        </Embed-Dependency>
+                        <Embed-Transitive>true</Embed-Transitive>
                     </instructions>
                 </configuration>
             </plugin>
