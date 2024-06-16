@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.push.notification.ContextMetadata;
 import io.entgra.device.mgt.core.device.mgt.core.config.push.notification.PushNotificationConfiguration;
+import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.util.FCMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
@@ -53,12 +54,7 @@ public class FCMNotificationStrategy implements NotificationStrategy {
     private static final int TIME_TO_LIVE = 2419199; // 1 second less than 28 days
     private static final int HTTP_STATUS_CODE_OK = 200;
     private final PushNotificationConfig config;
-    private static final String FCM_SERVICE_ACCOUNT_PATH = CarbonUtils.getCarbonHome() + File.separator +
-            "repository" + File.separator + "resources" + File.separator + "service-account.json";
-    private static final String[] FCM_SCOPES = { "https://www.googleapis.com/auth/firebase.messaging" };
     private static final String FCM_ENDPOINT_KEY = "FCM_SERVER_ENDPOINT";
-    private Properties contextMetadataProperties;
-    private volatile GoogleCredentials defaultApplication;
 
     public FCMNotificationStrategy(PushNotificationConfig config) {
         this.config = config;
@@ -66,8 +62,7 @@ public class FCMNotificationStrategy implements NotificationStrategy {
 
     @Override
     public void init() {
-        initContextConfigs();
-        initDefaultOAuthApplication();
+
     }
 
     @Override
@@ -77,8 +72,8 @@ public class FCMNotificationStrategy implements NotificationStrategy {
                 Device device = FCMDataHolder.getInstance().getDeviceManagementProviderService()
                         .getDeviceWithTypeProperties(ctx.getDeviceId());
                 if(device.getProperties() != null && getFCMToken(device.getProperties()) != null) {
-                    defaultApplication.refresh();
-                    sendWakeUpCall(defaultApplication.getAccessToken().getTokenValue(),
+                    FCMUtil.getInstance().getDefaultApplication().refresh();
+                    sendWakeUpCall(FCMUtil.getInstance().getDefaultApplication().getAccessToken().getTokenValue(),
                             getFCMToken(device.getProperties()));
                 }
             } else {
@@ -94,43 +89,14 @@ public class FCMNotificationStrategy implements NotificationStrategy {
         }
     }
 
-    private void initDefaultOAuthApplication() {
-        if (defaultApplication == null) {
-            synchronized (FCMNotificationStrategy.class) {
-                if (defaultApplication == null) {
-                    Path serviceAccountPath = Paths.get(FCM_SERVICE_ACCOUNT_PATH);
-                    try {
-                        this.defaultApplication = GoogleCredentials.
-                                fromStream(Files.newInputStream(serviceAccountPath)).
-                                createScoped(FCM_SCOPES);
-                    } catch (IOException e) {
-                        log.error("Fail to initialize default OAuth application for FCM communication");
-                        throw new IllegalStateException(e);
-                    }
-                }
-            }
-        }
-    }
 
-    private void initContextConfigs() {
-        PushNotificationConfiguration pushNotificationConfiguration = DeviceConfigurationManager.getInstance().
-                getDeviceManagementConfig().getPushNotificationConfiguration();
-        List<ContextMetadata> contextMetadata = pushNotificationConfiguration.getContextMetadata();
-        Properties properties = new Properties();
-        if (contextMetadata != null) {
-            for (ContextMetadata metadata : contextMetadata) {
-                properties.setProperty(metadata.getKey(), metadata.getValue());
-            }
-        }
-        contextMetadataProperties = properties;
-    }
 
     private void sendWakeUpCall(String accessToken, String registrationId) throws IOException,
             PushNotificationExecutionFailedException {
         OutputStream os = null;
         HttpURLConnection conn = null;
 
-        String fcmServerEndpoint = contextMetadataProperties.getProperty(FCM_ENDPOINT_KEY);
+        String fcmServerEndpoint = FCMUtil.getInstance().getContextMetadataProperties().getProperty(FCM_ENDPOINT_KEY);
         if(fcmServerEndpoint == null) {
             String msg = "Encountered configuration issue. " + FCM_ENDPOINT_KEY + " is not defined";
             log.error(msg);
