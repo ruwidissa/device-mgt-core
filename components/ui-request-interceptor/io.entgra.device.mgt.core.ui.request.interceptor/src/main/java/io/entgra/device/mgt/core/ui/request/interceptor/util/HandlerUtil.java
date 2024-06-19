@@ -19,9 +19,13 @@
 package io.entgra.device.mgt.core.ui.request.interceptor.util;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -62,8 +66,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -93,10 +100,6 @@ public class HandlerUtil {
     public static ProxyResponse execute(ClassicHttpRequest httpRequest) throws IOException {
 
         try (CloseableHttpClient client = getHttpClient()) {
-
-            JsonFactory jsonFactory = new JsonFactory();
-            ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
-
             return client.execute(httpRequest, response -> {
                 final HttpEntity responseEntity = response.getEntity();
                 ProxyResponse handlerResponse = new ProxyResponse();
@@ -109,41 +112,39 @@ public class HandlerUtil {
                             HandlerConstants.INTERNAL_ERROR_CODE));
                     return handlerResponse;
                 }
-                try (InputStream inputStream = responseEntity.getContent()) {
-                    JsonNode responseData = objectMapper.readTree(inputStream);
-                    if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
-                        handlerResponse.setCode(statusCode);
-                        handlerResponse.setData(responseData);
-                        handlerResponse.setStatus(ProxyResponse.Status.SUCCESS);
-                        handlerResponse.setExecutorResponse("SUCCESS");
-                        handlerResponse.setHeaders(response.getHeaders());
-                        return handlerResponse;
-                    } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                        if (isTokenExpired(responseData)) {
-                            handlerResponse.setCode(statusCode);
-                            handlerResponse.setStatus(ProxyResponse.Status.ERROR);
-                            handlerResponse.setExecutorResponse(HandlerConstants.TOKEN_IS_EXPIRED);
-                        } else {
-                            log.error(
-                                    "Received " + statusCode + " response for http request : " + httpRequest.getMethod()
-                                            + " " + httpRequest.getRequestUri() + ". Error message: " + responseData.textValue());
-                            handlerResponse.setCode(statusCode);
-                            handlerResponse.setData(responseData);
-                            handlerResponse.setStatus(ProxyResponse.Status.ERROR);
-                            handlerResponse.setExecutorResponse(
-                                    HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
-                        }
-                        return handlerResponse;
-                    }
-                    log.error("Received " + statusCode + " response for http request : " + httpRequest.getMethod()
-                            + " " + httpRequest.getRequestUri() + ". Error message: " + responseData.textValue());
+                JsonNode responseData = getResponseData(responseEntity);
+                if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
                     handlerResponse.setCode(statusCode);
                     handlerResponse.setData(responseData);
-                    handlerResponse.setStatus(ProxyResponse.Status.ERROR);
-                    handlerResponse
-                            .setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
+                    handlerResponse.setStatus(ProxyResponse.Status.SUCCESS);
+                    handlerResponse.setExecutorResponse("SUCCESS");
+                    handlerResponse.setHeaders(response.getHeaders());
+                    return handlerResponse;
+                } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                    if (isTokenExpired(responseData)) {
+                        handlerResponse.setCode(statusCode);
+                        handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                        handlerResponse.setExecutorResponse(HandlerConstants.TOKEN_IS_EXPIRED);
+                    } else {
+                        log.error(
+                                "Received " + statusCode + " response for http request : " + httpRequest.getMethod()
+                                        + " " + httpRequest.getRequestUri() + ". Error message: " + responseData.textValue());
+                        handlerResponse.setCode(statusCode);
+                        handlerResponse.setData(responseData);
+                        handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                        handlerResponse.setExecutorResponse(
+                                HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
+                    }
                     return handlerResponse;
                 }
+                log.error("Received " + statusCode + " response for http request : " + httpRequest.getMethod()
+                        + " " + httpRequest.getRequestUri() + ". Error message: " + responseData.textValue());
+                handlerResponse.setCode(statusCode);
+                handlerResponse.setData(responseData);
+                handlerResponse.setStatus(ProxyResponse.Status.ERROR);
+                handlerResponse
+                        .setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
+                return handlerResponse;
             });
         }
     }
@@ -747,5 +748,46 @@ public class HandlerUtil {
 
     public static String generateStateToken() {
         return new BigInteger(130, new SecureRandom()).toString(32);
+    }
+
+    /**
+     * Get response data and convert data into a json tree
+     * @param responseEntity Incoming {@link HttpEntity}
+     * @return {@link JsonNode} consists with response data content
+     * @throws IOException Throws when IO exception encountered
+     */
+    public static JsonNode getResponseData(HttpEntity responseEntity) throws IOException {
+        JsonFactory jsonFactory = new JsonFactory();
+        ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+        JsonNode finalNode;
+        try (InputStream inputStream = responseEntity.getContent()) {
+            String content = getResponseAsString(inputStream);
+            try {
+                finalNode = objectMapper.readTree(content);
+            } catch (JsonProcessingException e) {
+                ObjectNode objectNode = objectMapper.createObjectNode();
+                objectNode.put("message", content);
+                finalNode = objectMapper.valueToTree(objectNode);
+            }
+        }
+        return finalNode;
+    }
+
+    /**
+     * Get response content as a string
+     * @param inputStream Incoming response content as a stream
+     * @return String content of the incoming response
+     * @throws IOException Throws when IO exception encountered
+     */
+    public static String getResponseAsString(InputStream inputStream) throws IOException {
+        char []buffer = new char[8192];
+        StringBuilder stringBuilder = new StringBuilder();
+        try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            int charsRead;
+            while ((charsRead = reader.read(buffer, 0, buffer.length)) > 0) {
+                stringBuilder.append(buffer, 0, charsRead);
+            }
+        }
+        return stringBuilder.toString();
     }
 }
