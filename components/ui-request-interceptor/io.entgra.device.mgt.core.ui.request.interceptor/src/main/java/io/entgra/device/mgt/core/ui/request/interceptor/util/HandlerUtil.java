@@ -112,7 +112,7 @@ public class HandlerUtil {
                             HandlerConstants.INTERNAL_ERROR_CODE));
                     return handlerResponse;
                 }
-                JsonNode responseData = getResponseData(responseEntity);
+                JsonNode responseData = getResponseDataAsJsonNode(responseEntity);
                 if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
                     handlerResponse.setCode(statusCode);
                     handlerResponse.setData(responseData);
@@ -756,12 +756,12 @@ public class HandlerUtil {
      * @return {@link JsonNode} consists with response data content
      * @throws IOException Throws when IO exception encountered
      */
-    public static JsonNode getResponseData(HttpEntity responseEntity) throws IOException {
+    public static JsonNode getResponseDataAsJsonNode(HttpEntity responseEntity) throws IOException {
         JsonFactory jsonFactory = new JsonFactory();
         ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
         JsonNode finalNode;
         try (InputStream inputStream = responseEntity.getContent()) {
-            String content = getResponseAsString(inputStream);
+            String content = getResponseDataAsString(inputStream);
             try {
                 finalNode = objectMapper.readTree(content);
             } catch (JsonProcessingException e) {
@@ -779,7 +779,7 @@ public class HandlerUtil {
      * @return String content of the incoming response
      * @throws IOException Throws when IO exception encountered
      */
-    public static String getResponseAsString(InputStream inputStream) throws IOException {
+    public static String getResponseDataAsString(InputStream inputStream) throws IOException {
         char []buffer = new char[8192];
         StringBuilder stringBuilder = new StringBuilder();
         try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
