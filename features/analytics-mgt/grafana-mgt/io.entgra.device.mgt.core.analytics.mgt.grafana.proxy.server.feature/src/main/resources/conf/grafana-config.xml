@@ -32,4 +32,10 @@
 		<Username>admin</Username>
 		<Password>admin</Password>
 	</AdminUser>
+    <ValidationConfig>
+        <!-- Enable/Disable data source query validation. -->
+        <DSQueryValidation>true</DSQueryValidation>
+        <!-- Enable/Disable dashboard integration. -->
+        <DashboardIntegration>false</DashboardIntegration>
+    </ValidationConfig>
 </GrafanaConfiguration>

@@ -22,6 +22,8 @@ import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api.bean.ErrorRespo
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.api.exception.RefererNotValid;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.common.exception.GrafanaManagementException;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.bean.GrafanaPanelIdentifier;
+import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config.GrafanaConfiguration;
+import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config.GrafanaConfigurationManager;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.exception.GrafanaEnvVariablesNotDefined;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.util.GrafanaConstants;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.util.GrafanaUtil;
@@ -120,19 +122,23 @@ public class GrafanaRequestHandlerUtil {
         return path;
     }
 
-    public static GrafanaPanelIdentifier getPanelIdentifier(HttpHeaders headers) throws RefererNotValid {
+    public static GrafanaPanelIdentifier getPanelIdentifier(HttpHeaders headers) throws RefererNotValid, GrafanaManagementException {
         String referer = headers.getHeaderString(GrafanaConstants.REFERER_HEADER);
-        if(referer == null) {
+        if (referer == null) {
             String errMsg = "Request does not contain Referer header";
             log.error(errMsg);
             throw new RefererNotValid(errMsg);
         }
+        GrafanaConfiguration configuration = GrafanaConfigurationManager.getInstance().getGrafanaConfiguration();
+        boolean dashboardIntegrationConfig = configuration.getValidationConfig().getDashboardIntegration();
         GrafanaPanelIdentifier panelIdentifier = GrafanaUtil.getPanelIdentifierFromReferer(referer);
-        if(panelIdentifier.getDashboardId() == null ||
-                panelIdentifier.getPanelId() == null || panelIdentifier.getOrgId() == null) {
-            String errMsg = "Referer must contain dashboardId, panelId and orgId";
-            log.error(errMsg);
-            throw new RefererNotValid(errMsg);
+        if (!dashboardIntegrationConfig) {
+            if (panelIdentifier.getDashboardId() == null ||
+                    panelIdentifier.getPanelId() == null || panelIdentifier.getOrgId() == null) {
+                String errMsg = "Referer must contain dashboardId, panelId, and orgId";
+                log.error(errMsg);
+                throw new RefererNotValid(errMsg);
+            }
         }
         return panelIdentifier;
     }
