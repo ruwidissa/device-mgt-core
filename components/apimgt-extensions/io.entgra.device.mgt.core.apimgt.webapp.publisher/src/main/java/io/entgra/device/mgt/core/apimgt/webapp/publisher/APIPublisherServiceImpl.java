@@ -46,6 +46,7 @@ import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermission;
 import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermissions;
 import io.entgra.device.mgt.core.device.mgt.core.config.permission.ScopeMapping;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,6 +69,8 @@ import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionUtils;
+import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -610,9 +613,17 @@ public class APIPublisherServiceImpl implements APIPublisherService {
 
                             if (publisherRESTAPIServices.isSharedScopeNameExists(apiApplicationKey, accessTokenInfo, scope.getName())) {
                                 publisherRESTAPIServices.updateSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                                // todo: permission changed in update path, is not handled yet.
                             } else {
-                                // todo: come to this level means, that scope is removed from API, but haven't removed from the scope-role-permission-mappings list
-                                log.warn(scope.getName() + " not available as shared scope");
+                                // This scope doesn't have an api attached.
+                                log.warn(scope.getName() + " not available as shared, add as new scope");
+                                publisherRESTAPIServices.addNewSharedScope(apiApplicationKey, accessTokenInfo, scope);
+                                // add permission if not exist
+                                try {
+                                    PermissionUtils.putPermission(permission);
+                                } catch(PermissionManagementException e) {
+                                    log.error("Error when adding permission ", e);
+                                }
                             }
                         }
                         for (String role : rolePermissions.keySet()) {
