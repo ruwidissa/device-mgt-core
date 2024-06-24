@@ -205,7 +205,9 @@
                             org.wso2.carbon.utils;version="4.6",
                             org.wso2.carbon.utils.multitenancy;version="4.6",
                             org.apache.commons.lang,
-                            org.json
+                            org.json,
+                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt,
+                            io.entgra.device.mgt.core.device.mgt.core.permission.mgt
                         </Import-Package>
                         <Embed-Dependency>
                             jsr311-api;scope=compile|runtime;inline=false
