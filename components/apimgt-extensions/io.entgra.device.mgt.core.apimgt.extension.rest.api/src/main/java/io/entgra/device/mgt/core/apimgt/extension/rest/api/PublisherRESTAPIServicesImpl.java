@@ -120,7 +120,9 @@ public class PublisherRESTAPIServicesImpl implements PublisherRESTAPIServices {
                 throw new BadRequestException(msg);
             } else if (HttpStatus.SC_NOT_FOUND == response.code()) {
                 String msg = "Shared scope key not found : " + key;
-                log.info(msg);
+                if (log.isDebugEnabled()) {
+                    log.debug(msg);
+                }
                 return false;
             } else {
                 String msg = "Response : " + response.code() + response.body();
