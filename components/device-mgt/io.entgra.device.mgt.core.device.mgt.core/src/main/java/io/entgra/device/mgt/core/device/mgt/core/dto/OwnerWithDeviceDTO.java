@@ -27,6 +27,8 @@ public class OwnerWithDeviceDTO {
     private int deviceCount;
     private String deviceStatus;
     private String deviceNames;
+    private String deviceTypes;
+    private String deviceIdentifiers;
 
     public String getUserName() {
         return userName;
@@ -66,5 +68,21 @@ public class OwnerWithDeviceDTO {
 
     public void setDeviceNames(String deviceNames) {
         this.deviceNames = deviceNames;
+    }
+
+    public String getDeviceTypes() {
+        return deviceTypes;
+    }
+
+    public void setDeviceTypes(String deviceTypes) {
+        this.deviceTypes = deviceTypes;
+    }
+
+    public String getDeviceIdentifiers() {
+        return deviceIdentifiers;
+    }
+
+    public void setDeviceIdentifiers(String deviceIdentifiers) {
+        this.deviceIdentifiers = deviceIdentifiers;
     }
 }

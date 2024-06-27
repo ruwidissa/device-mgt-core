@@ -1792,6 +1792,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                             deviceDetail.setUnsubscribed(subscription.isUnsubscribed());
                             deviceDetail.setUnsubscribedBy(subscription.getUnsubscribedBy());
                             deviceDetail.setUnsubscribedTimestamp(subscription.getUnsubscribedTimestamp());
+                            deviceDetail.setType(groupDetailWithDevices.getDeviceTypes().get(deviceId));
+                            deviceDetail.setDeviceIdentifier(groupDetailWithDevices.getDeviceIdentifiers().get(deviceId));
 
                             status = subscription.getStatus();
                             switch (status) {
@@ -1829,6 +1831,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                 subscribedDeviceDetail.setActionTriggeredTimestamp(subscribedDevice.getSubscribedTimestamp());
                                 subscribedDeviceDetail.setActionType(subscribedDevice.getActionTriggeredFrom());
                                 subscribedDeviceDetail.setStatus(subscribedDevice.getStatus());
+                                subscribedDeviceDetail.setType(groupDetailWithDevices.getDeviceTypes().get(deviceId));
+                                subscribedDeviceDetail.setDeviceIdentifier(groupDetailWithDevices.getDeviceIdentifiers().get(deviceId));
                                 subscribedDevices.add(subscribedDeviceDetail);
                                 statusCounts.put("SUBSCRIBED", statusCounts.get("SUBSCRIBED") + 1);
                                 isSubscribedDevice = true;
@@ -1841,6 +1845,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                             newDeviceDetail.setDeviceOwner(groupDetailWithDevices.getDeviceOwners().get(deviceId));
                             newDeviceDetail.setDeviceStatus(groupDetailWithDevices.getDeviceStatuses().get(deviceId));
                             newDeviceDetail.setDeviceName(groupDetailWithDevices.getDeviceNames().get(deviceId));
+                            newDeviceDetail.setType(groupDetailWithDevices.getDeviceTypes().get(deviceId));
+                            newDeviceDetail.setDeviceIdentifier(groupDetailWithDevices.getDeviceIdentifiers().get(deviceId));
                             newDevices.add(newDeviceDetail);
                             statusCounts.put("NEW", statusCounts.get("NEW") + 1);
                         }
@@ -1975,6 +1981,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                             deviceDetail.setUnsubscribed(subscription.isUnsubscribed());
                             deviceDetail.setUnsubscribedBy(subscription.getUnsubscribedBy());
                             deviceDetail.setUnsubscribedTimestamp(subscription.getUnsubscribedTimestamp());
+                            deviceDetail.setType(ownerDetailsWithDevices.getDeviceTypes());
+                            deviceDetail.setDeviceIdentifier(ownerDetailsWithDevices.getDeviceIdentifiers());
 
                             status = subscription.getStatus();
                             switch (status) {
@@ -2012,6 +2020,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                 subscribedDeviceDetail.setActionTriggeredTimestamp(subscribedDevice.getSubscribedTimestamp());
                                 subscribedDeviceDetail.setActionType(subscribedDevice.getActionTriggeredFrom());
                                 subscribedDeviceDetail.setStatus(subscribedDevice.getStatus());
+                                subscribedDeviceDetail.setType(ownerDetailsWithDevices.getDeviceTypes());
+                                subscribedDeviceDetail.setDeviceIdentifier(ownerDetailsWithDevices.getDeviceIdentifiers());
                                 subscribedDevices.add(subscribedDeviceDetail);
                                 statusCounts.put("SUBSCRIBED", statusCounts.get("SUBSCRIBED") + 1);
                                 isSubscribedDevice = true;
@@ -2024,6 +2034,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                             newDeviceDetail.setDeviceOwner(ownerDetailsWithDevices.getUserName());
                             newDeviceDetail.setDeviceStatus(ownerDetailsWithDevices.getDeviceStatus());
                             newDeviceDetail.setDeviceName(ownerDetailsWithDevices.getDeviceNames());
+                            newDeviceDetail.setType(ownerDetailsWithDevices.getDeviceTypes());
+                            newDeviceDetail.setDeviceIdentifier(ownerDetailsWithDevices.getDeviceIdentifiers());
                             newDevices.add(newDeviceDetail);
                             statusCounts.put("NEW", statusCounts.get("NEW") + 1);
                         }
@@ -2166,6 +2178,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                 deviceDetail.setUnsubscribed(deviceSubscription.isUnsubscribed());
                                 deviceDetail.setUnsubscribedBy(deviceSubscription.getUnsubscribedBy());
                                 deviceDetail.setUnsubscribedTimestamp(deviceSubscription.getUnsubscribedTimestamp());
+                                deviceDetail.setType(ownerDetailsWithDevices.getDeviceTypes());
+                                deviceDetail.setDeviceIdentifier(ownerDetailsWithDevices.getDeviceIdentifiers());
 
                                 status = deviceSubscription.getStatus();
                                 switch (status) {
@@ -2203,6 +2217,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                     subscribedDeviceDetail.setActionTriggeredTimestamp(subscribedDevice.getSubscribedTimestamp());
                                     subscribedDeviceDetail.setActionType(subscribedDevice.getActionTriggeredFrom());
                                     subscribedDeviceDetail.setStatus(subscribedDevice.getStatus());
+                                    subscribedDeviceDetail.setType(ownerDetailsWithDevices.getDeviceTypes());
+                                    subscribedDeviceDetail.setDeviceIdentifier(ownerDetailsWithDevices.getDeviceIdentifiers());
                                     subscribedDevices.add(subscribedDeviceDetail);
                                     statusCounts.put("SUBSCRIBED", statusCounts.get("SUBSCRIBED") + 1);
                                     isSubscribedDevice = true;
@@ -2215,6 +2231,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                 newDeviceDetail.setDeviceName(ownerDetailsWithDevices.getDeviceNames());
                                 newDeviceDetail.setDeviceOwner(ownerDetailsWithDevices.getUserName());
                                 newDeviceDetail.setDeviceStatus(ownerDetailsWithDevices.getDeviceStatus());
+                                newDeviceDetail.setType(ownerDetailsWithDevices.getDeviceTypes());
+                                newDeviceDetail.setDeviceIdentifier(ownerDetailsWithDevices.getDeviceIdentifiers());
                                 newDevices.add(newDeviceDetail);
                                 statusCounts.put("NEW", statusCounts.get("NEW") + 1);
                             }
@@ -2359,6 +2377,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     deviceDetail.setUnsubscribed(subscription.isUnsubscribed());
                     deviceDetail.setUnsubscribedBy(subscription.getUnsubscribedBy());
                     deviceDetail.setUnsubscribedTimestamp(subscription.getUnsubscribedTimestamp());
+                    deviceDetail.setType(ownerWithDevice.getDeviceTypes());
+                    deviceDetail.setDeviceIdentifier(ownerWithDevice.getDeviceIdentifiers());
 
                     String status = subscription.getStatus();
                     switch (status) {
@@ -2393,6 +2413,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         subscribedDeviceDetail.setActionTriggeredTimestamp(allSubscription.getSubscribedTimestamp());
                         subscribedDeviceDetail.setActionType(allSubscription.getActionTriggeredFrom());
                         subscribedDeviceDetail.setStatus(allSubscription.getStatus());
+                        subscribedDeviceDetail.setType(ownerWithDevice.getDeviceTypes());
+                        subscribedDeviceDetail.setDeviceIdentifier(ownerWithDevice.getDeviceIdentifiers());
                         subscribedDevices.add(subscribedDeviceDetail);
                         statusCounts.put("SUBSCRIBED", statusCounts.get("SUBSCRIBED") + 1);
                     }
@@ -2402,6 +2424,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     newDeviceDetail.setDeviceId(deviceId);
                     newDeviceDetail.setDeviceOwner(ownerWithDevice.getUserName());
                     newDeviceDetail.setDeviceStatus(ownerWithDevice.getDeviceStatus());
+                    newDeviceDetail.setType(ownerWithDevice.getDeviceTypes());
+                    newDeviceDetail.setDeviceIdentifier(ownerWithDevice.getDeviceIdentifiers());
                     newDevices.add(newDeviceDetail);
                     statusCounts.put("NEW", statusCounts.get("NEW") + 1);
                 } else if (!unsubscribe && !allSubscriptionForSubscribedMap.containsKey(deviceId) && !deviceSubscriptionMap.containsKey(deviceId)
@@ -2411,6 +2435,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     newDeviceDetail.setDeviceName(ownerWithDevice.getDeviceNames());
                     newDeviceDetail.setDeviceOwner(ownerWithDevice.getUserName());
                     newDeviceDetail.setDeviceStatus(ownerWithDevice.getDeviceStatus());
+                    newDeviceDetail.setType(ownerWithDevice.getDeviceTypes());
+                    newDeviceDetail.setDeviceIdentifier(ownerWithDevice.getDeviceIdentifiers());
                     newDevices.add(newDeviceDetail);
                     statusCounts.put("NEW", statusCounts.get("NEW") + 1);
                 }
@@ -2521,6 +2547,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     deviceDetail.setUnsubscribed(subscription.isUnsubscribed());
                     deviceDetail.setUnsubscribedBy(subscription.getUnsubscribedBy());
                     deviceDetail.setUnsubscribedTimestamp(subscription.getUnsubscribedTimestamp());
+                    deviceDetail.setType(ownerWithDevice.getDeviceTypes());
+                    deviceDetail.setDeviceIdentifier(ownerWithDevice.getDeviceIdentifiers());
 
                     String status = subscription.getStatus();
                     switch (status) {
@@ -2547,6 +2575,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     newDeviceDetail.setDeviceName(ownerWithDevice.getDeviceNames());
                     newDeviceDetail.setDeviceOwner(ownerWithDevice.getUserName());
                     newDeviceDetail.setDeviceStatus(ownerWithDevice.getDeviceStatus());
+                    newDeviceDetail.setType(ownerWithDevice.getDeviceTypes());
+                    newDeviceDetail.setDeviceIdentifier(ownerWithDevice.getDeviceIdentifiers());
                     newDevices.add(newDeviceDetail);
                     statusCounts.put("NEW", statusCounts.get("NEW") + 1);
                 }
