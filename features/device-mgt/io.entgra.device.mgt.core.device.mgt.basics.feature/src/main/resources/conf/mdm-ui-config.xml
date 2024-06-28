@@ -421,6 +421,7 @@
         <Scope>dm:admin:cea:delete</Scope>
         <Scope>dm:admin:cea:sync</Scope>
         <Scope>am:pub:app:upload</Scope>
+        <Scope>dm:devices:ops:status:update</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
