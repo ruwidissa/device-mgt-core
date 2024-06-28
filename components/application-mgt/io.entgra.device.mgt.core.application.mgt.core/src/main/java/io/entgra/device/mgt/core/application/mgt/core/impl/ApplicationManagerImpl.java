@@ -4424,7 +4424,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             spApplicationDAO.deleteSPApplicationMappingByTenant(tenantId);
             spApplicationDAO.deleteIdentityServerByTenant(tenantId);
             applicationDAO.deleteApplicationsByTenant(tenantId);
-            APIUtil.getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
 
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
@@ -4446,12 +4445,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (ReviewManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while deleting reviews of application releases of the applications"
-                    + " of tenant ID: " + tenantId ;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        } catch (ApplicationStorageManagementException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred while deleting App folder of tenant"
                     + " of tenant ID: " + tenantId ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
@@ -4499,7 +4492,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             spApplicationDAO.deleteSPApplicationMappingByTenant(tenantId);
             spApplicationDAO.deleteIdentityServerByTenant(tenantId);
             applicationDAO.deleteApplicationsByTenant(tenantId);
-            APIUtil.getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
 
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
@@ -4524,15 +4516,32 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + " of tenant ID: " + tenantId ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (ApplicationStorageManagementException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred while deleting App folder of tenant"
-                    + " of tenant ID: " + tenantId ;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
+    }
 
+    @Override
+    public void deleteApplicationArtifactsByTenantDomain(String tenantDomain) throws ApplicationManagementException {
+        int tenantId;
+        try{
+            TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();
+            TenantInfoBean tenantInfoBean = tenantMgtAdminService.getTenant(tenantDomain);
+            tenantId = tenantInfoBean.getTenantId();
+
+        } catch (Exception e) {
+            String msg = "Error getting tenant ID from domain: "
+                    + tenantDomain + "when trying to delete application artifacts of tenant";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+        try {
+            APIUtil.getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
+        } catch (ApplicationStorageManagementException e) {
+            String msg = "Error occurred while deleting Application folders of tenant"
+                    + " of tenant ID: " + tenantId ;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
     }
 }

@@ -91,7 +91,7 @@ public class UserManagementAdminServiceImpl implements UserManagementAdminServic
     @DELETE
     @Path("/domain/{tenantDomain}")
     @Override
-    public Response deleteTenantByDomain(@PathParam("tenantDomain") String tenantDomain) {
+    public Response deleteTenantByDomain(@PathParam("tenantDomain") String tenantDomain, @QueryParam("deleteAppArtifacts") boolean deleteAppArtifacts) {
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             if (tenantId != MultitenantConstants.SUPER_TENANT_ID){
@@ -99,6 +99,9 @@ public class UserManagementAdminServiceImpl implements UserManagementAdminServic
                 log.error(msg);
                 return Response.status(Response.Status.UNAUTHORIZED).entity(msg).build();
             } else {
+                if(deleteAppArtifacts){
+                    DeviceMgtAPIUtils.getApplicationManager().deleteApplicationArtifactsByTenantDomain(tenantDomain);
+                }
                 DeviceMgtAPIUtils.getApplicationManager().deleteApplicationDataByTenantDomain(tenantDomain);
                 DeviceMgtAPIUtils.getDeviceManagementService().deleteDeviceDataByTenantDomain(tenantDomain);
                 TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();

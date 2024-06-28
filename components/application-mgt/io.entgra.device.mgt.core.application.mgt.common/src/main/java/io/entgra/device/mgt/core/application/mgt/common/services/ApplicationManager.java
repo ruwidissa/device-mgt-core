@@ -547,4 +547,5 @@ public interface ApplicationManager {
      */
     void deleteApplicationDataOfTenant(int tenantId) throws ApplicationManagementException;
     void deleteApplicationDataByTenantDomain(String tenantDomain) throws ApplicationManagementException;
+    void deleteApplicationArtifactsByTenantDomain(String tenantDomain) throws ApplicationManagementException;
 }
