@@ -3190,4 +3190,112 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     public abstract void refactorDeviceStatus (Connection conn, List<Device> validDevices)
             throws DeviceManagementDAOException;
 
+    @Override
+    public int getCountOfDevicesNotInGroup(PaginationRequest request, int tenantId) throws DeviceManagementDAOException {
+        int deviceCount = 0;
+        int groupId = request.getGroupId();
+        String deviceType = request.getDeviceType();
+        boolean isDeviceTypeProvided = false;
+        String deviceName = request.getDeviceName();
+        boolean isDeviceNameProvided = false;
+        String owner = request.getOwner();
+        boolean isOwnerProvided = false;
+        String ownerPattern = request.getOwnerPattern();
+        boolean isOwnerPatternProvided = false;
+        String ownership = request.getOwnership();
+        boolean isOwnershipProvided = false;
+        List<String> statusList = request.getStatusList();
+        boolean isStatusProvided = false;
+        Date since = request.getSince();
+        boolean isSinceProvided = false;
+
+        try {
+            Connection conn = getConnection();
+            String sql = "SELECT COUNT(d1.DEVICE_ID) AS DEVICE_COUNT " +
+                    "FROM DM_ENROLMENT e, " +
+                    "(SELECT gd.ID AS DEVICE_ID, " +
+                    "gd.DESCRIPTION, " +
+                    "gd.NAME, " +
+                    "gd.DEVICE_IDENTIFICATION " +
+                    "FROM DM_DEVICE gd " +
+                    "WHERE gd.ID NOT IN (SELECT dgm.DEVICE_ID " +
+                    "FROM DM_DEVICE_GROUP_MAP dgm " +
+                    "WHERE dgm.GROUP_ID = ?) " +
+                    "AND gd.TENANT_ID = ?";
+
+            if (deviceName != null && !deviceName.isEmpty()) {
+                sql += " AND gd.NAME LIKE ?";
+                isDeviceNameProvided = true;
+            }
+            sql += " AND 1=1";
+
+            if (since != null) {
+                sql += " AND gd.LAST_UPDATED_TIMESTAMP > ?";
+                isSinceProvided = true;
+            }
+            sql += " ) d1 WHERE d1.DEVICE_ID = e.DEVICE_ID AND e.TENANT_ID = ?";
+
+            if (deviceType != null && !deviceType.isEmpty()) {
+                sql += " AND e.DEVICE_TYPE = ?";
+                isDeviceTypeProvided = true;
+            }
+
+            if (ownership != null && !ownership.isEmpty()) {
+                sql += " AND e.OWNERSHIP = ?";
+                isOwnershipProvided = true;
+            }
+
+            if (owner != null && !owner.isEmpty()) {
+                sql += " AND e.OWNER = ?";
+                isOwnerProvided = true;
+            } else if (ownerPattern != null && !ownerPattern.isEmpty()) {
+                sql += " AND e.OWNER LIKE ?";
+                isOwnerPatternProvided = true;
+            }
+            if (statusList != null && !statusList.isEmpty()) {
+                sql += buildStatusQuery(statusList);
+                isStatusProvided = true;
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIdx = 1;
+                stmt.setInt(paramIdx++, groupId);
+                stmt.setInt(paramIdx++, tenantId);
+                if (isDeviceNameProvided) {
+                    stmt.setString(paramIdx++, "%" + deviceName + "%");
+                }
+                if (isSinceProvided) {
+                    stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
+                }
+                stmt.setInt(paramIdx++, tenantId);
+                if (isDeviceTypeProvided) {
+                    stmt.setString(paramIdx++, deviceType);
+                }
+                if (isOwnershipProvided) {
+                    stmt.setString(paramIdx++, ownership);
+                }
+                if (isOwnerProvided) {
+                    stmt.setString(paramIdx++, owner);
+                } else if (isOwnerPatternProvided) {
+                    stmt.setString(paramIdx++, ownerPattern + "%");
+                }
+                if (isStatusProvided) {
+                    for (String status : statusList) {
+                        stmt.setString(paramIdx++, status);
+                    }
+                }
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        deviceCount = rs.getInt("DEVICE_COUNT");
+                    }
+                    return deviceCount;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving count of devices not in group: " + groupId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
 }

@@ -844,4 +844,24 @@ public interface DeviceDAO {
     List<String> getAgentVersions(int tenantId) throws DeviceManagementDAOException;
     List<Device> getDevicesEnrolledSince(Date since) throws DeviceManagementDAOException;
     List<Device> getDevicesEnrolledPriorTo(Date priorTo) throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to search for devices that are not in a specific group.
+     *
+     * @param request  PaginationRequest object holding the data for pagination
+     * @param tenantId tenant id.
+     * @return returns paginated list of devices.
+     * @throws DeviceManagementDAOException
+     */
+    List<Device> searchDevicesNotInGroup(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to get device count that are not within a specific group.
+     *
+     * @param request PaginationRequest object holding the data for pagination
+     * @param tenantId tenant id
+     * @return Device count
+     * @throws DeviceManagementDAOException
+     */
+    int getCountOfDevicesNotInGroup(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
 }

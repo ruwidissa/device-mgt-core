@@ -147,6 +147,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("customProperty") String customProperty,
             @QueryParam("status") List<String> status,
             @QueryParam("groupId") int groupId,
+            @QueryParam("excludeGroupId") int excludeGroupId,
             @QueryParam("since") String since,
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
             @QueryParam("requireDeviceInfo") boolean requireDeviceInfo,
@@ -209,7 +210,22 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     request.setStatusList(status);
                 }
             }
-            // this is the user who initiates the request
+
+            if (excludeGroupId != 0) {
+                request.setGroupId(excludeGroupId);
+
+                if (user != null && !user.isEmpty()) {
+                    request.setOwner(MultitenantUtils.getTenantAwareUsername(user));
+                } else if (userPattern != null && !userPattern.isEmpty()) {
+                    request.setOwnerPattern(userPattern);
+                }
+
+                result = dms.getDevicesNotInGroup(request, requireDeviceInfo);
+                devices.setList((List<Device>) result.getData());
+                devices.setCount(result.getRecordsTotal());
+                return Response.status(Response.Status.OK).entity(devices).build();
+            }
+
             String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
             if (groupId != 0) {

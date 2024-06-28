@@ -1073,4 +1073,17 @@ public interface DeviceManagementProviderService {
     List<Device> getEnrolledDevicesSince(Date since) throws DeviceManagementException;
     List<Device> getEnrolledDevicesPriorTo(Date before) throws DeviceManagementException;
     void deleteDeviceDataByTenantDomain(String tenantDomain) throws DeviceManagementException;
+
+    /**
+     * Method to retrieve all the devices that are not in a group with pagination support.
+     *
+     * @param request PaginationRequest object holding the data for pagination
+     * @param requireDeviceInfo - A boolean indicating whether the device-info (location, app-info etc) is also required
+     *                          along with the device data.
+     * @return PaginationResult - Result including the required parameters necessary to do pagination.
+     * @throws DeviceManagementException If some unusual behaviour is observed while fetching the
+     *                                   devices.
+     */
+    PaginationResult getDevicesNotInGroup(PaginationRequest request, boolean requireDeviceInfo)
+            throws DeviceManagementException;
 }

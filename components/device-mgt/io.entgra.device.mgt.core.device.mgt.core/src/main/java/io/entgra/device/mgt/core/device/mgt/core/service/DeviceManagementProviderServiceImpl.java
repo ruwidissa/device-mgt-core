@@ -5339,4 +5339,59 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.closeConnection();
         }
     }
+
+    @Override
+    public PaginationResult getDevicesNotInGroup(PaginationRequest request, boolean requireDeviceInfo)
+            throws DeviceManagementException {
+        if (request == null) {
+            String msg = "Received incomplete pagination request for method getDevicesNotInGroup";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get devices not in group with pagination " + request.toString() +
+                    " and requiredDeviceInfo: " + requireDeviceInfo);
+        }
+        PaginationResult paginationResult = new PaginationResult();
+        List<Device> devicesNotInGroup = null;
+        int count = 0;
+        int tenantId = this.getTenantId();
+        DeviceManagerUtil.validateDeviceListPageSize(request);
+
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            if (request.getGroupId() != 0) {
+                devicesNotInGroup = deviceDAO.searchDevicesNotInGroup(request, tenantId);
+                count = deviceDAO.getCountOfDevicesNotInGroup(request, tenantId);
+            } else {
+                String msg = "Group ID is not provided for method getDevicesNotInGroup";
+                log.error(msg);
+                throw new DeviceManagementException(msg);
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving device list that are not in the specified group for the current tenant";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getDevicesNotInGroup";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+
+        if (requireDeviceInfo && devicesNotInGroup != null && !devicesNotInGroup.isEmpty()) {
+            paginationResult.setData(populateAllDeviceInfo(devicesNotInGroup));
+        } else {
+            paginationResult.setData(devicesNotInGroup);
+        }
+
+        paginationResult.setRecordsFiltered(count);
+        paginationResult.setRecordsTotal(count);
+        return paginationResult;
+    }
 }
