@@ -22,6 +22,8 @@ public class DeviceDetailsDTO {
     private int deviceId;
     private String owner;
     private String status;
+    private String type;
+    private String deviceIdentifier;
 
     public int getDeviceId() {
         return deviceId;
@@ -45,5 +47,21 @@ public class DeviceDetailsDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getDeviceIdentifier() {
+        return deviceIdentifier;
+    }
+
+    public void setDeviceIdentifier(String deviceIdentifier) {
+        this.deviceIdentifier = deviceIdentifier;
     }
 }
