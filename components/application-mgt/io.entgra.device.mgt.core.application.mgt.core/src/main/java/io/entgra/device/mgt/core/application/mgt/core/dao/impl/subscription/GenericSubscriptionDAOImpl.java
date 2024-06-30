@@ -1445,13 +1445,13 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 + "AR.PACKAGE_NAME, "
                 + "AR.VERSION, "
                 + "DS.SUBSCRIBED_BY, "
-                + "DS.STATUS, "
                 + "DS.ACTION_TRIGGERED_FROM "
                 + "FROM AP_APP_SUB_OP_MAPPING SOP "
                 + "JOIN AP_DEVICE_SUBSCRIPTION DS ON SOP.AP_DEVICE_SUBSCRIPTION_ID = DS.ID "
                 + "JOIN AP_APP_RELEASE AR ON DS.AP_APP_RELEASE_ID = AR.ID "
                 + "JOIN AP_APP AP ON AP.ID = AR.AP_APP_ID "
-                + " WHERE SOP.OPERATION_ID = ? AND SOP.TENANT_ID = ?";
+                + "WHERE SOP.OPERATION_ID = ? AND SOP.TENANT_ID = ? "
+                + "LIMIT 1";
 
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
