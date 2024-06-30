@@ -23,6 +23,8 @@ import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationResponse;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.core.dto.OperationDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.OperationResponseMeta;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMapping;
@@ -123,5 +125,16 @@ public interface OperationDAO {
             throws OperationManagementDAOException;
 
     int getDeviceActivitiesCount(ActivityPaginationRequest activityPaginationRequest)
+            throws OperationManagementDAOException;
+
+    /**
+     * This method is used to get the details of device subscriptions related to a UUID.
+     *
+     * @param operationId the operationId of the operation to be retrieved.
+     * @param tenantId id of the current tenant.
+     * @return {@link OperationDTO} which contains the details of device operations.
+     * @throws OperationManagementDAOException if connection establishment or SQL execution fails.
+     */
+    OperationDTO getOperationDetailsById(int operationId, int tenantId)
             throws OperationManagementDAOException;
 }

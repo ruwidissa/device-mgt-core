@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.extensions.device.type.template;
 
+import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.mockito.Mockito;
 import org.testng.annotations.BeforeSuite;
@@ -131,6 +132,7 @@ public class BaseExtensionsTest {
                 readDataSourceConfig(datasourceLocation + DATASOURCE_EXT));
         DeviceManagementDAOFactory.init(dataSource);
         MetadataManagementDAOFactory.init(dataSource);
+        OperationManagementDAOFactory.init(dataSource);
     }
 
     protected DataSourceConfig readDataSourceConfig(String configLocation) throws DeviceManagementException {

@@ -18,6 +18,9 @@
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.util.OperationDAOUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
@@ -26,6 +29,8 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOExceptio
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.dao.EnrollmentDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import io.entgra.device.mgt.core.device.mgt.core.dto.OwnerWithDeviceDTO;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,11 +38,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
+    private static final Log log = LogFactory.getLog(AbstractEnrollmentDAOImpl.class);
 
     @Override
     public EnrolmentInfo addEnrollment(int deviceId, DeviceIdentifier deviceIdentifier, EnrolmentInfo enrolmentInfo,
@@ -555,6 +561,111 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
         enrolmentInfo.setId(rs.getInt("ID"));
         return enrolmentInfo;
+    }
+
+    @Override
+    public OwnerWithDeviceDTO getOwnersWithDevices(String owner, int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn = null;
+        OwnerWithDeviceDTO ownerDetails = new OwnerWithDeviceDTO();
+        List<Integer> deviceIds = new ArrayList<>();
+        int deviceCount = 0;
+
+        String sql = "SELECT e.DEVICE_ID, e.OWNER, e.STATUS AS DEVICE_STATUS, d.NAME AS DEVICE_NAME " +
+                "FROM DM_ENROLMENT e " +
+                "JOIN DM_DEVICE d ON e.DEVICE_ID = d.ID " +
+                "WHERE e.OWNER = ? AND e.TENANT_ID = ?";
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, owner);
+                stmt.setInt(2, tenantId);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        if (ownerDetails.getUserName() == null) {
+                            ownerDetails.setUserName(rs.getString("OWNER"));
+                        }
+                        deviceIds.add(rs.getInt("DEVICE_ID"));
+                        deviceCount++;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving owners and device IDs for owner: " + owner;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+
+        ownerDetails.setDeviceIds(deviceIds);
+        ownerDetails.setDeviceStatus("DEVICE_STATUS");
+        ownerDetails.setDeviceNames("DEVICE_NAME");
+        ownerDetails.setDeviceCount(deviceCount);
+        return ownerDetails;
+    }
+
+    @Override
+    public OwnerWithDeviceDTO getOwnerWithDeviceByDeviceId(int deviceId, int tenantId)
+            throws DeviceManagementDAOException {
+        OwnerWithDeviceDTO deviceOwnerWithStatus = new OwnerWithDeviceDTO();
+        Connection conn = null;
+        String sql = "SELECT e.DEVICE_ID, e.OWNER, e.STATUS AS DEVICE_STATUS, d.NAME AS DEVICE_NAME " +
+                "FROM DM_ENROLMENT e " +
+                "JOIN DM_DEVICE d ON e.DEVICE_ID = d.ID " +
+                "WHERE e.DEVICE_ID = ? AND e.TENANT_ID = ?";
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, deviceId);
+                stmt.setInt(2, tenantId);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        deviceOwnerWithStatus.setUserName(rs.getString("OWNER"));
+                        deviceOwnerWithStatus.setDeviceStatus(rs.getString("DEVICE_STATUS"));
+                        List<Integer> deviceIds = new ArrayList<>();
+                        deviceIds.add(rs.getInt("DEVICE_ID"));
+                        deviceOwnerWithStatus.setDeviceIds(deviceIds);
+                        deviceOwnerWithStatus.setDeviceNames(rs.getString("DEVICE_NAME"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving owner and status for device ID: " + deviceId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+        return deviceOwnerWithStatus;
+    }
+
+    @Override
+    public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId)
+            throws DeviceManagementDAOException {
+        List<DeviceDetailsDTO> devices = new ArrayList<>();
+        String sql = "SELECT DEVICE_ID, OWNER, STATUS FROM DM_ENROLMENT WHERE TENANT_ID = ?";
+        Connection conn = null;
+
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        DeviceDetailsDTO device = new DeviceDetailsDTO();
+                        device.setDeviceId(rs.getInt("DEVICE_ID"));
+                        device.setOwner(rs.getString("OWNER"));
+                        device.setStatus(rs.getString("STATUS"));
+                        devices.add(device);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving devices for tenant ID: " + tenantId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+        return devices;
     }
 
 }

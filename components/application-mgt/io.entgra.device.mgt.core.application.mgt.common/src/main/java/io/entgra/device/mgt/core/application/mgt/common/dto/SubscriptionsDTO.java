@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 - 2023, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ * Copyright (c) 2018 - 2024, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -23,19 +23,46 @@ import io.entgra.device.mgt.core.application.mgt.common.CategorizedSubscriptionR
 import java.sql.Timestamp;
 import java.util.Map;
 
-public class RoleSubscriptionDTO {
+public class SubscriptionsDTO {
+    private int id;
+    private String owner;
+    private String name;
     private String subscribedBy;
     private Timestamp subscribedTimestamp;
-    private boolean isUnsubscribed;
     private boolean unsubscribed;
     private String unsubscribedBy;
     private Timestamp unsubscribedTimestamp;
     private String subscribedFrom;
-    private String roleName;
     private int appReleaseId;
     private int deviceCount;
+    private String deviceOwner;
+    private String deviceStatus;
     private Map<String, Double> statusPercentages;
     private CategorizedSubscriptionResult devices;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getSubscribedBy() {
         return subscribedBy;
@@ -51,18 +78,6 @@ public class RoleSubscriptionDTO {
 
     public void setSubscribedTimestamp(Timestamp subscribedTimestamp) {
         this.subscribedTimestamp = subscribedTimestamp;
-    }
-
-    public boolean getUnsubscribed() {
-        return unsubscribed;
-    }
-
-    public void setUnsubscribed(boolean unsubscribed) {
-        this.unsubscribed = unsubscribed;
-    }
-
-    public boolean isUnsubscribed() {
-        return isUnsubscribed;
     }
 
     public String getUnsubscribedBy() {
@@ -89,14 +104,6 @@ public class RoleSubscriptionDTO {
         this.subscribedFrom = subscribedFrom;
     }
 
-    public String getRoleName() {
-        return roleName;
-    }
-
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
-    }
-
     public int getAppReleaseId() {
         return appReleaseId;
     }
@@ -111,6 +118,22 @@ public class RoleSubscriptionDTO {
 
     public void setDeviceCount(int deviceCount) {
         this.deviceCount = deviceCount;
+    }
+
+    public String getDeviceOwner() {
+        return deviceOwner;
+    }
+
+    public void setDeviceOwner(String deviceOwner) {
+        this.deviceOwner = deviceOwner;
+    }
+
+    public String getDeviceStatus() {
+        return deviceStatus;
+    }
+
+    public void setDeviceStatus(String deviceStatus) {
+        this.deviceStatus = deviceStatus;
     }
 
     public Map<String, Double> getStatusPercentages() {
@@ -129,4 +152,11 @@ public class RoleSubscriptionDTO {
         this.devices = devices;
     }
 
+    public boolean getUnsubscribed() {
+        return unsubscribed;
+    }
+
+    public void setUnsubscribed(boolean unsubscribed) {
+        this.unsubscribed = unsubscribed;
+    }
 }

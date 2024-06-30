@@ -19,17 +19,44 @@
 package io.entgra.device.mgt.core.application.mgt.core.impl;
 
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationSubscriptionInfo;
+import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
+import io.entgra.device.mgt.core.application.mgt.common.CategorizedSubscriptionResult;
+import io.entgra.device.mgt.core.application.mgt.common.DeviceSubscriptionData;
+import io.entgra.device.mgt.core.application.mgt.common.dto.CategorizedSubscriptionCountsDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.SubscriptionsDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceOperationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionResponseDTO;
+import io.entgra.device.mgt.core.application.mgt.common.DeviceTypes;
+import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
+import io.entgra.device.mgt.core.application.mgt.common.SubAction;
+import io.entgra.device.mgt.core.application.mgt.common.SubscribingDeviceIdHolder;
+import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
+import io.entgra.device.mgt.core.application.mgt.common.dto.GroupSubscriptionDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
+import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationPolicyDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppAssetDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.VppUserDTO;
 import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
+import io.entgra.device.mgt.core.application.mgt.core.dao.ApplicationReleaseDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.VppApplicationDAO;
 import io.entgra.device.mgt.core.application.mgt.core.exception.BadRequestException;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
+import io.entgra.device.mgt.core.device.mgt.core.dto.GroupDetailsDTO;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
+import io.entgra.device.mgt.core.device.mgt.core.dto.OperationDTO;
+import io.entgra.device.mgt.core.device.mgt.core.dto.OwnerWithDeviceDTO;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.notification.logger.AppInstallLogContext;
 import io.entgra.device.mgt.core.notification.logger.impl.EntgraAppInstallLoggerImpl;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.lang.StringUtils;
 
 import org.apache.http.HttpResponse;
@@ -45,20 +72,6 @@ import org.json.JSONObject;
 import io.entgra.device.mgt.core.apimgt.application.extension.dto.ApiApplicationKey;
 import io.entgra.device.mgt.core.apimgt.application.extension.exception.APIManagerException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationSubscriptionInfo;
-import io.entgra.device.mgt.core.application.mgt.common.ApplicationType;
-import io.entgra.device.mgt.core.application.mgt.common.DeviceSubscriptionData;
-import io.entgra.device.mgt.core.application.mgt.common.DeviceTypes;
-import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
-import io.entgra.device.mgt.core.application.mgt.common.SubAction;
-import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
-import io.entgra.device.mgt.core.application.mgt.common.SubscribingDeviceIdHolder;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationPolicyDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ApplicationReleaseDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceSubscriptionDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.DBConnectionException;
 import io.entgra.device.mgt.core.application.mgt.common.exception.LifecycleManagementException;
@@ -99,6 +112,7 @@ import io.entgra.device.mgt.core.device.mgt.core.util.MDMIOSOperationUtil;
 import io.entgra.device.mgt.core.device.mgt.core.util.MDMWindowsOperationUtil;
 import io.entgra.device.mgt.core.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 
 import javax.ws.rs.core.MediaType;
 import java.io.BufferedReader;
@@ -113,6 +127,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -120,6 +135,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -131,12 +147,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     private SubscriptionDAO subscriptionDAO;
     private ApplicationDAO applicationDAO;
     private VppApplicationDAO vppApplicationDAO;
+    private ApplicationReleaseDAO applicationReleaseDAO;
     private LifecycleStateManager lifecycleStateManager;
 
     public SubscriptionManagerImpl() {
         this.lifecycleStateManager = DataHolder.getInstance().getLifecycleStateManager();
         this.subscriptionDAO = ApplicationManagementDAOFactory.getSubscriptionDAO();
         this.applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
+        this.applicationReleaseDAO = ApplicationManagementDAOFactory.getApplicationReleaseDAO();
         this.vppApplicationDAO = ApplicationManagementDAOFactory.getVppApplicationDAO();
     }
 
@@ -1505,16 +1523,19 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public PaginationResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus,
-                                                      String action, String installedVersion) throws ApplicationManagementException {
+    public CategorizedSubscriptionResult getAppSubscriptionDetails(PaginationRequest request, String appUUID, String actionStatus,
+                                                                   String action, String installedVersion) throws ApplicationManagementException {
         int limitValue = request.getRowCount();
         int offsetValue = request.getStartIndex();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        DeviceManagementProviderService deviceManagementProviderService = HelperUtil
-                .getDeviceManagementProviderService();
+        DeviceManagementProviderService deviceManagementProviderService = HelperUtil.getDeviceManagementProviderService();
+        List<DeviceSubscriptionData> installedDevices = new ArrayList<>();
+        List<DeviceSubscriptionData> pendingDevices = new ArrayList<>();
+        List<DeviceSubscriptionData> errorDevices = new ArrayList<>();
+
         if (offsetValue < 0 || limitValue <= 0) {
-            String msg = "Found incompatible values for offset and limit. Hence please check the request and resend. "
-                    + "Offset " + offsetValue + " limit " + limitValue;
+            String msg = "Found incompatible values for offset and limit. Hence please check the request and resend. " +
+                    "Offset " + offsetValue + " limit " + limitValue;
             log.error(msg);
             throw new BadRequestException(msg);
         }
@@ -1532,31 +1553,26 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
                     .getDeviceSubscriptions(applicationReleaseId, tenantId, actionStatus, action);
             if (deviceSubscriptionDTOS.isEmpty()) {
-                PaginationResult paginationResult = new PaginationResult();
-                paginationResult.setData(new ArrayList<>());
-                paginationResult.setRecordsFiltered(0);
-                paginationResult.setRecordsTotal(0);
-                return paginationResult;
+                return new CategorizedSubscriptionResult(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
             }
             List<Integer> deviceIdList = deviceSubscriptionDTOS.stream().map(DeviceSubscriptionDTO::getDeviceId)
                     .collect(Collectors.toList());
-            Map<Integer,String> currentVersionsMap = subscriptionDAO.getCurrentInstalledAppVersion(applicationDTO.getId(),deviceIdList, installedVersion);
+            Map<Integer, String> currentVersionsMap =
+                    subscriptionDAO.getCurrentInstalledAppVersion(applicationDTO.getId(), deviceIdList, installedVersion);
             try {
-                //pass the device id list to device manager service method
-                PaginationResult paginationResult = deviceManagementProviderService.getAppSubscribedDevices
-                        (request, deviceIdList);
-                List<DeviceSubscriptionData> deviceSubscriptionDataList = new ArrayList<>();
+                // Pass the device id list to device manager service method
+                PaginationResult paginationResult = deviceManagementProviderService.getAppSubscribedDevices(request, deviceIdList);
 
                 if (!paginationResult.getData().isEmpty()) {
                     List<Device> devices = (List<Device>) paginationResult.getData();
                     for (Device device : devices) {
-                        if(installedVersion != null && !installedVersion.isEmpty() && !currentVersionsMap.containsKey(device.getId())){
+                        if (installedVersion != null && !installedVersion.isEmpty() && !currentVersionsMap.containsKey(device.getId())) {
                             continue;
                         }
                         DeviceSubscriptionData deviceSubscriptionData = new DeviceSubscriptionData();
-                        if(currentVersionsMap.containsKey(device.getId())){
+                        if (currentVersionsMap.containsKey(device.getId())) {
                             deviceSubscriptionData.setCurrentInstalledVersion(currentVersionsMap.get(device.getId()));
-                        }else{
+                        } else {
                             deviceSubscriptionData.setCurrentInstalledVersion("-");
                         }
                         for (DeviceSubscriptionDTO subscription : deviceSubscriptionDTOS) {
@@ -1565,39 +1581,51 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                 if (subscription.isUnsubscribed()) {
                                     deviceSubscriptionData.setAction(Constants.UNSUBSCRIBED);
                                     deviceSubscriptionData.setActionTriggeredBy(subscription.getUnsubscribedBy());
-                                    deviceSubscriptionData
-                                            .setActionTriggeredTimestamp(subscription.getUnsubscribedTimestamp().getTime() / 1000);
+                                    deviceSubscriptionData.setActionTriggeredTimestamp(subscription.getUnsubscribedTimestamp());
                                 } else {
                                     deviceSubscriptionData.setAction(Constants.SUBSCRIBED);
                                     deviceSubscriptionData.setActionTriggeredBy(subscription.getSubscribedBy());
-                                    deviceSubscriptionData
-                                            .setActionTriggeredTimestamp(subscription.getSubscribedTimestamp().getTime() / 1000);
+                                    deviceSubscriptionData.setActionTriggeredTimestamp(subscription.getSubscribedTimestamp());
                                 }
                                 deviceSubscriptionData.setActionType(subscription.getActionTriggeredFrom());
                                 deviceSubscriptionData.setStatus(subscription.getStatus());
                                 deviceSubscriptionData.setSubId(subscription.getId());
-                                deviceSubscriptionDataList.add(deviceSubscriptionData);
+
+                                // Categorize the subscription data based on its status
+                                switch (subscription.getStatus()) {
+                                    case "COMPLETED":
+                                        installedDevices.add(deviceSubscriptionData);
+                                        break;
+                                    case "ERROR":
+                                    case "INVALID":
+                                    case "UNAUTHORIZED":
+                                        errorDevices.add(deviceSubscriptionData);
+                                        break;
+                                    case "IN_PROGRESS":
+                                    case "PENDING":
+                                    case "REPEATED":
+                                        pendingDevices.add(deviceSubscriptionData);
+                                        break;
+                                }
                                 break;
                             }
                         }
                     }
                 }
-                paginationResult.setData(deviceSubscriptionDataList);
-                return paginationResult;
+                return new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices);
             } catch (DeviceManagementException e) {
-                String msg = "service error occurred while getting device data from the device management service. "
-                        + "Device ids " + deviceIdList;
+                String msg = "Service error occurred while getting device data from the device management service. " +
+                        "Device ids " + deviceIdList;
                 log.error(msg, e);
                 throw new ApplicationManagementException(msg, e);
             }
         } catch (ApplicationManagementDAOException e) {
-            String msg =
-                    "Error occurred when getting application release data for application release UUID: " + appUUID;
+            String msg = "Error occurred when getting application release data for application release UUID: " + appUUID;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg = "DB Connection error occurred while trying to get subscription data of application which has "
-                    + "application release UUID " + appUUID;
+            String msg = "DB Connection error occurred while trying to get subscription data of application which has " +
+                    "application release UUID " + appUUID;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
@@ -1675,4 +1703,986 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    @Override
+    public List<SubscriptionsDTO> getGroupsSubscriptionDetailsByUUID(String uuid, String subscriptionStatus, int offset,
+                                                                     int limit) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        boolean unsubscribe = subscriptionStatus.equals("unsubscribed");
+        String groupName;
+        String status;
+
+        try {
+            ConnectionManagerUtil.openDBConnection();
+
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for application release UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            int appReleaseId = applicationReleaseDTO.getId();
+
+            List<SubscriptionsDTO> groupDetailsWithDevices = new ArrayList<>();
+
+            List<GroupSubscriptionDTO> groupDetails =
+                    subscriptionDAO.getGroupsSubscriptionDetailsByAppReleaseID(appReleaseId, unsubscribe, tenantId, offset, limit);
+            if (groupDetails == null) {
+                throw new ApplicationManagementException("Group details not found for appReleaseId: " + appReleaseId);
+            }
+
+            GroupManagementProviderService groupManagementProviderService = HelperUtil.getGroupManagementProviderService();
+
+            for (GroupSubscriptionDTO groupDetail : groupDetails) {
+                groupName = groupDetail.getGroupName();
+
+                // Retrieve group details and device IDs for the group using the service layer
+                GroupDetailsDTO groupDetailWithDevices =
+                        groupManagementProviderService.getGroupDetailsWithDevices(groupName, offset, limit);
+
+                SubscriptionsDTO groupDetailDTO = new SubscriptionsDTO();
+                groupDetailDTO.setId(groupDetailWithDevices.getGroupId());
+                groupDetailDTO.setName(groupDetail.getGroupName());
+                groupDetailDTO.setOwner(groupDetailWithDevices.getGroupOwner());
+                groupDetailDTO.setSubscribedBy(groupDetail.getSubscribedBy());
+                groupDetailDTO.setSubscribedTimestamp(groupDetail.getSubscribedTimestamp());
+                groupDetailDTO.setUnsubscribed(groupDetail.isUnsubscribed());
+                groupDetailDTO.setUnsubscribedBy(groupDetail.getUnsubscribedBy());
+                groupDetailDTO.setUnsubscribedTimestamp(groupDetail.getUnsubscribedTimestamp());
+                groupDetailDTO.setAppReleaseId(groupDetail.getAppReleaseId());
+                groupDetailDTO.setDeviceCount(groupDetailWithDevices.getDeviceCount());
+
+                // Fetch device subscriptions for each device ID in the group
+                List<DeviceSubscriptionData> pendingDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> installedDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> errorDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> newDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> subscribedDevices = new ArrayList<>();
+
+                List<Integer> deviceIds = groupDetailWithDevices.getDeviceIds();
+                Map<String, Integer> statusCounts = new HashMap<>();
+                statusCounts.put("PENDING", 0);
+                statusCounts.put("COMPLETED", 0);
+                statusCounts.put("ERROR", 0);
+                statusCounts.put("NEW", 0);
+                statusCounts.put("SUBSCRIBED", 0);
+
+                // Get subscribed devices if unsubscribed devices are requested
+                List<DeviceSubscriptionDTO> subscribedDeviceSubscriptions = new ArrayList<>();
+                if (unsubscribe) {
+                    subscribedDeviceSubscriptions = subscriptionDAO.getSubscriptionDetailsByDeviceIds(
+                            appReleaseId, !unsubscribe, tenantId, deviceIds);
+                }
+
+                for (Integer deviceId : deviceIds) {
+                    List<DeviceSubscriptionDTO> deviceSubscriptions = subscriptionDAO.getSubscriptionDetailsByDeviceIds(
+                            groupDetail.getAppReleaseId(), unsubscribe, tenantId, deviceIds);
+                    boolean isNewDevice = true;
+                    for (DeviceSubscriptionDTO subscription : deviceSubscriptions) {
+                        if (subscription.getDeviceId() == deviceId) {
+                            DeviceSubscriptionData deviceDetail = new DeviceSubscriptionData();
+                            deviceDetail.setDeviceId(subscription.getDeviceId());
+                            deviceDetail.setStatus(subscription.getStatus());
+                            deviceDetail.setActionType(subscription.getActionTriggeredFrom());
+                            deviceDetail.setDeviceOwner(groupDetailWithDevices.getDeviceOwners().get(deviceId));
+                            deviceDetail.setDeviceStatus(groupDetailWithDevices.getDeviceStatuses().get(deviceId));
+                            deviceDetail.setDeviceName(groupDetailWithDevices.getDeviceNames().get(deviceId));
+                            deviceDetail.setSubId(subscription.getId());
+                            deviceDetail.setActionTriggeredBy(subscription.getSubscribedBy());
+                            deviceDetail.setActionTriggeredTimestamp(subscription.getSubscribedTimestamp());
+                            deviceDetail.setUnsubscribed(subscription.isUnsubscribed());
+                            deviceDetail.setUnsubscribedBy(subscription.getUnsubscribedBy());
+                            deviceDetail.setUnsubscribedTimestamp(subscription.getUnsubscribedTimestamp());
+
+                            status = subscription.getStatus();
+                            switch (status) {
+                                case "COMPLETED":
+                                    installedDevices.add(deviceDetail);
+                                    statusCounts.put("COMPLETED", statusCounts.get("COMPLETED") + 1);
+                                    break;
+                                case "ERROR":
+                                case "INVALID":
+                                case "UNAUTHORIZED":
+                                    errorDevices.add(deviceDetail);
+                                    statusCounts.put("ERROR", statusCounts.get("ERROR") + 1);
+                                    break;
+                                case "IN_PROGRESS":
+                                case "PENDING":
+                                case "REPEATED":
+                                    pendingDevices.add(deviceDetail);
+                                    statusCounts.put("PENDING", statusCounts.get("PENDING") + 1);
+                                    break;
+                            }
+                            isNewDevice = false;
+                        }
+                    }
+                    if (isNewDevice) {
+                        boolean isSubscribedDevice = false;
+                        for (DeviceSubscriptionDTO subscribedDevice : subscribedDeviceSubscriptions) {
+                            if (subscribedDevice.getDeviceId() == deviceId) {
+                                DeviceSubscriptionData subscribedDeviceDetail = new DeviceSubscriptionData();
+                                subscribedDeviceDetail.setDeviceId(subscribedDevice.getDeviceId());
+                                subscribedDeviceDetail.setDeviceOwner(groupDetailWithDevices.getDeviceOwners().get(deviceId));
+                                subscribedDeviceDetail.setDeviceStatus(groupDetailWithDevices.getDeviceStatuses().get(deviceId));
+                                subscribedDeviceDetail.setDeviceName(groupDetailWithDevices.getDeviceNames().get(deviceId));
+                                subscribedDeviceDetail.setSubId(subscribedDevice.getId());
+                                subscribedDeviceDetail.setActionTriggeredBy(subscribedDevice.getSubscribedBy());
+                                subscribedDeviceDetail.setActionTriggeredTimestamp(subscribedDevice.getSubscribedTimestamp());
+                                subscribedDeviceDetail.setActionType(subscribedDevice.getActionTriggeredFrom());
+                                subscribedDeviceDetail.setStatus(subscribedDevice.getStatus());
+                                subscribedDevices.add(subscribedDeviceDetail);
+                                statusCounts.put("SUBSCRIBED", statusCounts.get("SUBSCRIBED") + 1);
+                                isSubscribedDevice = true;
+                                break;
+                            }
+                        }
+                        if (!isSubscribedDevice) {
+                            DeviceSubscriptionData newDeviceDetail = new DeviceSubscriptionData();
+                            newDeviceDetail.setDeviceId(deviceId);
+                            newDeviceDetail.setDeviceOwner(groupDetailWithDevices.getDeviceOwners().get(deviceId));
+                            newDeviceDetail.setDeviceStatus(groupDetailWithDevices.getDeviceStatuses().get(deviceId));
+                            newDeviceDetail.setDeviceName(groupDetailWithDevices.getDeviceNames().get(deviceId));
+                            newDevices.add(newDeviceDetail);
+                            statusCounts.put("NEW", statusCounts.get("NEW") + 1);
+                        }
+                    }
+                }
+
+                int totalDevices = deviceIds.size();
+                Map<String, Double> statusPercentages = new HashMap<>();
+                for (Map.Entry<String, Integer> entry : statusCounts.entrySet()) {
+                    double percentage = ((double) entry.getValue() / totalDevices) * 100;
+                    String formattedPercentage = String.format("%.2f", percentage);
+                    statusPercentages.put(entry.getKey(), Double.valueOf(formattedPercentage));
+                }
+
+                CategorizedSubscriptionResult categorizedSubscriptionResult;
+                if (subscribedDevices.isEmpty()) {
+                    categorizedSubscriptionResult =
+                            new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices);
+                } else {
+                    categorizedSubscriptionResult =
+                            new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices, subscribedDevices);
+                }
+                groupDetailDTO.setDevices(categorizedSubscriptionResult);
+                groupDetailDTO.setStatusPercentages(statusPercentages);
+
+                groupDetailsWithDevices.add(groupDetailDTO);
+            }
+
+            return groupDetailsWithDevices;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while fetching groups and devices for UUID: " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while fetching groups and devices for UUID: " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (GroupManagementException e) {
+            String msg = "Error occurred while fetching group details and device IDs: " + e.getMessage();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public List<SubscriptionsDTO> getUserSubscriptionsByUUID(String uuid, String subscriptionStatus, int offset, int limit)
+            throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        boolean unsubscribe = subscriptionStatus.equals("unsubscribed");
+        String userName;
+        String status;
+
+        try {
+            ConnectionManagerUtil.openDBConnection();
+
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for application release UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            int appReleaseId = applicationReleaseDTO.getId();
+
+            List<SubscriptionsDTO> userSubscriptionsWithDevices = new ArrayList<>();
+
+            List<SubscriptionsDTO> userSubscriptions =
+                    subscriptionDAO.getUserSubscriptionsByAppReleaseID(appReleaseId, unsubscribe, tenantId, offset, limit);
+            if (userSubscriptions == null) {
+                throw new ApplicationManagementException("User details not found for appReleaseId: " + appReleaseId);
+            }
+
+            DeviceManagementProviderService deviceManagementProviderService = HelperUtil.getDeviceManagementProviderService();
+
+            for (SubscriptionsDTO userSubscription : userSubscriptions) {
+                userName = userSubscription.getName();
+
+                // Retrieve owner details and device IDs for the user using the service layer
+                OwnerWithDeviceDTO ownerDetailsWithDevices =
+                        deviceManagementProviderService.getOwnersWithDeviceIds(userName);
+
+                SubscriptionsDTO userSubscriptionDTO = new SubscriptionsDTO();
+                userSubscriptionDTO.setName(userSubscription.getName());
+                userSubscriptionDTO.setSubscribedBy(userSubscription.getSubscribedBy());
+                userSubscriptionDTO.setSubscribedTimestamp(userSubscription.getSubscribedTimestamp());
+                userSubscriptionDTO.setUnsubscribed(userSubscription.getUnsubscribed());
+                userSubscriptionDTO.setUnsubscribedBy(userSubscription.getUnsubscribedBy());
+                userSubscriptionDTO.setUnsubscribedTimestamp(userSubscription.getUnsubscribedTimestamp());
+                userSubscriptionDTO.setAppReleaseId(userSubscription.getAppReleaseId());
+
+                userSubscriptionDTO.setDeviceCount(ownerDetailsWithDevices.getDeviceCount());
+
+                // Fetch device subscriptions for each device ID associated with the user
+                List<DeviceSubscriptionData> pendingDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> installedDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> errorDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> newDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> subscribedDevices = new ArrayList<>();
+
+                List<Integer> deviceIds = ownerDetailsWithDevices.getDeviceIds();
+                Map<String, Integer> statusCounts = new HashMap<>();
+                statusCounts.put("PENDING", 0);
+                statusCounts.put("COMPLETED", 0);
+                statusCounts.put("ERROR", 0);
+                statusCounts.put("NEW", 0);
+                statusCounts.put("SUBSCRIBED", 0);
+
+                List<DeviceSubscriptionDTO> subscribedDeviceSubscriptions = new ArrayList<>();
+                if (unsubscribe) {
+                    subscribedDeviceSubscriptions = subscriptionDAO.getSubscriptionDetailsByDeviceIds(
+                            appReleaseId, !unsubscribe, tenantId, deviceIds);
+                }
+
+                for (Integer deviceId : deviceIds) {
+                    List<DeviceSubscriptionDTO> deviceSubscriptions = subscriptionDAO.getSubscriptionDetailsByDeviceIds(
+                            userSubscription.getAppReleaseId(), unsubscribe, tenantId, deviceIds);
+                    boolean isNewDevice = true;
+                    for (DeviceSubscriptionDTO subscription : deviceSubscriptions) {
+                        if (subscription.getDeviceId() == deviceId) {
+                            DeviceSubscriptionData deviceDetail = new DeviceSubscriptionData();
+                            deviceDetail.setDeviceId(subscription.getDeviceId());
+                            deviceDetail.setSubId(subscription.getId());
+                            deviceDetail.setDeviceOwner(ownerDetailsWithDevices.getUserName());
+                            deviceDetail.setDeviceStatus(ownerDetailsWithDevices.getDeviceStatus());
+                            deviceDetail.setDeviceName(ownerDetailsWithDevices.getDeviceNames());
+                            deviceDetail.setActionType(subscription.getActionTriggeredFrom());
+                            deviceDetail.setStatus(subscription.getStatus());
+                            deviceDetail.setActionType(subscription.getActionTriggeredFrom());
+                            deviceDetail.setActionTriggeredBy(subscription.getSubscribedBy());
+                            deviceDetail.setActionTriggeredTimestamp(subscription.getSubscribedTimestamp());
+                            deviceDetail.setUnsubscribed(subscription.isUnsubscribed());
+                            deviceDetail.setUnsubscribedBy(subscription.getUnsubscribedBy());
+                            deviceDetail.setUnsubscribedTimestamp(subscription.getUnsubscribedTimestamp());
+
+                            status = subscription.getStatus();
+                            switch (status) {
+                                case "COMPLETED":
+                                    installedDevices.add(deviceDetail);
+                                    statusCounts.put("COMPLETED", statusCounts.get("COMPLETED") + 1);
+                                    break;
+                                case "ERROR":
+                                case "INVALID":
+                                case "UNAUTHORIZED":
+                                    errorDevices.add(deviceDetail);
+                                    statusCounts.put("ERROR", statusCounts.get("ERROR") + 1);
+                                    break;
+                                case "IN_PROGRESS":
+                                case "PENDING":
+                                case "REPEATED":
+                                    pendingDevices.add(deviceDetail);
+                                    statusCounts.put("PENDING", statusCounts.get("PENDING") + 1);
+                                    break;
+                            }
+                            isNewDevice = false;
+                        }
+                    }
+                    if (isNewDevice) {
+                        boolean isSubscribedDevice = false;
+                        for (DeviceSubscriptionDTO subscribedDevice : subscribedDeviceSubscriptions) {
+                            if (subscribedDevice.getDeviceId() == deviceId) {
+                                DeviceSubscriptionData subscribedDeviceDetail = new DeviceSubscriptionData();
+                                subscribedDeviceDetail.setDeviceId(subscribedDevice.getDeviceId());
+                                subscribedDeviceDetail.setDeviceName(ownerDetailsWithDevices.getDeviceNames());
+                                subscribedDeviceDetail.setDeviceOwner(ownerDetailsWithDevices.getUserName());
+                                subscribedDeviceDetail.setDeviceStatus(ownerDetailsWithDevices.getDeviceStatus());
+                                subscribedDeviceDetail.setSubId(subscribedDevice.getId());
+                                subscribedDeviceDetail.setActionTriggeredBy(subscribedDevice.getSubscribedBy());
+                                subscribedDeviceDetail.setActionTriggeredTimestamp(subscribedDevice.getSubscribedTimestamp());
+                                subscribedDeviceDetail.setActionType(subscribedDevice.getActionTriggeredFrom());
+                                subscribedDeviceDetail.setStatus(subscribedDevice.getStatus());
+                                subscribedDevices.add(subscribedDeviceDetail);
+                                statusCounts.put("SUBSCRIBED", statusCounts.get("SUBSCRIBED") + 1);
+                                isSubscribedDevice = true;
+                                break;
+                            }
+                        }
+                        if (!isSubscribedDevice) {
+                            DeviceSubscriptionData newDeviceDetail = new DeviceSubscriptionData();
+                            newDeviceDetail.setDeviceId(deviceId);
+                            newDeviceDetail.setDeviceOwner(ownerDetailsWithDevices.getUserName());
+                            newDeviceDetail.setDeviceStatus(ownerDetailsWithDevices.getDeviceStatus());
+                            newDeviceDetail.setDeviceName(ownerDetailsWithDevices.getDeviceNames());
+                            newDevices.add(newDeviceDetail);
+                            statusCounts.put("NEW", statusCounts.get("NEW") + 1);
+                        }
+                    }
+                }
+
+                int totalDevices = deviceIds.size();
+                Map<String, Double> statusPercentages = new HashMap<>();
+                for (Map.Entry<String, Integer> entry : statusCounts.entrySet()) {
+                    double percentage = ((double) entry.getValue() / totalDevices) * 100;
+                    String formattedPercentage = String.format("%.2f", percentage);
+                    statusPercentages.put(entry.getKey(), Double.valueOf(formattedPercentage));
+                }
+
+                CategorizedSubscriptionResult categorizedSubscriptionResult;
+                if (subscribedDevices.isEmpty()) {
+                    categorizedSubscriptionResult =
+                            new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices);
+                } else {
+                    categorizedSubscriptionResult =
+                            new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices, subscribedDevices);
+                }
+                userSubscriptionDTO.setDevices(categorizedSubscriptionResult);
+                userSubscriptionDTO.setStatusPercentages(statusPercentages);
+
+                userSubscriptionsWithDevices.add(userSubscriptionDTO);
+            }
+
+            return userSubscriptionsWithDevices;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting user subscriptions for the application release UUID: " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while getting user subscriptions for UUID: " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public List<SubscriptionsDTO> getRoleSubscriptionsByUUID(String uuid, String subscriptionStatus, int offset, int limit)
+            throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        boolean unsubscribe = subscriptionStatus.equals("unsubscribed");
+        String roleName;
+        String status;
+
+        try {
+            ConnectionManagerUtil.openDBConnection();
+
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for application release UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            int appReleaseId = applicationReleaseDTO.getId();
+
+            List<SubscriptionsDTO> roleSubscriptionsWithDevices = new ArrayList<>();
+
+            List<SubscriptionsDTO> roleSubscriptions =
+                    subscriptionDAO.getRoleSubscriptionsByAppReleaseID(appReleaseId, unsubscribe, tenantId, offset, limit);
+            if (roleSubscriptions == null) {
+                throw new ApplicationManagementException("Role details not found for appReleaseId: " + appReleaseId);
+            }
+
+            DeviceManagementProviderService deviceManagementProviderService = HelperUtil.getDeviceManagementProviderService();
+
+            for (SubscriptionsDTO roleSubscription : roleSubscriptions) {
+                roleName = roleSubscription.getName();
+
+                SubscriptionsDTO roleSubscriptionDTO = new SubscriptionsDTO();
+                roleSubscriptionDTO.setName(roleSubscription.getName());
+                roleSubscriptionDTO.setSubscribedBy(roleSubscription.getSubscribedBy());
+                roleSubscriptionDTO.setSubscribedTimestamp(roleSubscription.getSubscribedTimestamp());
+                roleSubscriptionDTO.setUnsubscribed(roleSubscription.getUnsubscribed());
+                roleSubscriptionDTO.setUnsubscribedBy(roleSubscription.getUnsubscribedBy());
+                roleSubscriptionDTO.setUnsubscribedTimestamp(roleSubscription.getUnsubscribedTimestamp());
+                roleSubscriptionDTO.setAppReleaseId(roleSubscription.getAppReleaseId());
+
+                List<DeviceSubscriptionData> pendingDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> installedDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> errorDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> newDevices = new ArrayList<>();
+                List<DeviceSubscriptionData> subscribedDevices = new ArrayList<>();
+
+                Map<String, Integer> statusCounts = new HashMap<>();
+                statusCounts.put("PENDING", 0);
+                statusCounts.put("COMPLETED", 0);
+                statusCounts.put("ERROR", 0);
+                statusCounts.put("NEW", 0);
+                statusCounts.put("SUBSCRIBED", 0);
+
+                List<String> users = this.getUsersForRole(roleName);
+
+                for (String user : users) {
+                    OwnerWithDeviceDTO ownerDetailsWithDevices;
+                    try {
+                        ownerDetailsWithDevices = deviceManagementProviderService.getOwnersWithDeviceIds(user);
+                    } catch (DeviceManagementDAOException e) {
+                        throw new ApplicationManagementException("Error retrieving owner details with devices for user: " + user, e);
+                    }
+
+                    List<Integer> deviceIds = ownerDetailsWithDevices.getDeviceIds();
+                    for (Integer deviceId : deviceIds) {
+
+                        List<DeviceSubscriptionDTO> subscribedDeviceSubscriptions = new ArrayList<>();
+                        if (unsubscribe) {
+                            subscribedDeviceSubscriptions = subscriptionDAO.getSubscriptionDetailsByDeviceIds(
+                                    appReleaseId, !unsubscribe, tenantId, deviceIds);
+                        }
+
+                        List<DeviceSubscriptionDTO> deviceSubscriptions;
+                        try {
+                            deviceSubscriptions = subscriptionDAO.getSubscriptionDetailsByDeviceIds(
+                                    roleSubscription.getAppReleaseId(), unsubscribe, tenantId, deviceIds);
+                        } catch (ApplicationManagementDAOException e) {
+                            throw new ApplicationManagementException("Error retrieving device subscriptions", e);
+                        }
+
+                        boolean isNewDevice = true;
+                        for (DeviceSubscriptionDTO deviceSubscription : deviceSubscriptions) {
+                            if (deviceSubscription.getDeviceId() == deviceId) {
+                                DeviceSubscriptionData deviceDetail = new DeviceSubscriptionData();
+                                deviceDetail.setDeviceId(deviceSubscription.getDeviceId());
+                                deviceDetail.setDeviceName(ownerDetailsWithDevices.getDeviceNames());
+                                deviceDetail.setDeviceOwner(ownerDetailsWithDevices.getUserName());
+                                deviceDetail.setDeviceStatus(ownerDetailsWithDevices.getDeviceStatus());
+                                deviceDetail.setActionType(deviceSubscription.getActionTriggeredFrom());
+                                deviceDetail.setStatus(deviceSubscription.getStatus());
+                                deviceDetail.setActionType(deviceSubscription.getActionTriggeredFrom());
+                                deviceDetail.setActionTriggeredBy(deviceSubscription.getSubscribedBy());
+                                deviceDetail.setSubId(deviceSubscription.getId());
+                                deviceDetail.setActionTriggeredTimestamp(deviceSubscription.getSubscribedTimestamp());
+                                deviceDetail.setUnsubscribed(deviceSubscription.isUnsubscribed());
+                                deviceDetail.setUnsubscribedBy(deviceSubscription.getUnsubscribedBy());
+                                deviceDetail.setUnsubscribedTimestamp(deviceSubscription.getUnsubscribedTimestamp());
+
+                                status = deviceSubscription.getStatus();
+                                switch (status) {
+                                    case "COMPLETED":
+                                        installedDevices.add(deviceDetail);
+                                        statusCounts.put("COMPLETED", statusCounts.get("COMPLETED") + 1);
+                                        break;
+                                    case "ERROR":
+                                    case "INVALID":
+                                    case "UNAUTHORIZED":
+                                        errorDevices.add(deviceDetail);
+                                        statusCounts.put("ERROR", statusCounts.get("ERROR") + 1);
+                                        break;
+                                    case "IN_PROGRESS":
+                                    case "PENDING":
+                                    case "REPEATED":
+                                        pendingDevices.add(deviceDetail);
+                                        statusCounts.put("PENDING", statusCounts.get("PENDING") + 1);
+                                        break;
+                                }
+                                isNewDevice = false;
+                            }
+                        }
+                        if (isNewDevice) {
+                            boolean isSubscribedDevice = false;
+                            for (DeviceSubscriptionDTO subscribedDevice : subscribedDeviceSubscriptions) {
+                                if (subscribedDevice.getDeviceId() == deviceId) {
+                                    DeviceSubscriptionData subscribedDeviceDetail = new DeviceSubscriptionData();
+                                    subscribedDeviceDetail.setDeviceId(subscribedDevice.getDeviceId());
+                                    subscribedDeviceDetail.setDeviceName(ownerDetailsWithDevices.getDeviceNames());
+                                    subscribedDeviceDetail.setDeviceOwner(ownerDetailsWithDevices.getUserName());
+                                    subscribedDeviceDetail.setDeviceStatus(ownerDetailsWithDevices.getDeviceStatus());
+                                    subscribedDeviceDetail.setSubId(subscribedDevice.getId());
+                                    subscribedDeviceDetail.setActionTriggeredBy(subscribedDevice.getSubscribedBy());
+                                    subscribedDeviceDetail.setActionTriggeredTimestamp(subscribedDevice.getSubscribedTimestamp());
+                                    subscribedDeviceDetail.setActionType(subscribedDevice.getActionTriggeredFrom());
+                                    subscribedDeviceDetail.setStatus(subscribedDevice.getStatus());
+                                    subscribedDevices.add(subscribedDeviceDetail);
+                                    statusCounts.put("SUBSCRIBED", statusCounts.get("SUBSCRIBED") + 1);
+                                    isSubscribedDevice = true;
+                                    break;
+                                }
+                            }
+                            if (!isSubscribedDevice) {
+                                DeviceSubscriptionData newDeviceDetail = new DeviceSubscriptionData();
+                                newDeviceDetail.setDeviceId(deviceId);
+                                newDeviceDetail.setDeviceName(ownerDetailsWithDevices.getDeviceNames());
+                                newDeviceDetail.setDeviceOwner(ownerDetailsWithDevices.getUserName());
+                                newDeviceDetail.setDeviceStatus(ownerDetailsWithDevices.getDeviceStatus());
+                                newDevices.add(newDeviceDetail);
+                                statusCounts.put("NEW", statusCounts.get("NEW") + 1);
+                            }
+                        }
+                    }
+                }
+
+                int totalDevices =
+                        pendingDevices.size() + installedDevices.size() + errorDevices.size() + newDevices.size() + subscribedDevices.size();
+                Map<String, Double> statusPercentages = new HashMap<>();
+                for (Map.Entry<String, Integer> entry : statusCounts.entrySet()) {
+                    double percentage = totalDevices == 0 ? 0.0 : ((double) entry.getValue() / totalDevices) * 100;
+                    String formattedPercentage = String.format("%.2f", percentage);
+                    statusPercentages.put(entry.getKey(), Double.valueOf(formattedPercentage));
+                }
+
+                CategorizedSubscriptionResult categorizedSubscriptionResult;
+                if (subscribedDevices.isEmpty()) {
+                    categorizedSubscriptionResult =
+                            new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices);
+                } else {
+                    categorizedSubscriptionResult =
+                            new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices, subscribedDevices);
+                }
+                roleSubscriptionDTO.setDevices(categorizedSubscriptionResult);
+                roleSubscriptionDTO.setStatusPercentages(statusPercentages);
+                roleSubscriptionDTO.setDeviceCount(totalDevices);
+
+                roleSubscriptionsWithDevices.add(roleSubscriptionDTO);
+            }
+
+            return roleSubscriptionsWithDevices;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred in retrieving role subscriptions with devices";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while retrieving the database connection";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while retrieving users for role";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    // Get user list for each role
+    public List<String> getUsersForRole(String roleName) throws UserStoreException {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        int tenantId = ctx.getTenantId();
+        UserStoreManager userStoreManager = DataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
+        String[] users = userStoreManager.getUserListOfRole(roleName);
+        return Arrays.asList(users);
+    }
+
+    @Override
+    public DeviceSubscriptionResponseDTO getDeviceSubscriptionsDetailsByUUID(String uuid, String subscriptionStatus, int offset,
+                                                                             int limit) throws ApplicationManagementException {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        boolean unsubscribe = subscriptionStatus.equals("unsubscribed");
+
+        try {
+            ConnectionManagerUtil.openDBConnection();
+
+            ApplicationReleaseDTO applicationReleaseDTO = applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for application release UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            int appReleaseId = applicationReleaseDTO.getId();
+
+            DeviceManagementProviderService deviceManagementProviderService = HelperUtil.getDeviceManagementProviderService();
+            List<DeviceSubscriptionDTO> deviceSubscriptions =
+                    subscriptionDAO.getDeviceSubscriptionsByAppReleaseID(appReleaseId, unsubscribe, tenantId, offset, limit);
+
+            // empty response for no device subscriptions
+            if (deviceSubscriptions.isEmpty()) {
+                return new DeviceSubscriptionResponseDTO(0, Collections.emptyMap(),
+                        new CategorizedSubscriptionResult(Collections.emptyList(),
+                                Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+            }
+
+            List<DeviceDetailsDTO> allDevices =
+                    deviceManagementProviderService.getDevicesByTenantId(tenantId);
+
+            List<Integer> deviceIds = allDevices.stream()
+                    .map(DeviceDetailsDTO::getDeviceId)
+                    .collect(Collectors.toList());
+
+            Map<String, Integer> statusCounts = new HashMap<>();
+            statusCounts.put("PENDING", 0);
+            statusCounts.put("COMPLETED", 0);
+            statusCounts.put("ERROR", 0);
+            statusCounts.put("NEW", 0);
+            statusCounts.put("SUBSCRIBED", 0);
+
+            List<DeviceSubscriptionData> installedDevices = new ArrayList<>();
+            List<DeviceSubscriptionData> pendingDevices = new ArrayList<>();
+            List<DeviceSubscriptionData> errorDevices = new ArrayList<>();
+            List<DeviceSubscriptionData> newDevices = new ArrayList<>();
+            List<DeviceSubscriptionData> subscribedDevices = new ArrayList<>();
+
+            Map<Integer, DeviceSubscriptionDTO> deviceSubscriptionMap = deviceSubscriptions.stream()
+                    .collect(Collectors.toMap(DeviceSubscriptionDTO::getDeviceId, Function.identity()));
+            Map<Integer, DeviceDetailsDTO> allDevicesMap = allDevices.stream()
+                    .collect(Collectors.toMap(DeviceDetailsDTO::getDeviceId, Function.identity()));
+
+            List<DeviceSubscriptionDTO> allSubscriptionsForUnSubscribed =
+                    subscriptionDAO.getSubscriptionDetailsByDeviceIds(appReleaseId, !unsubscribe, tenantId, deviceIds);
+            List<DeviceSubscriptionDTO> allSubscriptionsForSubscribed =
+                    subscriptionDAO.getSubscriptionDetailsByDeviceIds(appReleaseId, unsubscribe, tenantId, deviceIds);
+            Map<Integer, DeviceSubscriptionDTO> allSubscriptionForUnSubscribedMap = allSubscriptionsForUnSubscribed.stream()
+                    .collect(Collectors.toMap(DeviceSubscriptionDTO::getDeviceId, Function.identity()));
+            Map<Integer, DeviceSubscriptionDTO> allSubscriptionForSubscribedMap = allSubscriptionsForSubscribed.stream()
+                    .collect(Collectors.toMap(DeviceSubscriptionDTO::getDeviceId, Function.identity()));
+
+            for (DeviceDetailsDTO device : allDevices) {
+                Integer deviceId = device.getDeviceId();
+                OwnerWithDeviceDTO ownerWithDevice =
+                        deviceManagementProviderService.getOwnerWithDeviceByDeviceId(deviceId);
+                if (ownerWithDevice == null) {
+                    continue;
+                }
+
+                if (deviceSubscriptionMap.containsKey(deviceId)) {
+                    DeviceSubscriptionDTO subscription = deviceSubscriptionMap.get(deviceId);
+                    DeviceSubscriptionData deviceDetail = new DeviceSubscriptionData();
+                    deviceDetail.setDeviceId(subscription.getDeviceId());
+                    deviceDetail.setSubId(subscription.getId());
+                    deviceDetail.setDeviceName(ownerWithDevice.getDeviceNames());
+                    deviceDetail.setDeviceOwner(ownerWithDevice.getUserName());
+                    deviceDetail.setDeviceStatus(ownerWithDevice.getDeviceStatus());
+                    deviceDetail.setActionType(subscription.getActionTriggeredFrom());
+                    deviceDetail.setStatus(subscription.getStatus());
+                    deviceDetail.setActionTriggeredBy(subscription.getSubscribedBy());
+                    deviceDetail.setActionTriggeredTimestamp(subscription.getSubscribedTimestamp());
+                    deviceDetail.setUnsubscribed(subscription.isUnsubscribed());
+                    deviceDetail.setUnsubscribedBy(subscription.getUnsubscribedBy());
+                    deviceDetail.setUnsubscribedTimestamp(subscription.getUnsubscribedTimestamp());
+
+                    String status = subscription.getStatus();
+                    switch (status) {
+                        case "COMPLETED":
+                            installedDevices.add(deviceDetail);
+                            statusCounts.put("COMPLETED", statusCounts.get("COMPLETED") + 1);
+                            break;
+                        case "ERROR":
+                        case "INVALID":
+                        case "UNAUTHORIZED":
+                            errorDevices.add(deviceDetail);
+                            statusCounts.put("ERROR", statusCounts.get("ERROR") + 1);
+                            break;
+                        case "IN_PROGRESS":
+                        case "PENDING":
+                        case "REPEATED":
+                            pendingDevices.add(deviceDetail);
+                            statusCounts.put("PENDING", statusCounts.get("PENDING") + 1);
+                            break;
+                    }
+                } else if (unsubscribe && allSubscriptionForUnSubscribedMap.containsKey(deviceId) && !deviceSubscriptionMap.containsKey(deviceId)) {
+                    // Check if the device subscription has unsubscribed status set to false
+                    DeviceSubscriptionDTO allSubscription = allSubscriptionForUnSubscribedMap.get(deviceId);
+                    if (!allSubscription.isUnsubscribed()) {
+                        DeviceSubscriptionData subscribedDeviceDetail = new DeviceSubscriptionData();
+                        subscribedDeviceDetail.setDeviceId(allSubscription.getDeviceId());
+                        subscribedDeviceDetail.setDeviceName(ownerWithDevice.getDeviceNames());
+                        subscribedDeviceDetail.setDeviceOwner(ownerWithDevice.getUserName());
+                        subscribedDeviceDetail.setDeviceStatus(ownerWithDevice.getDeviceStatus());
+                        subscribedDeviceDetail.setSubId(allSubscription.getId());
+                        subscribedDeviceDetail.setActionTriggeredBy(allSubscription.getSubscribedBy());
+                        subscribedDeviceDetail.setActionTriggeredTimestamp(allSubscription.getSubscribedTimestamp());
+                        subscribedDeviceDetail.setActionType(allSubscription.getActionTriggeredFrom());
+                        subscribedDeviceDetail.setStatus(allSubscription.getStatus());
+                        subscribedDevices.add(subscribedDeviceDetail);
+                        statusCounts.put("SUBSCRIBED", statusCounts.get("SUBSCRIBED") + 1);
+                    }
+                } else if (unsubscribe && !allSubscriptionForUnSubscribedMap.containsKey(deviceId) && !deviceSubscriptionMap.containsKey(deviceId)
+                        && (allDevicesMap.containsKey(deviceId))) {
+                    DeviceSubscriptionData newDeviceDetail = new DeviceSubscriptionData();
+                    newDeviceDetail.setDeviceId(deviceId);
+                    newDeviceDetail.setDeviceOwner(ownerWithDevice.getUserName());
+                    newDeviceDetail.setDeviceStatus(ownerWithDevice.getDeviceStatus());
+                    newDevices.add(newDeviceDetail);
+                    statusCounts.put("NEW", statusCounts.get("NEW") + 1);
+                } else if (!unsubscribe && !allSubscriptionForSubscribedMap.containsKey(deviceId) && !deviceSubscriptionMap.containsKey(deviceId)
+                        && (allDevicesMap.containsKey(deviceId))) {
+                    DeviceSubscriptionData newDeviceDetail = new DeviceSubscriptionData();
+                    newDeviceDetail.setDeviceId(deviceId);
+                    newDeviceDetail.setDeviceName(ownerWithDevice.getDeviceNames());
+                    newDeviceDetail.setDeviceOwner(ownerWithDevice.getUserName());
+                    newDeviceDetail.setDeviceStatus(ownerWithDevice.getDeviceStatus());
+                    newDevices.add(newDeviceDetail);
+                    statusCounts.put("NEW", statusCounts.get("NEW") + 1);
+                }
+            }
+
+            int totalDevices = allDevices.size();
+            Map<String, Double> statusPercentages = new HashMap<>();
+            for (Map.Entry<String, Integer> entry : statusCounts.entrySet()) {
+                double percentage = ((double) entry.getValue() / totalDevices) * 100;
+                String formattedPercentage = String.format("%.2f", percentage);
+                statusPercentages.put(entry.getKey(), Double.valueOf(formattedPercentage));
+            }
+
+            CategorizedSubscriptionResult categorizedSubscriptionResult;
+            if (subscribedDevices.isEmpty()) {
+                categorizedSubscriptionResult =
+                        new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices);
+            } else {
+                categorizedSubscriptionResult =
+                        new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices, subscribedDevices);
+            }
+            DeviceSubscriptionResponseDTO deviceSubscriptionResponse =
+                    new DeviceSubscriptionResponseDTO(totalDevices, statusPercentages, categorizedSubscriptionResult);
+
+            return deviceSubscriptionResponse;
+
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting device subscriptions for the application release UUID: " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while getting device subscriptions for UUID: " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public DeviceSubscriptionResponseDTO getAllSubscriptionDetailsByUUID(String uuid, String subscriptionStatus, int offset, int limit)
+            throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        boolean unsubscribe = subscriptionStatus.equals("unsubscribed");
+
+        try {
+            ConnectionManagerUtil.openDBConnection();
+
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for application release UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            int appReleaseId = applicationReleaseDTO.getId();
+
+            List<DeviceSubscriptionDTO> allSubscriptions =
+                    subscriptionDAO.getAllSubscriptionsDetails(appReleaseId, unsubscribe, tenantId, offset, limit);
+
+            // empty response for no subscriptions
+            if (allSubscriptions.isEmpty()) {
+                return new DeviceSubscriptionResponseDTO(0, Collections.emptyMap(),
+                        new CategorizedSubscriptionResult(Collections.emptyList(),
+                                Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+            }
+
+            DeviceManagementProviderService deviceManagementProviderService = HelperUtil.getDeviceManagementProviderService();
+
+            Map<Integer, DeviceSubscriptionDTO> allSubscriptionMap = allSubscriptions.stream()
+                    .collect(Collectors.toMap(DeviceSubscriptionDTO::getDeviceId, Function.identity()));
+
+            List<DeviceSubscriptionData> pendingDevices = new ArrayList<>();
+            List<DeviceSubscriptionData> installedDevices = new ArrayList<>();
+            List<DeviceSubscriptionData> errorDevices = new ArrayList<>();
+            List<DeviceSubscriptionData> newDevices = new ArrayList<>();
+
+            Map<String, Integer> statusCounts = new HashMap<>();
+            statusCounts.put("PENDING", 0);
+            statusCounts.put("COMPLETED", 0);
+            statusCounts.put("ERROR", 0);
+            statusCounts.put("NEW", 0);
+
+            List<DeviceDetailsDTO> allDevices =
+                    deviceManagementProviderService.getDevicesByTenantId(tenantId);
+
+            for (DeviceDetailsDTO device : allDevices) {
+                Integer deviceId = device.getDeviceId();
+                OwnerWithDeviceDTO ownerWithDevice =
+                        deviceManagementProviderService.getOwnerWithDeviceByDeviceId(deviceId);
+                if (ownerWithDevice == null) {
+                    continue;
+                }
+
+                if (allSubscriptionMap.containsKey(deviceId)) {
+                    DeviceSubscriptionDTO subscription = allSubscriptionMap.get(deviceId);
+                    DeviceSubscriptionData deviceDetail = new DeviceSubscriptionData();
+                    deviceDetail.setDeviceId(subscription.getDeviceId());
+                    deviceDetail.setDeviceName(ownerWithDevice.getDeviceNames());
+                    deviceDetail.setSubId(subscription.getId());
+                    deviceDetail.setDeviceOwner(ownerWithDevice.getUserName());
+                    deviceDetail.setDeviceStatus(ownerWithDevice.getDeviceStatus());
+                    deviceDetail.setActionType(subscription.getActionTriggeredFrom());
+                    deviceDetail.setStatus(subscription.getStatus());
+                    deviceDetail.setActionTriggeredBy(subscription.getSubscribedBy());
+                    deviceDetail.setActionTriggeredTimestamp(subscription.getSubscribedTimestamp());
+                    deviceDetail.setUnsubscribed(subscription.isUnsubscribed());
+                    deviceDetail.setUnsubscribedBy(subscription.getUnsubscribedBy());
+                    deviceDetail.setUnsubscribedTimestamp(subscription.getUnsubscribedTimestamp());
+
+                    String status = subscription.getStatus();
+                    switch (status) {
+                        case "COMPLETED":
+                            installedDevices.add(deviceDetail);
+                            statusCounts.put("COMPLETED", statusCounts.get("COMPLETED") + 1);
+                            break;
+                        case "ERROR":
+                        case "INVALID":
+                        case "UNAUTHORIZED":
+                            errorDevices.add(deviceDetail);
+                            statusCounts.put("ERROR", statusCounts.get("ERROR") + 1);
+                            break;
+                        case "IN_PROGRESS":
+                        case "PENDING":
+                        case "REPEATED":
+                            pendingDevices.add(deviceDetail);
+                            statusCounts.put("PENDING", statusCounts.get("PENDING") + 1);
+                            break;
+                    }
+                } else {
+                    DeviceSubscriptionData newDeviceDetail = new DeviceSubscriptionData();
+                    newDeviceDetail.setDeviceId(deviceId);
+                    newDeviceDetail.setDeviceName(ownerWithDevice.getDeviceNames());
+                    newDeviceDetail.setDeviceOwner(ownerWithDevice.getUserName());
+                    newDeviceDetail.setDeviceStatus(ownerWithDevice.getDeviceStatus());
+                    newDevices.add(newDeviceDetail);
+                    statusCounts.put("NEW", statusCounts.get("NEW") + 1);
+                }
+            }
+
+            int totalDevices = allDevices.size();
+            Map<String, Double> statusPercentages = new HashMap<>();
+            for (Map.Entry<String, Integer> entry : statusCounts.entrySet()) {
+                double percentage = ((double) entry.getValue() / totalDevices) * 100;
+                String formattedPercentage = String.format("%.2f", percentage);
+                statusPercentages.put(entry.getKey(), Double.valueOf(formattedPercentage));
+            }
+
+            CategorizedSubscriptionResult categorizedSubscriptionResult =
+                    new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices);
+            DeviceSubscriptionResponseDTO result =
+                    new DeviceSubscriptionResponseDTO(totalDevices, statusPercentages, categorizedSubscriptionResult);
+
+            return result;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting user subscriptions for the application release UUID: " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while getting user subscriptions for UUID: " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public List<DeviceOperationDTO> getSubscriptionOperationsByUUIDAndDeviceID(int deviceId, String uuid, int offset, int limit)
+            throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        if (uuid == null || uuid.isEmpty()) {
+            throw new IllegalArgumentException("UUID cannot be null or empty.");
+        }
+        try {
+            ConnectionManagerUtil.openDBConnection();
+
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for application release UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            int appReleaseId = applicationReleaseDTO.getId();
+
+            DeviceManagementProviderService deviceManagementProviderService = HelperUtil.getDeviceManagementProviderService();
+            List<DeviceOperationDTO> deviceSubscriptions =
+                    subscriptionDAO.getSubscriptionOperationsByAppReleaseIDAndDeviceID(appReleaseId, deviceId, tenantId, offset, limit);
+            for (DeviceOperationDTO deviceSubscription : deviceSubscriptions) {
+                Integer operationId = deviceSubscription.getOperationId();
+                if (operationId != null) {
+                    OperationDTO operationDetails = deviceManagementProviderService.getOperationDetailsById(operationId);
+                    if (operationDetails != null) {
+                        deviceSubscription.setOperationCode(operationDetails.getOperationCode());
+                        deviceSubscription.setOperationDetails(operationDetails.getOperationDetails());
+                        deviceSubscription.setOperationProperties(operationDetails.getOperationProperties());
+                        deviceSubscription.setOperationResponses(operationDetails.getOperationResponses());
+                    }
+                }
+            }
+            return deviceSubscriptions;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while retrieving device subscriptions for UUID: " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while retrieving the database connection";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (OperationManagementException e) {
+            throw new RuntimeException(e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public List<CategorizedSubscriptionCountsDTO> getSubscriptionCountsByUUID(String uuid)
+            throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        if (uuid == null || uuid.isEmpty()) {
+            throw new IllegalArgumentException("UUID cannot be null or empty.");
+        }
+
+        try {
+            ConnectionManagerUtil.openDBConnection();
+
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for application release UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            int appReleaseId = applicationReleaseDTO.getId();
+
+            List<CategorizedSubscriptionCountsDTO> subscriptionCounts = new ArrayList<>();
+
+            subscriptionCounts.add(new CategorizedSubscriptionCountsDTO(
+                    "All",
+                    subscriptionDAO.getAllSubscriptionCount(appReleaseId, tenantId),
+                    subscriptionDAO.getAllUnsubscriptionCount(appReleaseId, tenantId)));
+            subscriptionCounts.add(new CategorizedSubscriptionCountsDTO(
+                    "Device",
+                    subscriptionDAO.getDeviceSubscriptionCount(appReleaseId, tenantId),
+                    subscriptionDAO.getDeviceUnsubscriptionCount(appReleaseId, tenantId)));
+            subscriptionCounts.add(new CategorizedSubscriptionCountsDTO(
+                    "Group",
+                    subscriptionDAO.getGroupSubscriptionCount(appReleaseId, tenantId),
+                    subscriptionDAO.getGroupUnsubscriptionCount(appReleaseId, tenantId)));
+            subscriptionCounts.add(new CategorizedSubscriptionCountsDTO(
+                    "Role",
+                    subscriptionDAO.getRoleSubscriptionCount(appReleaseId, tenantId),
+                    subscriptionDAO.getRoleUnsubscriptionCount(appReleaseId, tenantId)));
+            subscriptionCounts.add(new CategorizedSubscriptionCountsDTO(
+                    "User",
+                    subscriptionDAO.getUserSubscriptionCount(appReleaseId, tenantId),
+                    subscriptionDAO.getUserUnsubscriptionCount(appReleaseId, tenantId)));
+
+            return subscriptionCounts;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while retrieving subscriptions counts for UUID: " + uuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while retrieving the database connection";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
 }

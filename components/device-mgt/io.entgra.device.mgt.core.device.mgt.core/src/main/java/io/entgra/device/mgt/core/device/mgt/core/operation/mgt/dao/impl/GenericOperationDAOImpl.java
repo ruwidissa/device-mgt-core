@@ -17,32 +17,36 @@
  */
 package io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.impl;
 
-import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.ProfileOperation;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.ActivityPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
-import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityHolder;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityStatus;
+import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.DeviceActivity;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationResponse;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import io.entgra.device.mgt.core.device.mgt.core.dto.OperationDTO;
+import io.entgra.device.mgt.core.device.mgt.core.dto.OperationResponseDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.OperationResponseMeta;
+import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.ProfileOperation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMapping;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationDAO;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOUtil;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.util.OperationDAOUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -2773,5 +2777,67 @@ public class GenericOperationDAOImpl implements OperationDAO {
             throw new OperationManagementDAOException(msg, e);
         }
         return 0;
+    }
+
+    @Override
+    public OperationDTO getOperationDetailsById(int operationId, int tenantId)
+            throws OperationManagementDAOException {
+        OperationDTO operationDetails = new OperationDTO();
+
+        String sql = "SELECT o.ID, " +
+                "o.OPERATION_CODE, " +
+                "o.OPERATION_DETAILS, " +
+                "o.OPERATION_PROPERTIES, " +
+                "r.OPERATION_RESPONSE, " +
+                "r.RECEIVED_TIMESTAMP " +
+                "FROM DM_OPERATION o " +
+                "LEFT JOIN DM_DEVICE_OPERATION_RESPONSE r " +
+                "ON o.ID = r.OPERATION_ID " +
+                "WHERE o.ID = ? " +
+                "AND o.TENANT_ID = ?";
+
+        try {
+            Connection conn = OperationManagementDAOFactory.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, operationId);
+                stmt.setInt(2, tenantId);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    List<OperationResponseDTO> responses = new ArrayList<>();
+                    while (rs.next()) {
+                        if (operationDetails.getOperationId() == 0) {
+                            operationDetails.setOperationId(rs.getInt("ID"));
+                            operationDetails.setOperationCode(rs.getString("OPERATION_CODE"));
+                            Blob detailsBlob = rs.getBlob("OPERATION_DETAILS");
+                            if (detailsBlob != null) {
+                                JSONObject operationDetailsJson = OperationDAOUtil.convertBlobToJsonObject(detailsBlob);
+                                operationDetails.setOperationDetails(operationDetailsJson);
+                            }
+                            Blob propertiesBlob = rs.getBlob("OPERATION_PROPERTIES");
+                            if (propertiesBlob != null) {
+                                JSONObject operationPropertiesJson = OperationDAOUtil.convertBlobToJsonObject(propertiesBlob);
+                                operationDetails.setOperationProperties(operationPropertiesJson);
+                            }
+                        }
+
+                        String response = rs.getString("OPERATION_RESPONSE");
+                        Timestamp responseTimestamp = rs.getTimestamp("RECEIVED_TIMESTAMP");
+                        if (response != null && responseTimestamp != null) {
+                            OperationResponseDTO operationResponse = new OperationResponseDTO();
+                            operationResponse.setOperationResponse(response);
+                            operationResponse.setResponseTimeStamp(responseTimestamp);
+                            responses.add(operationResponse);
+                        }
+                    }
+                    operationDetails.setOperationResponses(responses);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving operation details for operation ID: " + operationId;
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
+        }
+
+        return operationDetails;
     }
 }
