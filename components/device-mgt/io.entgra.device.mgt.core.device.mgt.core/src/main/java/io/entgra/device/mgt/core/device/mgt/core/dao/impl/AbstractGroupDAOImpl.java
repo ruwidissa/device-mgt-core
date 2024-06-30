@@ -1484,34 +1484,35 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                 stmt.setInt(3, limit);
                 stmt.setInt(4, offset);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    if (groupDetails.getGroupId() == 0) {
-                        groupDetails.setGroupId(rs.getInt("GROUP_ID"));
-                        groupDetails.setGroupName(rs.getString("GROUP_NAME"));
-                        groupDetails.setGroupOwner(rs.getString("GROUP_OWNER"));
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        if (groupDetails.getGroupId() == 0) {
+                            groupDetails.setGroupId(rs.getInt("GROUP_ID"));
+                            groupDetails.setGroupName(rs.getString("GROUP_NAME"));
+                            groupDetails.setGroupOwner(rs.getString("GROUP_OWNER"));
+                        }
+                        int deviceId = rs.getInt("DEVICE_ID");
+                        deviceIds.add(deviceId);
+                        deviceOwners.put(deviceId, rs.getString("DEVICE_OWNER"));
+                        deviceStatuses.put(deviceId, rs.getString("DEVICE_STATUS"));
+                        deviceNames.put(deviceId, rs.getString("DEVICE_NAME"));
+                        deviceTypes.put(deviceId, rs.getString("DEVICE_TYPE"));
+                        deviceIdentifiers.put(deviceId, rs.getString("DEVICE_IDENTIFICATION"));
                     }
-                    int deviceId = rs.getInt("DEVICE_ID");
-                    deviceIds.add(deviceId);
-                    deviceOwners.put(deviceId, rs.getString("DEVICE_OWNER"));
-                    deviceStatuses.put(deviceId, rs.getString("DEVICE_STATUS"));
-                    deviceNames.put(deviceId, rs.getString("DEVICE_NAME"));
-                    deviceTypes.put(deviceId, rs.getString("DEVICE_TYPE"));
-                    deviceIdentifiers.put(deviceId, rs.getString("DEVICE_IDENTIFICATION"));
                 }
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
-            log.error(msg, e);
-            throw new GroupManagementDAOException(msg, e);
+            groupDetails.setDeviceIds(deviceIds);
+            groupDetails.setDeviceCount(deviceIds.size());
+            groupDetails.setDeviceOwners(deviceOwners);
+            groupDetails.setDeviceStatuses(deviceStatuses);
+            groupDetails.setDeviceNames(deviceNames);
+            groupDetails.setDeviceTypes(deviceTypes);
+            groupDetails.setDeviceIdentifiers(deviceIdentifiers);
+            return groupDetails;
         }
-        groupDetails.setDeviceIds(deviceIds);
-        groupDetails.setDeviceCount(deviceIds.size());
-        groupDetails.setDeviceOwners(deviceOwners);
-        groupDetails.setDeviceStatuses(deviceStatuses);
-        groupDetails.setDeviceNames(deviceNames);
-        groupDetails.setDeviceTypes(deviceTypes);
-        groupDetails.setDeviceIdentifiers(deviceIdentifiers);
-        return groupDetails;
+    } catch (SQLException e) {
+        String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
+        log.error(msg, e);
+        throw new GroupManagementDAOException(msg, e);
+    }
     }
 }
