@@ -32,6 +32,8 @@ public class GroupDetailsDTO {
     private Map<Integer, String> deviceOwners;
     private Map<Integer, String> deviceStatuses;
     private Map<Integer, String> deviceNames;
+    private Map<Integer, String> deviceTypes;
+    private Map<Integer, String> deviceIdentifiers;
 
     public int getGroupId() {
         return groupId;
@@ -111,5 +113,21 @@ public class GroupDetailsDTO {
 
     public void setDeviceNames(Map<Integer, String> deviceNames) {
         this.deviceNames = deviceNames;
+    }
+
+    public Map<Integer, String> getDeviceTypes() {
+        return deviceTypes;
+    }
+
+    public void setDeviceTypes(Map<Integer, String> deviceTypes) {
+        this.deviceTypes = deviceTypes;
+    }
+
+    public Map<Integer, String> getDeviceIdentifiers() {
+        return deviceIdentifiers;
+    }
+
+    public void setDeviceIdentifiers(Map<Integer, String> deviceIdentifiers) {
+        this.deviceIdentifiers = deviceIdentifiers;
     }
 }

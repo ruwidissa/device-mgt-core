@@ -571,7 +571,7 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         List<Integer> deviceIds = new ArrayList<>();
         int deviceCount = 0;
 
-        String sql = "SELECT e.DEVICE_ID, e.OWNER, e.STATUS AS DEVICE_STATUS, d.NAME AS DEVICE_NAME " +
+        String sql = "SELECT e.DEVICE_ID, e.OWNER, e.STATUS AS DEVICE_STATUS, d.NAME AS DEVICE_NAME, e.DEVICE_TYPE AS DEVICE_TYPE, e.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFICATION " +
                 "FROM DM_ENROLMENT e " +
                 "JOIN DM_DEVICE d ON e.DEVICE_ID = d.ID " +
                 "WHERE e.OWNER = ? AND e.TENANT_ID = ?";
@@ -600,6 +600,8 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         ownerDetails.setDeviceIds(deviceIds);
         ownerDetails.setDeviceStatus("DEVICE_STATUS");
         ownerDetails.setDeviceNames("DEVICE_NAME");
+        ownerDetails.setDeviceTypes("DEVICE_TYPE");
+        ownerDetails.setDeviceIdentifiers("DEVICE_IDENTIFICATION");
         ownerDetails.setDeviceCount(deviceCount);
         return ownerDetails;
     }
@@ -609,7 +611,7 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
             throws DeviceManagementDAOException {
         OwnerWithDeviceDTO deviceOwnerWithStatus = new OwnerWithDeviceDTO();
         Connection conn = null;
-        String sql = "SELECT e.DEVICE_ID, e.OWNER, e.STATUS AS DEVICE_STATUS, d.NAME AS DEVICE_NAME " +
+        String sql = "SELECT e.DEVICE_ID, e.OWNER, e.STATUS AS DEVICE_STATUS, d.NAME AS DEVICE_NAME, e.DEVICE_TYPE, e.DEVICE_IDENTIFICATION " +
                 "FROM DM_ENROLMENT e " +
                 "JOIN DM_DEVICE d ON e.DEVICE_ID = d.ID " +
                 "WHERE e.DEVICE_ID = ? AND e.TENANT_ID = ?";
@@ -627,6 +629,8 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
                         deviceIds.add(rs.getInt("DEVICE_ID"));
                         deviceOwnerWithStatus.setDeviceIds(deviceIds);
                         deviceOwnerWithStatus.setDeviceNames(rs.getString("DEVICE_NAME"));
+                        deviceOwnerWithStatus.setDeviceTypes(rs.getString("DEVICE_TYPE"));
+                        deviceOwnerWithStatus.setDeviceIdentifiers(rs.getString("DEVICE_IDENTIFICATION"));
                     }
                 }
             }
@@ -642,7 +646,9 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
     public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId)
             throws DeviceManagementDAOException {
         List<DeviceDetailsDTO> devices = new ArrayList<>();
-        String sql = "SELECT DEVICE_ID, OWNER, STATUS FROM DM_ENROLMENT WHERE TENANT_ID = ?";
+        String sql = "SELECT DEVICE_ID, OWNER, STATUS, DEVICE_TYPE, DEVICE_IDENTIFICATION " +
+                "FROM DM_ENROLMENT " +
+                "WHERE TENANT_ID = ?";
         Connection conn = null;
 
         try {
@@ -656,6 +662,8 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
                         device.setDeviceId(rs.getInt("DEVICE_ID"));
                         device.setOwner(rs.getString("OWNER"));
                         device.setStatus(rs.getString("STATUS"));
+                        device.setType(rs.getString("DEVICE_TYPE"));
+                        device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
                         devices.add(device);
                     }
                 }

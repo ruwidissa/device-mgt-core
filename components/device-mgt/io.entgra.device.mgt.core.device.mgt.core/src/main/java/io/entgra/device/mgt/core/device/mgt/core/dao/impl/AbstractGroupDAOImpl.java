@@ -1451,6 +1451,8 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         Map<Integer, String> deviceOwners = new HashMap<>();
         Map<Integer, String> deviceStatuses = new HashMap<>();
         Map<Integer, String> deviceNames = new HashMap<>();
+        Map<Integer, String> deviceTypes = new HashMap<>();
+        Map<Integer, String> deviceIdentifiers = new HashMap<>();
 
         String sql =
                 "SELECT " +
@@ -1459,6 +1461,8 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                         "    g.OWNER AS GROUP_OWNER, " +
                         "    e.OWNER AS DEVICE_OWNER, " +
                         "    e.STATUS AS DEVICE_STATUS, " +
+                        "    e.DEVICE_TYPE AS DEVICE_TYPE, " +
+                        "    e.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFICATION, " +
                         "    dgm.DEVICE_ID, " +
                         "    d.NAME AS DEVICE_NAME " +
                         "FROM " +
@@ -1492,19 +1496,23 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                         deviceOwners.put(deviceId, rs.getString("DEVICE_OWNER"));
                         deviceStatuses.put(deviceId, rs.getString("DEVICE_STATUS"));
                         deviceNames.put(deviceId, rs.getString("DEVICE_NAME"));
+                        deviceTypes.put(deviceId, rs.getString("DEVICE_TYPE"));
+                        deviceIdentifiers.put(deviceId, rs.getString("DEVICE_IDENTIFICATION"));
                     }
                 }
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
-            log.error(msg, e);
-            throw new GroupManagementDAOException(msg, e);
+            groupDetails.setDeviceIds(deviceIds);
+            groupDetails.setDeviceCount(deviceIds.size());
+            groupDetails.setDeviceOwners(deviceOwners);
+            groupDetails.setDeviceStatuses(deviceStatuses);
+            groupDetails.setDeviceNames(deviceNames);
+            groupDetails.setDeviceTypes(deviceTypes);
+            groupDetails.setDeviceIdentifiers(deviceIdentifiers);
+            return groupDetails;
         }
-        groupDetails.setDeviceIds(deviceIds);
-        groupDetails.setDeviceCount(deviceIds.size());
-        groupDetails.setDeviceOwners(deviceOwners);
-        groupDetails.setDeviceStatuses(deviceStatuses);
-        groupDetails.setDeviceNames(deviceNames);
-        return groupDetails;
+    } catch (SQLException e) {
+        String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
+        log.error(msg, e);
+        throw new GroupManagementDAOException(msg, e);
+    }
     }
 }

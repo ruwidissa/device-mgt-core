@@ -40,6 +40,8 @@ public class DeviceSubscriptionData {
     private String unsubscribedBy;
     private Timestamp unsubscribedTimestamp;
     private String deviceName;
+    private String deviceIdentifier;
+    private String type;
 
     public String getAction() {
         return action;
@@ -167,5 +169,21 @@ public class DeviceSubscriptionData {
 
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getDeviceIdentifier() {
+        return deviceIdentifier;
+    }
+
+    public void setDeviceIdentifier(String deviceIdentifier) {
+        this.deviceIdentifier = deviceIdentifier;
     }
 }
