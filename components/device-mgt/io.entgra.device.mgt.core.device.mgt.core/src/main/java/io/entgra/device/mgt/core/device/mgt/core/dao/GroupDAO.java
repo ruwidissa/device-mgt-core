@@ -23,6 +23,7 @@ import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
+import io.entgra.device.mgt.core.device.mgt.core.dto.GroupDetailsDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -466,6 +467,19 @@ public interface GroupDAO {
 
     List<Device> getGroupUnassignedDevices(PaginationRequest paginationRequest,
                                            List<String> groupNames)
+            throws GroupManagementDAOException;
+
+    /**
+     * Get group details and list of device IDs related to the group.
+     *
+     * @param groupName Group name
+     * @param tenantId Tenant ID
+     * @param offset the offset for the data set
+     * @param limit the limit for the data set
+     * @return {@link GroupDetailsDTO} which containing group details and a list of device IDs
+     * @throws GroupManagementDAOException if an error occurs while retrieving the group details and devices
+     */
+    GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int tenantId, int offset, int limit)
             throws GroupManagementDAOException;
 
 }

@@ -21,8 +21,11 @@ import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo.Status;
+import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
+import io.entgra.device.mgt.core.device.mgt.core.dto.OwnerWithDeviceDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EnrollmentDAO {
 
@@ -93,5 +96,33 @@ public interface EnrollmentDAO {
      */
     boolean addDeviceStatus(int enrolmentId, EnrolmentInfo.Status status) throws DeviceManagementDAOException;
 
+    /**
+     * Retrieves owners and the list of device IDs related to an owner.
+     *
+     * @param owner the owner whose device IDs need to be retrieved
+     * @param tenantId the ID of the tenant
+     * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user
+     * @throws DeviceManagementDAOException if an error occurs while fetching the data
+     */
+    OwnerWithDeviceDTO getOwnersWithDevices(String owner, int tenantId) throws DeviceManagementDAOException;
 
+    /**
+     * Retrieves a list of device IDs with owners and device status.
+     *
+     * @param deviceId the deviceId of the device which user need to be retrieved
+     * @param tenantId the ID of the tenant
+     * @return {@link OwnerWithDeviceDTO} which contains a list of devices
+     * @throws DeviceManagementDAOException if an error occurs while fetching the data
+     */
+    OwnerWithDeviceDTO getOwnerWithDeviceByDeviceId(int deviceId, int tenantId)
+            throws DeviceManagementDAOException;
+
+    /**
+     * Retrieves owners and the list of device IDs with device status.
+     *
+     * @param tenantId the ID of the tenant
+     * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user
+     * @throws DeviceManagementDAOException if an error occurs while fetching the data
+     */
+    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId) throws DeviceManagementDAOException;
 }

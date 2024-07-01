@@ -30,6 +30,7 @@ import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManag
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -96,6 +97,7 @@ public abstract class BaseTestCase {
         ConnectionManagerUtil.init(dataSource);
         DeviceManagementDAOFactory.init(dataSource);
         MetadataManagementDAOFactory.init(dataSource);
+        OperationManagementDAOFactory.init(dataSource);
 //        PolicyManagementDAOFactory.init(dataSource);
 //        OperationManagementDAOFactory.init(dataSource);
 //        GroupManagementDAOFactory.init(dataSource);

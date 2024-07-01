@@ -40,6 +40,7 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistEx
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import io.entgra.device.mgt.core.device.mgt.core.dto.GroupDetailsDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -1629,6 +1630,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             createGroupWithChildren(nextParentGroup, childrenGroups, requireGroupProps, tenantId, depth, counter);
         }
     }
+
     @Override
     public DeviceTypesOfGroups getDeviceTypesOfGroups(List<String> identifiers) throws GroupManagementException {
         DeviceTypesOfGroups deviceTypesOfGroups = new DeviceTypesOfGroups();
@@ -1685,4 +1687,37 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
         return deviceTypesOfGroups;
     }
+
+    @Override
+    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int offset, int limit)
+            throws GroupManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving group details and device IDs for group: " + groupName);
+        }
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        GroupDetailsDTO groupDetailsWithDevices;
+
+        try {
+            GroupManagementDAOFactory.openConnection();
+            groupDetailsWithDevices = this.groupDAO.getGroupDetailsWithDevices(groupName, tenantId, offset, limit);
+        } catch (GroupManagementDAOException | SQLException e) {
+            String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+
+        if (groupDetailsWithDevices != null) {
+            List<Integer> deviceIds = groupDetailsWithDevices.getDeviceIds();
+            if (deviceIds != null) {
+                groupDetailsWithDevices.setDeviceCount(deviceIds.size());
+            } else {
+                groupDetailsWithDevices.setDeviceCount(0);
+            }
+        }
+
+        return groupDetailsWithDevices;
+    }
+
 }

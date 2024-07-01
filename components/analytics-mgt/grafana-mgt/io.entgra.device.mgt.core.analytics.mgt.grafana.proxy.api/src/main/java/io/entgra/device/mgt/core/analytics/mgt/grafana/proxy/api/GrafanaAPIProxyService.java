@@ -94,6 +94,23 @@ public interface GrafanaAPIProxyService {
     )
     Response frontendMetrics(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo);
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/user/auth-tokens/rotate")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Rotate authentication tokens",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response rotateAuthToken(JsonObject body, @Context HttpHeaders headers, @Context UriInfo requestUriInfo);
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/dashboards/uid/{uid}")
@@ -112,6 +129,22 @@ public interface GrafanaAPIProxyService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/folders/{uid}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Grafana dashboard folder information",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response getFolders(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/annotations")
     @ApiOperation(
@@ -126,6 +159,23 @@ public interface GrafanaAPIProxyService {
             }
     )
     Response getAnnotations(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/prometheus/grafana/api/v1/rules")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Accessing Grafana Prometheus rule information",
+            tags = "Analytics",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "grafana:api:view")
+                    })
+            }
+    )
+    Response prometheusRuleInfo(@Context HttpHeaders headers, @Context UriInfo requestUriInfo) throws ClassNotFoundException;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

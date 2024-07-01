@@ -28,6 +28,7 @@ import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.windows.EnterpriseApplication;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.windows.HostedAppxApplication;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.windows.HostedMSIApplication;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.windows.WebClipApplication;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.UnknownApplicationTypeException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.ProfileOperation;
@@ -54,7 +55,6 @@ public class MDMWindowsOperationUtil {
     public static Operation createInstallAppOperation(App application) throws UnknownApplicationTypeException {
 
         ProfileOperation operation = new ProfileOperation();
-        operation.setCode(MDMAppConstants.WindowsConstants.INSTALL_ENTERPRISE_APPLICATION);
         operation.setType(Operation.Type.PROFILE);
         String appType = windowsAppType(application.getName());
         String metaData = application.getMetaData();
@@ -62,6 +62,7 @@ public class MDMWindowsOperationUtil {
 
         switch (application.getType()) {
             case ENTERPRISE:
+                operation.setCode(MDMAppConstants.WindowsConstants.INSTALL_ENTERPRISE_APPLICATION);
                 EnterpriseApplication enterpriseApplication = new EnterpriseApplication();
                 if (appType.equalsIgnoreCase(MDMAppConstants.WindowsConstants.APPX)) {
                     HostedAppxApplication hostedAppxApplication = new HostedAppxApplication();
@@ -110,6 +111,16 @@ public class MDMWindowsOperationUtil {
                     enterpriseApplication.setHostedMSIApplication(hostedMSIApplication);
                 }
                 operation.setPayLoad(enterpriseApplication.toJSON());
+                break;
+            case WEB_CLIP:
+                operation.setCode(MDMAppConstants.WindowsConstants.INSTALL_WEB_CLIP_APPLICATION);
+                WebClipApplication webClipApplication = new WebClipApplication();
+                webClipApplication.setUrl(application.getLocation());
+                webClipApplication.setName(application.getName());
+                webClipApplication.setIcon(application.getIconImage());
+                webClipApplication.setProperties(application.getProperties());
+                webClipApplication.setType(application.getType().toString());
+                operation.setPayLoad(webClipApplication.toJSON());
                 break;
             default:
                 String msg = "Application type " + application.getType() + " is not supported";
@@ -130,7 +141,6 @@ public class MDMWindowsOperationUtil {
     public static Operation createUninstallAppOperation(App application) throws UnknownApplicationTypeException {
 
         ProfileOperation operation = new ProfileOperation();
-        operation.setCode(MDMAppConstants.WindowsConstants.UNINSTALL_ENTERPRISE_APPLICATION);
         operation.setType(Operation.Type.PROFILE);
         String appType = windowsAppType(application.getName());
         String metaData = application.getMetaData();
@@ -138,6 +148,7 @@ public class MDMWindowsOperationUtil {
 
         switch (application.getType()) {
             case ENTERPRISE:
+                operation.setCode(MDMAppConstants.WindowsConstants.UNINSTALL_ENTERPRISE_APPLICATION);
                 EnterpriseApplication enterpriseApplication = new EnterpriseApplication();
                 if (appType.equalsIgnoreCase(MDMAppConstants.WindowsConstants.APPX)) {
                     HostedAppxApplication hostedAppxApplication = new HostedAppxApplication();
@@ -187,6 +198,15 @@ public class MDMWindowsOperationUtil {
                 }
                 operation.setPayLoad(enterpriseApplication.toJSON());
                 break;
+            case WEB_CLIP:
+                operation.setCode(MDMAppConstants.WindowsConstants.UNINSTALL_WEB_CLIP_APPLICATION);
+                WebClipApplication webClipApplication = new WebClipApplication();
+                webClipApplication.setUrl(application.getLocation());
+                webClipApplication.setName(application.getName());
+                webClipApplication.setIcon(application.getIconImage());
+                webClipApplication.setProperties(application.getProperties());
+                webClipApplication.setType(application.getType().toString());
+                operation.setPayLoad(webClipApplication.toJSON());
             default:
                 String msg = "Application type " + application.getType() + " is not supported";
                 log.error(msg);

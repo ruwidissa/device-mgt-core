@@ -24,17 +24,20 @@ import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityHolder;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityMapper;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.ActivityStatus;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.OperationResponse;
-import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.*;
 import io.entgra.device.mgt.core.device.mgt.core.DeviceManagementConstants;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.Operation;
 import io.entgra.device.mgt.core.device.mgt.core.dto.operation.mgt.*;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -383,6 +386,55 @@ public class OperationDAOUtil {
         }
         OperationDAOUtil.setActivityId(operation, rs.getInt("ID"));
         return operation;
+    }
+
+    /**
+     * @param blob
+     * @return
+     * @throws SQLException
+     */
+    public static JSONObject convertBlobToJsonObject(Blob blob) throws SQLException {
+        String jsonString;
+        try (InputStream inputStream = blob.getBinaryStream();
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            int bytesRead;
+            byte[] buffer = new byte[4096];
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            byte[] blobBytes = outputStream.toByteArray();
+
+            // Check if the blob data is a serialized Java object
+            if (blobBytes.length > 2 && (blobBytes[0] & 0xFF) == 0xAC && (blobBytes[1] & 0xFF) == 0xED) {
+                // Deserialize the object
+                try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(blobBytes))) {
+                    Object obj = ois.readObject();
+                    if (obj instanceof String) {
+                        jsonString = (String) obj;
+                    } else {
+                        jsonString = new JSONObject(obj).toString();
+                    }
+                } catch (ClassNotFoundException e) {
+                    String msg = "Failed to deserialize object from BLOB";
+                    log.error(msg, e);
+                    throw new SQLException(msg, e);
+                }
+            } else {
+                // If not serialized, treat it as plain JSON string
+                jsonString = new String(blobBytes, "UTF-8");
+            }
+        } catch (IOException e) {
+            String msg = "Failed to convert BLOB to JSON string";
+            log.error(msg, e);
+            throw new SQLException(msg, e);
+        }
+        // Convert JSON string to JSONObject
+        if (jsonString == null || jsonString.isEmpty()) {
+            String msg = "Converted JSON string is null or empty";
+            log.error(msg);
+            throw new SQLException(msg);
+        }
+        return new JSONObject(jsonString);
     }
 
 }

@@ -31,44 +31,94 @@ public class DeviceSubscriptionDTO {
     private String actionTriggeredFrom;
     private String status;
     private int deviceId;
+    private int appReleaseId;
+    private String appUuid;
 
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
-    public void setId(int id) { this.id = id; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getSubscribedBy() { return subscribedBy; }
+    public String getSubscribedBy() {
+        return subscribedBy;
+    }
 
-    public void setSubscribedBy(String subscribedBy) { this.subscribedBy = subscribedBy; }
+    public void setSubscribedBy(String subscribedBy) {
+        this.subscribedBy = subscribedBy;
+    }
 
-    public Timestamp getSubscribedTimestamp() { return subscribedTimestamp; }
+    public Timestamp getSubscribedTimestamp() {
+        return subscribedTimestamp;
+    }
 
     public void setSubscribedTimestamp(Timestamp subscribedTimestamp) {
         this.subscribedTimestamp = subscribedTimestamp;
     }
 
-    public boolean isUnsubscribed() { return isUnsubscribed; }
+    public boolean isUnsubscribed() {
+        return isUnsubscribed;
+    }
 
-    public void setUnsubscribed(boolean unsubscribed) { isUnsubscribed = unsubscribed; }
+    public void setUnsubscribed(boolean unsubscribed) {
+        isUnsubscribed = unsubscribed;
+    }
 
-    public String getUnsubscribedBy() { return unsubscribedBy; }
+    public String getUnsubscribedBy() {
+        return unsubscribedBy;
+    }
 
-    public void setUnsubscribedBy(String unsubscribedBy) { this.unsubscribedBy = unsubscribedBy; }
+    public void setUnsubscribedBy(String unsubscribedBy) {
+        this.unsubscribedBy = unsubscribedBy;
+    }
 
-    public Timestamp getUnsubscribedTimestamp() { return unsubscribedTimestamp; }
+    public Timestamp getUnsubscribedTimestamp() {
+        return unsubscribedTimestamp;
+    }
 
     public void setUnsubscribedTimestamp(Timestamp unsubscribedTimestamp) {
         this.unsubscribedTimestamp = unsubscribedTimestamp;
     }
 
-    public String getActionTriggeredFrom() { return actionTriggeredFrom; }
+    public String getActionTriggeredFrom() {
+        return actionTriggeredFrom;
+    }
 
-    public void setActionTriggeredFrom(String actionTriggeredFrom) { this.actionTriggeredFrom = actionTriggeredFrom; }
+    public void setActionTriggeredFrom(String actionTriggeredFrom) {
+        this.actionTriggeredFrom = actionTriggeredFrom;
+    }
 
-    public String getStatus() { return status; }
+    public String getStatus() {
+        return status;
+    }
 
-    public void setStatus(String status) { this.status = status; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public int getDeviceId() { return deviceId; }
+    public int getDeviceId() {
+        return deviceId;
+    }
 
-    public void setDeviceId(int deviceId) { this.deviceId = deviceId; }
+    public void setDeviceId(int deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public int getAppReleaseId() {
+        return appReleaseId;
+    }
+
+    public void setAppReleaseId(int appReleaseId) {
+        this.appReleaseId = appReleaseId;
+    }
+
+    public String getAppUuid() {
+        return appUuid;
+    }
+
+    public void setAppUuid(String appUuid) {
+        this.appUuid = appUuid;
+    }
 }
