@@ -22,7 +22,7 @@
     <parent>
         <artifactId>device-mgt-extensions</artifactId>
         <groupId>io.entgra.device.mgt.core</groupId>
-        <version>5.1.0</version>
+        <version>5.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
