@@ -81,6 +81,7 @@
                             com.dd.*,
                             io.entgra.device.mgt.core.identity.jwt.client.extension.*,
                             io.entgra.device.mgt.core.apimgt.application.extension.*,
+                            io.entgra.device.mgt.core.tenant.mgt.common.*,
                             org.apache.commons.httpclient,
                             org.apache.commons.httpclient.methods,
                             org.apache.commons.validator.routines
@@ -388,6 +389,10 @@
             <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.mgt</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.tenant.mgt.common</artifactId>
         </dependency>
     </dependencies>
 </project>
