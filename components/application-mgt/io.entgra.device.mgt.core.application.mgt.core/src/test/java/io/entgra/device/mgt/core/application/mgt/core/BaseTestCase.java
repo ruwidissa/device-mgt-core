@@ -37,6 +37,7 @@ import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManag
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.internal.RegistryDataHolder;
@@ -96,6 +97,7 @@ public abstract class BaseTestCase {
         ConnectionManagerUtil.init(dataSource);
         DeviceManagementDAOFactory.init(dataSource);
         MetadataManagementDAOFactory.init(dataSource);
+        OperationManagementDAOFactory.init(dataSource);
 //        PolicyManagementDAOFactory.init(dataSource);
 //        OperationManagementDAOFactory.init(dataSource);
 //        GroupManagementDAOFactory.init(dataSource);

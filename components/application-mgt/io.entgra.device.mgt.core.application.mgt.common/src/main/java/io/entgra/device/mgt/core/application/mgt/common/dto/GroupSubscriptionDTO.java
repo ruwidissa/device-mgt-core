@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 
 public class GroupSubscriptionDTO {
     private int id;
+    private String groupName;
     private String subscribedBy;
     private Timestamp subscribedTimestamp;
     private boolean isUnsubscribed;
@@ -29,6 +30,7 @@ public class GroupSubscriptionDTO {
     private Timestamp unsubscribedTimestamp;
     private String subscribedFrom;
     private int groupdId;
+    private int appReleaseId;
 
     public int getId() { return id; }
 
@@ -61,4 +63,20 @@ public class GroupSubscriptionDTO {
     public int getGroupdId() { return groupdId; }
 
     public void setGroupdId(int groupdId) { this.groupdId = groupdId; }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public int getAppReleaseId() {
+        return appReleaseId;
+    }
+
+    public void setAppReleaseId(int appReleaseId) {
+        this.appReleaseId = appReleaseId;
+    }
 }

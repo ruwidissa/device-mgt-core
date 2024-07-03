@@ -26,12 +26,22 @@ public class DeviceSubscriptionData {
 
     private int subId;
     private String action;
-    private long actionTriggeredTimestamp;
+    private Timestamp actionTriggeredTimestamp;
+    private String actionTriggeredFrom;
     private String actionTriggeredBy;
     private String actionType;
     private String status;
     private Device device;
     private String currentInstalledVersion;
+    private int deviceId;
+    private String deviceOwner;
+    private String deviceStatus;
+    private boolean unsubscribed;
+    private String unsubscribedBy;
+    private Timestamp unsubscribedTimestamp;
+    private String deviceName;
+    private String deviceIdentifier;
+    private String type;
 
     public String getAction() {
         return action;
@@ -39,14 +49,6 @@ public class DeviceSubscriptionData {
 
     public void setAction(String action) {
         this.action = action;
-    }
-
-    public long getActionTriggeredTimestamp() {
-        return actionTriggeredTimestamp;
-    }
-
-    public void setActionTriggeredTimestamp(long actionTriggeredTimestamp) {
-        this.actionTriggeredTimestamp = actionTriggeredTimestamp;
     }
 
     public String getActionTriggeredBy() {
@@ -81,9 +83,13 @@ public class DeviceSubscriptionData {
         this.device = device;
     }
 
-    public String getCurrentInstalledVersion() { return currentInstalledVersion; }
+    public String getCurrentInstalledVersion() {
+        return currentInstalledVersion;
+    }
 
-    public void setCurrentInstalledVersion(String currentInstalledVersion) { this.currentInstalledVersion = currentInstalledVersion; }
+    public void setCurrentInstalledVersion(String currentInstalledVersion) {
+        this.currentInstalledVersion = currentInstalledVersion;
+    }
 
     public int getSubId() {
         return subId;
@@ -91,5 +97,93 @@ public class DeviceSubscriptionData {
 
     public void setSubId(int subId) {
         this.subId = subId;
+    }
+
+    public int getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(int deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public String getActionTriggeredFrom() {
+        return actionTriggeredFrom;
+    }
+
+    public void setActionTriggeredFrom(String actionTriggeredFrom) {
+        this.actionTriggeredFrom = actionTriggeredFrom;
+    }
+
+    public Timestamp getActionTriggeredTimestamp() {
+        return actionTriggeredTimestamp;
+    }
+
+    public void setActionTriggeredTimestamp(Timestamp actionTriggeredTimestamp) {
+        this.actionTriggeredTimestamp = actionTriggeredTimestamp;
+    }
+
+    public String getDeviceOwner() {
+        return deviceOwner;
+    }
+
+    public void setDeviceOwner(String deviceOwner) {
+        this.deviceOwner = deviceOwner;
+    }
+
+    public String getDeviceStatus() {
+        return deviceStatus;
+    }
+
+    public void setDeviceStatus(String deviceStatus) {
+        this.deviceStatus = deviceStatus;
+    }
+
+    public boolean isUnsubscribed() {
+        return unsubscribed;
+    }
+
+    public void setUnsubscribed(boolean unsubscribed) {
+        this.unsubscribed = unsubscribed;
+    }
+
+    public String getUnsubscribedBy() {
+        return unsubscribedBy;
+    }
+
+    public void setUnsubscribedBy(String unsubscribedBy) {
+        this.unsubscribedBy = unsubscribedBy;
+    }
+
+    public Timestamp getUnsubscribedTimestamp() {
+        return unsubscribedTimestamp;
+    }
+
+    public void setUnsubscribedTimestamp(Timestamp unsubscribedTimestamp) {
+        this.unsubscribedTimestamp = unsubscribedTimestamp;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getDeviceIdentifier() {
+        return deviceIdentifier;
+    }
+
+    public void setDeviceIdentifier(String deviceIdentifier) {
+        this.deviceIdentifier = deviceIdentifier;
     }
 }
