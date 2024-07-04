@@ -157,7 +157,7 @@ public class DeviceManagementServiceImplTest {
                 .toReturn(this.deviceAccessAuthorizationService);
         Response response = this.deviceManagementService
                 .getDevices(TEST_DEVICE_NAME, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null, null, DEFAULT_STATUS_LIST, 1, null, null, false,
+                        null, null, DEFAULT_STATUS_LIST, 1, 0, null, null, false,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
     }
@@ -177,22 +177,22 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null,null, DEFAULT_STATUS_LIST, 1, null, null, false,
+                        null,null, DEFAULT_STATUS_LIST, 1, 0, null, null, false,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(TEST_DEVICE_NAME, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, null, DEFAULT_OWNERSHIP,
-                        null, null, DEFAULT_STATUS_LIST, 1, null, null, false,
+                        null, null, DEFAULT_STATUS_LIST, 1, 0, null, null, false,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(TEST_DEVICE_NAME, TEST_DEVICE_TYPE, null, null, null, DEFAULT_OWNERSHIP,
-                        null, null, DEFAULT_STATUS_LIST, 1, null, null, false,
+                        null, null, DEFAULT_STATUS_LIST, 1, 0, null, null, false,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(TEST_DEVICE_NAME, TEST_DEVICE_TYPE, null, null, null, DEFAULT_OWNERSHIP,
-                        null, null, DEFAULT_STATUS_LIST, 1, null, null, true,
+                        null, null, DEFAULT_STATUS_LIST, 1, 0, null, null, true,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
@@ -307,7 +307,7 @@ public class DeviceManagementServiceImplTest {
         Mockito.when(deviceAccessAuthorizationService.isDeviceAdminUser()).thenReturn(true);
         deviceManagementService.getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null,
                                            DEFAULT_ROLE, DEFAULT_OWNERSHIP, null,null, DEFAULT_STATUS_LIST, 1,
-                                           null, null, false, 10, 5);
+                                           0, null, null, false, 10, 5);
     }
 
     @Test(description = "Testing get devices when user is the device admin")
@@ -326,11 +326,11 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP
-                        , null, null, DEFAULT_STATUS_LIST, 1, null, null, false, 10, 5);
+                        , null, null, DEFAULT_STATUS_LIST, 1, 0, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, null, DEFAULT_USERNAME, DEFAULT_ROLE, DEFAULT_OWNERSHIP
-                        , null, null, DEFAULT_STATUS_LIST, 1, null, null, false, 10, 5);
+                        , null, null, DEFAULT_STATUS_LIST, 1, 0, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
@@ -352,7 +352,7 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, "newuser", null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null, null, DEFAULT_STATUS_LIST, 0, null, null, false,
+                        null, null, DEFAULT_STATUS_LIST, 0, 0, null, null, false,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.UNAUTHORIZED.getStatusCode());
         Mockito.reset(this.deviceAccessAuthorizationService);
@@ -374,17 +374,17 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null, null, DEFAULT_STATUS_LIST, 0, null, ifModifiedSince, false,
+                        null, null, DEFAULT_STATUS_LIST, 0, 0, null, ifModifiedSince, false,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_MODIFIED.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null, null, DEFAULT_STATUS_LIST, 0, null, ifModifiedSince, true,
+                        null, null, DEFAULT_STATUS_LIST, 0, 0, null, ifModifiedSince, true,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_MODIFIED.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null, null, DEFAULT_STATUS_LIST, 0, null, "ErrorModifiedSince",
+                        null, null, DEFAULT_STATUS_LIST, 0, 0, null, "ErrorModifiedSince",
                         false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
     }
@@ -405,17 +405,17 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null, null,DEFAULT_STATUS_LIST, 0, since, null, false,
+                        null, null,DEFAULT_STATUS_LIST, 0, 0, since, null, false,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null, null,DEFAULT_STATUS_LIST, 0, since, null, true,
+                        null, null,DEFAULT_STATUS_LIST, 0, 0, since, null, true,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null, null,DEFAULT_STATUS_LIST, 0, "ErrorSince", null, false,
+                        null, null,DEFAULT_STATUS_LIST, 0, 0, "ErrorSince", null, false,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
     }
@@ -438,7 +438,7 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null, null, DEFAULT_STATUS_LIST, 1, null, null, false,
+                        null, null, DEFAULT_STATUS_LIST, 1, 0, null, null, false,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         Mockito.reset(this.deviceManagementProviderService);
@@ -461,7 +461,7 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        null, null, DEFAULT_STATUS_LIST, 1, null, null, false,
+                        null, null, DEFAULT_STATUS_LIST, 1, 0, null, null, false,
                         10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         Mockito.reset(this.deviceAccessAuthorizationService);
