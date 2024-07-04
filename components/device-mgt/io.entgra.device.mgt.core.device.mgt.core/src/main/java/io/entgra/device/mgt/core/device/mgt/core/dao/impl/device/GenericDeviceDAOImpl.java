@@ -724,7 +724,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             }
             //Add the query for owner
             if (owner != null && !owner.isEmpty()) {
-                sql = sql + " AND e.OWNER = ?";
+                sql = sql + " AND e.OWNER LIKE ?";
                 isOwnerProvided = true;
             } else if (ownerPattern != null && !ownerPattern.isEmpty()) {
                 sql = sql + " AND e.OWNER LIKE ?";
@@ -776,7 +776,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     stmt.setString(paramIdx++, ownership);
                 }
                 if (isOwnerProvided) {
-                    stmt.setString(paramIdx++, owner);
+                    stmt.setString(paramIdx++, "%" + owner + "%");
                 } else if (isOwnerPatternProvided) {
                     stmt.setString(paramIdx++, ownerPattern + "%");
                 }
@@ -1684,6 +1684,174 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
         } catch (SQLException e) {
             String msg = "SQL error occurred while updating device status properties.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<Device> searchDevicesNotInGroup(PaginationRequest request, int tenantId) throws DeviceManagementDAOException {
+        List<Device> devices = null;
+        int groupId = request.getGroupId();
+        String deviceType = request.getDeviceType();
+        boolean isDeviceTypeProvided = false;
+        String deviceName = request.getDeviceName();
+        boolean isDeviceNameProvided = false;
+        String owner = request.getOwner();
+        boolean isOwnerProvided = false;
+        String ownerPattern = request.getOwnerPattern();
+        boolean isOwnerPatternProvided = false;
+        String ownership = request.getOwnership();
+        boolean isOwnershipProvided = false;
+        List<String> statusList = request.getStatusList();
+        boolean isStatusProvided = false;
+        Date since = request.getSince();
+        boolean isSinceProvided = false;
+        String serial = request.getSerialNumber();
+        boolean isSerialProvided = false;
+
+        try {
+            Connection conn = getConnection();
+            String sql = "SELECT d1.DEVICE_ID, " +
+                    "d1.DESCRIPTION, " +
+                    "d1.NAME AS DEVICE_NAME, " +
+                    "e.DEVICE_TYPE, " +
+                    "d1.DEVICE_IDENTIFICATION, " +
+                    "d1.LAST_UPDATED_TIMESTAMP, " +
+                    "e.OWNER, " +
+                    "e.OWNERSHIP, " +
+                    "e.STATUS, " +
+                    "e.IS_TRANSFERRED, " +
+                    "e.DATE_OF_LAST_UPDATE, " +
+                    "e.DATE_OF_ENROLMENT, " +
+                    "e.ID AS ENROLMENT_ID " +
+                    "FROM DM_ENROLMENT e, " +
+                    "(SELECT gd.DEVICE_ID, " +
+                    "gd.DESCRIPTION, " +
+                    "gd.NAME, " +
+                    "gd.DEVICE_IDENTIFICATION, " +
+                    "gd.LAST_UPDATED_TIMESTAMP " +
+                    "FROM " +
+                    "(SELECT d.ID AS DEVICE_ID, " +
+                    "d.DESCRIPTION,  " +
+                    "d.NAME, " +
+                    "d.DEVICE_IDENTIFICATION, " +
+                    "d.LAST_UPDATED_TIMESTAMP " +
+                    "FROM DM_DEVICE d " +
+                    "WHERE d.ID NOT IN " +
+                    "(SELECT dgm.DEVICE_ID " +
+                    "FROM DM_DEVICE_GROUP_MAP dgm " +
+                    "WHERE  dgm.GROUP_ID = ?) " +
+                    "AND d.TENANT_ID = ?";
+
+            if (deviceName != null && !deviceName.isEmpty()) {
+                sql = sql + " AND d.NAME LIKE ?";
+                isDeviceNameProvided = true;
+            }
+            sql = sql + ") gd";
+            sql = sql + " WHERE 1 = 1";
+
+            if (since != null) {
+                sql = sql + " AND gd.LAST_UPDATED_TIMESTAMP > ?";
+                isSinceProvided = true;
+            }
+            sql = sql + " ) d1 WHERE d1.DEVICE_ID = e.DEVICE_ID AND e.TENANT_ID = ? ";
+
+            if (deviceType != null && !deviceType.isEmpty()) {
+                sql = sql + " AND e.DEVICE_TYPE = ?";
+                isDeviceTypeProvided = true;
+            }
+
+            if (ownership != null && !ownership.isEmpty()) {
+                sql = sql + " AND e.OWNERSHIP = ?";
+                isOwnershipProvided = true;
+            }
+
+            if (owner != null && !owner.isEmpty()) {
+                sql = sql + " AND e.OWNER LIKE ?";
+                isOwnerProvided = true;
+            } else if (ownerPattern != null && !ownerPattern.isEmpty()) {
+                sql = sql + " AND e.OWNER LIKE ?";
+                isOwnerPatternProvided = true;
+            }
+            if (statusList != null && !statusList.isEmpty()) {
+                sql += buildStatusQuery(statusList);
+                isStatusProvided = true;
+            }
+
+            if (serial != null || !request.getCustomProperty().isEmpty()) {
+                if (serial != null) {
+                    sql += "AND EXISTS (" +
+                            "SELECT VALUE_FIELD " +
+                            "FROM DM_DEVICE_INFO di " +
+                            "WHERE di.DEVICE_ID = d1.DEVICE_ID " +
+                            "AND di.KEY_FIELD = 'serial' " +
+                            "AND di.VALUE_FIELD LIKE ?) ";
+                    isSerialProvided = true;
+                }
+                if (!request.getCustomProperty().isEmpty()) {
+                    for (Map.Entry<String, String> entry : request.getCustomProperty().entrySet()) {
+                        sql += "AND EXISTS (" +
+                                "SELECT VALUE_FIELD " +
+                                "FROM DM_DEVICE_INFO di2 " +
+                                "WHERE di2.DEVICE_ID = d1.DEVICE_ID " +
+                                "AND di2.KEY_FIELD = '" + entry.getKey() + "' " +
+                                "AND di2.VALUE_FIELD LIKE ?)";
+                    }
+                }
+            }
+            sql = sql + " LIMIT ? OFFSET ?";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIdx = 1;
+                stmt.setInt(paramIdx++, groupId);
+                stmt.setInt(paramIdx++, tenantId);
+                if (isDeviceNameProvided) {
+                    stmt.setString(paramIdx++, "%" + deviceName + "%");
+                }
+                if (isSinceProvided) {
+                    stmt.setTimestamp(paramIdx++, new Timestamp(since.getTime()));
+                }
+                stmt.setInt(paramIdx++, tenantId);
+                if (isDeviceTypeProvided) {
+                    stmt.setString(paramIdx++, deviceType);
+                }
+                if (isOwnershipProvided) {
+                    stmt.setString(paramIdx++, ownership);
+                }
+                if (isOwnerProvided) {
+                    stmt.setString(paramIdx++, "%" + owner + "%");
+                } else if (isOwnerPatternProvided) {
+                    stmt.setString(paramIdx++, "%" + ownerPattern + "%");
+                }
+                if (isStatusProvided) {
+                    for (String status : statusList) {
+                        stmt.setString(paramIdx++, status);
+                    }
+                }
+                if (isSerialProvided) {
+                    stmt.setString(paramIdx++, "%" + serial + "%");
+                }
+                if (!request.getCustomProperty().isEmpty()) {
+                    for (Map.Entry<String, String> entry : request.getCustomProperty().entrySet()) {
+                        stmt.setString(paramIdx++, "%" + entry.getValue() + "%");
+                    }
+                }
+                stmt.setInt(paramIdx++, request.getRowCount());
+                stmt.setInt(paramIdx, request.getStartIndex());
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    devices = new ArrayList<>();
+                    while (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        devices.add(device);
+                    }
+                    return devices;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of" +
+                    " devices not belonging to group : " + groupId;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
