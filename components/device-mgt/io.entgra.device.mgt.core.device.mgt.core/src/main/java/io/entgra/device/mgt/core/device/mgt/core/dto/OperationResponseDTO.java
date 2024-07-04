@@ -16,17 +16,28 @@
  * under the License.
  */
 
-package io.entgra.device.mgt.core.application.mgt.common.dto;
+package io.entgra.device.mgt.core.device.mgt.core.dto;
 
 import java.sql.Timestamp;
 
-public class UserSubscriptionDTO {
-    private int id;
-    private String subscribedBy;
-    private Timestamp subscribedTimestamp;
-    private boolean isUnsubscribed;
-    private String unsubscribedBy;
-    private Timestamp unsubscribedTimestamp;
-    private String subscribedFrom;
-    private String userName;
+public class OperationResponseDTO {
+    private String operationResponse;
+    private Timestamp responseTimeStamp;
+
+    public String getOperationResponse() {
+        return operationResponse;
+    }
+
+    public void setOperationResponse(String operationResponse) {
+        this.operationResponse = operationResponse;
+    }
+
+    public Timestamp getResponseTimeStamp() {
+        return responseTimeStamp;
+    }
+
+    public void setResponseTimeStamp(Timestamp responseTimeStamp) {
+        this.responseTimeStamp = responseTimeStamp;
+    }
 }
+

@@ -18,51 +18,115 @@
 
 package io.entgra.device.mgt.core.application.mgt.common.dto;
 
+import io.entgra.device.mgt.core.application.mgt.common.CategorizedSubscriptionResult;
+
 import java.sql.Timestamp;
+import java.util.Map;
 
 public class RoleSubscriptionDTO {
-    private int id;
     private String subscribedBy;
     private Timestamp subscribedTimestamp;
     private boolean isUnsubscribed;
+    private boolean unsubscribed;
     private String unsubscribedBy;
     private Timestamp unsubscribedTimestamp;
     private String subscribedFrom;
     private String roleName;
+    private int appReleaseId;
+    private int deviceCount;
+    private Map<String, Double> statusPercentages;
+    private CategorizedSubscriptionResult devices;
 
-    public int getId() { return id; }
+    public String getSubscribedBy() {
+        return subscribedBy;
+    }
 
-    public void setId(int id) { this.id = id; }
+    public void setSubscribedBy(String subscribedBy) {
+        this.subscribedBy = subscribedBy;
+    }
 
-    public String getSubscribedBy() { return subscribedBy; }
-
-    public void setSubscribedBy(String subscribedBy) { this.subscribedBy = subscribedBy; }
-
-    public Timestamp getSubscribedTimestamp() { return subscribedTimestamp; }
+    public Timestamp getSubscribedTimestamp() {
+        return subscribedTimestamp;
+    }
 
     public void setSubscribedTimestamp(Timestamp subscribedTimestamp) {
         this.subscribedTimestamp = subscribedTimestamp;
     }
 
-    public boolean isUnsubscribed() { return isUnsubscribed; }
+    public boolean getUnsubscribed() {
+        return unsubscribed;
+    }
 
-    public void setUnsubscribed(boolean unsubscribed) { isUnsubscribed = unsubscribed; }
+    public void setUnsubscribed(boolean unsubscribed) {
+        this.unsubscribed = unsubscribed;
+    }
 
-    public String getUnsubscribedBy() { return unsubscribedBy; }
+    public boolean isUnsubscribed() {
+        return isUnsubscribed;
+    }
 
-    public void setUnsubscribedBy(String unsubscribedBy) { this.unsubscribedBy = unsubscribedBy; }
+    public String getUnsubscribedBy() {
+        return unsubscribedBy;
+    }
 
-    public Timestamp getUnsubscribedTimestamp() { return unsubscribedTimestamp; }
+    public void setUnsubscribedBy(String unsubscribedBy) {
+        this.unsubscribedBy = unsubscribedBy;
+    }
+
+    public Timestamp getUnsubscribedTimestamp() {
+        return unsubscribedTimestamp;
+    }
 
     public void setUnsubscribedTimestamp(Timestamp unsubscribedTimestamp) {
         this.unsubscribedTimestamp = unsubscribedTimestamp;
     }
 
-    public String getSubscribedFrom() { return subscribedFrom; }
+    public String getSubscribedFrom() {
+        return subscribedFrom;
+    }
 
-    public void setSubscribedFrom(String subscribedFrom) { this.subscribedFrom = subscribedFrom; }
+    public void setSubscribedFrom(String subscribedFrom) {
+        this.subscribedFrom = subscribedFrom;
+    }
 
-    public String getRoleName() { return roleName; }
+    public String getRoleName() {
+        return roleName;
+    }
 
-    public void setRoleName(String roleName) { this.roleName = roleName; }
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public int getAppReleaseId() {
+        return appReleaseId;
+    }
+
+    public void setAppReleaseId(int appReleaseId) {
+        this.appReleaseId = appReleaseId;
+    }
+
+    public int getDeviceCount() {
+        return deviceCount;
+    }
+
+    public void setDeviceCount(int deviceCount) {
+        this.deviceCount = deviceCount;
+    }
+
+    public Map<String, Double> getStatusPercentages() {
+        return statusPercentages;
+    }
+
+    public void setStatusPercentages(Map<String, Double> statusPercentages) {
+        this.statusPercentages = statusPercentages;
+    }
+
+    public CategorizedSubscriptionResult getDevices() {
+        return devices;
+    }
+
+    public void setDevices(CategorizedSubscriptionResult devices) {
+        this.devices = devices;
+    }
+
 }

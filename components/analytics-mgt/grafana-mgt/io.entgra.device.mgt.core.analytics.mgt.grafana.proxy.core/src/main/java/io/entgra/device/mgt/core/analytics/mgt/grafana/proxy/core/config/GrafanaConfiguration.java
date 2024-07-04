@@ -19,6 +19,7 @@
 package io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config;
 
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config.xml.bean.CacheConfiguration;
+import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config.xml.bean.ValidationConfig;
 import io.entgra.device.mgt.core.analytics.mgt.grafana.proxy.core.config.xml.bean.User;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -30,11 +31,21 @@ import java.util.List;
 public class GrafanaConfiguration {
 
     private User adminUser;
+    private ValidationConfig validationConfig;
     private List<CacheConfiguration> caches;
 
     @XmlElement(name = "AdminUser")
     public User getAdminUser() {
         return adminUser;
+    }
+
+    @XmlElement(name = "ValidationConfig")
+    public ValidationConfig getValidationConfig() {
+        return validationConfig;
+    }
+
+    public void setValidationConfig(ValidationConfig validationConfig) {
+        this.validationConfig = validationConfig;
     }
 
     public void setAdminUser(User user) {

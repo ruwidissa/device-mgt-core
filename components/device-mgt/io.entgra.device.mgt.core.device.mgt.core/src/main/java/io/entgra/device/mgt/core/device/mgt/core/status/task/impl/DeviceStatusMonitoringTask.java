@@ -37,10 +37,15 @@ import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.status.task.DeviceStatusTaskException;
 import io.entgra.device.mgt.core.device.mgt.core.task.impl.DynamicPartitionedScheduleTask;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This implements the Task service which monitors the device activity periodically & update the device-status if
@@ -92,33 +97,70 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
         try {
             List<EnrolmentInfo> enrolmentInfoTobeUpdated = new ArrayList<>();
             List<DeviceMonitoringData> allDevicesForMonitoring = getAllDevicesForMonitoring();
-            long timeMillis = System.currentTimeMillis();
-            for (DeviceMonitoringData monitoringData : allDevicesForMonitoring) {
-                long lastUpdatedTime = (timeMillis - monitoringData
-                        .getLastUpdatedTime()) / 1000;
-
-                EnrolmentInfo enrolmentInfo = monitoringData.getDevice().getEnrolmentInfo();
-                EnrolmentInfo.Status status = null;
-                if (lastUpdatedTime >= deviceStatusTaskPluginConfig
-                        .getIdleTimeToMarkInactive()) {
-                    status = EnrolmentInfo.Status.INACTIVE;
-                } else if (lastUpdatedTime >= deviceStatusTaskPluginConfig
-                        .getIdleTimeToMarkUnreachable()) {
-                    status = EnrolmentInfo.Status.UNREACHABLE;
+            Map<Integer, List<DeviceMonitoringData>> tenantDevicesMap = new HashMap<>();
+            List<DeviceMonitoringData> tenantMonitoringData = null;
+            //Delegate the devices in each tenant to a separate list to be updated the statuses.
+            //This improvement has been done since the tenants maintain a separate caches and the task is running
+            //in the super-tenant space. Hence, the device status updates are not reflected in the tenant caches.
+            //Refer to https://roadmap.entgra.net/issues/11386 for more information.
+            for (DeviceMonitoringData deviceMonitoringData : allDevicesForMonitoring) {
+                tenantMonitoringData = tenantDevicesMap.get(deviceMonitoringData.getTenantId());
+                if (tenantMonitoringData == null) {
+                    tenantMonitoringData = new ArrayList<>();
                 }
-
-                if (status != null) {
-                    enrolmentInfo.setStatus(status);
-                    enrolmentInfoTobeUpdated.add(enrolmentInfo);
-                    DeviceIdentifier deviceIdentifier =
-                            new DeviceIdentifier(monitoringData.getDevice()
-                                    .getDeviceIdentifier(), deviceType);
-                    monitoringData.getDevice().setEnrolmentInfo(enrolmentInfo);
-                    DeviceCacheManagerImpl.getInstance().addDeviceToCache(deviceIdentifier,
-                            monitoringData.getDevice(), monitoringData.getTenantId());
-                }
+                tenantMonitoringData.add(deviceMonitoringData);
+                tenantDevicesMap.put(deviceMonitoringData.getTenantId(), tenantMonitoringData);
             }
 
+            List<DeviceMonitoringData> monitoringDevices = null;
+            long timeMillis = System.currentTimeMillis();
+            //Retrieving the devices belongs for each tenants and updating the status of the devices.
+            for (Map.Entry<Integer, List<DeviceMonitoringData>> entry : tenantDevicesMap.entrySet()) {
+                Integer tenantId = entry.getKey();
+                RealmService realmService = DeviceManagementDataHolder.getInstance().getRealmService();
+                if (realmService != null) {
+                    String domain = realmService.getTenantManager().getDomain(tenantId);
+                    if (domain != null) {
+                        try {
+                            PrivilegedCarbonContext.startTenantFlow();
+                            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(domain, true);
+                            monitoringDevices = entry.getValue();
+                            for (DeviceMonitoringData monitoringData : monitoringDevices) {
+                                long lastUpdatedTime = (timeMillis - monitoringData
+                                        .getLastUpdatedTime()) / 1000;
+
+                                EnrolmentInfo enrolmentInfo = monitoringData.getDevice().getEnrolmentInfo();
+                                EnrolmentInfo.Status status = null;
+                                if (lastUpdatedTime >= deviceStatusTaskPluginConfig
+                                        .getIdleTimeToMarkInactive()) {
+                                    status = EnrolmentInfo.Status.INACTIVE;
+                                } else if (lastUpdatedTime >= deviceStatusTaskPluginConfig
+                                        .getIdleTimeToMarkUnreachable()) {
+                                    status = EnrolmentInfo.Status.UNREACHABLE;
+                                }
+
+                                if (status != null) {
+                                    enrolmentInfo.setStatus(status);
+                                    enrolmentInfoTobeUpdated.add(enrolmentInfo);
+                                    DeviceIdentifier deviceIdentifier =
+                                            new DeviceIdentifier(monitoringData.getDevice()
+                                                    .getDeviceIdentifier(), deviceType);
+                                    monitoringData.getDevice().setEnrolmentInfo(enrolmentInfo);
+                                    DeviceCacheManagerImpl.getInstance().addDeviceToCache(deviceIdentifier,
+                                            monitoringData.getDevice(), monitoringData.getTenantId());
+                                }
+                            }
+                        } finally {
+                            PrivilegedCarbonContext.endTenantFlow();
+                        }
+                    } else {
+                        log.error("Failed while running the device status update task. Failed while " +
+                                "extracting tenant domain of the tenant id : " + tenantId);
+                    }
+                } else {
+                    log.error("Failed while running the device status update task. RealmService is not initiated");
+                }
+            }
             if (!enrolmentInfoTobeUpdated.isEmpty()) {
                 try {
                     this.updateDeviceStatus(enrolmentInfoTobeUpdated);
@@ -127,10 +169,11 @@ public class DeviceStatusMonitoringTask extends DynamicPartitionedScheduleTask {
                             "device-status of devices of type '" + deviceType + "'", e);
                 }
             }
-
-
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving devices list for monitoring.";
+            log.error(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while retrieving RealmService instance for updating device status.";
             log.error(msg, e);
         }
     }

@@ -161,6 +161,13 @@ import java.util.Map;
                         permissions = {"/device-mgt/devices/change-status"}
                 ),
                 @Scope(
+                        name = "Update status of a given operation",
+                        description = "Updates the status of a given operation of a given device",
+                        key = "dm:devices:ops:status:update",
+                        roles = {"Internal/devicemgt-user"},
+                        permissions = {"/device-mgt/devices/operations/status-update"}
+                ),
+                @Scope(
                         name = "Enroll Device",
                         description = "Register a device",
                         key = "dm:device:enroll",
@@ -298,6 +305,12 @@ public interface DeviceManagementService {
                     required = false)
             @QueryParam("groupId")
                     int groupId,
+            @ApiParam(
+                    name = "excludeGroupId",
+                    value = "Id of the group that needs to get the devices that are not belong.",
+                    required = false)
+            @QueryParam("excludeGroupId")
+                    int excludeGroupId,
             @ApiParam(
                     name = "since",
                     value = "Checks if the requested variant was created since the specified date-time.\n" +
@@ -2709,12 +2722,12 @@ public interface DeviceManagementService {
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
-            value = "Update status of a given opeation",
+            value = "Update status of a given operation",
             notes = "Updates the status of a given operation of a given device in Entgra IoT Server.",
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:ops:view")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "dm:devices:ops:status:update")
                     })
             }
     )

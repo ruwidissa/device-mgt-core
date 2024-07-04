@@ -22,6 +22,7 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementEx
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
+import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
@@ -126,6 +127,7 @@ public class BaseExtensionsTest {
                 readDataSourceConfig(datasourceLocation + DATASOURCE_EXT));
         DeviceManagementDAOFactory.init(dataSource);
         MetadataManagementDAOFactory.init(dataSource);
+        OperationManagementDAOFactory.init(dataSource);
     }
 
     protected DataSourceConfig readDataSourceConfig(String configLocation) throws DeviceManagementException {

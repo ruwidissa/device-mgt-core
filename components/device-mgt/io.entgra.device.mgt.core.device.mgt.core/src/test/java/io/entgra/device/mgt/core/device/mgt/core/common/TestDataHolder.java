@@ -19,6 +19,7 @@ package io.entgra.device.mgt.core.device.mgt.core.common;
 
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
+import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.notification.mgt.Notification;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.Calendar;
 
 public class TestDataHolder {
 
@@ -35,10 +37,17 @@ public class TestDataHolder {
     public final static Integer SUPER_TENANT_ID = -1234;
     public final static String SUPER_TENANT_DOMAIN = "carbon.super";
     public final static String initialDeviceIdentifier = "12345";
+    public final static String initialDeviceName = "TEST-DEVICE";
     public final static String OWNER = "admin";
     public static final String OPERATION_CONFIG = "TEST-OPERATION-";
     public static Device initialTestDevice;
     public static DeviceType initialTestDeviceType;
+
+    public static Date getTimeBefore(int minutes) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, -minutes);
+        return calendar.getTime();
+    }
 
     public static Device generateDummyDeviceData(String deviceType) {
         Device device = new Device();
@@ -135,6 +144,15 @@ public class TestDataHolder {
         device.setType(deviceIdentifier.getType());
         device.setName(deviceIdentifier.getType() + "-" + deviceIdentifier.getId());
         return device;
+    }
+
+    public static DeviceData generateDummyDevice(DeviceIdentifier deviceIdentifier) {
+        DeviceData deviceData = new DeviceData();
+        deviceData.setDeviceIdentifier(deviceIdentifier);
+        deviceData.setDeviceOwner(OWNER);
+        deviceData.setDeviceOwnership(EnrolmentInfo.OwnerShip.BYOD.toString());
+        deviceData.setLastModifiedDate(getTimeBefore(1));
+        return deviceData;
     }
 
     public static DeviceType generateDeviceTypeData(String devTypeName) {
