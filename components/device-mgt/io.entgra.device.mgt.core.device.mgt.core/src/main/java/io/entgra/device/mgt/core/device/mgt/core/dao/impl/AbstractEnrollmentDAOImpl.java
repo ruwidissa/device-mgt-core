@@ -585,6 +585,8 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
                     while (rs.next()) {
                         if (ownerDetails.getUserName() == null) {
                             ownerDetails.setUserName(rs.getString("OWNER"));
+                            ownerDetails.setDeviceStatus(rs.getString("DEVICE_STATUS"));
+                            ownerDetails.setDeviceNames(rs.getString("DEVICE_NAME"));
                         }
                         deviceIds.add(rs.getInt("DEVICE_ID"));
                         deviceCount++;
@@ -598,8 +600,6 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         }
 
         ownerDetails.setDeviceIds(deviceIds);
-        ownerDetails.setDeviceStatus("DEVICE_STATUS");
-        ownerDetails.setDeviceNames("DEVICE_NAME");
         ownerDetails.setDeviceTypes("DEVICE_TYPE");
         ownerDetails.setDeviceIdentifiers("DEVICE_IDENTIFICATION");
         ownerDetails.setDeviceCount(deviceCount);
