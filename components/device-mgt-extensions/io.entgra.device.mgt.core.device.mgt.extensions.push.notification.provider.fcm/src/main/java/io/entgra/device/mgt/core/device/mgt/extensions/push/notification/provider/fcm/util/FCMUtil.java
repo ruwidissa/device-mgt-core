@@ -57,12 +57,17 @@ public class FCMUtil {
                         fromStream(Files.newInputStream(serviceAccountPath)).
                         createScoped(FCM_SCOPES);
             } catch (IOException e) {
-                log.error("Fail to initialize default OAuth application for FCM communication");
-                throw new IllegalStateException(e);
+                String msg = "Fail to initialize default OAuth application for FCM communication";
+                log.error(msg);
+                throw new IllegalStateException(msg, e);
             }
         }
     }
 
+    /**
+     * Initialize the context metadata properties from the cdm-config.xml. This file includes the fcm server URL
+     * to be invoked when sending the wakeup call to the device.
+     */
     private void initContextConfigs() {
         PushNotificationConfiguration pushNotificationConfiguration = DeviceConfigurationManager.getInstance().
                 getDeviceManagementConfig().getPushNotificationConfiguration();
