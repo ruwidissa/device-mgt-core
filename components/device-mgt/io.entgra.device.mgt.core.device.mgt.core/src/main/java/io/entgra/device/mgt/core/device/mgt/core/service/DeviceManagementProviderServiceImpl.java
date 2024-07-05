@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.device.mgt.core.service;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.ConflictException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.dao.TenantDAO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
@@ -3917,6 +3918,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         DeviceCacheManagerImpl.getInstance().removeDeviceFromCache(deviceIdentifier, this.getTenantId());
     }
 
+    private void updateDeviceInCache(DeviceIdentifier deviceIdentifier, Device device) {
+        DeviceCacheManagerImpl.getInstance().updateDeviceInCache(deviceIdentifier, device, this.getTenantId());
+    }
+
     /***
      * This method removes a given list of devices from the cache
      * @param deviceList list of DeviceCacheKey objects
@@ -5502,5 +5507,53 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         paginationResult.setRecordsFiltered(count);
         paginationResult.setRecordsTotal(count);
         return paginationResult;
+    }
+
+    @Override
+    public Device updateDeviceName(Device device, String deviceType, String deviceId)
+            throws DeviceManagementException, DeviceNotFoundException, ConflictException {
+        Device persistedDevice = this.getDevice(new DeviceIdentifier(deviceId, deviceType), true);
+        if (persistedDevice == null) {
+            String msg = "Device not found for the given deviceId and deviceType";
+            log.error(msg);
+            throw new DeviceNotFoundException(msg);
+        }
+        if (persistedDevice.getName().equals(device.getName())) {
+            String msg = "Device names are the same.";
+            log.info(msg);
+            throw new ConflictException(msg);
+        }
+        persistedDevice.setName(device.getName());
+        if (log.isDebugEnabled()) {
+            log.debug("Rename Device name of: " + persistedDevice.getId() + " of type '" + persistedDevice.getType() + "'");
+        }
+        DeviceManager deviceManager = this.getDeviceManager(persistedDevice.getType());
+        if (deviceManager == null) {
+            String msg = "Device Manager associated with the device type '" + persistedDevice.getType() + "' is null. " +
+                    "Therefore, not attempting method 'modifyEnrolment'";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        DeviceIdentifier deviceIdentifier = new DeviceIdentifier(persistedDevice.getDeviceIdentifier(), persistedDevice.getType());
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            int tenantId = this.getTenantId();
+            deviceDAO.updateDevice(persistedDevice, tenantId);
+            DeviceManagementDAOFactory.commitTransaction();
+            this.updateDeviceInCache(deviceIdentifier, persistedDevice);
+            return persistedDevice;
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while renaming the device '" + persistedDevice.getId() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while initiating transaction to rename device: " + persistedDevice.getId();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
     }
 }

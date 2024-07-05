@@ -557,22 +557,49 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     @Path("/type/{deviceType}/id/{deviceId}/rename")
     public Response renameDevice(Device device, @PathParam("deviceType") String deviceType,
                                  @PathParam("deviceId") String deviceId) {
+        if (device == null) {
+            String msg = "Required values are not set to rename device";
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+        if (StringUtils.isEmpty(device.getName())) {
+            String msg = "Device name is not set to rename device";
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
         DeviceManagementProviderService deviceManagementProviderService = DeviceMgtAPIUtils.getDeviceManagementService();
         try {
-            Device persistedDevice = deviceManagementProviderService.getDevice(new DeviceIdentifier
-                    (deviceId, deviceType), true);
-            persistedDevice.setName(device.getName());
-            System.out.println("This is rename device");
-            boolean responseOfmodifyEnrollment = deviceManagementProviderService.modifyEnrollment(persistedDevice);
-            boolean responseOfDeviceNameChanged = deviceManagementProviderService.sendDeviceNameChangedNotification(
-                    persistedDevice);
-            boolean response = responseOfmodifyEnrollment && responseOfDeviceNameChanged;
-
-            return Response.status(Response.Status.CREATED).entity(response).build();
-        } catch (DeviceManagementException e) {
-            String msg = "Error encountered while updating requested device of type : " + deviceType ;
+            Device updatedDevice = deviceManagementProviderService.updateDeviceName(device, deviceType, deviceId);
+            if (updatedDevice != null) {
+                boolean notificationResponse = deviceManagementProviderService.sendDeviceNameChangedNotification(updatedDevice);
+                if (notificationResponse) {
+                    return Response.status(Response.Status.CREATED).entity(updatedDevice).build();
+                } else {
+                    String msg = "Device updated successfully, but failed to send notification.";
+                    log.warn(msg);
+                    return Response.status(Response.Status.CREATED).entity(updatedDevice).header("Warning", msg).build();
+                }
+            } else {
+                String msg = "Device update failed for device of type : " + deviceType;
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
+        } catch (BadRequestException e) {
+            String msg = "Bad request: " + e.getMessage();
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (DeviceNotFoundException e) {
+            String msg = "Device not found: " + e.getMessage();
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error encountered while updating requested device of type : " + deviceType;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (ConflictException e) {
+            String msg = "Conflict encountered while updating requested device of type : " + deviceType;
+            log.error(msg, e);
+            return Response.status(Response.Status.CONFLICT).entity(msg).build();
         }
     }
 
