@@ -17,11 +17,7 @@
  */
 package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.gson.JsonObject;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
-import io.entgra.device.mgt.core.device.mgt.core.config.push.notification.ContextMetadata;
-import io.entgra.device.mgt.core.device.mgt.core.config.push.notification.PushNotificationConfiguration;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.util.FCMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,18 +28,12 @@ import io.entgra.device.mgt.core.device.mgt.common.push.notification.Notificatio
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationConfig;
 import io.entgra.device.mgt.core.device.mgt.common.push.notification.PushNotificationExecutionFailedException;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.internal.FCMDataHolder;
-import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Properties;
 
 public class FCMNotificationStrategy implements NotificationStrategy {
 
@@ -90,13 +80,19 @@ public class FCMNotificationStrategy implements NotificationStrategy {
     }
 
 
-
+    /**
+     * Send FCM message to the FCM server to initiate the push notification
+     * @param accessToken Access token to authenticate with the FCM server
+     * @param registrationId Registration ID of the device
+     * @throws IOException If an error occurs while sending the request
+     * @throws PushNotificationExecutionFailedException If an error occurs while sending the push notification
+     */
     private void sendWakeUpCall(String accessToken, String registrationId) throws IOException,
             PushNotificationExecutionFailedException {
-        OutputStream os = null;
         HttpURLConnection conn = null;
 
-        String fcmServerEndpoint = FCMUtil.getInstance().getContextMetadataProperties().getProperty(FCM_ENDPOINT_KEY);
+        String fcmServerEndpoint = FCMUtil.getInstance().getContextMetadataProperties()
+                .getProperty(FCM_ENDPOINT_KEY);
         if(fcmServerEndpoint == null) {
             String msg = "Encountered configuration issue. " + FCM_ENDPOINT_KEY + " is not defined";
             log.error(msg);
@@ -112,23 +108,26 @@ public class FCMNotificationStrategy implements NotificationStrategy {
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
 
-            os = conn.getOutputStream();
-            os.write(bytes);
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(bytes);
+            }
 
             int status = conn.getResponseCode();
             if (status != 200) {
                 log.error("Response Status: " + status + ", Response Message: " + conn.getResponseMessage());
             }
         } finally {
-            if (os != null) {
-                os.close();
-            }
             if (conn != null) {
                 conn.disconnect();
             }
         }
     }
 
+    /**
+     * Get the FCM request as a JSON string
+     * @param registrationId Registration ID of the device
+     * @return FCM request as a JSON string
+     */
     private static String getFCMRequest(String registrationId) {
         JsonObject messageObject = new JsonObject();
         messageObject.addProperty("token", registrationId);

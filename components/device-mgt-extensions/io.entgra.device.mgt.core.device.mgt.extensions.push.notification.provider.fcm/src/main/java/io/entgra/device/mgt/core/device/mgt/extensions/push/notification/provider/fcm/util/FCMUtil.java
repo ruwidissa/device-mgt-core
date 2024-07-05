@@ -76,6 +76,12 @@ public class FCMUtil {
         contextMetadataProperties = properties;
     }
 
+    /**
+     * Get the instance of FCMUtil. FCMUtil is a singleton class which should not be
+     * instantiating more than once. Instantiating the class requires to read the service account file from
+     * the filesystem and instantiation of the GoogleCredentials object which are costly operations.
+     * @return FCMUtil instance
+     */
     public static FCMUtil getInstance() {
         if (instance == null) {
             synchronized (FCMUtil.class) {
