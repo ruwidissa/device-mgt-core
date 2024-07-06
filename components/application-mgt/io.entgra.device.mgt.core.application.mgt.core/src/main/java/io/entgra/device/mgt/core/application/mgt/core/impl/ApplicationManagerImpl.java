@@ -769,6 +769,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             return Constants.GOOGLE_PLAY_STORE_URL;
         } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
             return Constants.APPLE_STORE_URL;
+        } else if (DeviceTypes.WINDOWS.toString().equalsIgnoreCase(deviceType)) {
+            return Constants.MICROSOFT_STORE_URL;
         } else {
             throw new IllegalArgumentException("No such device with the name " + deviceType);
         }
