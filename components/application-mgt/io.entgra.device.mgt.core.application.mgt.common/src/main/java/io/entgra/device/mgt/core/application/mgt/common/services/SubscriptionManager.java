@@ -293,12 +293,10 @@ public interface SubscriptionManager {
      *
      * @param deviceId the deviceId of the device that need to get operation details.
      * @param uuid the UUID of the application release.
-     * @param offset the offset for the data set
-     * @param limit the limit for the data set
      * @return {@link DeviceOperationDTO} which contains the details of device subscriptions.
      * @throws SubscriptionManagementException if there is an error while fetching the details.
      */
-    List<DeviceOperationDTO> getSubscriptionOperationsByUUIDAndDeviceID(int deviceId, String uuid, int offset, int limit)
+    List<DeviceOperationDTO> getSubscriptionOperationsByUUIDAndDeviceID(int deviceId, String uuid)
             throws ApplicationManagementException;
 
     /**
