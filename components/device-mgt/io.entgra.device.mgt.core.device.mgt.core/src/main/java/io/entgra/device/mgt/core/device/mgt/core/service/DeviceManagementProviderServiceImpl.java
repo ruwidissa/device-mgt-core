@@ -5358,9 +5358,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         OwnerWithDeviceDTO ownerWithDeviceDTO;
 
+        List<String> allowingDeviceStatuses = new ArrayList<>();
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
+
         try {
             DeviceManagementDAOFactory.openConnection();
-            ownerWithDeviceDTO = this.enrollmentDAO.getOwnersWithDevices(owner, tenantId);
+            ownerWithDeviceDTO = this.enrollmentDAO.getOwnersWithDevices(owner, allowingDeviceStatuses, tenantId);
             if (ownerWithDeviceDTO == null) {
                 String msg = "No data found for owner: " + owner;
                 log.error(msg);
