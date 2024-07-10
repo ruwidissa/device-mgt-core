@@ -378,12 +378,10 @@ public interface SubscriptionDAO {
      * @param appReleaseId the appReleaseId of the application release.
      * @param deviceId the deviceId of the device that need to get operation details.
      * @param tenantId id of the current tenant.
-     * @param offset the offset for the data set
-     * @param limit the limit for the data set
      * @return {@link DeviceOperationDTO} which contains the details of device subscriptions.
      * @throws ApplicationManagementDAOException if connection establishment or SQL execution fails.
      */
-    List<DeviceOperationDTO> getSubscriptionOperationsByAppReleaseIDAndDeviceID(int appReleaseId, int deviceId, int tenantId, int offset, int limit)
+    List<DeviceOperationDTO> getSubscriptionOperationsByAppReleaseIDAndDeviceID(int appReleaseId, int deviceId, int tenantId)
             throws ApplicationManagementDAOException;
 
     /**
