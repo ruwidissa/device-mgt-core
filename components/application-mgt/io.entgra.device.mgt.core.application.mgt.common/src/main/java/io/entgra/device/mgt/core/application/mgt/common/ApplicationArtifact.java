@@ -25,16 +25,52 @@ public class ApplicationArtifact {
     private String installerName;
 
     private InputStream installerStream;
+    private String installerPath;
 
     private String bannerName;
 
     private InputStream bannerStream;
+    private String bannerPath;
 
     private String iconName;
 
     private InputStream iconStream;
+    private String iconPath;
 
     private Map<String , InputStream> screenshots;
+    private Map<String, String> screenshotPaths;
+
+    public String getInstallerPath() {
+        return installerPath;
+    }
+
+    public void setInstallerPath(String installerPath) {
+        this.installerPath = installerPath;
+    }
+
+    public String getBannerPath() {
+        return bannerPath;
+    }
+
+    public void setBannerPath(String bannerPath) {
+        this.bannerPath = bannerPath;
+    }
+
+    public String getIconPath() {
+        return iconPath;
+    }
+
+    public void setIconPath(String iconPath) {
+        this.iconPath = iconPath;
+    }
+
+    public Map<String, String> getScreenshotPaths() {
+        return screenshotPaths;
+    }
+
+    public void setScreenshotPaths(Map<String, String> screenshotPaths) {
+        this.screenshotPaths = screenshotPaths;
+    }
 
     public String getInstallerName() {
         return installerName;

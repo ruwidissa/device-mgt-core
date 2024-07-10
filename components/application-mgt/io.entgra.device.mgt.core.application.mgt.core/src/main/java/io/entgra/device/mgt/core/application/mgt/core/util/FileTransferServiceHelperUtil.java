@@ -23,7 +23,9 @@ import com.google.gson.Gson;
 import io.entgra.device.mgt.core.application.mgt.common.ChunkDescriptor;
 import io.entgra.device.mgt.core.application.mgt.common.FileDescriptor;
 import io.entgra.device.mgt.core.application.mgt.common.FileMetaEntry;
+import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationStorageManagementException;
 import io.entgra.device.mgt.core.application.mgt.core.exception.FileTransferServiceHelperUtilException;
+import io.entgra.device.mgt.core.application.mgt.core.internal.DataHolder;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.NotFoundException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -175,6 +177,12 @@ public class FileTransferServiceHelperUtil {
         }
 
         String []urlPathSegments = downloadUrl.getPath().split("/");
+
+        FileDescriptor fileDescriptorResolvedFromRelease = resolve(urlPathSegments);
+        if (fileDescriptorResolvedFromRelease != null) {
+            return fileDescriptorResolvedFromRelease;
+        }
+
         if (urlPathSegments.length < 2) {
             if (log.isDebugEnabled()) {
                 log.debug("URL patch segments contain less than 2 segments");
@@ -232,6 +240,56 @@ public class FileTransferServiceHelperUtil {
             setMinimumPermissions(artifactFile);
         } catch (IOException e) {
             throw new FileTransferServiceHelperUtilException("Error encountered while creating artifact file", e);
+        }
+    }
+
+    private static FileDescriptor resolve(String []urlSegments) throws FileTransferServiceHelperUtilException {
+        // check the possibility of url is pointing to a file resides in  the default storage path
+        if (urlSegments.length < 4) {
+            if (log.isDebugEnabled()) {
+                log.debug("URL path segments contain less than 4 segments");
+            }
+            return null;
+        }
+
+        int tenantId;
+        try {
+            tenantId = Integer.parseInt(urlSegments[urlSegments.length - 4]);
+        } catch (NumberFormatException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("URL isn't pointing to a file resides in  the default storage path");
+            }
+            return null;
+        }
+
+        String fileName = urlSegments[urlSegments.length - 1];
+        String folderName = urlSegments[urlSegments.length - 2];
+        String appHash = urlSegments[urlSegments.length - 3];
+
+        try {
+            InputStream fileStream = DataHolder.getInstance().
+                    getApplicationStorageManager().getFileStream(appHash, folderName, fileName, tenantId);
+            if (fileStream == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Could not found the file " + fileName);
+                }
+                return null;
+            }
+
+            String []fileNameSegments = fileName.split("\\.(?=[^.]+$)");
+            if (fileNameSegments.length < 2) {
+                throw new FileTransferServiceHelperUtilException("Invalid full qualified name encountered :" + fileName);
+            }
+            FileDescriptor fileDescriptor = new FileDescriptor();
+            fileDescriptor.setFile(fileStream);
+            fileDescriptor.setFullQualifiedName(fileName);
+            fileDescriptor.setExtension(fileNameSegments[fileNameSegments.length - 1]);
+            fileDescriptor.setFileName(fileNameSegments[fileNameSegments.length - 2]);
+            fileDescriptor.setAbsolutePath(DataHolder.getInstance().
+                    getApplicationStorageManager().getAbsolutePathOfFile(appHash, folderName, fileName, tenantId));
+            return fileDescriptor;
+        } catch (ApplicationStorageManagementException e) {
+            throw new FileTransferServiceHelperUtilException("Error encountered while getting file input stream", e);
         }
     }
 }

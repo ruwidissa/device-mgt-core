@@ -181,6 +181,7 @@ public class ApplicationManagementUtil {
             fileDescriptor = FileDownloaderServiceProvider.getFileDownloaderService(artifactLinkUrl).download(artifactLinkUrl);
             applicationArtifact.setInstallerName(fileDescriptor.getFullQualifiedName());
             applicationArtifact.setInstallerStream(fileDescriptor.getFile());
+            applicationArtifact.setInstallerPath(fileDescriptor.getAbsolutePath());
         }
 
         if (iconLink != null) {
@@ -188,6 +189,7 @@ public class ApplicationManagementUtil {
             fileDescriptor = FileDownloaderServiceProvider.getFileDownloaderService(iconLinkUrl).download(iconLinkUrl);
             applicationArtifact.setIconName(fileDescriptor.getFullQualifiedName());
             applicationArtifact.setIconStream(fileDescriptor.getFile());
+            applicationArtifact.setIconPath(fileDescriptor.getAbsolutePath());
         }
 
         if (bannerLink != null) {
@@ -195,10 +197,12 @@ public class ApplicationManagementUtil {
             fileDescriptor = FileDownloaderServiceProvider.getFileDownloaderService(bannerLinkUrl).download(bannerLinkUrl);
             applicationArtifact.setBannerName(fileDescriptor.getFullQualifiedName());
             applicationArtifact.setBannerStream(fileDescriptor.getFile());
+            applicationArtifact.setBannerPath(fileDescriptor.getAbsolutePath());
         }
 
         if (screenshotLinks != null) {
             Map<String, InputStream> screenshotData = new TreeMap<>();
+            Map<String, String> screenshotPaths = new TreeMap<>();
             // This is to handle cases in which multiple screenshots have the same name
             Map<String, Integer> screenshotNameCount = new HashMap<>();
             URL screenshotLinkUrl;
@@ -209,6 +213,7 @@ public class ApplicationManagementUtil {
                 screenshotNameCount.put(screenshotName, screenshotNameCount.getOrDefault(screenshotName, 0) + 1);
                 screenshotName = FileUtil.generateDuplicateFileName(screenshotName, screenshotNameCount.get(screenshotName));
                 screenshotData.put(screenshotName, fileDescriptor.getFile());
+                screenshotPaths.put(screenshotName, fileDescriptor.getAbsolutePath());
             }
             applicationArtifact.setScreenshots(screenshotData);
         }
