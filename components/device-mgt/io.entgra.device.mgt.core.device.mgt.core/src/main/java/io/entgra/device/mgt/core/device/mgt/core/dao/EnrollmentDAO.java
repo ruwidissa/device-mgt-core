@@ -126,5 +126,5 @@ public interface EnrollmentDAO {
      * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user
      * @throws DeviceManagementDAOException if an error occurs while fetching the data
      */
-    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId) throws DeviceManagementDAOException;
+    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, List<String> allowingDeviceStatuses) throws DeviceManagementDAOException;
 }

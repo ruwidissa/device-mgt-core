@@ -5418,9 +5418,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     @Override
     public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId) throws DeviceManagementDAOException {
         List<DeviceDetailsDTO> devices;
+        List<String> allowingDeviceStatuses = new ArrayList<>();
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
         try {
             DeviceManagementDAOFactory.openConnection();
-            devices = enrollmentDAO.getDevicesByTenantId(tenantId);
+            devices = enrollmentDAO.getDevicesByTenantId(tenantId, allowingDeviceStatuses);
             if (devices == null || devices.isEmpty()) {
                 String msg = "No devices found for tenant ID: " + tenantId;
                 log.error(msg);

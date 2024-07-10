@@ -654,18 +654,34 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
     }
 
     @Override
-    public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId)
+    public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, List<String> allowingDeviceStatuses)
             throws DeviceManagementDAOException {
         List<DeviceDetailsDTO> devices = new ArrayList<>();
+        if (allowingDeviceStatuses.isEmpty()) {
+            return devices;
+        }
+
+        StringBuilder deviceFilters = new StringBuilder();
+        for (int i = 0; i < allowingDeviceStatuses.size(); i++) {
+            deviceFilters.append("?");
+            if (i < allowingDeviceStatuses.size() - 1) {
+                deviceFilters.append(",");
+            }
+        }
+
         String sql = "SELECT DEVICE_ID, OWNER, STATUS, DEVICE_TYPE, DEVICE_IDENTIFICATION " +
                 "FROM DM_ENROLMENT " +
-                "WHERE TENANT_ID = ?";
+                "WHERE TENANT_ID = ? AND STATUS IN (" + deviceFilters.toString() + ")";
         Connection conn = null;
 
         try {
             conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, tenantId);
+                int index = 1;
+                stmt.setInt(index++, tenantId);
+                for (String status : allowingDeviceStatuses) {
+                    stmt.setString(index++, status);
+                }
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
@@ -686,5 +702,6 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         }
         return devices;
     }
+
 
 }
