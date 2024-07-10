@@ -32,7 +32,9 @@ public class FCMBasedPushNotificationProvider implements PushNotificationProvide
 
     @Override
     public NotificationStrategy getNotificationStrategy(PushNotificationConfig config) {
-        return new FCMNotificationStrategy(config);
+        FCMNotificationStrategy fcmNotificationStrategy = new FCMNotificationStrategy(config);
+        fcmNotificationStrategy.init();
+        return fcmNotificationStrategy;
     }
 
 }
