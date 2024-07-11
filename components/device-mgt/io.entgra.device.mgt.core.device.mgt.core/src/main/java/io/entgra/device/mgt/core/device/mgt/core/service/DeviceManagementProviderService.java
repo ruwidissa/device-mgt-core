@@ -1082,10 +1082,11 @@ public interface DeviceManagementProviderService {
      * Get owner details and device IDs for a given owner and tenant.
      *
      * @param owner the name of the owner.
+     * @param deviceTypeId the device type id
      * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user.
      * @throws DeviceManagementException if an error occurs while fetching owner details.
      */
-    OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner) throws DeviceManagementDAOException;
+    OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner, int deviceTypeId) throws DeviceManagementDAOException;
 
     /**
      * Get owner details and device IDs for a given owner and tenant.
@@ -1099,10 +1100,11 @@ public interface DeviceManagementProviderService {
     /**
      * Get owner details and device IDs for a given owner and tenant.
      * @param tenantId the tenant id which devices need to be retried
+     * @param deviceTypeId the device type id
      * @return {@link DeviceDetailsDTO} which contains devices details.
      * @throws DeviceManagementException if an error occurs while fetching owner details.
      */
-    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId) throws DeviceManagementDAOException;
+    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, int deviceTypeId) throws DeviceManagementDAOException;
 
     /**
      * Get operation details by operation code.

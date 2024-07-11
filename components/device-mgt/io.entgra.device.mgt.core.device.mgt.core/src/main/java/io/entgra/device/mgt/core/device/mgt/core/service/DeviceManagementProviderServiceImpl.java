@@ -5354,13 +5354,18 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner) throws DeviceManagementDAOException {
+    public OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner, int deviceTypeId) throws DeviceManagementDAOException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         OwnerWithDeviceDTO ownerWithDeviceDTO;
 
+        List<String> allowingDeviceStatuses = new ArrayList<>();
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
+
         try {
             DeviceManagementDAOFactory.openConnection();
-            ownerWithDeviceDTO = this.enrollmentDAO.getOwnersWithDevices(owner, tenantId);
+            ownerWithDeviceDTO = this.enrollmentDAO.getOwnersWithDevices(owner, allowingDeviceStatuses, tenantId, deviceTypeId);
             if (ownerWithDeviceDTO == null) {
                 String msg = "No data found for owner: " + owner;
                 log.error(msg);
@@ -5411,11 +5416,15 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId) throws DeviceManagementDAOException {
+    public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, int deviceTypeId) throws DeviceManagementDAOException {
         List<DeviceDetailsDTO> devices;
+        List<String> allowingDeviceStatuses = new ArrayList<>();
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
         try {
             DeviceManagementDAOFactory.openConnection();
-            devices = enrollmentDAO.getDevicesByTenantId(tenantId);
+            devices = enrollmentDAO.getDevicesByTenantId(tenantId, allowingDeviceStatuses, deviceTypeId);
             if (devices == null || devices.isEmpty()) {
                 String msg = "No devices found for tenant ID: " + tenantId;
                 log.error(msg);
