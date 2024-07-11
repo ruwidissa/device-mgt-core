@@ -24,6 +24,7 @@ import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionMan
 import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
+import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.java.security.SSLProtocolSocketFactory;
@@ -163,6 +164,7 @@ public class DeviceMgtAPIUtils {
     private static volatile ApplicationManager applicationManager;
 
     private static volatile APIPublisherService apiPublisher;
+    private static volatile TenantManagerAdminService tenantManagerAdminService;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -1242,5 +1244,22 @@ public class DeviceMgtAPIUtils {
             }
         }
         return isPermitted;
+    }
+
+    public static TenantManagerAdminService getTenantManagerAdminService(){
+        if(tenantManagerAdminService == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (tenantManagerAdminService == null) {
+                    tenantManagerAdminService = (TenantManagerAdminService) PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                            getOSGiService(TenantManagerAdminService.class, null);
+                    if (tenantManagerAdminService == null) {
+                        String msg = "Tenant Manager Admin Service is null";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+        return tenantManagerAdminService;
     }
 }

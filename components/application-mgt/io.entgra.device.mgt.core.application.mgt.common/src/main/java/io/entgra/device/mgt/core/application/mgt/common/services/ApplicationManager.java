@@ -546,5 +546,20 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException thrown if an error occurs when deleting data
      */
     void deleteApplicationDataOfTenant(int tenantId) throws ApplicationManagementException;
+
+    /**
+     * Delete all application related data of a tenant by tenant Domain
+     *
+     * @param tenantDomain Domain of the Tenant
+     * @throws ApplicationManagementException thrown if an error occurs when deleting data
+     */
     void deleteApplicationDataByTenantDomain(String tenantDomain) throws ApplicationManagementException;
+
+    /**
+     * Delete all Application artifacts related to a tenant by Tenant Domain
+     *
+     * @param tenantDomain Domain of the Tenant
+     * @throws ApplicationManagementException thrown if an error occurs when deleting app folders
+     */
+    void deleteApplicationArtifactsByTenantDomain(String tenantDomain) throws ApplicationManagementException;
 }
