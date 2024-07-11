@@ -614,9 +614,6 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         }
         ownerDetails.setDeviceIds(deviceIds);
         ownerDetails.setDeviceCount(deviceCount);
-        log.info("line no 617 device ids : " + ownerDetails.getDeviceIds());
-        log.info("line no 618 device identifiers : " + ownerDetails.getDeviceIdentifiers());
-        log.info("line no 619 device names : " + ownerDetails.getDeviceNames());
         return ownerDetails;
     }
 

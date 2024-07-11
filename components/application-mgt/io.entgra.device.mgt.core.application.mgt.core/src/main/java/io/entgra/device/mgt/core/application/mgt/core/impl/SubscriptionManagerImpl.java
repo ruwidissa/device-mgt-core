@@ -1929,9 +1929,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 // Retrieve owner details and device IDs for the user using the service layer
                 OwnerWithDeviceDTO ownerDetailsWithDevices =
                         deviceManagementProviderService.getOwnersWithDeviceIds(userName, applicationDTO.getDeviceTypeId());
-                log.info("line no 1932 device ids : " + ownerDetailsWithDevices.getDeviceIds());
-                log.info("line no 1933 device identifiers : " + ownerDetailsWithDevices.getDeviceIdentifiers());
-                log.info("line no 1934 device names : " + ownerDetailsWithDevices.getDeviceNames());
 
                 SubscriptionsDTO userSubscriptionDTO = new SubscriptionsDTO();
                 userSubscriptionDTO.setName(userSubscription.getName());
