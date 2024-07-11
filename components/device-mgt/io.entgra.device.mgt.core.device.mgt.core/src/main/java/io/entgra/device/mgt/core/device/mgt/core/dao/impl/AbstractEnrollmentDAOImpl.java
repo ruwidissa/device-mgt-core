@@ -564,7 +564,7 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
     }
 
     @Override
-    public OwnerWithDeviceDTO getOwnersWithDevices(String owner, List<String> allowingDeviceStatuses, int tenantId)
+    public OwnerWithDeviceDTO getOwnersWithDevices(String owner, List<String> allowingDeviceStatuses, int tenantId, int deviceTypeId)
             throws DeviceManagementDAOException {
         Connection conn = null;
         OwnerWithDeviceDTO ownerDetails = new OwnerWithDeviceDTO();
@@ -582,15 +582,16 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         String sql = "SELECT e.DEVICE_ID, e.OWNER, e.STATUS AS DEVICE_STATUS, d.NAME AS DEVICE_NAME, e.DEVICE_TYPE AS DEVICE_TYPE, e.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFICATION " +
                 "FROM DM_ENROLMENT e " +
                 "JOIN DM_DEVICE d ON e.DEVICE_ID = d.ID " +
-                "WHERE e.OWNER = ? AND e.TENANT_ID = ? AND e.STATUS IN (" + deviceFilters.toString() + ")";
+                "WHERE e.OWNER = ? AND e.TENANT_ID = ? AND d.DEVICE_TYPE_ID = ? AND e.STATUS IN (" + deviceFilters.toString() + ")";
 
         try {
             conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, owner);
                 stmt.setInt(2, tenantId);
+                stmt.setInt(3, deviceTypeId);
                 for (int i = 0; i < allowingDeviceStatuses.size(); i++) {
-                    stmt.setString(3 + i, allowingDeviceStatuses.get(i));
+                    stmt.setString(4 + i, allowingDeviceStatuses.get(i));
                 }
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
@@ -654,7 +655,7 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
     }
 
     @Override
-    public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, List<String> allowingDeviceStatuses)
+    public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, List<String> allowingDeviceStatuses, int deviceTypeId)
             throws DeviceManagementDAOException {
         List<DeviceDetailsDTO> devices = new ArrayList<>();
         if (allowingDeviceStatuses.isEmpty()) {
@@ -669,9 +670,10 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
             }
         }
 
-        String sql = "SELECT DEVICE_ID, OWNER, STATUS, DEVICE_TYPE, DEVICE_IDENTIFICATION " +
-                "FROM DM_ENROLMENT " +
-                "WHERE TENANT_ID = ? AND STATUS IN (" + deviceFilters.toString() + ")";
+        String sql = "SELECT e.DEVICE_ID, e.OWNER, e.STATUS, e.DEVICE_TYPE, e.DEVICE_IDENTIFICATION " +
+                "FROM DM_ENROLMENT e " +
+                "JOIN DM_DEVICE d ON e.DEVICE_ID = d.ID " +
+                "WHERE e.TENANT_ID = ? AND e.STATUS IN (" + deviceFilters.toString() + ") AND d.DEVICE_TYPE_ID = ?";
         Connection conn = null;
 
         try {
@@ -682,6 +684,7 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
                 for (String status : allowingDeviceStatuses) {
                     stmt.setString(index++, status);
                 }
+                stmt.setInt(index++, deviceTypeId);
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
@@ -702,6 +705,4 @@ public abstract class AbstractEnrollmentDAOImpl implements EnrollmentDAO {
         }
         return devices;
     }
-
-
 }

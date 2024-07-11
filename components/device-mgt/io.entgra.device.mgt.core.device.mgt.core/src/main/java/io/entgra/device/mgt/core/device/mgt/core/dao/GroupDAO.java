@@ -473,13 +473,15 @@ public interface GroupDAO {
      * Get group details and list of device IDs related to the group.
      *
      * @param groupName Group name
+     * @param allowingDeviceStatuses the statuses of devices
+     * @param deviceTypeId the device type id
      * @param tenantId Tenant ID
      * @param offset the offset for the data set
      * @param limit the limit for the data set
      * @return {@link GroupDetailsDTO} which containing group details and a list of device IDs
      * @throws GroupManagementDAOException if an error occurs while retrieving the group details and devices
      */
-    GroupDetailsDTO getGroupDetailsWithDevices(String groupName, List<String> allowingDeviceStatuses, int tenantId, int offset, int limit)
+    GroupDetailsDTO getGroupDetailsWithDevices(String groupName, List<String> allowingDeviceStatuses, int deviceTypeId, int tenantId, int offset, int limit)
             throws GroupManagementDAOException;
 
 }

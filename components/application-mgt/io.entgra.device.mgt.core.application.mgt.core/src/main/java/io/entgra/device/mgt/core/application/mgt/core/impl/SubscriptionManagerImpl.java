@@ -1720,8 +1720,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(uuid, tenantId);
             int appReleaseId = applicationReleaseDTO.getId();
-
+            int deviceTypeId = applicationDTO.getDeviceTypeId();
             List<SubscriptionsDTO> groupDetailsWithDevices = new ArrayList<>();
 
             List<GroupSubscriptionDTO> groupDetails =
@@ -1737,7 +1738,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
                 // Retrieve group details and device IDs for the group using the service layer
                 GroupDetailsDTO groupDetailWithDevices =
-                        groupManagementProviderService.getGroupDetailsWithDevices(groupName, offset, limit);
+                        groupManagementProviderService.getGroupDetailsWithDevices(groupName, deviceTypeId, offset, limit);
 
                 SubscriptionsDTO groupDetailDTO = new SubscriptionsDTO();
                 groupDetailDTO.setId(groupDetailWithDevices.getGroupId());
@@ -1910,8 +1911,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(uuid, tenantId);
             int appReleaseId = applicationReleaseDTO.getId();
-
+            int deviceTypeId = applicationDTO.getDeviceTypeId();
             List<SubscriptionsDTO> userSubscriptionsWithDevices = new ArrayList<>();
 
             List<SubscriptionsDTO> userSubscriptions =
@@ -1927,7 +1929,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
                 // Retrieve owner details and device IDs for the user using the service layer
                 OwnerWithDeviceDTO ownerDetailsWithDevices =
-                        deviceManagementProviderService.getOwnersWithDeviceIds(userName);
+                        deviceManagementProviderService.getOwnersWithDeviceIds(userName, deviceTypeId);
 
                 SubscriptionsDTO userSubscriptionDTO = new SubscriptionsDTO();
                 userSubscriptionDTO.setName(userSubscription.getName());
@@ -2097,8 +2099,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(uuid, tenantId);
             int appReleaseId = applicationReleaseDTO.getId();
-
+            int deviceTypeId = applicationDTO.getDeviceTypeId();
             List<SubscriptionsDTO> roleSubscriptionsWithDevices = new ArrayList<>();
 
             List<SubscriptionsDTO> roleSubscriptions =
@@ -2139,7 +2142,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 for (String user : users) {
                     OwnerWithDeviceDTO ownerDetailsWithDevices;
                     try {
-                        ownerDetailsWithDevices = deviceManagementProviderService.getOwnersWithDeviceIds(user);
+                        ownerDetailsWithDevices = deviceManagementProviderService.getOwnersWithDeviceIds(user, deviceTypeId);
                     } catch (DeviceManagementDAOException e) {
                         throw new ApplicationManagementException("Error retrieving owner details with devices for user: " + user, e);
                     }
@@ -2307,7 +2310,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(uuid, tenantId);
             int appReleaseId = applicationReleaseDTO.getId();
+            int deviceTypeId = applicationDTO.getDeviceTypeId();
 
             DeviceManagementProviderService deviceManagementProviderService = HelperUtil.getDeviceManagementProviderService();
             List<DeviceSubscriptionDTO> deviceSubscriptions =
@@ -2321,7 +2326,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             }
 
             List<DeviceDetailsDTO> allDevices =
-                    deviceManagementProviderService.getDevicesByTenantId(tenantId);
+                    deviceManagementProviderService.getDevicesByTenantId(tenantId, deviceTypeId);
 
             List<Integer> deviceIds = allDevices.stream()
                     .map(DeviceDetailsDTO::getDeviceId)
@@ -2493,7 +2498,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(uuid, tenantId);
             int appReleaseId = applicationReleaseDTO.getId();
+            int deviceTypeId = applicationDTO.getDeviceTypeId();
 
             List<DeviceSubscriptionDTO> allSubscriptions =
                     subscriptionDAO.getAllSubscriptionsDetails(appReleaseId, unsubscribe, tenantId, offset, limit);
@@ -2522,7 +2529,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             statusCounts.put("NEW", 0);
 
             List<DeviceDetailsDTO> allDevices =
-                    deviceManagementProviderService.getDevicesByTenantId(tenantId);
+                    deviceManagementProviderService.getDevicesByTenantId(tenantId, deviceTypeId);
 
             for (DeviceDetailsDTO device : allDevices) {
                 Integer deviceId = device.getDeviceId();

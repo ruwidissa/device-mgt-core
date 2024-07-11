@@ -106,7 +106,7 @@ public interface EnrollmentDAO {
      * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user
      * @throws DeviceManagementDAOException if an error occurs while fetching the data
      */
-    OwnerWithDeviceDTO getOwnersWithDevices(String owner, List<String> allowingDeviceStatuses, int tenantId) throws DeviceManagementDAOException;
+    OwnerWithDeviceDTO getOwnersWithDevices(String owner, List<String> allowingDeviceStatuses, int tenantId, int deviceTypeId) throws DeviceManagementDAOException;
 
     /**
      * Retrieves a list of device IDs with owners and device status.
@@ -123,8 +123,10 @@ public interface EnrollmentDAO {
      * Retrieves owners and the list of device IDs with device status.
      *
      * @param tenantId the ID of the tenant
+     * @param allowingDeviceStatuses the allowed device statuses of devices
+     * @param deviceTypeId the device type id
      * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user
      * @throws DeviceManagementDAOException if an error occurs while fetching the data
      */
-    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, List<String> allowingDeviceStatuses) throws DeviceManagementDAOException;
+    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, List<String> allowingDeviceStatuses, int deviceTypeId) throws DeviceManagementDAOException;
 }

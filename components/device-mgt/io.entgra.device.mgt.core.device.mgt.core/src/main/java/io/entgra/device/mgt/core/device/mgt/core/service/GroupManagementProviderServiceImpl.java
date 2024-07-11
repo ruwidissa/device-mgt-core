@@ -1684,7 +1684,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
     }
 
     @Override
-    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int offset, int limit)
+    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int deviceTypeId, int offset, int limit)
             throws GroupManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Retrieving group details and device IDs for group: " + groupName);
@@ -1698,7 +1698,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
         try {
             GroupManagementDAOFactory.openConnection();
-            groupDetailsWithDevices = this.groupDAO.getGroupDetailsWithDevices(groupName, allowingDeviceStatuses, tenantId, offset, limit);
+            groupDetailsWithDevices = this.groupDAO.getGroupDetailsWithDevices(groupName, allowingDeviceStatuses, deviceTypeId, tenantId, offset, limit);
         } catch (GroupManagementDAOException | SQLException e) {
             String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
             log.error(msg, e);
