@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.dao.impl.policy;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -54,6 +55,7 @@ import java.util.Properties;
  */
 public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
 
+    private static final Gson gson = new Gson();
     private static final Log log = LogFactory.getLog(AbstractPolicyDAOImpl.class);
 
     @Override
@@ -1187,13 +1189,13 @@ public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, deviceId);
             stmt.setInt(2, policy.getId());
-            stmt.setBytes(3, PolicyManagerUtil.getBytes(policy));
+            stmt.setString(3, PolicyManagerUtil.convertToJson(policy));
             stmt.setTimestamp(4, currentTimestamp);
             stmt.setTimestamp(5, currentTimestamp);
             stmt.setInt(6, tenantId);
             stmt.setInt(7, enrolmentId);
             stmt.executeUpdate();
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             throw new PolicyManagerDAOException("Error occurred while adding the evaluated feature list to device", e);
         } finally {
             PolicyManagementDAOUtil.cleanupResources(stmt, null);
@@ -1240,7 +1242,7 @@ public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
                     "APPLIED = ? WHERE DEVICE_ID = ? AND TENANT_ID = ? AND ENROLMENT_ID = ?";
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, policy.getId());
-            stmt.setBytes(2, PolicyManagerUtil.getBytes(policy));
+            stmt.setString(2, PolicyManagerUtil.convertToJson(policy));
             stmt.setTimestamp(3, currentTimestamp);
             stmt.setBoolean(4, false);
             stmt.setInt(5, deviceId);
@@ -1248,7 +1250,7 @@ public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
             stmt.setInt(7, enrolmentId);
             stmt.executeUpdate();
 
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             throw new PolicyManagerDAOException("Error occurred while updating the evaluated feature list " +
                     "to device", e);
         } finally {
@@ -1699,39 +1701,12 @@ public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
             resultSet = stmt.executeQuery();
 
             while (resultSet.next()) {
-                ByteArrayInputStream bais = null;
-                ObjectInputStream ois = null;
-                byte[] contentBytes;
-
-                try {
-                    contentBytes = resultSet.getBytes("POLICY_CONTENT");
-                    bais = new ByteArrayInputStream(contentBytes);
-                    ois = new ObjectInputStream(bais);
-                    policy = (Policy) ois.readObject();
-                } finally {
-                    if (bais != null) {
-                        try {
-                            bais.close();
-                        } catch (IOException e) {
-                            log.warn("Error occurred while closing ByteArrayOutputStream", e);
-                        }
-                    }
-                    if (ois != null) {
-                        try {
-                            ois.close();
-                        } catch (IOException e) {
-                            log.warn("Error occurred while closing ObjectOutputStream", e);
-                        }
-                    }
-                }
+                String contentString = resultSet.getString("POLICY_CONTENT");
+                policy = gson.fromJson(contentString, Policy.class);
             }
 
         } catch (SQLException e) {
             throw new PolicyManagerDAOException("Error occurred while getting the applied policy", e);
-        } catch (IOException e) {
-            throw new PolicyManagerDAOException("Unable to read the byte stream for content", e);
-        } catch (ClassNotFoundException e) {
-            throw new PolicyManagerDAOException("Class not found while converting the object", e);
         } finally {
             PolicyManagementDAOUtil.cleanupResources(stmt, resultSet);
         }
