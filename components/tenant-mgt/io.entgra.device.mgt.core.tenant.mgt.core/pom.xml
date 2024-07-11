@@ -60,6 +60,7 @@
                             org.wso2.carbon.stratos.common.beans,
                             org.wso2.carbon.stratos.common.exception,
                             org.wso2.carbon.stratos.common.listeners,
+                            org.wso2.carbon.tenant.mgt.services,
                             io.entgra.device.mgt.core.device.mgt.common.metadata.mgt,
                             io.entgra.device.mgt.core.device.mgt.common.exceptions,
                             io.entgra.device.mgt.core.device.mgt.common.permission.mgt,

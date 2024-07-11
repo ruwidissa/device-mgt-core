@@ -20,8 +20,10 @@ package io.entgra.device.mgt.core.tenant.mgt.core.internal;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
+import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerService;
 import io.entgra.device.mgt.core.tenant.mgt.core.TenantManager;
+import io.entgra.device.mgt.core.tenant.mgt.core.impl.TenantManagerAdminServiceImpl;
 import io.entgra.device.mgt.core.tenant.mgt.core.impl.TenantManagerImpl;
 import io.entgra.device.mgt.core.tenant.mgt.core.impl.TenantManagerServiceImpl;
 import io.entgra.device.mgt.core.tenant.mgt.core.listener.DeviceMgtTenantListener;
@@ -59,11 +61,14 @@ public class TenantMgtServiceComponent {
         try {
             TenantManagerService tenantManagerService = new TenantManagerServiceImpl();
             componentContext.getBundleContext().
-                    registerService(TenantManagerServiceImpl.class.getName(), tenantManagerService, null);
+                    registerService(TenantManagerService.class.getName(), tenantManagerService, null);
+            TenantManagerAdminService tenantManagerAdminService = new TenantManagerAdminServiceImpl();
+            componentContext.getBundleContext().
+                    registerService(TenantManagerAdminService.class.getName(), tenantManagerAdminService, null);
             TenantManager tenantManager = new TenantManagerImpl();
             TenantMgtDataHolder.getInstance().setTenantManager(tenantManager);
             WhiteLabelManagementService whiteLabelManagementService = new WhiteLabelManagementServiceImpl();
-            componentContext.getBundleContext().registerService(WhiteLabelManagementServiceImpl.class.getName(),
+            componentContext.getBundleContext().registerService(WhiteLabelManagementService.class.getName(),
                     whiteLabelManagementService, null);
             TenantMgtDataHolder.getInstance().setWhiteLabelManagementService(whiteLabelManagementService);
             DeviceStatusManagementService deviceStatusManagementService = new DeviceStatusManagementServiceImpl();

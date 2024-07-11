@@ -982,7 +982,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     + "e.TENANT_ID = ? AND "
                     + "LOWER(e.OWNER) = LOWER(?) AND "
                     + "e.STATUS IN (",
-                    ")) e1 ORDER BY e1.DATE_OF_LAST_UPDATE DESC");
+                    ")) e1 WHERE d.ID = e1.DEVICE_ID ORDER BY e1.DATE_OF_LAST_UPDATE DESC");
 
             deviceStatuses.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();

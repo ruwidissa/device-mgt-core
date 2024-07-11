@@ -30,6 +30,7 @@ import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
+import io.entgra.device.mgt.core.tenant.mgt.common.exception.TenantMgtException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -96,8 +97,6 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementEx
 
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
-import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -778,6 +777,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             return Constants.GOOGLE_PLAY_STORE_URL;
         } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
             return Constants.APPLE_STORE_URL;
+        } else if (DeviceTypes.WINDOWS.toString().equalsIgnoreCase(deviceType)) {
+            return Constants.MICROSOFT_STORE_URL;
         } else {
             throw new IllegalArgumentException("No such device with the name " + deviceType);
         }
@@ -4416,7 +4417,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             spApplicationDAO.deleteSPApplicationMappingByTenant(tenantId);
             spApplicationDAO.deleteIdentityServerByTenant(tenantId);
             applicationDAO.deleteApplicationsByTenant(tenantId);
-            APIUtil.getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
 
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
@@ -4441,12 +4441,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + " of tenant ID: " + tenantId ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (ApplicationStorageManagementException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred while deleting App folder of tenant"
-                    + " of tenant ID: " + tenantId ;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -4455,19 +4449,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @Override
     public void deleteApplicationDataByTenantDomain(String tenantDomain) throws ApplicationManagementException {
         int tenantId;
-        try{
-            TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();
-            TenantInfoBean tenantInfoBean = tenantMgtAdminService.getTenant(tenantDomain);
-            tenantId = tenantInfoBean.getTenantId();
-
-        } catch (Exception e) {
-            String msg = "Error getting tenant ID from domain: "
-                     + tenantDomain;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        }
-
         try {
+            tenantId = DataHolder.getInstance().getTenantManagerAdminService().getTenantId(tenantDomain);
+
             ConnectionManagerUtil.beginDBTransaction();
 
             vppApplicationDAO.deleteAssociationByTenant(tenantId);
@@ -4491,40 +4475,54 @@ public class ApplicationManagerImpl implements ApplicationManager {
             spApplicationDAO.deleteSPApplicationMappingByTenant(tenantId);
             spApplicationDAO.deleteIdentityServerByTenant(tenantId);
             applicationDAO.deleteApplicationsByTenant(tenantId);
-            APIUtil.getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
 
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while observing the database connection to delete applications for tenant with ID: "
-                    + tenantId;
+            String msg = "Error occurred while observing the database connection to delete applications for tenant with " +
+                    "domain: " + tenantDomain;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Database access error is occurred when getting applications for tenant with ID: " + tenantId;
+            String msg = "Database access error is occurred when getting applications for tenant with domain: "
+                    + tenantDomain;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while deleting life-cycle state data of application releases of the tenant"
-                    + " of ID: " + tenantId ;
+                    + " of domain: " + tenantDomain ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ReviewManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while deleting reviews of application releases of the applications"
-                    + " of tenant ID: " + tenantId ;
+                    + " of tenant of domain: " + tenantDomain ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (ApplicationStorageManagementException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred while deleting App folder of tenant"
-                    + " of tenant ID: " + tenantId ;
+        } catch (Exception e) {
+            String msg = "Error getting tenant ID from domain: "
+                    + tenantDomain;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
         }
+    }
 
+    @Override
+    public void deleteApplicationArtifactsByTenantDomain(String tenantDomain) throws ApplicationManagementException {
+        int tenantId;
+        try {
+            tenantId = DataHolder.getInstance().getTenantManagerAdminService().getTenantId(tenantDomain);
+            DataHolder.getInstance().getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
+        } catch (ApplicationStorageManagementException  e) {
+            String msg = "Error deleting app artifacts of tenant of domain: " + tenantDomain ;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TenantMgtException e) {
+            String msg = "Error getting tenant ID from domain: "
+                    + tenantDomain + " when trying to delete application artifacts of tenant";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
     }
 }
