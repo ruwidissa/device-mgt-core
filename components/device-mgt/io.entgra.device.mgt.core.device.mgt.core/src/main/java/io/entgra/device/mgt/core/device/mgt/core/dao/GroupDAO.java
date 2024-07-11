@@ -481,7 +481,8 @@ public interface GroupDAO {
      * @return {@link GroupDetailsDTO} which containing group details and a list of device IDs
      * @throws GroupManagementDAOException if an error occurs while retrieving the group details and devices
      */
-    GroupDetailsDTO getGroupDetailsWithDevices(String groupName, List<String> allowingDeviceStatuses, int deviceTypeId, int tenantId, int offset, int limit)
+    GroupDetailsDTO getGroupDetailsWithDevices(String groupName, List<String> allowingDeviceStatuses, int deviceTypeId,
+                                               int tenantId, int offset, int limit)
             throws GroupManagementDAOException;
 
 }

@@ -1441,7 +1441,8 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
     }
 
     @Override
-    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, List<String> allowedStatuses, int deviceTypeId, int tenantId, int offset, int limit)
+    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, List<String> allowedStatuses, int deviceTypeId,
+                                                      int tenantId, int offset, int limit)
             throws GroupManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get group details and device IDs for group: " + groupName);

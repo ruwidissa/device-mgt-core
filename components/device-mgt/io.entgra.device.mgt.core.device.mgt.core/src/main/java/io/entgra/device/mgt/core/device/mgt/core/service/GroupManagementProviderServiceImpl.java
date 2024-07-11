@@ -1698,7 +1698,8 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
 
         try {
             GroupManagementDAOFactory.openConnection();
-            groupDetailsWithDevices = this.groupDAO.getGroupDetailsWithDevices(groupName, allowingDeviceStatuses, deviceTypeId, tenantId, offset, limit);
+            groupDetailsWithDevices = this.groupDAO.getGroupDetailsWithDevices(groupName, allowingDeviceStatuses,
+                    deviceTypeId, tenantId, offset, limit);
         } catch (GroupManagementDAOException | SQLException e) {
             String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
             log.error(msg, e);
