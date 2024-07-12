@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.service;
 
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
@@ -1688,17 +1689,22 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
     }
 
     @Override
-    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int offset, int limit)
-            throws GroupManagementException {
+    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int deviceTypeId, String deviceOwner, String deviceName, String deviceStatus,
+                                                      int offset, int limit) throws GroupManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Retrieving group details and device IDs for group: " + groupName);
         }
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         GroupDetailsDTO groupDetailsWithDevices;
+        List<String> allowingDeviceStatuses = new ArrayList<>();
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
 
         try {
             GroupManagementDAOFactory.openConnection();
-            groupDetailsWithDevices = this.groupDAO.getGroupDetailsWithDevices(groupName, tenantId, offset, limit);
+            groupDetailsWithDevices = this.groupDAO.getGroupDetailsWithDevices(groupName, allowingDeviceStatuses,
+                    deviceTypeId, tenantId, deviceOwner, deviceName, deviceStatus, offset, limit);
         } catch (GroupManagementDAOException | SQLException e) {
             String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
             log.error(msg, e);

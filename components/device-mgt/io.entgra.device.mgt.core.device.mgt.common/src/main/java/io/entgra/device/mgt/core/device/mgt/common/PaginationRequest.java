@@ -41,6 +41,14 @@ public class PaginationRequest {
     private Date since;
     private String filter;
     private String serialNumber;
+    private String groupName;
+    private String roleName;
+    private String userName;
+    private String deviceStatus;
+    private String tabActionStatus;
+    private String actionStatus;
+    private String actionType;
+    private String actionTriggeredBy;
     private Map<String, String> customProperty = new HashMap<>();
     private Map<String, Object> property = new HashMap<>();
     private List<String> statusList = new ArrayList<>();
@@ -219,5 +227,69 @@ public class PaginationRequest {
                 + " Owner role '" + this.ownerRole + "' owner pattern '" + this.ownerPattern + "' ownership "
                 + this.ownership + "' Status '" + this.statusList + "' owner '" + this.owner + "' groupId: " + this.groupId
                 + " start index: " + this.startIndex + ", SortColumns: " + this.sortColumn;
+    }
+
+    public String getDeviceStatus() {
+        return deviceStatus;
+    }
+
+    public void setDeviceStatus(String deviceStatus) {
+        this.deviceStatus = deviceStatus;
+    }
+
+    public String getActionStatus() {
+        return actionStatus;
+    }
+
+    public void setActionStatus(String actionStatus) {
+        this.actionStatus = actionStatus;
+    }
+
+    public String getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
+    }
+
+    public String getActionTriggeredBy() {
+        return actionTriggeredBy;
+    }
+
+    public void setActionTriggeredBy(String actionTriggeredBy) {
+        this.actionTriggeredBy = actionTriggeredBy;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getTabActionStatus() {
+        return tabActionStatus;
+    }
+
+    public void setTabActionStatus(String tabActionStatus) {
+        this.tabActionStatus = tabActionStatus;
     }
 }

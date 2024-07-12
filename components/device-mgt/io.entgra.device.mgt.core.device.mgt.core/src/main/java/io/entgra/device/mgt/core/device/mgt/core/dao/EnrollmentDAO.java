@@ -101,29 +101,42 @@ public interface EnrollmentDAO {
      * Retrieves owners and the list of device IDs related to an owner.
      *
      * @param owner the owner whose device IDs need to be retrieved
+     * @param allowingDeviceStatuses statuses of devices need to be retrieved
      * @param tenantId the ID of the tenant
+     * @param deviceOwner owner of the device
+     * @param deviceName name of the device
+     * @param deviceStatus status of the device
      * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user
      * @throws DeviceManagementDAOException if an error occurs while fetching the data
      */
-    OwnerWithDeviceDTO getOwnersWithDevices(String owner, int tenantId) throws DeviceManagementDAOException;
+    OwnerWithDeviceDTO getOwnersWithDevices(String owner, List<String> allowingDeviceStatuses, int tenantId, int deviceTypeId,
+                                            String deviceOwner, String deviceName, String deviceStatus) throws DeviceManagementDAOException;
 
     /**
      * Retrieves a list of device IDs with owners and device status.
      *
      * @param deviceId the deviceId of the device which user need to be retrieved
      * @param tenantId the ID of the tenant
+     * @param deviceOwner owner of the device
+     * @param deviceName name of the device
+     * @param deviceStatus status of the device
      * @return {@link OwnerWithDeviceDTO} which contains a list of devices
      * @throws DeviceManagementDAOException if an error occurs while fetching the data
      */
-    OwnerWithDeviceDTO getOwnerWithDeviceByDeviceId(int deviceId, int tenantId)
+    OwnerWithDeviceDTO getOwnerWithDeviceByDeviceId(int deviceId, int tenantId, String deviceOwner, String deviceName, String deviceStatus)
             throws DeviceManagementDAOException;
 
     /**
      * Retrieves owners and the list of device IDs with device status.
      *
      * @param tenantId the ID of the tenant
+     * @param allowingDeviceStatuses the allowed device statuses of devices
+     * @param deviceTypeId the device type id
+     * @param deviceOwner owner of the device
+     * @param deviceStatus status of the device
      * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user
      * @throws DeviceManagementDAOException if an error occurs while fetching the data
      */
-    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId) throws DeviceManagementDAOException;
+    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, List<String> allowingDeviceStatuses, int deviceTypeId, String deviceOwner,
+                                                String deviceStatus) throws DeviceManagementDAOException;
 }
