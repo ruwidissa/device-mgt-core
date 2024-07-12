@@ -935,6 +935,12 @@ public interface PolicyManagementService {
             @QueryParam("status")
                     String status,
             @ApiParam(
+                    name = "deviceType",
+                    value = "The device type of the policy that needs filtering.",
+                    required = false)
+            @QueryParam("deviceType")
+            String deviceType,
+            @ApiParam(
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time. \n" +
                             "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
