@@ -57,4 +57,5 @@ public interface TenantManager {
      * @throws TenantMgtException Throws when deleting Tenant related device data
      */
     void deleteTenantDeviceData(int tenantId) throws TenantMgtException;
+
 }

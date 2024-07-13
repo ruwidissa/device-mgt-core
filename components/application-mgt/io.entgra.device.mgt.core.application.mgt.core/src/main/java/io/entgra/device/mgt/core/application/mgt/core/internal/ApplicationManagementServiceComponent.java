@@ -33,7 +33,9 @@ import io.entgra.device.mgt.core.application.mgt.core.impl.FileTransferServiceIm
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
+import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -71,6 +73,12 @@ import java.util.List;
  * policy="dynamic"
  * bind="setTaskService"
  * unbind="unsetTaskService"
+ * @scr.reference name="io.entgra.device.mgt.core.tenant.manager"
+ * interface="io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService"
+ * cardinality="0..1"
+ * policy="dynamic"
+ * bind="setTenantManagementAdminService"
+ * unbind="unsetTenantManagementAdminService"
  */
 @SuppressWarnings("unused")
 public class ApplicationManagementServiceComponent {
@@ -195,5 +203,21 @@ public class ApplicationManagementServiceComponent {
             log.debug("Removing the task service from Application Management SC");
         }
         DataHolder.getInstance().setTaskService(null);
+    }
+
+    @SuppressWarnings("unused")
+    protected void setTenantManagementAdminService(TenantManagerAdminService tenantManagerAdminService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting Tenant management admin Service");
+        }
+        DataHolder.getInstance().setTenantManagerAdminService(tenantManagerAdminService);
+    }
+
+    @SuppressWarnings("unused")
+    protected void unsetTenantManagementAdminService(TenantManagerAdminService tenantManagerAdminService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Un setting Tenant management admin service");
+        }
+        DataHolder.getInstance().setTenantManagerAdminService(null);
     }
 }

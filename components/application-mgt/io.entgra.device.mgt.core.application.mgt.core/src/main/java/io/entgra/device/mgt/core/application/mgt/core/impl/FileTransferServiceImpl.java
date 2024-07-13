@@ -31,6 +31,7 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.NotFoundException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.FileSystems;
@@ -103,8 +104,13 @@ public class FileTransferServiceImpl implements FileTransferService {
     @Override
     public boolean isExistsOnLocal(URL downloadUrl) throws FileTransferServiceException {
         try {
-            return FileTransferServiceHelperUtil.resolve(downloadUrl) != null;
-        } catch (FileTransferServiceHelperUtilException e) {
+            FileDescriptor fileDescriptor = FileTransferServiceHelperUtil.resolve(downloadUrl);
+            if (fileDescriptor != null && fileDescriptor.getFile() != null) {
+                fileDescriptor.getFile().close();
+                return true;
+            }
+            return false;
+        } catch (FileTransferServiceHelperUtilException | IOException e) {
             String msg = "Error occurred while checking the existence of artifact on the local environment";
             log.error(msg, e);
             throw new FileTransferServiceException(msg, e);

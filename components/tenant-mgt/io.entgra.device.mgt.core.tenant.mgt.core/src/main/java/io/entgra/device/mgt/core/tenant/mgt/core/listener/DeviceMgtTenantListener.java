@@ -88,13 +88,5 @@ public class DeviceMgtTenantListener implements TenantMgtListener {
     @Override
     public void onPreDelete(int i) throws StratosException {
         // Any work to be performed before a tenant is deleted
-        TenantManager tenantManager = TenantMgtDataHolder.getInstance().getTenantManager();
-        try{
-            tenantManager.deleteTenantDeviceData(i);
-            tenantManager.deleteTenantApplicationData(i);
-        } catch (TenantMgtException e) {
-            String msg = "Error occurred while deleting tenant data";
-            log.error(msg, e);
-        }
     }
 }

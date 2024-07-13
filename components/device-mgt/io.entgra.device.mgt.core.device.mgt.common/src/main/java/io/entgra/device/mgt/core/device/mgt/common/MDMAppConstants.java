@@ -58,6 +58,8 @@ public class MDMAppConstants {
 		}
 		public static final String INSTALL_ENTERPRISE_APPLICATION = "INSTALL_ENTERPRISE_APPLICATION";
 		public static final String UNINSTALL_ENTERPRISE_APPLICATION = "UNINSTALL_ENTERPRISE_APPLICATION";
+		public static final String INSTALL_STORE_APPLICATION = "INSTALL_STORE_APPLICATION";
+		public static final String UNINSTALL_STORE_APPLICATION = "UNINSTALL_STORE_APPLICATION";
 		public static final String INSTALL_WEB_CLIP_APPLICATION = "INSTALL_WEB_CLIP";
 		public static final String UNINSTALL_WEB_CLIP_APPLICATION = "UNINSTALL_WEB_CLIP";
 		//App type constants related to window device type

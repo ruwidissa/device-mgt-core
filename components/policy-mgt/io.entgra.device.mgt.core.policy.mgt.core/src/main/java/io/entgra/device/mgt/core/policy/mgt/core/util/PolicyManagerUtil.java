@@ -62,7 +62,7 @@ import java.io.ObjectOutputStream;
 import java.util.*;
 
 public class PolicyManagerUtil {
-
+    private static final Gson gson = new Gson();
     public static final String GENERAL_CONFIG_RESOURCE_PATH = "general";
     public static final String MONITORING_FREQUENCY = "notifierFrequency";
     private static final Log log = LogFactory.getLog(PolicyManagerUtil.class);
@@ -353,6 +353,15 @@ public class PolicyManagerUtil {
         bos.close();
         byte[] data = bos.toByteArray();
         return data;
+    }
+
+    /**
+     * Using for converting policy objects into Json strings
+     * @param obj
+     * @return
+     */
+    public static String convertToJson(Object obj) {
+        return gson.toJson(obj);
     }
 
     public static boolean convertIntToBoolean(int x) {

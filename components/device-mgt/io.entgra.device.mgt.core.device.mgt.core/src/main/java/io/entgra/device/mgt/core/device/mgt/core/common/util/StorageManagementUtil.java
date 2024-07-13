@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * This is a util class that handles Storage Management related tasks.
@@ -87,13 +90,14 @@ public class StorageManagementUtil {
      * @param path        Path the file need to be saved in.
      */
     public static void saveFile(InputStream inputStream, String path) throws IOException {
-        try (OutputStream outStream = new FileOutputStream(new File(path))) {
-            byte[] buffer = new byte[inputStream.available()];
-            if (inputStream.read(buffer) != -1) {
-                outStream.write(buffer);
+        try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(Files.newOutputStream(Paths.get(path)));
+             BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
+            byte []buffer = new byte[8192];
+            int n;
+            while ((n = bufferedInputStream.read(buffer)) != -1) {
+                bufferedOutputStream.write(buffer, 0, n);
             }
-        } finally {
-            inputStream.close();
+            bufferedOutputStream.flush();
         }
     }
 

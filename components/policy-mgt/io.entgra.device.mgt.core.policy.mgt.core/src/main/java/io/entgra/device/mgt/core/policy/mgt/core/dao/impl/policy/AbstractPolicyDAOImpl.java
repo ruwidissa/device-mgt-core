@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.policy.mgt.core.dao.impl.policy;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -26,6 +27,7 @@ import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.CorrectiveAction;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.DeviceGroupWrapper;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Policy;
 import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.PolicyCriterion;
+import io.entgra.device.mgt.core.device.mgt.common.policy.mgt.Profile;
 import io.entgra.device.mgt.core.policy.mgt.common.Criterion;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyDAO;
 import io.entgra.device.mgt.core.policy.mgt.core.dao.PolicyManagementDAOFactory;
@@ -54,6 +56,7 @@ import java.util.Properties;
  */
 public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
 
+    private static final Gson gson = new Gson();
     private static final Log log = LogFactory.getLog(AbstractPolicyDAOImpl.class);
 
     @Override
@@ -1187,13 +1190,13 @@ public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, deviceId);
             stmt.setInt(2, policy.getId());
-            stmt.setBytes(3, PolicyManagerUtil.getBytes(policy));
+            stmt.setString(3, PolicyManagerUtil.convertToJson(policy));
             stmt.setTimestamp(4, currentTimestamp);
             stmt.setTimestamp(5, currentTimestamp);
             stmt.setInt(6, tenantId);
             stmt.setInt(7, enrolmentId);
             stmt.executeUpdate();
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             throw new PolicyManagerDAOException("Error occurred while adding the evaluated feature list to device", e);
         } finally {
             PolicyManagementDAOUtil.cleanupResources(stmt, null);
@@ -1240,7 +1243,7 @@ public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
                     "APPLIED = ? WHERE DEVICE_ID = ? AND TENANT_ID = ? AND ENROLMENT_ID = ?";
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, policy.getId());
-            stmt.setBytes(2, PolicyManagerUtil.getBytes(policy));
+            stmt.setString(2, PolicyManagerUtil.convertToJson(policy));
             stmt.setTimestamp(3, currentTimestamp);
             stmt.setBoolean(4, false);
             stmt.setInt(5, deviceId);
@@ -1248,7 +1251,7 @@ public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
             stmt.setInt(7, enrolmentId);
             stmt.executeUpdate();
 
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             throw new PolicyManagerDAOException("Error occurred while updating the evaluated feature list " +
                     "to device", e);
         } finally {
@@ -1699,39 +1702,12 @@ public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
             resultSet = stmt.executeQuery();
 
             while (resultSet.next()) {
-                ByteArrayInputStream bais = null;
-                ObjectInputStream ois = null;
-                byte[] contentBytes;
-
-                try {
-                    contentBytes = resultSet.getBytes("POLICY_CONTENT");
-                    bais = new ByteArrayInputStream(contentBytes);
-                    ois = new ObjectInputStream(bais);
-                    policy = (Policy) ois.readObject();
-                } finally {
-                    if (bais != null) {
-                        try {
-                            bais.close();
-                        } catch (IOException e) {
-                            log.warn("Error occurred while closing ByteArrayOutputStream", e);
-                        }
-                    }
-                    if (ois != null) {
-                        try {
-                            ois.close();
-                        } catch (IOException e) {
-                            log.warn("Error occurred while closing ObjectOutputStream", e);
-                        }
-                    }
-                }
+                String contentString = resultSet.getString("POLICY_CONTENT");
+                policy = gson.fromJson(contentString, Policy.class);
             }
 
         } catch (SQLException e) {
             throw new PolicyManagerDAOException("Error occurred while getting the applied policy", e);
-        } catch (IOException e) {
-            throw new PolicyManagerDAOException("Unable to read the byte stream for content", e);
-        } catch (ClassNotFoundException e) {
-            throw new PolicyManagerDAOException("Class not found while converting the object", e);
         } finally {
             PolicyManagementDAOUtil.cleanupResources(stmt, resultSet);
         }
@@ -1844,4 +1820,66 @@ public abstract class AbstractPolicyDAOImpl implements PolicyDAO {
         }
         return policies;
     }
+
+    /**
+     * Extracts a list of Policy objects with associated Profile objects from the given ResultSet
+     *
+     * @param resultSet The ResultSet containing the policy and profile data
+     * @param tenantId The tenant ID
+     * @return A list of Policy objects populated with data from the ResultSet
+     * @throws SQLException If an SQL error occurs while processing the ResultSet
+     */
+    protected List<Policy> extractPolicyListWithProfileFromDbResult(ResultSet resultSet, int tenantId) throws SQLException {
+        List<Policy> policies = new ArrayList<>();
+        while (resultSet.next()) {
+            Policy policy = createPolicyFromResultSet(resultSet, tenantId);
+            Profile profile = createProfileFromResultSet(resultSet, tenantId);
+            policy.setProfile(profile);
+            policies.add(policy);
+        }
+        return policies;
+    }
+
+    /**
+     * Creates a Policy object from the current row in the given ResultSet
+     *
+     * @param resultSet The ResultSet containing the policy data
+     * @param tenantId The tenant ID
+     * @return A Policy object populated with data from the ResultSet
+     * @throws SQLException If an SQL error occurs while processing the ResultSet
+     */
+    private Policy createPolicyFromResultSet(ResultSet resultSet, int tenantId) throws SQLException {
+        Policy policy = new Policy();
+        policy.setId(resultSet.getInt("ID"));
+        policy.setProfileId(resultSet.getInt("PROFILE_ID"));
+        policy.setPolicyName(resultSet.getString("NAME"));
+        policy.setTenantId(tenantId);
+        policy.setPriorityId(resultSet.getInt("PRIORITY"));
+        policy.setCompliance(resultSet.getString("COMPLIANCE"));
+        policy.setOwnershipType(resultSet.getString("OWNERSHIP_TYPE"));
+        policy.setUpdated(PolicyManagerUtil.convertIntToBoolean(resultSet.getInt("UPDATED")));
+        policy.setActive(PolicyManagerUtil.convertIntToBoolean(resultSet.getInt("ACTIVE")));
+        policy.setDescription(resultSet.getString("DESCRIPTION"));
+        policy.setPolicyType(resultSet.getString("POLICY_TYPE"));
+        policy.setPolicyPayloadVersion(resultSet.getString("PAYLOAD_VERSION"));
+        return policy;
+    }
+
+    /**
+     * Creates a Profile object from the current row in the given ResultSet
+     *
+     * @param resultSet The ResultSet containing the profile data
+     * @param tenantId The tenant ID
+     * @return A Profile object populated with data from the ResultSet
+     * @throws SQLException If an SQL error occurs while processing the ResultSet
+     */
+    private Profile createProfileFromResultSet(ResultSet resultSet, int tenantId) throws SQLException {
+        Profile profile = new Profile();
+        profile.setProfileId(resultSet.getInt("PROFILE_ID"));
+        profile.setProfileName(resultSet.getString("PROFILE_NAME"));
+        profile.setTenantId(tenantId);
+        profile.setDeviceType(resultSet.getString("DEVICE_TYPE"));
+        return profile;
+    }
+
 }

@@ -30,6 +30,7 @@ import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.App;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
+import io.entgra.device.mgt.core.tenant.mgt.common.exception.TenantMgtException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -96,17 +97,19 @@ import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementEx
 
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
-import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.Response;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -723,23 +726,28 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @throws ResourceManagementException if error occurred while uploading
      */
     private ApplicationReleaseDTO uploadCustomAppReleaseArtifacts(ApplicationReleaseDTO releaseDTO, ApplicationArtifact applicationArtifact,
-                                                                 String deviceType)
+                                                                  String deviceType)
             throws ResourceManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        byte[] content = getByteContentOfApp(applicationArtifact);
-        String md5OfApp = generateMD5OfApp(applicationArtifact, content);
-        validateReleaseBinaryFileHash(md5OfApp);
-        releaseDTO.setUuid(UUID.randomUUID().toString());
-        releaseDTO.setAppHashValue(md5OfApp);
-        releaseDTO.setInstallerName(applicationArtifact.getInstallerName());
+        try {
+            String md5OfApp = applicationStorageManager.
+                    getMD5(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())));
+            validateReleaseBinaryFileHash(md5OfApp);
+            releaseDTO.setUuid(UUID.randomUUID().toString());
+            releaseDTO.setAppHashValue(md5OfApp);
+            releaseDTO.setInstallerName(applicationArtifact.getInstallerName());
 
-        try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
             applicationStorageManager.uploadReleaseArtifact(releaseDTO, deviceType,
-                    binaryDuplicate, tenantId);
+                    Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), tenantId);
         } catch (IOException e) {
             String msg = "Error occurred when uploading release artifact into the server";
             log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (StorageManagementException e) {
+            String msg = "Error occurred while md5sum value retrieving process: application UUID "
+                    + releaseDTO.getUuid();
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
         return addImageArtifacts(releaseDTO, applicationArtifact, tenantId);
@@ -769,6 +777,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             return Constants.GOOGLE_PLAY_STORE_URL;
         } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
             return Constants.APPLE_STORE_URL;
+        } else if (DeviceTypes.WINDOWS.toString().equalsIgnoreCase(deviceType)) {
+            return Constants.MICROSOFT_STORE_URL;
         } else {
             throw new IllegalArgumentException("No such device with the name " + deviceType);
         }
@@ -856,82 +866,77 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         String uuid = UUID.randomUUID().toString();
         applicationReleaseDTO.setUuid(uuid);
-
         // The application executable artifacts such as apks are uploaded.
         try {
-            byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
             applicationReleaseDTO.setInstallerName(applicationArtifact.getInstallerName());
-            try (ByteArrayInputStream binary = new ByteArrayInputStream(content)) {
-                if (!DeviceTypes.WINDOWS.toString().equalsIgnoreCase(deviceType)) {
-                    ApplicationInstaller applicationInstaller = applicationStorageManager
-                            .getAppInstallerData(binary, deviceType);
-                    applicationReleaseDTO.setVersion(applicationInstaller.getVersion());
-                    applicationReleaseDTO.setPackageName(applicationInstaller.getPackageName());
-                } else {
-                    String windowsInstallerName = applicationArtifact.getInstallerName();
-                    String extension = windowsInstallerName.substring(windowsInstallerName.lastIndexOf(".") + 1);
-                    if (!extension.equalsIgnoreCase(Constants.MSI) &&
-                            !extension.equalsIgnoreCase(Constants.APPX)) {
-                        String msg = "Application Type doesn't match with supporting application types of " +
-                                deviceType + "platform which are APPX and MSI";
-                        log.error(msg);
-                        throw new BadRequestException(msg);
-                    }
-                }
-
-                String packageName = applicationReleaseDTO.getPackageName();
-                try {
-                    ConnectionManagerUtil.openDBConnection();
-                    if (!isNewRelease && applicationReleaseDAO
-                            .isActiveReleaseExisitForPackageName(packageName, tenantId,
-                                    lifecycleStateManager.getEndState())) {
-                        String msg = "Application release is already exist for the package name: " + packageName
-                                + ". Either you can delete all application releases for package " + packageName + " or "
-                                + "you can add this app release as an new application release, under the existing "
-                                + "application.";
-                        log.error(msg);
-                        throw new ApplicationManagementException(msg);
-                    }
-                    String md5OfApp = applicationStorageManager.getMD5(new ByteArrayInputStream(content));
-                    if (md5OfApp == null) {
-                        String msg = "Error occurred while md5sum value retrieving process: application UUID "
-                                + applicationReleaseDTO.getUuid();
-                        log.error(msg);
-                        throw new ApplicationStorageManagementException(msg);
-                    }
-                    if (this.applicationReleaseDAO.verifyReleaseExistenceByHash(md5OfApp, tenantId)) {
-                        String msg =
-                                "Application release exists for the uploaded binary file. Device Type: " + deviceType;
-                        log.error(msg);
-                        throw new BadRequestException(msg);
-                    }
-                    applicationReleaseDTO.setAppHashValue(md5OfApp);
-
-                    try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
-                        applicationStorageManager
-                                .uploadReleaseArtifact(applicationReleaseDTO, deviceType, binaryDuplicate, tenantId);
-                    }
-                } catch (StorageManagementException e) {
-                    String msg = "Error occurred while md5sum value retrieving process: application UUID "
-                            + applicationReleaseDTO.getUuid();
-                    log.error(msg, e);
-                    throw new ApplicationStorageManagementException(msg, e);
-                } catch (DBConnectionException e) {
-                    String msg = "Error occurred when getting database connection for verifying app release data.";
-                    log.error(msg, e);
-                    throw new ApplicationManagementException(msg, e);
-                } catch (ApplicationManagementDAOException e) {
-                    String msg =
-                            "Error occurred when executing the query for verifying application release existence for "
-                                    + "the package.";
-                    log.error(msg, e);
-                    throw new ApplicationManagementException(msg, e);
-                } finally {
-                    ConnectionManagerUtil.closeDBConnection();
+            if (!DeviceTypes.WINDOWS.toString().equalsIgnoreCase(deviceType)) {
+                ApplicationInstaller applicationInstaller = applicationStorageManager
+                        .getAppInstallerData(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), deviceType);
+                applicationReleaseDTO.setVersion(applicationInstaller.getVersion());
+                applicationReleaseDTO.setPackageName(applicationInstaller.getPackageName());
+            } else {
+                String windowsInstallerName = applicationArtifact.getInstallerName();
+                String extension = windowsInstallerName.substring(windowsInstallerName.lastIndexOf(".") + 1);
+                if (!extension.equalsIgnoreCase(Constants.MSI) &&
+                        !extension.equalsIgnoreCase(Constants.APPX)) {
+                    String msg = "Application Type doesn't match with supporting application types of " +
+                            deviceType + "platform which are APPX and MSI";
+                    log.error(msg);
+                    throw new BadRequestException(msg);
                 }
             }
+
+            String packageName = applicationReleaseDTO.getPackageName();
+            try {
+                ConnectionManagerUtil.openDBConnection();
+                if (!isNewRelease && applicationReleaseDAO
+                        .isActiveReleaseExisitForPackageName(packageName, tenantId,
+                                lifecycleStateManager.getEndState())) {
+                    String msg = "Application release is already exist for the package name: " + packageName
+                            + ". Either you can delete all application releases for package " + packageName + " or "
+                            + "you can add this app release as an new application release, under the existing "
+                            + "application.";
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
+                String md5OfApp = applicationStorageManager.
+                        getMD5(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())));
+                if (md5OfApp == null) {
+                    String msg = "Error occurred while md5sum value retrieving process: application UUID "
+                            + applicationReleaseDTO.getUuid();
+                    log.error(msg);
+                    throw new ApplicationStorageManagementException(msg);
+                }
+                if (this.applicationReleaseDAO.verifyReleaseExistenceByHash(md5OfApp, tenantId)) {
+                    String msg =
+                            "Application release exists for the uploaded binary file. Device Type: " + deviceType;
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
+                applicationReleaseDTO.setAppHashValue(md5OfApp);
+                applicationStorageManager
+                        .uploadReleaseArtifact(applicationReleaseDTO, deviceType,
+                                Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), tenantId);
+            } catch (StorageManagementException e) {
+                String msg = "Error occurred while md5sum value retrieving process: application UUID "
+                        + applicationReleaseDTO.getUuid();
+                log.error(msg, e);
+                throw new ApplicationStorageManagementException(msg, e);
+            } catch (DBConnectionException e) {
+                String msg = "Error occurred when getting database connection for verifying app release data.";
+                log.error(msg, e);
+                throw new ApplicationManagementException(msg, e);
+            } catch (ApplicationManagementDAOException e) {
+                String msg =
+                        "Error occurred when executing the query for verifying application release existence for "
+                                + "the package.";
+                log.error(msg, e);
+                throw new ApplicationManagementException(msg, e);
+            } finally {
+                ConnectionManagerUtil.closeDBConnection();
+            }
         } catch (IOException e) {
-            String msg = "Error occurred when getting byte array of binary file. Installer name: " + applicationArtifact
+            String msg = "Error occurred when getting file input stream. Installer name: " + applicationArtifact
                     .getInstallerName();
             log.error(msg, e);
             throw new ApplicationStorageManagementException(msg, e);
@@ -957,73 +962,64 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         // The application executable artifacts such as apks are uploaded.
         try {
-            byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
+            String md5OfApp = applicationStorageManager.getMD5(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())));
+            if (md5OfApp == null) {
+                String msg = "Error occurred while retrieving md5sum value from the binary file for application "
+                        + "release UUID " + applicationReleaseDTO.getUuid();
+                log.error(msg);
+                throw new ApplicationStorageManagementException(msg);
+            }
 
-            try (ByteArrayInputStream binaryClone = new ByteArrayInputStream(content)) {
-                String md5OfApp = applicationStorageManager.getMD5(binaryClone);
+            if (!applicationReleaseDTO.getAppHashValue().equals(md5OfApp)) {
+                applicationReleaseDTO.setInstallerName(applicationArtifact.getInstallerName());
+                ApplicationInstaller applicationInstaller = applicationStorageManager
+                        .getAppInstallerData(Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), deviceType);
+                String packageName = applicationInstaller.getPackageName();
 
-                if (md5OfApp == null) {
-                    String msg = "Error occurred while retrieving md5sum value from the binary file for application "
-                            + "release UUID " + applicationReleaseDTO.getUuid();
-                    log.error(msg);
-                    throw new ApplicationStorageManagementException(msg);
-                }
-                if (!applicationReleaseDTO.getAppHashValue().equals(md5OfApp)) {
-                    applicationReleaseDTO.setInstallerName(applicationArtifact.getInstallerName());
-
-                    try (ByteArrayInputStream binary = new ByteArrayInputStream(content)) {
-                        ApplicationInstaller applicationInstaller = applicationStorageManager
-                                .getAppInstallerData(binary, deviceType);
-                        String packageName = applicationInstaller.getPackageName();
-
-                        try {
-                            ConnectionManagerUtil.getDBConnection();
-                            if (this.applicationReleaseDAO.verifyReleaseExistenceByHash(md5OfApp, tenantId)) {
-                                String msg = "Same binary file is in the server. Hence you can't add same file into the "
-                                        + "server. Device Type: " + deviceType + " and package name: " + packageName;
-                                log.error(msg);
-                                throw new BadRequestException(msg);
-                            }
-                            if (applicationReleaseDTO.getPackageName() == null){
-                                String msg = "Found null value for application release package name for application "
-                                        + "release which has UUID: " + applicationReleaseDTO.getUuid();
-                                log.error(msg);
-                                throw new ApplicationManagementException(msg);
-                            }
-                            if (!applicationReleaseDTO.getPackageName().equals(packageName)){
-                                String msg = "Package name of the new artifact does not match with the package name of "
-                                        + "the exiting application release. Package name of the existing app release "
-                                        + applicationReleaseDTO.getPackageName() + " and package name of the new "
-                                        + "application release " + packageName;
-                                log.error(msg);
-                                throw new BadRequestException(msg);
-                            }
-
-                            applicationReleaseDTO.setVersion(applicationInstaller.getVersion());
-                            applicationReleaseDTO.setPackageName(packageName);
-                            String deletingAppHashValue = applicationReleaseDTO.getAppHashValue();
-                            applicationReleaseDTO.setAppHashValue(md5OfApp);
-                            try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
-                                applicationStorageManager
-                                        .uploadReleaseArtifact(applicationReleaseDTO, deviceType, binaryDuplicate,
-                                                tenantId);
-                                applicationStorageManager.copyImageArtifactsAndDeleteInstaller(deletingAppHashValue,
-                                        applicationReleaseDTO, tenantId);
-                            }
-                        } catch (DBConnectionException e) {
-                            String msg = "Error occurred when getting database connection for verifying application "
-                                    + "release existing for new app hash value.";
-                            log.error(msg, e);
-                            throw new ApplicationManagementException(msg, e);
-                        } catch (ApplicationManagementDAOException e) {
-                            String msg = "Error occurred when executing the query for verifying application release "
-                                    + "existence for the new app hash value.";
-                            log.error(msg, e);
-                            throw new ApplicationManagementException(msg, e);
-                        } finally {
-                            ConnectionManagerUtil.closeDBConnection();
-                        }
+                try {
+                    ConnectionManagerUtil.getDBConnection();
+                    if (this.applicationReleaseDAO.verifyReleaseExistenceByHash(md5OfApp, tenantId)) {
+                        String msg = "Same binary file is in the server. Hence you can't add same file into the "
+                                + "server. Device Type: " + deviceType + " and package name: " + packageName;
+                        log.error(msg);
+                        throw new BadRequestException(msg);
                     }
+                    if (applicationReleaseDTO.getPackageName() == null) {
+                        String msg = "Found null value for application release package name for application "
+                                + "release which has UUID: " + applicationReleaseDTO.getUuid();
+                        log.error(msg);
+                        throw new ApplicationManagementException(msg);
+                    }
+                    if (!applicationReleaseDTO.getPackageName().equals(packageName)) {
+                        String msg = "Package name of the new artifact does not match with the package name of "
+                                + "the exiting application release. Package name of the existing app release "
+                                + applicationReleaseDTO.getPackageName() + " and package name of the new "
+                                + "application release " + packageName;
+                        log.error(msg);
+                        throw new BadRequestException(msg);
+                    }
+
+                    applicationReleaseDTO.setVersion(applicationInstaller.getVersion());
+                    applicationReleaseDTO.setPackageName(packageName);
+                    String deletingAppHashValue = applicationReleaseDTO.getAppHashValue();
+                    applicationReleaseDTO.setAppHashValue(md5OfApp);
+                    applicationStorageManager.uploadReleaseArtifact(applicationReleaseDTO, deviceType,
+                            Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())),
+                            tenantId);
+                    applicationStorageManager.copyImageArtifactsAndDeleteInstaller(deletingAppHashValue,
+                            applicationReleaseDTO, tenantId);
+                } catch (DBConnectionException e) {
+                    String msg = "Error occurred when getting database connection for verifying application "
+                            + "release existing for new app hash value.";
+                    log.error(msg, e);
+                    throw new ApplicationManagementException(msg, e);
+                } catch (ApplicationManagementDAOException e) {
+                    String msg = "Error occurred when executing the query for verifying application release "
+                            + "existence for the new app hash value.";
+                    log.error(msg, e);
+                    throw new ApplicationManagementException(msg, e);
+                } finally {
+                    ConnectionManagerUtil.closeDBConnection();
                 }
             }
         } catch (StorageManagementException e) {
@@ -1032,7 +1028,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg, e);
             throw new ApplicationStorageManagementException(msg, e);
         } catch (IOException e) {
-            String msg = "Error occurred when getting byte array of binary file. Installer name: " + applicationArtifact
+            String msg = "Error occurred when getting file input stream. Installer name: " + applicationArtifact
                     .getInstallerName();
             log.error(msg, e);
             throw new ApplicationStorageManagementException(msg, e);
@@ -3607,52 +3603,49 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 DeviceType deviceTypeObj = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
                 // The application executable artifacts such as deb are uploaded.
                 try {
-                    byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
-                    try (ByteArrayInputStream binaryClone = new ByteArrayInputStream(content)) {
-                        String md5OfApp = applicationStorageManager.getMD5(binaryClone);
-                        if (md5OfApp == null) {
-                            String msg = "Error occurred while retrieving md5sum value from the binary file for "
-                                    + "application release UUID " + applicationReleaseDTO.get().getUuid();
-                            log.error(msg);
-                            throw new ApplicationStorageManagementException(msg);
-                        }
-                        if (!applicationReleaseDTO.get().getAppHashValue().equals(md5OfApp)) {
-                            try {
-                                ConnectionManagerUtil.getDBConnection();
-                                if (this.applicationReleaseDAO.verifyReleaseExistenceByHash(md5OfApp, tenantId)) {
-                                    String msg =
-                                            "Same binary file is in the server. Hence you can't add same file into the "
-                                                    + "server. Device Type: " + deviceTypeObj.getName()
-                                                    + " and package name: " + applicationDTO.getApplicationReleaseDTOs()
-                                                    .get(0).getPackageName();
-                                    log.error(msg);
-                                    throw new BadRequestException(msg);
-                                }
+                    String md5OfApp = applicationStorageManager.getMD5(
+                            Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())));
+                    if (md5OfApp == null) {
+                        String msg = "Error occurred while retrieving md5sum value from the binary file for "
+                                + "application release UUID " + applicationReleaseDTO.get().getUuid();
+                        log.error(msg);
+                        throw new ApplicationStorageManagementException(msg);
+                    }
 
-                                applicationReleaseDTO.get().setInstallerName(applicationArtifact.getInstallerName());
-                                String deletingAppHashValue = applicationReleaseDTO.get().getAppHashValue();
-                                applicationReleaseDTO.get().setAppHashValue(md5OfApp);
-                                try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
-                                    applicationStorageManager
-                                            .uploadReleaseArtifact(applicationReleaseDTO.get(), deviceTypeObj.getName(),
-                                                    binaryDuplicate, tenantId);
-                                    applicationStorageManager.copyImageArtifactsAndDeleteInstaller(deletingAppHashValue,
-                                            applicationReleaseDTO.get(), tenantId);
-                                }
-                            } catch (DBConnectionException e) {
-                                String msg = "Error occurred when getting database connection for verifying application"
-                                        + " release existing for new app hash value.";
-                                log.error(msg, e);
-                                throw new ApplicationManagementException(msg, e);
-                            } catch (ApplicationManagementDAOException e) {
+                    if (!applicationReleaseDTO.get().getAppHashValue().equals(md5OfApp)) {
+                        try {
+                            ConnectionManagerUtil.getDBConnection();
+                            if (this.applicationReleaseDAO.verifyReleaseExistenceByHash(md5OfApp, tenantId)) {
                                 String msg =
-                                        "Error occurred when executing the query for verifying application release "
-                                                + "existence for the new app hash value.";
-                                log.error(msg, e);
-                                throw new ApplicationManagementException(msg, e);
-                            } finally {
-                                ConnectionManagerUtil.closeDBConnection();
+                                        "Same binary file is in the server. Hence you can't add same file into the "
+                                                + "server. Device Type: " + deviceTypeObj.getName()
+                                                + " and package name: " + applicationDTO.getApplicationReleaseDTOs()
+                                                .get(0).getPackageName();
+                                log.error(msg);
+                                throw new BadRequestException(msg);
                             }
+
+                            applicationReleaseDTO.get().setInstallerName(applicationArtifact.getInstallerName());
+                            String deletingAppHashValue = applicationReleaseDTO.get().getAppHashValue();
+                            applicationReleaseDTO.get().setAppHashValue(md5OfApp);
+                            applicationStorageManager.
+                                    uploadReleaseArtifact(applicationReleaseDTO.get(), deviceTypeObj.getName(),
+                                            Files.newInputStream(Paths.get(applicationArtifact.getInstallerPath())), tenantId);
+                            applicationStorageManager.copyImageArtifactsAndDeleteInstaller(deletingAppHashValue,
+                                    applicationReleaseDTO.get(), tenantId);
+                        } catch (DBConnectionException e) {
+                            String msg = "Error occurred when getting database connection for verifying application"
+                                    + " release existing for new app hash value.";
+                            log.error(msg, e);
+                            throw new ApplicationManagementException(msg, e);
+                        } catch (ApplicationManagementDAOException e) {
+                            String msg =
+                                    "Error occurred when executing the query for verifying application release "
+                                            + "existence for the new app hash value.";
+                            log.error(msg, e);
+                            throw new ApplicationManagementException(msg, e);
+                        } finally {
+                            ConnectionManagerUtil.closeDBConnection();
                         }
                     }
                 } catch (StorageManagementException e) {
@@ -4424,7 +4417,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             spApplicationDAO.deleteSPApplicationMappingByTenant(tenantId);
             spApplicationDAO.deleteIdentityServerByTenant(tenantId);
             applicationDAO.deleteApplicationsByTenant(tenantId);
-            APIUtil.getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
 
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
@@ -4449,12 +4441,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + " of tenant ID: " + tenantId ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (ApplicationStorageManagementException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred while deleting App folder of tenant"
-                    + " of tenant ID: " + tenantId ;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -4463,19 +4449,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @Override
     public void deleteApplicationDataByTenantDomain(String tenantDomain) throws ApplicationManagementException {
         int tenantId;
-        try{
-            TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();
-            TenantInfoBean tenantInfoBean = tenantMgtAdminService.getTenant(tenantDomain);
-            tenantId = tenantInfoBean.getTenantId();
-
-        } catch (Exception e) {
-            String msg = "Error getting tenant ID from domain: "
-                     + tenantDomain;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        }
-
         try {
+            tenantId = DataHolder.getInstance().getTenantManagerAdminService().getTenantId(tenantDomain);
+
             ConnectionManagerUtil.beginDBTransaction();
 
             vppApplicationDAO.deleteAssociationByTenant(tenantId);
@@ -4499,40 +4475,54 @@ public class ApplicationManagerImpl implements ApplicationManager {
             spApplicationDAO.deleteSPApplicationMappingByTenant(tenantId);
             spApplicationDAO.deleteIdentityServerByTenant(tenantId);
             applicationDAO.deleteApplicationsByTenant(tenantId);
-            APIUtil.getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
 
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while observing the database connection to delete applications for tenant with ID: "
-                    + tenantId;
+            String msg = "Error occurred while observing the database connection to delete applications for tenant with " +
+                    "domain: " + tenantDomain;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Database access error is occurred when getting applications for tenant with ID: " + tenantId;
+            String msg = "Database access error is occurred when getting applications for tenant with domain: "
+                    + tenantDomain;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while deleting life-cycle state data of application releases of the tenant"
-                    + " of ID: " + tenantId ;
+                    + " of domain: " + tenantDomain ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ReviewManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while deleting reviews of application releases of the applications"
-                    + " of tenant ID: " + tenantId ;
+                    + " of tenant of domain: " + tenantDomain ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (ApplicationStorageManagementException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred while deleting App folder of tenant"
-                    + " of tenant ID: " + tenantId ;
+        } catch (Exception e) {
+            String msg = "Error getting tenant ID from domain: "
+                    + tenantDomain;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
         }
+    }
 
+    @Override
+    public void deleteApplicationArtifactsByTenantDomain(String tenantDomain) throws ApplicationManagementException {
+        int tenantId;
+        try {
+            tenantId = DataHolder.getInstance().getTenantManagerAdminService().getTenantId(tenantDomain);
+            DataHolder.getInstance().getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
+        } catch (ApplicationStorageManagementException  e) {
+            String msg = "Error deleting app artifacts of tenant of domain: " + tenantDomain ;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TenantMgtException e) {
+            String msg = "Error getting tenant ID from domain: "
+                    + tenantDomain + " when trying to delete application artifacts of tenant";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
     }
 }
