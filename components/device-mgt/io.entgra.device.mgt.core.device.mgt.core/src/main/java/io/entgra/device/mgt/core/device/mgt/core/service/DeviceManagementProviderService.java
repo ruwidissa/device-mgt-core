@@ -1082,29 +1082,40 @@ public interface DeviceManagementProviderService {
      * Get owner details and device IDs for a given owner and tenant.
      *
      * @param owner the name of the owner.
-     * @param deviceTypeId the device type id
+     * @param deviceTypeId the device type id]
+     * @param deviceOwner owner of the device
+     * @param deviceName name of the device
+     * @param deviceStatus status of the device
      * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user.
      * @throws DeviceManagementException if an error occurs while fetching owner details.
      */
-    OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner, int deviceTypeId) throws DeviceManagementDAOException;
+    OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner, int deviceTypeId, String deviceOwner, String deviceName, String deviceStatus)
+            throws DeviceManagementDAOException;
 
     /**
      * Get owner details and device IDs for a given owner and tenant.
      *
      * @param deviceId the deviceId of the device.
+     * @param deviceOwner owner of the device
+     * @param deviceName name of the device
+     * @param deviceStatus status of the device
      * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user.
      * @throws DeviceManagementException if an error occurs while fetching owner details.
      */
-    OwnerWithDeviceDTO getOwnerWithDeviceByDeviceId(int deviceId) throws DeviceManagementDAOException;
+    OwnerWithDeviceDTO getOwnerWithDeviceByDeviceId(int deviceId, String deviceOwner, String deviceName, String deviceStatus)
+            throws DeviceManagementDAOException;
 
     /**
      * Get owner details and device IDs for a given owner and tenant.
      * @param tenantId the tenant id which devices need to be retried
      * @param deviceTypeId the device type id
+     * @param deviceOwner owner of the device
+     * @param deviceStatus status of the device
      * @return {@link DeviceDetailsDTO} which contains devices details.
      * @throws DeviceManagementException if an error occurs while fetching owner details.
      */
-    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, int deviceTypeId) throws DeviceManagementDAOException;
+    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, int deviceTypeId, String deviceOwner, String deviceStatus)
+            throws DeviceManagementDAOException;
 
     /**
      * Get operation details by operation code.
