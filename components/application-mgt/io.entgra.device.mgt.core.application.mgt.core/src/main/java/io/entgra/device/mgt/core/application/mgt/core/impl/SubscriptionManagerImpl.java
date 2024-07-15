@@ -2469,10 +2469,10 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 OwnerWithDeviceDTO ownerWithDevice =
                         deviceManagementProviderService.getOwnerWithDeviceByDeviceId(deviceId, request.getOwner(), request.getDeviceName(),
                                 request.getDeviceStatus());
-                if (ownerWithDevice == null) {
+                if (ownerWithDevice == null || (request.getDeviceName() != null && !request.getDeviceName().isEmpty() &&
+                        (ownerWithDevice.getDeviceNames() == null || !ownerWithDevice.getDeviceNames().contains(request.getDeviceName())))) {
                     continue;
                 }
-
                 if (deviceSubscriptionMap.containsKey(deviceId)) {
                     DeviceSubscriptionDTO subscription = deviceSubscriptionMap.get(deviceId);
                     DeviceSubscriptionData deviceDetail = new DeviceSubscriptionData();
@@ -2664,10 +2664,10 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 OwnerWithDeviceDTO ownerWithDevice =
                         deviceManagementProviderService.getOwnerWithDeviceByDeviceId(deviceId, request.getOwner(), request.getDeviceName(),
                                 request.getDeviceStatus());
-                if (ownerWithDevice == null) {
+                if (ownerWithDevice == null || (request.getDeviceName() != null && !request.getDeviceName().isEmpty() &&
+                        (ownerWithDevice.getDeviceNames() == null || !ownerWithDevice.getDeviceNames().contains(request.getDeviceName())))) {
                     continue;
                 }
-
                 if (allSubscriptionMap.containsKey(deviceId)) {
                     DeviceSubscriptionDTO subscription = allSubscriptionMap.get(deviceId);
                     DeviceSubscriptionData deviceDetail = new DeviceSubscriptionData();
