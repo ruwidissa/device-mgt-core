@@ -5362,7 +5362,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner, int deviceTypeId) throws DeviceManagementDAOException {
+    public OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner, int deviceTypeId, String deviceOwner, String deviceName, String deviceStatus)
+            throws DeviceManagementDAOException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         OwnerWithDeviceDTO ownerWithDeviceDTO;
 
@@ -5373,7 +5374,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
         try {
             DeviceManagementDAOFactory.openConnection();
-            ownerWithDeviceDTO = this.enrollmentDAO.getOwnersWithDevices(owner, allowingDeviceStatuses, tenantId, deviceTypeId);
+            ownerWithDeviceDTO = this.enrollmentDAO.getOwnersWithDevices(owner, allowingDeviceStatuses, tenantId, deviceTypeId, deviceOwner, deviceName, deviceStatus);
             if (ownerWithDeviceDTO == null) {
                 String msg = "No data found for owner: " + owner;
                 log.error(msg);
@@ -5397,13 +5398,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
 
     @Override
-    public OwnerWithDeviceDTO getOwnerWithDeviceByDeviceId(int deviceId) throws DeviceManagementDAOException {
+    public OwnerWithDeviceDTO getOwnerWithDeviceByDeviceId(int deviceId, String deviceOwner, String deviceName, String deviceStatus)
+            throws DeviceManagementDAOException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         OwnerWithDeviceDTO deviceOwnerWithStatus;
 
         try {
             DeviceManagementDAOFactory.openConnection();
-            deviceOwnerWithStatus = enrollmentDAO.getOwnerWithDeviceByDeviceId(deviceId, tenantId);
+            deviceOwnerWithStatus = enrollmentDAO.getOwnerWithDeviceByDeviceId(deviceId, tenantId, deviceOwner, deviceName, deviceStatus);
             if (deviceOwnerWithStatus == null) {
                 throw new DeviceManagementDAOException("No data found for device ID: " + deviceId);
             }
@@ -5424,7 +5426,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, int deviceTypeId) throws DeviceManagementDAOException {
+    public List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, int deviceTypeId, String deviceOwner, String deviceStatus)
+            throws DeviceManagementDAOException {
         List<DeviceDetailsDTO> devices;
         List<String> allowingDeviceStatuses = new ArrayList<>();
         allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
@@ -5432,7 +5435,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
         try {
             DeviceManagementDAOFactory.openConnection();
-            devices = enrollmentDAO.getDevicesByTenantId(tenantId, allowingDeviceStatuses, deviceTypeId);
+            devices = enrollmentDAO.getDevicesByTenantId(tenantId, allowingDeviceStatuses, deviceTypeId, deviceOwner, deviceStatus);
             if (devices == null || devices.isEmpty()) {
                 String msg = "No devices found for tenant ID: " + tenantId;
                 log.error(msg);

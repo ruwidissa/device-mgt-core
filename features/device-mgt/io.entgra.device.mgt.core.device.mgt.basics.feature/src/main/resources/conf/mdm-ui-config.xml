@@ -387,7 +387,10 @@
         <Scope>win:ops:device-info</Scope>
         <Scope>win:ops:security-info</Scope>
         <Scope>win:ops:firewall-info</Scope>
+        <Scope>win:ops:os-updates-info</Scope>
         <Scope>win:microsoft-store:search</Scope>
+        <Scope>win:updates:read</Scope>
+        <Scope>win:update:modify</Scope>
         <Scope>admin:tenant:view</Scope>
         <Scope>dm:admin:devices:usage:view</Scope>
         <Scope>and:ops:clear-app</Scope>

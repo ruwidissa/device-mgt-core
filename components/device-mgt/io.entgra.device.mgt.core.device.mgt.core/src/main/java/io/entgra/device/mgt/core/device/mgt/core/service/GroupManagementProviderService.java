@@ -378,11 +378,15 @@ public interface GroupManagementProviderService {
      *
      * @param groupName the name of the group.
      * @param deviceTypeId the device type id
+     * @param deviceOwner owner of the device
+     * @param deviceName name of the device
+     * @param deviceStatus status of the device
      * @param offset the offset for the data set
      * @param limit the limit for the data set
      * @return {@link GroupDetailsDTO} which containing group details and a list of device IDs
      * @throws GroupManagementException if an error occurs while fetching group details.
      */
-    GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int deviceTypeId, int offset, int limit) throws GroupManagementException;
+    GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int deviceTypeId, String deviceOwner, String deviceName, String deviceStatus,
+                                               int offset, int limit) throws GroupManagementException;
 
 }

@@ -390,12 +390,16 @@ public interface SubscriptionDAO {
      * @param appReleaseId the appReleaseId of the application release.
      * @param unsubscribe the Status of the subscription.
      * @param tenantId id of the current tenant.
+     * @param actionStatus Status of the action
+     * @param actionType type of the action
+     * @param actionTriggeredBy subscribed by
      * @param deviceIds deviceIds deviceIds to retrieve data.
      * @return {@link DeviceOperationDTO} which contains the details of device subscriptions.
      * @throws ApplicationManagementDAOException if connection establishment or SQL execution fails.
      */
-    List<DeviceSubscriptionDTO> getSubscriptionDetailsByDeviceIds(int appReleaseId, boolean unsubscribe, int tenantId, List<Integer> deviceIds)
-            throws ApplicationManagementDAOException;
+    List<DeviceSubscriptionDTO> getSubscriptionDetailsByDeviceIds(int appReleaseId, boolean unsubscribe, int tenantId,
+                                                                  List<Integer> deviceIds, String actionStatus, String actionType,
+                                                                  String actionTriggeredBy, String tabActionStatus) throws ApplicationManagementDAOException;
 
     /**
      * This method is used to get the details of device subscriptions related to a UUID.
@@ -403,13 +407,16 @@ public interface SubscriptionDAO {
      * @param appReleaseId the appReleaseId of the application release.
      * @param unsubscribe the Status of the subscription.
      * @param tenantId id of the current tenant.
+     * @param actionStatus Status of the action
+     * @param actionType type of the action
+     * @param actionTriggeredBy subscribed by
      * @param offset the offset for the data set
      * @param limit the limit for the data set
      * @return {@link DeviceOperationDTO} which contains the details of device subscriptions.
      * @throws ApplicationManagementDAOException if connection establishment or SQL execution fails.
      */
-    List<DeviceSubscriptionDTO> getAllSubscriptionsDetails(int appReleaseId, boolean unsubscribe, int tenantId, int offset, int limit)
-            throws ApplicationManagementDAOException;
+    List<DeviceSubscriptionDTO> getAllSubscriptionsDetails(int appReleaseId, boolean unsubscribe, int tenantId, String actionStatus, String actionType,
+                                                           String actionTriggeredBy, int offset, int limit) throws ApplicationManagementDAOException;
 
     /**
      * This method is used to get the counts of all subscription types related to a UUID.

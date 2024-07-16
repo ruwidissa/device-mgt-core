@@ -17,7 +17,12 @@
  */
 
 package io.entgra.device.mgt.core.device.mgt.core.service;
-import io.entgra.device.mgt.core.device.mgt.common.*;
+
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.GroupPaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
@@ -26,6 +31,7 @@ import io.entgra.device.mgt.core.device.mgt.core.geo.task.GeoFenceEventOperation
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMgtConstants;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
@@ -1690,8 +1696,8 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
     }
 
     @Override
-    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int deviceTypeId, int offset, int limit)
-            throws GroupManagementException {
+    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int deviceTypeId, String deviceOwner, String deviceName, String deviceStatus,
+                                                      int offset, int limit) throws GroupManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Retrieving group details and device IDs for group: " + groupName);
         }
@@ -1705,7 +1711,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         try {
             GroupManagementDAOFactory.openConnection();
             groupDetailsWithDevices = this.groupDAO.getGroupDetailsWithDevices(groupName, allowingDeviceStatuses,
-                    deviceTypeId, tenantId, offset, limit);
+                    deviceTypeId, tenantId, deviceOwner, deviceName, deviceStatus, offset, limit);
         } catch (GroupManagementDAOException | SQLException e) {
             String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
             log.error(msg, e);
