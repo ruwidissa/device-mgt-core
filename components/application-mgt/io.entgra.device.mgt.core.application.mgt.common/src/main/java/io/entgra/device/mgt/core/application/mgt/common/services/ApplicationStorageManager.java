@@ -140,4 +140,14 @@ public interface ApplicationStorageManager {
      * @throws ApplicationStorageManagementException thrown if
      */
     void deleteAppFolderOfTenant(int tenantId) throws ApplicationStorageManagementException;
+
+    /**
+     * Get absolute path of a file describe by hashVal, folder, file name and tenantId
+     * @param hashVal Hash value of the application release.
+     * @param folderName Folder name file resides.
+     * @param fileName File name of the file.
+     * @param tenantId Tenant ID
+     * @return Absolute path
+     */
+    String getAbsolutePathOfFile(String hashVal, String folderName, String fileName, int tenantId);
 }

@@ -48,6 +48,11 @@
             {% endfor %}
         {% endif %}
         </PushNotificationProviders>
+        {% if device_mgt_conf.push_notification_conf.fcm_server_endpoint is defined %}
+            <ProviderContextMetadata>
+                <ContextMetadata key="FCM_SERVER_ENDPOINT">{{device_mgt_conf.push_notification_conf.fcm_server_endpoint}}</ContextMetadata>
+            </ProviderContextMetadata>
+        {% endif %}
     </PushNotificationConfiguration>
     <PullNotificationConfiguration>
         {% if device_mgt_conf.pull_notification_conf is defined %}

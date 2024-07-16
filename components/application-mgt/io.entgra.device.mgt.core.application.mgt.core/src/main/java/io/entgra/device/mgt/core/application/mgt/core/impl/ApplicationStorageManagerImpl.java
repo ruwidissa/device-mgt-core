@@ -32,14 +32,13 @@ import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagem
 import io.entgra.device.mgt.core.device.mgt.core.common.util.StorageManagementUtil;
 import net.dongliu.apk.parser.bean.ApkMeta;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static io.entgra.device.mgt.core.device.mgt.core.common.util.StorageManagementUtil.saveFile;
@@ -158,13 +157,12 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     public void uploadReleaseArtifact(ApplicationReleaseDTO applicationReleaseDTO,
             String deviceType, InputStream binaryFile, int tenantId) throws ResourceManagementException {
         try {
-            byte [] content = IOUtils.toByteArray(binaryFile);
             String artifactDirectoryPath =
                     storagePath + tenantId + File.separator + applicationReleaseDTO.getAppHashValue() + File.separator
                             + Constants.APP_ARTIFACT;
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
             String artifactPath = artifactDirectoryPath + File.separator + applicationReleaseDTO.getInstallerName();
-            saveFile(new ByteArrayInputStream(content), artifactPath);
+            saveFile(binaryFile, artifactPath);
         } catch (IOException e) {
             String msg = "IO Exception while saving the release artifacts in the server for the application UUID "
                     + applicationReleaseDTO.getUuid();
@@ -326,5 +324,13 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                         "Error occurred while deleting App folder of tenant:" + tenantId, e);
             }
         }
+    }
+
+    @Override
+    public String getAbsolutePathOfFile(String hashVal, String folderName, String fileName, int tenantId) {
+        String filePath =
+                storagePath + tenantId + File.separator + hashVal + File.separator + folderName + File.separator
+                        + fileName;
+        return Paths.get(filePath).toAbsolutePath().toString();
     }
 }

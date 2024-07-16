@@ -24,6 +24,7 @@ public class PolicyPaginationRequest {
     private String name;
     private String type;
     private String status;
+    private String deviceType;
 
     public PolicyPaginationRequest(int start, int rowCount) {
         this.startIndex = start;
@@ -68,6 +69,14 @@ public class PolicyPaginationRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 
     @Override

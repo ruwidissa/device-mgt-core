@@ -19,6 +19,7 @@
 package io.entgra.device.mgt.core.device.mgt.core.service;
 
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.ConflictException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceDetailsDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OperationDTO;
 import io.entgra.device.mgt.core.device.mgt.core.dto.OwnerWithDeviceDTO;
@@ -1073,10 +1074,11 @@ public interface DeviceManagementProviderService {
      * Get owner details and device IDs for a given owner and tenant.
      *
      * @param owner the name of the owner.
+     * @param deviceTypeId the device type id
      * @return {@link OwnerWithDeviceDTO} which contains a list of devices related to a user.
      * @throws DeviceManagementException if an error occurs while fetching owner details.
      */
-    OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner) throws DeviceManagementDAOException;
+    OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner, int deviceTypeId) throws DeviceManagementDAOException;
 
     /**
      * Get owner details and device IDs for a given owner and tenant.
@@ -1090,10 +1092,11 @@ public interface DeviceManagementProviderService {
     /**
      * Get owner details and device IDs for a given owner and tenant.
      * @param tenantId the tenant id which devices need to be retried
+     * @param deviceTypeId the device type id
      * @return {@link DeviceDetailsDTO} which contains devices details.
      * @throws DeviceManagementException if an error occurs while fetching owner details.
      */
-    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId) throws DeviceManagementDAOException;
+    List<DeviceDetailsDTO> getDevicesByTenantId(int tenantId, int deviceTypeId) throws DeviceManagementDAOException;
 
     /**
      * Get operation details by operation code.
@@ -1117,4 +1120,17 @@ public interface DeviceManagementProviderService {
      */
     PaginationResult getDevicesNotInGroup(PaginationRequest request, boolean requireDeviceInfo)
             throws DeviceManagementException;
+
+    /**
+     * This method is to update devices names
+     * @param device {@link Device}
+     * @param deviceType the type of the device.
+     * @param deviceId ID of the device.
+     * @return boolean value of the update status.
+     * @throws DeviceManagementException if any service level or DAO level error occurs.
+     * @throws DeviceManagementException if service level null device error occurs.
+     * @throws ConflictException if service level data conflicts occurs.
+     */
+    Device updateDeviceName(Device device, String deviceType, String deviceId)
+            throws DeviceManagementException, DeviceNotFoundException, ConflictException;
 }

@@ -1530,6 +1530,8 @@ public class PolicyManagerImpl implements PolicyManager {
             for (Policy policy : policyList) {
                 policy.setRoles(policyDAO.getPolicyAppliedRoles(policy.getId()));
                 policy.setUsers(policyDAO.getPolicyAppliedUsers(policy.getId()));
+                policy.setProfile(profileDAO.getProfile(policy.getId()));
+
                 List<DeviceGroupWrapper> deviceGroupWrappers = policyDAO.getDeviceGroupsOfPolicy(policy.getId());
                 if (!deviceGroupWrappers.isEmpty()) {
                     deviceGroupWrappers = this.getDeviceGroupNames(deviceGroupWrappers);
@@ -1547,6 +1549,10 @@ public class PolicyManagerImpl implements PolicyManager {
             throw new PolicyManagementException(msg, e);
         } catch (GroupManagementException e) {
             String msg = "Error occurred while getting device groups.";
+            log.error(msg, e);
+            throw new PolicyManagementException(msg, e);
+        } catch (ProfileManagerDAOException e) {
+            String msg = "Error occurred while getting profiles.";
             log.error(msg, e);
             throw new PolicyManagementException(msg, e);
         } finally {

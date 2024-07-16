@@ -25,9 +25,9 @@ import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationMa
 import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.*;
 import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateManager;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -58,6 +58,7 @@ public class DataHolder {
 
     private TaskService taskService;
     private FileTransferService fileTransferService;
+    private TenantManagerAdminService tenantManagerAdminService;
 
     private static final DataHolder applicationMgtDataHolder = new DataHolder();
 
@@ -163,5 +164,13 @@ public class DataHolder {
 
     public void setFileTransferService(FileTransferService fileTransferService) {
         this.fileTransferService = fileTransferService;
+    }
+
+    public TenantManagerAdminService getTenantManagerAdminService() {
+        return tenantManagerAdminService;
+    }
+
+    public void setTenantManagerAdminService(TenantManagerAdminService tenantManagerAdminService) {
+        this.tenantManagerAdminService = tenantManagerAdminService;
     }
 }

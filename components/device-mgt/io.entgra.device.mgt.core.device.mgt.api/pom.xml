@@ -468,5 +468,10 @@
             <artifactId>jaxb-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.tenant.mgt.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

@@ -1858,7 +1858,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
 
     @Override
     public List<DeviceOperationDTO> getSubscriptionOperationsByAppReleaseIDAndDeviceID(
-            int appReleaseId, int deviceId, int tenantId, int offset, int limit) throws ApplicationManagementDAOException {
+            int appReleaseId, int deviceId, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get device subscriptions related to the given AppReleaseID and DeviceID.");
         }
@@ -1878,13 +1878,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     "WHERE ads.AP_APP_RELEASE_ID = ? " +
                     "AND ads.DM_DEVICE_ID = ? " +
                     "AND ads.TENANT_ID = ? " +
-                    "LIMIT ? OFFSET ?";
+                    "ORDER BY aasom.OPERATION_ID DESC " +
+                    "LIMIT 1";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, appReleaseId);
                 ps.setInt(2, deviceId);
                 ps.setInt(3, tenantId);
-                ps.setInt(4, limit);
-                ps.setInt(5, offset);
                 try (ResultSet rs = ps.executeQuery()) {
                     DeviceOperationDTO deviceSubscription;
                     while (rs.next()) {

@@ -47,24 +47,27 @@ public class OraclePolicyDAOImpl extends AbstractPolicyDAOImpl {
         String name = request.getName();
         String type = request.getType();
         String status = request.getStatus();
+        String deviceType = request.getDeviceType();
         int statusValue = 0;
         boolean isPolicyNameProvided = false;
         boolean isPolicyTypeProvided = false;
         boolean isPolicyStatusProvided = false;
+        boolean isDeviceTypeProvided = false;
 
         try {
             conn = this.getConnection();
             String query = "SELECT * " +
-                    "FROM DM_POLICY " +
-                    "WHERE TENANT_ID = ? ";
+                    "FROM DM_POLICY P " +
+                    "LEFT JOIN DM_PROFILE PR ON P.PROFILE_ID = PR.ID " +
+                    "WHERE P.TENANT_ID = ? ";
 
             if (name != null && !name.isEmpty()) {
-                query += "AND NAME LIKE ? " ;
+                query += "AND P.NAME LIKE ? " ;
                 isPolicyNameProvided = true;
             }
 
             if (type != null && !type.isEmpty()) {
-                query += "AND POLICY_TYPE = ? " ;
+                query += "AND P.POLICY_TYPE = ? " ;
                 isPolicyTypeProvided = true;
             }
 
@@ -72,11 +75,16 @@ public class OraclePolicyDAOImpl extends AbstractPolicyDAOImpl {
                 if (status.equals("ACTIVE")) {
                     statusValue = 1;
                 }
-                query += "AND ACTIVE = ? " ;
+                query += "AND P.ACTIVE = ? " ;
                 isPolicyStatusProvided = true;
             }
 
-            query += "ORDER BY ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+            if (deviceType != null && !deviceType.isEmpty()) {
+                query += "AND PR.DEVICE_TYPE = ? ";
+                isDeviceTypeProvided = true;
+            }
+
+            query += "ORDER BY P.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 int paramIdx = 1;
@@ -90,10 +98,13 @@ public class OraclePolicyDAOImpl extends AbstractPolicyDAOImpl {
                 if (isPolicyStatusProvided) {
                     stmt.setInt(paramIdx++, statusValue);
                 }
+                if (isDeviceTypeProvided) {
+                    stmt.setString(paramIdx++, deviceType);
+                }
                 stmt.setInt(paramIdx++, request.getStartIndex());
                 stmt.setInt(paramIdx++, request.getRowCount());
                 try (ResultSet resultSet = stmt.executeQuery()) {
-                    return this.extractPolicyListFromDbResult(resultSet, tenantId);
+                    return this.extractPolicyListWithProfileFromDbResult(resultSet, tenantId);
                 }
             }
         } catch (SQLException e) {

@@ -99,6 +99,7 @@
                             io.entgra.device.mgt.core.identity.jwt.client.extension.dto;version="[5.0,6)",
                             io.entgra.device.mgt.core.identity.jwt.client.extension.exception;version="[5.0,6)",
                             io.entgra.device.mgt.core.identity.jwt.client.extension.service;version="[5.0,6)",
+                            io.entgra.device.mgt.core.tenant.mgt.common.*;version="[5.0,6)",
                             javax.annotation;version="[1.0,2)",
                             javax.naming,
                             javax.sql,
@@ -442,6 +443,11 @@
             <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.mgt</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.entgra.device.mgt.core</groupId>
+            <artifactId>io.entgra.device.mgt.core.tenant.mgt.common</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.javax.xml.bind</groupId>

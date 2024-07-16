@@ -74,6 +74,7 @@
                             org.wso2.carbon.stratos.common.beans;version="[4.9,5)",
                             org.wso2.carbon.stratos.common.exception;version="[4.9,5)",
                             org.wso2.carbon.stratos.common.listeners;version="[4.9,5)",
+                            org.wso2.carbon.tenant.mgt.services,
                             org.wso2.carbon.user.api;version="[1.0,2)",
                             org.wso2.carbon.user.core.service;version="[4.8,5)"
                         </Import-Package>
