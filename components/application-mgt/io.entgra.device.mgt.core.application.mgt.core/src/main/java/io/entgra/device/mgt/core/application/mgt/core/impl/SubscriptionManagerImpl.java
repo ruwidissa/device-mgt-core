@@ -1725,7 +1725,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             List<SubscriptionsDTO> groupDetailsWithDevices = new ArrayList<>();
 
             List<GroupSubscriptionDTO> groupDetails =
-                    subscriptionDAO.getGroupsSubscriptionDetailsByAppReleaseID(appReleaseId, unsubscribe, tenantId, offset, limit);
+                    subscriptionDAO.getGroupsSubscriptionDetailsByAppReleaseID(appReleaseId, unsubscribe, tenantId, offset, -1);
             if (groupDetails == null) {
                 throw new ApplicationManagementException("Group details not found for appReleaseId: " + appReleaseId);
             }
@@ -1744,7 +1744,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 GroupDetailsDTO groupDetailWithDevices =
                         groupManagementProviderService.getGroupDetailsWithDevices(
                                 groupName, applicationDTO.getDeviceTypeId(), request.getOwner(),
-                                request.getDeviceName(), request.getDeviceStatus(), offset, limit);
+                                request.getDeviceName(), request.getDeviceStatus(), offset, -1);
 
                 SubscriptionsDTO groupDetailDTO = new SubscriptionsDTO();
                 groupDetailDTO.setId(groupDetailWithDevices.getGroupId());
@@ -1878,33 +1878,73 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 }
 
                 List<DeviceSubscriptionData> requestedDevices = new ArrayList<>();
+                int installedCount;
+                int pendingCount;
+                int errorCount;
+                int newCount;
+                int subscribedCount;
+                int totalDeviceCount =
+                        groupManagementProviderService.getDeviceCount(groupDetailWithDevices.getGroupId());
+
                 if (StringUtils.isNotBlank(request.getTabActionStatus())) {
                     switch (request.getTabActionStatus()) {
                         case "COMPLETED":
                             requestedDevices = installedDevices;
+                            installedCount = subscriptionDAO.countSubscriptionsByStatus(appReleaseId, tenantId, request.getTabActionStatus(), request.getActionType());
                             break;
                         case "PENDING":
                             requestedDevices = pendingDevices;
+                            pendingCount = subscriptionDAO.countSubscriptionsByStatus(appReleaseId, tenantId, request.getTabActionStatus(), request.getActionType());
                             break;
                         case "ERROR":
                             requestedDevices = errorDevices;
+                            errorCount = subscriptionDAO.countSubscriptionsByStatus(appReleaseId, tenantId, request.getTabActionStatus(), request.getActionType());
                             break;
                         case "NEW":
                             requestedDevices = newDevices;
                             break;
                         case "SUBSCRIBED":
                             requestedDevices = subscribedDevices;
+                            subscribedCount = subscriptionDAO.countSubscriptionsByStatus(appReleaseId, tenantId, request.getTabActionStatus(), request.getActionType());
                             break;
                     }
                     groupDetailDTO.setDevices(new CategorizedSubscriptionResult(requestedDevices, request.getTabActionStatus()));
                 } else {
                     CategorizedSubscriptionResult categorizedSubscriptionResult;
+
+                    installedCount = subscriptionDAO.countSubscriptionsByStatus(appReleaseId, tenantId, "COMPLETED", request.getActionType());
+                    pendingCount = subscriptionDAO.countSubscriptionsByStatus(appReleaseId, tenantId, "PENDING", request.getActionType());
+                    errorCount = subscriptionDAO.countSubscriptionsByStatus(appReleaseId, tenantId, "ERROR", request.getActionType());
+                    subscribedCount = subscriptionDAO.countSubscriptionsByStatus(appReleaseId, tenantId, "SUBSCRIBED", request.getActionType());
+                    newCount = totalDeviceCount - (installedCount + pendingCount + errorCount + subscribedCount);
+
+                    List<DeviceSubscriptionData> paginatedInstalledDevices = installedDevices.stream()
+                            .skip(offset)
+                            .limit(limit)
+                            .collect(Collectors.toList());
+                    List<DeviceSubscriptionData> paginatedPendingDevices = pendingDevices.stream()
+                            .skip(offset)
+                            .limit(limit)
+                            .collect(Collectors.toList());
+                    List<DeviceSubscriptionData> paginatedErrorDevices = errorDevices.stream()
+                            .skip(offset)
+                            .limit(limit)
+                            .collect(Collectors.toList());
+                    List<DeviceSubscriptionData> paginatedNewDevices = newDevices.stream()
+                            .skip(offset)
+                            .limit(limit)
+                            .collect(Collectors.toList());
+                    List<DeviceSubscriptionData> paginatedSubscribedDevices = subscribedDevices.stream()
+                            .skip(offset)
+                            .limit(limit)
+                            .collect(Collectors.toList());
+
                     if (subscribedDevices.isEmpty()) {
                         categorizedSubscriptionResult =
-                                new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices);
+                                new CategorizedSubscriptionResult(paginatedInstalledDevices, paginatedPendingDevices, paginatedErrorDevices, paginatedNewDevices, installedCount, pendingCount, errorCount, newCount);
                     } else {
                         categorizedSubscriptionResult =
-                                new CategorizedSubscriptionResult(installedDevices, pendingDevices, errorDevices, newDevices, subscribedDevices);
+                                new CategorizedSubscriptionResult(paginatedInstalledDevices, paginatedPendingDevices, paginatedErrorDevices, paginatedNewDevices, paginatedSubscribedDevices, installedCount, pendingCount, errorCount, newCount, subscribedCount);
                     }
                     groupDetailDTO.setDevices(categorizedSubscriptionResult);
                 }
