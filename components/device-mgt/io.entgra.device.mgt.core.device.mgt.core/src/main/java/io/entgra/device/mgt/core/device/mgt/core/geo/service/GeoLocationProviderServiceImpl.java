@@ -1528,7 +1528,11 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
     @Override
     public boolean updateGeofence(GeofenceData geofenceData, int fenceId)
             throws GeoLocationBasedServiceException, EventConfigurationException {
+        EventConfigurationProviderService eventConfigService;
+        eventConfigService = DeviceManagementDataHolder.getInstance().getEventConfigurationService();
         int tenantId;
+        List<Integer> groupIdsToDelete = new ArrayList<>();
+        List<Integer> groupIdsToAdd = new ArrayList<>();
         try {
             tenantId = DeviceManagementDAOUtil.getTenantId();
         } catch (DeviceManagementDAOException e) {
@@ -1543,8 +1547,6 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             int updatedRowCount = geofenceDAO.updateGeofence(geofenceData, fenceId);
             savedGroupIds = geofenceDAO.getGroupIdsOfGeoFence(fenceId);
             geofenceData.setId(fenceId);
-            List<Integer> groupIdsToDelete = new ArrayList<>();
-            List<Integer> groupIdsToAdd = new ArrayList<>();
             for (Integer savedGroupId : savedGroupIds) {
                 if (!geofenceData.getGroupIds().contains(savedGroupId)) {
                     groupIdsToDelete.add(savedGroupId);
@@ -1558,6 +1560,18 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             geofenceDAO.deleteGeofenceGroupMapping(groupIdsToDelete, fenceId);
             geofenceDAO.createGeofenceGroupMapping(geofenceData, groupIdsToAdd);
             EventManagementDAOFactory.commitTransaction();
+            try {
+                if (!groupIdsToDelete.isEmpty()) {
+                    eventConfigService.createEventOperationTask(OperationMgtConstants.OperationCodes.EVENT_REVOKE,
+                            DeviceManagementConstants.EventServices.GEOFENCE,
+                            new GeoFenceEventMeta(geofenceData), tenantId, groupIdsToDelete);
+                }
+            } catch (EventConfigurationException e) {
+                String msg = "Failed while creating EVENT_REVOKE operation creation task entry while updating geo fence "
+                        + geofenceData.getFenceName() + " of the tenant " + tenantId;
+                log.error(msg, e);
+                throw new GeoLocationBasedServiceException(msg, e);
+            }
             if (updatedRowCount > 0) {
                 GeoCacheManagerImpl.getInstance().updateGeoFenceInCache(geofenceData, fenceId, tenantId);
             }
