@@ -1482,9 +1482,11 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                         "WHERE " +
                         "    g.GROUP_NAME = ? " +
                         "    AND g.TENANT_ID = ? " +
-                        "    AND d.DEVICE_TYPE_ID = ? " +
                         "    AND e.STATUS IN (" + statusPlaceholders + ")");
 
+        if (deviceTypeId != 0) {
+            sql.append(" AND d.DEVICE_TYPE_ID = ?");
+        }
         if (deviceOwner != null && !deviceOwner.isEmpty()) {
             sql.append(" AND e.OWNER LIKE ?");
         }
@@ -1507,11 +1509,12 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                 int index = 1;
                 stmt.setString(index++, groupName);
                 stmt.setInt(index++, tenantId);
-                stmt.setInt(index++, deviceTypeId);
                 for (String status : allowedStatuses) {
                     stmt.setString(index++, status);
                 }
-
+                if (deviceTypeId != 0) {
+                    stmt.setInt(index++, deviceTypeId);
+                }
                 if (deviceOwner != null && !deviceOwner.isEmpty()) {
                     stmt.setString(index++, "%" + deviceOwner + "%");
                 }
