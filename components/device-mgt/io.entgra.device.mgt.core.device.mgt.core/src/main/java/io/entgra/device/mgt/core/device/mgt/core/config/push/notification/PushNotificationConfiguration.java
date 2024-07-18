@@ -33,6 +33,7 @@ public class PushNotificationConfiguration {
     private int schedulerTaskInitialDelay;
     private boolean schedulerTaskEnabled;
     private List<String> pushNotificationProviders;
+    private List<ContextMetadata> contextMetadata;
 
     @XmlElement(name = "SchedulerBatchSize", required = true)
     public int getSchedulerBatchSize() {
@@ -78,5 +79,15 @@ public class PushNotificationConfiguration {
 
     public void setPushNotificationProviders(List<String> pushNotificationProviders) {
         this.pushNotificationProviders = pushNotificationProviders;
+    }
+
+    @XmlElementWrapper(name = "ProviderContextMetadata")
+    @XmlElement(name = "ContextMetadata", required = true)
+    public List<ContextMetadata> getContextMetadata() {
+        return contextMetadata;
+    }
+
+    public void setContextMetadata(List<ContextMetadata> contextMetadata) {
+        this.contextMetadata = contextMetadata;
     }
 }

@@ -26,7 +26,6 @@ import io.entgra.device.mgt.core.application.mgt.common.services.ReviewManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SPApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.VPPApplicationManager;
-import io.entgra.device.mgt.core.application.mgt.common.services.*;
 import io.entgra.device.mgt.core.application.mgt.core.config.ConfigurationManager;
 import io.entgra.device.mgt.core.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import io.entgra.device.mgt.core.application.mgt.core.impl.AppmDataHandlerImpl;
@@ -35,11 +34,15 @@ import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateMa
 import io.entgra.device.mgt.core.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
+import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -109,7 +112,7 @@ public class ApplicationManagementServiceComponent {
             bundleContext.registerService(FileTransferService.class.getName(), fileTransferService, null);
 
             ScheduledAppSubscriptionTaskManager taskManager = new ScheduledAppSubscriptionTaskManager();
-            // todo: taskManager.scheduleCleanupTask();
+            taskManager.scheduleCleanupTask();
 
             log.info("ApplicationManagement core bundle has been successfully initialized");
         } catch (Throwable e) {
@@ -199,5 +202,26 @@ public class ApplicationManagementServiceComponent {
             log.debug("Removing the task service from Application Management SC");
         }
         DataHolder.getInstance().setTaskService(null);
+    }
+
+    @Reference(
+            name = "io.entgra.device.mgt.core.tenant.manager",
+            service = io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTenantManagementAdminService")
+    protected void setTenantManagementAdminService(TenantManagerAdminService tenantManagerAdminService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting Tenant management admin Service");
+        }
+        DataHolder.getInstance().setTenantManagerAdminService(tenantManagerAdminService);
+    }
+
+    @SuppressWarnings("unused")
+    protected void unsetTenantManagementAdminService(TenantManagerAdminService tenantManagerAdminService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Un setting Tenant management admin service");
+        }
+        DataHolder.getInstance().setTenantManagerAdminService(null);
     }
 }

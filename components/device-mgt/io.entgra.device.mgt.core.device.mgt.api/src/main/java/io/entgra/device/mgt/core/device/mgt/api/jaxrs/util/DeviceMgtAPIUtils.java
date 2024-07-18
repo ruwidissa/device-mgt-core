@@ -33,6 +33,7 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestV
 import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
+import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.java.security.SSLProtocolSocketFactory;
@@ -46,7 +47,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
 import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
-import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -167,6 +167,7 @@ public class DeviceMgtAPIUtils {
     private static volatile ConsumerRESTAPIServices consumerRESTAPIServices;
     private static volatile APIManagementProviderService apiManagementProviderService;
     private static volatile APIPublisherService apiPublisher;
+    private static volatile TenantManagerAdminService tenantManagerAdminService;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -1303,5 +1304,22 @@ public class DeviceMgtAPIUtils {
             }
         }
         return isPermitted;
+    }
+
+    public static TenantManagerAdminService getTenantManagerAdminService(){
+        if(tenantManagerAdminService == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (tenantManagerAdminService == null) {
+                    tenantManagerAdminService = (TenantManagerAdminService) PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                            getOSGiService(TenantManagerAdminService.class, null);
+                    if (tenantManagerAdminService == null) {
+                        String msg = "Tenant Manager Admin Service is null";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+        return tenantManagerAdminService;
     }
 }

@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.application.mgt.common;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CategorizedSubscriptionResult {
@@ -60,6 +61,33 @@ public class CategorizedSubscriptionResult {
         this.subscribedDevices = subscribedDevices;
     }
 
+    public CategorizedSubscriptionResult(List<DeviceSubscriptionData> devices, String tabActionStatus) {
+        switch (tabActionStatus) {
+            case "COMPLETED":
+                this.installedDevices = devices;
+                break;
+            case "PENDING":
+                this.pendingDevices = devices;
+                break;
+            case "ERROR":
+                this.errorDevices = devices;
+                break;
+            case "NEW":
+                this.newDevices = devices;
+                break;
+            case "SUBSCRIBED":
+                this.subscribedDevices = devices;
+                break;
+            default:
+                this.installedDevices = new ArrayList<>();
+                this.pendingDevices = new ArrayList<>();
+                this.errorDevices = new ArrayList<>();
+                this.newDevices = new ArrayList<>();
+                this.subscribedDevices = new ArrayList<>();
+                break;
+        }
+    }
+
     public List<DeviceSubscriptionData> getInstalledDevices() {
         return installedDevices;
     }
@@ -100,4 +128,3 @@ public class CategorizedSubscriptionResult {
         this.subscribedDevices = subscribedDevices;
     }
 }
-

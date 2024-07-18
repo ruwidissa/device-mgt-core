@@ -499,6 +499,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             @QueryParam("name") String name,
             @QueryParam("type") String type,
             @QueryParam("status") String status,
+            @QueryParam("deviceType") String deviceType,
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
             @QueryParam("offset") int offset,
             @QueryParam("limit") int limit) {
@@ -515,6 +516,9 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         }
         if (status != null){
             request.setStatus(status);
+        }
+        if (deviceType != null) {
+            request.setDeviceType(deviceType);
         }
         try {
             PolicyAdministratorPoint policyAdministratorPoint = policyManagementService.getPAP();

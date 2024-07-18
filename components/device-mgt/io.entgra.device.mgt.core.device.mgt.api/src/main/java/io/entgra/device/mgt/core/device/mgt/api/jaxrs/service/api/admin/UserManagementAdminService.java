@@ -298,8 +298,13 @@ public interface UserManagementAdminService {
                     name = "tenantDomain",
                     value = "The domain of the tenant to be deleted.",
                     required = true)
-
             @PathParam("tenantDomain")
-            String tenantDomain);
-
+            String tenantDomain,
+            @ApiParam(
+                    name = "deleteAppArtifacts",
+                    value = "Flag to indicate whether to delete application artifacts.",
+                    required = false)
+            @QueryParam("deleteAppArtifacts")
+            @DefaultValue("false")
+            boolean deleteAppArtifacts);
 }

@@ -17,6 +17,7 @@
  */
 
 package io.entgra.device.mgt.core.device.mgt.core.service;
+
 import io.entgra.device.mgt.core.device.mgt.common.Device;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
@@ -25,13 +26,12 @@ import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.TransactionManagementException;
-import io.entgra.device.mgt.core.device.mgt.common.group.mgt.*;
-import io.entgra.device.mgt.core.device.mgt.core.dao.*;
 import io.entgra.device.mgt.core.device.mgt.core.event.config.GroupAssignmentEventOperationExecutor;
 import io.entgra.device.mgt.core.device.mgt.core.geo.task.GeoFenceEventOperationManager;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
 import io.entgra.device.mgt.core.device.mgt.core.operation.mgt.OperationMgtConstants;
 import io.entgra.device.mgt.core.device.mgt.core.util.DeviceManagerUtil;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroup;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupConstants;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.DeviceGroupRoleWrapper;
@@ -59,7 +59,14 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -1689,17 +1696,22 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
     }
 
     @Override
-    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int offset, int limit)
-            throws GroupManagementException {
+    public GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int deviceTypeId, String deviceOwner, String deviceName, String deviceStatus,
+                                                      int offset, int limit) throws GroupManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Retrieving group details and device IDs for group: " + groupName);
         }
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         GroupDetailsDTO groupDetailsWithDevices;
+        List<String> allowingDeviceStatuses = new ArrayList<>();
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
 
         try {
             GroupManagementDAOFactory.openConnection();
-            groupDetailsWithDevices = this.groupDAO.getGroupDetailsWithDevices(groupName, tenantId, offset, limit);
+            groupDetailsWithDevices = this.groupDAO.getGroupDetailsWithDevices(groupName, allowingDeviceStatuses,
+                    deviceTypeId, tenantId, deviceOwner, deviceName, deviceStatus, offset, limit);
         } catch (GroupManagementDAOException | SQLException e) {
             String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
             log.error(msg, e);
