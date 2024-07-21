@@ -19,7 +19,6 @@
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import io.entgra.device.mgt.core.application.mgt.common.ApplicationInstallResponse;
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionType;
 import io.entgra.device.mgt.core.application.mgt.common.exception.SubscriptionManagementException;
@@ -44,6 +43,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.MobileAppTypes;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
@@ -1112,7 +1112,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("version") String version,
             @QueryParam("user") String user) {
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
-        Operation operation = new Operation();
         try {
             RequestValidationUtil.validateDeviceIdentifier(type, id);
             Device device = DeviceMgtAPIUtils.getDeviceManagementService().getDevice(id, false);
@@ -1133,11 +1132,12 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 //if the applications not installed via entgra store
             } else {
                 if (Constants.ANDROID.equals(type)) {
-                    ApplicationUninstallation applicationUninstallation = new ApplicationUninstallation(packageName, "PUBLIC", name, platform, version, user);
-                    Gson gson = new Gson();
+                    ApplicationUninstallation applicationUninstallation = new ApplicationUninstallation(packageName,
+                            MobileAppTypes.PUBLIC.toString(), name, platform, version, user);
+                    ProfileOperation operation = new ProfileOperation();
                     operation.setCode(MDMAppConstants.AndroidConstants.UNMANAGED_APP_UNINSTALL);
                     operation.setType(Operation.Type.PROFILE);
-                    operation.setPayLoad(gson.toJson(applicationUninstallation));
+                    operation.setPayLoad(applicationUninstallation.toJson());
                     DeviceManagementProviderService deviceManagementProviderService = HelperUtil
                             .getDeviceManagementProviderService();
                     Activity activity = deviceManagementProviderService.addOperation(
