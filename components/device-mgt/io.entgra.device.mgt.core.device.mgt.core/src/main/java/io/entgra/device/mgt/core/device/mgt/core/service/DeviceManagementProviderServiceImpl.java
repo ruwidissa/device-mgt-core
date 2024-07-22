@@ -161,6 +161,7 @@ import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
+import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -5359,25 +5360,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         OwnerWithDeviceDTO ownerWithDeviceDTO;
 
-        List<String> allowingDeviceStatuses = new ArrayList<>();
-        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
-        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
-        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
+        List<String> allowingDeviceStatuses = Arrays.asList(EnrolmentInfo.Status.ACTIVE.toString(),
+                EnrolmentInfo.Status.INACTIVE.toString(), EnrolmentInfo.Status.UNREACHABLE.toString());
 
         try {
             DeviceManagementDAOFactory.openConnection();
-            ownerWithDeviceDTO = this.enrollmentDAO.getOwnersWithDevices(owner, allowingDeviceStatuses, tenantId, deviceTypeId, deviceOwner, deviceName, deviceStatus);
-            if (ownerWithDeviceDTO == null) {
-                String msg = "No data found for owner: " + owner;
-                log.error(msg);
-                throw new DeviceManagementDAOException(msg);
-            }
-            List<Integer> deviceIds = ownerWithDeviceDTO.getDeviceIds();
-            if (deviceIds != null) {
-                ownerWithDeviceDTO.setDeviceCount(deviceIds.size());
-            } else {
-                ownerWithDeviceDTO.setDeviceCount(0);
-            }
+            ownerWithDeviceDTO = this.enrollmentDAO.getOwnersWithDevices(owner, allowingDeviceStatuses,
+                    tenantId, deviceTypeId, deviceOwner, deviceName, deviceStatus);
         } catch (DeviceManagementDAOException | SQLException e) {
             String msg = "Error occurred while retrieving device IDs for owner: " + owner;
             log.error(msg, e);
@@ -5387,6 +5376,41 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
         return ownerWithDeviceDTO;
     }
+
+//    @Override
+//    public OwnerWithDeviceDTO getOwnersWithDeviceIds(String owner, int deviceTypeId, String deviceOwner, String deviceName, String deviceStatus)
+//            throws DeviceManagementDAOException {
+//        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+//        OwnerWithDeviceDTO ownerWithDeviceDTO;
+//
+//        List<String> allowingDeviceStatuses = new ArrayList<>();
+//        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
+//        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
+//        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
+//
+//        try {
+//            DeviceManagementDAOFactory.openConnection();
+//            ownerWithDeviceDTO = this.enrollmentDAO.getOwnersWithDevices(owner, allowingDeviceStatuses, tenantId, deviceTypeId, deviceOwner, deviceName, deviceStatus);
+//            if (ownerWithDeviceDTO == null) {
+//                String msg = "No data found for owner: " + owner;
+//                log.error(msg);
+//                throw new DeviceManagementDAOException(msg);
+//            }
+//            List<Integer> deviceIds = ownerWithDeviceDTO.getDeviceIds();
+//            if (deviceIds != null) {
+//                ownerWithDeviceDTO.setDeviceCount(deviceIds.size());
+//            } else {
+//                ownerWithDeviceDTO.setDeviceCount(0);
+//            }
+//        } catch (DeviceManagementDAOException | SQLException e) {
+//            String msg = "Error occurred while retrieving device IDs for owner: " + owner;
+//            log.error(msg, e);
+//            throw new DeviceManagementDAOException(msg, e);
+//        } finally {
+//            DeviceManagementDAOFactory.closeConnection();
+//        }
+//        return ownerWithDeviceDTO;
+//    }
 
 
     @Override
@@ -5562,6 +5586,132 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } catch (TransactionManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while initiating transaction to rename device: " + persistedDevice.getId();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public List<Integer> getDevicesNotInGivenIdList(List<Integer> deviceIds, PaginationRequest paginationRequest)
+            throws DeviceManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (paginationRequest == null) {
+            String msg = "Received null for pagination request";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getDevicesNotInGivenIdList(paginationRequest, deviceIds, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error encountered while getting device ids";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error encountered while getting the database connection";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public List<Integer> getDevicesInGivenIdList(List<Integer> deviceIds, PaginationRequest paginationRequest)
+            throws DeviceManagementException {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (paginationRequest == null) {
+            String msg = "Received null for pagination request";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getDevicesInGivenIdList(paginationRequest, deviceIds, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error encountered while getting device ids";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error encountered while getting the database connection";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public int getDeviceCountNotInGivenIdList(List<Integer> deviceIds)
+            throws DeviceManagementException {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getDeviceCountNotInGivenIdList(deviceIds, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error encountered while getting device ids";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error encountered while getting the database connection";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public List<Device> getDevicesByDeviceIds(PaginationRequest paginationRequest, List<Integer> deviceIds)
+            throws DeviceManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (paginationRequest == null) {
+            String msg = "Received null for pagination request";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getDevicesByDeviceIds(paginationRequest, deviceIds, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error encountered while getting devices for device ids in " + deviceIds;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error encountered while getting the database connection";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public int getDeviceCountByDeviceIds(PaginationRequest paginationRequest, List<Integer> deviceIds)
+            throws DeviceManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (paginationRequest == null) {
+            String msg = "Received null for pagination request";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getDeviceCountByDeviceIds(paginationRequest, deviceIds, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error encountered while getting devices for device ids in " + deviceIds;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error encountered while getting the database connection";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         } finally {

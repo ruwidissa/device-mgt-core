@@ -1725,4 +1725,18 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         return groupDetailsWithDevices;
     }
 
+    @Override
+    public int getDeviceCount(String groupName) throws GroupManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            GroupManagementDAOFactory.openConnection();
+            return groupDAO.getDeviceCount(groupName, tenantId);
+        } catch (SQLException | GroupManagementDAOException e) {
+            String msg = "Error occurred while retrieving device count.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
 }

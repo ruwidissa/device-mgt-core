@@ -97,6 +97,10 @@ public class Device implements Serializable {
     public Device() {
     }
 
+    public Device(int id) {
+        this.id = id;
+    }
+
     public Device(String name, String type, String description, String deviceId, EnrolmentInfo enrolmentInfo,
                   List<Feature> features, List<Property> properties) {
         this.name = name;
@@ -268,7 +272,9 @@ public class Device implements Serializable {
 
         Device device = (Device) o;
 
-        return getDeviceIdentifier().equals(device.getDeviceIdentifier());
+        if (getDeviceIdentifier().equals(device.getDeviceIdentifier())) return true;
+
+        return getId() == device.getId();
 
     }
 
