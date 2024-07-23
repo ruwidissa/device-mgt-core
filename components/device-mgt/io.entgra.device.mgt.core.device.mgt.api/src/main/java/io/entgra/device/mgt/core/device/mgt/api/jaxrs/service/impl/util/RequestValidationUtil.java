@@ -23,6 +23,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import io.entgra.device.mgt.core.device.mgt.common.Base64File;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.Feature;
@@ -820,6 +822,30 @@ public class RequestValidationUtil {
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder()
                             .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (metadata.getMetaKey().equals("PER_DEVICE_COST")) {
+            String metaValue = metadata.getMetaValue();
+            JSONArray jsonArray = new JSONArray(metaValue);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                if (jsonObject.has("cost")) {
+                    Object costObj = jsonObject.get("cost");
+                    if (costObj == JSONObject.NULL || (costObj instanceof Number && ((Number) costObj).doubleValue() < 0)) {
+                        String msg = "Billing cost cannot be a minus value or null.";
+                        log.error(msg);
+                        throw new InputValidationException(
+                                new ErrorResponse.ErrorResponseBuilder()
+                                        .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+                    }
+                } else {
+                    String msg = "Billing cost is missing.";
+                    log.error(msg);
+                    throw new InputValidationException(
+                            new ErrorResponse.ErrorResponseBuilder()
+                                    .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+                }
+            }
         }
         if (metadata.getMetaValue() == null) {
             String msg = "Request parameter metaValue should be non empty.";
