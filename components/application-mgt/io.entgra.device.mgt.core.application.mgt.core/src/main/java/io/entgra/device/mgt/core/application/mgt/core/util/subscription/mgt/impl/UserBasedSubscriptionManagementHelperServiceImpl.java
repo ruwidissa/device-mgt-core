@@ -66,7 +66,7 @@ public class UserBasedSubscriptionManagementHelperServiceImpl implements Subscri
     @Override
     public SubscriptionResponse getStatusBaseSubscriptions(SubscriptionInfo subscriptionInfo, int limit, int offset)
             throws ApplicationManagementException {
-        final boolean isUnsubscribe = Objects.equals("unsubscribe", subscriptionInfo.getSubscriptionStatus());
+        final boolean isUnsubscribe = Objects.equals(SubscriptionMetadata.SUBSCRIPTION_STATUS_UNSUBSCRIBED, subscriptionInfo.getSubscriptionStatus());
         List<DeviceSubscriptionDTO> deviceSubscriptionDTOS;
         int deviceCount = 0;
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -137,7 +137,7 @@ public class UserBasedSubscriptionManagementHelperServiceImpl implements Subscri
     @Override
     public SubscriptionResponse getSubscriptions(SubscriptionInfo subscriptionInfo, int limit, int offset)
             throws ApplicationManagementException {
-        final boolean isUnsubscribe = Objects.equals("unsubscribe", subscriptionInfo.getSubscriptionStatus());
+        final boolean isUnsubscribe = Objects.equals(SubscriptionMetadata.SUBSCRIPTION_STATUS_UNSUBSCRIBED, subscriptionInfo.getSubscriptionStatus());
         final int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -165,7 +165,7 @@ public class UserBasedSubscriptionManagementHelperServiceImpl implements Subscri
 
     @Override
     public SubscriptionStatistics getSubscriptionStatistics(SubscriptionInfo subscriptionInfo) throws ApplicationManagementException {
-        final boolean isUnsubscribe = Objects.equals("unsubscribe", subscriptionInfo.getSubscriptionStatus());
+        final boolean isUnsubscribe = Objects.equals(SubscriptionMetadata.SUBSCRIPTION_STATUS_UNSUBSCRIBED, subscriptionInfo.getSubscriptionStatus());
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             ConnectionManagerUtil.openDBConnection();
