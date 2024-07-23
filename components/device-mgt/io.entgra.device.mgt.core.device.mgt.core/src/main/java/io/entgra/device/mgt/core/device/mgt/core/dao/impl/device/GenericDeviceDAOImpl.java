@@ -1870,6 +1870,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         boolean isDeviceStatusProvided = false;
         boolean isDeviceNameProvided = false;
         boolean isDeviceTypeIdProvided = false;
+
         try {
             Connection connection = getConnection();
             String sql = "SELECT e.DEVICE_ID, " +
@@ -1882,32 +1883,41 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "e.DATE_OF_LAST_UPDATE " +
                     "FROM DM_DEVICE d " +
                     "INNER JOIN DM_ENROLMENT e " +
+                    "ON d.ID = e.DEVICE_ID " +
                     "WHERE d.TENANT_ID = ? " +
                     "AND e.DEVICE_ID IN (" + deviceIdStringList+ ") " +
                     "AND e.STATUS NOT IN ('DELETED', 'REMOVED')";
+
             if (paginationRequest.getOwner() != null) {
                 sql = sql + " AND e.OWNER LIKE ?";
                 isOwnerProvided = true;
             }
+
             if (paginationRequest.getDeviceStatus() != null) {
                 sql = sql + " AND e.STATUS = ?";
                 isDeviceStatusProvided = true;
             }
+
             if (paginationRequest.getDeviceName() != null) {
                 sql = sql + " AND d.NAME LIKE ?";
                 isDeviceNameProvided = true;
             }
+
             if (paginationRequest.getDeviceTypeId() > 0) {
                 sql = sql + " AND d.DEVICE_TYPE_ID = ?";
                 isDeviceTypeIdProvided = true;
             }
+
             sql = sql + " LIMIT ? OFFSET ?";
+
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 int parameterIdx = 1;
                 preparedStatement.setInt(parameterIdx++, tenantId);
+
                 for (Integer deviceId : deviceIds) {
                     preparedStatement.setInt(parameterIdx++, deviceId);
                 }
+
                 if (isOwnerProvided) {
                     preparedStatement.setString(parameterIdx++, "%" + paginationRequest.getOwner() + "%");
                 }
@@ -1923,6 +1933,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
                 preparedStatement.setInt(parameterIdx++, paginationRequest.getRowCount());
                 preparedStatement.setInt(parameterIdx, paginationRequest.getStartIndex());
+
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
                     Device device;
                     while(resultSet.next()) {
