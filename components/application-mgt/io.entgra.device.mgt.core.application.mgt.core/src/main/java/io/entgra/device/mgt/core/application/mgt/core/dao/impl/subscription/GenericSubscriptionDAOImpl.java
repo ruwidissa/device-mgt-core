@@ -25,7 +25,11 @@ import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
 import io.entgra.device.mgt.core.application.mgt.core.util.DAOUtil;
+import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.operation.mgt.Activity;
+import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.application.mgt.common.ExecutionStatus;
@@ -2399,23 +2403,41 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public int getAllSubscriptionCount(int appReleaseId, int tenantId)
-            throws ApplicationManagementDAOException {
+    public int getAllSubscriptionCount(int appReleaseId, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
-            log.debug("Getting all subscriptions count for the application appReleaseId " + appReleaseId
-                    + " from the database");
+            log.debug("Getting all subscriptions count for the application appReleaseId " + appReleaseId + " from the database");
         }
+        List<String> allowingDeviceStatuses = new ArrayList<>();
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
+
+        DeviceManagementProviderService deviceManagementProviderService = HelperUtil.getDeviceManagementProviderService();
         try {
             Connection conn = this.getDBConnection();
+            List<Integer> deviceIds = deviceManagementProviderService.getDeviceIdsByStatus(allowingDeviceStatuses);
+            if (deviceIds.isEmpty()) {
+                return 0;
+            }
+            StringBuilder idList = new StringBuilder();
+            for (int i = 0; i < deviceIds.size(); i++) {
+                idList.append("?");
+                if (i < deviceIds.size() - 1) {
+                    idList.append(",");
+                }
+            }
             String sql = "SELECT COUNT(*) AS count " +
                     "FROM AP_DEVICE_SUBSCRIPTION " +
                     "WHERE AP_APP_RELEASE_ID = ? " +
                     "AND TENANT_ID = ? " +
-                    "AND UNSUBSCRIBED = FALSE";
-
+                    "AND UNSUBSCRIBED = FALSE " +
+                    "AND DM_DEVICE_ID IN (" + idList.toString() + ")";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, appReleaseId);
                 ps.setInt(2, tenantId);
+                for (int i = 0; i < deviceIds.size(); i++) {
+                    ps.setInt(3 + i, deviceIds.get(i));
+                }
 
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -2429,7 +2451,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 log.error(msg, e);
                 throw new ApplicationManagementDAOException(msg, e);
             }
-        } catch (DBConnectionException e) {
+        } catch (DBConnectionException | DeviceManagementException e) {
             String msg = "Error occurred while obtaining the DB connection for getting all subscriptions count for appReleaseId: "
                     + appReleaseId + ".";
             log.error(msg, e);
@@ -2438,23 +2460,41 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public int getAllUnsubscriptionCount(int appReleaseId, int tenantId)
-            throws ApplicationManagementDAOException {
+    public int getAllUnsubscriptionCount(int appReleaseId, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
-            log.debug("Getting all unsubscription count for the application appReleaseId " + appReleaseId
-                    + " from the database");
+            log.debug("Getting all unsubscription count for the application appReleaseId " + appReleaseId + " from the database");
         }
+        List<String> allowingDeviceStatuses = new ArrayList<>();
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.ACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.INACTIVE.toString());
+        allowingDeviceStatuses.add(EnrolmentInfo.Status.UNREACHABLE.toString());
+
+        DeviceManagementProviderService deviceManagementProviderService = HelperUtil.getDeviceManagementProviderService();
         try {
             Connection conn = this.getDBConnection();
+            List<Integer> deviceIds = deviceManagementProviderService.getDeviceIdsByStatus(allowingDeviceStatuses);
+            if (deviceIds.isEmpty()) {
+                return 0;
+            }
+            StringBuilder idList = new StringBuilder();
+            for (int i = 0; i < deviceIds.size(); i++) {
+                idList.append("?");
+                if (i < deviceIds.size() - 1) {
+                    idList.append(",");
+                }
+            }
             String sql = "SELECT COUNT(*) AS count " +
                     "FROM AP_DEVICE_SUBSCRIPTION " +
                     "WHERE AP_APP_RELEASE_ID = ? " +
                     "AND TENANT_ID = ? " +
-                    "AND UNSUBSCRIBED = TRUE";
-
+                    "AND UNSUBSCRIBED = TRUE " +
+                    "AND DM_DEVICE_ID IN (" + idList.toString() + ")";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, appReleaseId);
                 ps.setInt(2, tenantId);
+                for (int i = 0; i < deviceIds.size(); i++) {
+                    ps.setInt(3 + i, deviceIds.get(i));
+                }
 
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -2468,7 +2508,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 log.error(msg, e);
                 throw new ApplicationManagementDAOException(msg, e);
             }
-        } catch (DBConnectionException e) {
+        } catch (DBConnectionException | DeviceManagementException e) {
             String msg = "Error occurred while obtaining the DB connection for getting all unsubscription count for appReleaseId: "
                     + appReleaseId + ".";
             log.error(msg, e);

@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import org.apache.commons.collections.map.SingletonMap;
 import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo.Status;
@@ -879,4 +880,13 @@ public interface DeviceDAO {
 
     int getDeviceCountByDeviceIds(PaginationRequest paginationRequest, List<Integer> deviceIds, int tenantId)
             throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to get device count that are not within a specific group.
+     *
+     * @param statuses Device statuses to be filtered
+     * @return deviceIds
+     * @throws DeviceManagementException
+     */
+    List<Integer> getDeviceIdsByStatus(List<String> statuses) throws DeviceManagementException;
 }

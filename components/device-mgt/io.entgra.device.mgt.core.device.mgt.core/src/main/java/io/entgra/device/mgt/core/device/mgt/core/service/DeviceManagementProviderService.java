@@ -1163,4 +1163,12 @@ public interface DeviceManagementProviderService {
             throws DeviceManagementException;
     int getDeviceCountByDeviceIds(PaginationRequest paginationRequest, List<Integer> deviceIds)
             throws DeviceManagementException;
+
+    /**
+     * This method is to get Device ids by statuses
+     * @param statuses statuses to be filtered.
+     * @return deviceIds
+     * @throws DeviceManagementException if any service level or DAO level error occurs.
+     */
+    List<Integer> getDeviceIdsByStatus(List<String> statuses) throws DeviceManagementException;
 }
