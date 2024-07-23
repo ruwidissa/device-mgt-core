@@ -33,6 +33,10 @@ public class SubscriptionManagementServiceProvider {
     private SubscriptionManagementServiceProvider() {
     }
 
+    public static SubscriptionManagementServiceProvider getInstance() {
+        return SubscriptionManagementProviderServiceHolder.INSTANCE;
+    }
+
     /**
      * Retrieves the appropriate SubscriptionManagementHelperService based on the provided SubscriptionInfo.
      *
