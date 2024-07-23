@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SubscriptionMetadata {
+    public static final String SUBSCRIPTION_STATUS_UNSUBSCRIBED = "unsubscribed";
     public static final class DeviceSubscriptionStatus {
         public static final String NEW = "NEW";
         public static final String PENDING = "PENDING";
