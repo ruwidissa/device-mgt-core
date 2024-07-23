@@ -39,7 +39,6 @@ import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.subscription.mgt.SubscriptionManagementHelperUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.subscription.mgt.service.SubscriptionManagementHelperService;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.GroupDetailsDTO;
@@ -115,11 +114,8 @@ public class GroupBasedSubscriptionManagementHelperServiceImpl implements Subscr
                     allDeviceIdsOwnByGroup.remove(deviceId);
                 }
 
-                List<Integer> paginatedNewDeviceIds = deviceManagementProviderService.getDevicesInGivenIdList(allDeviceIdsOwnByGroup,
-                        new PaginationRequest(offset, limit));
-                deviceSubscriptionDTOS = paginatedNewDeviceIds.stream().map(DeviceSubscriptionDTO::new).collect(Collectors.toList());
-
-                deviceCount = allDeviceIdsOwnByGroup.size();
+                List<Integer> newDeviceIds = deviceManagementProviderService.getDevicesInGivenIdList(allDeviceIdsOwnByGroup);
+                deviceSubscriptionDTOS = newDeviceIds.stream().map(DeviceSubscriptionDTO::new).collect(Collectors.toList());
             } else {
                 groupDetailsDTO = groupManagementProviderService.getGroupDetailsWithDevices(subscriptionInfo.getIdentifier(),
                         applicationDTO.getDeviceTypeId(), deviceSubscriptionFilterCriteria.getOwner(), deviceSubscriptionFilterCriteria.getName(),
@@ -130,9 +126,10 @@ public class GroupBasedSubscriptionManagementHelperServiceImpl implements Subscr
                         isUnsubscribe, tenantId, paginatedDeviceIdsOwnByGroup, dbSubscriptionStatus,
                         null, deviceSubscriptionFilterCriteria.getTriggeredBy(), -1, -1);
 
-                deviceCount = SubscriptionManagementHelperUtil.getTotalDeviceSubscriptionCount(deviceSubscriptionDTOS,
-                        subscriptionInfo.getDeviceSubscriptionFilterCriteria(), applicationDTO.getDeviceTypeId());
             }
+            deviceCount = SubscriptionManagementHelperUtil.getTotalDeviceSubscriptionCount(deviceSubscriptionDTOS,
+                    subscriptionInfo.getDeviceSubscriptionFilterCriteria(), applicationDTO.getDeviceTypeId());
+
             List<DeviceSubscription> deviceSubscriptions = SubscriptionManagementHelperUtil.getDeviceSubscriptionData(deviceSubscriptionDTOS,
                     subscriptionInfo.getDeviceSubscriptionFilterCriteria(), isUnsubscribe, applicationDTO.getDeviceTypeId(), limit, offset);
             return new SubscriptionResponse(subscriptionInfo.getApplicationUUID(), deviceCount, deviceSubscriptions);
@@ -188,11 +185,19 @@ public class GroupBasedSubscriptionManagementHelperServiceImpl implements Subscr
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             ConnectionManagerUtil.openDBConnection();
+            ApplicationReleaseDTO applicationReleaseDTO = applicationReleaseDAO.
+                    getReleaseByUUID(subscriptionInfo.getApplicationUUID(), tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for application release UUID: " +
+                        subscriptionInfo.getApplicationUUID();
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
             List<Device> devices = HelperUtil.getGroupManagementProviderService().
                     getAllDevicesOfGroup(subscriptionInfo.getIdentifier(), false);
             List<Integer> deviceIdsOwnByGroup = devices.stream().map(Device::getId).collect(Collectors.toList());
             SubscriptionStatisticDTO subscriptionStatisticDTO = subscriptionDAO.
-                    getSubscriptionStatistic(deviceIdsOwnByGroup, null, isUnsubscribe, tenantId);
+                    getSubscriptionStatistic(deviceIdsOwnByGroup, isUnsubscribe, tenantId, applicationReleaseDTO.getId());
             int allDeviceCount = HelperUtil.getGroupManagementProviderService().getDeviceCount(subscriptionInfo.getIdentifier());
             return SubscriptionManagementHelperUtil.getSubscriptionStatistics(subscriptionStatisticDTO, allDeviceCount);
         } catch (ApplicationManagementDAOException e) {

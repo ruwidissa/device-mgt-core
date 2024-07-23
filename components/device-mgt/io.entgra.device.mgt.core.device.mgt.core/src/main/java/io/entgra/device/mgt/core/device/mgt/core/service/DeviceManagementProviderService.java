@@ -58,7 +58,6 @@ import io.entgra.device.mgt.core.device.mgt.common.geo.service.GeoCluster;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -1153,15 +1152,15 @@ public interface DeviceManagementProviderService {
     Device updateDeviceName(Device device, String deviceType, String deviceId)
             throws DeviceManagementException, DeviceNotFoundException, ConflictException;
 
-    List<Integer> getDevicesNotInGivenIdList(List<Integer> deviceIds, PaginationRequest paginationRequest)
+    List<Integer> getDevicesNotInGivenIdList(List<Integer> deviceIds)
             throws DeviceManagementException;
 
-    List<Integer> getDevicesInGivenIdList(List<Integer> deviceIds, PaginationRequest paginationRequest)
+    List<Integer> getDevicesInGivenIdList(List<Integer> deviceIds)
             throws DeviceManagementException;
     int getDeviceCountNotInGivenIdList(List<Integer> deviceIds) throws DeviceManagementException;
 
     List<Device> getDevicesByDeviceIds(PaginationRequest paginationRequest, List<Integer> deviceIds)
             throws DeviceManagementException;
-    public int getDeviceCountByDeviceIds(PaginationRequest paginationRequest, List<Integer> deviceIds)
+    int getDeviceCountByDeviceIds(PaginationRequest paginationRequest, List<Integer> deviceIds)
             throws DeviceManagementException;
 }

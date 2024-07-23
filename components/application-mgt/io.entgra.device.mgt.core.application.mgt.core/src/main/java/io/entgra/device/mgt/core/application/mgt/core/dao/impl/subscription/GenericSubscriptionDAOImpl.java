@@ -18,11 +18,9 @@
 package io.entgra.device.mgt.core.application.mgt.core.dao.impl.subscription;
 
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionMetadata;
-import io.entgra.device.mgt.core.application.mgt.common.dto.GroupSubscriptionDTO;
 import io.entgra.device.mgt.core.application.mgt.common.dto.DeviceOperationDTO;
 import io.entgra.device.mgt.core.application.mgt.common.SubscriptionEntity;
 import io.entgra.device.mgt.core.application.mgt.common.dto.SubscriptionStatisticDTO;
-import io.entgra.device.mgt.core.application.mgt.common.dto.SubscriptionsDTO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.SubscriptionDAO;
 import io.entgra.device.mgt.core.application.mgt.core.dao.impl.AbstractDAOImpl;
 import io.entgra.device.mgt.core.application.mgt.core.exception.UnexpectedServerErrorException;
@@ -2792,43 +2790,33 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
     }
 
-    // todo: fixed the status
     @Override
-    public SubscriptionStatisticDTO getSubscriptionStatistic(List<Integer> deviceIds, String subscriptionType,
-                                                             boolean isUnsubscribed, int tenantId)
+    public SubscriptionStatisticDTO getSubscriptionStatistic(List<Integer> deviceIds, boolean isUnsubscribed, int tenantId, int appReleaseId)
             throws ApplicationManagementDAOException {
         SubscriptionStatisticDTO subscriptionStatisticDTO = new SubscriptionStatisticDTO();
         if (deviceIds == null || deviceIds.isEmpty()) return subscriptionStatisticDTO;
 
-        boolean doesAllEntriesRequired = true;
         try {
             Connection connection = getDBConnection();
             String sql = "SELECT COUNT(DISTINCT ID) AS COUNT, " +
                     "STATUS FROM AP_DEVICE_SUBSCRIPTION " +
                     "WHERE TENANT_ID = ? " +
-                    "AND UNSUBSCRIBED = ?" +
+                    "AND AP_APP_RELEASE_ID = ? " +
+                    "AND UNSUBSCRIBED = ? " +
                     "AND DM_DEVICE_ID IN (" +
-                    deviceIds.stream().map(id -> "?").collect(Collectors.joining(",")) + ")";
-
-            if (!Objects.equals(subscriptionType, SubscriptionMetadata.SubscriptionTypes.DEVICE)) {
-                sql += " AND ACTION_TRIGGERED_FROM = ?";
-                doesAllEntriesRequired = false;
-            }
-
-            sql += " GROUP BY (STATUS)";
+                    deviceIds.stream().map(id -> "?").collect(Collectors.joining(",")) + ") " +
+                    "GROUP BY (STATUS)";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 int idx = 1;
 
                 preparedStatement.setInt(idx++, tenantId);
+                preparedStatement.setInt(idx++, appReleaseId);
                 preparedStatement.setBoolean(idx++, isUnsubscribed);
                 for (Integer deviceId : deviceIds) {
                     preparedStatement.setInt(idx++, deviceId);
                 }
 
-                if (!doesAllEntriesRequired) {
-                    preparedStatement.setString(idx, subscriptionType);
-                }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         // add the error and in progress

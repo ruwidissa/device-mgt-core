@@ -36,7 +36,6 @@ import io.entgra.device.mgt.core.application.mgt.core.util.ConnectionManagerUtil
 import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.subscription.mgt.SubscriptionManagementHelperUtil;
 import io.entgra.device.mgt.core.application.mgt.core.util.subscription.mgt.service.SubscriptionManagementHelperService;
-import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
 import org.apache.commons.logging.Log;
@@ -97,20 +96,17 @@ public class DeviceBasedSubscriptionManagementHelperServiceImpl implements Subsc
                 List<Integer> deviceIdsOfSubscription = deviceSubscriptionDTOS.stream().
                         map(DeviceSubscriptionDTO::getDeviceId).collect(Collectors.toList());
 
-                List<Integer> newDeviceIds = deviceManagementProviderService.getDevicesNotInGivenIdList(deviceIdsOfSubscription,
-                        new PaginationRequest(offset, limit));
+                List<Integer> newDeviceIds = deviceManagementProviderService.getDevicesNotInGivenIdList(deviceIdsOfSubscription);
 
                 deviceSubscriptionDTOS = newDeviceIds.stream().map(DeviceSubscriptionDTO::new).collect(Collectors.toList());
-
-                deviceCount = deviceManagementProviderService.getDeviceCountNotInGivenIdList(deviceIdsOfSubscription);
             } else {
                 deviceSubscriptionDTOS = subscriptionDAO.getAllSubscriptionsDetails(applicationReleaseDTO.
                         getId(), isUnsubscribe, tenantId, dbSubscriptionStatus, null,
                         deviceSubscriptionFilterCriteria.getTriggeredBy(), -1, -1);
-
-                deviceCount = SubscriptionManagementHelperUtil.getTotalDeviceSubscriptionCount(deviceSubscriptionDTOS,
-                        subscriptionInfo.getDeviceSubscriptionFilterCriteria(), applicationDTO.getDeviceTypeId());
             }
+            deviceCount = SubscriptionManagementHelperUtil.getTotalDeviceSubscriptionCount(deviceSubscriptionDTOS,
+                    subscriptionInfo.getDeviceSubscriptionFilterCriteria(), applicationDTO.getDeviceTypeId());
+
             List<DeviceSubscription> deviceSubscriptions = SubscriptionManagementHelperUtil.getDeviceSubscriptionData(deviceSubscriptionDTOS,
                     subscriptionInfo.getDeviceSubscriptionFilterCriteria(), isUnsubscribe, applicationDTO.getDeviceTypeId(), limit, offset);
             return new SubscriptionResponse(subscriptionInfo.getApplicationUUID(), deviceCount, deviceSubscriptions);

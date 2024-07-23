@@ -527,8 +527,8 @@ public interface SubscriptionDAO {
      */
     int getUserUnsubscriptionCount(int appReleaseId, int tenantId) throws ApplicationManagementDAOException;
 
-    SubscriptionStatisticDTO getSubscriptionStatistic(List<Integer> deviceIds, String subscriptionType, boolean isUnsubscribed,
-                                                      int tenantId) throws ApplicationManagementDAOException;
+    SubscriptionStatisticDTO getSubscriptionStatistic(List<Integer> deviceIds, boolean isUnsubscribed,
+                                                      int tenantId, int appReleaseId) throws ApplicationManagementDAOException;
     /**
      * This method is used to get the counts of devices related to a UUID.
      *
