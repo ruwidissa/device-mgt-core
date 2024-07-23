@@ -1869,6 +1869,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         boolean isOwnerProvided = false;
         boolean isDeviceStatusProvided = false;
         boolean isDeviceNameProvided = false;
+        boolean isDeviceTypeIdProvided = false;
         try {
             Connection connection = getConnection();
             String sql = "SELECT e.DEVICE_ID, " +
@@ -1881,8 +1882,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "e.DATE_OF_LAST_UPDATE " +
                     "FROM DM_DEVICE d " +
                     "INNER JOIN DM_ENROLMENT e " +
-                    "WHERE d.ID = e.DEVICE_ID " +
-                    "AND d.TENANT_ID = ? " +
+                    "WHERE d.TENANT_ID = ? " +
                     "AND e.DEVICE_ID IN (" + deviceIdStringList+ ") " +
                     "AND e.STATUS NOT IN ('DELETED', 'REMOVED')";
             if (paginationRequest.getOwner() != null) {
@@ -1897,6 +1897,10 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 sql = sql + " AND d.NAME LIKE ?";
                 isDeviceNameProvided = true;
             }
+            if (paginationRequest.getDeviceTypeId() > 0) {
+                sql = sql + " AND d.DEVICE_TYPE_ID = ?";
+                isDeviceTypeIdProvided = true;
+            }
             sql = sql + " LIMIT ? OFFSET ?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 int parameterIdx = 1;
@@ -1904,12 +1908,19 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 for (Integer deviceId : deviceIds) {
                     preparedStatement.setInt(parameterIdx++, deviceId);
                 }
-                if (isOwnerProvided)
+                if (isOwnerProvided) {
                     preparedStatement.setString(parameterIdx++, "%" + paginationRequest.getOwner() + "%");
-                if (isDeviceStatusProvided)
+                }
+                if (isDeviceStatusProvided) {
                     preparedStatement.setString(parameterIdx++, paginationRequest.getDeviceStatus());
-                if (isDeviceNameProvided)
+                }
+                if (isDeviceNameProvided) {
                     preparedStatement.setString(parameterIdx++, "%" + paginationRequest.getDeviceName() + "%");
+                }
+                if (isDeviceTypeIdProvided) {
+                    preparedStatement.setInt(parameterIdx++, paginationRequest.getDeviceTypeId());
+                }
+
                 preparedStatement.setInt(parameterIdx++, paginationRequest.getRowCount());
                 preparedStatement.setInt(parameterIdx, paginationRequest.getStartIndex());
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -1933,80 +1944,6 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             return devices;
         } catch (SQLException e) {
             String msg = "Error occurred while retrieving devices for device ids in: " + deviceIds;
-            log.error(msg, e);
-            throw new DeviceManagementDAOException(msg, e);
-        }
-    }
-
-    @Override
-    public List<Integer> getDevicesInGivenIdList(PaginationRequest request, List<Integer> deviceIds, int tenantId)
-            throws DeviceManagementDAOException {
-        List<Integer> filteredDeviceIds = new ArrayList<>();
-        if (deviceIds == null || deviceIds.isEmpty()) return filteredDeviceIds;
-        String deviceIdStringList = deviceIds.stream().map(id -> "?").collect(Collectors.joining(","));
-        try {
-            Connection connection = getConnection();
-            String sql = "SELECT ID AS DEVICE_ID " +
-                    "FROM DM_DEVICE WHERE ID IN " +
-                    "(" + deviceIdStringList + ") " +
-                    "AND TENANT_ID = ? " +
-                    "LIMIT ? " +
-                    "OFFSET ?";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                int paraIdx = 1;
-                for (Integer deviceId : deviceIds) {
-                    preparedStatement.setInt(paraIdx++, deviceId);
-                }
-                preparedStatement.setInt(paraIdx++, tenantId);
-                preparedStatement.setInt(paraIdx++, request.getRowCount());
-                preparedStatement.setInt(paraIdx, request.getStartIndex());
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    while (resultSet.next()) {
-                        filteredDeviceIds.add(resultSet.getInt("DEVICE_ID"));
-                    }
-                }
-                return filteredDeviceIds;
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while retrieving device ids in: " + filteredDeviceIds;
-            log.error(msg, e);
-            throw new DeviceManagementDAOException(msg, e);
-        }
-    }
-
-    @Override
-    public List<Integer> getDevicesNotInGivenIdList(PaginationRequest request, List<Integer> deviceIds, int tenantId)
-            throws DeviceManagementDAOException {
-        List<Integer> filteredDeviceIds = new ArrayList<>();
-        try {
-            Connection connection = getConnection();
-            String sql = "SELECT ID AS DEVICE_ID " +
-                    "FROM DM_DEVICE" +
-                    " WHERE TENANT_ID = ?";
-
-            if (deviceIds != null && !deviceIds.isEmpty()) {
-                sql += " AND ID NOT IN ( " + deviceIds.stream().map(id -> "?").collect(Collectors.joining(",")) + ")";
-            }
-            sql += " LIMIT ? OFFSET ?";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                int paraIdx = 1;
-                preparedStatement.setInt(paraIdx++, tenantId);
-                if (deviceIds != null && !deviceIds.isEmpty()) {
-                    for (Integer deviceId : deviceIds) {
-                        preparedStatement.setInt(paraIdx++, deviceId);
-                    }
-                }
-                preparedStatement.setInt(paraIdx++, request.getRowCount());
-                preparedStatement.setInt(paraIdx, request.getStartIndex());
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    while (resultSet.next()) {
-                        filteredDeviceIds.add(resultSet.getInt("DEVICE_ID"));
-                    }
-                }
-                return filteredDeviceIds;
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while retrieving device ids not in: " + filteredDeviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }

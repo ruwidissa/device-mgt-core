@@ -111,18 +111,16 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
                     deviceIdsOwnByRole.remove(deviceId);
                 }
 
-                List<Integer> paginatedNewDeviceIds = deviceManagementProviderService.getDevicesInGivenIdList(deviceIdsOwnByRole,
-                        new PaginationRequest(offset, limit));
-                deviceSubscriptionDTOS = paginatedNewDeviceIds.stream().map(DeviceSubscriptionDTO::new).collect(Collectors.toList());
-                deviceCount = deviceIdsOwnByRole.size();
+                List<Integer> newDeviceIds = deviceManagementProviderService.getDevicesInGivenIdList(deviceIdsOwnByRole);
+                deviceSubscriptionDTOS = newDeviceIds.stream().map(DeviceSubscriptionDTO::new).collect(Collectors.toList());
             } else {
                 deviceSubscriptionDTOS = subscriptionDAO.getSubscriptionDetailsByDeviceIds(applicationReleaseDTO.getId(),
                         isUnsubscribe, tenantId, deviceIdsOwnByRole, dbSubscriptionStatus,
                         subscriptionInfo.getSubscriptionType(), deviceSubscriptionFilterCriteria.getTriggeredBy(), -1, -1);
-
-                deviceCount = SubscriptionManagementHelperUtil.getTotalDeviceSubscriptionCount(deviceSubscriptionDTOS,
-                        subscriptionInfo.getDeviceSubscriptionFilterCriteria(), applicationDTO.getDeviceTypeId());
             }
+            deviceCount = SubscriptionManagementHelperUtil.getTotalDeviceSubscriptionCount(deviceSubscriptionDTOS,
+                    subscriptionInfo.getDeviceSubscriptionFilterCriteria(), applicationDTO.getDeviceTypeId());
+
             List<DeviceSubscription> deviceSubscriptions = SubscriptionManagementHelperUtil.
                     getDeviceSubscriptionData(deviceSubscriptionDTOS,
                             subscriptionInfo.getDeviceSubscriptionFilterCriteria(), isUnsubscribe, applicationDTO.getDeviceTypeId(), limit, offset);
@@ -180,9 +178,17 @@ public class RoleBasedSubscriptionManagementHelperServiceImpl implements Subscri
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             ConnectionManagerUtil.openDBConnection();
+            ApplicationReleaseDTO applicationReleaseDTO = applicationReleaseDAO.
+                    getReleaseByUUID(subscriptionInfo.getApplicationUUID(), tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for application release UUID: " +
+                        subscriptionInfo.getApplicationUUID();
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
             List<Integer> deviceIdsOwnByRole = getDeviceIdsOwnByRole(subscriptionInfo.getIdentifier(), tenantId);
             SubscriptionStatisticDTO subscriptionStatisticDTO = subscriptionDAO.
-                    getSubscriptionStatistic(deviceIdsOwnByRole, null, isUnsubscribe, tenantId);
+                    getSubscriptionStatistic(deviceIdsOwnByRole, isUnsubscribe, tenantId, applicationReleaseDTO.getId());
             int allDeviceCount = deviceIdsOwnByRole.size();
             return SubscriptionManagementHelperUtil.getSubscriptionStatistics(subscriptionStatisticDTO, allDeviceCount);
         } catch (DeviceManagementException | ApplicationManagementDAOException | UserStoreException e) {

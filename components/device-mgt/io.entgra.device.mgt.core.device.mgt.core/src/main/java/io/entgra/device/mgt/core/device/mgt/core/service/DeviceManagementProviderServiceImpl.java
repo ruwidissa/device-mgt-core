@@ -161,7 +161,6 @@ import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
-import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -5594,18 +5593,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<Integer> getDevicesNotInGivenIdList(List<Integer> deviceIds, PaginationRequest paginationRequest)
+    public List<Integer> getDevicesNotInGivenIdList(List<Integer> deviceIds)
             throws DeviceManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (paginationRequest == null) {
-            String msg = "Received null for pagination request";
-            log.error(msg);
-            throw new DeviceManagementException(msg);
-        }
 
         try {
             DeviceManagementDAOFactory.openConnection();
-            return deviceDAO.getDevicesNotInGivenIdList(paginationRequest, deviceIds, tenantId);
+            return deviceDAO.getDevicesNotInGivenIdList(deviceIds, tenantId);
         } catch (DeviceManagementDAOException e) {
             String msg = "Error encountered while getting device ids";
             log.error(msg, e);
@@ -5620,19 +5614,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<Integer> getDevicesInGivenIdList(List<Integer> deviceIds, PaginationRequest paginationRequest)
+    public List<Integer> getDevicesInGivenIdList(List<Integer> deviceIds)
             throws DeviceManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (paginationRequest == null) {
-            String msg = "Received null for pagination request";
-            log.error(msg);
-            throw new DeviceManagementException(msg);
-        }
-
         try {
             DeviceManagementDAOFactory.openConnection();
-            return deviceDAO.getDevicesInGivenIdList(paginationRequest, deviceIds, tenantId);
+            return deviceDAO.getDevicesInGivenIdList(deviceIds, tenantId);
         } catch (DeviceManagementDAOException e) {
             String msg = "Error encountered while getting device ids";
             log.error(msg, e);

@@ -82,6 +82,7 @@ public class OracleDeviceDAOImpl extends SQLServerDeviceDAOImpl {
         boolean isOwnerProvided = false;
         boolean isDeviceStatusProvided = false;
         boolean isDeviceNameProvided = false;
+        boolean isDeviceTypeIdProvided = false;
         try {
             Connection connection = getConnection();
             String sql = "SELECT e.DEVICE_ID, " +
@@ -110,6 +111,11 @@ public class OracleDeviceDAOImpl extends SQLServerDeviceDAOImpl {
                 sql += " AND d.NAME LIKE ?";
                 isDeviceNameProvided = true;
             }
+            if (paginationRequest.getDeviceTypeId() > 0) {
+                sql += " AND d.DEVICE_TYPE_ID = ?";
+                isDeviceTypeIdProvided = true;
+            }
+
             sql += " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 int parameterIdx = 1;
@@ -126,6 +132,10 @@ public class OracleDeviceDAOImpl extends SQLServerDeviceDAOImpl {
                 if (isDeviceNameProvided) {
                     preparedStatement.setString(parameterIdx++, "%" + paginationRequest.getDeviceName() + "%");
                 }
+                if (isDeviceTypeIdProvided) {
+                    preparedStatement.setInt(parameterIdx++, paginationRequest.getDeviceTypeId());
+                }
+
                 preparedStatement.setInt(parameterIdx++, paginationRequest.getStartIndex());
                 preparedStatement.setInt(parameterIdx, paginationRequest.getRowCount());
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -148,84 +158,6 @@ public class OracleDeviceDAOImpl extends SQLServerDeviceDAOImpl {
             return devices;
         } catch (SQLException e) {
             String msg = "Error occurred while retrieving devices for device ids in: " + deviceIds;
-            log.error(msg, e);
-            throw new DeviceManagementDAOException(msg, e);
-        }
-    }
-
-    @Override
-    public List<Integer> getDevicesInGivenIdList(PaginationRequest request, List<Integer> deviceIds, int tenantId)
-            throws DeviceManagementDAOException {
-        List<Integer> filteredDeviceIds = new ArrayList<>();
-        if (deviceIds == null || deviceIds.isEmpty()) return filteredDeviceIds;
-
-        String deviceIdStringList = deviceIds.stream().map(id -> "?").collect(Collectors.joining(","));
-        try {
-            Connection connection = getConnection();
-            String sql = "SELECT ID AS DEVICE_ID " +
-                    "FROM DM_DEVICE WHERE ID IN " +
-                    "(" + deviceIdStringList + ") " +
-                    "AND TENANT_ID = ? " +
-                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                int paraIdx = 1;
-                for (Integer deviceId : deviceIds) {
-                    preparedStatement.setInt(paraIdx++, deviceId);
-                }
-                preparedStatement.setInt(paraIdx++, tenantId);
-                preparedStatement.setInt(paraIdx++, request.getStartIndex());
-                preparedStatement.setInt(paraIdx, request.getRowCount());
-
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    while (resultSet.next()) {
-                        filteredDeviceIds.add(resultSet.getInt("DEVICE_ID"));
-                    }
-                }
-                return filteredDeviceIds;
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while retrieving device ids in: " + deviceIds;
-            log.error(msg, e);
-            throw new DeviceManagementDAOException(msg, e);
-        }
-    }
-
-    @Override
-    public List<Integer> getDevicesNotInGivenIdList(PaginationRequest request, List<Integer> deviceIds, int tenantId)
-            throws DeviceManagementDAOException {
-        List<Integer> filteredDeviceIds = new ArrayList<>();
-        try {
-            Connection connection = getConnection();
-            String sql = "SELECT ID AS DEVICE_ID " +
-                    "FROM DM_DEVICE " +
-                    "WHERE TENANT_ID = ?";
-
-            if (deviceIds != null && !deviceIds.isEmpty()) {
-                sql += " AND ID NOT IN (" + deviceIds.stream().map(id -> "?").collect(Collectors.joining(",")) + ")";
-            }
-
-            sql += "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                int paraIdx = 1;
-                preparedStatement.setInt(paraIdx++, tenantId);
-                if (deviceIds != null && !deviceIds.isEmpty()) {
-                    for (Integer deviceId : deviceIds) {
-                        preparedStatement.setInt(paraIdx++, deviceId);
-                    }
-                }
-                preparedStatement.setInt(paraIdx++, request.getStartIndex());
-                preparedStatement.setInt(paraIdx, request.getRowCount());
-
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    while (resultSet.next()) {
-                        filteredDeviceIds.add(resultSet.getInt("DEVICE_ID"));
-                    }
-                }
-                return filteredDeviceIds;
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while retrieving device ids not in: " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }

@@ -3301,7 +3301,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
-    public List<Integer> getDevicesNotInGivenIdList(PaginationRequest request, List<Integer> deviceIds, int tenantId)
+    public List<Integer> getDevicesNotInGivenIdList(List<Integer> deviceIds, int tenantId)
             throws DeviceManagementDAOException {
         List<Integer> filteredDeviceIds = new ArrayList<>();
         try {
@@ -3311,8 +3311,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             if (deviceIds != null && !deviceIds.isEmpty()) {
                 sql += " AND ID NOT IN ( " + deviceIds.stream().map(id -> "?").collect(Collectors.joining(",")) + ")";
             }
-
-            sql += " LIMIT ? OFFSET ?";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 int paraIdx = 1;
@@ -3324,8 +3322,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     }
                 }
 
-                preparedStatement.setInt(paraIdx++, request.getRowCount());
-                preparedStatement.setInt(paraIdx, request.getStartIndex());
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         filteredDeviceIds.add(resultSet.getInt("DEVICE_ID"));
@@ -3341,7 +3337,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
-    public List<Integer> getDevicesInGivenIdList(PaginationRequest request, List<Integer> deviceIds, int tenantId)
+    public List<Integer> getDevicesInGivenIdList(List<Integer> deviceIds, int tenantId)
             throws DeviceManagementDAOException {
         List<Integer> filteredDeviceIds = new ArrayList<>();
         if (deviceIds == null || deviceIds.isEmpty()) return filteredDeviceIds;
@@ -3351,19 +3347,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             Connection connection = getConnection();
             String sql = "SELECT ID AS DEVICE_ID " +
                     "FROM DM_DEVICE " +
-                    "WHERE ID IN (" + deviceIdStringList + ")" +
-                    " AND TENANT_ID = ? " +
-                    "LIMIT ? " +
-                    "OFFSET ?";
+                    "WHERE ID IN (" + deviceIdStringList + ") " +
+                    "AND TENANT_ID = ? ";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 int paraIdx = 1;
                 for (Integer deviceId : deviceIds) {
                     preparedStatement.setInt(paraIdx++, deviceId);
                 }
 
-                preparedStatement.setInt(paraIdx++, tenantId);
-                preparedStatement.setInt(paraIdx++, request.getRowCount());
-                preparedStatement.setInt(paraIdx, request.getStartIndex());
+                preparedStatement.setInt(paraIdx, tenantId);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         filteredDeviceIds.add(resultSet.getInt("DEVICE_ID"));
@@ -3426,6 +3418,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         boolean isOwnerProvided = false;
         boolean isDeviceStatusProvided = false;
         boolean isDeviceNameProvided = false;
+        boolean isDeviceTypeIdProvided = false;
+
         try {
             Connection connection = getConnection();
             String sql = "SELECT e.DEVICE_ID, " +
@@ -3439,8 +3433,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     "FROM DM_DEVICE d " +
                     "INNER JOIN DM_ENROLMENT e " +
                     "ON d.ID = e.DEVICE_ID " +
-                    "WHERE d.DEVICE_TYPE_ID = ? " +
-                    "AND d.TENANT_ID = ? " +
+                    "WHERE d.TENANT_ID = ? " +
                     "AND e.DEVICE_ID IN (" + deviceIdStringList+ ") " +
                     "AND e.STATUS NOT IN ('DELETED', 'REMOVED')";
 
@@ -3459,6 +3452,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 isDeviceNameProvided = true;
             }
 
+            if (paginationRequest.getDeviceTypeId() > 0) {
+                sql = sql + " AND d.DEVICE_TYPE_ID = ?";
+                isDeviceTypeIdProvided = true;
+            }
+
             sql = sql + " LIMIT ? OFFSET ?";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -3470,12 +3468,18 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     preparedStatement.setInt(parameterIdx++, deviceId);
                 }
 
-                if (isOwnerProvided)
+                if (isOwnerProvided) {
                     preparedStatement.setString(parameterIdx++, "%" + paginationRequest.getOwner() + "%");
-                if (isDeviceStatusProvided)
+                }
+                if (isDeviceStatusProvided) {
                     preparedStatement.setString(parameterIdx++, paginationRequest.getDeviceStatus());
-                if (isDeviceNameProvided)
+                }
+                if (isDeviceNameProvided) {
                     preparedStatement.setString(parameterIdx++, "%" + paginationRequest.getDeviceName() + "%");
+                }
+                if (isDeviceTypeIdProvided) {
+                    preparedStatement.setInt(parameterIdx++, paginationRequest.getDeviceTypeId());
+                }
 
                 preparedStatement.setInt(parameterIdx++, paginationRequest.getRowCount());
                 preparedStatement.setInt(parameterIdx, paginationRequest.getStartIndex());
@@ -3506,7 +3510,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
     }
 
-    // todo: fix the join query
     @Override
     public int getDeviceCountByDeviceIds(PaginationRequest paginationRequest, List<Integer> deviceIds, int tenantId)
             throws DeviceManagementDAOException {
@@ -3517,6 +3520,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         boolean isOwnerProvided = false;
         boolean isDeviceStatusProvided = false;
         boolean isDeviceNameProvided = false;
+        boolean isDeviceTypeIdProvided = false;
         try {
             Connection connection = getConnection();
             String sql = "SELECT COUNT(DISTINCT e.DEVICE_ID) AS COUNT " +
@@ -3525,7 +3529,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     "ON d.ID = e.DEVICE_ID " +
                     "WHERE e.TENANT_ID = ? " +
                     "AND e.DEVICE_ID IN (" + deviceIdStringList+ ") " +
-                    "AND d.DEVICE_TYPE_ID = ? " +
                     "AND e.STATUS NOT IN ('DELETED', 'REMOVED')";
 
             if (paginationRequest.getOwner() != null) {
@@ -3543,6 +3546,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 isDeviceNameProvided = true;
             }
 
+            if (paginationRequest.getDeviceTypeId() > 0) {
+                sql = sql + " AND d.DEVICE_TYPE_ID = ?";
+                isDeviceTypeIdProvided = true;
+            }
+
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 int parameterIdx = 1;
                 preparedStatement.setInt(parameterIdx++, tenantId);
@@ -3551,13 +3559,18 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     preparedStatement.setInt(parameterIdx++, deviceId);
                 }
 
-                preparedStatement.setInt(parameterIdx++, paginationRequest.getDeviceTypeId());
-                if (isOwnerProvided)
+                if (isOwnerProvided) {
                     preparedStatement.setString(parameterIdx++, "%" + paginationRequest.getOwner() + "%");
-                if (isDeviceStatusProvided)
+                }
+                if (isDeviceStatusProvided) {
                     preparedStatement.setString(parameterIdx++, paginationRequest.getDeviceStatus());
-                if (isDeviceNameProvided)
-                    preparedStatement.setString(parameterIdx, "%" + paginationRequest.getDeviceName() + "%");
+                }
+                if (isDeviceNameProvided) {
+                    preparedStatement.setString(parameterIdx++, "%" + paginationRequest.getDeviceName() + "%");
+                }
+                if (isDeviceTypeIdProvided) {
+                    preparedStatement.setInt(parameterIdx, paginationRequest.getDeviceTypeId());
+                }
 
                 try(ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
