@@ -35,7 +35,7 @@ public class SubscriptionMetadata {
         public static final String INVALID = "INVALID";
         public static final String UNAUTHORIZED = "UNAUTHORIZED";
         public static final String IN_PROGRESS = "IN_PROGRESS";
-        public static final String REPEAT = "REPEAT";
+        public static final String REPEATED = "REPEATED";
     }
 
     public static final class SubscriptionTypes {
@@ -51,7 +51,7 @@ public class SubscriptionMetadata {
         public static final List<String> ERROR_STATUS_LIST =
                 Arrays.asList(DeviceSubscriptionStatus.ERROR, DeviceSubscriptionStatus.INVALID, DeviceSubscriptionStatus.UNAUTHORIZED);
         public static final List<String> PENDING_STATUS_LIST =
-                Arrays.asList(DeviceSubscriptionStatus.PENDING, DeviceSubscriptionStatus.IN_PROGRESS, DeviceSubscriptionStatus.REPEAT);
+                Arrays.asList(DeviceSubscriptionStatus.PENDING, DeviceSubscriptionStatus.IN_PROGRESS, DeviceSubscriptionStatus.REPEATED);
     }
 
     public static Map<String, List<String>> deviceSubscriptionStatusToDBSubscriptionStatusMap;
@@ -59,11 +59,11 @@ public class SubscriptionMetadata {
         Map<String, List<String>> statusMap = new HashMap<>();
         statusMap.put(DeviceSubscriptionStatus.COMPLETED, DBSubscriptionStatus.COMPLETED_STATUS_LIST);
         statusMap.put(DeviceSubscriptionStatus.PENDING, DBSubscriptionStatus.PENDING_STATUS_LIST);
-        statusMap.put(DeviceSubscriptionStatus.IN_PROGRESS, DBSubscriptionStatus.PENDING_STATUS_LIST);
-        statusMap.put(DeviceSubscriptionStatus.REPEAT, DBSubscriptionStatus.PENDING_STATUS_LIST);
+        statusMap.put(DeviceSubscriptionStatus.IN_PROGRESS, Collections.singletonList(DeviceSubscriptionStatus.IN_PROGRESS));
+        statusMap.put(DeviceSubscriptionStatus.REPEATED, Collections.singletonList(DeviceSubscriptionStatus.REPEATED));
         statusMap.put(DeviceSubscriptionStatus.ERROR, DBSubscriptionStatus.ERROR_STATUS_LIST);
-        statusMap.put(DeviceSubscriptionStatus.INVALID, DBSubscriptionStatus.ERROR_STATUS_LIST);
-        statusMap.put(DeviceSubscriptionStatus.UNAUTHORIZED, DBSubscriptionStatus.ERROR_STATUS_LIST);
+        statusMap.put(DeviceSubscriptionStatus.INVALID,Collections.singletonList(DeviceSubscriptionStatus.INVALID));
+        statusMap.put(DeviceSubscriptionStatus.UNAUTHORIZED,Collections.singletonList(DeviceSubscriptionStatus.UNAUTHORIZED));
         deviceSubscriptionStatusToDBSubscriptionStatusMap = Collections.unmodifiableMap(statusMap);
     }
 }
