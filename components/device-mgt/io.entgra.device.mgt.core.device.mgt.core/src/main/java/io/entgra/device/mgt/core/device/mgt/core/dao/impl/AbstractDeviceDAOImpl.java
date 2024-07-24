@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.LogFactory;
@@ -3484,4 +3485,39 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
     }
 
+    @Override
+    public List<Integer> getDeviceIdsByStatus(List<String> statuses) throws DeviceManagementException {
+        StringBuilder deviceFilters = new StringBuilder();
+        for (int i = 0; i < statuses.size(); i++) {
+            deviceFilters.append("?");
+            if (i < statuses.size() - 1) {
+                deviceFilters.append(",");
+            }
+        }
+
+        try {
+            Connection conn = getConnection();
+            String sql = "SELECT DEVICE_ID " +
+                    "FROM DM_ENROLMENT " +
+                    "WHERE STATUS IN (" + deviceFilters.toString() + ")";
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                for (int i = 0; i < statuses.size(); i++) {
+                    ps.setString(i + 1, statuses.get(i));
+                }
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<Integer> deviceIds = new ArrayList<>();
+                    while (rs.next()) {
+                        deviceIds.add(rs.getInt("DEVICE_ID"));
+                    }
+                    return deviceIds;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while running SQL to get device IDs by status.";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }
+    }
 }
