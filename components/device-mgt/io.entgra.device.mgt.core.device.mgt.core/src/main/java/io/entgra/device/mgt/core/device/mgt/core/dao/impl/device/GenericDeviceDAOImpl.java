@@ -225,11 +225,11 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         try {
             Connection conn = getConnection();
             String sql = "SELECT d.ID AS DEVICE_ID, " +
-                    "DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION, " +
                     "DESCRIPTION, " +
                     "NAME, " +
                     "DATE_OF_ENROLMENT, " +
-                    "LAST_UPDATED_TIMESTAMP, " +
+                    "d.LAST_UPDATED_TIMESTAMP, " +
                     "STATUS, " +
                     "DATE_OF_LAST_UPDATE, " +
                     "TIMESTAMPDIFF(DAY, ?, DATE_OF_ENROLMENT) as DAYS_SINCE_ENROLLED " +
@@ -266,12 +266,12 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         try {
             conn = this.getConnection();
             String sql = "select d.ID AS DEVICE_ID, " +
-                    "DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION, " +
                     "DESCRIPTION, " +
                     "NAME, " +
                     "DATE_OF_ENROLMENT, " +
                     "DATE_OF_LAST_UPDATE, " +
-                    "d1.LAST_UPDATED_TIMESTAMP, " +
+                    "d.LAST_UPDATED_TIMESTAMP, " +
                     "STATUS, " +
                     "TIMESTAMPDIFF(DAY, DATE_OF_LAST_UPDATE, DATE_OF_ENROLMENT) AS DAYS_USED " +
                     "from DM_DEVICE d, DM_ENROLMENT e " +
@@ -311,11 +311,11 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         try {
             conn = this.getConnection();
             String sql = "select d.ID AS DEVICE_ID, " +
-                    "DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION, " +
                     "DESCRIPTION, " +
                     "NAME, " +
                     "DATE_OF_ENROLMENT, " +
-                    "LAST_UPDATED_TIMESTAMP, " +
+                    "d.LAST_UPDATED_TIMESTAMP, " +
                     "STATUS, " +
                     "DATE_OF_LAST_UPDATE, " +
                     "TIMESTAMPDIFF(DAY, ?, ?) as DAYS_SINCE_ENROLLED " +
@@ -352,12 +352,12 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         try {
             conn = this.getConnection();
             String sql = "select d.ID AS DEVICE_ID, " +
-                    "DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION, " +
                     "DESCRIPTION, " +
                     "NAME, " +
                     "DATE_OF_ENROLMENT, " +
                     "DATE_OF_LAST_UPDATE, " +
-                    "LAST_UPDATED_TIMESTAMP, " +
+                    "d.LAST_UPDATED_TIMESTAMP, " +
                     "STATUS, " +
                     "TIMESTAMPDIFF(DAY, DATE_OF_LAST_UPDATE,  ?) AS DAYS_USED " +
                     "from DM_DEVICE d, DM_ENROLMENT e " +
@@ -400,9 +400,9 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             conn = this.getConnection();
             String sql = "SELECT " +
                     "DM_DEVICE.ID AS DEVICE_ID, " +
-                    "DEVICE_IDENTIFICATION, " +
+                    "d.DEVICE_IDENTIFICATION, " +
                     "DESCRIPTION, " +
-                    "LAST_UPDATED_TIMESTAMP, " +
+                    "d.LAST_UPDATED_TIMESTAMP, " +
                     "DM_DEVICE.NAME AS DEVICE_NAME, " +
                     "DEVICE_TYPE, " +
                     "DM_ENROLMENT.ID AS ENROLMENT_ID, " +

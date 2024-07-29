@@ -2233,8 +2233,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred while opening a connection to the data source";
             log.info(msg, e);
             throw new DeviceManagementException(msg, e);
-        } finally {
-            DeviceManagementDAOFactory.closeConnection();
         }
     }
 
