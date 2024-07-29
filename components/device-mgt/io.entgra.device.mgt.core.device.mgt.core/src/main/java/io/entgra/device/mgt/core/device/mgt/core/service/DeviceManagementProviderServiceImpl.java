@@ -1154,50 +1154,62 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     public double generateCost(List<Device> allDevices, Timestamp startDate, Timestamp endDate,  Cost tenantCost, List<Device> deviceStatusNotAvailable, double totalCost) throws DeviceManagementException {
         List<DeviceStatus> deviceStatus;
-        for (Device device : allDevices) {
-            long dateDiff = 0;
-            deviceStatus = getDeviceStatusHistoryInsideTransaction(device, null, endDate, true);
-            if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
-                if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                        || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                    if (deviceStatus.get(0).getUpdateTime().getTime() >= startDate.getTime()) {
-                        dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - startDate.getTime();
+        try {
+            DeviceManagementDAOFactory.getConnection();
+            for (Device device : allDevices) {
+                long dateDiff = 0;
+                int tenantId = this.getTenantId();
+                deviceStatus = deviceStatusDAO.getStatus(device.getId(), tenantId, null, endDate, true);
+                if (device.getEnrolmentInfo().getDateOfEnrolment() < startDate.getTime()) {
+                    if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                            || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                        if (deviceStatus.get(0).getUpdateTime().getTime() >= startDate.getTime()) {
+                            dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - startDate.getTime();
+                        }
+                    } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                            && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                        dateDiff = endDate.getTime() - startDate.getTime();
                     }
-                } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                        && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                    dateDiff = endDate.getTime() - startDate.getTime();
-                }
-            } else {
-                if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                        || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                    if (deviceStatus.get(0).getUpdateTime().getTime() >= device.getEnrolmentInfo().getDateOfEnrolment()) {
-                        dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
+                } else {
+                    if (!deviceStatus.isEmpty() && (String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                            || String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                        if (deviceStatus.get(0).getUpdateTime().getTime() >= device.getEnrolmentInfo().getDateOfEnrolment()) {
+                            dateDiff = deviceStatus.get(0).getUpdateTime().getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
+                        }
+                    } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
+                            && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
+                        dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
                     }
-                } else if (!deviceStatus.isEmpty() && (!String.valueOf(deviceStatus.get(0).getStatus()).equals("REMOVED")
-                        && !String.valueOf(deviceStatus.get(0).getStatus()).equals("DELETED"))) {
-                    dateDiff = endDate.getTime() - device.getEnrolmentInfo().getDateOfEnrolment();
+                }
+
+                // Convert dateDiff to days as a decimal value
+                double dateDiffInDays = (double) dateDiff / (24 * 60 * 60 * 1000);
+
+                if (dateDiffInDays % 1 >= 0.9) {
+                    dateDiffInDays = Math.ceil(dateDiffInDays);
+                }
+
+                long dateInDays = (long) dateDiffInDays;
+                double cost = 0;
+                if (tenantCost != null) {
+                    cost = (tenantCost.getCost() / 365) * dateInDays;
+                }
+                totalCost += cost;
+                device.setCost(Math.round(cost * 100.0) / 100.0);
+                long totalDays = dateInDays + device.getDaysUsed();
+                device.setDaysUsed((int) totalDays);
+                if (deviceStatus.isEmpty()) {
+                    deviceStatusNotAvailable.add(device);
                 }
             }
-
-            // Convert dateDiff to days as a decimal value
-            double dateDiffInDays = (double) dateDiff / (24 * 60 * 60 * 1000);
-
-            if (dateDiffInDays % 1 >= 0.9) {
-                dateDiffInDays = Math.ceil(dateDiffInDays);
-            }
-
-            long dateInDays = (long) dateDiffInDays;
-            double cost = 0;
-            if (tenantCost != null) {
-                cost = (tenantCost.getCost() / 365) * dateInDays;
-            }
-            totalCost += cost;
-            device.setCost(Math.round(cost * 100.0) / 100.0);
-            long totalDays = dateInDays + device.getDaysUsed();
-            device.setDaysUsed((int) totalDays);
-            if (deviceStatus.isEmpty()) {
-                deviceStatusNotAvailable.add(device);
-            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred in retrieving status history for a device in billing.";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.info(msg, e);
+            throw new DeviceManagementException(msg, e);
         }
         return totalCost;
     }
@@ -2208,31 +2220,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throw new DeviceManagementException(msg, e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
-        }
-    }
-
-    /*
-    This is just to avoid breaking the billing functionality as it required to call getDeviceStatusHistory method
-    without transaction handling.
-     */
-    private List<DeviceStatus> getDeviceStatusHistoryInsideTransaction(
-            Device device, Date fromDate, Date toDate, boolean billingStatus)
-            throws DeviceManagementException {
-        if (log.isDebugEnabled()) {
-            log.debug("get status history of device: " + device.getDeviceIdentifier());
-        }
-        try {
-            DeviceManagementDAOFactory.getConnection();
-            int tenantId = this.getTenantId();
-            return deviceStatusDAO.getStatus(device.getId(), tenantId, fromDate, toDate, billingStatus);
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred in retrieving status history for device :" + device.getDeviceIdentifier();
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the data source";
-            log.info(msg, e);
-            throw new DeviceManagementException(msg, e);
         }
     }
 
