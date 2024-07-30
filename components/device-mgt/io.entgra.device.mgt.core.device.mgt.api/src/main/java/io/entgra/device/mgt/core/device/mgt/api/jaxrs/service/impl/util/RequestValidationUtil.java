@@ -23,7 +23,11 @@ import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.exception.BadRequestException;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.Constants;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
-import io.entgra.device.mgt.core.device.mgt.common.*;
+import io.entgra.device.mgt.core.device.mgt.common.Base64File;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.Feature;
+import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
+import io.entgra.device.mgt.core.device.mgt.common.OperationLogFilters;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
@@ -40,6 +44,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -808,6 +814,30 @@ public class RequestValidationUtil {
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder()
                             .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (metadata.getMetaKey().equals("PER_DEVICE_COST")) {
+            String metaValue = metadata.getMetaValue();
+            JSONArray jsonArray = new JSONArray(metaValue);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                if (jsonObject.has("cost")) {
+                    Object costObj = jsonObject.get("cost");
+                    if (costObj == JSONObject.NULL || (costObj instanceof Number && ((Number) costObj).doubleValue() < 0)) {
+                        String msg = "Billing cost cannot be a minus value or null.";
+                        log.error(msg);
+                        throw new InputValidationException(
+                                new ErrorResponse.ErrorResponseBuilder()
+                                        .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+                    }
+                } else {
+                    String msg = "Billing cost is missing.";
+                    log.error(msg);
+                    throw new InputValidationException(
+                            new ErrorResponse.ErrorResponseBuilder()
+                                    .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+                }
+            }
         }
         if (metadata.getMetaValue() == null) {
             String msg = "Request parameter metaValue should be non empty.";

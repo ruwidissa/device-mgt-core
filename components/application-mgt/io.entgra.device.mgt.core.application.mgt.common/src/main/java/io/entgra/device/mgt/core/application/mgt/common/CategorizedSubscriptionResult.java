@@ -23,10 +23,15 @@ import java.util.List;
 
 public class CategorizedSubscriptionResult {
     private List<DeviceSubscriptionData> installedDevices;
+    private int installedDevicesCount;
     private List<DeviceSubscriptionData> pendingDevices;
+    private int pendingDevicesCount;
     private List<DeviceSubscriptionData> errorDevices;
+    private int errorDevicesCount;
     private List<DeviceSubscriptionData> newDevices;
+    private int newDevicesCount;
     private List<DeviceSubscriptionData> subscribedDevices;
+    private int subscribedDevicesCount;
 
     public CategorizedSubscriptionResult(List<DeviceSubscriptionData> installedDevices,
                                          List<DeviceSubscriptionData> pendingDevices,
@@ -59,6 +64,48 @@ public class CategorizedSubscriptionResult {
         this.errorDevices = errorDevices;
         this.newDevices = newDevices;
         this.subscribedDevices = subscribedDevices;
+    }
+
+    public CategorizedSubscriptionResult(List<DeviceSubscriptionData> installedDevices,
+                                         List<DeviceSubscriptionData> pendingDevices,
+                                         List<DeviceSubscriptionData> errorDevices,
+                                         List<DeviceSubscriptionData> newDevices,
+                                         int installedDevicesCount,
+                                         int pendingDevicesCount,
+                                         int errorDevicesCount,
+                                         int newDevicesCount
+                                         ) {
+        this.installedDevices = installedDevices;
+        this.pendingDevices = pendingDevices;
+        this.errorDevices = errorDevices;
+        this.newDevices = newDevices;
+        this.subscribedDevices = null;
+        this.installedDevicesCount = installedDevicesCount;
+        this.pendingDevicesCount = pendingDevicesCount;
+        this.errorDevicesCount = errorDevicesCount;
+        this.newDevicesCount = newDevicesCount;
+        this.subscribedDevicesCount = 0;
+    }
+
+    public CategorizedSubscriptionResult(List<DeviceSubscriptionData> installedDevices,
+                                         List<DeviceSubscriptionData> pendingDevices,
+                                         List<DeviceSubscriptionData> errorDevices,
+                                         List<DeviceSubscriptionData> newDevices,
+                                         List<DeviceSubscriptionData> subscribedDevices, int installedDevicesCount,
+                                         int pendingDevicesCount,
+                                         int errorDevicesCount,
+                                         int newDevicesCount,
+                                         int subscribedDevicesCount) {
+        this.installedDevices = installedDevices;
+        this.pendingDevices = pendingDevices;
+        this.errorDevices = errorDevices;
+        this.newDevices = newDevices;
+        this.subscribedDevices = subscribedDevices;
+        this.installedDevicesCount = installedDevicesCount;
+        this.pendingDevicesCount = pendingDevicesCount;
+        this.errorDevicesCount = errorDevicesCount;
+        this.newDevicesCount = newDevicesCount;
+        this.subscribedDevicesCount = subscribedDevicesCount;
     }
 
     public CategorizedSubscriptionResult(List<DeviceSubscriptionData> devices, String tabActionStatus) {
@@ -126,5 +173,45 @@ public class CategorizedSubscriptionResult {
 
     public void setSubscribedDevices(List<DeviceSubscriptionData> subscribedDevices) {
         this.subscribedDevices = subscribedDevices;
+    }
+
+    public int getInstalledDevicesCount() {
+        return installedDevicesCount;
+    }
+
+    public void setInstalledDevicesCount(int installedDevicesCount) {
+        this.installedDevicesCount = installedDevicesCount;
+    }
+
+    public int getPendingDevicesCount() {
+        return pendingDevicesCount;
+    }
+
+    public void setPendingDevicesCount(int pendingDevicesCount) {
+        this.pendingDevicesCount = pendingDevicesCount;
+    }
+
+    public int getErrorDevicesCount() {
+        return errorDevicesCount;
+    }
+
+    public void setErrorDevicesCount(int errorDevicesCount) {
+        this.errorDevicesCount = errorDevicesCount;
+    }
+
+    public int getNewDevicesCount() {
+        return newDevicesCount;
+    }
+
+    public void setNewDevicesCount(int newDevicesCount) {
+        this.newDevicesCount = newDevicesCount;
+    }
+
+    public int getSubscribedDevicesCount() {
+        return subscribedDevicesCount;
+    }
+
+    public void setSubscribedDevicesCount(int subscribedDevicesCount) {
+        this.subscribedDevicesCount = subscribedDevicesCount;
     }
 }

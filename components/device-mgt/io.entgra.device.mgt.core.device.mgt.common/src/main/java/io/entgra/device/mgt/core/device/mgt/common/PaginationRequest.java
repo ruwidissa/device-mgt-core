@@ -50,6 +50,7 @@ public class PaginationRequest {
     private List<String> statusList = new ArrayList<>();
     private OperationLogFilters operationLogFilters = new OperationLogFilters();
     private List<SortColumn> sortColumn = new ArrayList<>();
+    private int deviceTypeId;
     public OperationLogFilters getOperationLogFilters() {
         return operationLogFilters;
     }
@@ -287,5 +288,13 @@ public class PaginationRequest {
 
     public void setTabActionStatus(String tabActionStatus) {
         this.tabActionStatus = tabActionStatus;
+    }
+
+    public int getDeviceTypeId() {
+        return deviceTypeId;
+    }
+
+    public void setDeviceTypeId(int deviceTypeId) {
+        this.deviceTypeId = deviceTypeId;
     }
 }

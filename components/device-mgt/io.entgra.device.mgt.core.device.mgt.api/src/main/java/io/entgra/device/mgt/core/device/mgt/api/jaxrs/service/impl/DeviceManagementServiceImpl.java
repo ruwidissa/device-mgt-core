@@ -43,14 +43,25 @@ import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionMan
 import io.entgra.device.mgt.core.application.mgt.core.util.HelperUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.DisenrollRequest;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtUtil;
+import io.entgra.device.mgt.core.device.mgt.common.Device;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceFilters;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
+import io.entgra.device.mgt.core.device.mgt.common.DeviceManagementConstants;
+import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
+import io.entgra.device.mgt.core.device.mgt.common.Feature;
+import io.entgra.device.mgt.core.device.mgt.common.FeatureManager;
+import io.entgra.device.mgt.core.device.mgt.common.MDMAppConstants;
+import io.entgra.device.mgt.core.device.mgt.common.OperationLogFilters;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationRequest;
+import io.entgra.device.mgt.core.device.mgt.common.PaginationResult;
 import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.entgra.device.mgt.core.device.mgt.common.*;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.Application;
 import io.entgra.device.mgt.core.device.mgt.common.app.mgt.ApplicationManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.app.mgt.MobileAppTypes;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceData;
@@ -104,7 +115,16 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.text.ParseException;
@@ -1161,7 +1181,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("version") String version,
             @QueryParam("user") String user) {
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
-        Operation operation = new Operation();
         try {
             RequestValidationUtil.validateDeviceIdentifier(type, id);
             Device device = DeviceMgtAPIUtils.getDeviceManagementService().getDevice(id, false);
@@ -1182,11 +1201,12 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 //if the applications not installed via entgra store
             } else {
                 if (Constants.ANDROID.equals(type)) {
-                    ApplicationUninstallation applicationUninstallation = new ApplicationUninstallation(packageName, "PUBLIC", name, platform, version, user);
-                    Gson gson = new Gson();
+                    ApplicationUninstallation applicationUninstallation = new ApplicationUninstallation(packageName,
+                            MobileAppTypes.PUBLIC.toString(), name, platform, version, user);
+                    ProfileOperation operation = new ProfileOperation();
                     operation.setCode(MDMAppConstants.AndroidConstants.UNMANAGED_APP_UNINSTALL);
                     operation.setType(Operation.Type.PROFILE);
-                    operation.setPayLoad(gson.toJson(applicationUninstallation));
+                    operation.setPayLoad(applicationUninstallation.toJson());
                     DeviceManagementProviderService deviceManagementProviderService = HelperUtil
                             .getDeviceManagementProviderService();
                     Activity activity = deviceManagementProviderService.addOperation(
