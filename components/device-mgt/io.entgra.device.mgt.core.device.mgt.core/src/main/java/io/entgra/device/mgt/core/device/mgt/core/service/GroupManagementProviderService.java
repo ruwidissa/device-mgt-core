@@ -30,6 +30,7 @@ import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupAlreadyExistEx
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.GroupNotExistException;
 import io.entgra.device.mgt.core.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import io.entgra.device.mgt.core.device.mgt.core.dao.GroupManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.GroupDetailsDTO;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -388,5 +389,7 @@ public interface GroupManagementProviderService {
      */
     GroupDetailsDTO getGroupDetailsWithDevices(String groupName, int deviceTypeId, String deviceOwner, String deviceName, String deviceStatus,
                                                int offset, int limit) throws GroupManagementException;
+
+    int getDeviceCount(String groupName) throws GroupManagementException;
 
 }

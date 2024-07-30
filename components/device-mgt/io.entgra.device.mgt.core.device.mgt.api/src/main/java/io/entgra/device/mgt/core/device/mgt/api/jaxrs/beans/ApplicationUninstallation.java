@@ -18,6 +18,7 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans;
 
+import com.google.gson.Gson;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -112,5 +113,9 @@ public class ApplicationUninstallation {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String toJson() {
+        return new Gson().toJson(this);
     }
 }

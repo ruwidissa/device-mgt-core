@@ -1482,9 +1482,11 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                         "WHERE " +
                         "    g.GROUP_NAME = ? " +
                         "    AND g.TENANT_ID = ? " +
-                        "    AND d.DEVICE_TYPE_ID = ? " +
                         "    AND e.STATUS IN (" + statusPlaceholders + ")");
 
+        if (deviceTypeId != 0) {
+            sql.append(" AND d.DEVICE_TYPE_ID = ?");
+        }
         if (deviceOwner != null && !deviceOwner.isEmpty()) {
             sql.append(" AND e.OWNER LIKE ?");
         }
@@ -1494,8 +1496,9 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         if (deviceStatus != null && !deviceStatus.isEmpty()) {
             sql.append(" AND e.STATUS = ?");
         }
-
-        sql.append(" LIMIT ? OFFSET ?");
+        if (limit >= 0 && offset >=0 ) {
+            sql.append(" LIMIT ? OFFSET ?");
+        }
 
         Connection conn = null;
         try {
@@ -1504,11 +1507,12 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                 int index = 1;
                 stmt.setString(index++, groupName);
                 stmt.setInt(index++, tenantId);
-                stmt.setInt(index++, deviceTypeId);
                 for (String status : allowedStatuses) {
                     stmt.setString(index++, status);
                 }
-
+                if (deviceTypeId != 0) {
+                    stmt.setInt(index++, deviceTypeId);
+                }
                 if (deviceOwner != null && !deviceOwner.isEmpty()) {
                     stmt.setString(index++, "%" + deviceOwner + "%");
                 }
@@ -1519,8 +1523,10 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                     stmt.setString(index++, deviceStatus);
                 }
 
-                stmt.setInt(index++, limit);
-                stmt.setInt(index++, offset);
+                if (limit >= 0 && offset >=0 ) {
+                    stmt.setInt(index++, limit);
+                    stmt.setInt(index++, offset);
+                }
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
@@ -1549,6 +1555,31 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             return groupDetails;
         } catch (SQLException e) {
             String msg = "Error occurred while retrieving group details and device IDs for group: " + groupName;
+            log.error(msg, e);
+            throw new GroupManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int getDeviceCount(String groupName, int tenantId) throws GroupManagementDAOException {
+        int deviceCount = 0;
+        try {
+            Connection connection = GroupManagementDAOFactory.getConnection();
+            String sql = "SELECT COUNT(d.ID) AS COUNT FROM DM_GROUP d INNER JOIN " +
+                    "DM_DEVICE_GROUP_MAP m ON  " +
+                    "d.ID = m.GROUP_ID WHERE d.TENANT_ID = ? AND d.GROUP_NAME = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setInt(1, tenantId);
+                preparedStatement.setString(2, groupName);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        deviceCount = resultSet.getInt("COUNT");
+                    }
+                }
+            }
+            return deviceCount;
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving device count for the group: " + groupName;
             log.error(msg, e);
             throw new GroupManagementDAOException(msg, e);
         }
