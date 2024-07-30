@@ -68,8 +68,6 @@ import org.wso2.carbon.user.core.tenant.Tenant;
 import org.wso2.carbon.user.core.tenant.TenantSearchResult;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionUtils;
 import io.entgra.device.mgt.core.device.mgt.common.permission.mgt.PermissionManagementException;
 
 import java.io.BufferedReader;
@@ -79,7 +77,15 @@ import java.io.IOException;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class represents the concrete implementation of the APIPublisherService that corresponds to providing all
@@ -599,7 +605,7 @@ public class APIPublisherServiceImpl implements APIPublisherService {
                                 // add permission if not exist
                                 try {
                                     PermissionUtils.putPermission(permission);
-                                } catch(PermissionManagementException e) {
+                                } catch (PermissionManagementException e) {
                                     log.error("Error when adding permission ", e);
                                 }
                             }

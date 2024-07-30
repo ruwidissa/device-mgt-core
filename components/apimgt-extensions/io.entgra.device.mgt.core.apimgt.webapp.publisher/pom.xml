@@ -180,6 +180,7 @@
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.dto,
                             io.entgra.device.mgt.core.apimgt.webapp.publisher.exception,
                             io.entgra.device.mgt.core.device.mgt.common.exceptions,
+                            io.entgra.device.mgt.core.device.mgt.common.permission.mgt,
                             io.entgra.device.mgt.core.device.mgt.common.metadata.mgt,
                             io.entgra.device.mgt.core.device.mgt.core.config,
                             io.entgra.device.mgt.core.device.mgt.core.config.permission,
