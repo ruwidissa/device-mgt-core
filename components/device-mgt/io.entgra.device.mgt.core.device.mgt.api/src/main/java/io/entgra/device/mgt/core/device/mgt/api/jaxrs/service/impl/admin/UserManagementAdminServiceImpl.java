@@ -20,6 +20,7 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.admin;
 import io.entgra.device.mgt.core.application.mgt.common.exception.ApplicationManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.DeviceManagementException;
 import io.entgra.device.mgt.core.tenant.mgt.common.exception.TenantMgtException;
+import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
@@ -32,7 +33,13 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 
 import javax.validation.constraints.Size;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -89,37 +96,46 @@ public class UserManagementAdminServiceImpl implements UserManagementAdminServic
     @DELETE
     @Path("/domain/{tenantDomain}")
     @Override
-    public Response deleteTenantByDomain(@PathParam("tenantDomain") String tenantDomain, @QueryParam("deleteAppArtifacts") boolean deleteAppArtifacts) {
+    public Response deleteTenantByDomain(@PathParam("tenantDomain") String tenantDomain,
+                                         @QueryParam("deleteAppArtifacts") boolean deleteAppArtifacts) {
         try {
-            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            if (tenantId != MultitenantConstants.SUPER_TENANT_ID){
-                String msg = "Only super tenants are allowed to delete tenants";
+            if (CarbonContext.getThreadLocalCarbonContext().getTenantId() != MultitenantConstants.SUPER_TENANT_ID){
+                String msg = "Only super tenants are allowed to delete tenants.";
                 log.error(msg);
                 return Response.status(Response.Status.UNAUTHORIZED).entity(msg).build();
-            } else {
-                if (deleteAppArtifacts) {
-                    DeviceMgtAPIUtils.getApplicationManager().deleteApplicationArtifactsByTenantDomain(tenantDomain);
-                }
-                DeviceMgtAPIUtils.getApplicationManager().deleteApplicationDataByTenantDomain(tenantDomain);
-                DeviceMgtAPIUtils.getDeviceManagementService().deleteDeviceDataByTenantDomain(tenantDomain);
-                DeviceMgtAPIUtils.getTenantManagerAdminService().deleteTenant(tenantDomain);
-                String msg = "Tenant Deletion process has been initiated for tenant:" + tenantDomain;
-                if (log.isDebugEnabled()) {
-                    log.debug(msg);
-                }
-                return Response.status(Response.Status.OK).entity(msg).build();
+            }
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                String msg = "You are not allowed to delete the super tenant.";
+                log.error(msg);
+                return Response.status(Response.Status.UNAUTHORIZED).entity(msg).build();
             }
 
+            if (log.isDebugEnabled()) {
+                log.debug("Tenant Deletion process has been initiated for tenant:" + tenantDomain);
+            }
+
+            TenantManagerAdminService tenantManagerAdminService = DeviceMgtAPIUtils.getTenantManagerAdminService();
+            int tenantId = tenantManagerAdminService.getTenantId(tenantDomain);
+
+            if (deleteAppArtifacts) {
+                DeviceMgtAPIUtils.getApplicationManager().deleteApplicationArtifactsByTenantId(tenantId);
+            }
+            DeviceMgtAPIUtils.getApplicationManager().deleteApplicationDataByTenantId(tenantId);
+            DeviceMgtAPIUtils.getDeviceManagementService().deleteDeviceDataByTenantId(tenantId);
+            DeviceMgtAPIUtils.getTenantManagerAdminService().deleteTenant(tenantDomain);
+
+            return Response.status(Response.Status.OK).entity("Tenant Deletion process has been completed " +
+                    "successfully for tenant: " + tenantDomain).build();
         } catch (TenantMgtException e) {
-            String msg = "Error deleting tenant: " + tenantDomain;
+            String msg = "Error occurred while deleting tenant: " + tenantDomain;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error deleting application data of tenant: " + tenantDomain;
+            String msg = "Error occurred while deleting application data of tenant: " + tenantDomain;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (DeviceManagementException e) {
-            String msg = "Error deleting device data of tenant: " + tenantDomain;
+            String msg = "Error occurred while deleting device data of tenant: " + tenantDomain;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

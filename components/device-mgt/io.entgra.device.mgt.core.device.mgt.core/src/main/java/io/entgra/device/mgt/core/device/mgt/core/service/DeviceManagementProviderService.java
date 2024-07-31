@@ -46,7 +46,6 @@ import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceStatus;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceTypeVersion;
-import org.apache.commons.collections.map.SingletonMap;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -1067,7 +1066,14 @@ public interface DeviceManagementProviderService {
     List<Application> getInstalledApplicationsOnDevice(Device device) throws DeviceManagementException;
     List<Device> getEnrolledDevicesSince(Date since) throws DeviceManagementException;
     List<Device> getEnrolledDevicesPriorTo(Date before) throws DeviceManagementException;
-    void deleteDeviceDataByTenantDomain(String tenantDomain) throws DeviceManagementException;
+
+    /**
+     * Delete all the device related data for a given Tenant by Tenant Id
+     *
+     * @param tenantId Id of the Tenant
+     * @throws DeviceManagementException if error occurs when deleting device data by using tenant Id
+     */
+    void deleteDeviceDataByTenantId(int tenantId) throws DeviceManagementException;
 
     /**
      * Get owner details and device IDs for a given owner and tenant.

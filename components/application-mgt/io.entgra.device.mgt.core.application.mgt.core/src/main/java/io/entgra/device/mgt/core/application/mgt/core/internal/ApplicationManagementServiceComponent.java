@@ -34,7 +34,6 @@ import io.entgra.device.mgt.core.application.mgt.core.lifecycle.LifecycleStateMa
 import io.entgra.device.mgt.core.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import io.entgra.device.mgt.core.application.mgt.core.util.ApplicationManagementUtil;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -202,26 +201,5 @@ public class ApplicationManagementServiceComponent {
             log.debug("Removing the task service from Application Management SC");
         }
         DataHolder.getInstance().setTaskService(null);
-    }
-
-    @Reference(
-            name = "io.entgra.device.mgt.core.tenant.manager",
-            service = io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetTenantManagementAdminService")
-    protected void setTenantManagementAdminService(TenantManagerAdminService tenantManagerAdminService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setting Tenant management admin Service");
-        }
-        DataHolder.getInstance().setTenantManagerAdminService(tenantManagerAdminService);
-    }
-
-    @SuppressWarnings("unused")
-    protected void unsetTenantManagementAdminService(TenantManagerAdminService tenantManagerAdminService) {
-        if (log.isDebugEnabled()) {
-            log.debug("Un setting Tenant management admin service");
-        }
-        DataHolder.getInstance().setTenantManagerAdminService(null);
     }
 }
