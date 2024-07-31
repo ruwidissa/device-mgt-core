@@ -82,7 +82,6 @@ import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import io.entgra.device.mgt.core.device.mgt.core.common.exception.StorageManagementException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.service.DeviceManagementProviderService;
-import io.entgra.device.mgt.core.tenant.mgt.common.exception.TenantMgtException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -4439,13 +4438,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void deleteApplicationDataByTenantDomain(String tenantDomain) throws ApplicationManagementException {
-        int tenantId;
+    public void deleteApplicationDataByTenantId(int tenantId) throws ApplicationManagementException {
         try {
-            tenantId = DataHolder.getInstance().getTenantManagerAdminService().getTenantId(tenantDomain);
-
             ConnectionManagerUtil.beginDBTransaction();
-
             vppApplicationDAO.deleteAssociationByTenant(tenantId);
             vppApplicationDAO.deleteVppUserByTenant(tenantId);
             vppApplicationDAO.deleteAssetsByTenant(tenantId);
@@ -4471,48 +4466,36 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
             String msg = "Error occurred while observing the database connection to delete applications for tenant with " +
-                    "domain: " + tenantDomain;
+                    "tenant ID: " + tenantId;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Database access error is occurred when getting applications for tenant with domain: "
-                    + tenantDomain;
+            String msg = "Database access error is occurred when getting applications for tenant with tenant Id: "
+                    + tenantId;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while deleting life-cycle state data of application releases of the tenant"
-                    + " of domain: " + tenantDomain ;
+                    + " of id: " + tenantId ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ReviewManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while deleting reviews of application releases of the applications"
-                    + " of tenant of domain: " + tenantDomain ;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        } catch (Exception e) {
-            String msg = "Error getting tenant ID from domain: "
-                    + tenantDomain;
+                    + " of tenant of id: " + tenantId ;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
     }
 
     @Override
-    public void deleteApplicationArtifactsByTenantDomain(String tenantDomain) throws ApplicationManagementException {
-        int tenantId;
+    public void deleteApplicationArtifactsByTenantId(int tenantId) throws ApplicationManagementException {
         try {
-            tenantId = DataHolder.getInstance().getTenantManagerAdminService().getTenantId(tenantDomain);
             DataHolder.getInstance().getApplicationStorageManager().deleteAppFolderOfTenant(tenantId);
-        } catch (ApplicationStorageManagementException  e) {
-            String msg = "Error deleting app artifacts of tenant of domain: " + tenantDomain ;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        } catch (TenantMgtException e) {
-            String msg = "Error getting tenant ID from domain: "
-                    + tenantDomain + " when trying to delete application artifacts of tenant";
+        } catch (ApplicationStorageManagementException e) {
+            String msg = "Error deleting app artifacts of tenant of Id: " + tenantId;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
