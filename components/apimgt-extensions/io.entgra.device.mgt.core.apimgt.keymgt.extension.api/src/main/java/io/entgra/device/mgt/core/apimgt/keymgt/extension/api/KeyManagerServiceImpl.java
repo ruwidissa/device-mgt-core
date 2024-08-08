@@ -46,7 +46,6 @@ public class KeyManagerServiceImpl implements KeyManagerService {
     public Response dynamicClientRegistration(DCRRequest dcrRequest) {
         try {
             KeyMgtService keyMgtService = new KeyMgtServiceImpl();
-            //todo lasantha - can pass password from here - modify DCRRequest object
             DCRResponse resp = keyMgtService.dynamicClientRegistration(dcrRequest.getApplicationName(), dcrRequest.getUsername(),
                     dcrRequest.getGrantTypes(), dcrRequest.getCallBackUrl(), dcrRequest.getTags(),
                     dcrRequest.getIsSaasApp(), dcrRequest.getValidityPeriod(), dcrRequest.getPassword(),

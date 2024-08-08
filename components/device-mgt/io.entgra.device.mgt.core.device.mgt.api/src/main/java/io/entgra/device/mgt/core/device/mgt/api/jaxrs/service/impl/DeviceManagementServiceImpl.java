@@ -957,7 +957,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
         KeyMgtService keyMgtService = new KeyMgtServiceImpl();
         try {
-            //todo - lasantha - can't get password from here
             ApiApplicationKey apiApplicationKey;
             try {
                 APIApplicationServices apiApplicationServices = DeviceMgtAPIUtils.getApiApplicationServices();

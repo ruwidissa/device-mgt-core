@@ -30,7 +30,13 @@ import io.entgra.device.mgt.core.apimgt.keymgt.extension.internal.KeyMgtDataHold
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
 import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
 import io.entgra.device.mgt.core.device.mgt.core.config.keymanager.KeyManagerConfigurations;
-import okhttp3.*;
+import okhttp3.Credentials;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
@@ -51,7 +57,11 @@ import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class KeyMgtServiceImpl implements KeyMgtService {
 
@@ -99,7 +109,6 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             return new DCRResponse(dcrApplication.getClientId(), dcrApplication.getClientSecret());
         } else {
             // super-tenant admin dcr and token generation
-            //todo lasantha null passed in last two params
             OAuthApplication superTenantOauthApp = createOauthApplication(
                     KeyMgtConstants.RESERVED_OAUTH_APP_NAME_PREFIX + KeyMgtConstants.SUPER_TENANT,
                     kmConfig.getAdminUsername(), null, validityPeriod, kmConfig.getAdminPassword(), null, null);
@@ -124,17 +133,11 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             createUserIfNotExists(subTenantUserUsername, subTenantUserPassword);
 
             // DCR for the requesting user
-            //todo lasantha -> need to pass password of user
-            //todo lasantha null passed in last two params
-
             OAuthApplication dcrApplication = createOauthApplication(clientName, owner, tags, validityPeriod,
                     password, null, null);
             String requestingUserAccessToken = createAccessToken(dcrApplication);
 
             // get application id
-            //todo --> can use requestingUserAccessToken token here to get application data - modify getApplication
-            // method signature
-
             io.entgra.device.mgt.core.apimgt.extension.rest.api.bean.APIMConsumer.Application application =
                     getApplication(clientName, requestingUserAccessToken);
             String applicationUUID = application.getApplicationId();
@@ -237,16 +240,16 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             }
         } catch (APIManagementException e) {
             msg = "Error occurred while retrieving application";
-            log.error(msg);
-            throw new KeyMgtException(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         } catch (IOException e) {
             msg = "Error occurred while mapping application keys";
-            log.error(msg);
-            throw new KeyMgtException(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         } catch (UserStoreException e) {
             msg = "Error occurred while fetching tenant id";
-            log.error(msg);
-            throw new KeyMgtException(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         }
     }
 
@@ -283,7 +286,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             client.newCall(request).execute();
         } catch (IOException e) {
             msg = "Error occurred while mapping application keys";
-            throw new KeyMgtException(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         }
     }
 
@@ -309,8 +313,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             }
         } catch (UserStoreException e) {
             msg = "Error when trying to fetch tenant details";
-            log.error(msg);
-            throw new KeyMgtException(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         }
     }
 
@@ -325,7 +329,6 @@ public class KeyMgtServiceImpl implements KeyMgtService {
     private OAuthApplication createOauthApplication (String clientName, String owner, String[] tags,
                                                      int validityPeriod, String ownerPassword,
                                                      List<String> supportedGrantTypes, String callbackUrl) throws KeyMgtException {
-        //todo modify this to pass the password as well
         String oauthAppCreationPayloadStr = createOauthAppCreationPayload(clientName, owner, tags, validityPeriod,
                 ownerPassword, supportedGrantTypes, callbackUrl);
         RequestBody oauthAppCreationPayload = RequestBody.Companion.create(oauthAppCreationPayloadStr, JSON);
@@ -333,7 +336,6 @@ public class KeyMgtServiceImpl implements KeyMgtService {
         String dcrEndpoint = kmConfig.getServerUrl() + KeyMgtConstants.DCR_ENDPOINT;
         String username, password;
 
-        //todo why can't we use owner details here?
         if (KeyMgtConstants.SUPER_TENANT.equals(MultitenantUtils.getTenantDomain(owner))) {
             username = kmConfig.getAdminUsername();
             password = kmConfig.getAdminPassword();
@@ -342,7 +344,6 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             password = subTenantUserPassword;
         }
 
-        //todo why can't we use owner details for authentication
         Request request = new Request.Builder()
                 .url(dcrEndpoint)
                 .addHeader(KeyMgtConstants.AUTHORIZATION_HEADER, Credentials.basic(username, password))
@@ -352,8 +353,9 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             Response response = client.newCall(request).execute();
             return gson.fromJson(response.body().string(), OAuthApplication.class);
         } catch (IOException e) {
-            msg = "Error occurred while processing the response" + e;
-            throw new KeyMgtException(msg);
+            msg = "Error occurred while processing the response." ;
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         }
     }
 
@@ -384,7 +386,8 @@ public class KeyMgtServiceImpl implements KeyMgtService {
             return jsonObject.getString("access_token");
         } catch (IOException e) {
             msg = "Error occurred while reading access token from response";
-            throw new KeyMgtException(msg);
+            log.error(msg, e);
+            throw new KeyMgtException(msg, e);
         }
     }
 
@@ -456,15 +459,15 @@ public class KeyMgtServiceImpl implements KeyMgtService {
         } catch (io.entgra.device.mgt.core.apimgt.extension.rest.api.exceptions.BadRequestException e) {
             msg = "Error while trying to retrieve the application";
             log.error(msg, e);
-            throw new KeyMgtException(msg);
+            throw new KeyMgtException(msg, e);
         } catch (UnexpectedResponseException e) {
             msg = "Received invalid response for the API applications retrieving REST API call.";
             log.error(msg, e);
-            throw new KeyMgtException(msg);
+            throw new KeyMgtException(msg, e);
         } catch (APIServicesException e) {
             msg = "Error occurred while processing the API Response.";
             log.error(msg, e);
-            throw new KeyMgtException(msg);
+            throw new KeyMgtException(msg, e);
         }
     }
 
