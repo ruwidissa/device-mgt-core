@@ -22,6 +22,8 @@ import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManag
 import io.entgra.device.mgt.core.device.mgt.core.config.push.notification.ContextMetadata;
 import io.entgra.device.mgt.core.device.mgt.core.config.push.notification.PushNotificationConfiguration;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.FCMNotificationStrategy;
+import okhttp3.ConnectionPool;
+import okhttp3.OkHttpClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -33,6 +35,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 public class FCMUtil {
 
@@ -43,10 +46,29 @@ public class FCMUtil {
             "repository" + File.separator + "resources" + File.separator + "service-account.json";
     private static final String[] FCM_SCOPES = { "https://www.googleapis.com/auth/firebase.messaging" };
     private Properties contextMetadataProperties;
+    private static ConnectionPool connectionPool;
+    private static OkHttpClient client;
 
     private FCMUtil() {
         initContextConfigs();
         initDefaultOAuthApplication();
+        initPooledConnection();
+    }
+
+    /**
+     * Initialize the connection pool for the OkHttpClient instance.
+     */
+    private void initPooledConnection() {
+        connectionPool = new ConnectionPool(25, 1, TimeUnit.MINUTES);
+        client = new OkHttpClient.Builder().connectionPool(connectionPool).build();
+    }
+
+    /**
+     * Get the Pooled OkHttpClient instance
+     * @return OkHttpClient instance
+     */
+    public OkHttpClient getHttpClient() {
+        return client;
     }
 
     private void initDefaultOAuthApplication() {

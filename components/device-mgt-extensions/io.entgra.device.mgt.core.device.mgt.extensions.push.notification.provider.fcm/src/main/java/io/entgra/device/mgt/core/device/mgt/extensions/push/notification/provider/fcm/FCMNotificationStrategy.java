@@ -19,6 +19,9 @@ package io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provid
 
 import com.google.gson.JsonObject;
 import io.entgra.device.mgt.core.device.mgt.extensions.push.notification.provider.fcm.util.FCMUtil;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
@@ -89,8 +92,6 @@ public class FCMNotificationStrategy implements NotificationStrategy {
      */
     private void sendWakeUpCall(String accessToken, String registrationId) throws IOException,
             PushNotificationExecutionFailedException {
-        HttpURLConnection conn = null;
-
         String fcmServerEndpoint = FCMUtil.getInstance().getContextMetadataProperties()
                 .getProperty(FCM_ENDPOINT_KEY);
         if(fcmServerEndpoint == null) {
@@ -99,26 +100,21 @@ public class FCMNotificationStrategy implements NotificationStrategy {
             throw new PushNotificationExecutionFailedException(msg);
         }
 
-        try {
-            byte[] bytes = getFCMRequest(registrationId).getBytes();
-            URL url = new URL(fcmServerEndpoint);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer " + accessToken);
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(bytes);
+        RequestBody fcmRequest = getFCMRequest(registrationId);
+        Request request = new Request.Builder()
+                .url(fcmServerEndpoint)
+                .post(fcmRequest)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build();
+        try (Response response = FCMUtil.getInstance().getHttpClient().newCall(request).execute()) {
+            if (log.isDebugEnabled()) {
+                log.debug("FCM message sent to the FCM server. Response code: " + response.code()
+                        + " Response message : " + response.message());
             }
-
-            int status = conn.getResponseCode();
-            if (status != 200) {
-                log.error("Response Status: " + status + ", Response Message: " + conn.getResponseMessage());
-            }
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
+            if(!response.isSuccessful()) {
+                String msg = "Response Status: " + response.code() + ", Response Message: " + response.message();
+                log.error(msg);
+                throw new IOException(msg);
             }
         }
     }
@@ -128,14 +124,14 @@ public class FCMNotificationStrategy implements NotificationStrategy {
      * @param registrationId Registration ID of the device
      * @return FCM request as a JSON string
      */
-    private static String getFCMRequest(String registrationId) {
+    private static RequestBody getFCMRequest(String registrationId) {
         JsonObject messageObject = new JsonObject();
         messageObject.addProperty("token", registrationId);
 
         JsonObject fcmRequest = new JsonObject();
         fcmRequest.add("message", messageObject);
 
-        return fcmRequest.toString();
+        return RequestBody.create(fcmRequest.toString(), okhttp3.MediaType.parse("application/json"));
     }
 
     @Override
