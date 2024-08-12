@@ -21,7 +21,7 @@ package io.entgra.device.mgt.core.subtype.mgt.impl;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import io.entgra.device.mgt.core.subtype.mgt.cache.GetDeviceSubTypeCacheLoader;
+import io.entgra.device.mgt.core.subtype.mgt.cache.DeviceSubTypeCacheLoader;
 import io.entgra.device.mgt.core.subtype.mgt.dto.DeviceSubTypeCacheKey;
 import io.entgra.device.mgt.core.subtype.mgt.exception.BadRequestException;
 import io.entgra.device.mgt.core.subtype.mgt.exception.DBConnectionException;
@@ -48,7 +48,7 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
     private static final LoadingCache<DeviceSubTypeCacheKey, DeviceSubType> deviceSubTypeCache
             = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.MINUTES)
-            .build(new GetDeviceSubTypeCacheLoader());
+            .build(new DeviceSubTypeCacheLoader());
     private final DeviceSubTypeDAO deviceSubTypeDAO;
 
     public DeviceSubTypeServiceImpl() {
@@ -166,7 +166,13 @@ public class DeviceSubTypeServiceImpl implements DeviceSubTypeService {
             throws SubTypeMgtPluginException {
         try {
             ConnectionManagerUtil.openDBConnection();
-            return deviceSubTypeDAO.getAllDeviceSubTypes(tenantId, deviceType);
+            List<DeviceSubType> subtypes = deviceSubTypeDAO.getAllDeviceSubTypes(tenantId, deviceType);
+            DeviceSubTypeCacheKey key;
+            for (DeviceSubType dst: subtypes) {
+                key = DeviceSubTypeMgtUtil.getDeviceSubTypeCacheKey(tenantId, dst.getSubTypeId(), deviceType);
+                deviceSubTypeCache.put(key, dst);
+            }
+            return subtypes;
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the database connection to retrieve all device subtype for " +
                     deviceType + " subtypes";
