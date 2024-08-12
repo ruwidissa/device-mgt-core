@@ -49,7 +49,7 @@ public class ServiceNegativeTest extends BaseOperationTemplatePluginTest {
     @Test(description = "This method tests Add Operation template under negative circumstances while missing " +
             "required fields",
             expectedExceptions = {OperationTemplateMgtPluginException.class},
-            expectedExceptionsMessageRegExp = "Invalid meter device subtype id: 0")
+            expectedExceptionsMessageRegExp = "Invalid device subtype id: 0")
     public void testAddOperationTemplates() throws OperationTemplateMgtPluginException {
 
         OperationTemplate operationTemplate = new OperationTemplate();

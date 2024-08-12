@@ -216,8 +216,8 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
             throws OperationTemplateMgtPluginException {
         AssertUtils.hasText(deviceType, "Invalid device type.");
         try {
-             ConnectionManagerUtils.openDBConnection();
-             return operationTemplateDAO.getAllOperationTemplates(deviceType);
+            ConnectionManagerUtils.openDBConnection();
+            return operationTemplateDAO.getAllOperationTemplates(deviceType);
         } catch (DBConnectionException | OperationTemplateManagementDAOException e) {
             log.error(e.getMessage());
             throw new OperationTemplateMgtPluginException(e.getMessage(), e);
@@ -273,11 +273,12 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
      */
     @Override
     public Set<String> getOperationTemplateCodes(String deviceType, String subTypeId)
-            throws OperationTemplateMgtPluginException  {
+            throws OperationTemplateMgtPluginException {
 
         try {
-            AssertUtils.hasText(subTypeId, "Invalid meter device subtype id: " + subTypeId);
-            AssertUtils.isTrue(Integer.valueOf(subTypeId)>0, "Invalid meter device subtype id: " + subTypeId);
+            AssertUtils.hasText(subTypeId, "Invalid device subtype id: " + subTypeId);
+            AssertUtils.isTrue(Integer.parseInt(subTypeId) > 0,
+                    "Invalid device subtype id: " + subTypeId);
             AssertUtils.hasText(deviceType, "Invalid device type.");
 
             String key = OperationTemplateManagementUtil.setOperationTemplateCacheKey(deviceType, subTypeId);
@@ -294,7 +295,6 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
     }
 
     /**
-     *
      * @param subTypeId
      * @param deviceType
      * @param operationCode
@@ -303,18 +303,18 @@ public class OperationTemplateServiceImpl implements OperationTemplateService {
     private void validateGetOperationTemplate(String subTypeId, String deviceType, String operationCode)
             throws OperationTemplateMgtPluginException {
 
-        AssertUtils.hasText(subTypeId, "Invalid meter device subtype id: " + subTypeId);
-        AssertUtils.isTrue(Integer.valueOf(subTypeId)>0, "Invalid meter device subtype id: " + subTypeId);
+        AssertUtils.hasText(subTypeId, "Invalid device subtype id: " + subTypeId);
+        AssertUtils.isTrue(Integer.parseInt(subTypeId) > 0, "Invalid device subtype id: " + subTypeId);
         AssertUtils.hasText(operationCode, "Validation failed due to invalid operation code: " + operationCode);
         AssertUtils.hasText(deviceType, "Invalid device type.");
-        AssertUtils.isTrue(deviceType.equals("METER"), "Invalid device type. ");
     }
 
     /**
      * @param operationTemplate
      * @throws OperationTemplateMgtPluginException
      */
-    private void validateAddOperationTemplate(OperationTemplate operationTemplate) throws OperationTemplateMgtPluginException {
+    private void validateAddOperationTemplate(OperationTemplate operationTemplate)
+            throws OperationTemplateMgtPluginException {
 
         AssertUtils.isNull(operationTemplate, "Operation Template can not be null");
         AssertUtils.hasText(operationTemplate.getOperationDefinition(), "Operation definition can not be null");
