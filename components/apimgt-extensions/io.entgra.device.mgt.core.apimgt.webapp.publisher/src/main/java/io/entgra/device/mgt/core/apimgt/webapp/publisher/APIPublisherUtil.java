@@ -24,25 +24,33 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
+import io.entgra.device.mgt.core.apimgt.extension.rest.api.constants.Constants;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.APIResource;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.APIResourceConfiguration;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.config.WebappPublisherConfig;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiUriTemplate;
+import io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.lifecycle.util.AnnotationProcessor;
+import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
+import org.apache.catalina.core.StandardContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.Utils;
+import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.servlet.ServletContext;
+import java.io.IOException;
 import java.util.*;
 
 public class APIPublisherUtil {
 
     public static final String API_VERSION_PARAM = "{version}";
+    public static final String PROPERTY_PROFILE = "profile";
     private static final Log log = LogFactory.getLog(APIPublisherUtil.class);
     private static final String DEFAULT_API_VERSION = "1.0.0";
     private static final String API_CONFIG_DEFAULT_VERSION = "1.0.0";
@@ -53,10 +61,10 @@ public class APIPublisherUtil {
     private static final String PARAM_MANAGED_API_IS_SECURED = "managed-api-isSecured";
     private static final String PARAM_SHARED_WITH_ALL_TENANTS = "isSharedWithAllTenants";
     private static final String PARAM_PROVIDER_TENANT_DOMAIN = "providerTenantDomain";
-
     private static final String NON_SECURED_RESOURCES = "nonSecuredEndPoints";
     private static final String AUTH_TYPE_NON_SECURED = "None";
     private static final String PARAM_IS_DEFAULT = "isDefault";
+    private static final Gson gson = new Gson();
 
     public static String getServerBaseUrl() {
         WebappPublisherConfig webappPublisherConfig = WebappPublisherConfig.getInstance();
@@ -255,7 +263,7 @@ public class APIPublisherUtil {
             policy = null;
         }
         apiConfig.setPolicy(policy);
-
+        setResourceAuthTypes(servletContext, apiConfig);
         return apiConfig;
     }
 
@@ -318,7 +326,7 @@ public class APIPublisherUtil {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("API swagger definition: " + swaggerDefinition.toString());
+            log.debug("API swagger definition: " + swaggerDefinition);
         }
         return swaggerDefinition.toString();
     }
@@ -336,8 +344,7 @@ public class APIPublisherUtil {
                 String fullPaath = "";
                 if (!template.getUriTemplate().equals(AnnotationProcessor.WILD_CARD)) {
                     fullPaath = apiConfig.getContext() + template.getUriTemplate();
-                }
-                else {
+                } else {
                     fullPaath = apiConfig.getContext();
                 }
                 for (String context : resourcesList) {
@@ -348,5 +355,74 @@ public class APIPublisherUtil {
             }
         }
         apiConfig.setUriTemplates(templates);
+    }
+
+    /**
+     * This method will extract and retrieve the API resource configuration by processing the API resources
+     * @param standardContext {@link StandardContext}
+     * @param servletContext {@link ServletContext}
+     * @return Extracted {@link APIResourceConfiguration} list describing from the servlet context
+     * @throws IOException Throws when error occurred while processing the swagger annotations
+     * @throws ClassNotFoundException Throws when error occurred while extracting api configurations
+     */
+    public static List<APIResourceConfiguration> getAPIResourceConfiguration(StandardContext standardContext, ServletContext servletContext)
+            throws IOException, ClassNotFoundException {
+        List<APIResourceConfiguration> apiResourceConfigurations = new ArrayList<>();
+        String profile = System.getProperty(PROPERTY_PROFILE);
+        if (WebappPublisherConfig.getInstance().getProfiles().getProfile().contains(profile.toLowerCase())) {
+            AnnotationProcessor annotationProcessor = new AnnotationProcessor(standardContext);
+            Set<String> annotatedSwaggerAPIClasses = annotationProcessor.
+                    scanStandardContext(io.swagger.annotations.SwaggerDefinition.class.getName());
+            apiResourceConfigurations = annotationProcessor.extractAPIInfo(servletContext,
+                    annotatedSwaggerAPIClasses);
+        }
+        return apiResourceConfigurations;
+    }
+
+    /**
+     * This method can use to publish the apis after the server startup complete.
+     *
+     * @param apiConfig {@link APIConfig} Contains API definition
+     */
+    public static void publishAPIAfterServerStartup(APIConfig apiConfig) {
+        APIPublisherDataHolder apiPublisherDataHolder = APIPublisherDataHolder.getInstance();
+        if (!apiPublisherDataHolder.isServerStarted()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Abort publishing the API [" + apiConfig.getName() + "]. Server still starting");
+            }
+            throw new IllegalStateException("Server starting procedure is still not completed");
+        }
+
+        TenantManager tenantManager = apiPublisherDataHolder.getTenantManager();
+        if (tenantManager == null) {
+            throw new IllegalStateException("Tenant manager service not initialized properly");
+        }
+        try {
+            if (tenantManager.isTenantActive(tenantManager.getTenantId(apiConfig.getTenantDomain()))) {
+                APIPublisherService apiPublisherService = apiPublisherDataHolder.getApiPublisherService();
+                if (apiPublisherService == null) {
+                    throw new IllegalStateException("API Publisher service is not initialized properly");
+                }
+                apiPublisherService.publishAPI(apiConfig);
+                for (ApiScope scope : apiConfig.getScopes()) {
+                    apiPublisherDataHolder.getPermScopeMapping().putIfAbsent(scope.getPermissions(), scope.getKey());
+                }
+
+                Metadata permScopeMapping = new Metadata();
+                permScopeMapping.setMetaKey(Constants.PERM_SCOPE_MAPPING_META_KEY);
+                permScopeMapping.setMetaValue(gson.toJson(apiPublisherDataHolder.getPermScopeMapping()));
+
+                try {
+                    apiPublisherDataHolder.getMetadataManagementService().updateMetadata(permScopeMapping);
+                } catch (MetadataManagementException e) {
+                    log.error("Error encountered while updating the " + Constants.PERM_SCOPE_MAPPING_META_KEY + "entry");
+                }
+            } else {
+                log.error("Can't find an active tenant under tenant domain " + apiConfig.getTenantDomain());
+            }
+        } catch (Throwable e) {
+            log.error("Error occurred while publishing API '" + apiConfig.getName() + "' with the context '" +
+                    apiConfig.getContext() + "' and version '" + apiConfig.getVersion() + "'", e);
+        }
     }
 }
