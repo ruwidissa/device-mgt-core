@@ -22,10 +22,6 @@ import io.entgra.device.mgt.core.apimgt.webapp.publisher.dto.ApiScope;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.MetadataManagementException;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.Metadata;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.MetadataManagementService;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceConfigurationManager;
-import io.entgra.device.mgt.core.device.mgt.core.config.DeviceManagementConfig;
-import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermission;
-import io.entgra.device.mgt.core.device.mgt.core.config.permission.DefaultPermissions;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleListener;
@@ -131,19 +127,13 @@ public class APIPublisherLifecycleListener implements LifecycleListener {
 
                         Metadata existingMetaData = metadataManagementService.retrieveMetadata("perm-scope" +
                                 "-mapping");
+
                         if (existingMetaData != null) {
                             existingMetaData.setMetaValue(new Gson().toJson(permScopeMap));
                             metadataManagementService.updateMetadata(existingMetaData);
                         } else {
                             Metadata newMetaData = new Metadata();
                             newMetaData.setMetaKey("perm-scope-mapping");
-
-                            DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
-                            DefaultPermissions defaultPermissions = deviceManagementConfig.getDefaultPermissions();
-
-                            for (DefaultPermission defaultPermission : defaultPermissions.getDefaultPermissions()) {
-                                permScopeMap.put(defaultPermission.getName(), defaultPermission.getScopeMapping().getKey());
-                            }
                             newMetaData.setMetaValue(new Gson().toJson(permScopeMap));
                             metadataManagementService.createMetadata(newMetaData);
                         }

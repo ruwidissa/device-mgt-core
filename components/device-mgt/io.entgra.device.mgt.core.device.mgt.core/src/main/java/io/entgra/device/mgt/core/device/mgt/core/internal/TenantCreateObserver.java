@@ -46,7 +46,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,26 +142,6 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
      */
     private void publishScopesToTenant(String tenantDomain) throws TenantManagementException {
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-
-            MetadataManagementService metadataManagementService = DeviceManagementDataHolder.getInstance().getMetadataManagementService();
-
-            Map<String, String> superTenantPermScopeMapping = getPermScopeMapping(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            Map<String, String> subTenantPermScopeMapping = getPermScopeMapping(tenantDomain);
-
-            if (superTenantPermScopeMapping == null) {
-                msg = "Error occurred while retrieving meta key '" + Constants.PERM_SCOPE_MAPPING_META_KEY + "' for tenant '" +
-                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME + "'. Hence aborting publishing scopes to tenant: '" +
-                        tenantDomain + "'.";
-                log.error(msg);
-                throw new TenantManagementException(msg);
-            }
-            if (superTenantPermScopeMapping.equals(subTenantPermScopeMapping)) {
-                if (log.isDebugEnabled()) {
-                    log.debug( "Scopes in '" + tenantDomain + "' are up to date with super tenant scopes.");
-                }
-                return;
-            }
-
             APIApplicationServices apiApplicationServices = DeviceManagementDataHolder.getInstance().getApiApplicationServices();
             APIApplicationKey apiApplicationKey;
             AccessTokenInfo accessTokenInfo;
@@ -268,10 +247,6 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
                                 }
                             }
                         }
-
-                        if (missingScopes.size() > 0 || deletedScopes.size() > 0) {
-                            updatePermScopeMetaData(superTenantPermScopeMapping, metadataManagementService);
-                        }
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Starting to publish shared scopes to newly created tenant: '" + tenantDomain + "'.");
@@ -279,7 +254,6 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
 
                         publishSharedScopes(Arrays.asList(superTenantScopes), publisherRESTAPIServices,
                                 apiApplicationKey, accessTokenInfo);
-                        updatePermScopeMetaData(superTenantPermScopeMapping, metadataManagementService);
                     }
                 } else {
                     msg = "Unable to publish scopes to sub tenants due to super tenant scopes list being empty.";
@@ -298,15 +272,6 @@ public class TenantCreateObserver extends AbstractAxis2ConfigurationContextObser
                 msg = "Error occurred while publishing scopes to '" + tenantDomain + "' tenant space.";
                 log.error(msg, e);
                 throw new TenantManagementException(msg, e);
-            } catch (MetadataManagementException e) {
-                msg = "Error occurred trying to create metadata entry '" + Constants.PERM_SCOPE_MAPPING_META_KEY + "'.";
-                log.error(msg);
-                throw new TenantManagementException(msg);
-            } catch (MetadataKeyAlreadyExistsException e) {
-                msg = "Error occurred trying to create metadata entry '" + Constants.PERM_SCOPE_MAPPING_META_KEY + "'. The meta key " +
-                        "already exists.";
-                log.error(msg);
-                throw new TenantManagementException(msg);
             } finally {
                 APIPublisherUtils.removeScopePublishUserIfExists(tenantDomain);
                 PrivilegedCarbonContext.endTenantFlow();
