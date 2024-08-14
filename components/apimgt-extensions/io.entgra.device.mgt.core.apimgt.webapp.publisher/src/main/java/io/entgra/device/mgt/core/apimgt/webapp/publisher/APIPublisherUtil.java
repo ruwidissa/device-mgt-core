@@ -357,6 +357,14 @@ public class APIPublisherUtil {
         apiConfig.setUriTemplates(templates);
     }
 
+    /**
+     * This method will extract and retrieve the API resource configuration by processing the API resources
+     * @param standardContext {@link StandardContext}
+     * @param servletContext {@link ServletContext}
+     * @return Extracted {@link APIResourceConfiguration} list describing from the servlet context
+     * @throws IOException Throws when error occurred while processing the swagger annotations
+     * @throws ClassNotFoundException Throws when error occurred while extracting api configurations
+     */
     public static List<APIResourceConfiguration> getAPIResourceConfiguration(StandardContext standardContext, ServletContext servletContext)
             throws IOException, ClassNotFoundException {
         List<APIResourceConfiguration> apiResourceConfigurations = new ArrayList<>();
