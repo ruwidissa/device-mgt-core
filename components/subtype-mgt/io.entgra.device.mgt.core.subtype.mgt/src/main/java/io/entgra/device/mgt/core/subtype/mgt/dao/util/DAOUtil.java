@@ -72,7 +72,7 @@ public class DAOUtil {
                     deviceSubType = loadDeviceSubType(rs);
                 }
                 if (operationCode != null) {
-                    deviceSubType.addOperationCode(operationCode);
+                    deviceSubType.addSupportedOperation(operationCode);
                 }
                 deviceSubTypes.put(key, deviceSubType);
             }

@@ -31,13 +31,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-public class GetDeviceSubTypeCacheLoader extends CacheLoader<DeviceSubTypeCacheKey, DeviceSubType> {
+public class DeviceSubTypeCacheLoader extends CacheLoader<DeviceSubTypeCacheKey, DeviceSubType> {
 
-    private static final Log log = LogFactory.getLog(GetDeviceSubTypeCacheLoader.class);
+    private static final Log log = LogFactory.getLog(DeviceSubTypeCacheLoader.class);
 
     private final DeviceSubTypeDAO deviceSubTypeDAO;
 
-    public GetDeviceSubTypeCacheLoader() {
+    public DeviceSubTypeCacheLoader() {
         this.deviceSubTypeDAO = DeviceSubTypeDAOFactory.getDeviceSubTypeDAO();
     }
 

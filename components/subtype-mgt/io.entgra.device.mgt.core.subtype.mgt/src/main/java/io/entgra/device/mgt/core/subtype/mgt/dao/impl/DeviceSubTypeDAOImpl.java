@@ -101,8 +101,9 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     public DeviceSubType getDeviceSubType(String subTypeId, int tenantId, String deviceType)
             throws SubTypeMgtDAOException {
         try {
-            String sql = "SELECT s.*, o.OPERATION_CODE  FROM DM_DEVICE_SUB_TYPE s " +
-                    "LEFT JOIN SUB_OPERATION_TEMPLATE o on s.SUB_TYPE_ID = o.SUB_TYPE_ID " +
+            String sql = "SELECT s.*, o.OPERATION_CODE FROM DM_DEVICE_SUB_TYPE s " +
+                    "LEFT JOIN SUB_OPERATION_TEMPLATE o ON s.SUB_TYPE_ID = o.SUB_TYPE_ID " +
+                    "AND s.DEVICE_TYPE = o.DEVICE_TYPE " +
                     "WHERE s.SUB_TYPE_ID = ? AND s.TENANT_ID = ? AND s.DEVICE_TYPE = ?";
 
             Connection conn = ConnectionManagerUtil.getDBConnection();
@@ -143,8 +144,7 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
                 stmt.setInt(1, tenantId);
                 stmt.setString(2, deviceType);
                 try (ResultSet rs = stmt.executeQuery()) {
-                    List<DeviceSubType> deviceSubTypes = DAOUtil.loadDeviceSubTypes(rs);
-                    return deviceSubTypes;
+                    return DAOUtil.loadDeviceSubTypes(rs);
                 }
             }
         } catch (DBConnectionException e) {
@@ -163,14 +163,14 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
     @Override
     public int getDeviceSubTypeCount(String deviceType) throws SubTypeMgtDAOException {
         try {
-            String sql = "SELECT COUNT(*) as DEVICE_COUNT FROM DM_DEVICE_SUB_TYPE WHERE DEVICE_TYPE = ? ";
+            String sql = "SELECT COUNT(*) as SUB_TYPE_COUNT FROM DM_DEVICE_SUB_TYPE WHERE DEVICE_TYPE = ? ";
 
             Connection conn = ConnectionManagerUtil.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, deviceType);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getInt("DEVICE_COUNT");
+                        return rs.getInt("SUB_TYPE_COUNT");
                     }
                     return 0;
                 }
@@ -252,4 +252,5 @@ public class DeviceSubTypeDAOImpl implements DeviceSubTypeDAO {
             throw new SubTypeMgtDAOException(msg, e);
         }
     }
+
 }
