@@ -71,14 +71,16 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
             publisher = APIPublisherDataHolder.getInstance().getApiPublisherService();
             int retryCount = 0;
             while (retryCount < MAX_RETRY_COUNT && (!failedAPIsStack.isEmpty() || !currentAPIsStack.isEmpty())) {
-                try {
-                    retryTime = retryTime * CONNECTION_RETRY_FACTOR;
-                    Thread.sleep(retryTime);
-                } catch (InterruptedException te) {
-                    //do nothing.
+                if (retryCount > 0) {
+                    try {
+                        retryTime = retryTime * CONNECTION_RETRY_FACTOR;
+                        Thread.sleep(retryTime);
+                    } catch (InterruptedException te) {
+                        //do nothing.
+                    }
                 }
                 Stack<APIConfig> failedApis;
-                if (!APIPublisherDataHolder.getInstance().getUnpublishedApis().isEmpty()) {
+                if (!currentAPIsStack.isEmpty()) {
                     publishAPIs(currentAPIsStack, failedAPIsStack);
                     failedApis = failedAPIsStack;
                 } else {
@@ -124,6 +126,13 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
         log.info("Starting API publishing procedure");
     }
 
+    /**
+     * Publish apis provided by the API stack, if failed while publishing, then failed API will be added to
+     * the failed API stack
+     *
+     * @param apis        Stack of APIs to publish
+     * @param failedStack Stack to record failed APIs
+     */
     private void publishAPIs(Stack<APIConfig> apis, Stack<APIConfig> failedStack) {
         while (!apis.isEmpty()) {
             APIConfig api = apis.pop();
