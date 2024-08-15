@@ -274,7 +274,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
-                lifecycleState.setUpdatedAt(new Timestamp(rs.getLong("UPDATED_AT")));
+                lifecycleState.setUpdatedAt(rs.getLong("UPDATED_AT"));
                 lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
             }
         } catch (SQLException e) {
@@ -300,7 +300,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
-                lifecycleState.setUpdatedAt(new Timestamp(rs.getLong("UPDATED_AT") * 1000L));
+                lifecycleState.setUpdatedAt(rs.getLong("UPDATED_AT"));
                 lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
                 lifecycleStates.add(lifecycleState);
             }
