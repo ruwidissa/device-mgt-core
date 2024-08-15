@@ -69,6 +69,8 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
         boolean isSinceProvided = false;
         String serial = request.getSerialNumber();
         boolean isSerialProvided = false;
+        List<String> tagList = request.getTags();
+        boolean isTagsProvided = false;
 
         try {
             conn = getConnection();
@@ -83,7 +85,10 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
                     "e.IS_TRANSFERRED, " +
                     "e.DATE_OF_LAST_UPDATE, " +
                     "e.DATE_OF_ENROLMENT, " +
-                    "e.ID AS ENROLMENT_ID " +
+                    "e.ID AS ENROLMENT_ID, " +
+                    "(SELECT STRING_AGG(t.NAME, ', ') FROM DM_DEVICE_TAG_MAPPING dtm " +
+                    "JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
+                    "WHERE dtm.ENROLMENT_ID = e.ID) AS TAGS " +
                     "FROM DM_ENROLMENT e, " +
                     "(SELECT d.ID, " +
                     "d.DESCRIPTION, " +
@@ -161,6 +166,19 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
                 sql += buildStatusQuery(statusList);
                 isStatusProvided = true;
             }
+            if (tagList!= null && !tagList.isEmpty()) {
+                sql += " AND e.ID IN (SELECT e.ID FROM DM_ENROLMENT e " +
+                        "LEFT JOIN DM_DEVICE_TAG_MAPPING dtm ON e.ID = dtm.ENROLMENT_ID " +
+                        "LEFT JOIN DM_TAG t ON dtm.TAG_ID = t.ID WHERE t.NAME IN (";
+                for (int i = 0; i < tagList.size(); i++) {
+                    if (i > 0) {
+                        sql += ", ";
+                    }
+                    sql += "?";
+                }
+                sql += ") GROUP BY e.ID HAVING COUNT(DISTINCT t.NAME) = ? ) ";
+                isTagsProvided = true;
+            }
             sql = sql + " ORDER BY ENROLMENT_ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -197,13 +215,19 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
                         stmt.setString(paramIdx++, status);
                     }
                 }
+                if (isTagsProvided) {
+                    for (String tag : tagList) {
+                        stmt.setString(paramIdx++, tag);
+                    }
+                    stmt.setInt(paramIdx++, tagList.size());
+                }
                 stmt.setInt(paramIdx++, request.getStartIndex());
                 stmt.setInt(paramIdx, request.getRowCount());
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     devices = new ArrayList<>();
                     while (rs.next()) {
-                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs, true);
                         devices.add(device);
                     }
                     return devices;
@@ -485,6 +509,8 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
         boolean isSinceProvided = false;
         String serial = request.getSerialNumber();
         boolean isSerialProvided = false;
+        List<String> tagList = request.getTags();
+        boolean isTagsProvided = false;
 
         try {
             conn = getConnection();
@@ -499,7 +525,10 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
                     "e.IS_TRANSFERRED, " +
                     "e.DATE_OF_LAST_UPDATE, " +
                     "e.DATE_OF_ENROLMENT, " +
-                    "e.ID AS ENROLMENT_ID " +
+                    "e.ID AS ENROLMENT_ID, " +
+                    "(SELECT STRING_AGG(t.NAME, ', ') FROM DM_DEVICE_TAG_MAPPING dtm " +
+                    "JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
+                    "WHERE dtm.ENROLMENT_ID = e.ID) AS TAGS " +
                     "FROM DM_ENROLMENT e, " +
                     "(SELECT gd.DEVICE_ID, " +
                     "gd.DESCRIPTION, " +
@@ -574,6 +603,24 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
                     }
                 }
             }
+
+            if (tagList != null && !tagList.isEmpty()) {
+                sql += " AND e.ID IN (" +
+                        "SELECT e.ID FROM DM_ENROLMENT e " +
+                        "LEFT JOIN DM_DEVICE_TAG_MAPPING dtm ON e.ID = dtm.ENROLMENT_ID " +
+                        "LEFT JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
+                        "WHERE t.NAME IN (";
+                for (int i = 0; i < tagList.size(); i++) {
+                    if (i > 0) {
+                        sql += ", ";
+                    }
+                    sql += "?";
+                }
+                sql += ") GROUP BY e.ID HAVING COUNT(DISTINCT t.NAME) = ?)";
+                isTagsProvided = true;
+            } else {
+                sql += " GROUP BY e.ID ";
+            }
             sql = sql + " ORDER BY ENROLMENT_ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -611,13 +658,19 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
                         stmt.setString(paramIdx++, "%" + entry.getValue() + "%");
                     }
                 }
+                if (isTagsProvided) {
+                    for (String tag : tagList) {
+                        stmt.setString(paramIdx++, tag);
+                    }
+                    stmt.setInt(paramIdx++, tagList.size());
+                }
                 stmt.setInt(paramIdx++, request.getStartIndex());
                 stmt.setInt(paramIdx, request.getRowCount());
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     devices = new ArrayList<>();
                     while (rs.next()) {
-                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs, true);
                         devices.add(device);
                     }
                     return devices;

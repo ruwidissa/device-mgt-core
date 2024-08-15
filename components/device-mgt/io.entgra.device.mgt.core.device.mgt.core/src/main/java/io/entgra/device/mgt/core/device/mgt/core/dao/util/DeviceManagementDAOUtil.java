@@ -26,16 +26,13 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.el.lang.ELSupport;
 import org.wso2.carbon.context.CarbonContext;
 import io.entgra.device.mgt.core.device.mgt.common.Device;
-import io.entgra.device.mgt.core.device.mgt.common.DeviceBilling;
 import io.entgra.device.mgt.core.device.mgt.common.DeviceIdentifier;
 import io.entgra.device.mgt.core.device.mgt.common.EnrolmentInfo;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceInfo;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import io.entgra.device.mgt.core.device.mgt.common.device.details.DeviceMonitoringData;
-import io.entgra.device.mgt.core.device.mgt.common.type.mgt.DeviceStatus;
 import io.entgra.device.mgt.core.device.mgt.core.dao.DeviceManagementDAOException;
 import io.entgra.device.mgt.core.device.mgt.core.dto.DeviceType;
 import io.entgra.device.mgt.core.device.mgt.core.internal.DeviceManagementDataHolder;
@@ -143,6 +140,10 @@ public final class DeviceManagementDAOUtil {
 	}*/
 
     public static EnrolmentInfo loadEnrolment(ResultSet rs) throws SQLException {
+        return loadEnrolment(rs, false);
+    }
+
+    public static EnrolmentInfo loadEnrolment(ResultSet rs, boolean isTagsProvided) throws SQLException {
         EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
         enrolmentInfo.setId(rs.getInt("ENROLMENT_ID"));
         enrolmentInfo.setOwner(rs.getString("OWNER"));
@@ -151,6 +152,16 @@ public final class DeviceManagementDAOUtil {
         enrolmentInfo.setDateOfEnrolment(rs.getTimestamp("DATE_OF_ENROLMENT").getTime());
         enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
         enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
+        if (isTagsProvided) {
+            List<String> tags = new ArrayList<>();
+            String tagColumn = rs.getString("TAGS");
+            if (tagColumn != null) {
+                for (String tag : tagColumn.split(",")) {
+                    tags.add(tag.trim());
+                }
+            }
+            enrolmentInfo.setTags(tags);
+        }
         return enrolmentInfo;
     }
 
@@ -224,6 +235,10 @@ public final class DeviceManagementDAOUtil {
     }
 
     public static Device loadDevice(ResultSet rs) throws SQLException {
+        return loadDevice(rs, false);
+    }
+
+    public static Device loadDevice(ResultSet rs, boolean isTagsProvided) throws SQLException {
         Device device = new Device();
         device.setId(rs.getInt("DEVICE_ID"));
         device.setName(rs.getString("DEVICE_NAME"));
@@ -231,7 +246,7 @@ public final class DeviceManagementDAOUtil {
         device.setType(rs.getString("DEVICE_TYPE"));
         device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
         device.setLastUpdatedTimeStamp(rs.getTimestamp("LAST_UPDATED_TIMESTAMP").getTime());
-        device.setEnrolmentInfo(loadEnrolment(rs));
+        device.setEnrolmentInfo(loadEnrolment(rs, isTagsProvided));
         return device;
     }
 

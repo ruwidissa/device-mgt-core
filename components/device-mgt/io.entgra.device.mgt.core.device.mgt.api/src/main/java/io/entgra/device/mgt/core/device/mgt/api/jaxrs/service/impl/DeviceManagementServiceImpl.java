@@ -151,6 +151,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("since") String since,
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
             @QueryParam("requireDeviceInfo") boolean requireDeviceInfo,
+            @QueryParam("tags") List<String> tags,
             @QueryParam("offset") int offset,
             @QueryParam("limit") int limit) {
         try {
@@ -226,6 +227,19 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 return Response.status(Response.Status.OK).entity(devices).build();
             }
 
+            if (tags != null && !tags.isEmpty()) {
+                boolean isTagsEmpty = true;
+                for (String tagString : tags) {
+                    if (StringUtils.isNotBlank(tagString)) {
+                        isTagsEmpty = false;
+                        break;
+                    }
+                }
+                if (!isTagsEmpty) {
+                    request.setTags(tags);
+                }
+            }
+            // this is the user who initiates the request
             String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
             if (groupId != 0) {

@@ -19,6 +19,7 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -491,6 +492,41 @@ public class RequestValidationUtil {
                             + "incorrect").build());
         }
     }
+
+    public static void validateTagDetails(Integer tagId, String tagName, TagInfo tagInfo) {
+        if (tagId == null && tagName == null) {
+            String msg = "Either tagId or tagName must be provided.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(msg).build());
+        }
+        if (tagInfo == null) {
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request body is "
+                            + "empty").build());
+        }
+    }
+
+    public static void validateTagListDetails(List<TagInfo> tagInfo) {
+        if (tagInfo == null) {
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request body is "
+                            + "empty").build());
+        }
+    }
+
+    public static void validateTagMappingDetails(TagMappingInfo tagMappingInfo) {
+        if (tagMappingInfo == null) {
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400L).setMessage("Request body is empty").build());
+        } else if (tagMappingInfo.getDeviceIdentifiers() == null || tagMappingInfo.getDeviceType() == null
+                || tagMappingInfo.getTags() == null) {
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400L).setMessage("Invalid tag mapping request body").build());
+        }
+    }
+
+
 
     public static void validateScopes(List<Scope> scopes) {
         if (scopes == null || scopes.isEmpty()) {

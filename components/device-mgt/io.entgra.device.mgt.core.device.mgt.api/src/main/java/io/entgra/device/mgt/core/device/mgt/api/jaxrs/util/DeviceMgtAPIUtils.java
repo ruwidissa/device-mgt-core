@@ -21,10 +21,12 @@ package io.entgra.device.mgt.core.device.mgt.api.jaxrs.util;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.APIPublisherService;
 import io.entgra.device.mgt.core.application.mgt.common.services.ApplicationManager;
 import io.entgra.device.mgt.core.application.mgt.common.services.SubscriptionManager;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.TagManagementService;
 import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuthorizationService;
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import io.entgra.device.mgt.core.tenant.mgt.common.spi.TenantManagerAdminService;
+import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderService;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.java.security.SSLProtocolSocketFactory;
@@ -503,6 +505,19 @@ public class DeviceMgtAPIUtils {
             throw new IllegalStateException(msg);
         }
         return policyManagementService;
+    }
+
+    public static TagManagementProviderService getTagManagementService() {
+        TagManagementProviderService tagManagementService;
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        tagManagementService =
+                (TagManagementProviderService) ctx.getOSGiService(TagManagementProviderService.class, null);
+        if (tagManagementService == null) {
+            String msg = "Tag Management service not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return tagManagementService;
     }
 
     public static PlatformConfigurationManagementService getPlatformConfigurationManagementService() {

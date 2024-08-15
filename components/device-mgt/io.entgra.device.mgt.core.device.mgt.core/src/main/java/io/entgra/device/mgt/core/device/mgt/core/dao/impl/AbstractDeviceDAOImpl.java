@@ -1030,6 +1030,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         boolean isStatusProvided = false;
         Date since = request.getSince();
         boolean isSinceProvided = false;
+        List<String> tagList = request.getTags();
+        boolean isTagsProvided = false;
 
         try {
             Connection conn = getConnection();
@@ -1084,6 +1086,21 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 sql += buildStatusQuery(statusList);
                 isStatusProvided = true;
             }
+            if (tagList != null && !tagList.isEmpty()) {
+                sql += " AND e.ID IN ( " +
+                        "SELECT dtm.ENROLMENT_ID " +
+                        "FROM DM_DEVICE_TAG_MAPPING dtm " +
+                        "JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
+                        "WHERE t.NAME IN (";
+                for (int i = 0; i < tagList.size(); i++) {
+                    if (i > 0) {
+                        sql += ", ";
+                    }
+                    sql += "?";
+                }
+                sql += ") GROUP BY dtm.ENROLMENT_ID HAVING COUNT(DISTINCT t.NAME) = ? )";
+                isTagsProvided = true;
+            }
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;
@@ -1111,6 +1128,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     for (String status : statusList) {
                         stmt.setString(paramIdx++, status);
                     }
+                }
+                if (isTagsProvided) {
+                    for (String tag : tagList) {
+                        stmt.setString(paramIdx++, tag);
+                    }
+                    stmt.setInt(paramIdx++, tagList.size());
                 }
 
                 try (ResultSet rs = stmt.executeQuery()) {
@@ -1300,6 +1323,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         boolean isStatusProvided = false;
         Date since = request.getSince();
         boolean isSinceProvided = false;
+        List<String> tagList = request.getTags();
+        boolean isTagsProvided = false;
 
         try {
             Connection conn = getConnection();
@@ -1342,6 +1367,21 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 sql += buildStatusQuery(statusList);
                 isStatusProvided = true;
             }
+            if (tagList != null && !tagList.isEmpty()) {
+                sql += " AND e.ID IN ( " +
+                        "SELECT dtm.ENROLMENT_ID " +
+                        "FROM DM_DEVICE_TAG_MAPPING dtm " +
+                        "JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
+                        "WHERE t.NAME IN (";
+                for (int i = 0; i < tagList.size(); i++) {
+                    if (i > 0) {
+                        sql += ", ";
+                    }
+                    sql += "?";
+                }
+                sql += ") GROUP BY dtm.ENROLMENT_ID HAVING COUNT(DISTINCT t.NAME) = ? )";
+                isTagsProvided = true;
+            }
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIdx = 1;
@@ -1367,6 +1407,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     for (String status : statusList) {
                         stmt.setString(paramIdx++, status);
                     }
+                }
+                if (isTagsProvided) {
+                    for (String tag : tagList) {
+                        stmt.setString(paramIdx++, tag);
+                    }
+                    stmt.setInt(paramIdx++, tagList.size());
                 }
 
                 try (ResultSet rs = stmt.executeQuery()) {
