@@ -17,7 +17,10 @@
  */
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api;
 
-import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.*;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.TagInfo;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.TagInfoList;
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.TagMappingInfo;
 import io.swagger.annotations.*;
 import io.entgra.device.mgt.core.apimgt.annotations.Scope;
 import io.entgra.device.mgt.core.apimgt.annotations.Scopes;
@@ -107,7 +110,7 @@ public interface TagManagementService {
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
             value = "Getting the List of Tags",
-            notes = "",
+            notes = "This endpoint is used to retrieve all tags",
             tags = "Tag Management",
             extensions = {
                     @Extension(properties = {
@@ -153,7 +156,7 @@ public interface TagManagementService {
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "POST",
             value = "Adding a Tag",
-            notes = "",
+            notes = "This endpoint is used to add new tags",
             tags = "Tag Management",
             extensions = {
                     @Extension(properties = {
@@ -212,7 +215,7 @@ public interface TagManagementService {
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
             value = "Updating a Tag",
-            notes = "",
+            notes = "This endpoint is used to update a specific tag",
             tags = "Tag Management",
             extensions = {
                     @Extension(properties = {
@@ -260,7 +263,7 @@ public interface TagManagementService {
     @ApiOperation(
             httpMethod = "DELETE",
             value = "Deleting a Tag",
-            notes = "",
+            notes = "This endpoint is used to delete a specific tag",
             tags = "Tag Management",
             extensions = {
                     @Extension(properties = {
@@ -293,7 +296,7 @@ public interface TagManagementService {
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
             value = "Getting a Tag by ID",
-            notes = "",
+            notes = "This endpoint is used to retrieve tag by id",
             tags = "Tag Management",
             extensions = {
                     @Extension(properties = {
@@ -332,7 +335,7 @@ public interface TagManagementService {
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "POST",
             value = "Adding a Device-Tag Mapping",
-            notes = "",
+            notes = "This endpoint is used to map devices with tags",
             tags = "Device-Tag Management",
             extensions = {
                     @Extension(properties = {
@@ -372,7 +375,7 @@ public interface TagManagementService {
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "DELETE",
             value = "Deleting a Device-Tag Mapping",
-            notes = "",
+            notes = "This endpoint is used to remove tag mappings from devices",
             tags = "Device-Tag Management",
             extensions = {
                     @Extension(properties = {

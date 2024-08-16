@@ -47,11 +47,13 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
             throw new BadRequestException(msg);
         }
         try {
-            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             DeviceManagementDAOFactory.beginTransaction();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             for (Tag tag : tags) {
                 if (tag.getName() == null) {
-                    throw new BadRequestException("Tag name cannot be null");
+                    String msg = "Tag name cannot be null";
+                    log.error(msg);
+                    throw new BadRequestException(msg);
                 }
             }
             if (log.isDebugEnabled()) {
@@ -80,9 +82,11 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
     @Override
     public List<Tag> getAllTags() throws TagManagementException {
         try {
-            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             DeviceManagementDAOFactory.beginTransaction();
-            return tagDAO.getTags(tenantId);
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            List<Tag> tags = tagDAO.getTags(tenantId);
+            DeviceManagementDAOFactory.commitTransaction();
+            return tags;
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while initiating transaction.";
             log.error(msg, e);
@@ -104,8 +108,8 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
     @Override
     public Tag getTagById(int tagId) throws TagManagementException, TagNotFoundException {
         try {
-            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             DeviceManagementDAOFactory.beginTransaction();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             Tag tag = tagDAO.getTagById(tagId, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
             if (tag == null) {
@@ -132,16 +136,14 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
         }
 
         try {
-            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             DeviceManagementDAOFactory.beginTransaction();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             Tag tag = tagDAO.getTagByName(tagName, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
-
             if (tag == null) {
                 String msg = "Tag with name " + tagName + " not found.";
                 throw new TagNotFoundException(msg);
             }
-
             return tag;
         } catch (TransactionManagementException | TagManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
@@ -162,8 +164,8 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
             throw new BadRequestException(msg);
         }
         try {
+            DeviceManagementDAOFactory.beginTransaction();
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            DeviceManagementDAOFactory.openConnection();
             Tag existingTag = tagDAO.getTagById(tag.getId(), tenantId);
             if (existingTag == null) {
                 String msg = "Tag with ID: " + tag.getId() + " does not exist.";
@@ -171,7 +173,8 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
                 throw new TagNotFoundException(msg);
             }
             tagDAO.updateTag(tag, tenantId);
-        } catch (TagManagementDAOException | SQLException e) {
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TagManagementDAOException | TransactionManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while updating the tag with ID: " + tag.getId();
             log.error(msg, e);
@@ -185,8 +188,8 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
     @Override
     public void deleteTag(int tagId) throws TagManagementException, TagNotFoundException {
         try {
+            DeviceManagementDAOFactory.beginTransaction();
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            DeviceManagementDAOFactory.openConnection();
             Tag existingTag = tagDAO.getTagById(tagId, tenantId);
             if (existingTag == null) {
                 String msg = "Tag with ID: " + tagId + " does not exist.";
@@ -195,7 +198,7 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
             }
             tagDAO.deleteTag(tagId, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
-        } catch (TagManagementDAOException | SQLException e) {
+        } catch (TagManagementDAOException | TransactionManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while deleting the tag with ID: " + tagId;
             log.error(msg, e);
@@ -206,17 +209,17 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
     }
 
     @Override
-    public void addDeviceTagMapping(TagMappingDTO tagMappingDto) throws TagManagementException, BadRequestException {
-        if (tagMappingDto == null || tagMappingDto.getDeviceIdentifiers() == null || tagMappingDto.getTags() == null
-                || tagMappingDto.getDeviceType() == null) {
+    public void addDeviceTagMapping(List<String> deviceIdentifiers, String deviceType, List<String> tags)
+            throws TagManagementException, BadRequestException {
+        if (deviceIdentifiers == null || deviceType == null || tags == null) {
             String msg = "Received incomplete data for device tag mapping.";
             log.error(msg);
             throw new BadRequestException(msg);
         }
         try {
+            DeviceManagementDAOFactory.beginTransaction();
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            DeviceManagementDAOFactory.openConnection();
-
+            TagMappingDTO tagMappingDto = new TagMappingDTO(deviceIdentifiers, deviceType, tags);
             List<Tag> tagList = new ArrayList<>();
             for (String tagName : tagMappingDto.getTags()) {
                 Tag tag = new Tag();
@@ -227,7 +230,7 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
             tagDAO.addTags(tagList, tenantId);
             tagDAO.addDeviceTagMapping(tagMappingDto.getDeviceIdentifiers(), tagMappingDto.getDeviceType(),
                     tagMappingDto.getTags(), tenantId);
-
+            DeviceManagementDAOFactory.commitTransaction();
         } catch (TagManagementDAOException e) {
             if (e.isUniqueConstraintViolation()) {
                 String msg = "Tag is already mapped to this device.";
@@ -239,7 +242,7 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
                 log.error(msg, e);
                 throw new TagManagementException(msg, e);
             }
-        } catch (SQLException e) {
+        } catch (TransactionManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while adding device tag mapping.";
             log.error(msg, e);
@@ -250,20 +253,20 @@ public class TagManagementProviderServiceImpl implements TagManagementProviderSe
     }
 
     @Override
-    public void deleteDeviceTagMapping(TagMappingDTO tagMappingDto) throws TagManagementException, BadRequestException {
-        if (tagMappingDto == null || tagMappingDto.getDeviceIdentifiers() == null || tagMappingDto.getTags() == null
-                || tagMappingDto.getDeviceType() == null) {
+    public void deleteDeviceTagMapping(List<String> deviceIdentifiers, String deviceType, List<String> tags) throws TagManagementException, BadRequestException {
+        if (deviceIdentifiers == null || deviceType == null || tags == null) {
             String msg = "Received incomplete data for device tag mapping.";
             log.error(msg);
             throw new BadRequestException(msg);
         }
         try {
+            DeviceManagementDAOFactory.beginTransaction();
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            DeviceManagementDAOFactory.openConnection();
+            TagMappingDTO tagMappingDto = new TagMappingDTO(deviceIdentifiers, deviceType, tags);
             tagDAO.deleteDeviceTagMapping(tagMappingDto.getDeviceIdentifiers(), tagMappingDto.getDeviceType(),
                     tagMappingDto.getTags(), tenantId);
             DeviceManagementDAOFactory.commitTransaction();
-        } catch (TagManagementDAOException | SQLException e) {
+        } catch (TagManagementDAOException | TransactionManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while deleting device tag mappings.";
             log.error(msg, e);

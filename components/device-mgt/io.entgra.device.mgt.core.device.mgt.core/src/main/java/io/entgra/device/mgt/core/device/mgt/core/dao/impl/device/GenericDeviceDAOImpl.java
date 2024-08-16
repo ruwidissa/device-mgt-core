@@ -174,13 +174,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     "LEFT JOIN DM_TAG t ON dtm.TAG_ID = t.ID ";
 
             if (tagList != null && !tagList.isEmpty()) {
-                sql += " WHERE t.NAME IN (";
-                for (int i = 0; i < tagList.size(); i++) {
-                    if (i > 0) {
-                        sql += ", ";
-                    }
-                    sql += "?";
-                }
+                sql += " WHERE t.NAME IN (" + buildTagQuery(tagList);
                 sql += ") GROUP BY e.ID HAVING COUNT(DISTINCT t.NAME) = ? ";
                 isTagsProvided = true;
             } else {
@@ -800,13 +794,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                         "FROM DM_ENROLMENT e " +
                         "LEFT JOIN DM_DEVICE_TAG_MAPPING dtm ON e.ID = dtm.ENROLMENT_ID " +
                         "LEFT JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
-                        "WHERE t.NAME IN (";
-                for (int i = 0; i < tagList.size(); i++) {
-                    if (i > 0) {
-                        sql += ", ";
-                    }
-                    sql += "?";
-                }
+                        "WHERE t.NAME IN (" + buildTagQuery(tagList);
                 sql += ") GROUP BY e.ID HAVING COUNT(DISTINCT t.NAME) = ? ) ";
                 isTagsProvided = true;
             } else {

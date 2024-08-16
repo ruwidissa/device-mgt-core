@@ -133,84 +133,60 @@ public class TagManagementProviderServiceTest extends BaseDeviceManagementTest {
 
     @Test(expectedExceptions = {BadRequestException.class}, dependsOnMethods = "deleteTag")
     public void createTagMappingsNull() throws TagManagementException, BadRequestException {
-        tagManagementProviderService.addDeviceTagMapping(null);
+        tagManagementProviderService.addDeviceTagMapping(null, null, null);
     }
 
     @Test(expectedExceptions = {BadRequestException.class}, dependsOnMethods = "createTagMappingsNull")
     public void createTagsMappingsNullDeviceIdentifiers() throws TagManagementException, DeviceManagementException {
-        TagMappingDTO tagMappingDTO = new TagMappingDTO();
-        tagMappingDTO.setDeviceIdentifiers(null);
-        tagMappingDTO.setDeviceType(DEVICE_TYPE);
-        tagMappingDTO.setTags(new ArrayList<>(Arrays.asList("tag1", "tag2")));
-        tagManagementProviderService.addDeviceTagMapping(tagMappingDTO);
+        tagManagementProviderService.addDeviceTagMapping(null, DEVICE_TYPE,
+                new ArrayList<>(Arrays.asList("tag1", "tag2")));
     }
 
     @Test(expectedExceptions = {BadRequestException.class}, dependsOnMethods = "createTagsMappingsNullDeviceIdentifiers")
     public void createTagsMappingsNullDeviceType() throws TagManagementException, DeviceManagementException {
-        TagMappingDTO tagMappingDTO = new TagMappingDTO();
-        tagMappingDTO.setDeviceIdentifiers(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)));
-        tagMappingDTO.setDeviceType(null);
-        tagMappingDTO.setTags(new ArrayList<>(Arrays.asList("tag1", "tag2")));
-        tagManagementProviderService.addDeviceTagMapping(tagMappingDTO);
+        tagManagementProviderService.addDeviceTagMapping(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)),
+                null, new ArrayList<>(Arrays.asList("tag1", "tag2")));
     }
 
     @Test(expectedExceptions = {BadRequestException.class}, dependsOnMethods = "createTagsMappingsNullDeviceType")
     public void createTagsMappingsNullTags() throws TagManagementException, DeviceManagementException {
-        TagMappingDTO tagMappingDTO = new TagMappingDTO();
-        tagMappingDTO.setDeviceIdentifiers(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)));
-        tagMappingDTO.setDeviceType(DEVICE_TYPE);
-        tagMappingDTO.setTags(null);
-        tagManagementProviderService.addDeviceTagMapping(tagMappingDTO);
+        tagManagementProviderService.addDeviceTagMapping(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)),
+                DEVICE_TYPE, null);
     }
 
     @Test(dependsOnMethods = "createTagsMappingsNullTags")
     public void createTagsMappings() throws TagManagementException, DeviceManagementException {
-        TagMappingDTO tagMappingDTO = new TagMappingDTO();
-        tagMappingDTO.setDeviceIdentifiers(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)));
-        tagMappingDTO.setDeviceType(DEVICE_TYPE);
-        tagMappingDTO.setTags(new ArrayList<>(Arrays.asList("tag1", "tag2")));
-        tagManagementProviderService.addDeviceTagMapping(tagMappingDTO);
+        tagManagementProviderService.addDeviceTagMapping(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)),
+                DEVICE_TYPE, new ArrayList<>(Arrays.asList("tag1", "tag2")));
     }
 
     @Test(expectedExceptions = {BadRequestException.class}, dependsOnMethods = "createTagsMappings")
     public void deleteTagMappingsNull() throws TagManagementException, BadRequestException {
-        tagManagementProviderService.deleteDeviceTagMapping(null);
+        tagManagementProviderService.deleteDeviceTagMapping(null, null, null);
     }
 
     @Test(expectedExceptions = {BadRequestException.class}, dependsOnMethods = "deleteTagMappingsNull")
     public void deleteTagsMappingsNullDeviceIdentifiers() throws TagManagementException, DeviceManagementException {
-        TagMappingDTO tagMappingDTO = new TagMappingDTO();
-        tagMappingDTO.setDeviceIdentifiers(null);
-        tagMappingDTO.setDeviceType(DEVICE_TYPE);
-        tagMappingDTO.setTags(new ArrayList<>(Arrays.asList("tag1", "tag2")));
-        tagManagementProviderService.deleteDeviceTagMapping(tagMappingDTO);
+        tagManagementProviderService.deleteDeviceTagMapping(null, DEVICE_TYPE,
+                new ArrayList<>(Arrays.asList("tag1", "tag2")));
     }
 
     @Test(expectedExceptions = {BadRequestException.class}, dependsOnMethods = "deleteTagsMappingsNullDeviceIdentifiers")
     public void deleteTagsMappingsNullDeviceType() throws TagManagementException, DeviceManagementException {
-        TagMappingDTO tagMappingDTO = new TagMappingDTO();
-        tagMappingDTO.setDeviceIdentifiers(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)));
-        tagMappingDTO.setDeviceType(null);
-        tagMappingDTO.setTags(new ArrayList<>(Arrays.asList("tag1", "tag2")));
-        tagManagementProviderService.deleteDeviceTagMapping(tagMappingDTO);
+        tagManagementProviderService.deleteDeviceTagMapping(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)),
+                null, new ArrayList<>(Arrays.asList("tag1", "tag2")));
     }
 
     @Test(expectedExceptions = {BadRequestException.class}, dependsOnMethods = "deleteTagsMappingsNullDeviceType")
     public void deleteTagsMappingsNullTags() throws TagManagementException, DeviceManagementException {
-        TagMappingDTO tagMappingDTO = new TagMappingDTO();
-        tagMappingDTO.setDeviceIdentifiers(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)));
-        tagMappingDTO.setDeviceType(DEVICE_TYPE);
-        tagMappingDTO.setTags(null);
-        tagManagementProviderService.deleteDeviceTagMapping(tagMappingDTO);
+        tagManagementProviderService.deleteDeviceTagMapping(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)),
+                DEVICE_TYPE, null);
     }
 
     @Test(dependsOnMethods = "deleteTagsMappingsNullTags")
     public void deleteTagsMappings() throws TagManagementException, DeviceManagementException {
-        TagMappingDTO tagMappingDTO = new TagMappingDTO();
-        tagMappingDTO.setDeviceIdentifiers(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)));
-        tagMappingDTO.setDeviceType(DEVICE_TYPE);
-        tagMappingDTO.setTags(new ArrayList<>(Arrays.asList("tag1", "tag2")));
-        tagManagementProviderService.deleteDeviceTagMapping(tagMappingDTO);
+        tagManagementProviderService.deleteDeviceTagMapping(new ArrayList<>(Arrays.asList(DEVICE_ID_1, DEVICE_ID_2)),
+                DEVICE_TYPE, new ArrayList<>(Arrays.asList("tag1", "tag2")));
     }
 }
 

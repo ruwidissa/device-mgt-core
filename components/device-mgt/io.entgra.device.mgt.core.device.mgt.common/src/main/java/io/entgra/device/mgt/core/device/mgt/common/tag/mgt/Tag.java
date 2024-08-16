@@ -18,7 +18,6 @@
 
 package io.entgra.device.mgt.core.device.mgt.common.tag.mgt;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 

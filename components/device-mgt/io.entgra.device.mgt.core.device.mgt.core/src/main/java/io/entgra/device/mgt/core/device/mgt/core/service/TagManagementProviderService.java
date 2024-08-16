@@ -82,16 +82,22 @@ public interface TagManagementProviderService {
     /**
      * Method to add a device-tag mapping.
      *
-     * @param tagMappingDto - TagMappingDTO object containing mapping information.
+     * @param deviceIdentifiers - List of device ids to map.
+     * @param deviceType - Device Type of that specific devices.
+     * @param tags - List of tags you want to attach.
      * @throws TagManagementException if something goes wrong while adding the device-tag mapping.
      */
-    void addDeviceTagMapping(TagMappingDTO tagMappingDto) throws TagManagementException, BadRequestException;
+    void addDeviceTagMapping(List<String> deviceIdentifiers, String deviceType, List<String> tags)
+            throws TagManagementException, BadRequestException;
 
     /**
      * Method to delete a device-tag mapping.
      *
-     * @param tagMappingDTO - TagMappingDTO object containing mapping information.
+     * @param deviceIdentifiers - List of device ids to map.
+     * @param deviceType - Device Type of that specific devices.
+     * @param tags - List of tags you want to attach.
      * @throws TagManagementException if something goes wrong while deleting the device-tag mapping.
      */
-    void deleteDeviceTagMapping(TagMappingDTO tagMappingDTO) throws TagManagementException, BadRequestException;
+    void deleteDeviceTagMapping(List<String> deviceIdentifiers, String deviceType, List<String> tags)
+            throws TagManagementException, BadRequestException;
 }

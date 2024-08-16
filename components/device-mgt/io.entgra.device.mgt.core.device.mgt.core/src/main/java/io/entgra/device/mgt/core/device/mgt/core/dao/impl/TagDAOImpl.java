@@ -21,8 +21,15 @@ package io.entgra.device.mgt.core.device.mgt.core.dao.impl;
 import io.entgra.device.mgt.core.device.mgt.common.tag.mgt.DeviceTag;
 import io.entgra.device.mgt.core.device.mgt.common.tag.mgt.Tag;
 import io.entgra.device.mgt.core.device.mgt.core.dao.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +39,8 @@ import static io.entgra.device.mgt.core.device.mgt.core.dao.util.TagManagementDA
 import static io.entgra.device.mgt.core.device.mgt.core.dao.util.TagManagementDAOUtil.cleanupResources;
 
 public class TagDAOImpl implements TagDAO {
+
+    private static final Log log = LogFactory.getLog(TagDAOImpl.class);
 
     protected Connection getConnection() throws SQLException {
         return DeviceManagementDAOFactory.getConnection();
@@ -62,11 +71,15 @@ public class TagDAOImpl implements TagDAO {
             int[] updateCounts = preparedStatement.executeBatch();
             for (int count : updateCounts) {
                 if (count == PreparedStatement.EXECUTE_FAILED) {
-                    throw new TagManagementDAOException("Error occurred while adding tags, adding some tags failed.");
+                    String msg = "Error occurred while adding tags, adding some tags failed.";
+                    log.error(msg);
+                    throw new TagManagementDAOException(msg);
                 }
             }
         } catch (SQLException e) {
-            throw new TagManagementDAOException("Error occurred while adding tags", e);
+            String msg = "Error occurred while adding tags.";
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e);
         } finally {
             cleanupResources(preparedStatement, null);
         }
@@ -87,7 +100,9 @@ public class TagDAOImpl implements TagDAO {
             preparedStatement.setInt(4, tenantId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new TagManagementDAOException("Error occurred while updating tag", e);
+            String msg = "Error occurred while updating tag.";
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e);
         } finally {
             cleanupResources(preparedStatement, null);
         }
@@ -106,7 +121,9 @@ public class TagDAOImpl implements TagDAO {
             preparedStatement.setInt(2, tenantId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new TagManagementDAOException("Error occurred while deleting tag", e);
+            String msg = "Error occurred while deleting tag.";
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e);
         } finally {
             cleanupResources(preparedStatement, null);
         }
@@ -131,7 +148,9 @@ public class TagDAOImpl implements TagDAO {
                 tag = loadTag(resultSet);
             }
         } catch (SQLException e) {
-            throw new TagManagementDAOException("Error occurred while retrieving tag", e);
+            String msg = "Error occurred while getting a specific tag." + tagId;
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e);
         } finally {
             cleanupResources(preparedStatement, resultSet);
         }
@@ -157,7 +176,9 @@ public class TagDAOImpl implements TagDAO {
                 tag = loadTag(resultSet);
             }
         } catch (SQLException e) {
-            throw new TagManagementDAOException("Error occurred while retrieving tag with name: " + tagName, e);
+            String msg = "Error occurred while retrieving tag with name: " + tagName;
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e);
         } finally {
             cleanupResources(preparedStatement, resultSet);
         }
@@ -184,7 +205,9 @@ public class TagDAOImpl implements TagDAO {
                 tags.add(tag);
             }
         } catch (SQLException e) {
-            throw new TagManagementDAOException("Error occurred while retrieving tags", e);
+            String msg = "Error occurred while retrieving tags";
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e);
         } finally {
             cleanupResources(preparedStatement, resultSet);
         }
@@ -237,9 +260,13 @@ public class TagDAOImpl implements TagDAO {
             preparedStatement.setInt(paramIndex, tenantId);
             preparedStatement.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
-            throw new TagManagementDAOException("Tag is already mapped to this device", e, true);
+            String msg = "Tag is already mapped to this device";
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e, true);
         } catch (SQLException e) {
-            throw new TagManagementDAOException("Error occurred while adding device tag", e);
+            String msg = "Error occurred while adding device tag mapping";
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e);
         } finally {
             cleanupResources(preparedStatement, null);
         }
@@ -287,7 +314,9 @@ public class TagDAOImpl implements TagDAO {
             preparedStatement.setInt(paramIndex, tenantId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new TagManagementDAOException("Error occurred while deleting device tag mapping", e);
+            String msg = "Error occurred while deleting device tag mapping";
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e);
         } finally {
             cleanupResources(preparedStatement, null);
         }
@@ -313,7 +342,9 @@ public class TagDAOImpl implements TagDAO {
                 deviceTags.add(deviceTag);
             }
         } catch (SQLException e) {
-            throw new TagManagementDAOException("Error occurred while retrieving device tags", e);
+            String msg = "Error occurred while retrieving device tags";
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e);
         } finally {
             cleanupResources(preparedStatement, resultSet);
         }
@@ -340,7 +371,9 @@ public class TagDAOImpl implements TagDAO {
                 deviceTags.add(deviceTag);
             }
         } catch (SQLException e) {
-            throw new TagManagementDAOException("Error occurred while retrieving devices for tag", e);
+            String msg = "Error occurred while retrieving devices for tag";
+            log.error(msg, e);
+            throw new TagManagementDAOException(msg, e);
         } finally {
             cleanupResources(preparedStatement, resultSet);
         }

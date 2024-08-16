@@ -18,13 +18,16 @@
 
 package io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl;
 
+import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.ErrorResponse;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.TagInfo;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.beans.TagMappingInfo;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.api.TagManagementService;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.service.impl.util.RequestValidationUtil;
 import io.entgra.device.mgt.core.device.mgt.api.jaxrs.util.DeviceMgtAPIUtils;
 import io.entgra.device.mgt.core.device.mgt.common.exceptions.BadRequestException;
-import io.entgra.device.mgt.core.device.mgt.common.tag.mgt.*;
+import io.entgra.device.mgt.core.device.mgt.common.tag.mgt.Tag;
+import io.entgra.device.mgt.core.device.mgt.common.tag.mgt.TagManagementException;
+import io.entgra.device.mgt.core.device.mgt.common.tag.mgt.TagNotFoundException;
 import io.entgra.device.mgt.core.device.mgt.extensions.logger.spi.EntgraLogger;
 import io.entgra.device.mgt.core.notification.logger.impl.EntgraRoleMgtLoggerImpl;
 
@@ -50,7 +53,8 @@ public class TagManagementServiceImpl implements TagManagementService {
         }  catch (TagManagementException e) {
             String msg = "Error occurred while getting tags.";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
     }
 
@@ -69,11 +73,15 @@ public class TagManagementServiceImpl implements TagManagementService {
         } catch (TagManagementException e) {
             String msg = "Error occurred while adding tags." ;
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity
+                    (new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (BadRequestException e) {
             String msg = "Error occurred while adding tags. Please check the request" ;
-            log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+            if(log.isDebugEnabled()) {
+                log.debug(msg, e);
+            }
+            return Response.status(Response.Status.BAD_REQUEST).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(e.getMessage()).build()).build();
         }
     }
 
@@ -89,9 +97,11 @@ public class TagManagementServiceImpl implements TagManagementService {
                 tag = DeviceMgtAPIUtils.getTagManagementService().getTagByName(tagName);
             }
             if (tag == null) {
-                String msg = "Tag not found.";
+                String msg = (tagId != null) ? "Tag with ID " + tagId + " is not found."
+                        : "Tag with name " + tagName + " is not found.";
                 log.error(msg);
-                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.ErrorResponseBuilder().
+                        setMessage(msg).build()).build();
             }
             tag.setName(tagInfo.getName());
             tag.setDescription(tagInfo.getDescription());
@@ -101,17 +111,22 @@ public class TagManagementServiceImpl implements TagManagementService {
             String msg = (tagId != null) ? "Error occurred while updating tag with ID " + tagId + "."
                     : "Error occurred while updating tag with name " + tagName + ".";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse.
+                    ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (TagNotFoundException e) {
             String msg = (tagId != null) ? "Tag with ID " + tagId + " is not found."
                     : "Tag with name " + tagName + " is not found.";
             log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.ErrorResponseBuilder().
+                    setMessage(msg).build()).build();
         } catch (BadRequestException e) {
             String msg = (tagId != null) ? "Error occurred while updating tag with ID " + tagId
                     : "Error occurred while updating tag with name " + tagName;
-            log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+            if(log.isDebugEnabled()) {
+                log.debug(msg, e);
+            }
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse.ErrorResponseBuilder().
+                    setMessage(msg).build()).build();
         }
     }
 
@@ -125,11 +140,13 @@ public class TagManagementServiceImpl implements TagManagementService {
         } catch (TagManagementException e) {
             String msg = "Error occurred while deleting tag with ID " + tagId + ".";
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse.ErrorResponseBuilder().
+                    setMessage(msg).build()).build();
         } catch (TagNotFoundException e) {
             String msg = "Tag with ID " + tagId + " is not found.";
             log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.ErrorResponseBuilder().
+                    setMessage(e.getMessage()).build()).build();
         }
     }
 
@@ -143,11 +160,13 @@ public class TagManagementServiceImpl implements TagManagementService {
         } catch (TagManagementException e) {
             String msg = "Error occurred while getting tag with ID " + tagId + ".";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse.
+                    ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (TagNotFoundException e) {
             String msg = "Tag with ID " + tagId + " is not found.";
             log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.
+                    ErrorResponseBuilder().setMessage(e.getMessage()).build()).build();
         }
     }
 
@@ -156,18 +175,21 @@ public class TagManagementServiceImpl implements TagManagementService {
     public Response addDeviceTagMapping(TagMappingInfo tagMappingInfo) {
         RequestValidationUtil.validateTagMappingDetails(tagMappingInfo);
         try {
-            TagMappingDTO tagMappingDTO = new TagMappingDTO(tagMappingInfo.getDeviceIdentifiers(),
+            DeviceMgtAPIUtils.getTagManagementService().addDeviceTagMapping(tagMappingInfo.getDeviceIdentifiers(),
                     tagMappingInfo.getDeviceType(), tagMappingInfo.getTags());
-            DeviceMgtAPIUtils.getTagManagementService().addDeviceTagMapping(tagMappingDTO);
-            return Response.status(Response.Status.CREATED).entity(tagMappingDTO).build();
+            return Response.status(Response.Status.CREATED).entity(tagMappingInfo).build();
         } catch (TagManagementException e) {
             String msg = "Error occurred while adding device-tag mapping.";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse.
+                    ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (BadRequestException e) {
             String msg = "Error occurred while adding tag mappings.";
-            log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+            if(log.isDebugEnabled()) {
+                log.debug(msg, e);
+            }
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse.
+                    ErrorResponseBuilder().setMessage(e.getMessage()).build()).build();
         }
     }
 
@@ -176,18 +198,21 @@ public class TagManagementServiceImpl implements TagManagementService {
     public Response deleteDeviceTagMapping(TagMappingInfo tagMappingInfo) {
         RequestValidationUtil.validateTagMappingDetails(tagMappingInfo);
         try {
-            TagMappingDTO tagMappingDTO = new TagMappingDTO(tagMappingInfo.getDeviceIdentifiers(),
+            DeviceMgtAPIUtils.getTagManagementService().deleteDeviceTagMapping(tagMappingInfo.getDeviceIdentifiers(),
                     tagMappingInfo.getDeviceType(), tagMappingInfo.getTags());
-            DeviceMgtAPIUtils.getTagManagementService().deleteDeviceTagMapping(tagMappingDTO);
-            return Response.status(Response.Status.NO_CONTENT).build();
+            return Response.status(Response.Status.NO_CONTENT).entity(tagMappingInfo).build();
         } catch (TagManagementException e) {
             String msg = "Error occurred while deleting tag mappings.";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse.
+                    ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (BadRequestException e) {
             String msg = "Error occurred while deleting tag mappings.";
-            log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+            if(log.isDebugEnabled()) {
+                log.debug(msg, e);
+            }
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse.
+                    ErrorResponseBuilder().setMessage(e.getMessage()).build()).build();
         }
     }
 }

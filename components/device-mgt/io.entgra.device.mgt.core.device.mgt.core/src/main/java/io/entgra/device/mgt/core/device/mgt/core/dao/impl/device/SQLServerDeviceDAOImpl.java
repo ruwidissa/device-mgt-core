@@ -169,13 +169,7 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
             if (tagList!= null && !tagList.isEmpty()) {
                 sql += " AND e.ID IN (SELECT e.ID FROM DM_ENROLMENT e " +
                         "LEFT JOIN DM_DEVICE_TAG_MAPPING dtm ON e.ID = dtm.ENROLMENT_ID " +
-                        "LEFT JOIN DM_TAG t ON dtm.TAG_ID = t.ID WHERE t.NAME IN (";
-                for (int i = 0; i < tagList.size(); i++) {
-                    if (i > 0) {
-                        sql += ", ";
-                    }
-                    sql += "?";
-                }
+                        "LEFT JOIN DM_TAG t ON dtm.TAG_ID = t.ID WHERE t.NAME IN (" + buildTagQuery(tagList);
                 sql += ") GROUP BY e.ID HAVING COUNT(DISTINCT t.NAME) = ? ) ";
                 isTagsProvided = true;
             }
@@ -609,13 +603,7 @@ public class SQLServerDeviceDAOImpl extends GenericDeviceDAOImpl {
                         "SELECT e.ID FROM DM_ENROLMENT e " +
                         "LEFT JOIN DM_DEVICE_TAG_MAPPING dtm ON e.ID = dtm.ENROLMENT_ID " +
                         "LEFT JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
-                        "WHERE t.NAME IN (";
-                for (int i = 0; i < tagList.size(); i++) {
-                    if (i > 0) {
-                        sql += ", ";
-                    }
-                    sql += "?";
-                }
+                        "WHERE t.NAME IN (" + buildTagQuery(tagList);
                 sql += ") GROUP BY e.ID HAVING COUNT(DISTINCT t.NAME) = ?)";
                 isTagsProvided = true;
             } else {

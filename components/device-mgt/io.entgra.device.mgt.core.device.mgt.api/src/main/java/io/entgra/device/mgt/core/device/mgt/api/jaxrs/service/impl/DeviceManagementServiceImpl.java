@@ -228,16 +228,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             }
 
             if (tags != null && !tags.isEmpty()) {
-                boolean isTagsEmpty = true;
-                for (String tagString : tags) {
-                    if (StringUtils.isNotBlank(tagString)) {
-                        isTagsEmpty = false;
-                        break;
-                    }
-                }
-                if (!isTagsEmpty) {
-                    request.setTags(tags);
-                }
+                request.setTags(tags);
             }
             // this is the user who initiates the request
             String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();

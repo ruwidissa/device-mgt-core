@@ -1091,13 +1091,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                         "SELECT dtm.ENROLMENT_ID " +
                         "FROM DM_DEVICE_TAG_MAPPING dtm " +
                         "JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
-                        "WHERE t.NAME IN (";
-                for (int i = 0; i < tagList.size(); i++) {
-                    if (i > 0) {
-                        sql += ", ";
-                    }
-                    sql += "?";
-                }
+                        "WHERE t.NAME IN (" + buildTagQuery(tagList);
                 sql += ") GROUP BY dtm.ENROLMENT_ID HAVING COUNT(DISTINCT t.NAME) = ? )";
                 isTagsProvided = true;
             }
@@ -1372,13 +1366,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                         "SELECT dtm.ENROLMENT_ID " +
                         "FROM DM_DEVICE_TAG_MAPPING dtm " +
                         "JOIN DM_TAG t ON dtm.TAG_ID = t.ID " +
-                        "WHERE t.NAME IN (";
-                for (int i = 0; i < tagList.size(); i++) {
-                    if (i > 0) {
-                        sql += ", ";
-                    }
-                    sql += "?";
-                }
+                        "WHERE t.NAME IN (" + buildTagQuery(tagList);
                 sql += ") GROUP BY dtm.ENROLMENT_ID HAVING COUNT(DISTINCT t.NAME) = ? )";
                 isTagsProvided = true;
             }
@@ -2986,6 +2974,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         statusList.stream().map(status -> "?").forEach(joiner::add);
 
         return joiner.toString();
+    }
+
+    protected String buildTagQuery(List<String> tagList)
+            throws DeviceManagementDAOException {
+        return String.join(", ", Collections.nCopies(tagList.size(), "?"));
     }
 
     public int getFunctioningDevicesInSystem() throws DeviceManagementDAOException {

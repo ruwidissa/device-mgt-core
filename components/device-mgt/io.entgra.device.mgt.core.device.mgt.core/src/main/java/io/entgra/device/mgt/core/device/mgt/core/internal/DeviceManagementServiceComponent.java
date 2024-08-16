@@ -21,7 +21,8 @@ import io.entgra.device.mgt.core.device.mgt.common.authorization.GroupAccessAuth
 import io.entgra.device.mgt.core.device.mgt.common.metadata.mgt.DeviceStatusManagementService;
 import io.entgra.device.mgt.core.device.mgt.core.authorization.GroupAccessAuthorizationServiceImpl;
 import io.entgra.device.mgt.core.device.mgt.core.metadata.mgt.DeviceStatusManagementServiceImpl;
-import io.entgra.device.mgt.core.device.mgt.core.service.*;
+import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderService;
+import io.entgra.device.mgt.core.device.mgt.core.service.TagManagementProviderServiceImpl;
 import io.entgra.device.mgt.core.server.bootup.heartbeat.beacon.service.HeartBeatManagementService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
