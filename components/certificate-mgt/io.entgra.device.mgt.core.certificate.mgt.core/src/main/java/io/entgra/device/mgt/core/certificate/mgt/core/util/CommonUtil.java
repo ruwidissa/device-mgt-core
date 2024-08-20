@@ -42,5 +42,4 @@ public class CommonUtil {
     public static synchronized BigInteger generateSerialNumber() {
         return BigInteger.valueOf(System.currentTimeMillis());
     }
-
 }

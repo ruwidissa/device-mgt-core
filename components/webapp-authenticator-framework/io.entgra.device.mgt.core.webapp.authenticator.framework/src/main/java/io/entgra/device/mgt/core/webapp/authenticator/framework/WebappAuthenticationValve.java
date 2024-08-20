@@ -94,6 +94,16 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
             return;
         }
         AuthenticationInfo authenticationInfo = authenticator.authenticate(request, response);
+
+        // If the request header contains 'Mdm-Signature', then it is a iOS or Windows device trying to sync and
+        // it is already authenticated from the CertificateAuthenticator. Hence, there is no need to check
+        // if the user associated with the device has permission.
+        if (request.getHeader(Constants.HTTPHeaders.CERTIFICATE_VERIFICATION_HEADER) != null &&
+                authenticationInfo.getStatus() == WebappAuthenticator.Status.SUCCESS) {
+            this.getNext().invoke(request, response, compositeValve);
+            return;
+        }
+
         if (isManagedAPI(request) && (authenticationInfo.getStatus() == WebappAuthenticator.Status.CONTINUE ||
                 authenticationInfo.getStatus() == WebappAuthenticator.Status.SUCCESS)) {
             WebappAuthenticator.Status status = WebappTenantAuthorizer.authorize(request, authenticationInfo);
