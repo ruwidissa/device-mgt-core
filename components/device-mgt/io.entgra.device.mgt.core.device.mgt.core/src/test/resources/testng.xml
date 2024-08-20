@@ -33,6 +33,7 @@
             <class name="io.entgra.device.mgt.core.device.mgt.core.app.mgt.AppManagementConfigurationManagerTest"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.search.DeviceDetails"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.dao.GroupPersistTests"/>
+            <class name="io.entgra.device.mgt.core.device.mgt.core.dao.TagPersistTests"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.dao.EnrolmentPersistenceTests"/>
             <class name="io.entgra.device.mgt.core.device.mgt.core.dao.DeviceStatusPersistenceTests"/>
         </classes>

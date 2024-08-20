@@ -41,6 +41,8 @@ public class TestDataHolder {
 
     public final static String TEST_DEVICE_TYPE = "TEST-DEVICE-TYPE";
     public final static Integer SUPER_TENANT_ID = -1234;
+    public final static Integer ALTERNATE_TENANT_ID = -1235;
+    public final static Integer ALTERNATE_TENANT_ID_1 = -1236;
     public final static String SUPER_TENANT_DOMAIN = "carbon.super";
     public final static String initialDeviceIdentifier = "12345";
     public final static String initialDeviceName = "TEST-DEVICE";

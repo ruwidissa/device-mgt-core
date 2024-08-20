@@ -48,6 +48,4 @@ public class TagInfoList extends BasePaginatedResult {
         sb.append("]}\n");
         return sb.toString();
     }
-
-
 }

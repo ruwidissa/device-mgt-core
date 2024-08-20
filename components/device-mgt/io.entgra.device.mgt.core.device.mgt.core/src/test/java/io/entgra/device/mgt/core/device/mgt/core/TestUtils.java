@@ -106,8 +106,17 @@ public class TestUtils {
     }
 
     public static Tag getTag2() {
+        return new Tag( 2, "tag2", "This is tag2");
+    }
+
+    public static Tag getTag1Dao() {
+        return new Tag("tag1", "This is tag1");
+    }
+
+    public static Tag getTag2Dao() {
         return new Tag( "tag2", "This is tag2");
     }
+
     public static Tag getTag3() {
         return new Tag("tag3", "This is tag3");
     }
@@ -122,6 +131,13 @@ public class TestUtils {
         List<Tag> tagList = new ArrayList<>();
         tagList.add(getTag1());
         tagList.add(getTag2());
+        return tagList;
+    }
+
+    public static List<Tag> createTagList3() {
+        List<Tag> tagList = new ArrayList<>();
+        tagList.add(getTag1Dao());
+        tagList.add(getTag2Dao());
         return tagList;
     }
 
