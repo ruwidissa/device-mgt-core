@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.exception.APIManagerPublisherException;
 import io.entgra.device.mgt.core.apimgt.webapp.publisher.internal.APIPublisherDataHolder;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerStartupObserver;
 
 import java.util.HashMap;
@@ -57,6 +58,7 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
 
     @Override
     public void completedServerStartup() {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         APIPublisherDataHolder.getInstance().setServerStarted(true);
         currentAPIsStack = APIPublisherDataHolder.getInstance().getUnpublishedApis();
         Thread t = new Thread(new Runnable() {
@@ -104,7 +106,13 @@ public class APIPublisherStartupHandler implements ServerStartupObserver {
                     log.error("failed to update scope role mapping.", e);
                 }
 
-                updateScopeMetadataEntryWithDefaultScopes();
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                    updateScopeMetadataEntryWithDefaultScopes();
+                } finally {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
 
                 // execute after api publishing
                 for (PostApiPublishingObsever observer : APIPublisherDataHolder.getInstance().getPostApiPublishingObseverList()) {
